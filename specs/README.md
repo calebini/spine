@@ -6,7 +6,7 @@ Current spec surface:
 
 - `overview.md`: purpose, doctrine, ontology, and non-goals
 - `architecture.md`: component boundaries and relationships to tickerd, Foreman/Threshold, adapters, and projections
-- `schema-epoch-0001.md`: first schema epoch sketch
+- `ontology.md`: first durable ontology and data model sketch
 - `decisions/0001-kinflow-is-donor-not-foundation.md`: accepted decision on the Kinflow relationship
 
 Spec status labels:

@@ -73,7 +73,7 @@ Events MUST NOT be forced into task semantics.
 
 ## 5. Candidate Item Types
 
-The first schema epoch should anticipate:
+The initial ontology should anticipate:
 
 - `event`
 - `task`

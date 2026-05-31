@@ -16,7 +16,7 @@ Authoritative starting points:
 
 - `specs/overview.md` defines purpose, doctrine, and non-goals.
 - `specs/architecture.md` defines component boundaries and runtime relationships.
-- `specs/schema-epoch-0001.md` sketches the first schema epoch.
+- `specs/ontology.md` sketches the first durable ontology and data model.
 - `specs/decisions/0001-kinflow-is-donor-not-foundation.md` records the Kinflow relationship.
 
 ## First Product Profiles

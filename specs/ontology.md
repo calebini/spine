@@ -1,13 +1,13 @@
-# Schema Epoch 0001
+# Spine Ontology
 
 Status: Draft v0.1.0  
-Scope: First canonical data model sketch for Spine
+Scope: First durable ontology and data model sketch for Spine
 
-## 1. Epoch Goal
+## 1. Ontology Goal
 
-Schema Epoch 0001 defines the first durable ontology for Spine.
+This document defines the first durable ontology for Spine.
 
-It is intentionally a schema sketch, not a migration. The goal is to make ownership, entity boundaries, and near-term compatibility clear before implementation.
+It is intentionally a conceptual data model, not a migration. The goal is to make ownership, entity boundaries, and near-term compatibility clear before implementation.
 
 ## 2. Design Principles
 
@@ -333,7 +333,7 @@ Suggested fields:
 - `created_at_utc`
 - `resolved_at_utc`
 
-Spine MAY defer this table until automation pressure becomes real, but the schema epoch reserves the concept.
+Spine MAY defer this table until automation pressure becomes real, but the ontology reserves the concept.
 
 ### 8.3 side_effect_attempts
 
