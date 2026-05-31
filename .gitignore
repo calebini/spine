@@ -6,6 +6,7 @@
 __pycache__/
 *.py[cod]
 .tickerd/
+whetstone_runs/
 dist/
 build/
 *.egg-info/

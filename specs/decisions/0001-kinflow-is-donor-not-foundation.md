@@ -23,7 +23,7 @@ Spine should preserve these lessons:
 - reason-code discipline
 - audit and replay model
 - idempotency receipts
-- `delivery_attempts` as the canonical adapter-result/send ledger
+- the single durable attempt-ledger pattern behind Kinflow's `delivery_attempts`
 - migration verification culture
 - contract and version pinning discipline
 - fail-closed adapter boundaries
@@ -50,5 +50,7 @@ Spine starts spec-first around a shared coordination core.
 Family scheduling becomes a profile over the core, not the core ontology.
 
 Task management is treated as a first-class near-term profile, not a later service glued onto event scheduling.
+
+Spine's canonical generic adapter-result/send ledger is `side_effect_attempts`. Kinflow's `delivery_attempts` informs the one-ledger pattern, idempotency posture, and replay discipline, but it does not force Spine to keep the Kinflow table name for all adapter outcomes.
 
 Kinflow code and specs may be consulted for patterns, tests, migration posture, and adapter lessons, but schema names and lifecycle shapes must be re-justified in Spine terms.

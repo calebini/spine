@@ -28,7 +28,7 @@ Salvage durable machinery and discipline from Kinflow:
 - reason-code discipline
 - audit and replay model
 - idempotency receipts
-- `delivery_attempts` as the canonical adapter-result/send ledger
+- the single durable attempt-ledger pattern behind Kinflow's `delivery_attempts`
 - migration verification culture
 - contract and version pinning discipline
 - fail-closed adapter boundaries
@@ -55,6 +55,8 @@ Spine does not own:
 - safety approval gates, which belong to Foreman/Threshold
 - vendor-side state, which belongs to adapters as projections
 - external side effects without a persisted attempt record
+
+Spine's canonical generic adapter-result/send ledger is `side_effect_attempts`.
 
 ## Verification Expectations
 

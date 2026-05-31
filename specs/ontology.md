@@ -339,6 +339,8 @@ Spine MAY defer this table until automation pressure becomes real, but the ontol
 
 Owns external write and delivery outcomes.
 
+`side_effect_attempts` is Spine's canonical generic adapter-result/send ledger.
+
 Suggested fields:
 
 - `attempt_id`
@@ -355,7 +357,9 @@ Suggested fields:
 - `attempted_at_utc`
 - `completed_at_utc`
 
-`delivery_attempts` MAY be used as the table name for notification delivery attempts if the implementation benefits from Kinflow continuity. A separate durable `adapter_results` store MUST NOT be introduced without an accepted decision.
+A separate durable `adapter_results` store MUST NOT be introduced without an accepted decision.
+
+`delivery_attempts` MAY be introduced only as a notification-specific view, alias, or derived compatibility surface over `side_effect_attempts`. It MUST NOT become a second canonical attempt ledger.
 
 ## 9. Projections and Audit
 
@@ -394,7 +398,6 @@ Suggested fields:
 
 ## 10. Near-Term Open Questions
 
-- Whether `side_effect_attempts` should be the generic table name or whether `delivery_attempts` should remain the canonical name for all adapter-result attempts.
 - Whether `temporal_anchors` and `time_models` should be separate tables or one table with typed anchor kinds.
 - Whether `blocks` and `part_of` should be stored relation types or deterministic derived views.
 - How strict the first reason-code catalog should be before runtime implementation begins.
