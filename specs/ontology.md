@@ -1,6 +1,6 @@
 # Spine Ontology
 
-Status: Draft v0.07.0
+Status: Draft v2.1.1
 Scope: First durable ontology and minimum data contract sketch for Spine
 
 ## 1. Ontology Goal
@@ -59,7 +59,7 @@ MVP hash computation contract:
   - Serialization MUST produce a valid JSON text with no insignificant whitespace.
   - Objects: keys MUST be sorted lexicographically by Unicode codepoint; no duplicate keys.
   - Arrays: order MUST be preserved.
-  - Strings: exact stored string value; no implicit whitespace normalization; JSON escaping MUST follow the JSON standard (quotes and backslashes escaped; control characters escaped); invalid surrogate code points MUST be rejected.
+  - Strings: exact stored string value; no implicit whitespace normalization; serialization MUST emit UTF-8 and MUST reject invalid surrogate code points; JSON escaping MUST be canonical: the encoder MUST NOT escape any character other than `"`, `\\`, and control characters U+0000 through U+001F; control characters MUST be escaped using `\u00XX` with lowercase hex; the encoder MUST NOT use `\b`, `\f`, `\n`, `\r`, or `\t`, and MUST NOT escape `/`.
   - Numbers: MUST NOT appear in any hashed payload in this MVP (use strings instead). If a future surface introduces numbers, it MUST specify a canonical numeric formatting rule.
   - Optional fields that are absent MUST be omitted from the JSON object (do not include them as `null`).
 
@@ -99,6 +99,14 @@ Minimum contract:
 - `status` (`text`, required) — enum: `active`, `archived`.
 - `created_at_utc` (`utc_instant`, required).
 - `updated_at_utc` (`utc_instant`, required).
+
+Location canonicality and mutation posture (MVP):
+
+- Canonical location fields are: `label`, `kind`, `address_text`, `latitude`, `longitude`, `timezone`, and `provider_ref`.
+- Canonical location fields MUST be treated as immutable once the `location_id` is referenced by any persisted `item_locations` row.
+- If a canonical location fact needs correction (e.g., a changed address label or coordinates), the writer MUST create a new `locations` row with a new `location_id` and MUST represent the correction as a new item version that points at the new `location_id` via new `item_locations` rows.
+- Attempts to update canonical location fields in place for a referenced location MUST be rejected as validation errors.
+- `metadata_json` MAY be updated in place (and `updated_at_utc` advanced) even when referenced, but it MUST be non-canonical and MUST NOT change the semantic meaning of historical item versions.
 - `archived_at_utc` (`utc_instant`, optional) — required when `status=archived`.
 
 Constraints:
@@ -136,6 +144,20 @@ Constraints:
 - Primary identity: `(item_id, version)` unique.
 - `version` MUST be contiguous starting at 1 per `item_id`.
 - `coordination_items.current_version` MUST equal the max `version` for that `item_id`.
+
+MVP item creation flow (bootstrap):
+
+- A brand-new coordination item MUST be created atomically in one transaction that results in a fully valid `(item_id, version=1)` bundle.
+- Required inputs for the create are: `item_id`, `item_type`, `title`, `created_at_utc`, `created_by_subject_id`, and any type-specific required detail inputs (Sections 4.3 and 4.4). Optional inputs: `summary`, `source_ref`, and initial supporting sets (locations, subject roles, notification policies), which may be empty.
+- Rows produced (minimum):
+  - One `coordination_items` row with `current_version=1`, `status=active`, and timestamps.
+  - One `coordination_item_versions` row with `(item_id, version=1)` and hashes computed from the v1 content.
+  - If `item_type=event`, one `event_details` row for `(item_id, version=1)`; if `item_type=task`, one `task_details` row for `(item_id, version=1)`. For `project` and `collection`, no type-specific detail row is required in this MVP.
+  - Zero or more `item_locations` rows at `(item_id, version=1)` representing the complete location set for v1 (empty set is represented by no rows, not by fallback).
+  - Zero or more `item_subject_roles` rows at `(item_id, version=1)` representing the complete role set for v1 (empty set is represented by no rows, not by fallback).
+  - Zero or more `notification_policies` rows at `(item_id, version=1)` representing the complete notification intent set for v1 (empty set is represented by no rows, not by fallback).
+  - At least one `audit_log` row recording the item creation.
+- Cross-row constraints MUST be enforced deterministically at transaction commit. Implementations MAY use deferrable foreign keys, service-level precommit validation, or both, but they MUST fail closed: if any required row is missing (e.g., required detail row for an event/task), the transaction MUST be rejected and MUST leave no partially created canonical rows behind.
 
 Version mutation posture (MVP):
 
@@ -196,6 +218,25 @@ Constraints:
 - `(item_id, version)` unique.
 - `coordination_items.item_type` MUST be `event` for rows present.
 
+Event time shape validation (MVP):
+
+- When `all_day=true`:
+  - The `start_anchor_id` anchor MUST have `anchor_kind=local_date`.
+  - If `end_anchor_id` is absent, the event represents one all-day occurrence on the `start_anchor_id.local_date` in `start_anchor_id.timezone`.
+  - If `end_anchor_id` is present:
+    - The `end_anchor_id` anchor MUST have `anchor_kind=local_date`.
+    - `end_anchor_id.timezone` MUST equal `start_anchor_id.timezone`.
+    - `end_anchor_id.local_date` MUST be strictly greater than `start_anchor_id.local_date`.
+    - Semantics: the all-day range is `[start_local_date, end_local_date)` in that timezone.
+- When `all_day=false`:
+  - The `start_anchor_id` anchor MUST have `anchor_kind` in `{instant_utc, local_instant}`.
+  - If `end_anchor_id` is present, its `anchor_kind` MUST equal the `start_anchor_id.anchor_kind`.
+  - If `start_anchor_id.anchor_kind=instant_utc` and `end_anchor_id` is present: `end_anchor_id.utc_instant` MUST be `>= start_anchor_id.utc_instant`.
+  - If `start_anchor_id.anchor_kind=local_instant` and `end_anchor_id` is present:
+    - `end_anchor_id.timezone` MUST equal `start_anchor_id.timezone`.
+    - The local datetime `(end.local_date, end.local_time)` MUST be `>= (start.local_date, start.local_time)`.
+  - Date/window anchors (`local_date`, `utc_window`, `local_window`) MUST be rejected for `all_day=false` events.
+
 Transitions (minimum):
 
 - `scheduled -> cancelled` allowed.
@@ -222,6 +263,19 @@ Constraints:
 - `(item_id, version)` unique.
 - `coordination_items.item_type` MUST be `task` for rows present.
 
+Task time shape validation (MVP):
+
+- If `due_anchor_id` is present, the referenced `temporal_anchors.anchor_kind` MUST be one of `{instant_utc, local_instant, local_date, utc_window, local_window}`.
+- If `defer_until_anchor_id` is present, the referenced `temporal_anchors.anchor_kind` MUST be one of `{instant_utc, local_instant, local_date}`.
+- `defer_until_anchor_id` MUST NOT reference a window anchor (`utc_window` or `local_window`).
+- `due_anchor_id` MAY reference a date-only anchor (`local_date`) to represent an all-day due date in that timezone.
+- `due_anchor_id` MAY reference a window anchor to represent a due window:
+  - If `anchor_kind=utc_window`, the due window is `[window_start_utc, window_end_utc)`.
+  - If `anchor_kind=local_window`, the due window is the full local-day window defined for `anchor_kind=local_window` in Section 6.1 (no persisted `window_start_utc`/`window_end_utc` fields in MVP).
+- Ordering/compatibility posture (MVP):
+  - Spine MUST accept tasks where both `due_anchor_id` and `defer_until_anchor_id` are set; a task may be "deferred" while still having a due constraint.
+  - Spine MUST NOT enforce a due-vs-defer ordering constraint in MVP. Implementations MUST NOT silently rewrite either anchor to satisfy ordering.
+
 Transitions (minimum):
 
 - `open -> done` allowed.
@@ -238,7 +292,7 @@ Minimum contract:
 - `source_item_id` (`id`, required) — FK to `coordination_items.item_id`.
 - `target_item_id` (`id`, required) — FK to `coordination_items.item_id`.
 - `relation_type` (`text`, required) — enum (MVP stored):
-  - `depends_on`, `part_of`, `related_to`, `duplicates`, `follows`, `causes`, `satisfies`.
+  - `depends_on`, `part_of`.
 - `relation_status` (`text`, required) — enum: `active`, `inactive`.
 - `created_at_utc` (`utc_instant`, required).
 - `created_by_subject_id` (`id`, required) — FK to `subjects.subject_id`.
@@ -254,10 +308,16 @@ Derived/query-only relation aliases (MVP, not stored as active canonical rows):
 - `blocks` is a derived/query alias of the inverse of `depends_on` (`A blocks B` is true iff there exists an active stored relation `B depends_on A`).
 - `contains` is a derived/query alias of the inverse of `part_of` (`A contains B` is true iff there exists an active stored relation `B part_of A`).
 
+Reserved future relation examples (not MVP stored enum values):
+
+- Broader relation categories such as `related_to`, `duplicates`, `follows`, `causes`, and `satisfies` are reserved for a later relation-vocabulary decision.
+- Implementations MUST reject these values as stored `relation_type` values in this MVP unless a later accepted revision explicitly promotes them into the canonical enum.
+
 Validation and normalization outcomes (MVP):
 
 - Storing `relation_type=blocks` or `relation_type=contains` as an active canonical row MUST be rejected.
 - If an implementation chooses to accept `blocks`/`contains` as input, it MUST normalize them into their canonical stored direction before persisting.
+- Storing any `relation_type` outside the MVP stored enum MUST be rejected.
 
 Transitions (minimum):
 
@@ -306,6 +366,14 @@ Minimum contract:
 - `status` (`text`, required) — enum: `active`, `ended`.
 - `starts_at_utc` (`utc_instant`, required).
 - `ends_at_utc` (`utc_instant`, optional) — required when `status=ended`.
+
+Lifecycle posture (MVP):
+
+- `subjects.status`: `active -> inactive` allowed; `inactive -> active` allowed.
+- `subject_groups.status`: `active -> inactive` allowed; `inactive -> active` allowed.
+- `subject_memberships.status`: `active -> ended` allowed; `ended` is terminal in MVP; `ended -> active` MUST be rejected.
+- Ending a membership MUST set `ends_at_utc` and MUST ensure `ends_at_utc >= starts_at_utc`.
+- Renewing a membership after `ended` MUST create a new `subject_memberships` row with a new `membership_id` and a new `starts_at_utc`; mutating an `ended` row back to `active` MUST be rejected.
 
 Family scheduler mapping:
 
@@ -391,6 +459,8 @@ Minimum contract:
 - `created_at_utc` (`utc_instant`, required).
 - `updated_at_utc` (`utc_instant`, required).
 
+Canonical location field mutation rules are defined in Section 4.1 (“Location canonicality and mutation posture (MVP)”) and apply to writes to `locations` rows.
+
 ### 7.2 item_locations
 
 Minimum contract:
@@ -446,13 +516,17 @@ Constraints:
 
 - `(item_id, version, recipient_subject_id, trigger_anchor_id)` MUST be unique; duplicates MUST be rejected.
 
-Generated reminders SHOULD become work instances rather than hidden scheduler state.
+Generated reminders MUST become `work_instances` rows before any delivery attempt.
+
+In MVP, `notification_policies` MUST NOT directly drive vendor delivery or hidden scheduler delivery state. If reminder generation is not implemented in a slice, implementations MUST treat `notification_policies` rows as inert and MUST NOT deliver reminders without a corresponding `work_instances` row.
 
 ## 9. Work, Candidate Actions, and Attempts
 
 ### 9.1 work_instances
 
 Owns generated domain work eligible for tickerd processing.
+
+Notification reminder rule (MVP): any deliverable reminder MUST be represented as a `work_instances` row. Implementations MUST NOT deliver reminders directly from `notification_policies` evaluation or hidden scheduler state.
 
 Minimum contract:
 
@@ -461,7 +535,13 @@ Minimum contract:
 - `item_version` (`int`, required) — version of the item truth that generated this work.
 - `notification_policy_id` (`id`, optional) — FK to `notification_policies.policy_id`.
 - `notification_policy_item_version` (`int`, optional) — required when `notification_policy_id` is present.
+- `source_work_instance_id` (`id`, optional) — FK to `work_instances.work_instance_id`; required when `generation_source_kind=work_instance`.
+- `generation_source_kind` (`text`, optional) — enum: `work_instance`, `notification_policy`, `schedule_tick`, `user_action`, `item_version`.
+- `generation_source_ref` (`text`, optional).
+- `work_subject_ref` (`text`, optional).
 - `work_kind` (`text`, required) — enum (minimum): `notification_reminder`.
+- `purpose_detail_ref` (`text`, optional) — reserved.
+- `policy_basis_ref` (`text`, optional).
 - `eligible_at_utc` (`utc_instant`, required).
 - `status` (`text`, required) — enum: `eligible`, `in_progress`, `succeeded`, `failed`, `cancelled`.
 - `attempt_count` (`int`, required).
@@ -473,40 +553,53 @@ Minimum contract:
 Version binding (MVP):
 
 - `item_version` MUST match an existing `coordination_item_versions` row for `item_id`.
-- If `notification_policy_id` is set, `notification_policy_item_version` MUST be set and MUST match the `notification_policies.version` for that policy.
+- If `notification_policy_id` is set:
+  - `notification_policy_item_version` MUST be set and MUST match the `notification_policies.version` for that policy.
+  - The referenced `notification_policies.item_id` MUST equal `work_instances.item_id`.
+  - `notification_policy_item_version` MUST equal `work_instances.item_version`.
 - The bound `item_version` and policy version are the creation-time source of truth for the work instance.
-- Work processing MUST NOT guess whether a work instance reflects current item truth. If `coordination_items.current_version` no longer equals `work_instances.item_version` before processing, the work instance is stale and MUST be cancelled, regenerated, or blocked by an explicit reason-coded transition. It MUST NOT be silently processed against the newer item version.
+- Work processing MUST NOT guess whether a work instance reflects current item truth. If `coordination_items.current_version` no longer equals `work_instances.item_version` before processing, the work instance is stale and MUST NOT be silently processed against the newer item version.
+
+Derivative work provenance (MVP):
+
+- A `work_instances` row MAY be generated from another `work_instances` row or from another accepted generation source.
+- Accepted generation source kinds in MVP are: `work_instance`, `notification_policy`, `schedule_tick`, `user_action`, and `item_version`.
+- If generated from prior work, `source_work_instance_id` MUST reference the source `work_instances.work_instance_id`, and `generation_source_kind` MUST be `work_instance`.
+- Every derivative work instance MUST declare:
+  - source: `generation_source_kind` plus `generation_source_ref`, or `source_work_instance_id` when the source is prior work.
+  - subject: `work_subject_ref`, naming the item, work instance, person, recipient, or resource the work is for.
+  - purpose: `work_kind` plus optional `purpose_detail_ref`.
+  - policy basis: `policy_basis_ref`, naming the policy, rule, schedule, user action, or item version basis that justified generation.
+- Derivative work MUST remain bound to an explicit `item_id` and `item_version`; it MUST NOT inherit current item truth implicitly from its source work row.
+- This provenance rule does not define retry, cancellation, recovery, or terminal outcome policy. Those lifecycle semantics remain deferred.
+
+Minimum stale-work safety (MVP):
+
+- If `coordination_items.current_version != work_instances.item_version` at attempt start time, starting an external side effect for that work instance MUST be rejected.
+- The exact cleanup, cancellation, regeneration, retry, and replacement lifecycle for stale work is deferred to a later work-execution lifecycle decision.
+- Implementations MAY record a deterministic audit or reason for the rejection, but this MVP does not require a canonical stale-work recovery transaction.
 
 Deterministic eligibility rule (MVP):
 
 - `eligible_at_utc` MUST be written once when generating the work instance. It MUST NOT be recomputed on read/replay.
-- If eligibility needs to change due to a canonical change, it MUST be represented as a new work instance or an explicit state transition, not an implicit recalculation.
+- If eligibility needs to change due to a canonical change, the MVP MUST NOT silently recalculate it on read. The canonical replacement or rescheduling policy is deferred.
 
-Failure and retry posture (MVP):
+Deferred lifecycle posture (MVP):
 
-- `failed` is terminal in MVP.
-- Retry semantics are deferred; any retry MUST be represented as a new `work_instances` row (or a future explicit retry transition once accepted).
-- When `status=failed`, `next_attempt_at_utc` MUST be NULL.
+- `work_instances.status` provides minimum storage vocabulary for generated work state.
+- Retry, failure recovery, cancellation-after-start, and terminal outcome coupling policies are deferred.
+- The MVP does not require a canonical retry representation, and tests SHOULD NOT assume whether a retry reuses the same work row, creates a replacement work row, or is handled by a later scheduler policy.
 
-Transitions (minimum):
+Status values (minimum):
 
-- `eligible -> in_progress` allowed.
-- `in_progress -> succeeded|failed|cancelled` allowed.
-- Terminal: `succeeded`, `failed`, `cancelled`.
+- Legal stored values are `eligible`, `in_progress`, `succeeded`, `failed`, and `cancelled`.
+- Invalid status values MUST be rejected.
+- Detailed transition rules are deferred except for the stale-work no-external-side-effect rule above.
 
-Attempt start coupling (MVP):
+Attempt linkage safety (MVP):
 
-- Recording a `side_effect_attempts` row with `attempt_status=started` and `work_instance_id` MUST be rejected unless the linked work instance is already `in_progress` or is transitioned from `eligible -> in_progress` in the same transaction.
-- When transitioning a work instance `eligible -> in_progress` due to starting an attempt, the writer MUST increment `work_instances.attempt_count`, MUST set `work_instances.next_attempt_at_utc=NULL`, and MUST update `work_instances.updated_at_utc`.
-
-Completion coupling (MVP):
-
-- When a `side_effect_attempts` row linked to a `work_instance_id` reaches `attempt_status=succeeded` and the linked work instance has `work_instances.status=in_progress`, the work instance MUST transition to `work_instances.status=succeeded` and MUST set `next_attempt_at_utc=NULL`.
-
-Cancellation coupling (MVP):
-
-- A work instance MAY be transitioned to `cancelled` even if a linked `side_effect_attempts` row already exists with `attempt_status=started`.
-- Recording a terminal `side_effect_attempts` outcome (`succeeded`, `failed`, `rejected`) for a `work_instance_id` whose `work_instances.status=cancelled` is allowed, but it MUST NOT transition the work instance out of `cancelled`.
+- If a `side_effect_attempts` row references `work_instance_id`, the reference MUST be enough to trace the attempt back to the bound item and item version.
+- The exact work-instance transition, counter update, and terminal completion policy around attempts is deferred.
 
 ### 9.2 candidate_actions
 
@@ -516,6 +609,7 @@ Minimum contract (MVP; enum is minimal and extendable):
 
 - `candidate_action_id` (`id`, required) — primary key.
 - `item_id` (`id`, required) — FK to `coordination_items.item_id`.
+- `item_version` (`int`, required) — version of the item truth that generated this candidate action; must match an existing `coordination_item_versions` row for `item_id`.
 - `action_kind` (`text`, required) — enum (minimum):
   - `deliver_notification`
   - `sync_projection`
@@ -536,6 +630,12 @@ Validation boundary (MVP):
 
 - Persisting a `candidate_actions` row with an unknown `action_kind` MUST be rejected.
 
+Version binding and staleness (MVP):
+
+- A candidate action is only valid against the bound `item_version`. It MUST NOT be executed against newer item truth without explicit revalidation.
+- If `coordination_items.current_version` is not equal to `candidate_actions.item_version` before approval or execution, the candidate action is stale and MUST NOT trigger an external side effect.
+- Replacement, dismissal/resolution semantics, and audit-only rejection transactions for stale candidate actions are deferred.
+
 ### 9.3 side_effect_attempts
 
 Owns external write and delivery outcomes.
@@ -547,8 +647,10 @@ Minimum contract:
 - `attempt_id` (`id`, required) — primary key.
 - `work_instance_id` (`id`, optional) — FK to `work_instances.work_instance_id`.
 - `candidate_action_id` (`id`, optional) — FK to `candidate_actions.candidate_action_id`.
+- `item_id` (`id`, optional) — FK to `coordination_items.item_id`.
 - `adapter_name` (`text`, required).
 - `projection_id` (`id`, optional) — FK to `external_projections.projection_id`.
+- `source_item_version` (`int`, optional) — required when `projection_id` is present; must match an existing `coordination_item_versions` row for `item_id`.
 - `idempotency_key` (`text`, required).
 - `attempt_status` (`text`, required) — enum: `started`, `succeeded`, `failed`, `rejected`.
 - `provider_ref` (`text`, optional).
@@ -565,29 +667,46 @@ Constraints:
 
 Origin/linkage integrity (MVP):
 
-- Allowed origin combinations are:
-  - `work_instance_id` only
-  - `candidate_action_id` only
-  - `projection_id` only
-  - `projection_id` + `work_instance_id`
-  - `projection_id` + `candidate_action_id`
+- The origin columns are `work_instance_id`, `candidate_action_id`, and `projection_id`. The combinations below describe only these origin columns; additional linkage fields such as `item_id` may be required by the Source version binding rules below.
+- Allowed origin-column combinations are:
+  - `work_instance_id` present; `candidate_action_id` null; `projection_id` null
+  - `candidate_action_id` present; `work_instance_id` null; `projection_id` null
+  - `projection_id` present; `work_instance_id` null; `candidate_action_id` null (requires `item_id` and `source_item_version`)
+  - `projection_id` + `work_instance_id` (`candidate_action_id` null)
+  - `projection_id` + `candidate_action_id` (`work_instance_id` null)
 - Forbidden origin combinations are:
   - all of `work_instance_id`, `candidate_action_id`, and `projection_id` null
   - both `work_instance_id` and `candidate_action_id` set (regardless of `projection_id`)
+
+Source version binding (MVP):
+
+- If `projection_id` is present, `item_id` and `source_item_version` MUST be present and MUST bind to the source-of-truth item version used to construct the outgoing request.
+- If `work_instance_id` is present, `item_id` MUST be present and MUST equal `work_instances.item_id`.
+- If `candidate_action_id` is present, `item_id` MUST be present and MUST equal `candidate_actions.item_id`.
+- If `projection_id` is present, `item_id` MUST equal `external_projections.item_id`.
+- If `projection_id` and `work_instance_id` are both present, `source_item_version` MUST equal `work_instances.item_version`.
+- If `projection_id` and `candidate_action_id` are both present, `source_item_version` MUST equal `candidate_actions.item_version`.
 
 Transitions (minimum):
 
 - `started -> succeeded|failed|rejected` allowed.
 - Terminal: `succeeded`, `failed`, `rejected`.
 
-Attempt row lifecycle (MVP):
+Attempt row posture (MVP):
 
-- One `side_effect_attempts` row represents one external attempt lifecycle.
-- The row MAY be inserted before the external call with `attempt_status=started`, then updated exactly once to a terminal status.
-- Terminal outcomes MUST update the original `attempt_id`; they MUST NOT be appended as separate attempt rows for the same external attempt.
-- A terminal update MUST preserve the original `attempt_id`, `adapter_name`, `idempotency_key`, `attempted_at_utc`, `request_payload_hash`, and `request_hash`.
-- A terminal update MUST set `completed_at_utc`, `attempt_status`, and any available `response_hash`, `provider_ref`, or `reason_code`.
-- Every terminal update MUST write an `audit_log` row.
+- One `side_effect_attempts` row represents one external attempt identity.
+- The row stores the attempt's origin linkage, idempotency identity, request identity, and current/terminal outcome fields.
+- A terminal outcome for the same external attempt MUST NOT be represented by a second canonical attempt ledger or a separate `adapter_results` row.
+
+Pre-write durability gate (MVP):
+
+- Before starting any adapter external write, Spine MUST persist a `side_effect_attempts` row with `attempt_status=started`.
+- The `started` attempt row MUST include enough evidence to make the attempt durable and traceable, including at minimum: the required origin linkage fields for the attempt (`work_instance_id` or `candidate_action_id` and/or `projection_id` as applicable), `adapter_name`, `idempotency_key`, `request_payload_hash`, `request_hash`, and `attempted_at_utc`, plus any linkage fields required by the source-binding rules above (`item_id` and `source_item_version` when required).
+- If this insert fails for any reason (including uniqueness conflict on `(adapter_name, idempotency_key)`), the external write MUST NOT start.
+
+Deferred attempt mechanics (MVP):
+
+- Terminal update mechanics, response capture, retry posture, and audit emission rules are deferred unless required by the minimum field constraints above.
 
 A separate durable `adapter_results` store MUST NOT be introduced without an accepted decision.
 
@@ -615,10 +734,21 @@ Constraints:
 
 - `(adapter_name, external_ref)` MUST be unique; duplicates MUST be rejected.
 
-Transitions (minimum):
+Status values (minimum):
 
-- `current -> stale|failed` allowed.
-- `stale|failed -> current` allowed only when a new successful attempt updates the projection.
+- Legal stored values are `current`, `stale`, and `failed`.
+- Invalid status values MUST be rejected.
+- Detailed transition rules are deferred.
+
+Version semantics (MVP):
+
+- `last_projected_version` is the last item version known to be successfully projected to `external_ref`.
+- Conditional requirements:
+  - When `projection_status=current`, `last_projected_version` MUST be present.
+  - When `projection_status=stale`, `last_projected_version` MUST be present and `stale_reason` MUST be present.
+  - When `projection_status=failed`, `last_projected_version` MAY be null only if no successful projection has ever occurred for this `projection_id` (i.e., the projection has never been current). If a projection was ever current, then `last_projected_version` MUST remain present even while `projection_status=failed`.
+- If `last_attempt_id` is present, it MUST reference the `side_effect_attempts` row that most recently informed the projection record.
+- Projection update, terminal failure/rejection handling, stale detection timing, and adapter-specific reconciliation policies are deferred beyond the MVP ontology.
 
 ### 10.2 audit_log
 
@@ -639,53 +769,53 @@ Minimum contract:
 
 ## 11. MVP Validation and Failure Behavior
 
-This section names the obvious validation and failure categories and defines minimum outcomes.
+This section names the obvious validation and failure categories and defines minimum outcomes. It is not an exhaustive validation matrix; the authoritative rule for each category remains in the specific section that defines the table or workflow.
 
 Validation errors MUST be deterministic, must be reported, and MUST NOT partially mutate canonical truth.
 
-Minimum validation categories and outcomes:
+Minimum validation categories:
 
-- Item/detail mismatch: reject `event_details` rows unless `coordination_items.item_type=event`; reject `task_details` rows unless `item_type=task`. For `item_type=project` and `item_type=collection`, reject any attempt to persist `event_details` or `task_details` rows.
-- Missing required detail row: for `item_type=event`, reject advancing `coordination_items.current_version` to a version that lacks a matching `event_details` row for the same `(item_id, version)`; for `item_type=task`, reject advancing `current_version` to a version that lacks a matching `task_details` row for the same `(item_id, version)`.
-- Dangling references: reject rows that reference missing `item_id`, missing `(item_id, version)`, missing `subject_id`, missing `anchor_id`, or missing `location_id` (except explicitly optional foreign keys).
-- Version mismatch: reject a detail row whose `(item_id, version)` has no matching `coordination_item_versions` row.
-- Stale version transition: reject any state transition attempt that targets a version other than `coordination_items.current_version`.
-- Stale work instance: reject or block processing when `work_instances.item_version` is not equal to `coordination_items.current_version`, unless the transaction explicitly cancels or regenerates the stale work.
-- Temporal anchor invalid: reject anchors that violate `anchor_kind` required/forbidden fields (including the narrowed `local_window` field rules).
-- Relation shape invalid: reject relations that reference missing items; reject any attempt to persist query-only aliases as active canonical rows (`blocks`, `contains`) unless normalized to stored direction.
-- Duplicate active relation: reject persisting an `active` `coordination_item_relations` row that would violate the active-uniqueness rule.
-- Duplicate item location role: reject persisting an `item_locations` row that would violate `(item_id, version, role)` uniqueness.
-- Duplicate projection identity: reject persisting an `external_projections` row that would violate `(adapter_name, external_ref)` uniqueness.
-- Duplicate attempt idempotency: reject a new `side_effect_attempts` row if `(adapter_name, idempotency_key)` already exists.
-- Side-effect attempt origin invalid: reject a `side_effect_attempts` row when all of `work_instance_id`, `candidate_action_id`, and `projection_id` are null; reject rows where both `work_instance_id` and `candidate_action_id` are set.
-- Work/attempt start mismatch: when recording a `side_effect_attempts` row with `attempt_status=started` for a `work_instance_id`, reject the record unless the linked `work_instances.status` is already `in_progress` or is atomically transitioned `eligible -> in_progress` in the same transaction.
-- Work/attempt terminal mismatch: when recording a terminal `side_effect_attempts` status (`succeeded`, `failed`, or `rejected`) for a `work_instance_id`, reject the record if the linked `work_instances.status` is neither `in_progress` nor `cancelled`.
-- Invalid status transition: reject transitions not listed as allowed in this document (including treating `work_instances.failed` as retryable in MVP, reopening `candidate_actions`, or reactivating inactive `coordination_item_relations`).
+- Item/version bundle validity: reject incomplete item creation, missing required detail rows, item/detail type mismatches, and stale-version transitions as defined in Sections 4.1 through 4.4.
+- Reference integrity: reject required references to missing items, item versions, subjects, temporal anchors, locations, projections, work instances, or candidate actions.
+- Time-shape validity: reject temporal anchors, event details, and task details that violate the legal shapes in Sections 4.3, 4.4, and 6.1.
+- Relation validity: reject missing relation endpoints, query-only relation aliases that are not normalized, relation types outside the MVP stored enum, and active relation duplicates under Section 4.5.
+- Uniqueness and identity validity: reject rows that violate the uniqueness rules stated on their owning tables.
+- Work/action/projection staleness: reject external side-effect starts when the bound item version is stale; detailed cleanup and recovery handling is deferred.
+- Derivative work provenance: reject derivative `work_instances` rows that omit the required source, subject, purpose, or policy-basis provenance fields defined in Section 9.1.
+- Reminder pre-work durability: reject any external notification delivery start unless a corresponding `work_instances` row already exists; `notification_policies` rows alone MUST NOT start delivery.
+- Attempt pre-write durability: reject any external side-effect start unless a `side_effect_attempts` row has already been durably persisted for that attempt with `attempt_status=started` and with the required request and origin linkage evidence.
+- Attempt origin version binding: reject `side_effect_attempts` rows where `source_item_version` (required when `projection_id` is present) disagrees with the bound `item_version` of a referenced `work_instances` or `candidate_actions` origin.
+- Status-transition validity: when this document defines transition rules for a table, reject transitions outside those listed rules.
 
 Adapter failure posture:
 
 - External failures MUST be represented as `side_effect_attempts` rows with `attempt_status=failed` (or `rejected`).
 - Adapter failures MUST NOT directly mutate canonical item truth unless the domain transition itself is explicitly represented and valid.
-- When a terminal adapter outcome is recorded for a `work_instance_id`:
-  - If `side_effect_attempts.attempt_status` becomes `failed` or `rejected` for a work instance whose `work_instances.status=in_progress`, the work instance MUST transition to `work_instances.status=failed` and MUST set `next_attempt_at_utc=NULL`.
-  - If `side_effect_attempts.attempt_status` becomes `succeeded` for a work instance whose `work_instances.status=in_progress`, the work instance MUST transition to `work_instances.status=succeeded` and MUST set `next_attempt_at_utc=NULL`.
+- Work-instance recovery, retry, and terminal coupling behavior after adapter outcomes is deferred.
 
 Projection drift posture:
 
-- Drift MUST be represented as `external_projections.projection_status=stale` with a reason; it MUST NOT be “fixed” by overwriting canonical facts from a vendor projection.
+- If projection drift is represented in the MVP, it MUST use `external_projections.projection_status=stale` with a reason. Drift MUST NOT be “fixed” by overwriting canonical facts from a vendor projection. Exact drift detection and reconciliation policy is deferred.
 
 ## 12. MVP Acceptance Criteria
 
 The ontology is ready for a first implementation pass when all of the following are true:
 
 - Every table in this document has a minimum contract (required vs optional fields, identity, and key relationships) sufficient for a first SQLite schema or typed model layer.
+- A developer can implement the bootstrap create for a new item deterministically: an atomic transaction produces a valid `coordination_items` row (`current_version=1`), a matching `coordination_item_versions` v1 row, any required v1 detail row, and any initial supporting sets without relying on deferred “fill-in” behavior.
 - A developer can implement `coordination_items` + `coordination_item_versions` + item-type detail legality without inventing new root concepts: an event version has exactly one `event_details` row and no `task_details` row, and a task version has exactly one `task_details` row and no `event_details` row.
 - Event/task canonical state transitions have an unambiguous version mutation posture: transitions create a new contiguous item version plus a matching detail row, and stale-version transition attempts are rejected.
 - Temporal anchors have explicit legal-field rules by `anchor_kind` (including a deterministic narrowed `local_window` shape), and historical persisted UTC values are treated as authoritative and not recomputed on read/replay.
+- Event time shapes are deterministic: `event_details.all_day` unambiguously constrains allowed `temporal_anchors.anchor_kind` values (and ordering/compatibility rules) for `start_anchor_id`/`end_anchor_id`.
+- Task due/defer time shapes are deterministic: `task_details.due_anchor_id` and `task_details.defer_until_anchor_id` have explicit allowed `temporal_anchors.anchor_kind` values and an explicit MVP posture for due-vs-defer ordering validation.
 - Locations and item relations can be created with deterministic validation and without ambiguous stored-vs-derived posture for dependency and containment inverses (`blocks`/`depends_on`, `contains`/`part_of`).
+- Locations have an unambiguous mutation posture: canonical location facts do not retroactively change historical item versions, and corrections are represented by creating a new `location_id` plus a new item version that points at it.
 - Item-linked supporting records have an unambiguous version posture: `item_locations`, `item_subject_roles`, and `notification_policies` are tied to item versions, immutable per `(item_id, version)`, materialized for every new item version (copy-forward allowed/required), and read at `coordination_items.current_version` without fallback.
-- One generated `work_instances` row and one `side_effect_attempts` row can be represented without introducing a second attempt ledger, and attempts have a non-ambiguous origin linkage, a deterministic request payload identity, and an unambiguous attempt start handoff from `eligible -> in_progress`.
-- The validation and failure behavior section is implementable: invalid references are rejected, adapter failures are recorded as attempts, work instances cannot be stranded indefinitely after a terminal succeeded/failed/rejected attempt (including when the work instance is cancelled while an attempt is in flight), and canonical item truth is not mutated implicitly.
+- Candidate actions are deterministically safe against item mutation: each candidate action is bound to an `item_version`, and stale candidate actions cannot trigger external side effects.
+- Derivative work provenance is explicit: derivative `work_instances` rows declare their source, subject, purpose, and policy basis without inheriting current item truth implicitly from a source work row.
+- External projection records are buildable as MVP storage facts: `current` and `stale` projection states require a `last_projected_version`, and adapter reconciliation policy is explicitly deferred.
+- One generated `work_instances` row and one `side_effect_attempts` row can be represented without introducing a second attempt ledger, and attempts have non-ambiguous origin linkage plus deterministic request payload identity.
+- The validation and failure behavior section is implementable at MVP depth: invalid references are rejected, adapter failures are recorded as attempts, stale truth does not start external side effects, and canonical item truth is not mutated implicitly.
 
 ## 13. Near-Term Open Questions
 
