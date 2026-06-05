@@ -1,6 +1,6 @@
 # Spine Ontology
 
-Status: Draft v2.1.1
+Status: Draft v3.0.1
 Scope: First durable ontology and minimum data contract sketch for Spine
 
 ## 1. Ontology Goal
@@ -99,14 +99,6 @@ Minimum contract:
 - `status` (`text`, required) — enum: `active`, `archived`.
 - `created_at_utc` (`utc_instant`, required).
 - `updated_at_utc` (`utc_instant`, required).
-
-Location canonicality and mutation posture (MVP):
-
-- Canonical location fields are: `label`, `kind`, `address_text`, `latitude`, `longitude`, `timezone`, and `provider_ref`.
-- Canonical location fields MUST be treated as immutable once the `location_id` is referenced by any persisted `item_locations` row.
-- If a canonical location fact needs correction (e.g., a changed address label or coordinates), the writer MUST create a new `locations` row with a new `location_id` and MUST represent the correction as a new item version that points at the new `location_id` via new `item_locations` rows.
-- Attempts to update canonical location fields in place for a referenced location MUST be rejected as validation errors.
-- `metadata_json` MAY be updated in place (and `updated_at_utc` advanced) even when referenced, but it MUST be non-canonical and MUST NOT change the semantic meaning of historical item versions.
 - `archived_at_utc` (`utc_instant`, optional) — required when `status=archived`.
 
 Constraints:
@@ -459,7 +451,13 @@ Minimum contract:
 - `created_at_utc` (`utc_instant`, required).
 - `updated_at_utc` (`utc_instant`, required).
 
-Canonical location field mutation rules are defined in Section 4.1 (“Location canonicality and mutation posture (MVP)”) and apply to writes to `locations` rows.
+Location canonicality and mutation posture (MVP):
+
+- Canonical location fields are: `label`, `kind`, `address_text`, `latitude`, `longitude`, `timezone`, and `provider_ref`.
+- Canonical location fields MUST be treated as immutable once the `location_id` is referenced by any persisted `item_locations` row.
+- If a canonical location fact needs correction (e.g., a changed address label or coordinates), the writer MUST create a new `locations` row with a new `location_id` and MUST represent the correction as a new item version that points at the new `location_id` via new `item_locations` rows.
+- Attempts to update canonical location fields in place for a referenced location MUST be rejected as validation errors.
+- `metadata_json` MAY be updated in place (and `updated_at_utc` advanced) even when referenced, but it MUST be non-canonical and MUST NOT change the semantic meaning of historical item versions.
 
 ### 7.2 item_locations
 
@@ -535,13 +533,13 @@ Minimum contract:
 - `item_version` (`int`, required) — version of the item truth that generated this work.
 - `notification_policy_id` (`id`, optional) — FK to `notification_policies.policy_id`.
 - `notification_policy_item_version` (`int`, optional) — required when `notification_policy_id` is present.
-- `source_work_instance_id` (`id`, optional) — FK to `work_instances.work_instance_id`; required when `generation_source_kind=work_instance`.
-- `generation_source_kind` (`text`, optional) — enum: `work_instance`, `notification_policy`, `schedule_tick`, `user_action`, `item_version`.
-- `generation_source_ref` (`text`, optional).
-- `work_subject_ref` (`text`, optional).
+- `source_work_instance_id` (`id`, optional) — FK to `work_instances.work_instance_id`; required when `generation_source_kind=work_instance` and conditionally required for derivative rows sourced from prior work.
+- `generation_source_kind` (`text`, optional for non-derivative base work; conditionally required for derivative rows) — enum: `work_instance`, `notification_policy`, `schedule_tick`, `user_action`, `item_version`.
+- `generation_source_ref` (`text`, optional for non-derivative base work; conditionally required for derivative rows unless `source_work_instance_id` supplies the source).
+- `work_subject_ref` (`text`, optional for non-derivative base work; conditionally required for derivative rows).
 - `work_kind` (`text`, required) — enum (minimum): `notification_reminder`.
 - `purpose_detail_ref` (`text`, optional) — reserved.
-- `policy_basis_ref` (`text`, optional).
+- `policy_basis_ref` (`text`, optional for non-derivative base work; conditionally required for derivative rows).
 - `eligible_at_utc` (`utc_instant`, required).
 - `status` (`text`, required) — enum: `eligible`, `in_progress`, `succeeded`, `failed`, `cancelled`.
 - `attempt_count` (`int`, required).
@@ -563,8 +561,10 @@ Version binding (MVP):
 Derivative work provenance (MVP):
 
 - A `work_instances` row MAY be generated from another `work_instances` row or from another accepted generation source.
+- For validation purposes, a derivative work instance is any `work_instances` row where `generation_source_kind` is present or `source_work_instance_id` is present. Rows with neither field present are non-derivative base work rows and are not required by this MVP to carry derivative provenance fields.
 - Accepted generation source kinds in MVP are: `work_instance`, `notification_policy`, `schedule_tick`, `user_action`, and `item_version`.
 - If generated from prior work, `source_work_instance_id` MUST reference the source `work_instances.work_instance_id`, and `generation_source_kind` MUST be `work_instance`.
+- If `source_work_instance_id` is present, `generation_source_kind` MUST be `work_instance`; if `generation_source_kind=work_instance`, `source_work_instance_id` MUST be present.
 - Every derivative work instance MUST declare:
   - source: `generation_source_kind` plus `generation_source_ref`, or `source_work_instance_id` when the source is prior work.
   - subject: `work_subject_ref`, naming the item, work instance, person, recipient, or resource the work is for.
@@ -686,6 +686,13 @@ Source version binding (MVP):
 - If `projection_id` is present, `item_id` MUST equal `external_projections.item_id`.
 - If `projection_id` and `work_instance_id` are both present, `source_item_version` MUST equal `work_instances.item_version`.
 - If `projection_id` and `candidate_action_id` are both present, `source_item_version` MUST equal `candidate_actions.item_version`.
+
+Projection staleness guard (MVP):
+
+- For any attempt with `projection_id` present, `source_item_version` is the item version used to construct the outgoing projection request.
+- Before starting the external projection write, `coordination_items.current_version` MUST equal `source_item_version`.
+- If `coordination_items.current_version` differs from `source_item_version` at attempt start time, the external projection write MUST be rejected as projection staleness and MUST NOT start.
+- This attempt-start guard is distinct from `external_projections.projection_status=stale`, which records mirror-state drift rather than permission to start a write from stale item truth.
 
 Transitions (minimum):
 
