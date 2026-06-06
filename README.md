@@ -50,5 +50,6 @@ This repository follows the Cortext1 component scaffold standard incrementally:
 - `README.md`: orientation
 - `specs/`: normative design and compatibility promises
 - `specs/decisions/`: accepted decisions
+- `docs/IMPLEMENTATION_PLAN.md`: non-normative build sequence for moving from specs to executable behavior
 
 Implementation, contracts, migrations, and tests should be added only when their behavior is ready to be made concrete.
