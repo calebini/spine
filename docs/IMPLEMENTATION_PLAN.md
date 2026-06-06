@@ -55,7 +55,7 @@ Steps:
 - Add package subdirectories only as needed for first behavior:
   - `src/spine/core/` for deterministic pure logic.
   - `src/spine/models/` for typed records and validation shapes.
-  - `src/spine/adapters/` only if the first SQLite connection/migration wrapper needs a home.
+  - `src/spine/ledger/` when the first canonical local persistence boundary exists.
 - Keep `services/` and `protocols/` absent until orchestration or public importable interfaces exist.
 
 Initial modules:
@@ -121,6 +121,9 @@ Purpose: create the first durable local ledger substrate.
 Recommended boundary:
 
 - Use SQLite first.
+- Put SQLite under `src/spine/ledger/`, not `src/spine/adapters/`.
+- Treat `ledger/` as Spine's canonical local persistence boundary.
+- Reserve `adapters/` for external projections and side-effect systems.
 - Keep schema creation deterministic and local.
 - Do not introduce a migration framework until there is more than one schema version to manage.
 
@@ -136,7 +139,8 @@ Tables for first schema:
 
 Steps:
 
-- Add a schema module or SQL file for schema version 1.
+- Add `src/spine/ledger/schema.sql` for schema version 1.
+- Add `src/spine/ledger/sqlite.py` with connection/bootstrap helpers.
 - Add a connection/bootstrap helper that can initialize an empty SQLite database.
 - Enable foreign keys on every connection.
 - Add schema introspection tests so table and constraint drift is visible.
