@@ -26,10 +26,10 @@ Already in place:
 - Deterministic canonical JSON and hash primitives.
 - SQLite schema/bootstrap helpers for the canonical local ledger.
 - Atomic event/task v1 creation workflows with audit rows and current reads.
+- Versioned lifecycle mutation workflows for event cancellation, task completion, task cancellation, and shell archiving.
 
 Not yet in place:
 
-- Version mutation workflows.
 - Supporting sets and relationships.
 - Public contracts, protocols, adapters, services, or runtime loop.
 

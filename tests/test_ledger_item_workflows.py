@@ -9,13 +9,19 @@ from spine.core.hashing import (
 )
 from spine.ledger import (
     TemporalAnchorInput,
+    archive_item,
     assert_ledger_invariants,
+    cancel_event,
+    cancel_task,
+    complete_task,
     connect,
     create_event_v1,
+    create_next_item_version,
     create_task_v1,
     creation_audit_payload,
     get_current_item,
     initialize_schema,
+    mutation_audit_payload,
 )
 
 
@@ -230,6 +236,376 @@ class LedgerItemWorkflowTests(unittest.TestCase):
 
         self.assert_item_absent("task-no-subject")
 
+    def test_create_next_item_version_from_current_v1(self) -> None:
+        create_task_v1(
+            self.connection,
+            item_id="task-versioned",
+            audit_id="audit-task-versioned-create",
+            created_at_utc=NOW,
+            created_by_subject_id=SUBJECT_ID,
+            title="Submit forms",
+        )
+
+        mutated = create_next_item_version(
+            self.connection,
+            item_id="task-versioned",
+            target_version=1,
+            audit_id="audit-task-versioned-v2",
+            created_at_utc="2026-06-06T11:00:00Z",
+            created_by_subject_id=SUBJECT_ID,
+            title="Submit updated forms",
+        )
+
+        self.assertEqual(mutated.previous_version, 1)
+        self.assertEqual(mutated.version, 2)
+        current = get_current_item(self.connection, "task-versioned")
+        self.assertEqual(current["current_version"], 2)
+        self.assertEqual(current["version"]["title"], "Submit updated forms")
+        self.assertEqual(current["detail"]["task_status"], "open")
+        self.assertEqual(
+            self.version_title("task-versioned", 1),
+            "Submit forms",
+        )
+        assert_ledger_invariants(self.connection)
+
+    def test_create_next_item_version_rejects_missing_intermediate_version(self) -> None:
+        create_task_v1(
+            self.connection,
+            item_id="task-no-v2",
+            audit_id="audit-task-no-v2-create",
+            created_at_utc=NOW,
+            created_by_subject_id=SUBJECT_ID,
+            title="Submit forms",
+        )
+
+        with self.assertRaisesRegex(SpineValidationError, "stale_item_version"):
+            create_next_item_version(
+                self.connection,
+                item_id="task-no-v2",
+                target_version=2,
+                audit_id="audit-task-no-v2-v3",
+                created_at_utc="2026-06-06T11:00:00Z",
+                created_by_subject_id=SUBJECT_ID,
+            )
+
+        self.assertEqual(self.current_version("task-no-v2"), 1)
+        self.assert_version_absent("task-no-v2", 2)
+
+    def test_mutation_against_stale_v1_is_rejected_after_v2_exists(self) -> None:
+        create_task_v1(
+            self.connection,
+            item_id="task-stale",
+            audit_id="audit-task-stale-create",
+            created_at_utc=NOW,
+            created_by_subject_id=SUBJECT_ID,
+            title="Submit forms",
+        )
+        create_next_item_version(
+            self.connection,
+            item_id="task-stale",
+            target_version=1,
+            audit_id="audit-task-stale-v2",
+            created_at_utc="2026-06-06T11:00:00Z",
+            created_by_subject_id=SUBJECT_ID,
+        )
+
+        with self.assertRaisesRegex(SpineValidationError, "stale_item_version"):
+            create_next_item_version(
+                self.connection,
+                item_id="task-stale",
+                target_version=1,
+                audit_id="audit-task-stale-retry",
+                created_at_utc="2026-06-06T12:00:00Z",
+                created_by_subject_id=SUBJECT_ID,
+            )
+
+        self.assertEqual(self.current_version("task-stale"), 2)
+        self.assert_version_absent("task-stale", 3)
+
+    def test_event_cancellation_creates_v2_and_preserves_v1(self) -> None:
+        create_event_v1(
+            self.connection,
+            item_id="event-cancel",
+            audit_id="audit-event-cancel-create",
+            created_at_utc=NOW,
+            created_by_subject_id=SUBJECT_ID,
+            title="Dentist",
+            all_day=False,
+            start_anchor=TemporalAnchorInput(
+                anchor_id="event-cancel-start",
+                anchor_kind="instant_utc",
+                utc_instant="2026-06-06T14:00:00Z",
+            ),
+        )
+
+        cancel_event(
+            self.connection,
+            item_id="event-cancel",
+            target_version=1,
+            audit_id="audit-event-cancel-v2",
+            cancelled_at_utc="2026-06-06T11:00:00Z",
+            cancelled_by_subject_id=SUBJECT_ID,
+        )
+
+        current = get_current_item(self.connection, "event-cancel")
+        self.assertEqual(current["current_version"], 2)
+        self.assertEqual(current["detail"]["event_status"], "cancelled")
+        self.assertEqual(self.event_status("event-cancel", 1), "scheduled")
+        self.assertEqual(self.event_status("event-cancel", 2), "cancelled")
+        assert_ledger_invariants(self.connection)
+
+    def test_cancelled_event_cannot_be_rescheduled_by_mvp_transition(self) -> None:
+        create_event_v1(
+            self.connection,
+            item_id="event-terminal",
+            audit_id="audit-event-terminal-create",
+            created_at_utc=NOW,
+            created_by_subject_id=SUBJECT_ID,
+            title="Dentist",
+            all_day=False,
+            start_anchor=TemporalAnchorInput(
+                anchor_id="event-terminal-start",
+                anchor_kind="instant_utc",
+                utc_instant="2026-06-06T14:00:00Z",
+            ),
+        )
+        cancel_event(
+            self.connection,
+            item_id="event-terminal",
+            target_version=1,
+            audit_id="audit-event-terminal-v2",
+            cancelled_at_utc="2026-06-06T11:00:00Z",
+            cancelled_by_subject_id=SUBJECT_ID,
+        )
+
+        with self.assertRaisesRegex(SpineValidationError, "invalid_event_transition"):
+            cancel_event(
+                self.connection,
+                item_id="event-terminal",
+                target_version=2,
+                audit_id="audit-event-terminal-v3",
+                cancelled_at_utc="2026-06-06T12:00:00Z",
+                cancelled_by_subject_id=SUBJECT_ID,
+            )
+
+        self.assert_version_absent("event-terminal", 3)
+
+    def test_generic_next_version_rejects_event_reschedule_bypass(self) -> None:
+        create_event_v1(
+            self.connection,
+            item_id="event-bypass",
+            audit_id="audit-event-bypass-create",
+            created_at_utc=NOW,
+            created_by_subject_id=SUBJECT_ID,
+            title="Dentist",
+            all_day=False,
+            start_anchor=TemporalAnchorInput(
+                anchor_id="event-bypass-start",
+                anchor_kind="instant_utc",
+                utc_instant="2026-06-06T14:00:00Z",
+            ),
+        )
+        cancel_event(
+            self.connection,
+            item_id="event-bypass",
+            target_version=1,
+            audit_id="audit-event-bypass-v2",
+            cancelled_at_utc="2026-06-06T11:00:00Z",
+            cancelled_by_subject_id=SUBJECT_ID,
+        )
+
+        with self.assertRaisesRegex(SpineValidationError, "invalid_event_transition"):
+            create_next_item_version(
+                self.connection,
+                item_id="event-bypass",
+                target_version=2,
+                audit_id="audit-event-bypass-v3",
+                created_at_utc="2026-06-06T12:00:00Z",
+                created_by_subject_id=SUBJECT_ID,
+                event_detail={"event_status": "scheduled"},
+            )
+
+        self.assert_version_absent("event-bypass", 3)
+
+    def test_task_completion_creates_v2_and_records_completion_fields(self) -> None:
+        create_task_v1(
+            self.connection,
+            item_id="task-complete",
+            audit_id="audit-task-complete-create",
+            created_at_utc=NOW,
+            created_by_subject_id=SUBJECT_ID,
+            title="Submit forms",
+        )
+
+        complete_task(
+            self.connection,
+            item_id="task-complete",
+            target_version=1,
+            audit_id="audit-task-complete-v2",
+            completed_at_utc="2026-06-06T11:00:00Z",
+            completed_by_subject_id=SUBJECT_ID,
+            completion_state="submitted",
+        )
+
+        current = get_current_item(self.connection, "task-complete")
+        self.assertEqual(current["current_version"], 2)
+        self.assertEqual(current["detail"]["task_status"], "done")
+        self.assertEqual(current["detail"]["completion_state"], "submitted")
+        self.assertEqual(current["detail"]["completed_at_utc"], "2026-06-06T11:00:00Z")
+        self.assertEqual(current["detail"]["completed_by_subject_id"], SUBJECT_ID)
+        self.assertEqual(self.task_status("task-complete", 1), "open")
+        assert_ledger_invariants(self.connection)
+
+    def test_task_cancellation_creates_v2(self) -> None:
+        create_task_v1(
+            self.connection,
+            item_id="task-cancel",
+            audit_id="audit-task-cancel-create",
+            created_at_utc=NOW,
+            created_by_subject_id=SUBJECT_ID,
+            title="Submit forms",
+        )
+
+        cancel_task(
+            self.connection,
+            item_id="task-cancel",
+            target_version=1,
+            audit_id="audit-task-cancel-v2",
+            cancelled_at_utc="2026-06-06T11:00:00Z",
+            cancelled_by_subject_id=SUBJECT_ID,
+        )
+
+        current = get_current_item(self.connection, "task-cancel")
+        self.assertEqual(current["current_version"], 2)
+        self.assertEqual(current["detail"]["task_status"], "cancelled")
+        self.assertEqual(self.task_status("task-cancel", 1), "open")
+        assert_ledger_invariants(self.connection)
+
+    def test_terminal_task_rejects_further_transitions(self) -> None:
+        create_task_v1(
+            self.connection,
+            item_id="task-terminal",
+            audit_id="audit-task-terminal-create",
+            created_at_utc=NOW,
+            created_by_subject_id=SUBJECT_ID,
+            title="Submit forms",
+        )
+        complete_task(
+            self.connection,
+            item_id="task-terminal",
+            target_version=1,
+            audit_id="audit-task-terminal-v2",
+            completed_at_utc="2026-06-06T11:00:00Z",
+            completed_by_subject_id=SUBJECT_ID,
+        )
+
+        with self.assertRaisesRegex(SpineValidationError, "invalid_task_transition"):
+            cancel_task(
+                self.connection,
+                item_id="task-terminal",
+                target_version=2,
+                audit_id="audit-task-terminal-v3",
+                cancelled_at_utc="2026-06-06T12:00:00Z",
+                cancelled_by_subject_id=SUBJECT_ID,
+            )
+
+        self.assert_version_absent("task-terminal", 3)
+
+    def test_generic_next_version_rejects_terminal_task_reopen_bypass(self) -> None:
+        create_task_v1(
+            self.connection,
+            item_id="task-bypass",
+            audit_id="audit-task-bypass-create",
+            created_at_utc=NOW,
+            created_by_subject_id=SUBJECT_ID,
+            title="Submit forms",
+        )
+        complete_task(
+            self.connection,
+            item_id="task-bypass",
+            target_version=1,
+            audit_id="audit-task-bypass-v2",
+            completed_at_utc="2026-06-06T11:00:00Z",
+            completed_by_subject_id=SUBJECT_ID,
+        )
+
+        with self.assertRaisesRegex(SpineValidationError, "invalid_task_transition"):
+            create_next_item_version(
+                self.connection,
+                item_id="task-bypass",
+                target_version=2,
+                audit_id="audit-task-bypass-v3",
+                created_at_utc="2026-06-06T12:00:00Z",
+                created_by_subject_id=SUBJECT_ID,
+                task_detail={"task_status": "open"},
+            )
+
+        self.assert_version_absent("task-bypass", 3)
+
+    def test_archive_updates_shell_and_writes_audit_without_new_item_version(self) -> None:
+        create_task_v1(
+            self.connection,
+            item_id="task-archive",
+            audit_id="audit-task-archive-create",
+            created_at_utc=NOW,
+            created_by_subject_id=SUBJECT_ID,
+            title="Submit forms",
+        )
+
+        archive_item(
+            self.connection,
+            item_id="task-archive",
+            target_version=1,
+            audit_id="audit-task-archive",
+            archived_at_utc="2026-06-06T11:00:00Z",
+            archived_by_subject_id=SUBJECT_ID,
+        )
+
+        current = get_current_item(self.connection, "task-archive")
+        self.assertEqual(current["status"], "archived")
+        self.assertEqual(current["current_version"], 1)
+        self.assertEqual(current["archived_at_utc"], "2026-06-06T11:00:00Z")
+        self.assert_version_absent("task-archive", 2)
+        audit = self.audit("audit-task-archive")
+        self.assertEqual(audit["action"], "item_archived")
+        assert_ledger_invariants(self.connection)
+
+    def test_mutation_audit_row_is_written_with_expected_payload_hash(self) -> None:
+        create_task_v1(
+            self.connection,
+            item_id="task-audit-mutation",
+            audit_id="audit-task-audit-mutation-create",
+            created_at_utc=NOW,
+            created_by_subject_id=SUBJECT_ID,
+            title="Submit forms",
+        )
+
+        complete_task(
+            self.connection,
+            item_id="task-audit-mutation",
+            target_version=1,
+            audit_id="audit-task-audit-mutation-v2",
+            completed_at_utc="2026-06-06T11:00:00Z",
+            completed_by_subject_id=SUBJECT_ID,
+        )
+
+        audit = self.audit("audit-task-audit-mutation-v2")
+        self.assertEqual(audit["item_id"], "task-audit-mutation")
+        self.assertEqual(audit["action"], "task_completed")
+        self.assertEqual(audit["reason_code"], "task_completed")
+        self.assertEqual(
+            audit["payload_hash"],
+            audit_log_payload_hash(
+                mutation_audit_payload(
+                    action="task_completed",
+                    item_id="task-audit-mutation",
+                    item_type="task",
+                    previous_version=1,
+                    version=2,
+                )
+            ),
+        )
+
     def assert_item_absent(self, item_id: str) -> None:
         count = self.connection.execute(
             "SELECT COUNT(*) FROM coordination_items WHERE item_id = ?",
@@ -243,6 +619,43 @@ class LedgerItemWorkflowTests(unittest.TestCase):
             (anchor_id,),
         ).fetchone()[0]
         self.assertEqual(count, 0)
+
+    def assert_version_absent(self, item_id: str, version: int) -> None:
+        count = self.connection.execute(
+            "SELECT COUNT(*) FROM coordination_item_versions WHERE item_id = ? AND version = ?",
+            (item_id, version),
+        ).fetchone()[0]
+        self.assertEqual(count, 0)
+
+    def current_version(self, item_id: str) -> int:
+        return self.connection.execute(
+            "SELECT current_version FROM coordination_items WHERE item_id = ?",
+            (item_id,),
+        ).fetchone()[0]
+
+    def version_title(self, item_id: str, version: int) -> str:
+        return self.connection.execute(
+            "SELECT title FROM coordination_item_versions WHERE item_id = ? AND version = ?",
+            (item_id, version),
+        ).fetchone()[0]
+
+    def event_status(self, item_id: str, version: int) -> str:
+        return self.connection.execute(
+            "SELECT event_status FROM event_details WHERE item_id = ? AND version = ?",
+            (item_id, version),
+        ).fetchone()[0]
+
+    def task_status(self, item_id: str, version: int) -> str:
+        return self.connection.execute(
+            "SELECT task_status FROM task_details WHERE item_id = ? AND version = ?",
+            (item_id, version),
+        ).fetchone()[0]
+
+    def audit(self, audit_id: str) -> sqlite3.Row:
+        return self.connection.execute(
+            "SELECT * FROM audit_log WHERE audit_id = ?",
+            (audit_id,),
+        ).fetchone()
 
 
 def insert_subject(connection: sqlite3.Connection) -> None:
