@@ -10,7 +10,7 @@ Spine owns coordination truth. Adapters make it visible, actionable, or enriched
 
 ## Current Status
 
-Seed-spec phase. This repository intentionally starts with orientation and normative specs before runtime code.
+Seed-spec phase with an initial runtime scaffold. This repository intentionally starts with orientation and normative specs before adding substantive runtime behavior.
 
 Authoritative starting points:
 
@@ -51,5 +51,7 @@ This repository follows the Cortext1 component scaffold standard incrementally:
 - `specs/`: normative design and compatibility promises
 - `specs/decisions/`: accepted decisions
 - `docs/IMPLEMENTATION_PLAN.md`: non-normative build sequence for moving from specs to executable behavior
+- `src/spine/`: initial Python package scaffold
+- `tests/`: executable expectations
 
 Implementation, contracts, migrations, and tests should be added only when their behavior is ready to be made concrete.
