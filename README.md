@@ -10,7 +10,7 @@ Spine owns coordination truth. Adapters make it visible, actionable, or enriched
 
 ## Current Status
 
-Seed-spec phase with an initial runtime scaffold. This repository intentionally starts with orientation and normative specs before adding substantive runtime behavior.
+Seed-spec phase with an initial runtime scaffold and deterministic core primitives. This repository intentionally starts with orientation and normative specs before adding substantive runtime behavior.
 
 Authoritative starting points:
 
