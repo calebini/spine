@@ -22,12 +22,15 @@ Already in place:
 - Normative specs in `specs/`.
 - A converged MVP ontology in `specs/ontology.md`.
 - Accepted spec versioning and freeze policy in `specs/SPINE_SPEC_VERSIONING_AND_FREEZE_POLICY.md`.
+- Python package scaffold under `src/spine/`.
+- Deterministic canonical JSON and hash primitives.
+- SQLite schema/bootstrap helpers for the canonical local ledger.
+- Atomic event/task v1 creation workflows with audit rows and current reads.
 
 Not yet in place:
 
-- Python package scaffold.
-- SQLite schema or migrations.
-- Executable model/validation layer.
+- Version mutation workflows.
+- Supporting sets and relationships.
 - Public contracts, protocols, adapters, services, or runtime loop.
 
 ## Build Strategy
@@ -485,8 +488,12 @@ Checkpoint 3: item command workflows
 
 - create event v1
 - create task v1
-- create next item version
-- event/task status transitions
 - current reads and audit verification
 
-After these three checkpoints, Spine has broken ground for real: it can persist canonical coordination truth, prove deterministic identity, and reject invalid state without relying on external systems.
+Checkpoint 4: version mutation workflows
+
+- create next item version
+- event/task status transitions
+- stale target rejection
+
+After these checkpoints, Spine has broken ground for real: it can persist canonical coordination truth, prove deterministic identity, and reject invalid state without relying on external systems.

@@ -10,7 +10,7 @@ Spine owns coordination truth. Adapters make it visible, actionable, or enriched
 
 ## Current Status
 
-Seed-spec phase with an initial runtime scaffold, deterministic core primitives, and a SQLite local ledger schema foundation. This repository intentionally starts with orientation and normative specs before adding broader runtime behavior.
+Seed-spec phase with an initial runtime scaffold, deterministic core primitives, a SQLite local ledger schema foundation, and atomic event/task v1 creation workflows. This repository intentionally starts with orientation and normative specs before adding broader runtime behavior.
 
 Authoritative starting points:
 
