@@ -29,10 +29,11 @@ Already in place:
 - Versioned lifecycle mutation workflows for event cancellation, task completion, task cancellation, and shell archiving.
 - Supporting-set and relationship workflows for locations, item subject roles, inert notification policies, stored MVP relations, derived relation aliases, and copy-forward into new versions.
 - Durable side-effect pressure ledgers for work instances, candidate actions, side-effect attempts, and external projections.
+- Provider-agnostic internal services for item commands, reminder work generation, work eligibility, projection planning, and pre-write attempt gates.
 
 Not yet in place:
 
-- Public contracts, protocols, adapters, services, or runtime loop.
+- Public contracts, protocols, adapters, or runtime loop.
 
 ## Build Strategy
 

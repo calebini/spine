@@ -10,7 +10,7 @@ Spine owns coordination truth. Adapters make it visible, actionable, or enriched
 
 ## Current Status
 
-Seed-spec phase with an initial runtime scaffold, deterministic core primitives, a SQLite local ledger schema foundation, atomic event/task v1 creation workflows, versioned lifecycle mutation workflows, first supporting-set/relationship workflows, and durable side-effect pressure ledgers. This repository intentionally starts with orientation and normative specs before adding broader runtime behavior.
+Seed-spec phase with an initial runtime scaffold, deterministic core primitives, a SQLite local ledger schema foundation, atomic event/task v1 creation workflows, versioned lifecycle mutation workflows, first supporting-set/relationship workflows, durable side-effect pressure ledgers, and provider-agnostic internal services. This repository intentionally starts with orientation and normative specs before adding broader runtime behavior.
 
 Authoritative starting points:
 
@@ -53,6 +53,7 @@ This repository follows the Cortext1 component scaffold standard incrementally:
 - `docs/IMPLEMENTATION_PLAN.md`: non-normative build sequence for moving from specs to executable behavior
 - `src/spine/`: initial Python package scaffold
 - `src/spine/ledger/`: canonical local persistence boundary
+- `src/spine/services/`: provider-agnostic orchestration over ledger workflows
 - `tests/`: executable expectations
 
 Implementation, contracts, migrations, and tests should be added only when their behavior is ready to be made concrete.
