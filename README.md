@@ -64,7 +64,8 @@ Implementation, contracts, migrations, and tests should be added only when their
 With the sibling Tickerd checkout available, Spine can run a bounded observe-only Tickerd pass over a local SQLite ledger:
 
 ```bash
-PYTHONPATH=src:../tickerd/src python3 -m spine.runtime.tickerd_observe path/to/spine.sqlite
+PYTHONPATH=src python3 -m spine.runtime.seed_demo /tmp/spine-demo.sqlite
+PYTHONPATH=src:../tickerd/src python3 -m spine.runtime.tickerd_observe /tmp/spine-demo.sqlite
 ```
 
-Use `--initialize-schema` when creating a fresh demo ledger. The command emits Tickerd JSONL records and does not perform vendor writes.
+The seed command creates one subject, one task, one notification policy, and one eligible generated work instance. The Tickerd observe command emits JSONL records and does not perform vendor writes.
