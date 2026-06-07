@@ -28,10 +28,10 @@ Already in place:
 - Atomic event/task v1 creation workflows with audit rows and current reads.
 - Versioned lifecycle mutation workflows for event cancellation, task completion, task cancellation, and shell archiving.
 - Supporting-set and relationship workflows for locations, item subject roles, inert notification policies, stored MVP relations, derived relation aliases, and copy-forward into new versions.
+- Durable side-effect pressure ledgers for work instances, candidate actions, side-effect attempts, and external projections.
 
 Not yet in place:
 
-- Work, candidate actions, side-effect attempts, and projections.
 - Public contracts, protocols, adapters, services, or runtime loop.
 
 ## Build Strategy

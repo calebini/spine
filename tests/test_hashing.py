@@ -6,6 +6,8 @@ from spine.core.hashing import (
     coordination_item_version_intent_hash,
     coordination_item_version_normalized_fields_hash,
     hash_canonical_json,
+    side_effect_request_hash,
+    side_effect_request_payload_hash,
 )
 
 
@@ -54,6 +56,40 @@ class HashingTests(unittest.TestCase):
         self.assertEqual(
             audit_log_payload_hash({"event": "item_created", "item_id": "item-1"}),
             hash_canonical_json({"item_id": "item-1", "event": "item_created"}),
+        )
+
+    def test_side_effect_request_payload_hash_uses_adapter_envelope_payload(self) -> None:
+        self.assertEqual(
+            side_effect_request_payload_hash(
+                adapter_name="notification",
+                request_envelope={"body": "Dentist", "to": "subject-1"},
+            ),
+            hash_canonical_json(
+                {
+                    "adapter_name": "notification",
+                    "request_envelope": {"body": "Dentist", "to": "subject-1"},
+                }
+            ),
+        )
+
+    def test_side_effect_request_hash_omits_absent_optional_origins(self) -> None:
+        request_payload_hash = hash_canonical_json({"payload": "abc"})
+
+        self.assertEqual(
+            side_effect_request_hash(
+                adapter_name="notification",
+                idempotency_key="idem-1",
+                request_payload_hash=request_payload_hash,
+                work_instance_id="work-1",
+            ),
+            hash_canonical_json(
+                {
+                    "adapter_name": "notification",
+                    "idempotency_key": "idem-1",
+                    "request_payload_hash": request_payload_hash,
+                    "work_instance_id": "work-1",
+                }
+            ),
         )
 
 

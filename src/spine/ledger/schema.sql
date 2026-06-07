@@ -364,6 +364,256 @@ CREATE UNIQUE INDEX IF NOT EXISTS coordination_item_relations_active_unique
 ON coordination_item_relations (source_item_id, target_item_id, relation_type)
 WHERE relation_status = 'active';
 
+CREATE TABLE IF NOT EXISTS work_instances (
+  work_instance_id TEXT PRIMARY KEY,
+  item_id TEXT NOT NULL,
+  item_version INTEGER NOT NULL,
+  notification_policy_id TEXT,
+  notification_policy_item_version INTEGER,
+  source_work_instance_id TEXT,
+  generation_source_kind TEXT CHECK (
+    generation_source_kind IN ('work_instance', 'notification_policy', 'schedule_tick', 'user_action', 'item_version')
+  ),
+  generation_source_ref TEXT,
+  work_subject_ref TEXT,
+  work_kind TEXT NOT NULL CHECK (work_kind IN ('notification_reminder')),
+  purpose_detail_ref TEXT,
+  policy_basis_ref TEXT,
+  eligible_at_utc TEXT NOT NULL,
+  status TEXT NOT NULL CHECK (status IN ('eligible', 'in_progress', 'succeeded', 'failed', 'cancelled')),
+  attempt_count INTEGER NOT NULL CHECK (attempt_count >= 0),
+  next_attempt_at_utc TEXT,
+  reason_code TEXT,
+  created_at_utc TEXT NOT NULL,
+  updated_at_utc TEXT NOT NULL,
+  CHECK (
+    (
+      generation_source_kind IS NULL
+      AND source_work_instance_id IS NULL
+    )
+    OR (
+      generation_source_kind = 'work_instance'
+      AND source_work_instance_id IS NOT NULL
+      AND work_subject_ref IS NOT NULL
+      AND policy_basis_ref IS NOT NULL
+    )
+    OR (
+      generation_source_kind IS NOT NULL
+      AND generation_source_kind != 'work_instance'
+      AND source_work_instance_id IS NULL
+      AND generation_source_ref IS NOT NULL
+      AND work_subject_ref IS NOT NULL
+      AND policy_basis_ref IS NOT NULL
+    )
+  ),
+  CHECK (
+    (notification_policy_id IS NULL AND notification_policy_item_version IS NULL)
+    OR (notification_policy_id IS NOT NULL AND notification_policy_item_version IS NOT NULL)
+  ),
+  FOREIGN KEY (item_id, item_version)
+    REFERENCES coordination_item_versions (item_id, version)
+    DEFERRABLE INITIALLY DEFERRED,
+  FOREIGN KEY (notification_policy_id)
+    REFERENCES notification_policies (policy_id)
+    DEFERRABLE INITIALLY DEFERRED,
+  FOREIGN KEY (source_work_instance_id)
+    REFERENCES work_instances (work_instance_id)
+    DEFERRABLE INITIALLY DEFERRED
+);
+
+CREATE TRIGGER IF NOT EXISTS work_instances_notification_policy_binding_insert
+BEFORE INSERT ON work_instances
+FOR EACH ROW
+WHEN NEW.notification_policy_id IS NOT NULL
+AND NOT EXISTS (
+  SELECT 1
+  FROM notification_policies
+  WHERE policy_id = NEW.notification_policy_id
+    AND item_id = NEW.item_id
+    AND version = NEW.notification_policy_item_version
+    AND version = NEW.item_version
+)
+BEGIN
+  SELECT RAISE(ABORT, 'work_instances notification policy binding is invalid');
+END;
+
+CREATE TABLE IF NOT EXISTS candidate_actions (
+  candidate_action_id TEXT PRIMARY KEY,
+  item_id TEXT NOT NULL,
+  item_version INTEGER NOT NULL,
+  action_kind TEXT NOT NULL CHECK (
+    action_kind IN ('deliver_notification', 'sync_projection', 'request_user_decision')
+  ),
+  urgency TEXT,
+  status TEXT NOT NULL CHECK (status IN ('open', 'resolved', 'dismissed')),
+  evidence_ref TEXT,
+  requires_approval INTEGER NOT NULL CHECK (requires_approval IN (0, 1)),
+  created_at_utc TEXT NOT NULL,
+  resolved_at_utc TEXT,
+  CHECK (
+    (status = 'open' AND resolved_at_utc IS NULL)
+    OR (status IN ('resolved', 'dismissed') AND resolved_at_utc IS NOT NULL)
+  ),
+  FOREIGN KEY (item_id, item_version)
+    REFERENCES coordination_item_versions (item_id, version)
+    DEFERRABLE INITIALLY DEFERRED
+);
+
+CREATE TABLE IF NOT EXISTS external_projections (
+  projection_id TEXT PRIMARY KEY,
+  item_id TEXT NOT NULL,
+  adapter_name TEXT NOT NULL CHECK (length(adapter_name) > 0),
+  external_ref TEXT NOT NULL CHECK (length(external_ref) > 0),
+  projection_status TEXT NOT NULL CHECK (projection_status IN ('current', 'stale', 'failed')),
+  last_projected_version INTEGER,
+  last_attempt_id TEXT,
+  stale_reason TEXT,
+  updated_at_utc TEXT NOT NULL,
+  UNIQUE (adapter_name, external_ref),
+  CHECK (
+    (projection_status = 'current' AND last_projected_version IS NOT NULL AND stale_reason IS NULL)
+    OR (projection_status = 'stale' AND last_projected_version IS NOT NULL AND stale_reason IS NOT NULL)
+    OR (projection_status = 'failed')
+  ),
+  FOREIGN KEY (item_id)
+    REFERENCES coordination_items (item_id)
+    DEFERRABLE INITIALLY DEFERRED,
+  FOREIGN KEY (item_id, last_projected_version)
+    REFERENCES coordination_item_versions (item_id, version)
+    DEFERRABLE INITIALLY DEFERRED,
+  FOREIGN KEY (last_attempt_id)
+    REFERENCES side_effect_attempts (attempt_id)
+    DEFERRABLE INITIALLY DEFERRED
+);
+
+CREATE TABLE IF NOT EXISTS side_effect_attempts (
+  attempt_id TEXT PRIMARY KEY,
+  work_instance_id TEXT,
+  candidate_action_id TEXT,
+  item_id TEXT,
+  adapter_name TEXT NOT NULL CHECK (length(adapter_name) > 0),
+  projection_id TEXT,
+  source_item_version INTEGER,
+  idempotency_key TEXT NOT NULL CHECK (length(idempotency_key) > 0),
+  attempt_status TEXT NOT NULL CHECK (attempt_status IN ('started', 'succeeded', 'failed', 'rejected')),
+  provider_ref TEXT,
+  request_payload_hash TEXT NOT NULL CHECK (
+    length(request_payload_hash) = 64 AND request_payload_hash NOT GLOB '*[^0-9a-f]*'
+  ),
+  request_hash TEXT NOT NULL CHECK (
+    length(request_hash) = 64 AND request_hash NOT GLOB '*[^0-9a-f]*'
+  ),
+  response_hash TEXT CHECK (
+    response_hash IS NULL OR (length(response_hash) = 64 AND response_hash NOT GLOB '*[^0-9a-f]*')
+  ),
+  reason_code TEXT,
+  attempted_at_utc TEXT NOT NULL,
+  completed_at_utc TEXT,
+  UNIQUE (adapter_name, idempotency_key),
+  CHECK (
+    (work_instance_id IS NOT NULL OR candidate_action_id IS NOT NULL OR projection_id IS NOT NULL)
+    AND NOT (work_instance_id IS NOT NULL AND candidate_action_id IS NOT NULL)
+  ),
+  CHECK (
+    (attempt_status = 'started' AND completed_at_utc IS NULL)
+    OR (attempt_status IN ('succeeded', 'failed', 'rejected') AND completed_at_utc IS NOT NULL)
+  ),
+  CHECK (
+    (projection_id IS NULL)
+    OR (item_id IS NOT NULL AND source_item_version IS NOT NULL)
+  ),
+  FOREIGN KEY (work_instance_id)
+    REFERENCES work_instances (work_instance_id)
+    DEFERRABLE INITIALLY DEFERRED,
+  FOREIGN KEY (candidate_action_id)
+    REFERENCES candidate_actions (candidate_action_id)
+    DEFERRABLE INITIALLY DEFERRED,
+  FOREIGN KEY (item_id)
+    REFERENCES coordination_items (item_id)
+    DEFERRABLE INITIALLY DEFERRED,
+  FOREIGN KEY (item_id, source_item_version)
+    REFERENCES coordination_item_versions (item_id, version)
+    DEFERRABLE INITIALLY DEFERRED,
+  FOREIGN KEY (projection_id)
+    REFERENCES external_projections (projection_id)
+    DEFERRABLE INITIALLY DEFERRED
+);
+
+CREATE TRIGGER IF NOT EXISTS side_effect_attempts_origin_binding_insert
+BEFORE INSERT ON side_effect_attempts
+FOR EACH ROW
+WHEN (
+  NEW.work_instance_id IS NOT NULL
+  AND NOT EXISTS (
+    SELECT 1 FROM work_instances
+    WHERE work_instance_id = NEW.work_instance_id
+      AND item_id = NEW.item_id
+      AND (
+        NEW.projection_id IS NULL
+        OR item_version = NEW.source_item_version
+      )
+  )
+)
+OR (
+  NEW.candidate_action_id IS NOT NULL
+  AND NOT EXISTS (
+    SELECT 1 FROM candidate_actions
+    WHERE candidate_action_id = NEW.candidate_action_id
+      AND item_id = NEW.item_id
+      AND (
+        NEW.projection_id IS NULL
+        OR item_version = NEW.source_item_version
+      )
+  )
+)
+OR (
+  NEW.projection_id IS NOT NULL
+  AND NOT EXISTS (
+    SELECT 1 FROM external_projections
+    WHERE projection_id = NEW.projection_id
+      AND item_id = NEW.item_id
+  )
+)
+BEGIN
+  SELECT RAISE(ABORT, 'side_effect_attempts origin binding is invalid');
+END;
+
+CREATE TRIGGER IF NOT EXISTS side_effect_attempts_staleness_insert
+BEFORE INSERT ON side_effect_attempts
+FOR EACH ROW
+WHEN (
+  NEW.work_instance_id IS NOT NULL
+  AND EXISTS (
+    SELECT 1
+    FROM work_instances AS w
+    JOIN coordination_items AS i ON i.item_id = w.item_id
+    WHERE w.work_instance_id = NEW.work_instance_id
+      AND i.current_version != w.item_version
+  )
+)
+OR (
+  NEW.candidate_action_id IS NOT NULL
+  AND EXISTS (
+    SELECT 1
+    FROM candidate_actions AS c
+    JOIN coordination_items AS i ON i.item_id = c.item_id
+    WHERE c.candidate_action_id = NEW.candidate_action_id
+      AND i.current_version != c.item_version
+  )
+)
+OR (
+  NEW.projection_id IS NOT NULL
+  AND EXISTS (
+    SELECT 1
+    FROM coordination_items AS i
+    WHERE i.item_id = NEW.item_id
+      AND i.current_version != NEW.source_item_version
+  )
+)
+BEGIN
+  SELECT RAISE(ABORT, 'side_effect_attempts source item version is stale');
+END;
+
 CREATE TABLE IF NOT EXISTS audit_log (
   audit_id TEXT PRIMARY KEY,
   item_id TEXT NOT NULL,
