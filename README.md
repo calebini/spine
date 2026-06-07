@@ -58,3 +58,13 @@ This repository follows the Cortext1 component scaffold standard incrementally:
 - `tests/`: executable expectations
 
 Implementation, contracts, migrations, and tests should be added only when their behavior is ready to be made concrete.
+
+## Local Runtime Smoke
+
+With the sibling Tickerd checkout available, Spine can run a bounded observe-only Tickerd pass over a local SQLite ledger:
+
+```bash
+PYTHONPATH=src:../tickerd/src python3 -m spine.runtime.tickerd_observe path/to/spine.sqlite
+```
+
+Use `--initialize-schema` when creating a fresh demo ledger. The command emits Tickerd JSONL records and does not perform vendor writes.

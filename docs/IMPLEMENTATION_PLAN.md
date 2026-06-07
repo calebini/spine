@@ -30,11 +30,12 @@ Already in place:
 - Supporting-set and relationship workflows for locations, item subject roles, inert notification policies, stored MVP relations, derived relation aliases, and copy-forward into new versions.
 - Durable side-effect pressure ledgers for work instances, candidate actions, side-effect attempts, and external projections.
 - Provider-agnostic internal services for item commands, reminder work generation, work eligibility, projection planning, and pre-write attempt gates.
+- Initial Tickerd work adapter and bounded observe-only runtime command.
 
 Not yet in place:
 
 - Public contracts or vendor adapters.
-- A packaged tickerd dependency declaration; local integration can run against the sibling tickerd repo while packaging is settled.
+- A packaged tickerd dependency declaration; local integration currently runs against the sibling tickerd repo while packaging is settled.
 
 ## Build Strategy
 
@@ -390,11 +391,13 @@ Tests:
 - observe-only processing blocks side effects.
 - active mode without a configured processor blocks rather than inventing external behavior.
 - Tickerd's reusable conformance smoke can run against the Spine adapter when the sibling Tickerd package is on `PYTHONPATH`.
+- a bounded `python -m spine.runtime.tickerd_observe` command emits Tickerd JSONL records for eligible work.
 
 Exit criteria:
 
 - tickerd can observe eligible Spine work.
 - the adapter can be wired into a Tickerd kernel without direct ledger ownership.
+- a local user can run a finite observe-only pass against a Spine SQLite ledger.
 - Spine remains the ledger of coordination truth, not the daemon owner.
 
 ## Stage 10: Foreman/Threshold Boundary
