@@ -27,10 +27,11 @@ Already in place:
 - SQLite schema/bootstrap helpers for the canonical local ledger.
 - Atomic event/task v1 creation workflows with audit rows and current reads.
 - Versioned lifecycle mutation workflows for event cancellation, task completion, task cancellation, and shell archiving.
+- Supporting-set and relationship workflows for locations, item subject roles, inert notification policies, stored MVP relations, derived relation aliases, and copy-forward into new versions.
 
 Not yet in place:
 
-- Supporting sets and relationships.
+- Work, candidate actions, side-effect attempts, and projections.
 - Public contracts, protocols, adapters, services, or runtime loop.
 
 ## Build Strategy

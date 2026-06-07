@@ -263,6 +263,107 @@ BEGIN
   SELECT RAISE(ABORT, 'task_details time shape is invalid');
 END;
 
+CREATE TABLE IF NOT EXISTS locations (
+  location_id TEXT PRIMARY KEY,
+  label TEXT NOT NULL CHECK (length(label) > 0),
+  kind TEXT NOT NULL CHECK (kind IN ('address', 'place', 'virtual', 'relative', 'unknown')),
+  address_text TEXT,
+  latitude TEXT,
+  longitude TEXT,
+  timezone TEXT,
+  provider_ref TEXT,
+  metadata_json TEXT,
+  created_at_utc TEXT NOT NULL,
+  updated_at_utc TEXT NOT NULL
+);
+
+CREATE TRIGGER IF NOT EXISTS locations_referenced_canonical_fields_update
+BEFORE UPDATE OF label, kind, address_text, latitude, longitude, timezone, provider_ref ON locations
+FOR EACH ROW
+WHEN EXISTS (SELECT 1 FROM item_locations WHERE location_id = OLD.location_id)
+BEGIN
+  SELECT RAISE(ABORT, 'referenced location canonical fields are immutable');
+END;
+
+CREATE TABLE IF NOT EXISTS item_locations (
+  item_location_id TEXT PRIMARY KEY,
+  item_id TEXT NOT NULL,
+  version INTEGER NOT NULL,
+  location_id TEXT NOT NULL,
+  role TEXT NOT NULL CHECK (role IN ('primary', 'pickup', 'dropoff', 'meeting_link', 'context')),
+  created_at_utc TEXT NOT NULL,
+  UNIQUE (item_id, version, role),
+  FOREIGN KEY (item_id, version)
+    REFERENCES coordination_item_versions (item_id, version)
+    DEFERRABLE INITIALLY DEFERRED,
+  FOREIGN KEY (location_id)
+    REFERENCES locations (location_id)
+    DEFERRABLE INITIALLY DEFERRED
+);
+
+CREATE TABLE IF NOT EXISTS item_subject_roles (
+  item_subject_role_id TEXT PRIMARY KEY,
+  item_id TEXT NOT NULL,
+  version INTEGER NOT NULL,
+  subject_id TEXT NOT NULL,
+  role TEXT NOT NULL CHECK (role IN ('participant', 'assignee', 'watcher', 'owner', 'recipient')),
+  status TEXT NOT NULL CHECK (status IN ('active', 'inactive')),
+  created_at_utc TEXT NOT NULL,
+  UNIQUE (item_id, version, subject_id, role),
+  FOREIGN KEY (item_id, version)
+    REFERENCES coordination_item_versions (item_id, version)
+    DEFERRABLE INITIALLY DEFERRED,
+  FOREIGN KEY (subject_id)
+    REFERENCES subjects (subject_id)
+    DEFERRABLE INITIALLY DEFERRED
+);
+
+CREATE TABLE IF NOT EXISTS notification_policies (
+  policy_id TEXT PRIMARY KEY,
+  item_id TEXT NOT NULL,
+  version INTEGER NOT NULL,
+  recipient_subject_id TEXT NOT NULL,
+  channel_preference_ref TEXT,
+  trigger_anchor_id TEXT NOT NULL,
+  quiet_hours_policy_ref TEXT,
+  status TEXT NOT NULL CHECK (status IN ('active', 'disabled')),
+  created_at_utc TEXT NOT NULL,
+  UNIQUE (item_id, version, recipient_subject_id, trigger_anchor_id),
+  FOREIGN KEY (item_id, version)
+    REFERENCES coordination_item_versions (item_id, version)
+    DEFERRABLE INITIALLY DEFERRED,
+  FOREIGN KEY (recipient_subject_id)
+    REFERENCES subjects (subject_id)
+    DEFERRABLE INITIALLY DEFERRED,
+  FOREIGN KEY (trigger_anchor_id)
+    REFERENCES temporal_anchors (anchor_id)
+    DEFERRABLE INITIALLY DEFERRED
+);
+
+CREATE TABLE IF NOT EXISTS coordination_item_relations (
+  relation_id TEXT PRIMARY KEY,
+  source_item_id TEXT NOT NULL,
+  target_item_id TEXT NOT NULL,
+  relation_type TEXT NOT NULL CHECK (relation_type IN ('depends_on', 'part_of')),
+  relation_status TEXT NOT NULL CHECK (relation_status IN ('active', 'inactive')),
+  created_at_utc TEXT NOT NULL,
+  created_by_subject_id TEXT NOT NULL,
+  metadata_json TEXT,
+  FOREIGN KEY (source_item_id)
+    REFERENCES coordination_items (item_id)
+    DEFERRABLE INITIALLY DEFERRED,
+  FOREIGN KEY (target_item_id)
+    REFERENCES coordination_items (item_id)
+    DEFERRABLE INITIALLY DEFERRED,
+  FOREIGN KEY (created_by_subject_id)
+    REFERENCES subjects (subject_id)
+    DEFERRABLE INITIALLY DEFERRED
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS coordination_item_relations_active_unique
+ON coordination_item_relations (source_item_id, target_item_id, relation_type)
+WHERE relation_status = 'active';
+
 CREATE TABLE IF NOT EXISTS audit_log (
   audit_id TEXT PRIMARY KEY,
   item_id TEXT NOT NULL,
