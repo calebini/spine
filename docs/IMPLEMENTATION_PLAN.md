@@ -29,6 +29,7 @@ Already in place:
 - Versioned lifecycle mutation workflows for event cancellation, task completion, task cancellation, and shell archiving.
 - Supporting-set and relationship workflows for locations, item subject roles, inert notification policies, stored MVP relations, derived relation aliases, and copy-forward into new versions.
 - Durable side-effect pressure ledgers for work instances, candidate actions, side-effect attempts, and external projections.
+- Work outcome lifecycle services for start, success, failure, cancellation, and retry scheduling.
 - Provider-agnostic internal services for item commands, reminder work generation, work eligibility, projection planning, and pre-write attempt gates.
 - Initial Tickerd work adapter and bounded observe-only runtime command.
 

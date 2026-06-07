@@ -571,7 +571,17 @@ Derivative work provenance (MVP):
   - purpose: `work_kind` plus optional `purpose_detail_ref`.
   - policy basis: `policy_basis_ref`, naming the policy, rule, schedule, user action, or item version basis that justified generation.
 - Derivative work MUST remain bound to an explicit `item_id` and `item_version`; it MUST NOT inherit current item truth implicitly from its source work row.
-- This provenance rule does not define retry, cancellation, recovery, or terminal outcome policy. Those lifecycle semantics remain deferred.
+Work lifecycle semantics (MVP):
+
+- Legal stored work status values are `eligible`, `in_progress`, `succeeded`, `failed`, and `cancelled`.
+- Starting work MUST transition `eligible -> in_progress` and increment `attempt_count` by exactly one.
+- Work MAY transition `in_progress -> succeeded`.
+- Work MAY transition `eligible -> failed` or `in_progress -> failed` with a required `reason_code`.
+- Work MAY transition `eligible -> cancelled` or `in_progress -> cancelled` with a required `reason_code`.
+- Work MAY transition `in_progress -> eligible` for retry with a required `reason_code` and required `next_attempt_at_utc`.
+- Retry scheduling MUST NOT increment `attempt_count`; the next start of the work increments it.
+- Eligible work with a future `next_attempt_at_utc` MUST NOT be selected for processing before that timestamp.
+- `succeeded`, `failed`, and `cancelled` are terminal in MVP.
 
 Minimum stale-work safety (MVP):
 

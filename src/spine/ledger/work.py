@@ -19,6 +19,15 @@ class CreatedWorkInstance:
     item_version: int
 
 
+@dataclass(frozen=True)
+class UpdatedWorkInstance:
+    """Result of changing generated work lifecycle state."""
+
+    work_instance_id: str
+    status: str
+    attempt_count: int
+
+
 def create_work_instance(
     connection: sqlite3.Connection,
     *,
@@ -90,6 +99,133 @@ def create_work_instance(
     return CreatedWorkInstance(work_instance_id=work_instance_id, item_id=item_id, item_version=item_version)
 
 
+def start_work_instance(
+    connection: sqlite3.Connection,
+    *,
+    work_instance_id: str,
+    started_at_utc: str,
+    reason_code: str | None = None,
+) -> UpdatedWorkInstance:
+    """Mark eligible work in progress and count one processing attempt."""
+
+    require_non_empty("started_at_utc", started_at_utc)
+    row = _get_work_for_outcome(connection, work_instance_id)
+    if row["status"] != WorkStatus.ELIGIBLE.value:
+        raise SpineValidationError("work_outcome_rejected", f"work is not eligible: {work_instance_id}")
+    with connection:
+        connection.execute(
+            """
+            UPDATE work_instances
+            SET status = 'in_progress',
+                attempt_count = attempt_count + 1,
+                next_attempt_at_utc = NULL,
+                reason_code = ?,
+                updated_at_utc = ?
+            WHERE work_instance_id = ?
+            """,
+            (reason_code, started_at_utc, work_instance_id),
+        )
+    updated = get_work_instance(connection, work_instance_id)
+    return _updated_work_result(updated)
+
+
+def succeed_work_instance(
+    connection: sqlite3.Connection,
+    *,
+    work_instance_id: str,
+    succeeded_at_utc: str,
+    reason_code: str | None = None,
+) -> UpdatedWorkInstance:
+    """Mark in-progress work succeeded."""
+
+    require_non_empty("succeeded_at_utc", succeeded_at_utc)
+    row = _get_work_for_outcome(connection, work_instance_id)
+    if row["status"] != WorkStatus.IN_PROGRESS.value:
+        raise SpineValidationError("work_outcome_rejected", f"work is not in progress: {work_instance_id}")
+    return _set_work_outcome(
+        connection,
+        work_instance_id=work_instance_id,
+        status=WorkStatus.SUCCEEDED,
+        updated_at_utc=succeeded_at_utc,
+        reason_code=reason_code,
+        next_attempt_at_utc=None,
+    )
+
+
+def fail_work_instance(
+    connection: sqlite3.Connection,
+    *,
+    work_instance_id: str,
+    failed_at_utc: str,
+    reason_code: str,
+) -> UpdatedWorkInstance:
+    """Mark eligible or in-progress work failed with a durable reason."""
+
+    require_non_empty("failed_at_utc", failed_at_utc)
+    _require_reason(reason_code)
+    row = _get_work_for_outcome(connection, work_instance_id)
+    if row["status"] not in {WorkStatus.ELIGIBLE.value, WorkStatus.IN_PROGRESS.value}:
+        raise SpineValidationError("work_outcome_rejected", f"work cannot fail from status {row['status']}")
+    return _set_work_outcome(
+        connection,
+        work_instance_id=work_instance_id,
+        status=WorkStatus.FAILED,
+        updated_at_utc=failed_at_utc,
+        reason_code=reason_code,
+        next_attempt_at_utc=None,
+    )
+
+
+def retry_work_instance(
+    connection: sqlite3.Connection,
+    *,
+    work_instance_id: str,
+    next_attempt_at_utc: str,
+    updated_at_utc: str,
+    reason_code: str,
+) -> UpdatedWorkInstance:
+    """Return in-progress work to eligible state for a later retry."""
+
+    require_non_empty("next_attempt_at_utc", next_attempt_at_utc)
+    require_non_empty("updated_at_utc", updated_at_utc)
+    _require_reason(reason_code)
+    row = _get_work_for_outcome(connection, work_instance_id)
+    if row["status"] != WorkStatus.IN_PROGRESS.value:
+        raise SpineValidationError("work_outcome_rejected", f"work is not in progress: {work_instance_id}")
+    return _set_work_outcome(
+        connection,
+        work_instance_id=work_instance_id,
+        status=WorkStatus.ELIGIBLE,
+        updated_at_utc=updated_at_utc,
+        reason_code=reason_code,
+        next_attempt_at_utc=next_attempt_at_utc,
+    )
+
+
+def cancel_work_instance(
+    connection: sqlite3.Connection,
+    *,
+    work_instance_id: str,
+    cancelled_at_utc: str,
+    reason_code: str,
+) -> UpdatedWorkInstance:
+    """Cancel eligible or in-progress work with a durable reason."""
+
+    require_non_empty("cancelled_at_utc", cancelled_at_utc)
+    _require_reason(reason_code)
+    row = _get_work_for_outcome(connection, work_instance_id)
+    if row["status"] not in {WorkStatus.ELIGIBLE.value, WorkStatus.IN_PROGRESS.value}:
+        raise SpineValidationError("work_outcome_rejected", f"work cannot be cancelled from status {row['status']}")
+    return _set_work_outcome(
+        connection,
+        work_instance_id=work_instance_id,
+        status=WorkStatus.CANCELLED,
+        updated_at_utc=cancelled_at_utc,
+        reason_code=reason_code,
+        next_attempt_at_utc=None,
+    )
+
+
 def assert_work_instance_not_stale(connection: sqlite3.Connection, work_instance_id: str) -> None:
     row = connection.execute(
         """
@@ -114,3 +250,46 @@ def get_work_instance(connection: sqlite3.Connection, work_instance_id: str) -> 
     if row is None:
         raise SpineValidationError("work_instance_not_found", f"work instance not found: {work_instance_id}")
     return dict(row)
+
+
+def _get_work_for_outcome(connection: sqlite3.Connection, work_instance_id: str) -> dict[str, object]:
+    assert_work_instance_not_stale(connection, work_instance_id)
+    return get_work_instance(connection, work_instance_id)
+
+
+def _set_work_outcome(
+    connection: sqlite3.Connection,
+    *,
+    work_instance_id: str,
+    status: WorkStatus,
+    updated_at_utc: str,
+    reason_code: str | None,
+    next_attempt_at_utc: str | None,
+) -> UpdatedWorkInstance:
+    with connection:
+        connection.execute(
+            """
+            UPDATE work_instances
+            SET status = ?,
+                next_attempt_at_utc = ?,
+                reason_code = ?,
+                updated_at_utc = ?
+            WHERE work_instance_id = ?
+            """,
+            (status.value, next_attempt_at_utc, reason_code, updated_at_utc, work_instance_id),
+        )
+    updated = get_work_instance(connection, work_instance_id)
+    return _updated_work_result(updated)
+
+
+def _updated_work_result(row: dict[str, object]) -> UpdatedWorkInstance:
+    return UpdatedWorkInstance(
+        work_instance_id=str(row["work_instance_id"]),
+        status=str(row["status"]),
+        attempt_count=int(row["attempt_count"]),
+    )
+
+
+def _require_reason(reason_code: str) -> None:
+    if not isinstance(reason_code, str) or len(reason_code) == 0:
+        raise SpineValidationError("work_outcome_rejected", "reason_code must be a non-empty string")

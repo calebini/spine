@@ -10,9 +10,12 @@ from spine.ledger import (
     create_task_v1,
     get_candidate_action,
     get_side_effect_attempt,
+    get_work_instance,
     initialize_schema,
 )
 from spine.services import (
+    cancel_work,
+    fail_work,
     generate_notification_reminder_work,
     get_current,
     list_eligible_work,
@@ -21,6 +24,9 @@ from spine.services import (
     prepare_projection_attempt,
     prepare_work_attempt,
     require_processable_work,
+    retry_work,
+    start_work,
+    succeed_work,
 )
 
 
@@ -107,6 +113,134 @@ class ServiceWorkflowTests(unittest.TestCase):
                 idempotency_key="service-stale-work",
                 request_envelope={"body": "Submit forms"},
                 attempted_at_utc="2026-06-07T12:00:00Z",
+            )
+
+    def test_work_outcome_start_and_succeed(self) -> None:
+        create_task_with_policy(self.connection)
+        generate_notification_reminder_work(
+            self.connection,
+            work_instance_id="service-work-success",
+            notification_policy_id="service-policy",
+            eligible_at_utc="2026-06-07T09:00:00Z",
+            created_at_utc=NOW,
+        )
+
+        started = start_work(
+            self.connection,
+            work_instance_id="service-work-success",
+            started_at_utc="2026-06-07T10:01:00Z",
+            reason_code="processor_started",
+        )
+        self.assertEqual(started.status, "in_progress")
+        self.assertEqual(started.attempt_count, 1)
+
+        succeeded = succeed_work(
+            self.connection,
+            work_instance_id="service-work-success",
+            succeeded_at_utc="2026-06-07T10:02:00Z",
+            reason_code="delivered",
+        )
+        work = get_work_instance(self.connection, "service-work-success")
+        self.assertEqual(succeeded.status, "succeeded")
+        self.assertEqual(work["status"], "succeeded")
+        self.assertEqual(work["reason_code"], "delivered")
+        self.assertEqual(list_eligible_work(self.connection, now_utc="2026-06-07T10:03:00Z"), [])
+
+    def test_work_retry_returns_in_progress_work_to_eligible_after_retry_time(self) -> None:
+        create_task_with_policy(self.connection)
+        generate_notification_reminder_work(
+            self.connection,
+            work_instance_id="service-work-retry",
+            notification_policy_id="service-policy",
+            eligible_at_utc="2026-06-07T09:00:00Z",
+            created_at_utc=NOW,
+        )
+        start_work(
+            self.connection,
+            work_instance_id="service-work-retry",
+            started_at_utc="2026-06-07T10:01:00Z",
+        )
+
+        retried = retry_work(
+            self.connection,
+            work_instance_id="service-work-retry",
+            next_attempt_at_utc="2026-06-07T10:30:00Z",
+            updated_at_utc="2026-06-07T10:02:00Z",
+            reason_code="transient_adapter_failure",
+        )
+
+        self.assertEqual(retried.status, "eligible")
+        self.assertEqual(retried.attempt_count, 1)
+        self.assertEqual(list_eligible_work(self.connection, now_utc="2026-06-07T10:29:00Z"), [])
+        eligible = list_eligible_work(self.connection, now_utc="2026-06-07T10:30:00Z")
+        self.assertEqual([row["work_instance_id"] for row in eligible], ["service-work-retry"])
+
+    def test_work_fail_and_cancel_record_reason_codes(self) -> None:
+        create_task_with_policy(self.connection)
+        generate_notification_reminder_work(
+            self.connection,
+            work_instance_id="service-work-fail",
+            notification_policy_id="service-policy",
+            eligible_at_utc="2026-06-07T09:00:00Z",
+            created_at_utc=NOW,
+        )
+        fail_work(
+            self.connection,
+            work_instance_id="service-work-fail",
+            failed_at_utc="2026-06-07T10:01:00Z",
+            reason_code="recipient_unreachable",
+        )
+        failed = get_work_instance(self.connection, "service-work-fail")
+        self.assertEqual(failed["status"], "failed")
+        self.assertEqual(failed["reason_code"], "recipient_unreachable")
+
+        generate_notification_reminder_work(
+            self.connection,
+            work_instance_id="service-work-cancel",
+            notification_policy_id="service-policy",
+            eligible_at_utc="2026-06-07T09:00:00Z",
+            created_at_utc=NOW,
+        )
+        cancel_work(
+            self.connection,
+            work_instance_id="service-work-cancel",
+            cancelled_at_utc="2026-06-07T10:02:00Z",
+            reason_code="policy_disabled",
+        )
+        cancelled = get_work_instance(self.connection, "service-work-cancel")
+        self.assertEqual(cancelled["status"], "cancelled")
+        self.assertEqual(cancelled["reason_code"], "policy_disabled")
+
+    def test_work_outcomes_reject_invalid_transitions_and_stale_work(self) -> None:
+        create_task_with_policy(self.connection)
+        generate_notification_reminder_work(
+            self.connection,
+            work_instance_id="service-work-invalid",
+            notification_policy_id="service-policy",
+            eligible_at_utc="2026-06-07T09:00:00Z",
+            created_at_utc=NOW,
+        )
+
+        with self.assertRaisesRegex(SpineValidationError, "work_outcome_rejected"):
+            succeed_work(
+                self.connection,
+                work_instance_id="service-work-invalid",
+                succeeded_at_utc="2026-06-07T10:01:00Z",
+            )
+
+        create_next_item_version(
+            self.connection,
+            item_id="service-task",
+            target_version=1,
+            audit_id="audit-service-task-v2-outcomes",
+            created_at_utc="2026-06-07T11:00:00Z",
+            created_by_subject_id=SUBJECT_ID,
+        )
+        with self.assertRaisesRegex(SpineValidationError, "stale_work_instance"):
+            start_work(
+                self.connection,
+                work_instance_id="service-work-invalid",
+                started_at_utc="2026-06-07T11:01:00Z",
             )
 
     def test_plan_projection_sync_and_prepare_candidate_action_attempt(self) -> None:
