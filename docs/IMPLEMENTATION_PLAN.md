@@ -33,7 +33,8 @@ Already in place:
 
 Not yet in place:
 
-- Public contracts, protocols, adapters, or runtime loop.
+- Public contracts or vendor adapters.
+- A packaged tickerd dependency declaration; local integration can run against the sibling tickerd repo while packaging is settled.
 
 ## Build Strategy
 
@@ -44,7 +45,8 @@ Implement inside-out:
 3. Versioned coordination item workflows.
 4. Supporting tables and relationships.
 5. Work, attempts, and projection ledgers.
-6. Tickerd, Foreman/Threshold, and vendor adapters.
+6. Tickerd work observation/processing boundary.
+7. Foreman/Threshold approval boundary and vendor adapters.
 
 Avoid starting with adapters, dashboards, or automation. Those should consume Spine truth only after Spine can create, version, validate, and audit its own canonical records.
 
@@ -366,18 +368,40 @@ Exit criteria:
 
 - Common workflows can be called through stable internal APIs instead of direct table manipulation.
 
-## Stage 9: Tickerd and Foreman/Threshold Boundaries
+## Stage 9: Tickerd Work Boundary
 
-Purpose: connect Spine to nearby Cortext1 components without letting them own Spine truth.
+Purpose: let Spine consume Tickerd as the reusable runtime kernel without letting Tickerd own Spine truth.
 
-Tickerd integration:
+Scope:
 
-- expose eligible work query
-- map eligible work to tickerd work items
-- respect observe-only mode
-- reject stale work before external side effects
+- Add a Spine-owned Tickerd adapter under `src/spine/adapters/`.
+- Keep Tickerd as an optional runtime dependency until packaging is settled.
+- Map eligible Spine `work_instances` into deterministic Tickerd `WorkItem` payloads.
+- Respect Tickerd `observe_only`, `active`, and `suspended` mode semantics.
+- In `observe_only`, validate/report eligible work without creating attempts or external writes.
+- In `active`, reject stale work before any external work and delegate processing only through an explicit handler.
+- Do not integrate Foreman/Threshold in this stage.
+- Do not call vendor APIs in this stage.
 
-Foreman/Threshold integration:
+Tests:
+
+- payload mapping is deterministic and JSON-friendly.
+- eligible work maps to Tickerd work items when Tickerd is importable.
+- observe-only processing blocks side effects.
+- active mode without a configured processor blocks rather than inventing external behavior.
+- Tickerd's reusable conformance smoke can run against the Spine adapter when the sibling Tickerd package is on `PYTHONPATH`.
+
+Exit criteria:
+
+- tickerd can observe eligible Spine work.
+- the adapter can be wired into a Tickerd kernel without direct ledger ownership.
+- Spine remains the ledger of coordination truth, not the daemon owner.
+
+## Stage 10: Foreman/Threshold Boundary
+
+Purpose: prepare the approval boundary after Tickerd can surface work.
+
+Potential integration:
 
 - persist candidate actions before approval checks
 - pass approval evidence out to Foreman/Threshold
@@ -386,11 +410,10 @@ Foreman/Threshold integration:
 
 Exit criteria:
 
-- tickerd can observe and later process eligible work.
 - Foreman/Threshold can govern boundary crossing.
 - Spine remains the ledger of coordination truth, not the policy gate or daemon owner.
 
-## Stage 10: First Adapter Slice
+## Stage 11: First Adapter Slice
 
 Purpose: prove the projection and attempt model with one low-risk adapter.
 
@@ -414,7 +437,7 @@ Exit criteria:
 
 - One adapter can perform a bounded side effect with full attempt accounting and replay evidence.
 
-## Stage 11: Contracts and Freeze Manifest
+## Stage 12: Contracts and Freeze Manifest
 
 Purpose: promote stable public surfaces only when they deserve compatibility promises.
 
@@ -437,7 +460,7 @@ Exit criteria:
 
 - Canonical surfaces have version declarations, tests, and optional manifest pins.
 
-## Stage 12: Product Profiles
+## Stage 13: Product Profiles
 
 Purpose: build real user-facing value on top of the ledger.
 
