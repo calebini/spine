@@ -4,8 +4,6 @@ from __future__ import annotations
 
 import sqlite3
 from dataclasses import dataclass
-from enum import StrEnum
-from uuid import uuid4
 
 from spine.core import SpineValidationError
 from spine.core.hashing import (
@@ -13,90 +11,27 @@ from spine.core.hashing import (
     coordination_item_version_intent_hash,
     coordination_item_version_normalized_fields_hash,
 )
-from spine.models.enums import (
-    EventStatus,
-    ItemLocationRole,
-    ItemStatus,
-    ItemSubjectRole,
-    ItemType,
-    LocationKind,
-    NotificationPolicyStatus,
-    RelationStatus,
-    RelationType,
-    TaskStatus,
-    TemporalAnchorKind,
+from spine.ledger.common import (
+    TemporalAnchorInput,
+    enum_value,
+    insert_temporal_anchor,
+    new_id,
+    require_non_empty,
 )
+from spine.ledger.relations import create_item_relation, get_active_relations, get_derived_relations
+from spine.ledger.supporting import (
+    ItemLocationInput,
+    ItemSubjectRoleInput,
+    LocationInput,
+    NotificationPolicyInput,
+    copy_forward_supporting_sets,
+    current_locations,
+    current_notification_policies,
+    current_subject_roles,
+    insert_supporting_sets,
+)
+from spine.models.enums import EventStatus, ItemStatus, ItemType, TaskStatus
 from spine.ledger.sqlite import assert_ledger_invariants
-
-
-@dataclass(frozen=True)
-class TemporalAnchorInput:
-    """Input row for a temporal anchor created with an item workflow."""
-
-    anchor_kind: TemporalAnchorKind | str
-    anchor_id: str | None = None
-    local_date: str | None = None
-    local_time: str | None = None
-    timezone: str | None = None
-    utc_instant: str | None = None
-    window_start_utc: str | None = None
-    window_end_utc: str | None = None
-    recurrence_rule: str | None = None
-    source: str | None = None
-    created_at_utc: str | None = None
-
-
-@dataclass(frozen=True)
-class LocationInput:
-    """Input row for a first-class location."""
-
-    label: str
-    kind: LocationKind | str
-    location_id: str | None = None
-    address_text: str | None = None
-    latitude: str | None = None
-    longitude: str | None = None
-    timezone: str | None = None
-    provider_ref: str | None = None
-    metadata_json: str | None = None
-    created_at_utc: str | None = None
-    updated_at_utc: str | None = None
-
-
-@dataclass(frozen=True)
-class ItemLocationInput:
-    """Input row for an item-version location role."""
-
-    role: ItemLocationRole | str
-    location: LocationInput | None = None
-    location_id: str | None = None
-    item_location_id: str | None = None
-    created_at_utc: str | None = None
-
-
-@dataclass(frozen=True)
-class ItemSubjectRoleInput:
-    """Input row for an item-version subject role."""
-
-    subject_id: str
-    role: ItemSubjectRole | str
-    item_subject_role_id: str | None = None
-    status: str = "active"
-    created_at_utc: str | None = None
-
-
-@dataclass(frozen=True)
-class NotificationPolicyInput:
-    """Input row for inert durable notification intent."""
-
-    recipient_subject_id: str
-    trigger_anchor: TemporalAnchorInput | None = None
-    trigger_anchor_id: str | None = None
-    policy_id: str | None = None
-    channel_preference_ref: str | None = None
-    quiet_hours_policy_ref: str | None = None
-    status: NotificationPolicyStatus | str = NotificationPolicyStatus.ACTIVE
-    created_at_utc: str | None = None
 
 
 @dataclass(frozen=True)
@@ -143,27 +78,27 @@ def create_event_v1(
 ) -> CreatedItem:
     """Create a brand-new event item and its v1 facts in one transaction."""
 
-    item_id = item_id or _new_id("item")
-    audit_id = audit_id or _new_id("audit")
-    _require_non_empty("item_id", item_id)
-    _require_non_empty("audit_id", audit_id)
+    item_id = item_id or new_id("item")
+    audit_id = audit_id or new_id("audit")
+    require_non_empty("item_id", item_id)
+    require_non_empty("audit_id", audit_id)
     _require_common_create_inputs(created_at_utc, created_by_subject_id, title)
 
-    start_anchor_id = start_anchor.anchor_id or _new_id("anchor")
+    start_anchor_id = start_anchor.anchor_id or new_id("anchor")
     end_anchor_id = end_anchor.anchor_id if end_anchor is not None else None
     if end_anchor is not None and end_anchor_id is None:
-        end_anchor_id = _new_id("anchor")
+        end_anchor_id = new_id("anchor")
 
     try:
         with connection:
-            _insert_temporal_anchor(
+            insert_temporal_anchor(
                 connection,
                 anchor=start_anchor,
                 anchor_id=start_anchor_id,
                 default_created_at_utc=created_at_utc,
             )
             if end_anchor is not None:
-                _insert_temporal_anchor(
+                insert_temporal_anchor(
                     connection,
                     anchor=end_anchor,
                     anchor_id=end_anchor_id,
@@ -195,7 +130,7 @@ def create_event_v1(
                 """,
                 (
                     item_id,
-                    _enum_value(event_status),
+                    enum_value(event_status),
                     int(all_day),
                     start_anchor_id,
                     end_anchor_id,
@@ -203,7 +138,7 @@ def create_event_v1(
                     attendance_policy_ref,
                 ),
             )
-            _insert_supporting_sets(
+            insert_supporting_sets(
                 connection,
                 item_id=item_id,
                 version=1,
@@ -250,30 +185,30 @@ def create_task_v1(
 ) -> CreatedItem:
     """Create a brand-new task item and its v1 facts in one transaction."""
 
-    item_id = item_id or _new_id("item")
-    audit_id = audit_id or _new_id("audit")
-    _require_non_empty("item_id", item_id)
-    _require_non_empty("audit_id", audit_id)
+    item_id = item_id or new_id("item")
+    audit_id = audit_id or new_id("audit")
+    require_non_empty("item_id", item_id)
+    require_non_empty("audit_id", audit_id)
     _require_common_create_inputs(created_at_utc, created_by_subject_id, title)
 
     due_anchor_id = due_anchor.anchor_id if due_anchor is not None else None
     if due_anchor is not None and due_anchor_id is None:
-        due_anchor_id = _new_id("anchor")
+        due_anchor_id = new_id("anchor")
     defer_until_anchor_id = defer_until_anchor.anchor_id if defer_until_anchor is not None else None
     if defer_until_anchor is not None and defer_until_anchor_id is None:
-        defer_until_anchor_id = _new_id("anchor")
+        defer_until_anchor_id = new_id("anchor")
 
     try:
         with connection:
             if due_anchor is not None:
-                _insert_temporal_anchor(
+                insert_temporal_anchor(
                     connection,
                     anchor=due_anchor,
                     anchor_id=due_anchor_id,
                     default_created_at_utc=created_at_utc,
                 )
             if defer_until_anchor is not None:
-                _insert_temporal_anchor(
+                insert_temporal_anchor(
                     connection,
                     anchor=defer_until_anchor,
                     anchor_id=defer_until_anchor_id,
@@ -305,7 +240,7 @@ def create_task_v1(
                 """,
                 (
                     item_id,
-                    _enum_value(task_status),
+                    enum_value(task_status),
                     completion_state,
                     priority,
                     due_anchor_id,
@@ -314,7 +249,7 @@ def create_task_v1(
                     completed_by_subject_id,
                 ),
             )
-            _insert_supporting_sets(
+            insert_supporting_sets(
                 connection,
                 item_id=item_id,
                 version=1,
@@ -356,11 +291,11 @@ def create_next_item_version(
 ) -> MutatedItem:
     """Create the next immutable item version from the current version."""
 
-    audit_id = audit_id or _new_id("audit")
-    _require_non_empty("item_id", item_id)
-    _require_non_empty("audit_id", audit_id)
-    _require_non_empty("created_at_utc", created_at_utc)
-    _require_non_empty("created_by_subject_id", created_by_subject_id)
+    audit_id = audit_id or new_id("audit")
+    require_non_empty("item_id", item_id)
+    require_non_empty("audit_id", audit_id)
+    require_non_empty("created_at_utc", created_at_utc)
+    require_non_empty("created_by_subject_id", created_by_subject_id)
     if target_version < 1:
         raise SpineValidationError("stale_item_version", "target_version must be greater than or equal to 1")
 
@@ -374,7 +309,7 @@ def create_next_item_version(
                 )
             next_version = target_version + 1
             next_title = title if title is not None else current["title"]
-            _require_non_empty("title", next_title)
+            require_non_empty("title", next_title)
             next_summary = current["summary"] if summary is _UNSET else summary
             next_source_ref = current["source_ref"] if source_ref is _UNSET else source_ref
 
@@ -397,7 +332,7 @@ def create_next_item_version(
                 event_detail=event_detail,
                 task_detail=task_detail,
             )
-            _copy_forward_supporting_sets(
+            copy_forward_supporting_sets(
                 connection,
                 item_id=item_id,
                 previous_version=target_version,
@@ -542,11 +477,11 @@ def archive_item(
 ) -> str:
     """Archive an item shell without creating a new item version."""
 
-    audit_id = audit_id or _new_id("audit")
-    _require_non_empty("item_id", item_id)
-    _require_non_empty("audit_id", audit_id)
-    _require_non_empty("archived_at_utc", archived_at_utc)
-    _require_non_empty("archived_by_subject_id", archived_by_subject_id)
+    audit_id = audit_id or new_id("audit")
+    require_non_empty("item_id", item_id)
+    require_non_empty("audit_id", audit_id)
+    require_non_empty("archived_at_utc", archived_at_utc)
+    require_non_empty("archived_by_subject_id", archived_by_subject_id)
     try:
         with connection:
             current = _load_current_row(connection, item_id=item_id)
@@ -626,129 +561,14 @@ def get_current_item(connection: sqlite3.Connection, item_id: str) -> dict[str, 
             "created_by_subject_id": row["created_by_subject_id"],
         },
         "detail": detail,
-        "locations": _current_locations(connection, item_id=item_id, version=row["current_version"]),
-        "subject_roles": _current_subject_roles(connection, item_id=item_id, version=row["current_version"]),
-        "notification_policies": _current_notification_policies(
+        "locations": current_locations(connection, item_id=item_id, version=row["current_version"]),
+        "subject_roles": current_subject_roles(connection, item_id=item_id, version=row["current_version"]),
+        "notification_policies": current_notification_policies(
             connection,
             item_id=item_id,
             version=row["current_version"],
         ),
     }
-
-
-def create_item_relation(
-    connection: sqlite3.Connection,
-    *,
-    relation_id: str | None = None,
-    source_item_id: str,
-    target_item_id: str,
-    relation_type: RelationType | str,
-    created_at_utc: str,
-    created_by_subject_id: str,
-    relation_status: RelationStatus | str = RelationStatus.ACTIVE,
-    metadata_json: str | None = None,
-) -> str:
-    """Create a stored MVP item relation."""
-
-    relation_id = relation_id or _new_id("relation")
-    _require_non_empty("relation_id", relation_id)
-    _require_non_empty("source_item_id", source_item_id)
-    _require_non_empty("target_item_id", target_item_id)
-    _require_non_empty("created_at_utc", created_at_utc)
-    _require_non_empty("created_by_subject_id", created_by_subject_id)
-    relation_type_value = _enum_value(relation_type)
-    if relation_type_value in {"blocks", "contains"}:
-        raise SpineValidationError("reserved_relation_type", f"relation_type is query-only: {relation_type_value}")
-    try:
-        with connection:
-            connection.execute(
-                """
-                INSERT INTO coordination_item_relations (
-                  relation_id, source_item_id, target_item_id, relation_type, relation_status,
-                  created_at_utc, created_by_subject_id, metadata_json
-                )
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-                """,
-                (
-                    relation_id,
-                    source_item_id,
-                    target_item_id,
-                    relation_type_value,
-                    _enum_value(relation_status),
-                    created_at_utc,
-                    created_by_subject_id,
-                    metadata_json,
-                ),
-            )
-    except sqlite3.IntegrityError as exc:
-        raise SpineValidationError("item_relation_rejected", str(exc)) from exc
-    return relation_id
-
-
-def get_active_relations(
-    connection: sqlite3.Connection,
-    *,
-    source_item_id: str,
-    relation_type: RelationType | str | None = None,
-) -> list[dict[str, object]]:
-    """Return active stored relations from an item."""
-
-    if relation_type is None:
-        rows = connection.execute(
-            """
-            SELECT *
-            FROM coordination_item_relations
-            WHERE source_item_id = ? AND relation_status = 'active'
-            ORDER BY relation_id
-            """,
-            (source_item_id,),
-        ).fetchall()
-    else:
-        rows = connection.execute(
-            """
-            SELECT *
-            FROM coordination_item_relations
-            WHERE source_item_id = ? AND relation_status = 'active' AND relation_type = ?
-            ORDER BY relation_id
-            """,
-            (source_item_id, _enum_value(relation_type)),
-        ).fetchall()
-    return [dict(row) for row in rows]
-
-
-def get_derived_relations(
-    connection: sqlite3.Connection,
-    *,
-    source_item_id: str,
-    relation_type: str,
-) -> list[dict[str, object]]:
-    """Return derived query-only relation aliases for an item."""
-
-    if relation_type == "blocks":
-        stored_type = RelationType.DEPENDS_ON.value
-    elif relation_type == "contains":
-        stored_type = RelationType.PART_OF.value
-    else:
-        raise SpineValidationError("unsupported_derived_relation", f"unsupported derived relation: {relation_type}")
-    rows = connection.execute(
-        """
-        SELECT *
-        FROM coordination_item_relations
-        WHERE target_item_id = ? AND relation_status = 'active' AND relation_type = ?
-        ORDER BY relation_id
-        """,
-        (source_item_id, stored_type),
-    ).fetchall()
-    return [
-        {
-            "source_item_id": source_item_id,
-            "target_item_id": row["source_item_id"],
-            "relation_type": relation_type,
-            "stored_relation_id": row["relation_id"],
-            "stored_relation_type": row["relation_type"],
-        }
-        for row in rows
-    ]
 
 
 def creation_audit_payload(*, item_id: str, item_type: ItemType | str, version: int) -> dict[str, object]:
@@ -757,7 +577,7 @@ def creation_audit_payload(*, item_id: str, item_type: ItemType | str, version: 
     return {
         "action": "created",
         "item_id": item_id,
-        "item_type": _enum_value(item_type),
+        "item_type": enum_value(item_type),
         "version": str(version),
     }
 
@@ -775,44 +595,10 @@ def mutation_audit_payload(
     return {
         "action": action,
         "item_id": item_id,
-        "item_type": _enum_value(item_type),
+        "item_type": enum_value(item_type),
         "previous_version": str(previous_version),
         "version": str(version),
     }
-
-
-def _insert_temporal_anchor(
-    connection: sqlite3.Connection,
-    *,
-    anchor: TemporalAnchorInput,
-    anchor_id: str,
-    default_created_at_utc: str,
-) -> None:
-    _require_non_empty("anchor_id", anchor_id)
-    created_at_utc = anchor.created_at_utc or default_created_at_utc
-    _require_non_empty("anchor.created_at_utc", created_at_utc)
-    connection.execute(
-        """
-        INSERT INTO temporal_anchors (
-          anchor_id, anchor_kind, local_date, local_time, timezone, utc_instant,
-          window_start_utc, window_end_utc, recurrence_rule, source, created_at_utc
-        )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        """,
-        (
-            anchor_id,
-            _enum_value(anchor.anchor_kind),
-            anchor.local_date,
-            anchor.local_time,
-            anchor.timezone,
-            anchor.utc_instant,
-            anchor.window_start_utc,
-            anchor.window_end_utc,
-            anchor.recurrence_rule,
-            anchor.source,
-            created_at_utc,
-        ),
-    )
 
 
 def _insert_item_shell(
@@ -868,275 +654,6 @@ def _insert_item_version(
             created_by_subject_id,
         ),
     )
-
-
-def _insert_supporting_sets(
-    connection: sqlite3.Connection,
-    *,
-    item_id: str,
-    version: int,
-    default_created_at_utc: str,
-    item_locations: tuple[ItemLocationInput, ...],
-    subject_roles: tuple[ItemSubjectRoleInput, ...],
-    notification_policies: tuple[NotificationPolicyInput, ...],
-) -> None:
-    for item_location in item_locations:
-        _insert_item_location(
-            connection,
-            item_id=item_id,
-            version=version,
-            item_location=item_location,
-            default_created_at_utc=default_created_at_utc,
-        )
-    for subject_role in subject_roles:
-        _insert_item_subject_role(
-            connection,
-            item_id=item_id,
-            version=version,
-            subject_role=subject_role,
-            default_created_at_utc=default_created_at_utc,
-        )
-    for policy in notification_policies:
-        _insert_notification_policy(
-            connection,
-            item_id=item_id,
-            version=version,
-            policy=policy,
-            default_created_at_utc=default_created_at_utc,
-        )
-
-
-def _insert_item_location(
-    connection: sqlite3.Connection,
-    *,
-    item_id: str,
-    version: int,
-    item_location: ItemLocationInput,
-    default_created_at_utc: str,
-) -> None:
-    location_id = item_location.location_id
-    if item_location.location is not None:
-        location_id = item_location.location.location_id or location_id or _new_id("location")
-        _insert_location(
-            connection,
-            location=item_location.location,
-            location_id=location_id,
-            default_created_at_utc=default_created_at_utc,
-        )
-    if location_id is None:
-        raise SpineValidationError("invalid_item_location", "item location requires location or location_id")
-    connection.execute(
-        """
-        INSERT INTO item_locations (
-          item_location_id, item_id, version, location_id, role, created_at_utc
-        )
-        VALUES (?, ?, ?, ?, ?, ?)
-        """,
-        (
-            item_location.item_location_id or _new_id("item-location"),
-            item_id,
-            version,
-            location_id,
-            _enum_value(item_location.role),
-            item_location.created_at_utc or default_created_at_utc,
-        ),
-    )
-
-
-def _insert_location(
-    connection: sqlite3.Connection,
-    *,
-    location: LocationInput,
-    location_id: str,
-    default_created_at_utc: str,
-) -> None:
-    _require_non_empty("location.label", location.label)
-    created_at_utc = location.created_at_utc or default_created_at_utc
-    updated_at_utc = location.updated_at_utc or created_at_utc
-    connection.execute(
-        """
-        INSERT INTO locations (
-          location_id, label, kind, address_text, latitude, longitude, timezone,
-          provider_ref, metadata_json, created_at_utc, updated_at_utc
-        )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        """,
-        (
-            location_id,
-            location.label,
-            _enum_value(location.kind),
-            location.address_text,
-            location.latitude,
-            location.longitude,
-            location.timezone,
-            location.provider_ref,
-            location.metadata_json,
-            created_at_utc,
-            updated_at_utc,
-        ),
-    )
-
-
-def _insert_item_subject_role(
-    connection: sqlite3.Connection,
-    *,
-    item_id: str,
-    version: int,
-    subject_role: ItemSubjectRoleInput,
-    default_created_at_utc: str,
-) -> None:
-    _require_non_empty("subject_role.subject_id", subject_role.subject_id)
-    connection.execute(
-        """
-        INSERT INTO item_subject_roles (
-          item_subject_role_id, item_id, version, subject_id, role, status, created_at_utc
-        )
-        VALUES (?, ?, ?, ?, ?, ?, ?)
-        """,
-        (
-            subject_role.item_subject_role_id or _new_id("item-subject-role"),
-            item_id,
-            version,
-            subject_role.subject_id,
-            _enum_value(subject_role.role),
-            _enum_value(subject_role.status),
-            subject_role.created_at_utc or default_created_at_utc,
-        ),
-    )
-
-
-def _insert_notification_policy(
-    connection: sqlite3.Connection,
-    *,
-    item_id: str,
-    version: int,
-    policy: NotificationPolicyInput,
-    default_created_at_utc: str,
-) -> None:
-    trigger_anchor_id = policy.trigger_anchor_id
-    if policy.trigger_anchor is not None:
-        trigger_anchor_id = policy.trigger_anchor.anchor_id or trigger_anchor_id or _new_id("anchor")
-        _insert_temporal_anchor(
-            connection,
-            anchor=policy.trigger_anchor,
-            anchor_id=trigger_anchor_id,
-            default_created_at_utc=default_created_at_utc,
-        )
-    if trigger_anchor_id is None:
-        raise SpineValidationError("invalid_notification_policy", "notification policy requires a trigger anchor")
-    connection.execute(
-        """
-        INSERT INTO notification_policies (
-          policy_id, item_id, version, recipient_subject_id, channel_preference_ref,
-          trigger_anchor_id, quiet_hours_policy_ref, status, created_at_utc
-        )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-        """,
-        (
-            policy.policy_id or _new_id("policy"),
-            item_id,
-            version,
-            policy.recipient_subject_id,
-            policy.channel_preference_ref,
-            trigger_anchor_id,
-            policy.quiet_hours_policy_ref,
-            _enum_value(policy.status),
-            policy.created_at_utc or default_created_at_utc,
-        ),
-    )
-
-
-def _copy_forward_supporting_sets(
-    connection: sqlite3.Connection,
-    *,
-    item_id: str,
-    previous_version: int,
-    next_version: int,
-    created_at_utc: str,
-) -> None:
-    for row in connection.execute(
-        """
-        SELECT item_location_id, location_id, role
-        FROM item_locations
-        WHERE item_id = ? AND version = ?
-        ORDER BY item_location_id
-        """,
-        (item_id, previous_version),
-    ):
-        connection.execute(
-            """
-            INSERT INTO item_locations (
-              item_location_id, item_id, version, location_id, role, created_at_utc
-            )
-            VALUES (?, ?, ?, ?, ?, ?)
-            """,
-            (
-                _copy_id(row["item_location_id"], next_version),
-                item_id,
-                next_version,
-                row["location_id"],
-                row["role"],
-                created_at_utc,
-            ),
-        )
-
-    for row in connection.execute(
-        """
-        SELECT item_subject_role_id, subject_id, role, status
-        FROM item_subject_roles
-        WHERE item_id = ? AND version = ?
-        ORDER BY item_subject_role_id
-        """,
-        (item_id, previous_version),
-    ):
-        connection.execute(
-            """
-            INSERT INTO item_subject_roles (
-              item_subject_role_id, item_id, version, subject_id, role, status, created_at_utc
-            )
-            VALUES (?, ?, ?, ?, ?, ?, ?)
-            """,
-            (
-                _copy_id(row["item_subject_role_id"], next_version),
-                item_id,
-                next_version,
-                row["subject_id"],
-                row["role"],
-                row["status"],
-                created_at_utc,
-            ),
-        )
-
-    for row in connection.execute(
-        """
-        SELECT policy_id, recipient_subject_id, channel_preference_ref, trigger_anchor_id,
-               quiet_hours_policy_ref, status
-        FROM notification_policies
-        WHERE item_id = ? AND version = ?
-        ORDER BY policy_id
-        """,
-        (item_id, previous_version),
-    ):
-        connection.execute(
-            """
-            INSERT INTO notification_policies (
-              policy_id, item_id, version, recipient_subject_id, channel_preference_ref,
-              trigger_anchor_id, quiet_hours_policy_ref, status, created_at_utc
-            )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """,
-            (
-                _copy_id(row["policy_id"], next_version),
-                item_id,
-                next_version,
-                row["recipient_subject_id"],
-                row["channel_preference_ref"],
-                row["trigger_anchor_id"],
-                row["quiet_hours_policy_ref"],
-                row["status"],
-                created_at_utc,
-            ),
-        )
 
 
 def _insert_next_detail(
@@ -1314,7 +831,7 @@ def _current_detail(
     return dict(row)
 
 
-def _current_locations(connection: sqlite3.Connection, *, item_id: str, version: int) -> list[dict[str, object]]:
+def current_locations(connection: sqlite3.Connection, *, item_id: str, version: int) -> list[dict[str, object]]:
     rows = connection.execute(
         """
         SELECT
@@ -1332,7 +849,7 @@ def _current_locations(connection: sqlite3.Connection, *, item_id: str, version:
     return [dict(row) for row in rows]
 
 
-def _current_subject_roles(connection: sqlite3.Connection, *, item_id: str, version: int) -> list[dict[str, object]]:
+def current_subject_roles(connection: sqlite3.Connection, *, item_id: str, version: int) -> list[dict[str, object]]:
     rows = connection.execute(
         """
         SELECT *
@@ -1345,7 +862,7 @@ def _current_subject_roles(connection: sqlite3.Connection, *, item_id: str, vers
     return [dict(row) for row in rows]
 
 
-def _current_notification_policies(
+def current_notification_policies(
     connection: sqlite3.Connection,
     *,
     item_id: str,
@@ -1443,23 +960,6 @@ def _validate_task_status_transition(previous_status: object, next_status: objec
 
 
 def _require_common_create_inputs(created_at_utc: str, created_by_subject_id: str, title: str) -> None:
-    _require_non_empty("created_at_utc", created_at_utc)
-    _require_non_empty("created_by_subject_id", created_by_subject_id)
-    _require_non_empty("title", title)
-
-
-def _require_non_empty(name: str, value: str) -> None:
-    if not isinstance(value, str) or len(value) == 0:
-        raise SpineValidationError("invalid_item_create_input", f"{name} must be a non-empty string")
-
-
-def _enum_value(value: StrEnum | str) -> str:
-    return value.value if isinstance(value, StrEnum) else value
-
-
-def _new_id(prefix: str) -> str:
-    return f"{prefix}-{uuid4().hex}"
-
-
-def _copy_id(row_id: str, version: int) -> str:
-    return f"{row_id}-v{version}"
+    require_non_empty("created_at_utc", created_at_utc)
+    require_non_empty("created_by_subject_id", created_by_subject_id)
+    require_non_empty("title", title)
