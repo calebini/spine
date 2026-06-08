@@ -14,6 +14,24 @@ Build Spine in small executable slices while preserving its core doctrine:
 - Determinism, audit, replay, and version binding come before adapters.
 - Runtime directories appear only when behavior exists.
 
+## Production Replacement Charter
+
+Near-term production goal: replace the current Kinflow production service with Spine for the existing concierge-agent scheduling/message-runner path.
+
+Current production baseline:
+
+- Kinflow is in production.
+- The only production adapter is OpenClaw.
+- OpenClaw serves as the message runner between the concierge agent and schedule/reminder delivery.
+- The replacement target is not a broad adapter platform yet; it is the narrow path needed to decommission Kinflow safely.
+
+Priority implications:
+
+- Spine should prioritize notification/reminder work, OpenClaw delivery, Tickerd foreground runtime, durable side-effect attempts, and operator verification.
+- Google Calendar, Foreman/Threshold, dashboards, and broad projection work are lower priority until the Kinflow replacement path is viable.
+- Kinflow remains a donor/reference for OpenClaw adapter semantics, delivery attempt discipline, operational probes, and rollout/rollback posture.
+- Spine must not clone Kinflow's event-root ontology, but it should deliberately salvage the production mechanics needed for this replacement.
+
 ## Current Ground
 
 Already in place:
@@ -48,7 +66,8 @@ Implement inside-out:
 4. Supporting tables and relationships.
 5. Work, attempts, and projection ledgers.
 6. Tickerd work observation/processing boundary.
-7. Foreman/Threshold approval boundary and vendor adapters.
+7. OpenClaw notification delivery path for the Kinflow replacement milestone.
+8. Foreman/Threshold approval boundary and broader vendor adapters.
 
 Avoid starting with adapters, dashboards, or automation. Those should consume Spine truth only after Spine can create, version, validate, and audit its own canonical records.
 
@@ -402,9 +421,30 @@ Exit criteria:
 - a local user can run a finite observe-only pass against a Spine SQLite ledger.
 - Spine remains the ledger of coordination truth, not the daemon owner.
 
-## Stage 10: Foreman/Threshold Boundary
+## Stage 10: OpenClaw Replacement Path
 
-Purpose: prepare the approval boundary after Tickerd can surface work.
+Purpose: make Spine capable of replacing Kinflow's production OpenClaw message-runner path.
+
+Scope:
+
+- Map Spine notification reminder work into an OpenClaw outbound message envelope.
+- Persist `side_effect_attempts` before any OpenClaw send attempt.
+- Normalize OpenClaw outcomes into Spine work outcomes and side-effect attempt terminal state.
+- Preserve deterministic idempotency keys and request hashes.
+- Add a bounded active runtime smoke that uses a fake OpenClaw send function.
+- Add an operator-facing verification command comparable to Kinflow's production probes.
+- Keep Foreman/Threshold out of this milestone unless a concrete production gate requires it.
+
+Exit criteria:
+
+- A seeded reminder can be processed through the Spine Tickerd active path into an OpenClaw-style send attempt with durable attempt evidence.
+- Success, retryable failure, permanent failure, and adapter binding failure are represented without mutating canonical item truth.
+- The path can run locally with a fake sender and can be switched to the real OpenClaw command behind an explicit operator choice.
+- Kinflow's current production message-runner behavior has an equivalent Spine path ready for controlled canary use.
+
+## Stage 11: Foreman/Threshold Boundary
+
+Purpose: prepare the approval boundary after the OpenClaw replacement path exists.
 
 Potential integration:
 
@@ -418,9 +458,9 @@ Exit criteria:
 - Foreman/Threshold can govern boundary crossing.
 - Spine remains the ledger of coordination truth, not the policy gate or daemon owner.
 
-## Stage 11: First Adapter Slice
+## Stage 12: Broader Adapter Slice
 
-Purpose: prove the projection and attempt model with one low-risk adapter.
+Purpose: expand projection and adapter behavior after the OpenClaw replacement path is proven.
 
 Recommended first adapter:
 
@@ -442,7 +482,7 @@ Exit criteria:
 
 - One adapter can perform a bounded side effect with full attempt accounting and replay evidence.
 
-## Stage 12: Contracts and Freeze Manifest
+## Stage 13: Contracts and Freeze Manifest
 
 Purpose: promote stable public surfaces only when they deserve compatibility promises.
 
@@ -465,7 +505,7 @@ Exit criteria:
 
 - Canonical surfaces have version declarations, tests, and optional manifest pins.
 
-## Stage 13: Product Profiles
+## Stage 14: Product Profiles
 
 Purpose: build real user-facing value on top of the ledger.
 
