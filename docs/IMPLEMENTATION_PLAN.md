@@ -31,7 +31,7 @@ Already in place:
 - Durable side-effect pressure ledgers for work instances, candidate actions, side-effect attempts, and external projections.
 - Work outcome lifecycle services for start, success, failure, cancellation, and retry scheduling.
 - Provider-agnostic internal services for item commands, reminder work generation, work eligibility, projection planning, and pre-write attempt gates.
-- Initial Tickerd work adapter and bounded observe-only runtime command.
+- Initial Tickerd work adapter, active processor outcome handling, and bounded observe-only runtime command.
 
 Not yet in place:
 
@@ -382,6 +382,7 @@ Scope:
 - Respect Tickerd `observe_only`, `active`, and `suspended` mode semantics.
 - In `observe_only`, validate/report eligible work without creating attempts or external writes.
 - In `active`, reject stale work before any external work and delegate processing only through an explicit handler.
+- Persist explicit active processor outcomes through Spine work lifecycle services.
 - Do not integrate Foreman/Threshold in this stage.
 - Do not call vendor APIs in this stage.
 

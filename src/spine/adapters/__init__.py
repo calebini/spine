@@ -5,6 +5,7 @@ from spine.adapters.tickerd import (
     SIDE_EFFECTS_BLOCKED,
     STALE_WORK_BLOCKED,
     SpineTickerdWorkAdapter,
+    WorkProcessingOutcome,
     build_work_item_payload,
 )
 
@@ -13,5 +14,6 @@ __all__ = [
     "SIDE_EFFECTS_BLOCKED",
     "STALE_WORK_BLOCKED",
     "SpineTickerdWorkAdapter",
+    "WorkProcessingOutcome",
     "build_work_item_payload",
 ]

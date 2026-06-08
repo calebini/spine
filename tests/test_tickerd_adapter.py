@@ -1,9 +1,15 @@
 import unittest
 from datetime import UTC, datetime
 
-from spine.adapters import NO_PROCESSOR_CONFIGURED, SIDE_EFFECTS_BLOCKED, SpineTickerdWorkAdapter, build_work_item_payload
-from spine.ledger import NotificationPolicyInput, TemporalAnchorInput, connect, create_task_v1, initialize_schema
-from spine.services import generate_notification_reminder_work
+from spine.adapters import (
+    NO_PROCESSOR_CONFIGURED,
+    SIDE_EFFECTS_BLOCKED,
+    SpineTickerdWorkAdapter,
+    WorkProcessingOutcome,
+    build_work_item_payload,
+)
+from spine.ledger import NotificationPolicyInput, TemporalAnchorInput, connect, create_task_v1, get_work_instance, initialize_schema
+from spine.services import generate_notification_reminder_work, list_eligible_work
 
 try:
     from tickerd import CycleEnvelope, RuntimeMode, TickerdConfig
@@ -89,6 +95,91 @@ class TickerdAdapterTests(unittest.TestCase):
         result = adapter.process_work_item(item, cycle_envelope(), side_effects_allowed=True)
 
         self.assertEqual(result.reason, NO_PROCESSOR_CONFIGURED)
+
+    def test_active_processor_success_marks_work_succeeded(self) -> None:
+        def processor(_connection, work_row, _envelope):
+            self.assertEqual(work_row["work_instance_id"], "tickerd-work")
+            self.assertEqual(work_row["status"], "in_progress")
+            self.assertEqual(work_row["attempt_count"], 1)
+            return WorkProcessingOutcome.succeeded("demo_processed")
+
+        adapter = SpineTickerdWorkAdapter(self.connection, runtime_mode="active", processor=processor)
+        item = adapter.list_work_items(cycle_envelope(), limit=10)[0]
+
+        result = adapter.process_work_item(item, cycle_envelope(), side_effects_allowed=True)
+
+        work = get_work_instance(self.connection, "tickerd-work")
+        self.assertEqual(result.status.value, "processed")
+        self.assertEqual(work["status"], "succeeded")
+        self.assertEqual(work["attempt_count"], 1)
+        self.assertEqual(work["reason_code"], "demo_processed")
+
+    def test_active_processor_retry_schedules_next_attempt(self) -> None:
+        def processor(_connection, _work_row, _envelope):
+            return WorkProcessingOutcome.retry(
+                reason_code="transient_failure",
+                next_attempt_at_utc="2026-06-07T10:30:00Z",
+            )
+
+        adapter = SpineTickerdWorkAdapter(self.connection, runtime_mode="active", processor=processor)
+        item = adapter.list_work_items(cycle_envelope(), limit=10)[0]
+
+        result = adapter.process_work_item(item, cycle_envelope(), side_effects_allowed=True)
+
+        work = get_work_instance(self.connection, "tickerd-work")
+        self.assertEqual(result.status.value, "processed")
+        self.assertEqual(work["status"], "eligible")
+        self.assertEqual(work["attempt_count"], 1)
+        self.assertEqual(work["reason_code"], "transient_failure")
+        self.assertEqual(work["next_attempt_at_utc"], "2026-06-07T10:30:00Z")
+        self.assertEqual(list_eligible_work(self.connection, now_utc="2026-06-07T10:29:00Z"), [])
+        self.assertEqual(
+            [row["work_instance_id"] for row in list_eligible_work(self.connection, now_utc="2026-06-07T10:30:00Z")],
+            ["tickerd-work"],
+        )
+
+    def test_active_processor_failure_and_cancellation_persist_reason_codes(self) -> None:
+        def failure_processor(_connection, _work_row, _envelope):
+            return WorkProcessingOutcome.failed("hard_failure")
+
+        adapter = SpineTickerdWorkAdapter(self.connection, runtime_mode="active", processor=failure_processor)
+        item = adapter.list_work_items(cycle_envelope(), limit=10)[0]
+        adapter.process_work_item(item, cycle_envelope(), side_effects_allowed=True)
+        failed = get_work_instance(self.connection, "tickerd-work")
+        self.assertEqual(failed["status"], "failed")
+        self.assertEqual(failed["reason_code"], "hard_failure")
+
+        generate_notification_reminder_work(
+            self.connection,
+            work_instance_id="tickerd-work-cancel",
+            notification_policy_id="tickerd-policy",
+            eligible_at_utc="2026-06-07T09:00:00Z",
+            created_at_utc=NOW,
+        )
+
+        def cancel_processor(_connection, _work_row, _envelope):
+            return WorkProcessingOutcome.cancelled("policy_disabled")
+
+        cancel_adapter = SpineTickerdWorkAdapter(self.connection, runtime_mode="active", processor=cancel_processor)
+        cancel_item = next(item for item in cancel_adapter.list_work_items(cycle_envelope(), limit=10) if item.item_id == "tickerd-work-cancel")
+        cancel_adapter.process_work_item(cancel_item, cycle_envelope(), side_effects_allowed=True)
+        cancelled = get_work_instance(self.connection, "tickerd-work-cancel")
+        self.assertEqual(cancelled["status"], "cancelled")
+        self.assertEqual(cancelled["reason_code"], "policy_disabled")
+
+    def test_observe_only_with_processor_does_not_mutate_work(self) -> None:
+        def processor(_connection, _work_row, _envelope):
+            return WorkProcessingOutcome.succeeded("should_not_run")
+
+        adapter = SpineTickerdWorkAdapter(self.connection, runtime_mode="observe_only", processor=processor)
+        item = adapter.list_work_items(cycle_envelope(), limit=10)[0]
+
+        result = adapter.process_work_item(item, cycle_envelope(), side_effects_allowed=False)
+
+        work = get_work_instance(self.connection, "tickerd-work")
+        self.assertEqual(result.reason, SIDE_EFFECTS_BLOCKED)
+        self.assertEqual(work["status"], "eligible")
+        self.assertEqual(work["attempt_count"], 0)
 
     def test_passes_tickerd_basic_conformance_smoke(self) -> None:
         adapter = SpineTickerdWorkAdapter(self.connection)

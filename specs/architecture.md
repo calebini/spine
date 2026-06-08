@@ -86,7 +86,7 @@ The Spine tickerd adapter SHOULD map eligible Spine work instances to tickerd wo
 
 In `observe_only` mode, the adapter MUST inspect or report eligible work without external side effects.
 
-In `active` mode, the adapter MAY process eligible work, but any external write MUST pass through Spine side-effect attempt accounting and any required Foreman/Threshold approval.
+In `active` mode, the adapter MAY process eligible work through an explicit processor. The adapter MUST start the work before invoking the processor and MUST persist the processor outcome as Spine work lifecycle state. Any external write MUST pass through Spine side-effect attempt accounting and any required Foreman/Threshold approval.
 
 ## 5. Relationship to Foreman/Threshold
 
