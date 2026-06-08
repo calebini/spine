@@ -66,6 +66,10 @@ With the sibling Tickerd checkout available, Spine can run a bounded observe-onl
 ```bash
 PYTHONPATH=src python3 -m spine.runtime.seed_demo /tmp/spine-demo.sqlite
 PYTHONPATH=src:../tickerd/src python3 -m spine.runtime.tickerd_observe /tmp/spine-demo.sqlite
+PYTHONPATH=src:../tickerd/src python3 -m spine.runtime.tickerd_runner \
+  --db /tmp/spine-demo.sqlite \
+  --state-dir /tmp/spine-state \
+  --max-cycles 1
 ```
 
-The seed command creates one subject, one task, one notification policy, and one eligible generated work instance. The Tickerd observe command emits JSONL records and does not perform vendor writes.
+The seed command creates one subject, one task, one notification policy, and one eligible generated work instance. The observe command emits JSONL records to stdout. The foreground runner writes lock, owner, health, and event files under the state directory. Neither command performs vendor writes in the default `observe_only` mode.

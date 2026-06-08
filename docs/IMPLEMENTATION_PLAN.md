@@ -49,7 +49,7 @@ Already in place:
 - Durable side-effect pressure ledgers for work instances, candidate actions, side-effect attempts, and external projections.
 - Work outcome lifecycle services for start, success, failure, cancellation, and retry scheduling.
 - Provider-agnostic internal services for item commands, reminder work generation, work eligibility, projection planning, and pre-write attempt gates.
-- Initial Tickerd work adapter, active processor outcome handling, and bounded observe-only runtime command.
+- Initial Tickerd work adapter, active processor outcome handling, bounded observe-only runtime command, and foreground Tickerd runner with file lock, owner, health, and event outputs.
 
 Not yet in place:
 
@@ -413,12 +413,14 @@ Tests:
 - active mode without a configured processor blocks rather than inventing external behavior.
 - Tickerd's reusable conformance smoke can run against the Spine adapter when the sibling Tickerd package is on `PYTHONPATH`.
 - a bounded `python -m spine.runtime.tickerd_observe` command emits Tickerd JSONL records for eligible work.
+- a foreground `python -m spine.runtime.tickerd_runner` command writes Tickerd lock, owner, health, and event files.
 
 Exit criteria:
 
 - tickerd can observe eligible Spine work.
 - the adapter can be wired into a Tickerd kernel without direct ledger ownership.
 - a local user can run a finite observe-only pass against a Spine SQLite ledger.
+- a local user can run the foreground runner for a bounded number of cycles.
 - Spine remains the ledger of coordination truth, not the daemon owner.
 
 ## Stage 10: OpenClaw Replacement Path
