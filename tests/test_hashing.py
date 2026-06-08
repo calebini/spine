@@ -8,6 +8,7 @@ from spine.core.hashing import (
     hash_canonical_json,
     side_effect_request_hash,
     side_effect_request_payload_hash,
+    side_effect_response_hash,
 )
 
 
@@ -90,6 +91,12 @@ class HashingTests(unittest.TestCase):
                     "work_instance_id": "work-1",
                 }
             ),
+        )
+
+    def test_side_effect_response_hash_omits_absent_provider_ref(self) -> None:
+        self.assertEqual(
+            side_effect_response_hash(attempt_id="attempt-1", attempt_status="failed"),
+            hash_canonical_json({"attempt_id": "attempt-1", "attempt_status": "failed"}),
         )
 
 

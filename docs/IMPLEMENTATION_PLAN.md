@@ -437,6 +437,11 @@ Scope:
 - Add an operator-facing verification command comparable to Kinflow's production probes.
 - Keep Foreman/Threshold out of this milestone unless a concrete production gate requires it.
 
+Current first slice:
+
+- OpenClaw-style outbound envelopes, deterministic idempotency keys, terminal side-effect attempt updates, and fake-sender result normalization exist locally.
+- The real OpenClaw host binding and operator-facing verification command remain to be added.
+
 Exit criteria:
 
 - A seeded reminder can be processed through the Spine Tickerd active path into an OpenClaw-style send attempt with durable attempt evidence.

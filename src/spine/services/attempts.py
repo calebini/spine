@@ -6,11 +6,14 @@ import sqlite3
 from dataclasses import dataclass
 
 from spine.ledger import (
+    CompletedAttempt,
     StartedAttempt,
     assert_candidate_action_not_stale,
     assert_work_instance_not_stale,
+    complete_side_effect_attempt,
     create_started_attempt,
 )
+from spine.models.enums import AttemptStatus
 
 
 @dataclass(frozen=True)
@@ -105,3 +108,63 @@ def prepare_projection_attempt(
         attempted_at_utc=attempted_at_utc,
     )
     return AttemptGate(attempt=attempt)
+
+
+def record_attempt_success(
+    connection: sqlite3.Connection,
+    *,
+    attempt_id: str,
+    completed_at_utc: str,
+    provider_ref: str | None = None,
+    reason_code: str | None = None,
+) -> CompletedAttempt:
+    """Record a successful terminal side-effect attempt outcome."""
+
+    return complete_side_effect_attempt(
+        connection,
+        attempt_id=attempt_id,
+        attempt_status=AttemptStatus.SUCCEEDED,
+        completed_at_utc=completed_at_utc,
+        provider_ref=provider_ref,
+        reason_code=reason_code,
+    )
+
+
+def record_attempt_failure(
+    connection: sqlite3.Connection,
+    *,
+    attempt_id: str,
+    completed_at_utc: str,
+    reason_code: str,
+    provider_ref: str | None = None,
+) -> CompletedAttempt:
+    """Record a failed terminal side-effect attempt outcome."""
+
+    return complete_side_effect_attempt(
+        connection,
+        attempt_id=attempt_id,
+        attempt_status=AttemptStatus.FAILED,
+        completed_at_utc=completed_at_utc,
+        provider_ref=provider_ref,
+        reason_code=reason_code,
+    )
+
+
+def record_attempt_rejection(
+    connection: sqlite3.Connection,
+    *,
+    attempt_id: str,
+    completed_at_utc: str,
+    reason_code: str,
+    provider_ref: str | None = None,
+) -> CompletedAttempt:
+    """Record a rejected terminal side-effect attempt outcome."""
+
+    return complete_side_effect_attempt(
+        connection,
+        attempt_id=attempt_id,
+        attempt_status=AttemptStatus.REJECTED,
+        completed_at_utc=completed_at_utc,
+        provider_ref=provider_ref,
+        reason_code=reason_code,
+    )

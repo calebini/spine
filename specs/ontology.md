@@ -721,9 +721,12 @@ Pre-write durability gate (MVP):
 - The `started` attempt row MUST include enough evidence to make the attempt durable and traceable, including at minimum: the required origin linkage fields for the attempt (`work_instance_id` or `candidate_action_id` and/or `projection_id` as applicable), `adapter_name`, `idempotency_key`, `request_payload_hash`, `request_hash`, and `attempted_at_utc`, plus any linkage fields required by the source-binding rules above (`item_id` and `source_item_version` when required).
 - If this insert fails for any reason (including uniqueness conflict on `(adapter_name, idempotency_key)`), the external write MUST NOT start.
 
-Deferred attempt mechanics (MVP):
+Terminal attempt mechanics (MVP):
 
-- Terminal update mechanics, response capture, retry posture, and audit emission rules are deferred unless required by the minimum field constraints above.
+- A started attempt MAY be terminally updated to `succeeded`, `failed`, or `rejected`.
+- Terminal updates MUST preserve the original attempt identity and MUST populate `completed_at_utc`.
+- If response identity is captured, `response_hash` MUST use the canonical response hash shape defined in Section 2.
+- Retry posture, adapter-specific response payload capture, and audit emission rules remain deferred unless required by the minimum field constraints above.
 
 A separate durable `adapter_results` store MUST NOT be introduced without an accepted decision.
 
@@ -808,7 +811,7 @@ Adapter failure posture:
 
 - External failures MUST be represented as `side_effect_attempts` rows with `attempt_status=failed` (or `rejected`).
 - Adapter failures MUST NOT directly mutate canonical item truth unless the domain transition itself is explicitly represented and valid.
-- Work-instance recovery, retry, and terminal coupling behavior after adapter outcomes is deferred.
+- Work-instance recovery, retry, and terminal coupling behavior after adapter outcomes is defined only for explicitly implemented adapter processors. Other adapter-specific policies remain deferred.
 
 Projection drift posture:
 

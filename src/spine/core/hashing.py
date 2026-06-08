@@ -70,5 +70,24 @@ def side_effect_request_hash(
     )
 
 
+def side_effect_response_hash(
+    *,
+    attempt_id: str,
+    attempt_status: str,
+    provider_ref: str | None = None,
+) -> str:
+    """Hash ``side_effect_attempts.response_hash`` payload."""
+
+    return hash_canonical_json(
+        _omit_absent(
+            {
+                "attempt_id": attempt_id,
+                "attempt_status": attempt_status,
+                "provider_ref": provider_ref,
+            }
+        )
+    )
+
+
 def _omit_absent(payload: dict[str, object | None]) -> dict[str, object]:
     return {key: value for key, value in payload.items() if value is not None}

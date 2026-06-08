@@ -6,7 +6,7 @@ import sqlite3
 from dataclasses import dataclass
 
 from spine.core import SpineValidationError
-from spine.core.hashing import side_effect_request_hash, side_effect_request_payload_hash
+from spine.core.hashing import side_effect_request_hash, side_effect_request_payload_hash, side_effect_response_hash
 from spine.ledger.common import enum_value, new_id, require_non_empty
 from spine.models.enums import AttemptStatus
 
@@ -18,6 +18,15 @@ class StartedAttempt:
     attempt_id: str
     request_payload_hash: str
     request_hash: str
+
+
+@dataclass(frozen=True)
+class CompletedAttempt:
+    """Result of terminally updating a side-effect attempt row."""
+
+    attempt_id: str
+    attempt_status: str
+    response_hash: str
 
 
 def create_started_attempt(
@@ -96,6 +105,52 @@ def create_started_attempt(
         request_payload_hash=request_payload_hash,
         request_hash=request_hash,
     )
+
+
+def complete_side_effect_attempt(
+    connection: sqlite3.Connection,
+    *,
+    attempt_id: str,
+    attempt_status: AttemptStatus | str,
+    completed_at_utc: str,
+    provider_ref: str | None = None,
+    reason_code: str | None = None,
+) -> CompletedAttempt:
+    """Terminally update a started side-effect attempt."""
+
+    require_non_empty("attempt_id", attempt_id)
+    require_non_empty("completed_at_utc", completed_at_utc)
+    status = enum_value(attempt_status)
+    if status == AttemptStatus.STARTED.value:
+        raise SpineValidationError("side_effect_attempt_transition_rejected", "terminal status required")
+    if status not in {
+        AttemptStatus.SUCCEEDED.value,
+        AttemptStatus.FAILED.value,
+        AttemptStatus.REJECTED.value,
+    }:
+        raise SpineValidationError("side_effect_attempt_transition_rejected", f"unknown terminal status: {status}")
+    row = get_side_effect_attempt(connection, attempt_id)
+    if row["attempt_status"] != AttemptStatus.STARTED.value:
+        raise SpineValidationError("side_effect_attempt_transition_rejected", f"attempt is terminal: {attempt_id}")
+    response_hash = side_effect_response_hash(
+        attempt_id=attempt_id,
+        attempt_status=status,
+        provider_ref=provider_ref,
+    )
+    with connection:
+        connection.execute(
+            """
+            UPDATE side_effect_attempts
+            SET attempt_status = ?,
+                provider_ref = ?,
+                response_hash = ?,
+                reason_code = ?,
+                completed_at_utc = ?
+            WHERE attempt_id = ?
+            """,
+            (status, provider_ref, response_hash, reason_code, completed_at_utc, attempt_id),
+        )
+    return CompletedAttempt(attempt_id=attempt_id, attempt_status=status, response_hash=response_hash)
 
 
 def get_side_effect_attempt(connection: sqlite3.Connection, attempt_id: str) -> dict[str, object]:

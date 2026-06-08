@@ -6,7 +6,13 @@ from spine.ledger.actions import (
     create_candidate_action,
     get_candidate_action,
 )
-from spine.ledger.attempts import StartedAttempt, create_started_attempt, get_side_effect_attempt
+from spine.ledger.attempts import (
+    CompletedAttempt,
+    StartedAttempt,
+    complete_side_effect_attempt,
+    create_started_attempt,
+    get_side_effect_attempt,
+)
 from spine.ledger.items import (
     CreatedItem,
     MutatedItem,
@@ -49,6 +55,7 @@ __all__ = [
     "CreatedItem",
     "CreatedProjection",
     "CreatedWorkInstance",
+    "CompletedAttempt",
     "ItemLocationInput",
     "ItemSubjectRoleInput",
     "LocationInput",
@@ -65,6 +72,7 @@ __all__ = [
     "cancel_task",
     "cancel_work_instance",
     "complete_task",
+    "complete_side_effect_attempt",
     "connect",
     "create_candidate_action",
     "create_event_v1",
