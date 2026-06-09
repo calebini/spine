@@ -78,3 +78,17 @@ PYTHONPATH=src:../tickerd/src python3 -m spine.runtime.openclaw_smoke \
 ```
 
 The seed command creates one subject, one task, one notification policy, and one eligible generated work instance. The observe command emits JSONL records to stdout. The foreground runner writes lock, owner, health, and event files under the state directory. Neither command performs vendor writes in the default `observe_only` mode. The OpenClaw smoke runs Tickerd in active mode with a file-backed fake sender and writes fake outbound evidence to `openclaw_sends.jsonl` under the state directory.
+
+The OpenClaw smoke is fake by default. A real OpenClaw gateway send requires an explicit operator opt-in:
+
+```bash
+PYTHONPATH=src:../tickerd/src python3 -m spine.runtime.openclaw_smoke \
+  --db /tmp/spine-openclaw-gateway.sqlite \
+  --state-dir /tmp/spine-openclaw-gateway-state \
+  --seed-demo \
+  --sender gateway \
+  --allow-real-send \
+  --max-cycles 1
+```
+
+The gateway sender calls `openclaw gateway call send --params ... --json`. It reads `SPINE_OPENCLAW_GATEWAY_URL`, `SPINE_OPENCLAW_GATEWAY_TOKEN`, `SPINE_OPENCLAW_GATEWAY_PASSWORD`, and `SPINE_OPENCLAW_GATEWAY_TIMEOUT_MS`, with Kinflow gateway env names accepted as migration fallback.

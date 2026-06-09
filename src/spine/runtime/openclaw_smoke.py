@@ -10,7 +10,14 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Sequence
 
-from spine.adapters import NormalizedOpenClawResult, OpenClawBindingError, OpenClawNotificationProcessor, OpenClawOutboundMessage
+from spine.adapters import (
+    NormalizedOpenClawResult,
+    OpenClawBindingError,
+    OpenClawGatewayConfig,
+    OpenClawGatewaySender,
+    OpenClawNotificationProcessor,
+    OpenClawOutboundMessage,
+)
 from spine.adapters import SpineTickerdWorkAdapter
 from spine.ledger import connect, initialize_schema
 from spine.runtime.seed_demo import seed_demo_ledger
@@ -83,9 +90,10 @@ def run_openclaw_smoke(
     reconcile_interval_ms: int = 1,
     max_work_items_per_tick: int = 100,
     fake_result: str = "delivered",
+    sender_mode: str = "fake",
     install_signal_handlers: bool = True,
 ) -> Any:
-    """Run Tickerd active mode with a fake OpenClaw notification processor."""
+    """Run Tickerd active mode with a fake or explicitly enabled OpenClaw processor."""
 
     (
         TickerdConfig,
@@ -97,7 +105,12 @@ def run_openclaw_smoke(
     ) = _tickerd_runner_types()
     paths = OpenClawSmokePaths.from_state_dir(state_dir)
     paths.runner.state_dir.mkdir(parents=True, exist_ok=True)
-    sender = FakeOpenClawSender(paths.sends_path, result=fake_result)
+    if sender_mode == "gateway":
+        sender = OpenClawGatewaySender(OpenClawGatewayConfig.from_env())
+    elif sender_mode == "fake":
+        sender = FakeOpenClawSender(paths.sends_path, result=fake_result)
+    else:
+        raise ValueError(f"unknown OpenClaw smoke sender mode: {sender_mode}")
     processor = OpenClawNotificationProcessor(sender=sender)
     adapter = SpineTickerdWorkAdapter(connection, runtime_mode="active", processor=processor)
     config = TickerdConfig(
@@ -134,6 +147,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         raise SystemExit("--max-work-items must be at least 1")
     if args.seed_demo and args.initialize_schema:
         raise SystemExit("--seed-demo already initializes the schema; do not pass --initialize-schema")
+    if args.sender == "gateway" and not args.allow_real_send:
+        raise SystemExit("--sender gateway requires --allow-real-send")
 
     db_path = Path(args.db)
     if db_path.exists() and args.seed_demo:
@@ -158,6 +173,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             reconcile_interval_ms=args.reconcile_interval_ms,
             max_work_items_per_tick=args.max_work_items,
             fake_result=args.fake_result,
+            sender_mode=args.sender,
             install_signal_handlers=True,
         )
     finally:
@@ -169,6 +185,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         "state_dir": str(paths.runner.state_dir),
         "openclaw_sends": str(paths.sends_path),
         "fake_result": args.fake_result,
+        "sender": args.sender,
         "exit_code": result.exit_code,
         "reason": result.reason,
         "cycles_completed": result.cycles_completed,
@@ -186,6 +203,13 @@ def _parse_args(argv: Sequence[str] | None) -> argparse.Namespace:
     parser.add_argument("--state-dir", required=True, help="Directory for lock, owner, health, Tickerd events, and fake sends.")
     parser.add_argument("--seed-demo", action="store_true", help="Create and seed the deterministic demo ledger first.")
     parser.add_argument("--initialize-schema", action="store_true", help="Initialize an empty Spine schema before running.")
+    parser.add_argument(
+        "--sender",
+        choices=("fake", "gateway"),
+        default="fake",
+        help="OpenClaw sender binding to use. Gateway mode can perform a real external send.",
+    )
+    parser.add_argument("--allow-real-send", action="store_true", help="Required with --sender gateway.")
     parser.add_argument(
         "--fake-result",
         choices=("delivered", "transient", "permanent", "blocked", "binding_error", "send_exception"),
