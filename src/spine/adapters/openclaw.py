@@ -7,14 +7,15 @@ from dataclasses import dataclass
 from datetime import UTC, datetime
 from typing import Any, Callable, Literal, Mapping
 
-from spine.adapters.tickerd import WorkProcessingOutcome
-from spine.services import (
-    get_current,
-    prepare_work_attempt,
-    record_attempt_failure,
-    record_attempt_rejection,
-    record_attempt_success,
+from spine.adapters.side_effects import (
+    AttemptBackedSideEffectProcessor,
+    AttemptBackedSideEffectRequest,
+    NormalizedSideEffectResult,
+    SideEffectBindingError,
+    record_side_effect_result,
 )
+from spine.adapters.tickerd import WorkProcessingOutcome
+from spine.services import get_current
 
 OPENCLAW_ADAPTER_NAME = "openclaw"
 
@@ -22,7 +23,7 @@ OpenClawResultStatus = Literal["delivered", "failed_transient", "failed_permanen
 OpenClawSender = Callable[["OpenClawOutboundMessage"], "NormalizedOpenClawResult"]
 
 
-class OpenClawBindingError(RuntimeError):
+class OpenClawBindingError(SideEffectBindingError):
     """Raised when the configured OpenClaw sender cannot be invoked."""
 
 
@@ -89,48 +90,48 @@ class OpenClawNotificationProcessor:
     channel_hint: str = "openclaw_auto"
 
     def __call__(self, connection: sqlite3.Connection, work_row: Mapping[str, object], envelope: Any) -> WorkProcessingOutcome:
-        outbound = build_openclaw_outbound_message(
-            connection,
-            work_row=work_row,
-            trace_id=str(envelope.trace_id),
-            causation_id=str(envelope.causation_id),
-            created_at_utc=_utc_z(envelope.actual_start_ts),
-            channel_hint=self.channel_hint,
-        )
-        gate = prepare_work_attempt(
-            connection,
-            attempt_id=outbound.attempt_id,
-            work_instance_id=outbound.delivery_id,
+        processor: AttemptBackedSideEffectProcessor[OpenClawOutboundMessage] = AttemptBackedSideEffectProcessor(
             adapter_name=OPENCLAW_ADAPTER_NAME,
-            idempotency_key=outbound.dedupe_key,
-            request_envelope=outbound.request_envelope(),
-            attempted_at_utc=outbound.created_at_utc,
+            build_request=lambda request_connection, request_work_row, request_envelope: build_openclaw_side_effect_request(
+                request_connection,
+                work_row=request_work_row,
+                envelope=request_envelope,
+                channel_hint=self.channel_hint,
+            ),
+            sender=lambda outbound: normalize_openclaw_result(self.sender(outbound)),
+            binding_error_type=OpenClawBindingError,
+            binding_failure_reason_code="openclaw_binding_failed",
+            send_exception_reason_code="openclaw_send_exception",
+            missing_retry_reason_code="openclaw_missing_retry_at",
         )
-        try:
-            result = self.sender(outbound)
-        except OpenClawBindingError:
-            record_attempt_rejection(
-                connection,
-                attempt_id=gate.attempt.attempt_id,
-                completed_at_utc=outbound.created_at_utc,
-                reason_code="openclaw_binding_failed",
-            )
-            return WorkProcessingOutcome.failed("openclaw_binding_failed")
-        except Exception:
-            record_attempt_failure(
-                connection,
-                attempt_id=gate.attempt.attempt_id,
-                completed_at_utc=outbound.created_at_utc,
-                reason_code="openclaw_send_exception",
-            )
-            return WorkProcessingOutcome.failed("openclaw_send_exception")
+        return processor(connection, work_row, envelope)
 
-        return record_openclaw_result(
-            connection,
-            attempt_id=gate.attempt.attempt_id,
-            result=result,
-            completed_at_utc=outbound.created_at_utc,
-        )
+
+def build_openclaw_side_effect_request(
+    connection: sqlite3.Connection,
+    *,
+    work_row: Mapping[str, object],
+    envelope: Any,
+    channel_hint: str = "openclaw_auto",
+) -> AttemptBackedSideEffectRequest[OpenClawOutboundMessage]:
+    """Build the generic attempt-backed request for an OpenClaw outbound message."""
+
+    outbound = build_openclaw_outbound_message(
+        connection,
+        work_row=work_row,
+        trace_id=str(envelope.trace_id),
+        causation_id=str(envelope.causation_id),
+        created_at_utc=_utc_z(envelope.actual_start_ts),
+        channel_hint=channel_hint,
+    )
+    return AttemptBackedSideEffectRequest(
+        message=outbound,
+        attempt_id=outbound.attempt_id,
+        work_instance_id=outbound.delivery_id,
+        idempotency_key=outbound.dedupe_key,
+        request_envelope=outbound.request_envelope(),
+        attempted_at_utc=outbound.created_at_utc,
+    )
 
 
 def build_openclaw_outbound_message(
@@ -171,53 +172,39 @@ def record_openclaw_result(
 ) -> WorkProcessingOutcome:
     """Persist normalized OpenClaw result and return the matching Spine work outcome."""
 
+    return record_side_effect_result(
+        connection,
+        attempt_id=attempt_id,
+        result=normalize_openclaw_result(result),
+        completed_at_utc=completed_at_utc,
+        missing_retry_reason_code="openclaw_missing_retry_at",
+    )
+
+
+def normalize_openclaw_result(result: NormalizedOpenClawResult) -> NormalizedSideEffectResult:
+    """Translate OpenClaw-shaped outcomes into provider-neutral side-effect outcomes."""
+
     if result.status == "delivered":
-        record_attempt_success(
-            connection,
-            attempt_id=attempt_id,
-            completed_at_utc=completed_at_utc,
-            provider_ref=result.provider_ref,
+        return NormalizedSideEffectResult.succeeded(
             reason_code=result.reason_code,
+            provider_ref=result.provider_ref,
         )
-        return WorkProcessingOutcome.succeeded(result.reason_code)
     if result.status == "failed_transient":
-        if not result.next_attempt_at_utc:
-            record_attempt_failure(
-                connection,
-                attempt_id=attempt_id,
-                completed_at_utc=completed_at_utc,
-                provider_ref=result.provider_ref,
-                reason_code="openclaw_missing_retry_at",
-            )
-            return WorkProcessingOutcome.failed("openclaw_missing_retry_at")
-        record_attempt_failure(
-            connection,
-            attempt_id=attempt_id,
-            completed_at_utc=completed_at_utc,
+        return NormalizedSideEffectResult.retry(
+            reason_code=result.reason_code,
             provider_ref=result.provider_ref,
-            reason_code=result.reason_code,
-        )
-        return WorkProcessingOutcome.retry(
-            reason_code=result.reason_code,
             next_attempt_at_utc=result.next_attempt_at_utc or "",
         )
     if result.status == "failed_permanent":
-        record_attempt_failure(
-            connection,
-            attempt_id=attempt_id,
-            completed_at_utc=completed_at_utc,
+        return NormalizedSideEffectResult.failed(
+            reason_code=result.reason_code,
             provider_ref=result.provider_ref,
-            reason_code=result.reason_code,
         )
-        return WorkProcessingOutcome.failed(result.reason_code)
     if result.status == "blocked":
-        record_attempt_rejection(
-            connection,
-            attempt_id=attempt_id,
-            completed_at_utc=completed_at_utc,
+        return NormalizedSideEffectResult.cancelled(
             reason_code=result.reason_code,
+            provider_ref=result.provider_ref,
         )
-        return WorkProcessingOutcome.cancelled(result.reason_code)
     raise ValueError(f"unknown OpenClaw result status: {result.status}")
 
 

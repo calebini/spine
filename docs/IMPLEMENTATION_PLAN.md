@@ -439,7 +439,7 @@ Scope:
 
 Current first slice:
 
-- OpenClaw-style outbound envelopes, deterministic idempotency keys, terminal side-effect attempt updates, and fake-sender result normalization exist locally.
+- Generic attempt-backed side-effect processing, OpenClaw-style outbound envelopes, deterministic idempotency keys, terminal side-effect attempt updates, and fake-sender result normalization exist locally.
 - The real OpenClaw host binding and operator-facing verification command remain to be added.
 
 Exit criteria:
