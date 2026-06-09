@@ -440,7 +440,8 @@ Scope:
 Current first slice:
 
 - Generic attempt-backed side-effect processing, OpenClaw-style outbound envelopes, deterministic idempotency keys, terminal side-effect attempt updates, and fake-sender result normalization exist locally.
-- The real OpenClaw host binding and operator-facing verification command remain to be added.
+- A bounded active fake-OpenClaw runtime smoke exists for local and deployment-host verification.
+- The real OpenClaw host binding and real-adapter operator verification command remain to be added.
 
 Exit criteria:
 
