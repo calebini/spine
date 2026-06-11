@@ -5,6 +5,7 @@ from __future__ import annotations
 import sqlite3
 from collections.abc import Callable
 from dataclasses import dataclass
+from typing import cast
 
 from spine.core import SpineValidationError
 from spine.core.hashing import (
@@ -18,8 +19,11 @@ from spine.ledger.common import (
     insert_temporal_anchor,
     new_id,
     require_non_empty,
+    require_optional_utc_z,
+    require_utc_z,
 )
-from spine.ledger.item_drafts import EventDraft, ItemVersionDraft, TaskDraft, _UNSET
+from spine.ledger.item_drafts import _UNSET, EventDraft, ItemVersionDraft, TaskDraft
+from spine.ledger.sqlite import assert_ledger_invariants
 from spine.ledger.supporting import (
     ItemLocationInput,
     ItemSubjectRoleInput,
@@ -31,7 +35,6 @@ from spine.ledger.supporting import (
     insert_supporting_sets,
 )
 from spine.models.enums import EventStatus, ItemStatus, ItemType, TaskStatus
-from spine.ledger.sqlite import assert_ledger_invariants
 
 
 @dataclass(frozen=True)
@@ -74,6 +77,7 @@ def create_event_from_draft(connection: sqlite3.Connection, draft: EventDraft) -
             default_created_at_utc=draft.created_at_utc,
         )
         if draft.end_anchor is not None:
+            assert end_anchor_id is not None
             insert_temporal_anchor(
                 connection,
                 anchor=draft.end_anchor,
@@ -172,6 +176,7 @@ def create_task_from_draft(connection: sqlite3.Connection, draft: TaskDraft) -> 
     require_non_empty("item_id", item_id)
     require_non_empty("audit_id", audit_id)
     _require_common_create_inputs(draft.created_at_utc, draft.created_by_subject_id, draft.title)
+    require_optional_utc_z("completed_at_utc", draft.completed_at_utc)
 
     due_anchor_id = draft.due_anchor.anchor_id if draft.due_anchor is not None else None
     if draft.due_anchor is not None and due_anchor_id is None:
@@ -182,6 +187,7 @@ def create_task_from_draft(connection: sqlite3.Connection, draft: TaskDraft) -> 
 
     def insert_anchors(connection: sqlite3.Connection) -> None:
         if draft.due_anchor is not None:
+            assert due_anchor_id is not None
             insert_temporal_anchor(
                 connection,
                 anchor=draft.due_anchor,
@@ -189,6 +195,7 @@ def create_task_from_draft(connection: sqlite3.Connection, draft: TaskDraft) -> 
                 default_created_at_utc=draft.created_at_utc,
             )
         if draft.defer_until_anchor is not None:
+            assert defer_until_anchor_id is not None
             insert_temporal_anchor(
                 connection,
                 anchor=draft.defer_until_anchor,
@@ -288,7 +295,7 @@ def create_item_version_from_draft(connection: sqlite3.Connection, draft: ItemVe
     audit_id = draft.audit_id or new_id("audit")
     require_non_empty("item_id", draft.item_id)
     require_non_empty("audit_id", audit_id)
-    require_non_empty("created_at_utc", draft.created_at_utc)
+    require_utc_z("created_at_utc", draft.created_at_utc)
     require_non_empty("created_by_subject_id", draft.created_by_subject_id)
     if draft.target_version < 1:
         raise SpineValidationError("stale_item_version", "target_version must be greater than or equal to 1")
@@ -304,8 +311,16 @@ def create_item_version_from_draft(connection: sqlite3.Connection, draft: ItemVe
             next_version = draft.target_version + 1
             next_title = draft.title if draft.title is not None else current["title"]
             require_non_empty("title", next_title)
-            next_summary = current["summary"] if draft.summary is _UNSET else draft.summary
-            next_source_ref = current["source_ref"] if draft.source_ref is _UNSET else draft.source_ref
+            next_summary = (
+                cast(str | None, current["summary"])
+                if draft.summary is _UNSET
+                else _optional_string("summary", draft.summary)
+            )
+            next_source_ref = (
+                cast(str | None, current["source_ref"])
+                if draft.source_ref is _UNSET
+                else _optional_string("source_ref", draft.source_ref)
+            )
 
             _insert_item_version(
                 connection,
@@ -417,7 +432,8 @@ def cancel_event(
 
     current = get_current_item(connection, item_id)
     _require_item_type(current, ItemType.EVENT)
-    if current["detail"]["event_status"] != EventStatus.SCHEDULED.value:
+    detail = _item_detail(current)
+    if detail["event_status"] != EventStatus.SCHEDULED.value:
         raise SpineValidationError("invalid_event_transition", "only scheduled events can be cancelled")
 
     return create_next_item_version(
@@ -447,7 +463,8 @@ def complete_task(
 
     current = get_current_item(connection, item_id)
     _require_item_type(current, ItemType.TASK)
-    if current["detail"]["task_status"] != TaskStatus.OPEN.value:
+    detail = _item_detail(current)
+    if detail["task_status"] != TaskStatus.OPEN.value:
         raise SpineValidationError("invalid_task_transition", "only open tasks can be completed")
 
     return create_next_item_version(
@@ -481,7 +498,8 @@ def cancel_task(
 
     current = get_current_item(connection, item_id)
     _require_item_type(current, ItemType.TASK)
-    if current["detail"]["task_status"] != TaskStatus.OPEN.value:
+    detail = _item_detail(current)
+    if detail["task_status"] != TaskStatus.OPEN.value:
         raise SpineValidationError("invalid_task_transition", "only open tasks can be cancelled")
 
     return create_next_item_version(
@@ -511,7 +529,7 @@ def archive_item(
     audit_id = audit_id or new_id("audit")
     require_non_empty("item_id", item_id)
     require_non_empty("audit_id", audit_id)
-    require_non_empty("archived_at_utc", archived_at_utc)
+    require_utc_z("archived_at_utc", archived_at_utc)
     require_non_empty("archived_by_subject_id", archived_by_subject_id)
     try:
         with connection:
@@ -792,6 +810,9 @@ def _insert_next_detail(
         previous_status = detail["task_status"]
         detail.update(task_detail or {})
         _validate_task_status_transition(previous_status, detail["task_status"])
+        completed_at_utc = detail["completed_at_utc"]
+        if completed_at_utc is not None:
+            require_utc_z("task_detail.completed_at_utc", str(completed_at_utc))
         connection.execute(
             """
             INSERT INTO task_details (
@@ -922,55 +943,6 @@ def _current_detail(
     return dict(row)
 
 
-def current_locations(connection: sqlite3.Connection, *, item_id: str, version: int) -> list[dict[str, object]]:
-    rows = connection.execute(
-        """
-        SELECT
-          il.item_location_id, il.item_id, il.version, il.location_id, il.role,
-          il.created_at_utc,
-          l.label, l.kind, l.address_text, l.latitude, l.longitude, l.timezone,
-          l.provider_ref, l.metadata_json
-        FROM item_locations AS il
-        JOIN locations AS l ON l.location_id = il.location_id
-        WHERE il.item_id = ? AND il.version = ?
-        ORDER BY il.item_location_id
-        """,
-        (item_id, version),
-    ).fetchall()
-    return [dict(row) for row in rows]
-
-
-def current_subject_roles(connection: sqlite3.Connection, *, item_id: str, version: int) -> list[dict[str, object]]:
-    rows = connection.execute(
-        """
-        SELECT *
-        FROM item_subject_roles
-        WHERE item_id = ? AND version = ?
-        ORDER BY item_subject_role_id
-        """,
-        (item_id, version),
-    ).fetchall()
-    return [dict(row) for row in rows]
-
-
-def current_notification_policies(
-    connection: sqlite3.Connection,
-    *,
-    item_id: str,
-    version: int,
-) -> list[dict[str, object]]:
-    rows = connection.execute(
-        """
-        SELECT *
-        FROM notification_policies
-        WHERE item_id = ? AND version = ?
-        ORDER BY policy_id
-        """,
-        (item_id, version),
-    ).fetchall()
-    return [dict(row) for row in rows]
-
-
 def _load_current_row(connection: sqlite3.Connection, *, item_id: str) -> sqlite3.Row:
     row = connection.execute(
         """
@@ -987,7 +959,7 @@ def _load_current_row(connection: sqlite3.Connection, *, item_id: str) -> sqlite
     ).fetchone()
     if row is None:
         raise SpineValidationError("item_not_found", f"coordination item not found: {item_id}")
-    return row
+    return cast(sqlite3.Row, row)
 
 
 def _load_event_detail(connection: sqlite3.Connection, *, item_id: str, version: int) -> dict[str, object]:
@@ -1025,6 +997,21 @@ def _require_item_type(item: dict[str, object], item_type: ItemType) -> None:
         raise SpineValidationError("item_type_mismatch", f"item is not a {item_type.value}")
 
 
+def _item_detail(item: dict[str, object]) -> dict[str, object]:
+    detail = item.get("detail")
+    if not isinstance(detail, dict):
+        raise SpineValidationError("item_detail_not_found", f"current detail row not found for {item['item_id']}")
+    return detail
+
+
+def _optional_string(name: str, value: object) -> str | None:
+    if value is None:
+        return None
+    if not isinstance(value, str):
+        raise SpineValidationError("invalid_item_create_input", f"{name} must be a string or None")
+    return value
+
+
 def _validate_event_status_transition(previous_status: object, next_status: object) -> None:
     if previous_status == next_status:
         return
@@ -1051,6 +1038,6 @@ def _validate_task_status_transition(previous_status: object, next_status: objec
 
 
 def _require_common_create_inputs(created_at_utc: str, created_by_subject_id: str, title: str) -> None:
-    require_non_empty("created_at_utc", created_at_utc)
+    require_utc_z("created_at_utc", created_at_utc)
     require_non_empty("created_by_subject_id", created_by_subject_id)
     require_non_empty("title", title)

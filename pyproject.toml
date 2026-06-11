@@ -15,14 +15,41 @@ authors = [
 
 [project.optional-dependencies]
 test = ["pytest>=8"]
+dev = [
+  "mypy>=1.13",
+  "ruff>=0.8",
+]
+
+[project.scripts]
+spine-ledger-migrate = "spine.ledger.migrate:main"
+spine-openclaw-smoke = "spine.runtime.openclaw_smoke:main"
+spine-seed-demo = "spine.runtime.seed_demo:main"
+spine-tickerd-observe = "spine.runtime.tickerd_observe:main"
+spine-tickerd-runner = "spine.runtime.tickerd_runner:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
 
 [tool.setuptools.package-data]
 "spine.ledger" = ["schema.sql", "migrations/*.sql"]
+"spine" = ["py.typed"]
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]
 testpaths = ["tests"]
 addopts = "-q"
+
+[tool.ruff]
+line-length = 140
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+files = [
+  "src/spine/core",
+  "src/spine/ledger",
+]

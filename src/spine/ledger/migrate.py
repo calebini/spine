@@ -3,18 +3,18 @@
 from __future__ import annotations
 
 import argparse
-from dataclasses import dataclass
-from datetime import UTC, datetime
 import json
-from importlib import resources
-from pathlib import Path
 import sqlite3
 import sys
-from typing import Sequence
+from collections.abc import Sequence
+from dataclasses import dataclass
+from datetime import UTC, datetime
+from importlib import resources
+from pathlib import Path
 
 from spine.core import SpineValidationError
+from spine.ledger.common import utc_z_from_datetime
 from spine.ledger.sqlite import assert_ledger_invariants, connect, initialize_schema
-
 
 CURRENT_SCHEMA_VERSION = 2
 
@@ -206,28 +206,28 @@ def main(argv: Sequence[str] | None = None) -> int:
     connection = connect(Path(args.db))
     try:
         if args.verify_only:
-            result = verify_schema(connection)
+            verification_result = verify_schema(connection)
             payload = {
-                "schema_version": result.schema_version,
-                "table_count": result.table_count,
-                "index_count": result.index_count,
-                "foreign_key_errors": result.foreign_key_errors,
-                "integrity_check": result.integrity_check,
-                "ledger_invariants_ok": result.ledger_invariants_ok,
+                "schema_version": verification_result.schema_version,
+                "table_count": verification_result.table_count,
+                "index_count": verification_result.index_count,
+                "foreign_key_errors": verification_result.foreign_key_errors,
+                "integrity_check": verification_result.integrity_check,
+                "ledger_invariants_ok": verification_result.ledger_invariants_ok,
                 "verified": True,
             }
         else:
-            result = migrate_schema(
+            migration_result = migrate_schema(
                 connection,
                 initialize_if_empty=args.initialize_if_empty,
                 verify=not args.no_verify,
             )
             payload = {
-                "before_version": result.before_version,
-                "after_version": result.after_version,
-                "applied_versions": list(result.applied_versions),
-                "initialized": result.initialized,
-                "verified": result.verified,
+                "before_version": migration_result.before_version,
+                "after_version": migration_result.after_version,
+                "applied_versions": list(migration_result.applied_versions),
+                "initialized": migration_result.initialized,
+                "verified": migration_result.verified,
             }
     finally:
         connection.close()
@@ -318,7 +318,7 @@ def _object_names(connection: sqlite3.Connection, *, object_type: str) -> frozen
 
 
 def _utc_now() -> str:
-    return datetime.now(UTC).isoformat().replace("+00:00", "Z")
+    return utc_z_from_datetime(datetime.now(UTC))
 
 
 def _parse_args(argv: Sequence[str] | None) -> argparse.Namespace:

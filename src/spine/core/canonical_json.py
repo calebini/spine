@@ -2,13 +2,10 @@
 
 from collections.abc import Mapping, Sequence
 from numbers import Number
-from typing import TypeAlias
 
 from spine.core.errors import SpineValidationError
 
-CanonicalJsonValue: TypeAlias = (
-    None | bool | str | Mapping[str, "CanonicalJsonValue"] | Sequence["CanonicalJsonValue"]
-)
+type CanonicalJsonValue = None | bool | str | Mapping[str, CanonicalJsonValue] | Sequence[CanonicalJsonValue]
 
 
 def canonical_json_text(value: object) -> str:

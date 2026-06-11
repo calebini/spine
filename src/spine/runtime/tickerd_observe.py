@@ -106,7 +106,7 @@ def _tickerd_runtime_types() -> tuple[Any, Any, Any]:
         from tickerd.events import JsonLineEventSink
     except ImportError as exc:
         raise RuntimeError(
-            "Tickerd is required for this runtime; install tickerd or run with ../tickerd/src on PYTHONPATH."
+            "Tickerd is required for this runtime; install tickerd or put Tickerd's src directory on PYTHONPATH."
         ) from exc
     return TickerdConfig, JsonLineEventSink, RuntimeKernel
 

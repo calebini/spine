@@ -4,14 +4,20 @@ from __future__ import annotations
 
 import sqlite3
 from dataclasses import dataclass
-from datetime import UTC, datetime
-from typing import Any, Callable, Mapping, Sequence, TYPE_CHECKING
+from datetime import datetime
+from typing import Callable, Mapping, Sequence
 
 from spine.core import SpineValidationError
+from spine.ledger.common import utc_z_from_datetime
+from spine.protocols import (
+    TickerdCycleEnvelope,
+    TickerdProcessResult,
+    TickerdPublicTypes,
+    TickerdReconcileResult,
+    TickerdRuntimeMode,
+    TickerdWorkItem,
+)
 from spine.services import cancel_work, fail_work, list_eligible_work, require_processable_work, retry_work, start_work, succeed_work
-
-if TYPE_CHECKING:
-    from tickerd import CycleEnvelope, WorkItem
 
 
 SIDE_EFFECTS_BLOCKED = "SIDE_EFFECTS_BLOCKED"
@@ -19,7 +25,7 @@ NO_PROCESSOR_CONFIGURED = "NO_PROCESSOR_CONFIGURED"
 STALE_WORK_BLOCKED = "STALE_WORK_INSTANCE"
 INVALID_WORK_OUTCOME = "INVALID_WORK_OUTCOME"
 
-WorkProcessor = Callable[[sqlite3.Connection, Mapping[str, object], Any], "WorkProcessingOutcome"]
+WorkProcessor = Callable[[sqlite3.Connection, Mapping[str, object], TickerdCycleEnvelope], "WorkProcessingOutcome"]
 
 
 @dataclass(frozen=True)
@@ -55,34 +61,43 @@ class SpineTickerdWorkAdapter:
     runtime_mode: str = "observe_only"
     processor: WorkProcessor | None = None
 
-    def read_mode(self) -> Any:
+    def read_mode(self) -> TickerdRuntimeMode:
         """Return Tickerd's runtime mode without making Tickerd a hard import."""
 
-        _, _, _, RuntimeMode = _tickerd_public_types()
-        return RuntimeMode(self.runtime_mode)
+        tickerd_types = _tickerd_public_types()
+        return tickerd_types.runtime_mode(self.runtime_mode)
 
-    def list_work_items(self, envelope: CycleEnvelope, limit: int) -> Sequence[WorkItem]:
+    def list_work_items(self, envelope: TickerdCycleEnvelope, limit: int) -> Sequence[TickerdWorkItem]:
         """Map eligible, non-stale Spine work instances into Tickerd work items."""
 
-        WorkItem, _, _, _ = _tickerd_public_types()
+        tickerd_types = _tickerd_public_types()
         rows = list_eligible_work(self.connection, now_utc=_utc_z(envelope.actual_start_ts), limit=limit)
-        return tuple(WorkItem(item_id=str(row["work_instance_id"]), payload=build_work_item_payload(row)) for row in rows)
+        return tuple(
+            tickerd_types.work_item(item_id=str(row["work_instance_id"]), payload=build_work_item_payload(row))
+            for row in rows
+        )
 
-    def process_work_item(self, item: WorkItem, envelope: CycleEnvelope, *, side_effects_allowed: bool) -> Any:
+    def process_work_item(
+        self,
+        item: TickerdWorkItem,
+        envelope: TickerdCycleEnvelope,
+        *,
+        side_effects_allowed: bool,
+    ) -> TickerdProcessResult:
         """Validate work freshness and delegate active processing only when configured."""
 
-        _, ProcessResult, _, _ = _tickerd_public_types()
+        tickerd_types = _tickerd_public_types()
         try:
             require_processable_work(self.connection, item.item_id)
         except SpineValidationError as exc:
             if exc.code in {"stale_work_instance", "work_instance_not_found"}:
-                return ProcessResult.blocked(STALE_WORK_BLOCKED)
+                return tickerd_types.process_result.blocked(STALE_WORK_BLOCKED)
             raise
 
         if not side_effects_allowed:
-            return ProcessResult.blocked(SIDE_EFFECTS_BLOCKED)
+            return tickerd_types.process_result.blocked(SIDE_EFFECTS_BLOCKED)
         if self.processor is None:
-            return ProcessResult.blocked(NO_PROCESSOR_CONFIGURED)
+            return tickerd_types.process_result.blocked(NO_PROCESSOR_CONFIGURED)
         start_work(
             self.connection,
             work_instance_id=item.item_id,
@@ -105,14 +120,14 @@ class SpineTickerdWorkAdapter:
                 failed_at_utc=_utc_z(envelope.actual_start_ts),
                 reason_code="processor_exception",
             )
-            return ProcessResult.failed("PROCESSOR_EXCEPTION")
-        return ProcessResult.processed()
+            return tickerd_types.process_result.failed("PROCESSOR_EXCEPTION")
+        return tickerd_types.process_result.processed()
 
-    def reconcile(self, envelope: CycleEnvelope, *, max_batches: int) -> Any:
+    def reconcile(self, envelope: TickerdCycleEnvelope, *, max_batches: int) -> TickerdReconcileResult:
         """Provide a bounded no-op reconciliation hook for the first integration slice."""
 
-        _, _, ReconcileResult, _ = _tickerd_public_types()
-        return ReconcileResult(ok=True, items_scanned=0, items_repaired=0)
+        tickerd_types = _tickerd_public_types()
+        return tickerd_types.reconcile_result(ok=True, items_scanned=0, items_repaired=0)
 
 
 def build_work_item_payload(row: Mapping[str, object]) -> dict[str, object]:
@@ -179,17 +194,21 @@ def _apply_work_processing_outcome(
         raise SpineValidationError(INVALID_WORK_OUTCOME.lower(), f"unknown work outcome: {outcome.status}")
 
 
-def _tickerd_public_types() -> tuple[Any, Any, Any, Any]:
+def _tickerd_public_types() -> TickerdPublicTypes:
     try:
         from tickerd import ProcessResult, RuntimeMode, WorkItem
         from tickerd.types import ReconcileResult
     except ImportError as exc:
         raise RuntimeError(
-            "Tickerd is required for SpineTickerdWorkAdapter; install tickerd or run with ../tickerd/src on PYTHONPATH."
+            "Tickerd is required for SpineTickerdWorkAdapter; install tickerd or put Tickerd's src directory on PYTHONPATH."
         ) from exc
-    return WorkItem, ProcessResult, ReconcileResult, RuntimeMode
+    return TickerdPublicTypes(
+        work_item=WorkItem,
+        process_result=ProcessResult,
+        reconcile_result=ReconcileResult,
+        runtime_mode=RuntimeMode,
+    )
 
 
 def _utc_z(value: datetime) -> str:
-    utc_value = value.astimezone(UTC).replace(tzinfo=None)
-    return f"{utc_value.isoformat()}Z"
+    return utc_z_from_datetime(value)

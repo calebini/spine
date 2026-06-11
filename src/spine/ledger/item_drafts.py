@@ -8,7 +8,6 @@ from spine.ledger.common import TemporalAnchorInput
 from spine.ledger.supporting import ItemLocationInput, ItemSubjectRoleInput, NotificationPolicyInput
 from spine.models.enums import EventStatus, TaskStatus
 
-
 _UNSET = object()
 
 

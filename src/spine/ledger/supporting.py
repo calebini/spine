@@ -13,6 +13,7 @@ from spine.ledger.common import (
     insert_temporal_anchor,
     new_id,
     require_non_empty,
+    require_utc_z,
 )
 from spine.models.enums import (
     ItemLocationRole,
@@ -85,6 +86,7 @@ def insert_supporting_sets(
     subject_roles: tuple[ItemSubjectRoleInput, ...],
     notification_policies: tuple[NotificationPolicyInput, ...],
 ) -> None:
+    require_utc_z("default_created_at_utc", default_created_at_utc)
     for item_location in item_locations:
         insert_item_location(
             connection,
@@ -119,6 +121,7 @@ def copy_forward_supporting_sets(
     next_version: int,
     created_at_utc: str,
 ) -> None:
+    require_utc_z("created_at_utc", created_at_utc)
     for row in connection.execute(
         """
         SELECT item_location_id, location_id, role
@@ -285,7 +288,7 @@ def insert_item_location(
             version,
             location_id,
             enum_value(item_location.role),
-            item_location.created_at_utc or default_created_at_utc,
+            require_utc_z("item_location.created_at_utc", item_location.created_at_utc or default_created_at_utc),
         ),
     )
 
@@ -300,6 +303,8 @@ def insert_location(
     require_non_empty("location.label", location.label)
     created_at_utc = location.created_at_utc or default_created_at_utc
     updated_at_utc = location.updated_at_utc or created_at_utc
+    require_utc_z("location.created_at_utc", created_at_utc)
+    require_utc_z("location.updated_at_utc", updated_at_utc)
     connection.execute(
         """
         INSERT INTO locations (
@@ -333,6 +338,7 @@ def insert_item_subject_role(
     default_created_at_utc: str,
 ) -> None:
     require_non_empty("subject_role.subject_id", subject_role.subject_id)
+    require_utc_z("subject_role.created_at_utc", subject_role.created_at_utc or default_created_at_utc)
     connection.execute(
         """
         INSERT INTO item_subject_roles (
@@ -371,6 +377,7 @@ def insert_notification_policy(
         )
     if trigger_anchor_id is None:
         raise SpineValidationError("invalid_notification_policy", "notification policy requires a trigger anchor")
+    require_utc_z("policy.created_at_utc", policy.created_at_utc or default_created_at_utc)
     connection.execute(
         """
         INSERT INTO notification_policies (

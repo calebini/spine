@@ -7,7 +7,7 @@ from dataclasses import dataclass
 
 from spine.core import SpineValidationError
 from spine.core.hashing import side_effect_request_hash, side_effect_request_payload_hash, side_effect_response_hash
-from spine.ledger.common import enum_value, new_id, require_non_empty
+from spine.ledger.common import enum_value, new_id, require_non_empty, require_utc_z
 from spine.models.enums import AttemptStatus
 
 
@@ -50,7 +50,7 @@ def create_started_attempt(
     require_non_empty("attempt_id", attempt_id)
     require_non_empty("adapter_name", adapter_name)
     require_non_empty("idempotency_key", idempotency_key)
-    require_non_empty("attempted_at_utc", attempted_at_utc)
+    require_utc_z("attempted_at_utc", attempted_at_utc)
     item_id, source_item_version = _resolve_attempt_binding(
         connection,
         item_id=item_id,
@@ -119,7 +119,7 @@ def complete_side_effect_attempt(
     """Terminally update a started side-effect attempt."""
 
     require_non_empty("attempt_id", attempt_id)
-    require_non_empty("completed_at_utc", completed_at_utc)
+    require_utc_z("completed_at_utc", completed_at_utc)
     status = enum_value(attempt_status)
     if status == AttemptStatus.STARTED.value:
         raise SpineValidationError("side_effect_attempt_transition_rejected", "terminal status required")

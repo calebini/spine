@@ -2,12 +2,11 @@
 
 from __future__ import annotations
 
+import sqlite3
 from importlib import resources
 from pathlib import Path
-import sqlite3
 
 from spine.core.errors import SpineValidationError
-
 
 DEFAULT_BUSY_TIMEOUT_MS = 5000
 

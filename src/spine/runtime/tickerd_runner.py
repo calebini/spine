@@ -141,7 +141,7 @@ def _tickerd_runner_types() -> tuple[Any, Any, Any, Any, Any, Any]:
         from tickerd.sinks import JsonFileHealthSink
     except ImportError as exc:
         raise RuntimeError(
-            "Tickerd is required for this runtime; install tickerd or run with ../tickerd/src on PYTHONPATH."
+            "Tickerd is required for this runtime; install tickerd or put Tickerd's src directory on PYTHONPATH."
         ) from exc
     return TickerdConfig, RuntimeKernel, FileLockBackend, JsonFileHealthSink, JsonlFileEventSink, ForegroundRunner
 

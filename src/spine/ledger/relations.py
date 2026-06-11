@@ -5,7 +5,7 @@ from __future__ import annotations
 import sqlite3
 
 from spine.core import SpineValidationError
-from spine.ledger.common import enum_value, new_id, require_non_empty
+from spine.ledger.common import enum_value, new_id, require_non_empty, require_utc_z
 from spine.models.enums import RelationStatus, RelationType
 
 
@@ -27,7 +27,7 @@ def create_item_relation(
     require_non_empty("relation_id", relation_id)
     require_non_empty("source_item_id", source_item_id)
     require_non_empty("target_item_id", target_item_id)
-    require_non_empty("created_at_utc", created_at_utc)
+    require_utc_z("created_at_utc", created_at_utc)
     require_non_empty("created_by_subject_id", created_by_subject_id)
     relation_type_value = enum_value(relation_type)
     if relation_type_value in {"blocks", "contains"}:

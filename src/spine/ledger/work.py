@@ -6,7 +6,7 @@ import sqlite3
 from dataclasses import dataclass
 
 from spine.core import SpineValidationError
-from spine.ledger.common import enum_value, new_id, require_non_empty
+from spine.ledger.common import enum_value, new_id, require_non_empty, require_optional_utc_z, require_utc_z
 from spine.models.enums import GenerationSourceKind, WorkKind, WorkStatus
 
 
@@ -56,8 +56,11 @@ def create_work_instance(
     work_instance_id = work_instance_id or new_id("work")
     require_non_empty("work_instance_id", work_instance_id)
     require_non_empty("item_id", item_id)
-    require_non_empty("eligible_at_utc", eligible_at_utc)
-    require_non_empty("created_at_utc", created_at_utc)
+    require_utc_z("eligible_at_utc", eligible_at_utc)
+    require_utc_z("created_at_utc", created_at_utc)
+    require_optional_utc_z("next_attempt_at_utc", next_attempt_at_utc)
+    if updated_at_utc is not None:
+        require_utc_z("updated_at_utc", updated_at_utc)
     try:
         with connection:
             connection.execute(
@@ -108,7 +111,7 @@ def start_work_instance(
 ) -> UpdatedWorkInstance:
     """Mark eligible work in progress and count one processing attempt."""
 
-    require_non_empty("started_at_utc", started_at_utc)
+    require_utc_z("started_at_utc", started_at_utc)
     row = _get_work_for_outcome(connection, work_instance_id)
     if row["status"] != WorkStatus.ELIGIBLE.value:
         raise SpineValidationError("work_outcome_rejected", f"work is not eligible: {work_instance_id}")
@@ -138,7 +141,7 @@ def succeed_work_instance(
 ) -> UpdatedWorkInstance:
     """Mark in-progress work succeeded."""
 
-    require_non_empty("succeeded_at_utc", succeeded_at_utc)
+    require_utc_z("succeeded_at_utc", succeeded_at_utc)
     row = _get_work_for_outcome(connection, work_instance_id)
     if row["status"] != WorkStatus.IN_PROGRESS.value:
         raise SpineValidationError("work_outcome_rejected", f"work is not in progress: {work_instance_id}")
@@ -161,7 +164,7 @@ def fail_work_instance(
 ) -> UpdatedWorkInstance:
     """Mark eligible or in-progress work failed with a durable reason."""
 
-    require_non_empty("failed_at_utc", failed_at_utc)
+    require_utc_z("failed_at_utc", failed_at_utc)
     _require_reason(reason_code)
     row = _get_work_for_outcome(connection, work_instance_id)
     if row["status"] not in {WorkStatus.ELIGIBLE.value, WorkStatus.IN_PROGRESS.value}:
@@ -186,8 +189,8 @@ def retry_work_instance(
 ) -> UpdatedWorkInstance:
     """Return in-progress work to eligible state for a later retry."""
 
-    require_non_empty("next_attempt_at_utc", next_attempt_at_utc)
-    require_non_empty("updated_at_utc", updated_at_utc)
+    require_utc_z("next_attempt_at_utc", next_attempt_at_utc)
+    require_utc_z("updated_at_utc", updated_at_utc)
     _require_reason(reason_code)
     row = _get_work_for_outcome(connection, work_instance_id)
     if row["status"] != WorkStatus.IN_PROGRESS.value:
@@ -211,7 +214,7 @@ def cancel_work_instance(
 ) -> UpdatedWorkInstance:
     """Cancel eligible or in-progress work with a durable reason."""
 
-    require_non_empty("cancelled_at_utc", cancelled_at_utc)
+    require_utc_z("cancelled_at_utc", cancelled_at_utc)
     _require_reason(reason_code)
     row = _get_work_for_outcome(connection, work_instance_id)
     if row["status"] not in {WorkStatus.ELIGIBLE.value, WorkStatus.IN_PROGRESS.value}:
@@ -283,10 +286,13 @@ def _set_work_outcome(
 
 
 def _updated_work_result(row: dict[str, object]) -> UpdatedWorkInstance:
+    attempt_count = row["attempt_count"]
+    if not isinstance(attempt_count, int):
+        raise SpineValidationError("work_instance_rejected", "attempt_count must be an integer")
     return UpdatedWorkInstance(
         work_instance_id=str(row["work_instance_id"]),
         status=str(row["status"]),
-        attempt_count=int(row["attempt_count"]),
+        attempt_count=attempt_count,
     )
 
 

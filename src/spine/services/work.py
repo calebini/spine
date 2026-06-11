@@ -5,6 +5,7 @@ from __future__ import annotations
 import sqlite3
 
 from spine.core import SpineValidationError
+from spine.ledger.common import require_utc_z
 from spine.ledger import (
     CreatedWorkInstance,
     UpdatedWorkInstance,
@@ -49,6 +50,7 @@ def generate_notification_reminder_work(
 def list_eligible_work(connection: sqlite3.Connection, *, now_utc: str, limit: int | None = None) -> list[dict[str, object]]:
     """Return eligible, non-stale work rows ordered by eligibility time."""
 
+    require_utc_z("now_utc", now_utc)
     sql = """
         SELECT w.*
         FROM work_instances AS w

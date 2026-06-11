@@ -7,7 +7,7 @@ import os
 import sqlite3
 import subprocess
 from dataclasses import dataclass
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta
 from typing import Any, Callable, Literal, Mapping, Sequence
 
 from spine.adapters.side_effects import (
@@ -19,6 +19,7 @@ from spine.adapters.side_effects import (
 )
 from spine.adapters.tickerd import WorkProcessingOutcome
 from spine.ledger import get_current_item
+from spine.ledger.common import require_utc_z, utc_z_from_datetime
 
 OPENCLAW_ADAPTER_NAME = "openclaw"
 
@@ -256,6 +257,7 @@ def build_openclaw_outbound_message(
 ) -> OpenClawOutboundMessage:
     """Map Spine reminder work into an OpenClaw-style outbound message."""
 
+    require_utc_z("created_at_utc", created_at_utc)
     item = get_current_item(connection, str(work_row["item_id"]))
     work_instance_id = str(work_row["work_instance_id"])
     attempt_count = str(work_row["attempt_count"])
@@ -320,7 +322,7 @@ def normalize_openclaw_result(result: NormalizedOpenClawResult) -> NormalizedSid
 
 
 def _utc_z(value: datetime) -> str:
-    return f"{value.astimezone(UTC).replace(tzinfo=None).isoformat()}Z"
+    return utc_z_from_datetime(value)
 
 
 def _env_first(env: Mapping[str, str], *names: str) -> str | None:
@@ -408,6 +410,7 @@ def _provider_ref_transport_meaningful(provider_ref: str | None) -> bool:
 
 
 def _plus_seconds(created_at_utc: str, seconds: int) -> str:
+    require_utc_z("created_at_utc", created_at_utc)
     value = created_at_utc
     if value.endswith("Z"):
         value = value[:-1] + "+00:00"

@@ -6,7 +6,7 @@ import sqlite3
 from dataclasses import dataclass
 
 from spine.core import SpineValidationError
-from spine.ledger.common import enum_value, new_id, require_non_empty
+from spine.ledger.common import enum_value, new_id, require_non_empty, require_optional_utc_z, require_utc_z
 from spine.models.enums import CandidateActionKind, CandidateActionStatus
 
 
@@ -38,7 +38,8 @@ def create_candidate_action(
     candidate_action_id = candidate_action_id or new_id("candidate-action")
     require_non_empty("candidate_action_id", candidate_action_id)
     require_non_empty("item_id", item_id)
-    require_non_empty("created_at_utc", created_at_utc)
+    require_utc_z("created_at_utc", created_at_utc)
+    require_optional_utc_z("resolved_at_utc", resolved_at_utc)
     try:
         with connection:
             connection.execute(

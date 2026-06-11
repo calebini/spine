@@ -61,16 +61,22 @@ Implementation, contracts, migrations, and tests should be added only when their
 
 ## Local Runtime Smoke
 
-With the sibling Tickerd checkout available, Spine can run a bounded observe-only Tickerd pass over a local SQLite ledger:
+Install Spine locally during development so runtime entry points do not depend on manual `PYTHONPATH=src` wiring:
 
 ```bash
-PYTHONPATH=src python3 -m spine.runtime.seed_demo /tmp/spine-demo.sqlite
-PYTHONPATH=src:../tickerd/src python3 -m spine.runtime.tickerd_observe /tmp/spine-demo.sqlite
-PYTHONPATH=src:../tickerd/src python3 -m spine.runtime.tickerd_runner \
+python3 -m pip install -e ".[dev,test]"
+```
+
+With Tickerd installed, or with `TICKERD_SRC` pointing at a local Tickerd `src` directory, Spine can run a bounded observe-only Tickerd pass over a local SQLite ledger:
+
+```bash
+spine-seed-demo /tmp/spine-demo.sqlite
+PYTHONPATH="$TICKERD_SRC" spine-tickerd-observe /tmp/spine-demo.sqlite
+PYTHONPATH="$TICKERD_SRC" spine-tickerd-runner \
   --db /tmp/spine-demo.sqlite \
   --state-dir /tmp/spine-state \
   --max-cycles 1
-PYTHONPATH=src:../tickerd/src python3 -m spine.runtime.openclaw_smoke \
+PYTHONPATH="$TICKERD_SRC" spine-openclaw-smoke \
   --db /tmp/spine-openclaw-smoke.sqlite \
   --state-dir /tmp/spine-openclaw-state \
   --seed-demo \
@@ -82,7 +88,7 @@ The seed command creates one subject, one task, one notification policy, and one
 The OpenClaw smoke is fake by default. A real OpenClaw gateway send requires an explicit operator opt-in:
 
 ```bash
-PYTHONPATH=src:../tickerd/src python3 -m spine.runtime.openclaw_smoke \
+PYTHONPATH="$TICKERD_SRC" spine-openclaw-smoke \
   --db /tmp/spine-openclaw-gateway.sqlite \
   --state-dir /tmp/spine-openclaw-gateway-state \
   --seed-demo \
@@ -98,7 +104,7 @@ The gateway sender calls `openclaw gateway call send --params ... --json`. It re
 Spine keeps `schema.sql` as the latest fresh-ledger bootstrap and stores numbered SQLite migrations under `src/spine/ledger/migrations/` for existing ledgers. Before running a durable local ledger through Tickerd or an adapter, apply and verify migrations:
 
 ```bash
-PYTHONPATH=src python3 -m spine.ledger.migrate \
+spine-ledger-migrate \
   --db ~/.spine/ledger.sqlite \
   --initialize-if-empty
 ```
@@ -106,9 +112,19 @@ PYTHONPATH=src python3 -m spine.ledger.migrate \
 For an already-initialized ledger, omit `--initialize-if-empty`. To run verification without applying migrations:
 
 ```bash
-PYTHONPATH=src python3 -m spine.ledger.migrate \
+spine-ledger-migrate \
   --db ~/.spine/ledger.sqlite \
   --verify-only
 ```
 
 Verification checks the recorded schema version, required tables and indexes, SQLite foreign-key and integrity checks, and Spine's full ledger invariant sweep.
+
+## Local Verification
+
+CI runs the unittest suite, Ruff, and strict mypy over the mature `src/spine/core` and `src/spine/ledger` surfaces. Run the same checks locally with:
+
+```bash
+python3 -m unittest discover -s tests
+ruff check src/spine/core src/spine/ledger
+mypy --strict src/spine/core src/spine/ledger
+```

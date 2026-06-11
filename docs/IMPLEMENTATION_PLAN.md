@@ -50,6 +50,7 @@ Already in place:
 - Work outcome lifecycle services for start, success, failure, cancellation, and retry scheduling.
 - Provider-agnostic internal services for item commands, reminder work generation, work eligibility, projection planning, and pre-write attempt gates.
 - Initial Tickerd work adapter, active processor outcome handling, bounded observe-only runtime command, and foreground Tickerd runner with file lock, owner, health, and event outputs.
+- A small `src/spine/protocols/` surface for the Tickerd shapes Spine consumes while Tickerd packaging remains unsettled.
 
 Not yet in place:
 

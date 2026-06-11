@@ -6,7 +6,7 @@ import sqlite3
 from dataclasses import dataclass
 
 from spine.core import SpineValidationError
-from spine.ledger.common import enum_value, new_id, require_non_empty
+from spine.ledger.common import enum_value, new_id, require_non_empty, require_utc_z
 from spine.models.enums import ProjectionStatus
 
 
@@ -38,7 +38,7 @@ def create_external_projection(
     require_non_empty("item_id", item_id)
     require_non_empty("adapter_name", adapter_name)
     require_non_empty("external_ref", external_ref)
-    require_non_empty("updated_at_utc", updated_at_utc)
+    require_utc_z("updated_at_utc", updated_at_utc)
     try:
         with connection:
             connection.execute(
