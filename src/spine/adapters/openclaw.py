@@ -18,7 +18,7 @@ from spine.adapters.side_effects import (
     record_side_effect_result,
 )
 from spine.adapters.tickerd import WorkProcessingOutcome
-from spine.services import get_current
+from spine.ledger import get_current_item
 
 OPENCLAW_ADAPTER_NAME = "openclaw"
 
@@ -256,7 +256,7 @@ def build_openclaw_outbound_message(
 ) -> OpenClawOutboundMessage:
     """Map Spine reminder work into an OpenClaw-style outbound message."""
 
-    item = get_current(connection, str(work_row["item_id"]))
+    item = get_current_item(connection, str(work_row["item_id"]))
     work_instance_id = str(work_row["work_instance_id"])
     attempt_count = str(work_row["attempt_count"])
     target_ref = str(work_row.get("work_subject_ref") or "")

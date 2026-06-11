@@ -8,6 +8,9 @@ from spine.core.hashing import (
     coordination_item_version_normalized_fields_hash,
 )
 from spine.ledger import (
+    EventDraft,
+    ItemVersionDraft,
+    TaskDraft,
     TemporalAnchorInput,
     archive_item,
     assert_ledger_invariants,
@@ -15,8 +18,11 @@ from spine.ledger import (
     cancel_task,
     complete_task,
     connect,
+    create_event_from_draft,
     create_event_v1,
+    create_item_version_from_draft,
     create_next_item_version,
+    create_task_from_draft,
     create_task_v1,
     creation_audit_payload,
     get_current_item,
@@ -79,6 +85,30 @@ class LedgerItemWorkflowTests(unittest.TestCase):
         )
         assert_ledger_invariants(self.connection)
 
+    def test_create_event_from_draft_with_instant_utc_start(self) -> None:
+        created = create_event_from_draft(
+            self.connection,
+            EventDraft(
+                item_id="event-draft",
+                audit_id="audit-event-draft",
+                created_at_utc=NOW,
+                created_by_subject_id=SUBJECT_ID,
+                title="Dentist",
+                all_day=False,
+                start_anchor=TemporalAnchorInput(
+                    anchor_id="event-draft-start",
+                    anchor_kind="instant_utc",
+                    utc_instant="2026-06-06T14:00:00Z",
+                ),
+            ),
+        )
+
+        self.assertEqual(created.item_id, "event-draft")
+        item = get_current_item(self.connection, "event-draft")
+        self.assertEqual(item["item_type"], "event")
+        self.assertEqual(item["detail"]["start_anchor_id"], "event-draft-start")
+        assert_ledger_invariants(self.connection)
+
     def test_create_all_day_event_v1_with_local_date_anchor(self) -> None:
         create_event_v1(
             self.connection,
@@ -114,6 +144,24 @@ class LedgerItemWorkflowTests(unittest.TestCase):
         item = get_current_item(self.connection, "task-1")
         self.assertEqual(item["item_type"], "task")
         self.assertEqual(item["detail"]["task_status"], "open")
+        self.assertIsNone(item["detail"]["due_anchor_id"])
+        assert_ledger_invariants(self.connection)
+
+    def test_create_task_from_draft_with_no_due_anchor(self) -> None:
+        created = create_task_from_draft(
+            self.connection,
+            TaskDraft(
+                item_id="task-draft",
+                audit_id="audit-task-draft",
+                created_at_utc=NOW,
+                created_by_subject_id=SUBJECT_ID,
+                title="Submit forms",
+            ),
+        )
+
+        self.assertEqual(created.item_id, "task-draft")
+        item = get_current_item(self.connection, "task-draft")
+        self.assertEqual(item["item_type"], "task")
         self.assertIsNone(item["detail"]["due_anchor_id"])
         assert_ledger_invariants(self.connection)
 
@@ -283,6 +331,36 @@ class LedgerItemWorkflowTests(unittest.TestCase):
             self.version_title("task-versioned", 1),
             "Submit forms",
         )
+        assert_ledger_invariants(self.connection)
+
+    def test_create_item_version_from_draft_from_current_v1(self) -> None:
+        create_task_v1(
+            self.connection,
+            item_id="task-versioned-draft",
+            audit_id="audit-task-versioned-draft-create",
+            created_at_utc=NOW,
+            created_by_subject_id=SUBJECT_ID,
+            title="Submit forms",
+        )
+
+        mutated = create_item_version_from_draft(
+            self.connection,
+            ItemVersionDraft(
+                item_id="task-versioned-draft",
+                target_version=1,
+                audit_id="audit-task-versioned-draft-v2",
+                created_at_utc="2026-06-06T11:00:00Z",
+                created_by_subject_id=SUBJECT_ID,
+                title="Submit updated forms",
+            ),
+        )
+
+        self.assertEqual(mutated.previous_version, 1)
+        self.assertEqual(mutated.version, 2)
+        current = get_current_item(self.connection, "task-versioned-draft")
+        self.assertEqual(current["current_version"], 2)
+        self.assertEqual(current["version"]["title"], "Submit updated forms")
+        self.assertEqual(current["detail"]["task_status"], "open")
         assert_ledger_invariants(self.connection)
 
     def test_create_next_item_version_rejects_missing_intermediate_version(self) -> None:

@@ -1,4 +1,10 @@
-"""Provider-agnostic Spine service workflows."""
+"""Provider-agnostic Spine service workflows.
+
+Services are reserved for orchestration that adds policy, freshness checks,
+work generation, attempt gating, or adapter-facing outcome handling. Plain
+ledger passthroughs should import from ``spine.ledger`` directly instead of
+accumulating here.
+"""
 
 from spine.services.attempts import (
     AttemptGate,
@@ -9,7 +15,6 @@ from spine.services.attempts import (
     record_attempt_rejection,
     record_attempt_success,
 )
-from spine.services.items import create_event, create_task, get_current
 from spine.services.projections import plan_projection_sync
 from spine.services.work import (
     cancel_work,
@@ -25,11 +30,8 @@ from spine.services.work import (
 __all__ = [
     "AttemptGate",
     "cancel_work",
-    "create_event",
-    "create_task",
     "fail_work",
     "generate_notification_reminder_work",
-    "get_current",
     "list_eligible_work",
     "plan_projection_sync",
     "prepare_candidate_action_attempt",

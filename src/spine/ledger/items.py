@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import sqlite3
+from collections.abc import Callable
 from dataclasses import dataclass
 
 from spine.core import SpineValidationError
@@ -18,11 +19,10 @@ from spine.ledger.common import (
     new_id,
     require_non_empty,
 )
-from spine.ledger.relations import create_item_relation, get_active_relations, get_derived_relations
+from spine.ledger.item_drafts import EventDraft, ItemVersionDraft, TaskDraft, _UNSET
 from spine.ledger.supporting import (
     ItemLocationInput,
     ItemSubjectRoleInput,
-    LocationInput,
     NotificationPolicyInput,
     copy_forward_supporting_sets,
     current_locations,
@@ -52,8 +52,71 @@ class MutatedItem:
     version: int
     audit_id: str
 
+def create_event_from_draft(connection: sqlite3.Connection, draft: EventDraft) -> CreatedItem:
+    """Create a brand-new event item from an input bundle."""
 
-_UNSET = object()
+    item_id = draft.item_id or new_id("item")
+    audit_id = draft.audit_id or new_id("audit")
+    require_non_empty("item_id", item_id)
+    require_non_empty("audit_id", audit_id)
+    _require_common_create_inputs(draft.created_at_utc, draft.created_by_subject_id, draft.title)
+
+    start_anchor_id = draft.start_anchor.anchor_id or new_id("anchor")
+    end_anchor_id = draft.end_anchor.anchor_id if draft.end_anchor is not None else None
+    if draft.end_anchor is not None and end_anchor_id is None:
+        end_anchor_id = new_id("anchor")
+
+    def insert_anchors(connection: sqlite3.Connection) -> None:
+        insert_temporal_anchor(
+            connection,
+            anchor=draft.start_anchor,
+            anchor_id=start_anchor_id,
+            default_created_at_utc=draft.created_at_utc,
+        )
+        if draft.end_anchor is not None:
+            insert_temporal_anchor(
+                connection,
+                anchor=draft.end_anchor,
+                anchor_id=end_anchor_id,
+                default_created_at_utc=draft.created_at_utc,
+            )
+
+    def insert_detail(connection: sqlite3.Connection) -> None:
+        connection.execute(
+            """
+            INSERT INTO event_details (
+              item_id, version, event_status, all_day, start_anchor_id, end_anchor_id,
+              visibility, attendance_policy_ref
+            )
+            VALUES (?, 1, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                item_id,
+                enum_value(draft.event_status),
+                int(draft.all_day),
+                start_anchor_id,
+                end_anchor_id,
+                draft.visibility,
+                draft.attendance_policy_ref,
+            ),
+        )
+
+    return _create_item_v1(
+        connection,
+        item_id=item_id,
+        audit_id=audit_id,
+        item_type=ItemType.EVENT,
+        created_at_utc=draft.created_at_utc,
+        created_by_subject_id=draft.created_by_subject_id,
+        title=draft.title,
+        summary=draft.summary,
+        source_ref=draft.source_ref,
+        item_locations=draft.item_locations,
+        subject_roles=draft.subject_roles,
+        notification_policies=draft.notification_policies,
+        insert_anchors=insert_anchors,
+        insert_detail=insert_detail,
+    )
 
 
 def create_event_v1(
@@ -78,88 +141,98 @@ def create_event_v1(
 ) -> CreatedItem:
     """Create a brand-new event item and its v1 facts in one transaction."""
 
-    item_id = item_id or new_id("item")
-    audit_id = audit_id or new_id("audit")
+    return create_event_from_draft(
+        connection,
+        EventDraft(
+            item_id=item_id,
+            audit_id=audit_id,
+            created_at_utc=created_at_utc,
+            created_by_subject_id=created_by_subject_id,
+            title=title,
+            summary=summary,
+            source_ref=source_ref,
+            event_status=event_status,
+            all_day=all_day,
+            start_anchor=start_anchor,
+            end_anchor=end_anchor,
+            visibility=visibility,
+            attendance_policy_ref=attendance_policy_ref,
+            item_locations=item_locations,
+            subject_roles=subject_roles,
+            notification_policies=notification_policies,
+        ),
+    )
+
+
+def create_task_from_draft(connection: sqlite3.Connection, draft: TaskDraft) -> CreatedItem:
+    """Create a brand-new task item from an input bundle."""
+
+    item_id = draft.item_id or new_id("item")
+    audit_id = draft.audit_id or new_id("audit")
     require_non_empty("item_id", item_id)
     require_non_empty("audit_id", audit_id)
-    _require_common_create_inputs(created_at_utc, created_by_subject_id, title)
+    _require_common_create_inputs(draft.created_at_utc, draft.created_by_subject_id, draft.title)
 
-    start_anchor_id = start_anchor.anchor_id or new_id("anchor")
-    end_anchor_id = end_anchor.anchor_id if end_anchor is not None else None
-    if end_anchor is not None and end_anchor_id is None:
-        end_anchor_id = new_id("anchor")
+    due_anchor_id = draft.due_anchor.anchor_id if draft.due_anchor is not None else None
+    if draft.due_anchor is not None and due_anchor_id is None:
+        due_anchor_id = new_id("anchor")
+    defer_until_anchor_id = draft.defer_until_anchor.anchor_id if draft.defer_until_anchor is not None else None
+    if draft.defer_until_anchor is not None and defer_until_anchor_id is None:
+        defer_until_anchor_id = new_id("anchor")
 
-    try:
-        with connection:
+    def insert_anchors(connection: sqlite3.Connection) -> None:
+        if draft.due_anchor is not None:
             insert_temporal_anchor(
                 connection,
-                anchor=start_anchor,
-                anchor_id=start_anchor_id,
-                default_created_at_utc=created_at_utc,
+                anchor=draft.due_anchor,
+                anchor_id=due_anchor_id,
+                default_created_at_utc=draft.created_at_utc,
             )
-            if end_anchor is not None:
-                insert_temporal_anchor(
-                    connection,
-                    anchor=end_anchor,
-                    anchor_id=end_anchor_id,
-                    default_created_at_utc=created_at_utc,
-                )
-            _insert_item_shell(
+        if draft.defer_until_anchor is not None:
+            insert_temporal_anchor(
                 connection,
-                item_id=item_id,
-                item_type=ItemType.EVENT,
-                created_at_utc=created_at_utc,
+                anchor=draft.defer_until_anchor,
+                anchor_id=defer_until_anchor_id,
+                default_created_at_utc=draft.created_at_utc,
             )
-            _insert_item_version(
-                connection,
-                item_id=item_id,
-                version=1,
-                title=title,
-                summary=summary,
-                source_ref=source_ref,
-                created_at_utc=created_at_utc,
-                created_by_subject_id=created_by_subject_id,
-            )
-            connection.execute(
-                """
-                INSERT INTO event_details (
-                  item_id, version, event_status, all_day, start_anchor_id, end_anchor_id,
-                  visibility, attendance_policy_ref
-                )
-                VALUES (?, 1, ?, ?, ?, ?, ?, ?)
-                """,
-                (
-                    item_id,
-                    enum_value(event_status),
-                    int(all_day),
-                    start_anchor_id,
-                    end_anchor_id,
-                    visibility,
-                    attendance_policy_ref,
-                ),
-            )
-            insert_supporting_sets(
-                connection,
-                item_id=item_id,
-                version=1,
-                default_created_at_utc=created_at_utc,
-                item_locations=item_locations,
-                subject_roles=subject_roles,
-                notification_policies=notification_policies,
-            )
-            _insert_creation_audit(
-                connection,
-                audit_id=audit_id,
-                item_id=item_id,
-                item_type=ItemType.EVENT,
-                created_by_subject_id=created_by_subject_id,
-                created_at_utc=created_at_utc,
-            )
-            assert_ledger_invariants(connection, item_id=item_id)
-    except sqlite3.IntegrityError as exc:
-        raise SpineValidationError("item_create_rejected", str(exc)) from exc
 
-    return CreatedItem(item_id=item_id, version=1, audit_id=audit_id)
+    def insert_detail(connection: sqlite3.Connection) -> None:
+        connection.execute(
+            """
+            INSERT INTO task_details (
+              item_id, version, task_status, completion_state, priority, due_anchor_id,
+              defer_until_anchor_id, completed_at_utc, completed_by_subject_id
+            )
+            VALUES (?, 1, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                item_id,
+                enum_value(draft.task_status),
+                draft.completion_state,
+                draft.priority,
+                due_anchor_id,
+                defer_until_anchor_id,
+                draft.completed_at_utc,
+                draft.completed_by_subject_id,
+            ),
+        )
+
+    return _create_item_v1(
+        connection,
+        item_id=item_id,
+        audit_id=audit_id,
+        item_type=ItemType.TASK,
+        created_at_utc=draft.created_at_utc,
+        created_by_subject_id=draft.created_by_subject_id,
+        title=draft.title,
+        summary=draft.summary,
+        source_ref=draft.source_ref,
+        item_locations=draft.item_locations,
+        subject_roles=draft.subject_roles,
+        notification_policies=draft.notification_policies,
+        insert_anchors=insert_anchors,
+        insert_detail=insert_detail,
+    )
 
 
 def create_task_v1(
@@ -185,92 +258,113 @@ def create_task_v1(
 ) -> CreatedItem:
     """Create a brand-new task item and its v1 facts in one transaction."""
 
-    item_id = item_id or new_id("item")
-    audit_id = audit_id or new_id("audit")
-    require_non_empty("item_id", item_id)
-    require_non_empty("audit_id", audit_id)
-    _require_common_create_inputs(created_at_utc, created_by_subject_id, title)
+    return create_task_from_draft(
+        connection,
+        TaskDraft(
+            item_id=item_id,
+            audit_id=audit_id,
+            created_at_utc=created_at_utc,
+            created_by_subject_id=created_by_subject_id,
+            title=title,
+            summary=summary,
+            source_ref=source_ref,
+            task_status=task_status,
+            completion_state=completion_state,
+            priority=priority,
+            due_anchor=due_anchor,
+            defer_until_anchor=defer_until_anchor,
+            completed_at_utc=completed_at_utc,
+            completed_by_subject_id=completed_by_subject_id,
+            item_locations=item_locations,
+            subject_roles=subject_roles,
+            notification_policies=notification_policies,
+        ),
+    )
 
-    due_anchor_id = due_anchor.anchor_id if due_anchor is not None else None
-    if due_anchor is not None and due_anchor_id is None:
-        due_anchor_id = new_id("anchor")
-    defer_until_anchor_id = defer_until_anchor.anchor_id if defer_until_anchor is not None else None
-    if defer_until_anchor is not None and defer_until_anchor_id is None:
-        defer_until_anchor_id = new_id("anchor")
+
+def create_item_version_from_draft(connection: sqlite3.Connection, draft: ItemVersionDraft) -> MutatedItem:
+    """Create the next immutable item version from an input bundle."""
+
+    audit_id = draft.audit_id or new_id("audit")
+    require_non_empty("item_id", draft.item_id)
+    require_non_empty("audit_id", audit_id)
+    require_non_empty("created_at_utc", draft.created_at_utc)
+    require_non_empty("created_by_subject_id", draft.created_by_subject_id)
+    if draft.target_version < 1:
+        raise SpineValidationError("stale_item_version", "target_version must be greater than or equal to 1")
 
     try:
         with connection:
-            if due_anchor is not None:
-                insert_temporal_anchor(
-                    connection,
-                    anchor=due_anchor,
-                    anchor_id=due_anchor_id,
-                    default_created_at_utc=created_at_utc,
+            current = _load_current_row(connection, item_id=draft.item_id)
+            if current["current_version"] != draft.target_version:
+                raise SpineValidationError(
+                    "stale_item_version",
+                    f"target version {draft.target_version} is not current version {current['current_version']}",
                 )
-            if defer_until_anchor is not None:
-                insert_temporal_anchor(
-                    connection,
-                    anchor=defer_until_anchor,
-                    anchor_id=defer_until_anchor_id,
-                    default_created_at_utc=created_at_utc,
-                )
-            _insert_item_shell(
-                connection,
-                item_id=item_id,
-                item_type=ItemType.TASK,
-                created_at_utc=created_at_utc,
-            )
+            next_version = draft.target_version + 1
+            next_title = draft.title if draft.title is not None else current["title"]
+            require_non_empty("title", next_title)
+            next_summary = current["summary"] if draft.summary is _UNSET else draft.summary
+            next_source_ref = current["source_ref"] if draft.source_ref is _UNSET else draft.source_ref
+
             _insert_item_version(
                 connection,
-                item_id=item_id,
-                version=1,
-                title=title,
-                summary=summary,
-                source_ref=source_ref,
-                created_at_utc=created_at_utc,
-                created_by_subject_id=created_by_subject_id,
+                item_id=draft.item_id,
+                version=next_version,
+                title=next_title,
+                summary=next_summary,
+                source_ref=next_source_ref,
+                created_at_utc=draft.created_at_utc,
+                created_by_subject_id=draft.created_by_subject_id,
             )
-            connection.execute(
-                """
-                INSERT INTO task_details (
-                  item_id, version, task_status, completion_state, priority, due_anchor_id,
-                  defer_until_anchor_id, completed_at_utc, completed_by_subject_id
-                )
-                VALUES (?, 1, ?, ?, ?, ?, ?, ?, ?)
-                """,
-                (
-                    item_id,
-                    enum_value(task_status),
-                    completion_state,
-                    priority,
-                    due_anchor_id,
-                    defer_until_anchor_id,
-                    completed_at_utc,
-                    completed_by_subject_id,
-                ),
-            )
-            insert_supporting_sets(
+            _insert_next_detail(
                 connection,
-                item_id=item_id,
-                version=1,
-                default_created_at_utc=created_at_utc,
-                item_locations=item_locations,
-                subject_roles=subject_roles,
-                notification_policies=notification_policies,
+                item_id=draft.item_id,
+                item_type=current["item_type"],
+                previous_version=draft.target_version,
+                next_version=next_version,
+                event_detail=draft.event_detail,
+                task_detail=draft.task_detail,
             )
-            _insert_creation_audit(
+            copy_forward_supporting_sets(
+                connection,
+                item_id=draft.item_id,
+                previous_version=draft.target_version,
+                next_version=next_version,
+                created_at_utc=draft.created_at_utc,
+            )
+            cursor = connection.execute(
+                """
+                UPDATE coordination_items
+                SET current_version = ?, updated_at_utc = ?
+                WHERE item_id = ? AND current_version = ?
+                """,
+                (next_version, draft.created_at_utc, draft.item_id, draft.target_version),
+            )
+            if cursor.rowcount != 1:
+                raise SpineValidationError("stale_item_version", "current item pointer was not updated")
+            _insert_mutation_audit(
                 connection,
                 audit_id=audit_id,
-                item_id=item_id,
-                item_type=ItemType.TASK,
-                created_by_subject_id=created_by_subject_id,
-                created_at_utc=created_at_utc,
+                item_id=draft.item_id,
+                item_type=current["item_type"],
+                previous_version=draft.target_version,
+                version=next_version,
+                action=draft.audit_action,
+                reason_code=draft.reason_code,
+                actor_ref=draft.created_by_subject_id,
+                created_at_utc=draft.created_at_utc,
             )
-            assert_ledger_invariants(connection, item_id=item_id)
+            assert_ledger_invariants(connection, item_id=draft.item_id)
     except sqlite3.IntegrityError as exc:
-        raise SpineValidationError("item_create_rejected", str(exc)) from exc
+        raise SpineValidationError("item_mutation_rejected", str(exc)) from exc
 
-    return CreatedItem(item_id=item_id, version=1, audit_id=audit_id)
+    return MutatedItem(
+        item_id=draft.item_id,
+        previous_version=draft.target_version,
+        version=draft.target_version + 1,
+        audit_id=audit_id,
+    )
 
 
 def create_next_item_version(
@@ -291,85 +385,22 @@ def create_next_item_version(
 ) -> MutatedItem:
     """Create the next immutable item version from the current version."""
 
-    audit_id = audit_id or new_id("audit")
-    require_non_empty("item_id", item_id)
-    require_non_empty("audit_id", audit_id)
-    require_non_empty("created_at_utc", created_at_utc)
-    require_non_empty("created_by_subject_id", created_by_subject_id)
-    if target_version < 1:
-        raise SpineValidationError("stale_item_version", "target_version must be greater than or equal to 1")
-
-    try:
-        with connection:
-            current = _load_current_row(connection, item_id=item_id)
-            if current["current_version"] != target_version:
-                raise SpineValidationError(
-                    "stale_item_version",
-                    f"target version {target_version} is not current version {current['current_version']}",
-                )
-            next_version = target_version + 1
-            next_title = title if title is not None else current["title"]
-            require_non_empty("title", next_title)
-            next_summary = current["summary"] if summary is _UNSET else summary
-            next_source_ref = current["source_ref"] if source_ref is _UNSET else source_ref
-
-            _insert_item_version(
-                connection,
-                item_id=item_id,
-                version=next_version,
-                title=next_title,
-                summary=next_summary,
-                source_ref=next_source_ref,
-                created_at_utc=created_at_utc,
-                created_by_subject_id=created_by_subject_id,
-            )
-            _insert_next_detail(
-                connection,
-                item_id=item_id,
-                item_type=current["item_type"],
-                previous_version=target_version,
-                next_version=next_version,
-                event_detail=event_detail,
-                task_detail=task_detail,
-            )
-            copy_forward_supporting_sets(
-                connection,
-                item_id=item_id,
-                previous_version=target_version,
-                next_version=next_version,
-                created_at_utc=created_at_utc,
-            )
-            cursor = connection.execute(
-                """
-                UPDATE coordination_items
-                SET current_version = ?, updated_at_utc = ?
-                WHERE item_id = ? AND current_version = ?
-                """,
-                (next_version, created_at_utc, item_id, target_version),
-            )
-            if cursor.rowcount != 1:
-                raise SpineValidationError("stale_item_version", "current item pointer was not updated")
-            _insert_mutation_audit(
-                connection,
-                audit_id=audit_id,
-                item_id=item_id,
-                item_type=current["item_type"],
-                previous_version=target_version,
-                version=next_version,
-                action=audit_action,
-                reason_code=reason_code,
-                actor_ref=created_by_subject_id,
-                created_at_utc=created_at_utc,
-            )
-            assert_ledger_invariants(connection, item_id=item_id)
-    except sqlite3.IntegrityError as exc:
-        raise SpineValidationError("item_mutation_rejected", str(exc)) from exc
-
-    return MutatedItem(
-        item_id=item_id,
-        previous_version=target_version,
-        version=target_version + 1,
-        audit_id=audit_id,
+    return create_item_version_from_draft(
+        connection,
+        ItemVersionDraft(
+            item_id=item_id,
+            target_version=target_version,
+            created_at_utc=created_at_utc,
+            created_by_subject_id=created_by_subject_id,
+            audit_id=audit_id,
+            title=title,
+            summary=summary,
+            source_ref=source_ref,
+            event_detail=event_detail,
+            task_detail=task_detail,
+            audit_action=audit_action,
+            reason_code=reason_code,
+        ),
     )
 
 
@@ -599,6 +630,66 @@ def mutation_audit_payload(
         "previous_version": str(previous_version),
         "version": str(version),
     }
+
+
+def _create_item_v1(
+    connection: sqlite3.Connection,
+    *,
+    item_id: str,
+    audit_id: str,
+    item_type: ItemType,
+    created_at_utc: str,
+    created_by_subject_id: str,
+    title: str,
+    summary: str | None,
+    source_ref: str | None,
+    item_locations: tuple[ItemLocationInput, ...],
+    subject_roles: tuple[ItemSubjectRoleInput, ...],
+    notification_policies: tuple[NotificationPolicyInput, ...],
+    insert_anchors: Callable[[sqlite3.Connection], None],
+    insert_detail: Callable[[sqlite3.Connection], None],
+) -> CreatedItem:
+    try:
+        with connection:
+            insert_anchors(connection)
+            _insert_item_shell(
+                connection,
+                item_id=item_id,
+                item_type=item_type,
+                created_at_utc=created_at_utc,
+            )
+            _insert_item_version(
+                connection,
+                item_id=item_id,
+                version=1,
+                title=title,
+                summary=summary,
+                source_ref=source_ref,
+                created_at_utc=created_at_utc,
+                created_by_subject_id=created_by_subject_id,
+            )
+            insert_detail(connection)
+            insert_supporting_sets(
+                connection,
+                item_id=item_id,
+                version=1,
+                default_created_at_utc=created_at_utc,
+                item_locations=item_locations,
+                subject_roles=subject_roles,
+                notification_policies=notification_policies,
+            )
+            _insert_creation_audit(
+                connection,
+                audit_id=audit_id,
+                item_id=item_id,
+                item_type=item_type,
+                created_by_subject_id=created_by_subject_id,
+                created_at_utc=created_at_utc,
+            )
+            assert_ledger_invariants(connection, item_id=item_id)
+    except sqlite3.IntegrityError as exc:
+        raise SpineValidationError("item_create_rejected", str(exc)) from exc
+    return CreatedItem(item_id=item_id, version=1, audit_id=audit_id)
 
 
 def _insert_item_shell(

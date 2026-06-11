@@ -9,6 +9,7 @@ from spine.ledger import (
     create_next_item_version,
     create_task_v1,
     get_candidate_action,
+    get_current_item,
     get_side_effect_attempt,
     get_work_instance,
     initialize_schema,
@@ -17,7 +18,6 @@ from spine.services import (
     cancel_work,
     fail_work,
     generate_notification_reminder_work,
-    get_current,
     list_eligible_work,
     plan_projection_sync,
     prepare_candidate_action_attempt,
@@ -306,7 +306,7 @@ class ServiceWorkflowTests(unittest.TestCase):
     def test_item_service_read_surface_returns_current_truth(self) -> None:
         create_task_with_policy(self.connection)
 
-        current = get_current(self.connection, "service-task")
+        current = get_current_item(self.connection, "service-task")
 
         self.assertEqual(current["item_id"], "service-task")
         self.assertEqual(current["current_version"], 1)
