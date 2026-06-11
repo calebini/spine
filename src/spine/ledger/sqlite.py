@@ -9,12 +9,19 @@ import sqlite3
 from spine.core.errors import SpineValidationError
 
 
-def connect(path: str | Path = ":memory:") -> sqlite3.Connection:
+DEFAULT_BUSY_TIMEOUT_MS = 5000
+
+
+def connect(path: str | Path = ":memory:", *, busy_timeout_ms: int = DEFAULT_BUSY_TIMEOUT_MS) -> sqlite3.Connection:
     """Open a SQLite connection with Spine-required connection settings."""
 
-    connection = sqlite3.connect(str(path))
+    database = str(path)
+    connection = sqlite3.connect(database)
     connection.row_factory = sqlite3.Row
     connection.execute("PRAGMA foreign_keys = ON")
+    connection.execute(f"PRAGMA busy_timeout = {int(busy_timeout_ms)}")
+    if _is_file_backed_database(database):
+        connection.execute("PRAGMA journal_mode = WAL")
     return connection
 
 
@@ -29,6 +36,10 @@ def initialize_schema(connection: sqlite3.Connection) -> None:
 
     connection.execute("PRAGMA foreign_keys = ON")
     connection.executescript(schema_sql())
+
+
+def _is_file_backed_database(database: str) -> bool:
+    return database not in {":memory:", ""}
 
 
 def assert_ledger_invariants(connection: sqlite3.Connection, *, item_id: str | None = None) -> None:

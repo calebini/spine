@@ -1,5 +1,7 @@
 import sqlite3
+import tempfile
 import unittest
+from pathlib import Path
 
 from spine.core import SpineValidationError
 from spine.core.hashing import (
@@ -50,6 +52,19 @@ class LedgerSqliteTests(unittest.TestCase):
         self.assertEqual(self.connection.execute("PRAGMA foreign_keys").fetchone()[0], 1)
         self.assertIn("CREATE TABLE IF NOT EXISTS subjects", schema_sql())
         self.assertEqual(current_schema_version(self.connection), CURRENT_SCHEMA_VERSION)
+
+    def test_connect_sets_busy_timeout(self) -> None:
+        self.assertEqual(self.connection.execute("PRAGMA busy_timeout").fetchone()[0], 5000)
+
+    def test_connect_enables_wal_for_file_backed_ledgers(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            connection = connect(Path(tmpdir) / "spine.sqlite")
+            try:
+                journal_mode = connection.execute("PRAGMA journal_mode").fetchone()[0]
+                self.assertEqual(journal_mode.lower(), "wal")
+                self.assertEqual(connection.execute("PRAGMA busy_timeout").fetchone()[0], 5000)
+            finally:
+                connection.close()
 
     def test_schema_initializes_expected_indexes(self) -> None:
         index_names = {
