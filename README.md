@@ -92,3 +92,23 @@ PYTHONPATH=src:../tickerd/src python3 -m spine.runtime.openclaw_smoke \
 ```
 
 The gateway sender calls `openclaw gateway call send --params ... --json`. It reads `SPINE_OPENCLAW_GATEWAY_URL`, `SPINE_OPENCLAW_GATEWAY_TOKEN`, `SPINE_OPENCLAW_GATEWAY_PASSWORD`, and `SPINE_OPENCLAW_GATEWAY_TIMEOUT_MS`, with Kinflow gateway env names accepted as migration fallback.
+
+## Ledger Migrations
+
+Spine keeps `schema.sql` as the latest fresh-ledger bootstrap and stores numbered SQLite migrations under `src/spine/ledger/migrations/` for existing ledgers. Before running a durable local ledger through Tickerd or an adapter, apply and verify migrations:
+
+```bash
+PYTHONPATH=src python3 -m spine.ledger.migrate \
+  --db ~/.spine/ledger.sqlite \
+  --initialize-if-empty
+```
+
+For an already-initialized ledger, omit `--initialize-if-empty`. To run verification without applying migrations:
+
+```bash
+PYTHONPATH=src python3 -m spine.ledger.migrate \
+  --db ~/.spine/ledger.sqlite \
+  --verify-only
+```
+
+Verification checks the recorded schema version, required tables and indexes, SQLite foreign-key and integrity checks, and Spine's full ledger invariant sweep.

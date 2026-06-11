@@ -708,4 +708,4 @@ CREATE TABLE IF NOT EXISTS ledger_schema (
 );
 
 INSERT OR IGNORE INTO ledger_schema (schema_version, applied_at_utc)
-VALUES (1, '1970-01-01T00:00:00Z');
+VALUES (2, '1970-01-01T00:00:00Z');

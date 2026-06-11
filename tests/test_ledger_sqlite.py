@@ -8,6 +8,7 @@ from spine.core.hashing import (
     coordination_item_version_normalized_fields_hash,
 )
 from spine.ledger import assert_ledger_invariants, connect, initialize_schema, schema_sql
+from spine.ledger.migrate import CURRENT_SCHEMA_VERSION, current_schema_version
 
 
 NOW = "2026-06-06T10:00:00Z"
@@ -48,6 +49,7 @@ class LedgerSqliteTests(unittest.TestCase):
         self.assertIn("ledger_schema", table_names)
         self.assertEqual(self.connection.execute("PRAGMA foreign_keys").fetchone()[0], 1)
         self.assertIn("CREATE TABLE IF NOT EXISTS subjects", schema_sql())
+        self.assertEqual(current_schema_version(self.connection), CURRENT_SCHEMA_VERSION)
 
     def test_schema_initializes_expected_indexes(self) -> None:
         index_names = {
