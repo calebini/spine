@@ -49,6 +49,39 @@ class LedgerSqliteTests(unittest.TestCase):
         self.assertEqual(self.connection.execute("PRAGMA foreign_keys").fetchone()[0], 1)
         self.assertIn("CREATE TABLE IF NOT EXISTS subjects", schema_sql())
 
+    def test_schema_initializes_expected_indexes(self) -> None:
+        index_names = {
+            row["name"]
+            for row in self.connection.execute(
+                "SELECT name FROM sqlite_master WHERE type = 'index'"
+            )
+        }
+
+        expected_indexes = {
+            "audit_log_causation_idx",
+            "audit_log_correlation_idx",
+            "audit_log_item_created_idx",
+            "candidate_actions_item_status_idx",
+            "candidate_actions_open_kind_idx",
+            "coordination_item_relations_active_source_idx",
+            "coordination_item_relations_active_target_idx",
+            "coordination_item_relations_active_unique",
+            "external_projections_item_adapter_status_idx",
+            "external_projections_status_updated_idx",
+            "item_locations_location_idx",
+            "item_subject_roles_subject_idx",
+            "notification_policies_item_version_status_idx",
+            "notification_policies_recipient_status_idx",
+            "side_effect_attempts_candidate_action_idx",
+            "side_effect_attempts_item_adapter_status_idx",
+            "side_effect_attempts_projection_idx",
+            "side_effect_attempts_work_instance_idx",
+            "work_instances_eligible_due_idx",
+            "work_instances_item_version_status_idx",
+            "work_instances_source_work_idx",
+        }
+        self.assertTrue(expected_indexes.issubset(index_names))
+
     def test_insert_subject(self) -> None:
         insert_subject(self.connection)
 
@@ -159,6 +192,36 @@ class LedgerSqliteTests(unittest.TestCase):
                 """
             )
 
+        with self.assertRaisesRegex(SpineValidationError, "ledger_current_version_mismatch"):
+            assert_ledger_invariants(self.connection)
+
+    def test_scoped_invariant_validation_catches_touched_item_mismatch(self) -> None:
+        insert_valid_event_bundle(self.connection)
+        with self.connection:
+            insert_instant_anchor(self.connection, "event-1-v2-start")
+            insert_item_version(
+                self.connection,
+                item_id="event-1",
+                version=2,
+                title="Dentist updated",
+            )
+            self.connection.execute(
+                """
+                INSERT INTO event_details (
+                  item_id, version, event_status, all_day, start_anchor_id
+                )
+                VALUES ('event-1', 2, 'scheduled', 0, 'event-1-v2-start')
+                """
+            )
+
+        with self.assertRaisesRegex(SpineValidationError, "ledger_current_version_mismatch"):
+            assert_ledger_invariants(self.connection, item_id="event-1")
+
+    def test_scoped_invariant_validation_ignores_unrelated_item_mismatch(self) -> None:
+        insert_valid_task_bundle(self.connection)
+        insert_event_with_unadvanced_current_version(self.connection)
+
+        assert_ledger_invariants(self.connection, item_id="task-1")
         with self.assertRaisesRegex(SpineValidationError, "ledger_current_version_mismatch"):
             assert_ledger_invariants(self.connection)
 
@@ -319,6 +382,36 @@ def insert_valid_event_bundle(connection: sqlite3.Connection) -> None:
             """
         )
         insert_audit_log(connection, item_id="event-1", audit_id="audit-event-1")
+
+
+def insert_event_with_unadvanced_current_version(connection: sqlite3.Connection) -> None:
+    with connection:
+        insert_instant_anchor(connection, "event-1-start")
+        insert_item_shell(connection, item_id="event-1", item_type="event")
+        insert_item_version(connection, item_id="event-1", title="Dentist")
+        connection.execute(
+            """
+            INSERT INTO event_details (
+              item_id, version, event_status, all_day, start_anchor_id
+            )
+            VALUES ('event-1', 1, 'scheduled', 0, 'event-1-start')
+            """
+        )
+        insert_instant_anchor(connection, "event-1-v2-start")
+        insert_item_version(
+            connection,
+            item_id="event-1",
+            version=2,
+            title="Dentist updated",
+        )
+        connection.execute(
+            """
+            INSERT INTO event_details (
+              item_id, version, event_status, all_day, start_anchor_id
+            )
+            VALUES ('event-1', 2, 'scheduled', 0, 'event-1-v2-start')
+            """
+        )
 
 
 def insert_valid_task_bundle(connection: sqlite3.Connection) -> None:

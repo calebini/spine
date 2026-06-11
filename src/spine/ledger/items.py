@@ -155,7 +155,7 @@ def create_event_v1(
                 created_by_subject_id=created_by_subject_id,
                 created_at_utc=created_at_utc,
             )
-            assert_ledger_invariants(connection)
+            assert_ledger_invariants(connection, item_id=item_id)
     except sqlite3.IntegrityError as exc:
         raise SpineValidationError("item_create_rejected", str(exc)) from exc
 
@@ -266,7 +266,7 @@ def create_task_v1(
                 created_by_subject_id=created_by_subject_id,
                 created_at_utc=created_at_utc,
             )
-            assert_ledger_invariants(connection)
+            assert_ledger_invariants(connection, item_id=item_id)
     except sqlite3.IntegrityError as exc:
         raise SpineValidationError("item_create_rejected", str(exc)) from exc
 
@@ -361,7 +361,7 @@ def create_next_item_version(
                 actor_ref=created_by_subject_id,
                 created_at_utc=created_at_utc,
             )
-            assert_ledger_invariants(connection)
+            assert_ledger_invariants(connection, item_id=item_id)
     except sqlite3.IntegrityError as exc:
         raise SpineValidationError("item_mutation_rejected", str(exc)) from exc
 
@@ -514,7 +514,7 @@ def archive_item(
                 actor_ref=archived_by_subject_id,
                 created_at_utc=archived_at_utc,
             )
-            assert_ledger_invariants(connection)
+            assert_ledger_invariants(connection, item_id=item_id)
     except sqlite3.IntegrityError as exc:
         raise SpineValidationError("item_archive_rejected", str(exc)) from exc
     return audit_id

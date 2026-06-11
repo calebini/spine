@@ -31,29 +31,35 @@ def initialize_schema(connection: sqlite3.Connection) -> None:
     connection.executescript(schema_sql())
 
 
-def assert_ledger_invariants(connection: sqlite3.Connection) -> None:
+def assert_ledger_invariants(connection: sqlite3.Connection, *, item_id: str | None = None) -> None:
     """Validate cross-row invariants that SQLite cannot fully express.
 
     SQLite enforces many field, foreign-key, enum, and trigger constraints
     directly. This function covers the item/version/detail bundle rules that
-    need cross-table counting or max-version checks.
+    need cross-table counting or max-version checks. Passing ``item_id`` scopes
+    the validation to one item for transactional write paths; omitting it keeps
+    the full-ledger sweep for startup or periodic integrity passes.
     """
 
-    _assert_current_version_is_max(connection)
-    _assert_versions_are_contiguous(connection)
-    _assert_detail_rows_match_item_type(connection)
+    _assert_current_version_is_max(connection, item_id=item_id)
+    _assert_versions_are_contiguous(connection, item_id=item_id)
+    _assert_detail_rows_match_item_type(connection, item_id=item_id)
 
 
-def _assert_current_version_is_max(connection: sqlite3.Connection) -> None:
+def _assert_current_version_is_max(connection: sqlite3.Connection, *, item_id: str | None) -> None:
+    where_clause = "WHERE i.item_id = ?" if item_id is not None else ""
+    params = (item_id,) if item_id is not None else ()
     row = connection.execute(
-        """
+        f"""
         SELECT i.item_id, i.current_version, MAX(v.version) AS max_version
         FROM coordination_items AS i
         LEFT JOIN coordination_item_versions AS v ON v.item_id = i.item_id
+        {where_clause}
         GROUP BY i.item_id
         HAVING max_version IS NULL OR i.current_version != max_version
         LIMIT 1
-        """
+        """,
+        params,
     ).fetchone()
     if row is not None:
         raise SpineValidationError(
@@ -65,13 +71,16 @@ def _assert_current_version_is_max(connection: sqlite3.Connection) -> None:
         )
 
 
-def _assert_versions_are_contiguous(connection: sqlite3.Connection) -> None:
-    item_ids = [
-        row["item_id"]
-        for row in connection.execute(
-            "SELECT DISTINCT item_id FROM coordination_item_versions ORDER BY item_id"
-        )
-    ]
+def _assert_versions_are_contiguous(connection: sqlite3.Connection, *, item_id: str | None) -> None:
+    if item_id is None:
+        item_ids = [
+            row["item_id"]
+            for row in connection.execute(
+                "SELECT DISTINCT item_id FROM coordination_item_versions ORDER BY item_id"
+            )
+        ]
+    else:
+        item_ids = [item_id]
     for item_id in item_ids:
         versions = [
             row["version"]
@@ -93,9 +102,11 @@ def _assert_versions_are_contiguous(connection: sqlite3.Connection) -> None:
                 )
 
 
-def _assert_detail_rows_match_item_type(connection: sqlite3.Connection) -> None:
+def _assert_detail_rows_match_item_type(connection: sqlite3.Connection, *, item_id: str | None) -> None:
+    where_clause = "WHERE i.item_id = ?" if item_id is not None else ""
+    params = (item_id,) if item_id is not None else ()
     rows = connection.execute(
-        """
+        f"""
         SELECT i.item_id, i.item_type, v.version,
           (SELECT COUNT(*)
            FROM event_details AS e
@@ -105,8 +116,10 @@ def _assert_detail_rows_match_item_type(connection: sqlite3.Connection) -> None:
            WHERE t.item_id = v.item_id AND t.version = v.version) AS task_detail_count
         FROM coordination_items AS i
         JOIN coordination_item_versions AS v ON v.item_id = i.item_id
+        {where_clause}
         ORDER BY i.item_id, v.version
-        """
+        """,
+        params,
     )
     for row in rows:
         _assert_detail_count(

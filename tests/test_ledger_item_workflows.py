@@ -117,6 +117,23 @@ class LedgerItemWorkflowTests(unittest.TestCase):
         self.assertIsNone(item["detail"]["due_anchor_id"])
         assert_ledger_invariants(self.connection)
 
+    def test_create_task_v1_uses_scoped_invariant_validation(self) -> None:
+        self.insert_event_with_unadvanced_current_version()
+
+        create_task_v1(
+            self.connection,
+            item_id="task-created-after-unrelated-issue",
+            audit_id="audit-task-created-after-unrelated-issue",
+            created_at_utc=NOW,
+            created_by_subject_id=SUBJECT_ID,
+            title="Submit forms",
+        )
+
+        item = get_current_item(self.connection, "task-created-after-unrelated-issue")
+        self.assertEqual(item["item_type"], "task")
+        with self.assertRaisesRegex(SpineValidationError, "ledger_current_version_mismatch"):
+            assert_ledger_invariants(self.connection)
+
     def test_create_task_v1_with_due_local_date(self) -> None:
         create_task_v1(
             self.connection,
@@ -656,6 +673,78 @@ class LedgerItemWorkflowTests(unittest.TestCase):
             "SELECT * FROM audit_log WHERE audit_id = ?",
             (audit_id,),
         ).fetchone()
+
+    def insert_event_with_unadvanced_current_version(self) -> None:
+        with self.connection:
+            self.connection.execute(
+                """
+                INSERT INTO temporal_anchors (anchor_id, anchor_kind, utc_instant, created_at_utc)
+                VALUES ('unrelated-event-start', 'instant_utc', ?, ?)
+                """,
+                (NOW, NOW),
+            )
+            self.connection.execute(
+                """
+                INSERT INTO coordination_items (
+                  item_id, item_type, current_version, status, created_at_utc, updated_at_utc
+                )
+                VALUES ('unrelated-event', 'event', 1, 'active', ?, ?)
+                """,
+                (NOW, NOW),
+            )
+            self.connection.execute(
+                """
+                INSERT INTO coordination_item_versions (
+                  item_id, version, title, intent_hash, normalized_fields_hash,
+                  created_at_utc, created_by_subject_id
+                )
+                VALUES ('unrelated-event', 1, 'Dentist', ?, ?, ?, ?)
+                """,
+                (
+                    coordination_item_version_intent_hash(title="Dentist"),
+                    coordination_item_version_normalized_fields_hash(title="Dentist"),
+                    NOW,
+                    SUBJECT_ID,
+                ),
+            )
+            self.connection.execute(
+                """
+                INSERT INTO event_details (
+                  item_id, version, event_status, all_day, start_anchor_id
+                )
+                VALUES ('unrelated-event', 1, 'scheduled', 0, 'unrelated-event-start')
+                """
+            )
+            self.connection.execute(
+                """
+                INSERT INTO temporal_anchors (anchor_id, anchor_kind, utc_instant, created_at_utc)
+                VALUES ('unrelated-event-v2-start', 'instant_utc', ?, ?)
+                """,
+                (NOW, NOW),
+            )
+            self.connection.execute(
+                """
+                INSERT INTO coordination_item_versions (
+                  item_id, version, title, intent_hash, normalized_fields_hash,
+                  created_at_utc, created_by_subject_id
+                )
+                VALUES ('unrelated-event', 2, 'Dentist updated', ?, ?, ?, ?)
+                """,
+                (
+                    coordination_item_version_intent_hash(title="Dentist updated"),
+                    coordination_item_version_normalized_fields_hash(title="Dentist updated"),
+                    NOW,
+                    SUBJECT_ID,
+                ),
+            )
+            self.connection.execute(
+                """
+                INSERT INTO event_details (
+                  item_id, version, event_status, all_day, start_anchor_id
+                )
+                VALUES ('unrelated-event', 2, 'scheduled', 0, 'unrelated-event-v2-start')
+                """
+            )
 
 
 def insert_subject(connection: sqlite3.Connection) -> None:
