@@ -81,6 +81,7 @@ Run the installed-script smoke help checks:
 ```bash
 spine-ledger-migrate --help
 spine-seed-demo --help
+PYTHONPATH="$TICKERD_SRC" spine-openclaw-runner --help
 PYTHONPATH="$TICKERD_SRC" spine-openclaw-smoke --help
 PYTHONPATH="$TICKERD_SRC" spine-tickerd-runner --help
 ```
@@ -166,10 +167,11 @@ The expected successful ledger terminal state is:
 Use observe-only mode to verify runtime cadence and work visibility without side effects:
 
 ```bash
-PYTHONPATH="$TICKERD_SRC" spine-tickerd-runner \
+PYTHONPATH="$TICKERD_SRC" spine-openclaw-runner \
   --db "$SPINE_DB" \
   --state-dir "$SPINE_STATE_DIR" \
   --mode observe_only \
+  --sender fake \
   --max-cycles 1 \
   --trace-id spine-openclaw-observe
 ```
@@ -195,13 +197,15 @@ Real sends require all of the following:
 Environment variables:
 
 ```bash
-export SPINE_OPENCLAW_GATEWAY_URL=...
-export SPINE_OPENCLAW_GATEWAY_TOKEN=...
-# or:
-export SPINE_OPENCLAW_GATEWAY_PASSWORD=...
+export SPINE_OPENCLAW_GATEWAY_URL="<gateway-url>"
 export SPINE_OPENCLAW_GATEWAY_TIMEOUT_MS=10000
 export SPINE_OPENCLAW_RETRY_DELAY_SECONDS=300
 ```
+
+Set exactly one gateway credential in the protected env file:
+
+- `SPINE_OPENCLAW_GATEWAY_TOKEN`
+- `SPINE_OPENCLAW_GATEWAY_PASSWORD`
 
 Kinflow gateway env names are accepted as migration fallback:
 
@@ -213,9 +217,10 @@ Kinflow gateway env names are accepted as migration fallback:
 Bounded gateway smoke:
 
 ```bash
-PYTHONPATH="$TICKERD_SRC" spine-openclaw-smoke \
+PYTHONPATH="$TICKERD_SRC" spine-openclaw-runner \
   --db "$SPINE_DB" \
   --state-dir "$SPINE_STATE_DIR" \
+  --mode active \
   --sender gateway \
   --allow-real-send \
   --max-cycles 1 \
@@ -229,10 +234,12 @@ Do not run gateway mode against production reminder work until the target work r
 The long-running command shape is:
 
 ```bash
-PYTHONPATH="$TICKERD_SRC" spine-tickerd-runner \
+PYTHONPATH="$TICKERD_SRC" spine-openclaw-runner \
   --db "$SPINE_DB" \
   --state-dir "$SPINE_STATE_DIR" \
   --mode active \
+  --sender gateway \
+  --allow-real-send \
   --trace-id spine-openclaw-runner
 ```
 
@@ -312,3 +319,12 @@ Before production cutover:
 - Operator readbacks show expected work and attempt rows.
 - Kinflow rollback command/path is known.
 - The first active production run has an explicit operator watching health, events, work rows, and attempt rows.
+
+## Deployment Templates
+
+The repository includes deployment templates:
+
+- `deploy/env/openclaw-runner.env.example`
+- `deploy/systemd/spine-openclaw-runner.service`
+
+The systemd template defaults to `observe_only` with the fake sender. Edit the `ExecStart` line only after observe-only and fake active trials have passed.

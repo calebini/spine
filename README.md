@@ -52,6 +52,7 @@ This repository follows the Cortext1 component scaffold standard incrementally:
 - `specs/decisions/`: accepted decisions
 - `docs/IMPLEMENTATION_PLAN.md`: non-normative build sequence for moving from specs to executable behavior
 - `docs/OPENCLAW_DEPLOYMENT_RUNBOOK.md`: operational rollout notes for the first OpenClaw replacement path
+- `deploy/`: deployment templates for systemd and environment files
 - `src/spine/`: initial Python package scaffold
 - `src/spine/ledger/`: canonical local persistence boundary
 - `src/spine/services/`: provider-agnostic orchestration over ledger workflows

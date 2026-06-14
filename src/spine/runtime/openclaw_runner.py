@@ -1,0 +1,233 @@
+"""Production-shaped OpenClaw Tickerd runner for Spine."""
+
+from __future__ import annotations
+
+import argparse
+import json
+import sqlite3
+import sys
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Any, Sequence
+
+from spine.adapters import (
+    NormalizedOpenClawResult,
+    OpenClawBindingError,
+    OpenClawGatewayConfig,
+    OpenClawGatewaySender,
+    OpenClawNotificationProcessor,
+    OpenClawOutboundMessage,
+    SpineTickerdWorkAdapter,
+)
+from spine.ledger import connect, initialize_schema
+from spine.runtime.tickerd_observe import RUNTIME_MODES
+from spine.runtime.tickerd_runner import SpineRunnerPaths, _tickerd_runner_types
+
+
+FAKE_OPENCLAW_RESULTS = ("delivered", "transient", "permanent", "blocked", "binding_error", "send_exception")
+OPENCLAW_SENDERS = ("fake", "gateway")
+
+
+@dataclass(frozen=True)
+class OpenClawRunnerPaths:
+    """Filesystem paths written by the OpenClaw runner."""
+
+    runner: SpineRunnerPaths
+    sends_path: Path
+
+    @classmethod
+    def from_state_dir(cls, state_dir: Path | str) -> "OpenClawRunnerPaths":
+        runner_paths = SpineRunnerPaths.from_state_dir(state_dir)
+        return cls(runner=runner_paths, sends_path=runner_paths.state_dir / "openclaw_sends.jsonl")
+
+
+@dataclass(frozen=True)
+class FakeOpenClawSender:
+    """File-backed fake OpenClaw sender for deployment dry runs."""
+
+    sends_path: Path
+    result: str = "delivered"
+
+    def __call__(self, message: OpenClawOutboundMessage) -> NormalizedOpenClawResult:
+        if self.result == "binding_error":
+            raise OpenClawBindingError("fake OpenClaw binding unavailable")
+        if self.result == "send_exception":
+            raise RuntimeError("fake OpenClaw sender exception")
+
+        provider_ref = f"fake-openclaw:{message.delivery_id}:{message.attempt_id}"
+        self._write_send(message, provider_ref)
+        if self.result == "delivered":
+            return NormalizedOpenClawResult.delivered(provider_ref=provider_ref)
+        if self.result == "transient":
+            return NormalizedOpenClawResult.transient_failure(
+                reason_code="openclaw_fake_transient",
+                next_attempt_at_utc="2026-06-07T10:30:00Z",
+            )
+        if self.result == "permanent":
+            return NormalizedOpenClawResult.permanent_failure(
+                reason_code="openclaw_fake_permanent",
+                provider_ref=provider_ref,
+            )
+        if self.result == "blocked":
+            return NormalizedOpenClawResult.blocked(reason_code="openclaw_fake_blocked")
+        raise ValueError(f"unknown fake OpenClaw result: {self.result}")
+
+    def _write_send(self, message: OpenClawOutboundMessage, provider_ref: str) -> None:
+        self.sends_path.parent.mkdir(parents=True, exist_ok=True)
+        record = {
+            "event": "openclaw_fake_send",
+            "fake_result": self.result,
+            "provider_ref": provider_ref,
+            **message.request_envelope(),
+        }
+        with self.sends_path.open("a", encoding="utf-8") as handle:
+            handle.write(json.dumps(record, sort_keys=True) + "\n")
+
+
+def run_openclaw_runner(
+    connection: sqlite3.Connection,
+    *,
+    state_dir: Path | str,
+    runtime_mode: str = "active",
+    trace_id: str = "spine-openclaw-runner",
+    max_cycles: int | None = None,
+    tick_interval_ms: int = 1000,
+    reconcile_interval_ms: int = 5000,
+    max_work_items_per_tick: int = 100,
+    sender_mode: str = "fake",
+    fake_result: str = "delivered",
+    install_signal_handlers: bool = True,
+) -> Any:
+    """Run Spine reminder work through Tickerd with an OpenClaw sender attached."""
+
+    (
+        TickerdConfig,
+        RuntimeKernel,
+        FileLockBackend,
+        JsonFileHealthSink,
+        JsonlFileEventSink,
+        ForegroundRunner,
+    ) = _tickerd_runner_types()
+    paths = OpenClawRunnerPaths.from_state_dir(state_dir)
+    paths.runner.state_dir.mkdir(parents=True, exist_ok=True)
+    sender = _openclaw_sender(paths=paths, sender_mode=sender_mode, fake_result=fake_result)
+    processor = OpenClawNotificationProcessor(sender=sender)
+    adapter = SpineTickerdWorkAdapter(connection, runtime_mode=runtime_mode, processor=processor)
+    config = TickerdConfig(
+        tick_interval_ms=tick_interval_ms,
+        reconcile_interval_ms=reconcile_interval_ms,
+        max_work_items_per_tick=max_work_items_per_tick,
+    )
+    events = JsonlFileEventSink(paths.runner.events_path)
+    kernel = RuntimeKernel(
+        config,
+        mode_reader=adapter,
+        work_source=adapter,
+        processor=adapter,
+        reconciler=adapter,
+        event_sink=events,
+        trace_id=trace_id,
+    )
+    runner = ForegroundRunner(
+        config,
+        kernel=kernel,
+        lock_backend=FileLockBackend(paths.runner.lock_path, paths.runner.owner_path),
+        health_sink=JsonFileHealthSink(paths.runner.health_path),
+        event_sink=events,
+        install_signal_handlers=install_signal_handlers,
+    )
+    return runner.run(max_cycles=max_cycles)
+
+
+def main(argv: Sequence[str] | None = None) -> int:
+    args = _parse_args(argv)
+    _validate_args(args)
+
+    db_path = Path(args.db)
+    if not db_path.exists() and not args.initialize_schema:
+        raise SystemExit(f"database does not exist: {db_path}; pass --initialize-schema to create it")
+
+    db_path.parent.mkdir(parents=True, exist_ok=True)
+    connection = connect(db_path)
+    try:
+        if args.initialize_schema:
+            initialize_schema(connection)
+        result = run_openclaw_runner(
+            connection,
+            state_dir=args.state_dir,
+            runtime_mode=args.mode,
+            trace_id=args.trace_id,
+            max_cycles=args.max_cycles,
+            tick_interval_ms=args.tick_interval_ms,
+            reconcile_interval_ms=args.reconcile_interval_ms,
+            max_work_items_per_tick=args.max_work_items,
+            sender_mode=args.sender,
+            fake_result=args.fake_result,
+            install_signal_handlers=True,
+        )
+    finally:
+        connection.close()
+
+    paths = OpenClawRunnerPaths.from_state_dir(args.state_dir)
+    payload = {
+        "database": str(db_path),
+        "state_dir": str(paths.runner.state_dir),
+        "openclaw_sends": str(paths.sends_path),
+        "fake_result": args.fake_result,
+        "sender": args.sender,
+        "runtime_mode": args.mode,
+        "exit_code": result.exit_code,
+        "reason": result.reason,
+        "cycles_completed": result.cycles_completed,
+    }
+    json.dump(payload, sys.stdout, sort_keys=True)
+    sys.stdout.write("\n")
+    return int(result.exit_code)
+
+
+def _openclaw_sender(*, paths: OpenClawRunnerPaths, sender_mode: str, fake_result: str) -> Any:
+    if sender_mode == "gateway":
+        return OpenClawGatewaySender(OpenClawGatewayConfig.from_env())
+    if sender_mode == "fake":
+        return FakeOpenClawSender(paths.sends_path, result=fake_result)
+    raise ValueError(f"unknown OpenClaw sender mode: {sender_mode}")
+
+
+def _validate_args(args: argparse.Namespace) -> None:
+    if args.max_cycles is not None and args.max_cycles < 1:
+        raise SystemExit("--max-cycles must be at least 1 when provided")
+    if args.max_work_items < 1:
+        raise SystemExit("--max-work-items must be at least 1")
+    if args.sender == "gateway" and not args.allow_real_send:
+        raise SystemExit("--sender gateway requires --allow-real-send")
+
+
+def _parse_args(argv: Sequence[str] | None) -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description="Run Spine's OpenClaw Tickerd worker.")
+    parser.add_argument("--db", required=True, help="Path to a Spine SQLite ledger database.")
+    parser.add_argument("--state-dir", required=True, help="Directory for lock, owner, health, Tickerd events, and fake sends.")
+    parser.add_argument("--initialize-schema", action="store_true", help="Initialize the Spine schema before running.")
+    parser.add_argument("--mode", choices=RUNTIME_MODES, default="active", help="Tickerd runtime mode.")
+    parser.add_argument(
+        "--sender",
+        choices=OPENCLAW_SENDERS,
+        default="fake",
+        help="OpenClaw sender binding to use. Gateway mode can perform a real external send.",
+    )
+    parser.add_argument("--allow-real-send", action="store_true", help="Required with --sender gateway.")
+    parser.add_argument(
+        "--fake-result",
+        choices=FAKE_OPENCLAW_RESULTS,
+        default="delivered",
+        help="Fake OpenClaw sender result to return.",
+    )
+    parser.add_argument("--max-cycles", type=int, help="Stop after this many cycles. Omit for a long-running service.")
+    parser.add_argument("--trace-id", default="spine-openclaw-runner", help="Trace id for emitted Tickerd records.")
+    parser.add_argument("--tick-interval-ms", type=int, default=1000, help="Tickerd tick interval.")
+    parser.add_argument("--reconcile-interval-ms", type=int, default=5000, help="Tickerd reconcile cadence.")
+    parser.add_argument("--max-work-items", type=int, default=100, help="Maximum work items to process per cycle.")
+    return parser.parse_args(argv)
+
+
+if __name__ == "__main__":
+    raise SystemExit(main(sys.argv[1:]))
