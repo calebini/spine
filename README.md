@@ -73,6 +73,8 @@ With Tickerd installed, or with `TICKERD_SRC` pointing at a local Tickerd `src` 
 
 ```bash
 spine-seed-demo /tmp/spine-demo.sqlite
+# For an already-created ledger, seed the demo only when absent:
+spine-seed-demo --if-absent /tmp/spine-demo.sqlite
 PYTHONPATH="$TICKERD_SRC" spine-tickerd-observe /tmp/spine-demo.sqlite
 PYTHONPATH="$TICKERD_SRC" spine-tickerd-runner \
   --db /tmp/spine-demo.sqlite \

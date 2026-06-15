@@ -65,17 +65,28 @@ def seed_demo_ledger(connection: sqlite3.Connection) -> dict[str, object]:
 def main(argv: Sequence[str] | None = None) -> int:
     args = _parse_args(argv)
     db_path = Path(args.db_path)
-    if db_path.exists():
+    if db_path.exists() and not args.if_absent:
         raise SystemExit(f"database already exists: {db_path}")
 
     db_path.parent.mkdir(parents=True, exist_ok=True)
     connection = connect(db_path)
     try:
-        result = seed_demo_ledger(connection)
+        if args.if_absent:
+            initialize_schema(connection)
+            if _demo_work_exists(connection):
+                result = _existing_demo_result()
+                seeded = False
+            else:
+                result = seed_demo_ledger(connection)
+                seeded = True
+        else:
+            result = seed_demo_ledger(connection)
     finally:
         connection.close()
 
     payload = {"database": str(db_path), **result}
+    if args.if_absent:
+        payload["seeded"] = seeded
     json.dump(payload, sys.stdout, sort_keys=True)
     sys.stdout.write("\n")
     return 0
@@ -94,9 +105,32 @@ def _insert_demo_subject(connection: sqlite3.Connection) -> None:
         )
 
 
+def _demo_work_exists(connection: sqlite3.Connection) -> bool:
+    row = connection.execute(
+        "SELECT 1 FROM work_instances WHERE work_instance_id = ?",
+        (DEMO_WORK_INSTANCE_ID,),
+    ).fetchone()
+    return row is not None
+
+
+def _existing_demo_result() -> dict[str, object]:
+    return {
+        "subject_id": DEMO_SUBJECT_ID,
+        "item_id": DEMO_TASK_ID,
+        "notification_policy_id": DEMO_POLICY_ID,
+        "work_instance_id": DEMO_WORK_INSTANCE_ID,
+        "eligible_at_utc": "2026-06-07T09:00:00Z",
+    }
+
+
 def _parse_args(argv: Sequence[str] | None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Create a deterministic local Spine demo ledger.")
     parser.add_argument("db_path", help="Path where the demo SQLite ledger should be created.")
+    parser.add_argument(
+        "--if-absent",
+        action="store_true",
+        help="Allow an existing ledger and seed only when the deterministic demo work row is absent.",
+    )
     return parser.parse_args(argv)
 
 

@@ -111,6 +111,14 @@ spine-ledger-migrate \
   --verify-only
 ```
 
+For persistent-ledger visibility checks, seed the deterministic demo row only when it is absent:
+
+```bash
+spine-seed-demo --if-absent "$SPINE_DB"
+```
+
+Without `--if-absent`, `spine-seed-demo` refuses existing database paths.
+
 ## Fake OpenClaw Smoke
 
 Use fake mode before any real gateway send. This performs active Spine/Tickerd processing but writes only fake send evidence.
