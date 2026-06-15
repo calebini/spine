@@ -23,6 +23,7 @@ dev = [
 [project.scripts]
 spine-ledger-migrate = "spine.ledger.migrate:main"
 spine-openclaw-smoke = "spine.runtime.openclaw_smoke:main"
+spine-seed-canary = "spine.runtime.seed_canary:main"
 spine-seed-demo = "spine.runtime.seed_demo:main"
 spine-tickerd-observe = "spine.runtime.tickerd_observe:main"
 spine-tickerd-runner = "spine.runtime.tickerd_runner:main"

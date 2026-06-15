@@ -80,6 +80,7 @@ Run the installed-script smoke help checks:
 
 ```bash
 spine-ledger-migrate --help
+spine-seed-canary --help
 spine-seed-demo --help
 PYTHONPATH="$TICKERD_SRC" spine-worker --help
 PYTHONPATH="$TICKERD_SRC" spine-openclaw-smoke --help
@@ -118,6 +119,18 @@ spine-seed-demo --if-absent "$SPINE_DB"
 ```
 
 Without `--if-absent`, `spine-seed-demo` refuses existing database paths.
+
+For real gateway canary preparation, seed a controlled reminder and inspect the predicted OpenClaw envelope before any active/gateway run:
+
+```bash
+spine-seed-canary "$SPINE_DB" \
+  --prefix operator-canary \
+  --target-ref "<openclaw-target>" \
+  --title "Spine canary reminder" \
+  --if-absent
+```
+
+The command returns `predicted_openclaw_envelope`, including `target_ref`, `body_text`, `dedupe_key`, and the expected first `attempt_id`.
 
 ## Fake OpenClaw Smoke
 
