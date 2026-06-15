@@ -6,7 +6,7 @@ from io import StringIO
 from pathlib import Path
 
 from spine.ledger import connect, get_side_effect_attempt, get_work_instance, initialize_schema
-from spine.runtime.openclaw_runner import OpenClawRunnerPaths, main, run_openclaw_runner
+from spine.runtime.worker import SpineWorkerPaths, main, run_spine_worker
 from spine.runtime.seed_demo import DEMO_WORK_INSTANCE_ID, seed_demo_ledger
 
 try:
@@ -17,7 +17,7 @@ except ImportError:
     TICKERD_AVAILABLE = False
 
 
-class OpenClawRunnerCliValidationTests(unittest.TestCase):
+class SpineWorkerCliValidationTests(unittest.TestCase):
     def test_cli_refuses_missing_database_without_initialization(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             db_path = Path(directory) / "missing.sqlite"
@@ -36,15 +36,39 @@ class OpenClawRunnerCliValidationTests(unittest.TestCase):
             finally:
                 connection.close()
 
-            with self.assertRaisesRegex(SystemExit, "--sender gateway requires --allow-real-send"):
+            with self.assertRaisesRegex(SystemExit, "--openclaw-sender gateway requires --allow-real-send"):
                 main(
                     [
                         "--db",
                         str(db_path),
                         "--state-dir",
                         str(state_dir),
-                        "--sender",
+                        "--openclaw-sender",
                         "gateway",
+                        "--max-cycles",
+                        "1",
+                    ]
+                )
+
+    def test_cli_refuses_unsupported_binding(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            db_path = Path(directory) / "spine.sqlite"
+            state_dir = Path(directory) / "state"
+            connection = connect(db_path)
+            try:
+                initialize_schema(connection)
+            finally:
+                connection.close()
+
+            with self.assertRaisesRegex(SystemExit, "unsupported worker binding"):
+                main(
+                    [
+                        "--db",
+                        str(db_path),
+                        "--state-dir",
+                        str(state_dir),
+                        "--bindings",
+                        "calendar",
                         "--max-cycles",
                         "1",
                     ]
@@ -52,7 +76,7 @@ class OpenClawRunnerCliValidationTests(unittest.TestCase):
 
 
 @unittest.skipUnless(TICKERD_AVAILABLE, "tickerd is not importable")
-class OpenClawRunnerRuntimeTests(unittest.TestCase):
+class SpineWorkerRuntimeTests(unittest.TestCase):
     def test_observe_only_runner_blocks_work_without_fake_send(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
@@ -61,21 +85,22 @@ class OpenClawRunnerRuntimeTests(unittest.TestCase):
             connection = connect(db_path)
             try:
                 seed_demo_ledger(connection)
-                result = run_openclaw_runner(
+                result = run_spine_worker(
                     connection,
                     state_dir=state_dir,
                     runtime_mode="observe_only",
-                    trace_id="openclaw-runner-observe-test",
+                    trace_id="spine-worker-observe-test",
                     max_cycles=1,
                     tick_interval_ms=1,
                     reconcile_interval_ms=1,
+                    bindings=("openclaw",),
                     install_signal_handlers=False,
                 )
                 work = get_work_instance(connection, DEMO_WORK_INSTANCE_ID)
             finally:
                 connection.close()
 
-            paths = OpenClawRunnerPaths.from_state_dir(state_dir)
+            paths = SpineWorkerPaths.from_state_dir(state_dir)
             self.assertEqual(result.exit_code, 0)
             self.assertEqual(work["status"], "eligible")
             self.assertFalse(paths.sends_path.exists())
@@ -91,14 +116,15 @@ class OpenClawRunnerRuntimeTests(unittest.TestCase):
             connection = connect(db_path)
             try:
                 seed_demo_ledger(connection)
-                result = run_openclaw_runner(
+                result = run_spine_worker(
                     connection,
                     state_dir=state_dir,
                     runtime_mode="active",
-                    trace_id="openclaw-runner-fake-test",
+                    trace_id="spine-worker-fake-test",
                     max_cycles=1,
                     tick_interval_ms=1,
                     reconcile_interval_ms=1,
+                    bindings=("openclaw",),
                     install_signal_handlers=False,
                 )
                 work = get_work_instance(connection, DEMO_WORK_INSTANCE_ID)
@@ -109,7 +135,7 @@ class OpenClawRunnerRuntimeTests(unittest.TestCase):
             finally:
                 connection.close()
 
-            paths = OpenClawRunnerPaths.from_state_dir(state_dir)
+            paths = SpineWorkerPaths.from_state_dir(state_dir)
             sends = [json.loads(line) for line in paths.sends_path.read_text(encoding="utf-8").splitlines()]
             self.assertEqual(result.exit_code, 0)
             self.assertEqual(result.reason, "max_cycles_reached")
@@ -144,17 +170,18 @@ class OpenClawRunnerRuntimeTests(unittest.TestCase):
                         "--reconcile-interval-ms",
                         "1",
                         "--trace-id",
-                        "openclaw-runner-cli-test",
+                        "spine-worker-cli-test",
                     ]
                 )
 
-            paths = OpenClawRunnerPaths.from_state_dir(state_dir)
+            paths = SpineWorkerPaths.from_state_dir(state_dir)
             payload = json.loads(stream.getvalue())
             events = [json.loads(line) for line in paths.runner.events_path.read_text(encoding="utf-8").splitlines()]
             summary = next(record for record in events if record["event"] == "cycle_summary")
             self.assertEqual(exit_code, 0)
             self.assertEqual(payload["runtime_mode"], "observe_only")
-            self.assertEqual(payload["sender"], "fake")
+            self.assertEqual(payload["bindings"], "openclaw")
+            self.assertEqual(payload["openclaw_sender"], "fake")
             self.assertEqual(summary["items_scanned"], 0)
 
 

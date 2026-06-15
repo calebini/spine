@@ -46,14 +46,14 @@ Recommended production-shaped paths:
 
 ```text
 SPINE_DB=/var/lib/spine/ledger.sqlite
-SPINE_STATE_DIR=/var/lib/spine/openclaw-runner
+SPINE_STATE_DIR=/var/lib/spine/worker
 ```
 
 For non-root trials, use an operator-owned equivalent:
 
 ```text
 SPINE_DB=$HOME/.spine/ledger.sqlite
-SPINE_STATE_DIR=$HOME/.spine/openclaw-runner
+SPINE_STATE_DIR=$HOME/.spine/worker
 ```
 
 The state directory contains operational runtime files:
@@ -81,7 +81,7 @@ Run the installed-script smoke help checks:
 ```bash
 spine-ledger-migrate --help
 spine-seed-demo --help
-PYTHONPATH="$TICKERD_SRC" spine-openclaw-runner --help
+PYTHONPATH="$TICKERD_SRC" spine-worker --help
 PYTHONPATH="$TICKERD_SRC" spine-openclaw-smoke --help
 PYTHONPATH="$TICKERD_SRC" spine-tickerd-runner --help
 ```
@@ -167,13 +167,14 @@ The expected successful ledger terminal state is:
 Use observe-only mode to verify runtime cadence and work visibility without side effects:
 
 ```bash
-PYTHONPATH="$TICKERD_SRC" spine-openclaw-runner \
+PYTHONPATH="$TICKERD_SRC" spine-worker \
   --db "$SPINE_DB" \
   --state-dir "$SPINE_STATE_DIR" \
   --mode observe_only \
-  --sender fake \
+  --bindings openclaw \
+  --openclaw-sender fake \
   --max-cycles 1 \
-  --trace-id spine-openclaw-observe
+  --trace-id spine-worker-observe
 ```
 
 Expected behavior:
@@ -190,7 +191,7 @@ Real sends require all of the following:
 - OpenClaw CLI installed on the host
 - gateway target configured
 - gateway credential configured
-- explicit `--sender gateway`
+- explicit `--openclaw-sender gateway`
 - explicit `--allow-real-send`
 - operator-selected test ledger/work item
 
@@ -217,14 +218,15 @@ Kinflow gateway env names are accepted as migration fallback:
 Bounded gateway smoke:
 
 ```bash
-PYTHONPATH="$TICKERD_SRC" spine-openclaw-runner \
+PYTHONPATH="$TICKERD_SRC" spine-worker \
   --db "$SPINE_DB" \
   --state-dir "$SPINE_STATE_DIR" \
   --mode active \
-  --sender gateway \
+  --bindings openclaw \
+  --openclaw-sender gateway \
   --allow-real-send \
   --max-cycles 1 \
-  --trace-id spine-openclaw-gateway-trial
+  --trace-id spine-worker-gateway-trial
 ```
 
 Do not run gateway mode against production reminder work until the target work row, recipient, message body, and idempotency key have been inspected.
@@ -234,13 +236,14 @@ Do not run gateway mode against production reminder work until the target work r
 The long-running command shape is:
 
 ```bash
-PYTHONPATH="$TICKERD_SRC" spine-openclaw-runner \
+PYTHONPATH="$TICKERD_SRC" spine-worker \
   --db "$SPINE_DB" \
   --state-dir "$SPINE_STATE_DIR" \
   --mode active \
-  --sender gateway \
+  --bindings openclaw \
+  --openclaw-sender gateway \
   --allow-real-send \
-  --trace-id spine-openclaw-runner
+  --trace-id spine-worker
 ```
 
 At the current stage, prefer a supervised shell/session trial before creating a service unit. Once the command is stable, a process supervisor should own restart policy, logs, environment loading, and host boot behavior.
@@ -324,7 +327,7 @@ Before production cutover:
 
 The repository includes deployment templates:
 
-- `deploy/env/openclaw-runner.env.example`
-- `deploy/systemd/spine-openclaw-runner.service`
+- `deploy/env/worker.env.example`
+- `deploy/systemd/spine-worker.service`
 
-The systemd template defaults to `observe_only` with the fake sender. Edit the `ExecStart` line only after observe-only and fake active trials have passed.
+The systemd template defaults to `observe_only` with the OpenClaw fake sender binding. Edit the `ExecStart` line only after observe-only and fake active trials have passed.

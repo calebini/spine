@@ -442,7 +442,7 @@ Current first slice:
 
 - Generic attempt-backed side-effect processing, OpenClaw-style outbound envelopes, deterministic idempotency keys, terminal side-effect attempt updates, and fake-sender result normalization exist locally.
 - A bounded active fake-OpenClaw runtime smoke exists for local and deployment-host verification.
-- A Spine-native OpenClaw gateway sender binding exists and is opt-in behind `--sender gateway --allow-real-send`.
+- A Spine-native OpenClaw gateway sender binding exists and is opt-in behind `--openclaw-sender gateway --allow-real-send` on the generic worker and `--sender gateway --allow-real-send` on the bounded OpenClaw smoke.
 - Full real-adapter operator verification against the production OpenClaw environment remains to be added.
 
 Exit criteria:

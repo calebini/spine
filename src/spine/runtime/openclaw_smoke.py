@@ -10,15 +10,15 @@ from pathlib import Path
 from typing import Any, Sequence
 
 from spine.ledger import connect, initialize_schema
-from spine.runtime.openclaw_runner import (
+from spine.runtime.worker import (
     FAKE_OPENCLAW_RESULTS,
     OPENCLAW_SENDERS,
-    OpenClawRunnerPaths,
-    run_openclaw_runner,
+    SpineWorkerPaths,
+    run_spine_worker,
 )
 from spine.runtime.seed_demo import seed_demo_ledger
 
-OpenClawSmokePaths = OpenClawRunnerPaths
+OpenClawSmokePaths = SpineWorkerPaths
 
 
 def run_openclaw_smoke(
@@ -36,7 +36,7 @@ def run_openclaw_smoke(
 ) -> Any:
     """Run Tickerd active mode with a fake or explicitly enabled OpenClaw processor."""
 
-    return run_openclaw_runner(
+    return run_spine_worker(
         connection,
         state_dir=state_dir,
         runtime_mode="active",
@@ -45,8 +45,9 @@ def run_openclaw_smoke(
         tick_interval_ms=tick_interval_ms,
         reconcile_interval_ms=reconcile_interval_ms,
         max_work_items_per_tick=max_work_items_per_tick,
-        sender_mode=sender_mode,
-        fake_result=fake_result,
+        bindings=("openclaw",),
+        openclaw_sender_mode=sender_mode,
+        openclaw_fake_result=fake_result,
         install_signal_handlers=install_signal_handlers,
     )
 

@@ -78,6 +78,14 @@ PYTHONPATH="$TICKERD_SRC" spine-tickerd-runner \
   --db /tmp/spine-demo.sqlite \
   --state-dir /tmp/spine-state \
   --max-cycles 1
+PYTHONPATH="$TICKERD_SRC" spine-worker \
+  --db /tmp/spine-worker.sqlite \
+  --state-dir /tmp/spine-worker-state \
+  --initialize-schema \
+  --mode observe_only \
+  --bindings openclaw \
+  --openclaw-sender fake \
+  --max-cycles 1
 PYTHONPATH="$TICKERD_SRC" spine-openclaw-smoke \
   --db /tmp/spine-openclaw-smoke.sqlite \
   --state-dir /tmp/spine-openclaw-state \
@@ -85,7 +93,7 @@ PYTHONPATH="$TICKERD_SRC" spine-openclaw-smoke \
   --max-cycles 1
 ```
 
-The seed command creates one subject, one task, one notification policy, and one eligible generated work instance. The observe command emits JSONL records to stdout. The foreground runner writes lock, owner, health, and event files under the state directory. Neither command performs vendor writes in the default `observe_only` mode. The OpenClaw smoke runs Tickerd in active mode with a file-backed fake sender and writes fake outbound evidence to `openclaw_sends.jsonl` under the state directory.
+The seed command creates one subject, one task, one notification policy, and one eligible generated work instance. The observe command emits JSONL records to stdout. The foreground runner and worker write lock, owner, health, and event files under the state directory. Neither command performs vendor writes in the default `observe_only` mode. The OpenClaw smoke runs Tickerd in active mode with a file-backed fake sender and writes fake outbound evidence to `openclaw_sends.jsonl` under the state directory.
 
 The OpenClaw smoke is fake by default. A real OpenClaw gateway send requires an explicit operator opt-in:
 
