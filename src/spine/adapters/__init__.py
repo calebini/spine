@@ -1,6 +1,7 @@
 """External runtime and side-effect adapter boundaries."""
 
 from spine.adapters.openclaw import (
+    DEFAULT_OPENCLAW_CHANNEL,
     OPENCLAW_ADAPTER_NAME,
     NormalizedOpenClawResult,
     OpenClawBindingError,
@@ -31,6 +32,7 @@ from spine.adapters.tickerd import (
 )
 
 __all__ = [
+    "DEFAULT_OPENCLAW_CHANNEL",
     "OPENCLAW_ADAPTER_NAME",
     "AttemptBackedSideEffectProcessor",
     "AttemptBackedSideEffectRequest",

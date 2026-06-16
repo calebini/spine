@@ -22,6 +22,7 @@ from spine.ledger import get_current_item
 from spine.ledger.common import require_utc_z, utc_z_from_datetime
 
 OPENCLAW_ADAPTER_NAME = "openclaw"
+DEFAULT_OPENCLAW_CHANNEL = "whatsapp"
 
 OpenClawResultStatus = Literal["delivered", "failed_transient", "failed_permanent", "blocked"]
 OpenClawSender = Callable[["OpenClawOutboundMessage"], "NormalizedOpenClawResult"]
@@ -199,7 +200,7 @@ class OpenClawNotificationProcessor:
     """Active Tickerd processor that sends reminder work through an OpenClaw-style sender."""
 
     sender: OpenClawSender
-    channel_hint: str = "openclaw_auto"
+    channel_hint: str = DEFAULT_OPENCLAW_CHANNEL
 
     def __call__(self, connection: sqlite3.Connection, work_row: Mapping[str, object], envelope: Any) -> WorkProcessingOutcome:
         processor: AttemptBackedSideEffectProcessor[OpenClawOutboundMessage] = AttemptBackedSideEffectProcessor(
@@ -224,7 +225,7 @@ def build_openclaw_side_effect_request(
     *,
     work_row: Mapping[str, object],
     envelope: Any,
-    channel_hint: str = "openclaw_auto",
+    channel_hint: str = DEFAULT_OPENCLAW_CHANNEL,
 ) -> AttemptBackedSideEffectRequest[OpenClawOutboundMessage]:
     """Build the generic attempt-backed request for an OpenClaw outbound message."""
 
@@ -253,7 +254,7 @@ def build_openclaw_outbound_message(
     trace_id: str,
     causation_id: str,
     created_at_utc: str,
-    channel_hint: str = "openclaw_auto",
+    channel_hint: str = DEFAULT_OPENCLAW_CHANNEL,
 ) -> OpenClawOutboundMessage:
     """Map Spine reminder work into an OpenClaw-style outbound message."""
 
@@ -364,7 +365,13 @@ def _normalize_gateway_failure_response(
         )
     if "blocked" in lowered or "policy" in lowered:
         return NormalizedOpenClawResult.blocked(reason_code="openclaw_gateway_blocked")
-    if "auth" in lowered or "invalid request" in lowered or "unsupported" in lowered or "unknown target" in lowered:
+    if (
+        "auth" in lowered
+        or "invalid request" in lowered
+        or "invalid_request" in lowered
+        or "unsupported" in lowered
+        or "unknown target" in lowered
+    ):
         return NormalizedOpenClawResult.permanent_failure(reason_code="openclaw_gateway_permanent")
     return NormalizedOpenClawResult.transient_failure(
         reason_code="openclaw_gateway_transient",

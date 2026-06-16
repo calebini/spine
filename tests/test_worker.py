@@ -74,6 +74,30 @@ class SpineWorkerCliValidationTests(unittest.TestCase):
                     ]
                 )
 
+    def test_cli_refuses_empty_openclaw_channel(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            db_path = Path(directory) / "spine.sqlite"
+            state_dir = Path(directory) / "state"
+            connection = connect(db_path)
+            try:
+                initialize_schema(connection)
+            finally:
+                connection.close()
+
+            with self.assertRaisesRegex(SystemExit, "--openclaw-channel must be non-empty"):
+                main(
+                    [
+                        "--db",
+                        str(db_path),
+                        "--state-dir",
+                        str(state_dir),
+                        "--openclaw-channel",
+                        " ",
+                        "--max-cycles",
+                        "1",
+                    ]
+                )
+
 
 @unittest.skipUnless(TICKERD_AVAILABLE, "tickerd is not importable")
 class SpineWorkerRuntimeTests(unittest.TestCase):
@@ -145,6 +169,7 @@ class SpineWorkerRuntimeTests(unittest.TestCase):
             self.assertEqual(attempt["attempt_status"], "succeeded")
             self.assertEqual(len(sends), 1)
             self.assertEqual(sends[0]["event"], "openclaw_fake_send")
+            self.assertEqual(sends[0]["channel_hint"], "whatsapp")
 
     def test_cli_can_initialize_empty_database_for_observe_only_trial(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
@@ -171,6 +196,8 @@ class SpineWorkerRuntimeTests(unittest.TestCase):
                         "1",
                         "--trace-id",
                         "spine-worker-cli-test",
+                        "--openclaw-channel",
+                        "whatsapp",
                     ]
                 )
 
@@ -181,6 +208,7 @@ class SpineWorkerRuntimeTests(unittest.TestCase):
             self.assertEqual(exit_code, 0)
             self.assertEqual(payload["runtime_mode"], "observe_only")
             self.assertEqual(payload["bindings"], "openclaw")
+            self.assertEqual(payload["openclaw_channel"], "whatsapp")
             self.assertEqual(payload["openclaw_sender"], "fake")
             self.assertEqual(summary["items_scanned"], 0)
 

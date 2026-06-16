@@ -60,6 +60,7 @@ class OpenClawAdapterTests(unittest.TestCase):
         self.assertEqual(outbound.delivery_id, "openclaw-work")
         self.assertEqual(outbound.attempt_id, "openclaw-attempt-openclaw-work-1")
         self.assertEqual(outbound.dedupe_key, "openclaw:openclaw-work:1")
+        self.assertEqual(outbound.channel_hint, "whatsapp")
         self.assertEqual(outbound.target_ref, SUBJECT_ID)
         self.assertEqual(outbound.body_text, "Reminder: Submit forms")
         self.assertEqual(outbound.request_envelope()["payload_version"], "spine.openclaw.outbound.v1")
@@ -81,6 +82,7 @@ class OpenClawAdapterTests(unittest.TestCase):
         self.assertEqual(attempt["provider_ref"], "wamid.demo")
         self.assertEqual(attempt["reason_code"], "openclaw_delivered")
         self.assertIsNotNone(attempt["response_hash"])
+        self.assertEqual(captured[0].channel_hint, "whatsapp")
         self.assertEqual(captured[0].body_text, "Reminder: Submit forms")
 
     def test_transient_result_records_failed_attempt_and_retry_outcome(self) -> None:

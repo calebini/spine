@@ -11,6 +11,7 @@ from pathlib import Path
 from typing import Any, Sequence
 
 from spine.adapters import (
+    DEFAULT_OPENCLAW_CHANNEL,
     NormalizedOpenClawResult,
     OpenClawBindingError,
     OpenClawGatewayConfig,
@@ -96,6 +97,7 @@ def run_spine_worker(
     reconcile_interval_ms: int = 5000,
     max_work_items_per_tick: int = 100,
     bindings: Sequence[str] = WORKER_BINDINGS,
+    openclaw_channel: str = DEFAULT_OPENCLAW_CHANNEL,
     openclaw_sender_mode: str = "fake",
     openclaw_fake_result: str = "delivered",
     install_signal_handlers: bool = True,
@@ -115,6 +117,7 @@ def run_spine_worker(
     processor = _worker_processor(
         paths=paths,
         bindings=bindings,
+        openclaw_channel=openclaw_channel,
         openclaw_sender_mode=openclaw_sender_mode,
         openclaw_fake_result=openclaw_fake_result,
     )
@@ -169,6 +172,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             reconcile_interval_ms=args.reconcile_interval_ms,
             max_work_items_per_tick=args.max_work_items,
             bindings=bindings,
+            openclaw_channel=args.openclaw_channel,
             openclaw_sender_mode=args.openclaw_sender,
             openclaw_fake_result=args.openclaw_fake_result,
             install_signal_handlers=True,
@@ -183,6 +187,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         "bindings": args.bindings,
         "openclaw_sends": str(paths.sends_path),
         "openclaw_fake_result": args.openclaw_fake_result,
+        "openclaw_channel": args.openclaw_channel,
         "openclaw_sender": args.openclaw_sender,
         "runtime_mode": args.mode,
         "exit_code": result.exit_code,
@@ -198,12 +203,13 @@ def _worker_processor(
     *,
     paths: SpineWorkerPaths,
     bindings: Sequence[str],
+    openclaw_channel: str,
     openclaw_sender_mode: str,
     openclaw_fake_result: str,
 ) -> Any:
     if tuple(bindings) == ("openclaw",):
         sender = _openclaw_sender(paths=paths, sender_mode=openclaw_sender_mode, fake_result=openclaw_fake_result)
-        return OpenClawNotificationProcessor(sender=sender)
+        return OpenClawNotificationProcessor(sender=sender, channel_hint=openclaw_channel)
     raise ValueError(f"unsupported worker bindings: {','.join(bindings)}")
 
 
@@ -221,6 +227,7 @@ def _validate_args(args: argparse.Namespace) -> None:
     if args.max_work_items < 1:
         raise SystemExit("--max-work-items must be at least 1")
     _parse_bindings(args.bindings)
+    _require_non_empty("--openclaw-channel", args.openclaw_channel)
     if args.openclaw_sender == "gateway" and not args.allow_real_send:
         raise SystemExit("--openclaw-sender gateway requires --allow-real-send")
 
@@ -235,6 +242,11 @@ def _parse_bindings(raw: str) -> tuple[str, ...]:
     if bindings != ("openclaw",):
         raise SystemExit("only --bindings openclaw is supported in this release")
     return bindings
+
+
+def _require_non_empty(name: str, value: str) -> None:
+    if not value.strip():
+        raise SystemExit(f"{name} must be non-empty")
 
 
 def _parse_args(argv: Sequence[str] | None) -> argparse.Namespace:
@@ -253,6 +265,11 @@ def _parse_args(argv: Sequence[str] | None) -> argparse.Namespace:
         choices=OPENCLAW_SENDERS,
         default="fake",
         help="OpenClaw sender binding to use. Gateway mode can perform a real external send.",
+    )
+    parser.add_argument(
+        "--openclaw-channel",
+        default=DEFAULT_OPENCLAW_CHANNEL,
+        help="OpenClaw gateway channel value. Kinflow-compatible default: whatsapp.",
     )
     parser.add_argument("--allow-real-send", action="store_true", help="Required with --openclaw-sender gateway.")
     parser.add_argument(

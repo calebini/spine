@@ -10,7 +10,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Mapping, Sequence
 
-from spine.adapters import build_openclaw_outbound_message
+from spine.adapters import DEFAULT_OPENCLAW_CHANNEL, build_openclaw_outbound_message
 from spine.ledger import (
     NotificationPolicyInput,
     TemporalAnchorInput,
@@ -33,6 +33,7 @@ def seed_canary_reminder(
     prefix: str = DEFAULT_CANARY_PREFIX,
     now_utc: str | None = None,
     eligible_at_utc: str | None = None,
+    openclaw_channel: str = DEFAULT_OPENCLAW_CHANNEL,
     if_absent: bool = False,
 ) -> dict[str, object]:
     """Seed a controlled canary reminder and return its predicted OpenClaw envelope."""
@@ -40,6 +41,7 @@ def seed_canary_reminder(
     now_utc = now_utc or utc_z_from_datetime(datetime.now(UTC))
     eligible_at_utc = eligible_at_utc or now_utc
     _require_non_empty("target_ref", target_ref)
+    _require_non_empty("openclaw_channel", openclaw_channel)
     require_utc_z("now_utc", now_utc)
     require_utc_z("eligible_at_utc", eligible_at_utc)
     ids = _canary_ids(prefix)
@@ -89,6 +91,7 @@ def seed_canary_reminder(
         trace_id=f"{prefix}-preview",
         causation_id=f"ROOT:{prefix}-preview",
         created_at_utc=now_utc,
+        channel_hint=openclaw_channel,
     )
     return {
         **ids,
@@ -115,6 +118,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             prefix=args.prefix,
             now_utc=args.now_utc,
             eligible_at_utc=args.eligible_at_utc,
+            openclaw_channel=args.openclaw_channel,
             if_absent=args.if_absent,
         )
     finally:
@@ -175,6 +179,7 @@ def _predicted_openclaw_envelope(
     trace_id: str,
     causation_id: str,
     created_at_utc: str,
+    channel_hint: str,
 ) -> dict[str, str]:
     preview_work = dict(work)
     preview_work["attempt_count"] = int(preview_work["attempt_count"]) + 1
@@ -184,6 +189,7 @@ def _predicted_openclaw_envelope(
         trace_id=trace_id,
         causation_id=causation_id,
         created_at_utc=created_at_utc,
+        channel_hint=channel_hint,
     ).request_envelope()
 
 
@@ -195,6 +201,11 @@ def _parse_args(argv: Sequence[str] | None) -> argparse.Namespace:
     parser.add_argument("--prefix", default=DEFAULT_CANARY_PREFIX, help="Stable ID prefix for the canary rows.")
     parser.add_argument("--now-utc", help="Creation timestamp. Defaults to current UTC.")
     parser.add_argument("--eligible-at-utc", help="Eligibility timestamp. Defaults to now-utc.")
+    parser.add_argument(
+        "--openclaw-channel",
+        default=DEFAULT_OPENCLAW_CHANNEL,
+        help="OpenClaw gateway channel preview value. Kinflow-compatible default: whatsapp.",
+    )
     parser.add_argument("--if-absent", action="store_true", help="Reuse the canary if its work row already exists.")
     return parser.parse_args(argv)
 

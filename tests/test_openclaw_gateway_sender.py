@@ -86,6 +86,20 @@ class OpenClawGatewaySenderTests(unittest.TestCase):
         self.assertEqual(result.reason_code, "openclaw_gateway_transient")
         self.assertEqual(result.next_attempt_at_utc, "2026-06-07T10:01:00Z")
 
+    def test_gateway_sender_maps_invalid_request_to_permanent_failure(self) -> None:
+        def runner(cmd, **_kwargs):
+            return subprocess.CompletedProcess(
+                cmd,
+                1,
+                stdout='{"error":"INVALID_REQUEST","message":"unsupported channel: openclaw_auto"}',
+                stderr="",
+            )
+
+        result = OpenClawGatewaySender(OpenClawGatewayConfig(), command_runner=runner)(outbound_message())
+
+        self.assertEqual(result.status, "failed_permanent")
+        self.assertEqual(result.reason_code, "openclaw_gateway_permanent")
+
     def test_gateway_sender_blocks_gateway_url_without_credentials(self) -> None:
         calls = 0
 

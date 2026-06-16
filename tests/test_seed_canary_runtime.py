@@ -33,6 +33,7 @@ class SeedCanaryRuntimeTests(unittest.TestCase):
         self.assertEqual(work["attempt_count"], 0)
         self.assertEqual([row["work_instance_id"] for row in eligible], ["canary-test-work"])
         self.assertEqual(preview["target_ref"], "canary-target")
+        self.assertEqual(preview["channel_hint"], "whatsapp")
         self.assertEqual(preview["body_text"], "Reminder: Spine canary")
         self.assertEqual(preview["dedupe_key"], "openclaw:canary-test-work:1")
         self.assertEqual(preview["attempt_id"], "openclaw-attempt-canary-test-work-1")
@@ -69,7 +70,41 @@ class SeedCanaryRuntimeTests(unittest.TestCase):
             self.assertEqual(payload["database"], str(db_path))
             self.assertEqual(payload["work_instance_id"], "cli-canary-work")
             self.assertEqual(payload["target_ref"], "target-1")
+            self.assertEqual(payload["predicted_openclaw_envelope"]["channel_hint"], "whatsapp")
             self.assertEqual(payload["predicted_openclaw_envelope"]["body_text"], "Reminder: Check the canary")
+
+    def test_cli_allows_channel_preview_override(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            db_path = Path(directory) / "canary.sqlite"
+            stream = StringIO()
+            original_stdout = None
+            try:
+                import sys
+
+                original_stdout = sys.stdout
+                sys.stdout = stream
+                exit_code = main(
+                    [
+                        str(db_path),
+                        "--target-ref",
+                        "target-1",
+                        "--title",
+                        "Check the canary",
+                        "--prefix",
+                        "channel-canary",
+                        "--now-utc",
+                        "2026-06-15T20:00:00Z",
+                        "--openclaw-channel",
+                        "whatsapp",
+                    ]
+                )
+            finally:
+                if original_stdout is not None:
+                    sys.stdout = original_stdout
+
+            payload = json.loads(stream.getvalue())
+            self.assertEqual(exit_code, 0)
+            self.assertEqual(payload["predicted_openclaw_envelope"]["channel_hint"], "whatsapp")
 
     def test_cli_if_absent_reuses_existing_canary(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

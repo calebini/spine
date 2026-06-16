@@ -127,10 +127,11 @@ spine-seed-canary "$SPINE_DB" \
   --prefix operator-canary \
   --target-ref "<openclaw-target>" \
   --title "Spine canary reminder" \
+  --openclaw-channel whatsapp \
   --if-absent
 ```
 
-The command returns `predicted_openclaw_envelope`, including `target_ref`, `body_text`, `dedupe_key`, and the expected first `attempt_id`.
+The command returns `predicted_openclaw_envelope`, including `channel_hint`, `target_ref`, `body_text`, `dedupe_key`, and the expected first `attempt_id`.
 
 ## Fake OpenClaw Smoke
 
@@ -212,6 +213,7 @@ Real sends require all of the following:
 - OpenClaw CLI installed on the host
 - gateway target configured
 - gateway credential configured
+- explicit `--openclaw-channel whatsapp` or another known gateway-supported channel
 - explicit `--openclaw-sender gateway`
 - explicit `--allow-real-send`
 - operator-selected test ledger/work item
@@ -220,6 +222,7 @@ Environment variables:
 
 ```bash
 export SPINE_OPENCLAW_GATEWAY_URL="<gateway-url>"
+export SPINE_OPENCLAW_CHANNEL=whatsapp
 export SPINE_OPENCLAW_GATEWAY_TIMEOUT_MS=10000
 export SPINE_OPENCLAW_RETRY_DELAY_SECONDS=300
 ```
@@ -244,6 +247,7 @@ PYTHONPATH="$TICKERD_SRC" spine-worker \
   --state-dir "$SPINE_STATE_DIR" \
   --mode active \
   --bindings openclaw \
+  --openclaw-channel whatsapp \
   --openclaw-sender gateway \
   --allow-real-send \
   --max-cycles 1 \
@@ -262,6 +266,7 @@ PYTHONPATH="$TICKERD_SRC" spine-worker \
   --state-dir "$SPINE_STATE_DIR" \
   --mode active \
   --bindings openclaw \
+  --openclaw-channel whatsapp \
   --openclaw-sender gateway \
   --allow-real-send \
   --trace-id spine-worker
