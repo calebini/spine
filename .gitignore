@@ -10,3 +10,7 @@ whetstone_runs/
 dist/
 build/
 *.egg-info/
+
+# Local/private operational notes. Keep public runbooks sanitized.
+ops/private/
+*.private.md

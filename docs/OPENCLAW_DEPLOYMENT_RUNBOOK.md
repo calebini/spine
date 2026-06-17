@@ -1,20 +1,20 @@
 # OpenClaw Deployment Runbook
 
 Status: operational draft  
-Scope: narrow Kinflow replacement path for OpenClaw reminder delivery
+Scope: OpenClaw reminder delivery through the Spine worker
 
 This runbook covers the first production-shaped Spine path: generated reminder work processed by Tickerd and delivered through the OpenClaw gateway adapter. It is intentionally narrower than the full Spine product surface.
 
 ## Goal
 
-Use Spine as the durable coordination ledger and OpenClaw message runner for reminder work that currently flows through Kinflow.
+Use Spine as the durable coordination ledger and OpenClaw message runner for reminder work.
 
 The rollout target is:
 
 - Spine owns item, work, attempt, and outcome truth.
 - Tickerd owns foreground runtime cadence, health, file lock, and cycle records.
 - OpenClaw owns external message transport.
-- Kinflow remains available as rollback until Spine has proven stable in production-like operation.
+- The existing reminder runner remains available as rollback until Spine has proven stable in production operation.
 
 ## Host Prerequisites
 
@@ -45,6 +45,8 @@ export TICKERD_SRC=/path/to/tickerd/src
 Recommended production-shaped paths:
 
 ```text
+SPINE_CHECKOUT=/opt/spine
+TICKERD_SRC=/opt/tickerd/src
 SPINE_DB=/var/lib/spine/ledger.sqlite
 SPINE_STATE_DIR=/var/lib/spine/worker
 ```
@@ -52,6 +54,8 @@ SPINE_STATE_DIR=/var/lib/spine/worker
 For non-root trials, use an operator-owned equivalent:
 
 ```text
+SPINE_CHECKOUT=$HOME/spine
+TICKERD_SRC=$HOME/tickerd/src
 SPINE_DB=$HOME/.spine/ledger.sqlite
 SPINE_STATE_DIR=$HOME/.spine/worker
 ```
@@ -232,7 +236,7 @@ Set exactly one gateway credential in the protected env file:
 - `SPINE_OPENCLAW_GATEWAY_TOKEN`
 - `SPINE_OPENCLAW_GATEWAY_PASSWORD`
 
-Kinflow gateway env names are accepted as migration fallback:
+Legacy Kinflow gateway env names are accepted as migration fallback:
 
 - `KINFLOW_GATEWAY_URL`
 - `KINFLOW_GATEWAY_TOKEN`
@@ -322,14 +326,14 @@ ORDER BY eligible_at_utc, work_instance_id;
 
 ## Rollback
 
-Rollback means stopping Spine as the OpenClaw runner and returning reminder execution to Kinflow.
+Rollback means stopping Spine as the OpenClaw runner and returning reminder execution to the prior production reminder path.
 
 Immediate rollback steps:
 
 1. Stop the Spine runner process or supervisor unit.
 2. Confirm `health.json` moves to `DOWN` or the process is absent.
 3. Leave the Spine SQLite ledger intact for audit.
-4. Restart or re-enable the Kinflow production path.
+4. Restart or re-enable the prior production reminder path.
 5. Record the final Spine `events.jsonl` tail and recent `side_effect_attempts` rows.
 
 Do not delete the Spine ledger during rollback. It is the record of what Spine attempted before rollback.
@@ -346,7 +350,7 @@ Before production cutover:
 - Gateway credentials are configured outside git.
 - A single bounded real gateway trial succeeds.
 - Operator readbacks show expected work and attempt rows.
-- Kinflow rollback command/path is known.
+- Prior-runner rollback command/path is known.
 - The first active production run has an explicit operator watching health, events, work rows, and attempt rows.
 
 ## Deployment Templates
