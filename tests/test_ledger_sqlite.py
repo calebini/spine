@@ -45,6 +45,7 @@ class LedgerSqliteTests(unittest.TestCase):
         self.assertIn("coordination_item_relations", table_names)
         self.assertIn("work_instances", table_names)
         self.assertIn("candidate_actions", table_names)
+        self.assertIn("command_receipts", table_names)
         self.assertIn("side_effect_attempts", table_names)
         self.assertIn("external_projections", table_names)
         self.assertIn("audit_log", table_names)
@@ -80,6 +81,7 @@ class LedgerSqliteTests(unittest.TestCase):
             "audit_log_item_created_idx",
             "candidate_actions_item_status_idx",
             "candidate_actions_open_kind_idx",
+            "command_receipts_item_created_idx",
             "coordination_item_relations_active_source_idx",
             "coordination_item_relations_active_target_idx",
             "coordination_item_relations_active_unique",

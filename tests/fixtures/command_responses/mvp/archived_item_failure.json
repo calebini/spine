@@ -1,0 +1,9 @@
+{
+  "command": "event.update",
+  "error": {
+    "code": "invalid_state_transition",
+    "field": "status",
+    "message": "archived items are immutable"
+  },
+  "ok": false
+}

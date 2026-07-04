@@ -1,0 +1,24 @@
+{
+  "command": "task.update",
+  "command_receipt_id": "command_receipt_e3954d393a5a732fc05963ba8b7ec2cbb49e6dc35c77bf3350a845566e898351",
+  "current_common": {
+    "created_at_utc": "2026-06-06T10:02:00Z",
+    "created_by_subject_id": "agent",
+    "intent_hash": "8af1dba03e008c41f92f7726af1e4ae37dd72f66db76dd092c069566af154241",
+    "normalized_fields_hash": "8af1dba03e008c41f92f7726af1e4ae37dd72f66db76dd092c069566af154241",
+    "title": "Fixture task",
+    "version": "1"
+  },
+  "current_version": "1",
+  "dry_run": true,
+  "item_id": "item_4d2a4cad7f010c7771e8dda2d7072e5e9bf3f970df90342bc1f74d7846ede63d",
+  "item_type": "task",
+  "ok": true,
+  "target_version": "1",
+  "task_detail": {
+    "task_status": "open"
+  },
+  "updated": false,
+  "updated_at_utc": "2026-06-06T10:02:00Z",
+  "version": "1"
+}

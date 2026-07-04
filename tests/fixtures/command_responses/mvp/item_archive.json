@@ -1,0 +1,15 @@
+{
+  "archived": true,
+  "archived_at_utc": "2026-06-06T10:40:00Z",
+  "audit_id": "audit_1916e7ff957a1d19358a8da0e323d1b5cedf43b004496b5c3157cab6eb7842aa",
+  "command": "item.archive",
+  "command_receipt_id": "command_receipt_bc23cc34835c7ef305f786a24aa63f1fde3a8b7f825f0b0956e7d530882ec289",
+  "current_version": "4",
+  "item_id": "item_0f3afe27f9de445de632f4a8348957214f5dd24aac0de81a0ee8566dd4e976d5",
+  "item_type": "event",
+  "ok": true,
+  "status": "archived",
+  "target_version": "4",
+  "updated_at_utc": "2026-06-06T10:40:00Z",
+  "version": "4"
+}

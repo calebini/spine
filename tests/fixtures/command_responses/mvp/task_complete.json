@@ -1,0 +1,13 @@
+{
+  "audit_id": "audit_2d6960d0269af7ccf14fd7eecd215ae2189e9ea84eb14d93f354653769f81ba9",
+  "command": "task.complete",
+  "command_receipt_id": "command_receipt_0191f73413f4b7ed6d2c106ea40a84a2641a4e325a104481dd8e4efc0f56098a",
+  "completed": true,
+  "current_version": "3",
+  "item_id": "item_94dc6f9f68de8a74eba98b7587a2821b389bfd1d5fb158d0c3714f5532023be8",
+  "item_type": "task",
+  "ok": true,
+  "target_version": "2",
+  "updated_at_utc": "2026-06-06T10:25:00Z",
+  "version": "3"
+}

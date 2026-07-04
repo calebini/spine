@@ -1,0 +1,10 @@
+{
+  "command": "event.create",
+  "dry_run": true,
+  "error": {
+    "code": "invalid_request",
+    "field": "start_anchor",
+    "message": "start_anchor must be an object"
+  },
+  "ok": false
+}

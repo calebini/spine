@@ -1,0 +1,13 @@
+{
+  "command": "subject.upsert",
+  "command_receipt_id": "command_receipt_dee124cd02da32a0f4f7351c6f0fe0f4455fe5889cf06dfce9c4769b03d191ec",
+  "created": false,
+  "created_at_utc": "2026-06-06T10:00:00Z",
+  "display_name": "Agent",
+  "ok": true,
+  "status": "active",
+  "subject_id": "agent",
+  "subject_kind": "agent",
+  "updated": false,
+  "updated_at_utc": "2026-06-06T10:00:00Z"
+}

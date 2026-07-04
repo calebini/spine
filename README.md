@@ -17,6 +17,7 @@ Authoritative starting points:
 - `specs/overview.md` defines purpose, doctrine, and non-goals.
 - `specs/architecture.md` defines component boundaries and runtime relationships.
 - `specs/ontology.md` sketches the first durable ontology and data model.
+- `specs/agent-command-contract.md` defines the MVP agent command core and CLI contract.
 - `specs/decisions/0001-kinflow-is-donor-not-foundation.md` records the Kinflow relationship.
 
 ## First Product Profiles
@@ -53,6 +54,7 @@ This repository follows the Cortext1 component scaffold standard incrementally:
 - `docs/IMPLEMENTATION_PLAN.md`: non-normative build sequence for moving from specs to executable behavior
 - `docs/AGENT_OPERATOR_GUIDE.md`: agent-facing contract for operating current Spine runtime surfaces safely
 - `docs/OPENCLAW_DEPLOYMENT_RUNBOOK.md`: operational rollout notes for the first OpenClaw replacement path
+- `contracts/`: machine-readable command fixture manifest and shared response schema
 - `deploy/`: deployment templates for systemd and environment files
 - `src/spine/`: initial Python package scaffold
 - `src/spine/ledger/`: canonical local persistence boundary

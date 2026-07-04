@@ -1,0 +1,13 @@
+{
+  "audit_id": "audit_b4a58312c563703394c86fbf3485c865d07638e16975baa79e65263605ca7913",
+  "cancelled": true,
+  "command": "task.cancel",
+  "command_receipt_id": "command_receipt_82b8dff1ad77f169581fac106dec7de2dc7cd87297f7b1244e23081f092d2925",
+  "current_version": "2",
+  "item_id": "item_d53b56116928f169911cca4120b8d059dbf4500ee4b353c48daba89081d43168",
+  "item_type": "task",
+  "ok": true,
+  "target_version": "1",
+  "updated_at_utc": "2026-06-06T10:26:00Z",
+  "version": "2"
+}

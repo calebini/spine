@@ -1,0 +1,173 @@
+{
+  "fixtures": [
+    {
+      "branch": "archived_item",
+      "command": "event.update",
+      "expected_exit_code": 2,
+      "fixture": "tests/fixtures/command_responses/mvp/archived_item_failure.json",
+      "schema": "contracts/schemas/command-response.schema.json"
+    },
+    {
+      "branch": "dry_run_created",
+      "command": "event.create",
+      "expected_exit_code": 0,
+      "fixture": "tests/fixtures/command_responses/mvp/dry_run_event_create.json",
+      "schema": "contracts/schemas/command-response.schema.json"
+    },
+    {
+      "branch": "dry_run_failure",
+      "command": "event.create",
+      "expected_exit_code": 2,
+      "fixture": "tests/fixtures/command_responses/mvp/dry_run_failure.json",
+      "schema": "contracts/schemas/command-response.schema.json"
+    },
+    {
+      "branch": "dry_run_noop",
+      "command": "task.update",
+      "expected_exit_code": 0,
+      "fixture": "tests/fixtures/command_responses/mvp/dry_run_task_update_noop.json",
+      "schema": "contracts/schemas/command-response.schema.json"
+    },
+    {
+      "branch": "duplicate_conflict",
+      "command": "relation.create",
+      "expected_exit_code": 6,
+      "fixture": "tests/fixtures/command_responses/mvp/duplicate_failure.json",
+      "schema": "contracts/schemas/command-response.schema.json"
+    },
+    {
+      "branch": "cancelled",
+      "command": "event.cancel",
+      "expected_exit_code": 0,
+      "fixture": "tests/fixtures/command_responses/mvp/event_cancel.json",
+      "schema": "contracts/schemas/command-response.schema.json"
+    },
+    {
+      "branch": "created",
+      "command": "event.create",
+      "expected_exit_code": 0,
+      "fixture": "tests/fixtures/command_responses/mvp/event_create.json",
+      "schema": "contracts/schemas/command-response.schema.json"
+    },
+    {
+      "branch": "rescheduled",
+      "command": "event.reschedule",
+      "expected_exit_code": 0,
+      "fixture": "tests/fixtures/command_responses/mvp/event_reschedule.json",
+      "schema": "contracts/schemas/command-response.schema.json"
+    },
+    {
+      "branch": "updated",
+      "command": "event.update",
+      "expected_exit_code": 0,
+      "fixture": "tests/fixtures/command_responses/mvp/event_update.json",
+      "schema": "contracts/schemas/command-response.schema.json"
+    },
+    {
+      "branch": "archived",
+      "command": "item.archive",
+      "expected_exit_code": 0,
+      "fixture": "tests/fixtures/command_responses/mvp/item_archive.json",
+      "schema": "contracts/schemas/command-response.schema.json"
+    },
+    {
+      "branch": "event_filter",
+      "command": "item.list",
+      "expected_exit_code": 0,
+      "fixture": "tests/fixtures/command_responses/mvp/item_list_event.json",
+      "schema": "contracts/schemas/command-response.schema.json"
+    },
+    {
+      "branch": "event",
+      "command": "item.show",
+      "expected_exit_code": 0,
+      "fixture": "tests/fixtures/command_responses/mvp/item_show_event.json",
+      "schema": "contracts/schemas/command-response.schema.json"
+    },
+    {
+      "branch": "created",
+      "command": "relation.create",
+      "expected_exit_code": 0,
+      "fixture": "tests/fixtures/command_responses/mvp/relation_create.json",
+      "schema": "contracts/schemas/command-response.schema.json"
+    },
+    {
+      "branch": "with_derived_alias",
+      "command": "relation.list",
+      "expected_exit_code": 0,
+      "fixture": "tests/fixtures/command_responses/mvp/relation_list.json",
+      "schema": "contracts/schemas/command-response.schema.json"
+    },
+    {
+      "branch": "created_no_external_send",
+      "command": "reminder.create",
+      "expected_exit_code": 0,
+      "fixture": "tests/fixtures/command_responses/mvp/reminder_create.json",
+      "schema": "contracts/schemas/command-response.schema.json"
+    },
+    {
+      "branch": "duplicate_if_absent",
+      "command": "reminder.create",
+      "expected_exit_code": 0,
+      "fixture": "tests/fixtures/command_responses/mvp/reminder_duplicate_if_absent.json",
+      "schema": "contracts/schemas/command-response.schema.json"
+    },
+    {
+      "branch": "stale_version",
+      "command": "task.update",
+      "expected_exit_code": 5,
+      "fixture": "tests/fixtures/command_responses/mvp/stale_version_failure.json",
+      "schema": "contracts/schemas/command-response.schema.json"
+    },
+    {
+      "branch": "created",
+      "command": "subject.upsert",
+      "expected_exit_code": 0,
+      "fixture": "tests/fixtures/command_responses/mvp/subject_upsert_created.json",
+      "schema": "contracts/schemas/command-response.schema.json"
+    },
+    {
+      "branch": "compatible_replay",
+      "command": "subject.upsert",
+      "expected_exit_code": 0,
+      "fixture": "tests/fixtures/command_responses/mvp/subject_upsert_replay.json",
+      "schema": "contracts/schemas/command-response.schema.json"
+    },
+    {
+      "branch": "cancelled",
+      "command": "task.cancel",
+      "expected_exit_code": 0,
+      "fixture": "tests/fixtures/command_responses/mvp/task_cancel.json",
+      "schema": "contracts/schemas/command-response.schema.json"
+    },
+    {
+      "branch": "completed",
+      "command": "task.complete",
+      "expected_exit_code": 0,
+      "fixture": "tests/fixtures/command_responses/mvp/task_complete.json",
+      "schema": "contracts/schemas/command-response.schema.json"
+    },
+    {
+      "branch": "created",
+      "command": "task.create",
+      "expected_exit_code": 0,
+      "fixture": "tests/fixtures/command_responses/mvp/task_create.json",
+      "schema": "contracts/schemas/command-response.schema.json"
+    },
+    {
+      "branch": "updated",
+      "command": "task.update",
+      "expected_exit_code": 0,
+      "fixture": "tests/fixtures/command_responses/mvp/task_update.json",
+      "schema": "contracts/schemas/command-response.schema.json"
+    },
+    {
+      "branch": "wrong_item_type",
+      "command": "event.update",
+      "expected_exit_code": 2,
+      "fixture": "tests/fixtures/command_responses/mvp/wrong_type_failure.json",
+      "schema": "contracts/schemas/command-response.schema.json"
+    }
+  ],
+  "schema_version": "spine.agent-command-fixtures.v1"
+}

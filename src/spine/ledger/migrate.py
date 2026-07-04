@@ -16,12 +16,13 @@ from spine.core import SpineValidationError
 from spine.ledger.common import utc_z_from_datetime
 from spine.ledger.sqlite import assert_ledger_invariants, connect, initialize_schema
 
-CURRENT_SCHEMA_VERSION = 2
+CURRENT_SCHEMA_VERSION = 3
 
 EXPECTED_SCHEMA_TABLES = frozenset(
     {
         "audit_log",
         "candidate_actions",
+        "command_receipts",
         "coordination_item_relations",
         "coordination_item_versions",
         "coordination_items",
@@ -47,6 +48,7 @@ EXPECTED_SCHEMA_INDEXES = frozenset(
         "audit_log_item_created_idx",
         "candidate_actions_item_status_idx",
         "candidate_actions_open_kind_idx",
+        "command_receipts_item_created_idx",
         "coordination_item_relations_active_source_idx",
         "coordination_item_relations_active_target_idx",
         "coordination_item_relations_active_unique",

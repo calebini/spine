@@ -41,18 +41,20 @@ class LedgerMigrationTests(unittest.TestCase):
         with self.assertRaisesRegex(SpineValidationError, "ledger_schema_uninitialized"):
             migrate_schema(self.connection)
 
-    def test_migrate_v1_database_applies_access_path_index_migration(self) -> None:
+    def test_migrate_v1_database_applies_pending_migrations(self) -> None:
         initialize_schema(self.connection)
         rewind_to_v1_without_access_indexes(self.connection)
         self.assertEqual(current_schema_version(self.connection), 1)
         self.assertNotIn("work_instances_eligible_due_idx", index_names(self.connection))
+        self.connection.execute("DROP TABLE command_receipts")
 
         result = migrate_schema(self.connection)
 
         self.assertEqual(result.before_version, 1)
         self.assertEqual(result.after_version, CURRENT_SCHEMA_VERSION)
-        self.assertEqual(result.applied_versions, (2,))
+        self.assertEqual(result.applied_versions, (2, 3))
         self.assertIn("work_instances_eligible_due_idx", index_names(self.connection))
+        self.assertIn("command_receipts_item_created_idx", index_names(self.connection))
 
     def test_verify_schema_rejects_missing_required_index(self) -> None:
         initialize_schema(self.connection)

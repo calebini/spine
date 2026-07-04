@@ -1,0 +1,26 @@
+{
+  "command": "item.list",
+  "items": [
+    {
+      "created_at_utc": "2026-06-06T10:01:00Z",
+      "current_common": {
+        "created_at_utc": "2026-06-06T10:01:00Z",
+        "created_by_subject_id": "agent",
+        "intent_hash": "50d7d4db88b4a42e787158abb27fb48c761896fbd8e7d847e714769783355785",
+        "normalized_fields_hash": "50d7d4db88b4a42e787158abb27fb48c761896fbd8e7d847e714769783355785",
+        "summary": "Bring forms",
+        "title": "Fixture event",
+        "version": "1"
+      },
+      "current_version": "1",
+      "detail_status": "scheduled",
+      "item_id": "item_0f3afe27f9de445de632f4a8348957214f5dd24aac0de81a0ee8566dd4e976d5",
+      "item_type": "event",
+      "status": "active",
+      "updated_at_utc": "2026-06-06T10:01:00Z"
+    }
+  ],
+  "limit": "50",
+  "ok": true,
+  "truncated": false
+}

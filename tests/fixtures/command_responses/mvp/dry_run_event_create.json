@@ -1,0 +1,32 @@
+{
+  "audit_id": "audit_4cb29b0cef502c5c5555449a5671cc97e39f4d5f6b39a92143c3b4057208e644",
+  "command": "event.create",
+  "command_receipt_id": "command_receipt_eea69090747a847d8e8668495a01ec28bd1c2acacc5fa7a8be7d7242b2c7b765",
+  "created": true,
+  "current_common": {
+    "created_at_utc": "2026-06-06T10:01:00Z",
+    "created_by_subject_id": "agent",
+    "intent_hash": "50d7d4db88b4a42e787158abb27fb48c761896fbd8e7d847e714769783355785",
+    "normalized_fields_hash": "50d7d4db88b4a42e787158abb27fb48c761896fbd8e7d847e714769783355785",
+    "summary": "Bring forms",
+    "title": "Fixture event",
+    "version": "1"
+  },
+  "current_version": "1",
+  "dry_run": true,
+  "event_detail": {
+    "all_day": false,
+    "event_status": "scheduled",
+    "start_anchor": {
+      "anchor_id": "anchor_34eef0c924f44a0e06f1f2066157ae82ddf23363bc1cc33ecdea00137e3f4f4b",
+      "anchor_kind": "instant_utc",
+      "created_at_utc": "2026-06-06T10:01:00Z",
+      "utc_instant": "2026-06-06T12:00:00Z"
+    },
+    "start_anchor_id": "anchor_34eef0c924f44a0e06f1f2066157ae82ddf23363bc1cc33ecdea00137e3f4f4b"
+  },
+  "item_id": "item_39c826f3e5c8bd107fc5df26c66e9db7e938b5c536065f60749157c350fb4568",
+  "item_type": "event",
+  "ok": true,
+  "version": "1"
+}

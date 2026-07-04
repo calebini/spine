@@ -1,0 +1,9 @@
+{
+  "command": "task.update",
+  "error": {
+    "code": "stale_version",
+    "field": "target_version",
+    "message": "target version is not current"
+  },
+  "ok": false
+}

@@ -1,0 +1,1537 @@
+"""Transport-neutral dispatcher for the Spine agent command contract MVP."""
+
+from __future__ import annotations
+
+import sqlite3
+from collections.abc import Mapping, Sequence
+from typing import Any
+
+from spine.commands.context import CommandContext
+from spine.commands.receipts import (
+    command_derived_id,
+    command_receipt,
+    get_command_receipt,
+    insert_command_receipt,
+)
+from spine.commands.responses import (
+    event_reschedule_response,
+    event_update_response,
+    item_list_response,
+    item_show_response,
+    task_update_response,
+)
+from spine.core import SpineValidationError
+from spine.core.hashing import audit_log_payload_hash
+from spine.ledger.common import TemporalAnchorInput, insert_temporal_anchor, require_utc_z
+from spine.ledger.item_drafts import _UNSET
+from spine.ledger.items import (
+    archive_item,
+    cancel_event,
+    cancel_task,
+    complete_task,
+    create_event_v1,
+    create_next_item_version,
+    create_task_v1,
+    get_current_item,
+)
+from spine.ledger.relations import create_item_relation
+from spine.ledger.supporting import (
+    NotificationPolicyInput,
+    current_locations,
+    current_notification_policies,
+    current_subject_roles,
+    insert_notification_policy,
+)
+from spine.ledger.work import create_work_instance
+
+MVP_COMMANDS = frozenset(
+    {
+        "subject.upsert",
+        "item.show",
+        "item.list",
+        "item.archive",
+        "event.create",
+        "event.update",
+        "event.reschedule",
+        "event.cancel",
+        "task.create",
+        "task.update",
+        "task.complete",
+        "task.cancel",
+        "relation.create",
+        "relation.list",
+        "reminder.create",
+    }
+)
+
+WRITE_COMMANDS = MVP_COMMANDS - {"item.show", "item.list", "relation.list"}
+
+
+def handle(command: str, request: Mapping[str, Any], context: CommandContext) -> dict[str, Any]:
+    """Dispatch the MVP command-core interface."""
+
+    if command not in MVP_COMMANDS:
+        return _error(command, "unsupported_command", f"unsupported command: {command}", "command")
+    if not isinstance(request, Mapping):
+        return _error(command, "invalid_request", "request must be a JSON object", "request")
+    if context.ledger is None:
+        return _error(command, "invalid_request", f"{command} requires CommandContext.ledger", "ledger")
+    try:
+        if context.dry_run and command in WRITE_COMMANDS:
+            preview = sqlite3.connect(":memory:")
+            preview.row_factory = sqlite3.Row
+            context.ledger.backup(preview)
+            try:
+                preview_context = CommandContext(
+                    ledger=preview,
+                    ledger_path=context.ledger_path,
+                    dry_run=context.dry_run,
+                    transport_metadata=context.transport_metadata,
+                    correlation_id=context.correlation_id,
+                    adapter_bindings=context.adapter_bindings,
+                )
+                result = _dispatch(command, request, preview_context)
+            finally:
+                preview.close()
+            result["dry_run"] = True
+            return result
+        return _dispatch(command, request, context)
+    except SpineValidationError as exc:
+        response = _validation_error(command, exc)
+        if context.dry_run and command in WRITE_COMMANDS:
+            response["dry_run"] = True
+        return response
+    except sqlite3.IntegrityError as exc:
+        response = _error(command, "semantic_conflict", str(exc), "request")
+        if context.dry_run and command in WRITE_COMMANDS:
+            response["dry_run"] = True
+        return response
+
+
+def _dispatch(command: str, request: Mapping[str, Any], context: CommandContext) -> dict[str, Any]:
+    if command == "subject.upsert":
+        return _handle_subject_upsert(request, context)
+    if command == "item.show":
+        return _handle_item_show(request, context)
+    if command == "item.list":
+        return _handle_item_list(request, context)
+    if command == "event.create":
+        return _handle_event_create(request, context)
+    if command == "task.create":
+        return _handle_task_create(request, context)
+    if command == "event.update":
+        return _handle_common_update("event.update", "event", request, context)
+    if command == "task.update":
+        return _handle_common_update("task.update", "task", request, context)
+    if command == "event.reschedule":
+        return _handle_event_reschedule(request, context)
+    if command == "event.cancel":
+        return _handle_event_cancel(request, context)
+    if command == "task.complete":
+        return _handle_task_complete(request, context)
+    if command == "task.cancel":
+        return _handle_task_cancel(request, context)
+    if command == "item.archive":
+        return _handle_item_archive(request, context)
+    if command == "relation.create":
+        return _handle_relation_create(request, context)
+    if command == "relation.list":
+        return _handle_relation_list(request, context)
+    if command == "reminder.create":
+        return _handle_reminder_create(request, context)
+    return _error(command, "unsupported_command", f"unsupported command: {command}", "command")
+
+
+def _handle_subject_upsert(request: Mapping[str, Any], context: CommandContext) -> dict[str, Any]:
+    _check_fields("subject.upsert", request, {"command_id", "actor_subject_id", "subject_id", "subject_kind", "display_name", "status", "updated_at_utc"})
+    command_id = _required_str(request, "command_id")
+    actor_subject_id = _required_str(request, "actor_subject_id")
+    subject_id = _required_str(request, "subject_id")
+    subject_kind = _enum(request.get("subject_kind"), "subject_kind", {"person", "agent"})
+    display_name = _required_str(request, "display_name")
+    status = _enum(request.get("status", "active"), "status", {"active", "inactive"})
+    updated_at_utc = _timestamp(request, "updated_at_utc")
+    semantic_facts = {
+        "command": "subject.upsert",
+        "command_id": command_id,
+        "actor_subject_id": actor_subject_id,
+        "action_timestamp_utc": updated_at_utc,
+        "subject_id": subject_id,
+        "subject_kind": subject_kind,
+        "display_name": display_name,
+        "status": status,
+    }
+    replay = _compatible_replay("subject.upsert", command_id, semantic_facts, context)
+    if replay is not None:
+        subject = _subject(context.ledger, subject_id)
+        response = _subject_response(subject, created=False, updated=False, receipt_id=replay["command_receipt_id"])
+        return response
+    if not _subject_exists(context.ledger, actor_subject_id):
+        count = context.ledger.execute("SELECT COUNT(*) FROM subjects").fetchone()[0]
+        if not (count == 0 and actor_subject_id == subject_id):
+            return _error("subject.upsert", "referenced_row_not_found", "actor subject not found", "actor_subject_id")
+    existing = _subject(context.ledger, subject_id, required=False)
+    created = existing is None
+    updated = created or any(
+        existing[key] != value
+        for key, value in {"subject_kind": subject_kind, "display_name": display_name, "status": status}.items()
+    )
+    effect = "subject_created" if created else "subject_updated" if updated else "subject_noop"
+    receipt = _make_receipt(
+        command="subject.upsert",
+        command_id=command_id,
+        actor_subject_id=actor_subject_id,
+        action_timestamp_utc=updated_at_utc,
+        effect=effect,
+        semantic_facts={**semantic_facts, "created": created, "updated": updated},
+        result_identity_facts={
+            "command_receipt_id": _receipt_id("subject.upsert", command_id),
+            "subject_id": subject_id,
+            "created": created,
+            "updated": updated,
+        },
+    )
+    with context.ledger:
+        if created:
+            context.ledger.execute(
+                """
+                INSERT INTO subjects (
+                  subject_id, subject_kind, display_name, status, created_at_utc, updated_at_utc
+                )
+                VALUES (?, ?, ?, ?, ?, ?)
+                """,
+                (subject_id, subject_kind, display_name, status, updated_at_utc, updated_at_utc),
+            )
+        elif updated:
+            context.ledger.execute(
+                """
+                UPDATE subjects
+                SET subject_kind = ?, display_name = ?, status = ?, updated_at_utc = ?
+                WHERE subject_id = ?
+                """,
+                (subject_kind, display_name, status, updated_at_utc, subject_id),
+            )
+        insert_command_receipt(context.ledger, receipt)
+    return _subject_response(_subject(context.ledger, subject_id), created=created, updated=updated, receipt_id=receipt["command_receipt_id"])
+
+
+def _handle_item_show(request: Mapping[str, Any], context: CommandContext) -> dict[str, Any]:
+    _check_fields("item.show", request, {"item_id", "include_relations", "locations_limit", "subject_roles_limit", "notification_policies_limit", "relations_limit"})
+    item_id = _required_str(request, "item_id")
+    item = _hydrated_item(context.ledger, item_id)
+    include_relations = bool(request.get("include_relations", False))
+    locations_limit = _limit(request.get("locations_limit", 50))
+    subject_roles_limit = _limit(request.get("subject_roles_limit", 50))
+    notification_policies_limit = _limit(request.get("notification_policies_limit", 50))
+    relations_limit = _limit(request.get("relations_limit", 50))
+    locations = _limit_sequence(item.get("locations", ()), locations_limit)
+    subject_roles = _limit_sequence(item.get("subject_roles", ()), subject_roles_limit)
+    notification_policies = _limit_sequence(item.get("notification_policies", ()), notification_policies_limit)
+    shown_item = {
+        **item,
+        "locations": locations[0],
+        "subject_roles": subject_roles[0],
+        "notification_policies": notification_policies[0],
+    }
+    relations: tuple[list[dict[str, Any]], bool] = ([], False)
+    if include_relations:
+        relations = _limit_sequence(_relations_for_item(context.ledger, item_id), relations_limit)
+    return item_show_response(
+        shown_item,
+        include_relations=include_relations,
+        relations=relations[0],
+        locations_limit=str(locations_limit),
+        locations_truncated=locations[1],
+        subject_roles_limit=str(subject_roles_limit),
+        subject_roles_truncated=subject_roles[1],
+        notification_policies_limit=str(notification_policies_limit),
+        notification_policies_truncated=notification_policies[1],
+        relations_limit=str(relations_limit),
+        relations_truncated=relations[1],
+    )
+
+
+def _handle_item_list(request: Mapping[str, Any], context: CommandContext) -> dict[str, Any]:
+    _check_fields("item.list", request, {"item_type", "status", "include_archived", "limit"})
+    limit = _limit(request.get("limit", 50))
+    item_type = request.get("item_type")
+    status = request.get("status")
+    if status is not None and "include_archived" in request:
+        return _error("item.list", "invalid_request", "status and include_archived are mutually exclusive", "include_archived")
+    include_archived = bool(request.get("include_archived", False))
+    if item_type is not None:
+        item_type = _enum(item_type, "item_type", {"event", "task", "project", "collection"})
+    if status is not None:
+        status = _enum(status, "status", {"active", "archived"})
+    where = []
+    params: list[Any] = []
+    if item_type is not None:
+        where.append("item_type = ?")
+        params.append(item_type)
+    if status is not None:
+        where.append("status = ?")
+        params.append(status)
+    elif not include_archived:
+        where.append("status = 'active'")
+    clause = "WHERE " + " AND ".join(where) if where else ""
+    rows = context.ledger.execute(
+        f"""
+        SELECT item_id
+        FROM coordination_items
+        {clause}
+        ORDER BY updated_at_utc DESC, item_id ASC
+        LIMIT ?
+        """,
+        (*params, limit + 1),
+    ).fetchall()
+    truncated = len(rows) > limit
+    items = [_hydrated_item(context.ledger, row["item_id"]) for row in rows[:limit]]
+    return item_list_response(items, limit=str(limit), truncated=truncated)
+
+
+def _handle_event_create(request: Mapping[str, Any], context: CommandContext) -> dict[str, Any]:
+    allowed = {"command_id", "actor_subject_id", "created_at_utc", "title", "summary", "source_ref", "all_day", "start_anchor", "end_anchor", "visibility", "attendance_policy_ref"}
+    _check_fields("event.create", request, allowed)
+    command_id, actor, created_at = _write_identity("event.create", request, "created_at_utc", context)
+    title = _required_str(request, "title")
+    all_day = _required_bool(request, "all_day")
+    start_anchor = _anchor_input(request.get("start_anchor"), "start_anchor", _derived_id("event.create", command_id, "start_anchor", "/start_anchor"))
+    end_anchor = None
+    if request.get("end_anchor") is not None:
+        end_anchor = _anchor_input(request.get("end_anchor"), "end_anchor", _derived_id("event.create", command_id, "end_anchor", "/end_anchor"))
+    semantic = _semantic_request("event.create", command_id, actor, created_at, request, allowed)
+    replay = _compatible_replay("event.create", command_id, semantic, context)
+    if replay is not None:
+        return _create_response("event.create", _receipt_item(context.ledger, replay), False, replay)
+    item_id = _derived_id("event.create", command_id, "item", "/item")
+    audit_id = _derived_id("event.create", command_id, "audit", "/audit")
+    result = create_event_v1(
+        context.ledger,
+        item_id=item_id,
+        audit_id=audit_id,
+        created_at_utc=created_at,
+        created_by_subject_id=actor,
+        title=title,
+        summary=_optional_str(request, "summary"),
+        source_ref=_optional_str(request, "source_ref"),
+        all_day=all_day,
+        start_anchor=start_anchor,
+        end_anchor=end_anchor,
+        visibility=_optional_str(request, "visibility"),
+        attendance_policy_ref=_optional_str(request, "attendance_policy_ref"),
+    )
+    receipt = _store_write_receipt(
+        context,
+        command="event.create",
+        command_id=command_id,
+        actor_subject_id=actor,
+        action_timestamp_utc=created_at,
+        effect="event_created",
+        item_id=result.item_id,
+        target_version="0",
+        semantic_facts={**semantic, "item_id": result.item_id, "version": "1", "created": True},
+        result_identity_facts={
+            "command_receipt_id": _receipt_id("event.create", command_id),
+            "item_id": result.item_id,
+            "version": "1",
+            "current_version": "1",
+            "audit_id": result.audit_id,
+        },
+    )
+    return _create_response("event.create", _hydrated_item(context.ledger, result.item_id), True, receipt)
+
+
+def _handle_task_create(request: Mapping[str, Any], context: CommandContext) -> dict[str, Any]:
+    allowed = {"command_id", "actor_subject_id", "created_at_utc", "title", "summary", "source_ref", "due_anchor", "defer_until_anchor", "priority"}
+    _check_fields("task.create", request, allowed)
+    command_id, actor, created_at = _write_identity("task.create", request, "created_at_utc", context)
+    title = _required_str(request, "title")
+    due_anchor = _anchor_input(request.get("due_anchor"), "due_anchor", _derived_id("task.create", command_id, "due_anchor", "/due_anchor")) if request.get("due_anchor") is not None else None
+    defer_anchor = _anchor_input(request.get("defer_until_anchor"), "defer_until_anchor", _derived_id("task.create", command_id, "defer_until_anchor", "/defer_until_anchor")) if request.get("defer_until_anchor") is not None else None
+    semantic = _semantic_request("task.create", command_id, actor, created_at, request, allowed)
+    replay = _compatible_replay("task.create", command_id, semantic, context)
+    if replay is not None:
+        return _create_response("task.create", _receipt_item(context.ledger, replay), False, replay)
+    item_id = _derived_id("task.create", command_id, "item", "/item")
+    audit_id = _derived_id("task.create", command_id, "audit", "/audit")
+    result = create_task_v1(
+        context.ledger,
+        item_id=item_id,
+        audit_id=audit_id,
+        created_at_utc=created_at,
+        created_by_subject_id=actor,
+        title=title,
+        summary=_optional_str(request, "summary"),
+        source_ref=_optional_str(request, "source_ref"),
+        priority=_optional_str(request, "priority"),
+        due_anchor=due_anchor,
+        defer_until_anchor=defer_anchor,
+    )
+    receipt = _store_write_receipt(
+        context,
+        command="task.create",
+        command_id=command_id,
+        actor_subject_id=actor,
+        action_timestamp_utc=created_at,
+        effect="task_created",
+        item_id=result.item_id,
+        target_version="0",
+        semantic_facts={**semantic, "item_id": result.item_id, "version": "1", "created": True},
+        result_identity_facts={
+            "command_receipt_id": _receipt_id("task.create", command_id),
+            "item_id": result.item_id,
+            "version": "1",
+            "current_version": "1",
+            "audit_id": result.audit_id,
+        },
+    )
+    return _create_response("task.create", _hydrated_item(context.ledger, result.item_id), True, receipt)
+
+
+def _handle_common_update(command: str, expected_type: str, request: Mapping[str, Any], context: CommandContext) -> dict[str, Any]:
+    allowed = {"command_id", "actor_subject_id", "item_id", "target_version", "updated_at_utc", "patch"}
+    _check_fields(command, request, allowed)
+    command_id, actor, updated_at = _write_identity(command, request, "updated_at_utc", context)
+    item_id = _required_str(request, "item_id")
+    target_version = _version(request, "target_version")
+    if "patch" not in request:
+        raise SpineValidationError("missing_patch", "patch is required")
+    patch = _patch(request["patch"])
+    semantic = _semantic_request(command, command_id, actor, updated_at, request, allowed)
+    replay = _compatible_replay(command, command_id, semantic, context)
+    if replay is not None:
+        response_fn = event_update_response if expected_type == "event" else task_update_response
+        return response_fn(updated=False, item=_receipt_item(context.ledger, replay), target_version=str(target_version), audit_id=None, command_receipt_id=replay["command_receipt_id"])
+    item = _require_item_for_write(context.ledger, command, item_id, expected_type, target_version)
+    current_common = item["version"]
+    changes = _changed_common(current_common, patch)
+    if not changes:
+        receipt = _store_write_receipt(
+            context,
+            command=command,
+            command_id=command_id,
+            actor_subject_id=actor,
+            action_timestamp_utc=updated_at,
+            effect=f"{expected_type}_update_noop",
+            item_id=item_id,
+            target_version=str(target_version),
+            semantic_facts={**semantic, "updated": False},
+            result_identity_facts={
+                "command_receipt_id": _receipt_id(command, command_id),
+                "item_id": item_id,
+                "target_version": str(target_version),
+                "version": str(item["current_version"]),
+                "current_version": str(item["current_version"]),
+            },
+        )
+        response_fn = event_update_response if expected_type == "event" else task_update_response
+        return response_fn(updated=False, item=item, target_version=str(target_version), audit_id=None, command_receipt_id=receipt["command_receipt_id"])
+    audit_id = _derived_id(command, command_id, "audit", "/audit")
+    mutation = create_next_item_version(
+        context.ledger,
+        item_id=item_id,
+        target_version=target_version,
+        created_at_utc=updated_at,
+        created_by_subject_id=actor,
+        audit_id=audit_id,
+        title=patch.get("title"),
+        summary=patch["summary"] if "summary" in patch else _UNSET,
+        source_ref=patch["source_ref"] if "source_ref" in patch else _UNSET,
+        audit_action=f"{expected_type}_updated",
+        reason_code=f"{expected_type}_updated",
+    )
+    receipt = _store_write_receipt(
+        context,
+        command=command,
+        command_id=command_id,
+        actor_subject_id=actor,
+        action_timestamp_utc=updated_at,
+        effect=f"{expected_type}_updated",
+        item_id=item_id,
+        target_version=str(target_version),
+        semantic_facts={**semantic, "version": str(mutation.version), "updated": True},
+        result_identity_facts={
+            "command_receipt_id": _receipt_id(command, command_id),
+            "item_id": item_id,
+            "target_version": str(target_version),
+            "version": str(mutation.version),
+            "current_version": str(mutation.version),
+            "audit_id": mutation.audit_id,
+        },
+    )
+    response_fn = event_update_response if expected_type == "event" else task_update_response
+    return response_fn(updated=True, item=_hydrated_item(context.ledger, item_id), target_version=str(target_version), audit_id=mutation.audit_id, command_receipt_id=receipt["command_receipt_id"])
+
+
+def _handle_event_reschedule(request: Mapping[str, Any], context: CommandContext) -> dict[str, Any]:
+    allowed = {"command_id", "actor_subject_id", "item_id", "target_version", "rescheduled_at_utc", "all_day", "start_anchor", "end_anchor", "patch"}
+    _check_fields("event.reschedule", request, allowed)
+    command_id, actor, at = _write_identity("event.reschedule", request, "rescheduled_at_utc", context)
+    item_id = _required_str(request, "item_id")
+    target_version = _version(request, "target_version")
+    all_day = _required_bool(request, "all_day")
+    start_anchor = _anchor_input(request.get("start_anchor"), "start_anchor", _derived_id("event.reschedule", command_id, "start_anchor", "/start_anchor"))
+    end_anchor = _anchor_input(request.get("end_anchor"), "end_anchor", _derived_id("event.reschedule", command_id, "end_anchor", "/end_anchor")) if request.get("end_anchor") is not None else None
+    patch = _patch(request.get("patch", {}))
+    semantic = _semantic_request("event.reschedule", command_id, actor, at, request, allowed)
+    replay = _compatible_replay("event.reschedule", command_id, semantic, context)
+    if replay is not None:
+        return event_reschedule_response(rescheduled=False, item=_receipt_item(context.ledger, replay), target_version=str(target_version), audit_id=None, command_receipt_id=replay["command_receipt_id"])
+    item = _require_item_for_write(context.ledger, "event.reschedule", item_id, "event", target_version)
+    if item["detail"]["event_status"] == "cancelled":
+        return _error("event.reschedule", "invalid_state_transition", "cancelled events cannot be rescheduled", "event_status")
+    current = item["detail"]
+    anchor_noop = current["start_anchor"] == _anchor_output(start_anchor) and current.get("end_anchor") == (_anchor_output(end_anchor) if end_anchor is not None else None) and bool(current["all_day"]) == all_day
+    common_noop = not _changed_common(item["version"], patch)
+    if anchor_noop and common_noop:
+        receipt = _store_write_receipt(
+            context,
+            command="event.reschedule",
+            command_id=command_id,
+            actor_subject_id=actor,
+            action_timestamp_utc=at,
+            effect="event_reschedule_noop",
+            item_id=item_id,
+            target_version=str(target_version),
+            semantic_facts={**semantic, "rescheduled": False},
+            result_identity_facts={"command_receipt_id": _receipt_id("event.reschedule", command_id), "item_id": item_id, "target_version": str(target_version), "version": str(target_version), "current_version": str(target_version)},
+        )
+        return event_reschedule_response(rescheduled=False, item=item, target_version=str(target_version), audit_id=None, command_receipt_id=receipt["command_receipt_id"])
+    audit_id = _derived_id("event.reschedule", command_id, "audit", "/audit")
+    with context.ledger:
+        insert_temporal_anchor(context.ledger, anchor=start_anchor, anchor_id=start_anchor.anchor_id or "", default_created_at_utc=at)
+        if end_anchor is not None:
+            insert_temporal_anchor(context.ledger, anchor=end_anchor, anchor_id=end_anchor.anchor_id or "", default_created_at_utc=at)
+    mutation = create_next_item_version(
+        context.ledger,
+        item_id=item_id,
+        target_version=target_version,
+        created_at_utc=at,
+        created_by_subject_id=actor,
+        audit_id=audit_id,
+        title=patch.get("title"),
+        summary=patch["summary"] if "summary" in patch else _UNSET,
+        source_ref=patch["source_ref"] if "source_ref" in patch else _UNSET,
+        event_detail={
+            "all_day": int(all_day),
+            "start_anchor_id": start_anchor.anchor_id,
+            "end_anchor_id": end_anchor.anchor_id if end_anchor is not None else None,
+        },
+        audit_action="event_rescheduled",
+        reason_code="event_rescheduled",
+    )
+    receipt = _store_write_receipt(
+        context,
+        command="event.reschedule",
+        command_id=command_id,
+        actor_subject_id=actor,
+        action_timestamp_utc=at,
+        effect="event_rescheduled",
+        item_id=item_id,
+        target_version=str(target_version),
+        semantic_facts={**semantic, "version": str(mutation.version), "rescheduled": True},
+        result_identity_facts={"command_receipt_id": _receipt_id("event.reschedule", command_id), "item_id": item_id, "target_version": str(target_version), "version": str(mutation.version), "current_version": str(mutation.version), "audit_id": mutation.audit_id},
+    )
+    return event_reschedule_response(rescheduled=True, item=_hydrated_item(context.ledger, item_id), target_version=str(target_version), audit_id=mutation.audit_id, command_receipt_id=receipt["command_receipt_id"])
+
+
+def _handle_event_cancel(request: Mapping[str, Any], context: CommandContext) -> dict[str, Any]:
+    return _lifecycle("event.cancel", request, context, "event", "cancelled_at_utc", "cancelled", cancel_event, "cancelled")
+
+
+def _handle_task_complete(request: Mapping[str, Any], context: CommandContext) -> dict[str, Any]:
+    return _lifecycle("task.complete", request, context, "task", "completed_at_utc", "completed", complete_task, "done")
+
+
+def _handle_task_cancel(request: Mapping[str, Any], context: CommandContext) -> dict[str, Any]:
+    return _lifecycle("task.cancel", request, context, "task", "cancelled_at_utc", "cancelled", cancel_task, "cancelled")
+
+
+def _handle_item_archive(request: Mapping[str, Any], context: CommandContext) -> dict[str, Any]:
+    allowed = {"command_id", "actor_subject_id", "item_id", "target_version", "archived_at_utc"}
+    _check_fields("item.archive", request, allowed)
+    command_id, actor, at = _write_identity("item.archive", request, "archived_at_utc", context)
+    item_id = _required_str(request, "item_id")
+    target_version = _version(request, "target_version")
+    semantic = _semantic_request("item.archive", command_id, actor, at, request, allowed)
+    replay = _compatible_replay("item.archive", command_id, semantic, context)
+    if replay is not None:
+        return _archive_response(_hydrated_item(context.ledger, item_id), False, replay["command_receipt_id"], replay["result_identity_facts"].get("audit_id"))
+    item = _hydrated_item(context.ledger, item_id)
+    if item["status"] == "archived":
+        return _error("item.archive", "invalid_state_transition", "item is already archived", "status")
+    if int(item["current_version"]) != target_version:
+        return _error("item.archive", "stale_version", "target version is not current", "target_version")
+    audit_id = _derived_id("item.archive", command_id, "audit", "/audit")
+    archive_item(context.ledger, item_id=item_id, target_version=target_version, archived_at_utc=at, archived_by_subject_id=actor, audit_id=audit_id)
+    receipt = _store_write_receipt(
+        context,
+        command="item.archive",
+        command_id=command_id,
+        actor_subject_id=actor,
+        action_timestamp_utc=at,
+        effect="item_archived",
+        item_id=item_id,
+        target_version=str(target_version),
+        semantic_facts={**semantic, "archived": True},
+        result_identity_facts={"command_receipt_id": _receipt_id("item.archive", command_id), "item_id": item_id, "target_version": str(target_version), "current_version": str(target_version), "audit_id": audit_id},
+    )
+    return _archive_response(_hydrated_item(context.ledger, item_id), True, receipt["command_receipt_id"], audit_id)
+
+
+def _handle_relation_create(request: Mapping[str, Any], context: CommandContext) -> dict[str, Any]:
+    allowed = {"command_id", "actor_subject_id", "source_item_id", "source_target_version", "target_item_id", "target_target_version", "relation_type", "created_at_utc"}
+    _check_fields("relation.create", request, allowed)
+    command_id, actor, at = _write_identity("relation.create", request, "created_at_utc", context)
+    source_id = _required_str(request, "source_item_id")
+    target_id = _required_str(request, "target_item_id")
+    source_version = _version(request, "source_target_version")
+    target_version = _version(request, "target_target_version")
+    relation_type = _enum(request.get("relation_type"), "relation_type", {"depends_on", "part_of"})
+    semantic = _semantic_request("relation.create", command_id, actor, at, request, allowed)
+    replay = _compatible_replay("relation.create", command_id, semantic, context)
+    if replay is not None:
+        return _relation_create_response(context.ledger, replay["result_identity_facts"], created=False)
+    source = _require_item_for_write(context.ledger, "relation.create", source_id, None, source_version, field="source_target_version")
+    _require_item_for_write(context.ledger, "relation.create", target_id, None, target_version, field="target_target_version")
+    relation_id = _derived_id("relation.create", command_id, "relation", "/relation")
+    audit_id = _derived_id("relation.create", command_id, "audit", "/audit")
+    create_item_relation(
+        context.ledger,
+        relation_id=relation_id,
+        source_item_id=source_id,
+        target_item_id=target_id,
+        relation_type=relation_type,
+        created_at_utc=at,
+        created_by_subject_id=actor,
+    )
+    _insert_audit(context.ledger, audit_id, source_id, "relation_created", actor, at, {"action": "relation_created", "relation_id": relation_id})
+    receipt = _store_write_receipt(
+        context,
+        command="relation.create",
+        command_id=command_id,
+        actor_subject_id=actor,
+        action_timestamp_utc=at,
+        effect="relation_created",
+        item_id=source_id,
+        target_version=str(source_version),
+        semantic_facts={**semantic, "relation_id": relation_id, "created": True},
+        result_identity_facts={"command_receipt_id": _receipt_id("relation.create", command_id), "relation_id": relation_id, "source_item_id": source_id, "source_target_version": str(source_version), "source_current_version": str(source["current_version"]), "target_item_id": target_id, "target_target_version": str(target_version), "target_current_version": str(target_version), "audit_id": audit_id},
+    )
+    return _relation_create_response(context.ledger, receipt["result_identity_facts"], created=True)
+
+
+def _handle_relation_list(request: Mapping[str, Any], context: CommandContext) -> dict[str, Any]:
+    _check_fields("relation.list", request, {"item_id", "source_item_id", "target_item_id", "relation_type", "direction", "include_derived_aliases", "bounded", "limit"})
+    limit = _limit(request.get("limit", 50))
+    include_aliases = bool(request.get("include_derived_aliases", False))
+    relation_type = request.get("relation_type")
+    allowed_types = {"depends_on", "part_of", "blocks", "contains"} if include_aliases else {"depends_on", "part_of"}
+    if relation_type is not None:
+        relation_type = _enum(relation_type, "relation_type", allowed_types)
+    item_id = request.get("item_id")
+    source_id = request.get("source_item_id")
+    target_id = request.get("target_item_id")
+    if not any([item_id, source_id, target_id, request.get("bounded")]):
+        return _error("relation.list", "missing_required_field", "item_id or bounded=true is required", "item_id")
+    if "direction" in request and (source_id is not None or target_id is not None):
+        return _error("relation.list", "invalid_request", "direction is only valid with item_id", "direction")
+    source = _required_str(request, "source_item_id") if source_id is not None else None
+    target = _required_str(request, "target_item_id") if target_id is not None else None
+    item = _required_str(request, "item_id") if item_id is not None else None
+    direction = request.get("direction", "both")
+    if item is not None and direction not in {"source", "target", "both"}:
+        return _error("relation.list", "invalid_request", "direction must be source, target, or both", "direction")
+    rows = context.ledger.execute(
+        """
+        SELECT *
+        FROM coordination_item_relations
+        WHERE relation_status = 'active'
+        ORDER BY relation_type, source_item_id, target_item_id, relation_id
+        """
+    ).fetchall()
+    relations = [_relation_element(dict(row)) for row in rows]
+    if include_aliases:
+        relations.extend(_derived_aliases([dict(row) for row in rows], None))
+    relations = [
+        relation
+        for relation in relations
+        if _relation_matches_filters(
+            relation,
+            relation_type=relation_type,
+            source_id=source,
+            target_id=target,
+            item_id=item,
+            direction=str(direction),
+        )
+    ]
+    relations.sort(key=lambda row: (row["relation_type"], row["source_item_id"], row["target_item_id"], row["relation_id"]))
+    truncated = len(relations) > limit
+    return {"ok": True, "command": "relation.list", "relations": relations[:limit], "limit": str(limit), "truncated": truncated}
+
+
+def _relation_matches_filters(
+    relation: Mapping[str, Any],
+    *,
+    relation_type: str | None,
+    source_id: str | None,
+    target_id: str | None,
+    item_id: str | None,
+    direction: str,
+) -> bool:
+    if relation_type is not None and relation["relation_type"] != relation_type:
+        return False
+    if source_id is not None and relation["source_item_id"] != source_id:
+        return False
+    if target_id is not None and relation["target_item_id"] != target_id:
+        return False
+    if item_id is not None:
+        if direction == "source":
+            return relation["source_item_id"] == item_id
+        if direction == "target":
+            return relation["target_item_id"] == item_id
+        return relation["source_item_id"] == item_id or relation["target_item_id"] == item_id
+    return True
+
+
+def _handle_reminder_create(request: Mapping[str, Any], context: CommandContext) -> dict[str, Any]:
+    allowed = {"command_id", "actor_subject_id", "item_id", "target_version", "created_at_utc", "work_subject_ref", "channel", "eligible_at_utc", "trigger_anchor", "if_absent"}
+    _check_fields("reminder.create", request, allowed)
+    command_id, actor, created_at = _write_identity("reminder.create", request, "created_at_utc", context)
+    item_id = _required_str(request, "item_id")
+    target_version = _version(request, "target_version")
+    work_subject_ref = _required_str(request, "work_subject_ref")
+    channel = _enum(request.get("channel"), "channel", {"whatsapp"})
+    eligible_at = _timestamp(request, "eligible_at_utc")
+    trigger_anchor = _anchor_input(request.get("trigger_anchor") or {"anchor_kind": "instant_utc", "utc_instant": eligible_at}, "trigger_anchor", _derived_id("reminder.create", command_id, "trigger_anchor", "/trigger_anchor"))
+    if_absent = bool(request.get("if_absent", False))
+    semantic = _semantic_request("reminder.create", command_id, actor, created_at, request, allowed)
+    replay = _compatible_replay("reminder.create", command_id, semantic, context)
+    if replay is not None:
+        return _reminder_response(replay["result_identity_facts"], created=False)
+    if not _subject_exists(context.ledger, work_subject_ref):
+        return _error("reminder.create", "referenced_row_not_found", "work subject not found", "work_subject_ref")
+    if not _has_openclaw(context):
+        return _error("reminder.create", "environment_failure", "OpenClaw whatsapp binding is required", "channel")
+    duplicate = _find_duplicate_reminder(context.ledger, item_id, work_subject_ref, eligible_at, channel)
+    if duplicate is not None and if_absent:
+        receipt = _store_write_receipt(
+            context,
+            command="reminder.create",
+            command_id=command_id,
+            actor_subject_id=actor,
+            action_timestamp_utc=created_at,
+            effect="reminder_duplicate_noop",
+            item_id=item_id,
+            target_version=str(target_version),
+            semantic_facts={**semantic, "created": False},
+            result_identity_facts={**duplicate, "command_receipt_id": _receipt_id("reminder.create", command_id), "target_version": str(target_version), "created": False},
+        )
+        return _reminder_response(receipt["result_identity_facts"], created=False)
+    item = _require_item_for_write(context.ledger, "reminder.create", item_id, None, target_version)
+    if duplicate is not None:
+        return _error("reminder.create", "semantic_conflict", "matching active reminder already exists", "reminder")
+    next_version = target_version + 1
+    audit_id = _derived_id("reminder.create", command_id, "audit", "/audit")
+    policy_id = _derived_id("reminder.create", command_id, "notification_policy", "/notification_policy")
+    work_id = _derived_id("reminder.create", command_id, "work_instance", "/work_instance")
+    with context.ledger:
+        insert_temporal_anchor(context.ledger, anchor=trigger_anchor, anchor_id=trigger_anchor.anchor_id or "", default_created_at_utc=created_at)
+    create_next_item_version(
+        context.ledger,
+        item_id=item_id,
+        target_version=target_version,
+        created_at_utc=created_at,
+        created_by_subject_id=actor,
+        audit_id=audit_id,
+        audit_action="reminder_created",
+        reason_code="reminder_created",
+    )
+    insert_notification_policy(
+        context.ledger,
+        item_id=item_id,
+        version=next_version,
+        policy=NotificationPolicyInput(
+            policy_id=policy_id,
+            recipient_subject_id=work_subject_ref,
+            channel_preference_ref=channel,
+            trigger_anchor_id=trigger_anchor.anchor_id,
+        ),
+        default_created_at_utc=created_at,
+    )
+    create_work_instance(
+        context.ledger,
+        work_instance_id=work_id,
+        item_id=item_id,
+        item_version=next_version,
+        notification_policy_id=policy_id,
+        notification_policy_item_version=next_version,
+        generation_source_kind="notification_policy",
+        generation_source_ref=policy_id,
+        work_subject_ref=work_subject_ref,
+        policy_basis_ref=policy_id,
+        eligible_at_utc=eligible_at,
+        created_at_utc=created_at,
+    )
+    facts = {
+        "command_receipt_id": _receipt_id("reminder.create", command_id),
+        "item_id": item_id,
+        "item_type": item["item_type"],
+        "target_version": str(target_version),
+        "version": str(next_version),
+        "current_version": str(next_version),
+        "audit_id": audit_id,
+        "notification_policy_id": policy_id,
+        "notification_policy_item_version": str(next_version),
+        "work_instance_id": work_id,
+        "trigger_anchor_id": trigger_anchor.anchor_id,
+        "eligible_at_utc": eligible_at,
+        "created": True,
+        "predicted_delivery": _predicted_delivery(channel, work_subject_ref, eligible_at),
+    }
+    receipt = _store_write_receipt(
+        context,
+        command="reminder.create",
+        command_id=command_id,
+        actor_subject_id=actor,
+        action_timestamp_utc=created_at,
+        effect="reminder_created",
+        item_id=item_id,
+        target_version=str(target_version),
+        semantic_facts={**semantic, "version": str(next_version), "created": True},
+        result_identity_facts=facts,
+    )
+    return _reminder_response(receipt["result_identity_facts"], created=True)
+
+
+def _lifecycle(command: str, request: Mapping[str, Any], context: CommandContext, item_type: str, timestamp_field: str, effect_name: str, workflow: Any, terminal_status: str) -> dict[str, Any]:
+    allowed = {"command_id", "actor_subject_id", "item_id", "target_version", timestamp_field}
+    if command == "task.complete":
+        allowed = allowed | {"completion_state"}
+    _check_fields(command, request, allowed)
+    command_id, actor, at = _write_identity(command, request, timestamp_field, context)
+    item_id = _required_str(request, "item_id")
+    target_version = _version(request, "target_version")
+    semantic = _semantic_request(command, command_id, actor, at, request, allowed)
+    replay = _compatible_replay(command, command_id, semantic, context)
+    if replay is not None:
+        return _lifecycle_response(
+            command,
+            _receipt_item(context.ledger, replay),
+            effect_name,
+            False,
+            replay["command_receipt_id"],
+            replay["result_identity_facts"].get("audit_id"),
+            target_version=str(replay["result_identity_facts"]["target_version"]),
+        )
+    item = _hydrated_item(context.ledger, item_id)
+    if item["item_type"] != item_type:
+        return _wrong_type(command, item_id, item_type, str(item["item_type"]))
+    detail_status = item["detail"]["event_status"] if item_type == "event" else item["detail"]["task_status"]
+    if detail_status == terminal_status or detail_status != ("scheduled" if item_type == "event" else "open"):
+        return _error(command, "invalid_state_transition", "item is already terminal", "status")
+    item = _require_item_for_write(context.ledger, command, item_id, item_type, target_version)
+    audit_id = _derived_id(command, command_id, "audit", "/audit")
+    if command == "task.complete":
+        mutation = workflow(context.ledger, item_id=item_id, target_version=target_version, completed_at_utc=at, completed_by_subject_id=actor, completion_state=_optional_str(request, "completion_state"), audit_id=audit_id)
+    elif command == "event.cancel":
+        mutation = workflow(context.ledger, item_id=item_id, target_version=target_version, cancelled_at_utc=at, cancelled_by_subject_id=actor, audit_id=audit_id)
+    else:
+        mutation = workflow(context.ledger, item_id=item_id, target_version=target_version, cancelled_at_utc=at, cancelled_by_subject_id=actor, audit_id=audit_id)
+    receipt = _store_write_receipt(
+        context,
+        command=command,
+        command_id=command_id,
+        actor_subject_id=actor,
+        action_timestamp_utc=at,
+        effect=f"{item_type}_{effect_name}",
+        item_id=item_id,
+        target_version=str(target_version),
+        semantic_facts={**semantic, "version": str(mutation.version), effect_name: True},
+        result_identity_facts={"command_receipt_id": _receipt_id(command, command_id), "item_id": item_id, "target_version": str(target_version), "version": str(mutation.version), "current_version": str(mutation.version), "audit_id": mutation.audit_id},
+    )
+    return _lifecycle_response(
+        command,
+        _hydrated_item(context.ledger, item_id),
+        effect_name,
+        True,
+        receipt["command_receipt_id"],
+        mutation.audit_id,
+        target_version=str(target_version),
+    )
+
+
+def _write_identity(command: str, request: Mapping[str, Any], timestamp_field: str, context: CommandContext) -> tuple[str, str, str]:
+    command_id = _required_str(request, "command_id")
+    actor = _required_str(request, "actor_subject_id")
+    action_timestamp = _timestamp(request, timestamp_field)
+    if command != "subject.upsert" and not _subject_exists(context.ledger, actor):
+        raise SpineValidationError("actor_not_found", "actor subject not found")
+    return command_id, actor, action_timestamp
+
+
+def _compatible_replay(command: str, command_id: str, semantic_facts: Mapping[str, Any], context: CommandContext) -> dict[str, Any] | None:
+    existing = get_command_receipt(context.ledger, command_id)
+    if existing is None:
+        return None
+    if existing["command"] != command:
+        raise SpineValidationError("command_id_reuse", "command_id was already used by a different command")
+    existing_facts = existing["semantic_facts"]
+    if any(existing_facts.get(key) != value for key, value in semantic_facts.items()):
+        raise SpineValidationError("incompatible_replay", "command_id replay facts do not match")
+    return existing
+
+
+def _store_write_receipt(context: CommandContext, **kwargs: Any) -> dict[str, Any]:
+    receipt = _make_receipt(**kwargs)
+    with context.ledger:
+        insert_command_receipt(context.ledger, receipt)
+    return receipt
+
+
+def _make_receipt(**kwargs: Any) -> dict[str, Any]:
+    return command_receipt(command_receipt_id=_receipt_id(kwargs["command"], kwargs["command_id"]), **kwargs)
+
+
+def _receipt_id(command: str, command_id: str) -> str:
+    return _derived_id(command, command_id, "command_receipt", "/")
+
+
+def _derived_id(command: str, command_id: str, row_role: str, request_path: str) -> str:
+    prefixes = {
+        "item": "item",
+        "audit": "audit",
+        "command_receipt": "command_receipt",
+        "relation": "relation",
+        "start_anchor": "anchor",
+        "end_anchor": "anchor",
+        "due_anchor": "anchor",
+        "defer_until_anchor": "anchor",
+        "trigger_anchor": "anchor",
+        "notification_policy": "notification_policy",
+        "work_instance": "work_instance",
+    }
+    return command_derived_id(prefix=prefixes[row_role], command=command, command_id=command_id, row_role=row_role, request_path=request_path)
+
+
+def _semantic_request(command: str, command_id: str, actor: str, action_timestamp: str, request: Mapping[str, Any], allowed: set[str]) -> dict[str, Any]:
+    facts = {
+        "command": command,
+        "command_id": command_id,
+        "actor_subject_id": actor,
+        "action_timestamp_utc": action_timestamp,
+    }
+    for key in sorted(allowed):
+        if key in {"command_id", "actor_subject_id"}:
+            continue
+        if key in request:
+            facts[key] = _canonical_value(request[key])
+    return facts
+
+
+def _canonical_value(value: Any) -> Any:
+    if isinstance(value, bool) or value is None or isinstance(value, str):
+        return value
+    if isinstance(value, int):
+        return str(value)
+    if isinstance(value, Mapping):
+        return {str(key): _canonical_value(value[key]) for key in sorted(value)}
+    if isinstance(value, Sequence) and not isinstance(value, (str, bytes, bytearray)):
+        return [_canonical_value(item) for item in value]
+    return str(value)
+
+
+def _required_str(request: Mapping[str, Any], field: str) -> str:
+    value = request.get(field)
+    if not isinstance(value, str) or value == "":
+        raise SpineValidationError(f"missing_{field}", f"{field} must be a non-empty string")
+    return value
+
+
+def _optional_str(request: Mapping[str, Any], field: str) -> str | None:
+    value = request.get(field)
+    if value is None:
+        return None
+    if not isinstance(value, str):
+        raise SpineValidationError(f"invalid_{field}", f"{field} must be a string")
+    return value
+
+
+def _required_bool(request: Mapping[str, Any], field: str) -> bool:
+    value = request.get(field)
+    if not isinstance(value, bool):
+        raise SpineValidationError(f"invalid_{field}", f"{field} must be a boolean")
+    return value
+
+
+def _timestamp(request: Mapping[str, Any], field: str) -> str:
+    value = _required_str(request, field)
+    try:
+        return require_utc_z(field, value)
+    except SpineValidationError as exc:
+        raise SpineValidationError(f"invalid_timestamp_{field}", exc.message) from exc
+
+
+def _version(request: Mapping[str, Any], field: str) -> int:
+    value = request.get(field)
+    if isinstance(value, str) and value.isdigit():
+        value = int(value)
+    if not isinstance(value, int) or value < 1:
+        raise SpineValidationError(f"invalid_{field}", f"{field} must be a positive integer")
+    return value
+
+
+def _limit(value: Any) -> int:
+    if isinstance(value, str) and value.isdigit():
+        value = int(value)
+    if not isinstance(value, int) or value < 0 or value > 100:
+        raise SpineValidationError("invalid_limit", "limit must be between 0 and 100")
+    return value
+
+
+def _limit_sequence(values: Any, limit: int) -> tuple[list[Any], bool]:
+    sequence = list(values if isinstance(values, Sequence) and not isinstance(values, (str, bytes, bytearray)) else ())
+    return sequence[:limit], len(sequence) > limit
+
+
+def _enum(value: Any, field: str, allowed: set[str]) -> str:
+    if not isinstance(value, str) or value not in allowed:
+        raise SpineValidationError(f"unsupported_{field}", f"{field} must be one of {sorted(allowed)}")
+    return value
+
+
+def _patch(value: Any) -> dict[str, str | None]:
+    if not isinstance(value, Mapping):
+        raise SpineValidationError("invalid_patch", "patch must be an object")
+    patch: dict[str, str | None] = {}
+    for key, val in value.items():
+        if key not in {"title", "summary", "source_ref"}:
+            raise SpineValidationError(f"unsupported_patch.{key}", f"unsupported patch field: {key}")
+        if key == "title":
+            if not isinstance(val, str) or val == "":
+                raise SpineValidationError("invalid_patch.title", "patch.title must be a non-empty string")
+            patch[key] = val
+        elif val is not None and not isinstance(val, str):
+            raise SpineValidationError(f"invalid_patch.{key}", f"patch.{key} must be a string or null")
+        else:
+            patch[key] = val
+    return patch
+
+
+def _changed_common(current: Mapping[str, Any], patch: Mapping[str, str | None]) -> bool:
+    return any(current.get(key) != value for key, value in patch.items())
+
+
+def _anchor_input(value: Any, field: str, anchor_id: str) -> TemporalAnchorInput:
+    if not isinstance(value, Mapping):
+        raise SpineValidationError(f"invalid_{field}", f"{field} must be an object")
+    allowed = {
+        "anchor_kind",
+        "local_date",
+        "local_time",
+        "timezone",
+        "utc_instant",
+        "window_start_utc",
+        "window_end_utc",
+        "recurrence_rule",
+        "source",
+    }
+    for key in value:
+        if key not in allowed:
+            raise SpineValidationError(f"unsupported_field:{field}.{key}", f"unsupported anchor field: {key}")
+    kind = _enum(value.get("anchor_kind"), f"{field}.anchor_kind", {"instant_utc", "local_instant", "local_date", "utc_window", "local_window"})
+    _validate_anchor_shape(value, field, kind)
+    return TemporalAnchorInput(
+        anchor_id=anchor_id,
+        anchor_kind=kind,
+        local_date=_map_optional_str(value, "local_date"),
+        local_time=_map_optional_str(value, "local_time"),
+        timezone=_map_optional_str(value, "timezone"),
+        utc_instant=_anchor_optional_utc(value, "utc_instant", field),
+        window_start_utc=_anchor_optional_utc(value, "window_start_utc", field),
+        window_end_utc=_anchor_optional_utc(value, "window_end_utc", field),
+        recurrence_rule=_map_optional_str(value, "recurrence_rule"),
+        source=_map_optional_str(value, "source"),
+    )
+
+
+def _validate_anchor_shape(value: Mapping[str, Any], field: str, kind: str) -> None:
+    required_by_kind = {
+        "instant_utc": {"utc_instant"},
+        "local_instant": {"local_date", "local_time", "timezone"},
+        "local_date": {"local_date", "timezone"},
+        "utc_window": {"window_start_utc", "window_end_utc"},
+        "local_window": {"local_date", "timezone"},
+    }
+    forbidden_by_kind = {
+        "instant_utc": {"local_date", "local_time", "timezone", "window_start_utc", "window_end_utc"},
+        "local_instant": {"utc_instant", "window_start_utc", "window_end_utc"},
+        "local_date": {"local_time", "utc_instant", "window_start_utc", "window_end_utc"},
+        "utc_window": {"local_date", "local_time", "timezone", "utc_instant"},
+        "local_window": {"local_time", "utc_instant", "window_start_utc", "window_end_utc"},
+    }
+    for required in sorted(required_by_kind[kind]):
+        if value.get(required) is None:
+            raise SpineValidationError(f"missing_{field}.{required}", f"{field}.{required} is required for {kind}")
+    for forbidden in sorted(forbidden_by_kind[kind]):
+        if value.get(forbidden) is not None:
+            raise SpineValidationError(f"unsupported_field:{field}.{forbidden}", f"{field}.{forbidden} is not valid for {kind}")
+    if kind == "utc_window":
+        start = _anchor_optional_utc(value, "window_start_utc", field)
+        end = _anchor_optional_utc(value, "window_end_utc", field)
+        if start is not None and end is not None and start > end:
+            raise SpineValidationError(f"invalid_{field}.window_end_utc", f"{field}.window_end_utc must be after or equal to window_start_utc")
+
+
+def _anchor_optional_utc(value: Mapping[str, Any], key: str, field: str) -> str | None:
+    item = _map_optional_str(value, key)
+    if item is None:
+        return None
+    try:
+        return require_utc_z(f"{field}.{key}", item)
+    except SpineValidationError as exc:
+        raise SpineValidationError(f"invalid_timestamp_{field}.{key}", exc.message) from exc
+
+
+def _map_optional_str(value: Mapping[str, Any], field: str) -> str | None:
+    item = value.get(field)
+    if item is None:
+        return None
+    if not isinstance(item, str):
+        raise SpineValidationError(f"invalid_{field}", f"{field} must be a string")
+    return item
+
+
+def _anchor_output(anchor: TemporalAnchorInput) -> dict[str, Any]:
+    row = {
+        "anchor_id": anchor.anchor_id,
+        "anchor_kind": anchor.anchor_kind,
+        "created_at_utc": anchor.created_at_utc,
+        "local_date": anchor.local_date,
+        "local_time": anchor.local_time,
+        "timezone": anchor.timezone,
+        "utc_instant": anchor.utc_instant,
+        "window_start_utc": anchor.window_start_utc,
+        "window_end_utc": anchor.window_end_utc,
+        "recurrence_rule": anchor.recurrence_rule,
+        "source": anchor.source,
+    }
+    return {key: value for key, value in row.items() if value is not None}
+
+
+def _check_fields(command: str, request: Mapping[str, Any], allowed: set[str]) -> None:
+    for key in request:
+        if key not in allowed:
+            raise SpineValidationError(f"unsupported_field:{key}", f"unsupported field for {command}: {key}")
+
+
+def _subject_exists(connection: sqlite3.Connection, subject_id: str) -> bool:
+    return connection.execute("SELECT 1 FROM subjects WHERE subject_id = ?", (subject_id,)).fetchone() is not None
+
+
+def _subject(connection: sqlite3.Connection, subject_id: str, *, required: bool = True) -> dict[str, Any] | None:
+    row = connection.execute("SELECT * FROM subjects WHERE subject_id = ?", (subject_id,)).fetchone()
+    if row is None:
+        if required:
+            raise SpineValidationError("subject_not_found", f"subject not found: {subject_id}")
+        return None
+    return dict(row)
+
+
+def _subject_response(subject: Mapping[str, Any] | None, *, created: bool, updated: bool, receipt_id: str) -> dict[str, Any]:
+    assert subject is not None
+    return {
+        "ok": True,
+        "command": "subject.upsert",
+        "created": created,
+        "updated": updated,
+        "subject_id": subject["subject_id"],
+        "subject_kind": subject["subject_kind"],
+        "display_name": subject["display_name"],
+        "status": subject["status"],
+        "created_at_utc": subject["created_at_utc"],
+        "updated_at_utc": subject["updated_at_utc"],
+        "command_receipt_id": receipt_id,
+    }
+
+
+def _hydrated_item(connection: sqlite3.Connection, item_id: str) -> dict[str, Any]:
+    item = get_current_item(connection, item_id)
+    detail = dict(item["detail"])
+    for key in ("start_anchor_id", "end_anchor_id", "due_anchor_id", "defer_until_anchor_id"):
+        if detail.get(key) is not None:
+            detail[key.removesuffix("_id")] = _anchor_row(connection, str(detail[key]), field=key)
+    item["detail"] = detail
+    return item
+
+
+def _receipt_item(connection: sqlite3.Connection, receipt: Mapping[str, Any]) -> dict[str, Any]:
+    facts = receipt["result_identity_facts"]
+    return _hydrated_item_at_version(connection, str(facts["item_id"]), int(facts["version"]))
+
+
+def _hydrated_item_at_version(connection: sqlite3.Connection, item_id: str, version: int) -> dict[str, Any]:
+    row = connection.execute(
+        """
+        SELECT
+          i.item_id, i.item_type, i.status, i.created_at_utc, i.archived_at_utc,
+          v.title, v.summary, v.intent_hash, v.normalized_fields_hash, v.source_ref,
+          v.created_at_utc AS version_created_at_utc,
+          v.created_by_subject_id
+        FROM coordination_items AS i
+        JOIN coordination_item_versions AS v
+          ON v.item_id = i.item_id
+         AND v.version = ?
+        WHERE i.item_id = ?
+        """,
+        (version, item_id),
+    ).fetchone()
+    if row is None:
+        raise SpineValidationError("item_not_found", f"coordination item version not found: {item_id} v{version}")
+    detail = _detail_at_version(connection, item_id=item_id, item_type=row["item_type"], version=version)
+    for key in ("start_anchor_id", "end_anchor_id", "due_anchor_id", "defer_until_anchor_id"):
+        if detail.get(key) is not None:
+            detail[key.removesuffix("_id")] = _anchor_row(connection, str(detail[key]), field=key)
+    return {
+        "item_id": row["item_id"],
+        "item_type": row["item_type"],
+        "current_version": version,
+        "status": row["status"],
+        "created_at_utc": row["created_at_utc"],
+        "updated_at_utc": row["version_created_at_utc"],
+        "archived_at_utc": row["archived_at_utc"],
+        "version": {
+            "version": str(version),
+            "title": row["title"],
+            "summary": row["summary"],
+            "intent_hash": row["intent_hash"],
+            "normalized_fields_hash": row["normalized_fields_hash"],
+            "source_ref": row["source_ref"],
+            "created_at_utc": row["version_created_at_utc"],
+            "created_by_subject_id": row["created_by_subject_id"],
+        },
+        "detail": detail,
+        "locations": current_locations(connection, item_id=item_id, version=version),
+        "subject_roles": current_subject_roles(connection, item_id=item_id, version=version),
+        "notification_policies": current_notification_policies(connection, item_id=item_id, version=version),
+    }
+
+
+def _detail_at_version(connection: sqlite3.Connection, *, item_id: str, item_type: str, version: int) -> dict[str, Any]:
+    if item_type == "event":
+        row = connection.execute(
+            """
+            SELECT event_status, all_day, start_anchor_id, end_anchor_id, visibility,
+                   attendance_policy_ref
+            FROM event_details
+            WHERE item_id = ? AND version = ?
+            """,
+            (item_id, version),
+        ).fetchone()
+    elif item_type == "task":
+        row = connection.execute(
+            """
+            SELECT task_status, completion_state, priority, due_anchor_id, defer_until_anchor_id,
+                   completed_at_utc, completed_by_subject_id
+            FROM task_details
+            WHERE item_id = ? AND version = ?
+            """,
+            (item_id, version),
+        ).fetchone()
+    else:
+        return {}
+    if row is None:
+        raise SpineValidationError("item_not_found", f"coordination item detail not found: {item_id} v{version}")
+    return dict(row)
+
+
+def _anchor_row(connection: sqlite3.Connection, anchor_id: str, *, field: str) -> dict[str, Any]:
+    row = connection.execute("SELECT * FROM temporal_anchors WHERE anchor_id = ?", (anchor_id,)).fetchone()
+    if row is None:
+        raise SpineValidationError(f"anchor_not_found:{field}", f"anchor not found: {anchor_id}")
+    result = {"anchor_id": row["anchor_id"], "anchor_kind": row["anchor_kind"], "created_at_utc": row["created_at_utc"]}
+    for key in ("local_date", "local_time", "timezone", "utc_instant", "window_start_utc", "window_end_utc", "recurrence_rule", "source"):
+        if row[key] is not None:
+            result[key] = row[key]
+    return result
+
+
+def _require_item_for_write(connection: sqlite3.Connection, command: str, item_id: str, expected_type: str | None, target_version: int, *, field: str = "target_version") -> dict[str, Any]:
+    item = _hydrated_item(connection, item_id)
+    if expected_type is not None and item["item_type"] != expected_type:
+        raise SpineValidationError(f"wrong_type:{expected_type}:{item['item_type']}", "wrong item type")
+    if item["status"] == "archived":
+        raise SpineValidationError("archived_item", "archived items are immutable")
+    if int(item["current_version"]) != target_version:
+        raise SpineValidationError(f"stale_version:{field}", "target version is not current")
+    return item
+
+
+def _create_response(command: str, item: Mapping[str, Any], created: bool, receipt: Mapping[str, Any]) -> dict[str, Any]:
+    result = {
+        "ok": True,
+        "command": command,
+        "created": created,
+        "item_id": item["item_id"],
+        "item_type": item["item_type"],
+        "version": str(item["current_version"]),
+        "current_version": str(item["current_version"]),
+        "current_common": item_show_response(item)["current_common"],
+        "audit_id": receipt["result_identity_facts"].get("audit_id"),
+        "command_receipt_id": receipt["command_receipt_id"],
+    }
+    if item["item_type"] == "event":
+        result["event_detail"] = item_show_response(item)["event_detail"]
+    if item["item_type"] == "task":
+        result["task_detail"] = item_show_response(item)["task_detail"]
+    return {key: value for key, value in result.items() if value is not None}
+
+
+def _lifecycle_response(
+    command: str,
+    item: Mapping[str, Any],
+    effect_name: str,
+    effect_value: bool,
+    receipt_id: str,
+    audit_id: Any,
+    *,
+    target_version: str,
+) -> dict[str, Any]:
+    return {
+        "ok": True,
+        "command": command,
+        effect_name: effect_value,
+        "item_id": item["item_id"],
+        "item_type": item["item_type"],
+        "target_version": target_version,
+        "version": str(item["current_version"]),
+        "current_version": str(item["current_version"]),
+        "updated_at_utc": item["updated_at_utc"],
+        "audit_id": audit_id,
+        "command_receipt_id": receipt_id,
+    }
+
+
+def _archive_response(item: Mapping[str, Any], archived: bool, receipt_id: str, audit_id: Any) -> dict[str, Any]:
+    return {
+        "ok": True,
+        "command": "item.archive",
+        "archived": archived,
+        "item_id": item["item_id"],
+        "item_type": item["item_type"],
+        "target_version": str(item["current_version"]),
+        "version": str(item["current_version"]),
+        "current_version": str(item["current_version"]),
+        "status": item["status"],
+        "archived_at_utc": item.get("archived_at_utc"),
+        "updated_at_utc": item["updated_at_utc"],
+        "audit_id": audit_id,
+        "command_receipt_id": receipt_id,
+    }
+
+
+def _relation_create_response(connection: sqlite3.Connection, facts: Mapping[str, Any], *, created: bool) -> dict[str, Any]:
+    row = connection.execute("SELECT * FROM coordination_item_relations WHERE relation_id = ?", (facts["relation_id"],)).fetchone()
+    if row is None:
+        raise SpineValidationError("relation_not_found", "relation not found")
+    return {
+        "ok": True,
+        "command": "relation.create",
+        "created": created,
+        "relation_id": row["relation_id"],
+        "source_item_id": row["source_item_id"],
+        "source_target_version": str(facts["source_target_version"]),
+        "source_current_version": str(facts["source_current_version"]),
+        "target_item_id": row["target_item_id"],
+        "target_target_version": str(facts["target_target_version"]),
+        "target_current_version": str(facts["target_current_version"]),
+        "relation_type": row["relation_type"],
+        "relation_status": row["relation_status"],
+        "created_at_utc": row["created_at_utc"],
+        "created_by_subject_id": row["created_by_subject_id"],
+        "audit_id": facts.get("audit_id"),
+        "command_receipt_id": facts["command_receipt_id"],
+    }
+
+
+def _relation_element(row: Mapping[str, Any]) -> dict[str, Any]:
+    return {
+        "relation_id": row["relation_id"],
+        "relation_type": row["relation_type"],
+        "source_item_id": row["source_item_id"],
+        "target_item_id": row["target_item_id"],
+        "relation_status": row["relation_status"],
+        "created_at_utc": row["created_at_utc"],
+        "created_by_subject_id": row["created_by_subject_id"],
+        "result_kind": "stored",
+        "derived": False,
+    }
+
+
+def _derived_aliases(rows: Sequence[Mapping[str, Any]], relation_type: Any) -> list[dict[str, Any]]:
+    aliases = []
+    for row in rows:
+        if row["relation_type"] == "depends_on" and relation_type in {None, "blocks"}:
+            alias_type = "blocks"
+        elif row["relation_type"] == "part_of" and relation_type in {None, "contains"}:
+            alias_type = "contains"
+        else:
+            continue
+        aliases.append(
+            {
+                "relation_id": row["relation_id"],
+                "relation_type": alias_type,
+                "source_item_id": row["target_item_id"],
+                "target_item_id": row["source_item_id"],
+                "relation_status": row["relation_status"],
+                "created_at_utc": row["created_at_utc"],
+                "created_by_subject_id": row["created_by_subject_id"],
+                "result_kind": "derived_alias",
+                "derived": True,
+                "derived_from_relation_id": row["relation_id"],
+                "derived_from_relation_type": row["relation_type"],
+                "derived_source_item_id": row["source_item_id"],
+                "derived_target_item_id": row["target_item_id"],
+            }
+        )
+    return aliases
+
+
+def _relations_for_item(connection: sqlite3.Connection, item_id: str) -> list[dict[str, Any]]:
+    rows = connection.execute(
+        """
+        SELECT *
+        FROM coordination_item_relations
+        WHERE relation_status = 'active'
+          AND (source_item_id = ? OR target_item_id = ?)
+        ORDER BY relation_type, source_item_id, target_item_id, relation_id
+        """,
+        (item_id, item_id),
+    ).fetchall()
+    return [_relation_element(dict(row)) for row in rows]
+
+
+def _reminder_response(facts: Mapping[str, Any], *, created: bool) -> dict[str, Any]:
+    response = {"ok": True, "command": "reminder.create", **dict(facts)}
+    response["created"] = created
+    return response
+
+
+def _predicted_delivery(channel: str, work_subject_ref: str, eligible_at_utc: str) -> dict[str, str]:
+    return {
+        "channel": channel,
+        "work_subject_ref": work_subject_ref,
+        "eligible_at_utc": eligible_at_utc,
+        "adapter_binding": "openclaw",
+        "send_boundary": "no_external_send_from_authoring_command",
+    }
+
+
+def _find_duplicate_reminder(connection: sqlite3.Connection, item_id: str, work_subject_ref: str, eligible_at_utc: str, channel: str) -> dict[str, Any] | None:
+    row = connection.execute(
+        """
+        SELECT p.policy_id, p.version, p.trigger_anchor_id, w.work_instance_id, i.item_type, i.current_version
+        FROM notification_policies AS p
+        JOIN work_instances AS w ON w.notification_policy_id = p.policy_id
+        JOIN coordination_items AS i ON i.item_id = p.item_id
+        WHERE p.item_id = ?
+          AND p.recipient_subject_id = ?
+          AND p.channel_preference_ref = ?
+          AND p.status = 'active'
+          AND w.eligible_at_utc = ?
+          AND w.status = 'eligible'
+        ORDER BY p.created_at_utc, p.policy_id
+        LIMIT 1
+        """,
+        (item_id, work_subject_ref, channel, eligible_at_utc),
+    ).fetchone()
+    if row is None:
+        return None
+    return {
+        "item_id": item_id,
+        "item_type": row["item_type"],
+        "version": str(row["version"]),
+        "current_version": str(row["current_version"]),
+        "notification_policy_id": row["policy_id"],
+        "notification_policy_item_version": str(row["version"]),
+        "work_instance_id": row["work_instance_id"],
+        "trigger_anchor_id": row["trigger_anchor_id"],
+        "eligible_at_utc": eligible_at_utc,
+        "predicted_delivery": _predicted_delivery(channel, work_subject_ref, eligible_at_utc),
+    }
+
+
+def _has_openclaw(context: CommandContext) -> bool:
+    binding = context.adapter_bindings.get("openclaw")
+    return isinstance(binding, Mapping) and binding.get("binding_name") == "openclaw" and binding.get("channel") == "whatsapp" and binding.get("configured") is True
+
+
+def _insert_audit(connection: sqlite3.Connection, audit_id: str, item_id: str, action: str, actor: str, created_at: str, payload: Mapping[str, Any]) -> None:
+    with connection:
+        connection.execute(
+            """
+            INSERT INTO audit_log (
+              audit_id, item_id, stage, action, reason_code, actor_ref, payload_hash, created_at_utc
+            )
+            VALUES (?, ?, 'item', ?, ?, ?, ?, ?)
+            """,
+            (audit_id, item_id, action, action, actor, audit_log_payload_hash(payload), created_at),
+        )
+
+
+def _error(command: str, code: str, message: str, field: str | None = None) -> dict[str, Any]:
+    error = {"code": code, "message": message}
+    if field is not None:
+        error["field"] = field
+    return {"ok": False, "command": command, "error": error}
+
+
+def _validation_error(command: str, exc: SpineValidationError) -> dict[str, Any]:
+    code = exc.code
+    if code.startswith("unsupported_field:"):
+        return _error(command, "unsupported_field", exc.message, code.split(":", 1)[1])
+    if code.startswith("unsupported_patch."):
+        return _error(command, "unsupported_field", exc.message, "patch." + code.split(".", 1)[1])
+    if code.startswith("invalid_patch."):
+        return _error(command, "invalid_request", exc.message, "patch." + code.split(".", 1)[1])
+    if code.startswith("stale_version:"):
+        return _error(command, "stale_version", exc.message, code.split(":", 1)[1])
+    if code.startswith("wrong_type:"):
+        _, expected, actual = code.split(":")
+        return _wrong_type(command, "", expected, actual)
+    if code.startswith("anchor_not_found:"):
+        return _error(command, "referenced_row_not_found", exc.message, code.split(":", 1)[1])
+    if code == "actor_not_found":
+        return _error(command, "referenced_row_not_found", exc.message, "actor_subject_id")
+    if code == "subject_not_found":
+        return _error(command, "referenced_row_not_found", exc.message, "subject_id")
+    if code in {"item_not_found", "anchor_not_found"}:
+        return _error(command, "referenced_row_not_found", exc.message, "item_id")
+    if code in {"command_id_reuse", "incompatible_replay"}:
+        return _error(command, "semantic_conflict", exc.message, "command_id")
+    if code in {"item_relation_rejected"}:
+        return _error(command, "semantic_conflict", exc.message, "relation")
+    if code == "archived_item":
+        return _error(command, "invalid_state_transition", exc.message, "status")
+    if code.startswith("invalid_timestamp"):
+        field = code.removeprefix("invalid_timestamp").removeprefix("_")
+        return _error(command, "invalid_timestamp", exc.message, field or None)
+    if code.startswith("missing_"):
+        field = code.removeprefix("missing_")
+        return _error(command, "missing_required_field", exc.message, field)
+    if code.startswith("invalid_"):
+        field = code.removeprefix("invalid_")
+        return _error(command, "invalid_request", exc.message, field)
+    if code.startswith("unsupported_"):
+        field = code.removeprefix("unsupported_")
+        public_code = "unsupported_field" if field in {"relation_type", "channel", "item_type", "status"} else "invalid_request"
+        return _error(command, public_code, exc.message, field)
+    if code in {"item_type_mismatch"}:
+        return _error(command, "wrong_item_type", exc.message, "item_id")
+    if code.startswith("invalid_") or "transition" in code:
+        return _error(command, "invalid_state_transition", exc.message, "status")
+    return _error(command, "invalid_request", exc.message, "request")
+
+
+def _wrong_type(command: str, item_id: str, expected: str, actual: str) -> dict[str, Any]:
+    return _error(command, "wrong_item_type", f"expected {expected} item but found {actual}", "item_id")

@@ -1,0 +1,9 @@
+{
+  "command": "event.update",
+  "error": {
+    "code": "wrong_item_type",
+    "field": "item_id",
+    "message": "expected event item but found task"
+  },
+  "ok": false
+}

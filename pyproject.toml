@@ -21,6 +21,8 @@ dev = [
 ]
 
 [project.scripts]
+spine = "spine.commands.cli:main"
+spine-command = "spine.commands.cli:main"
 spine-ledger-migrate = "spine.ledger.migrate:main"
 spine-openclaw-smoke = "spine.runtime.openclaw_smoke:main"
 spine-seed-canary = "spine.runtime.seed_canary:main"

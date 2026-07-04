@@ -1,0 +1,18 @@
+{
+  "audit_id": "audit_0bc5bff15da7863a87ba9fda4fc39f6e00948decbb2ac0946a1674b29c71763a",
+  "command": "relation.create",
+  "command_receipt_id": "command_receipt_8bfac1f52ddfcc63b642d0fae15509ee0af36f508d849df500788d497d9eff88",
+  "created": true,
+  "created_at_utc": "2026-06-06T10:50:00Z",
+  "created_by_subject_id": "agent",
+  "ok": true,
+  "relation_id": "relation_a36e2f74e3df5b7969c50196f31017c284be5e812aab62644cba0d082562c06a",
+  "relation_status": "active",
+  "relation_type": "depends_on",
+  "source_current_version": "2",
+  "source_item_id": "item_d53b56116928f169911cca4120b8d059dbf4500ee4b353c48daba89081d43168",
+  "source_target_version": "2",
+  "target_current_version": "3",
+  "target_item_id": "item_94dc6f9f68de8a74eba98b7587a2821b389bfd1d5fb158d0c3714f5532023be8",
+  "target_target_version": "3"
+}

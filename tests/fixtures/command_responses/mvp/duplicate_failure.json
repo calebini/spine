@@ -1,0 +1,9 @@
+{
+  "command": "relation.create",
+  "error": {
+    "code": "semantic_conflict",
+    "field": "relation",
+    "message": "UNIQUE constraint failed: coordination_item_relations.source_item_id, coordination_item_relations.target_item_id, coordination_item_relations.relation_type"
+  },
+  "ok": false
+}

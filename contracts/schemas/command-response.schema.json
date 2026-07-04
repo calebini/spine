@@ -1,0 +1,69 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cortext.local/spine/contracts/schemas/command-response.schema.json",
+  "title": "Spine Agent Command Response",
+  "type": "object",
+  "required": ["ok"],
+  "properties": {
+    "ok": {
+      "type": "boolean"
+    },
+    "command": {
+      "type": "string",
+      "pattern": "^[a-z]+\\.[a-z]+$"
+    },
+    "error": {
+      "type": "object",
+      "required": ["code", "message"],
+      "properties": {
+        "code": {
+          "type": "string"
+        },
+        "message": {
+          "type": "string"
+        },
+        "field": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "command_receipt_id": {
+      "type": "string"
+    },
+    "dry_run": {
+      "type": "boolean"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "ok": {
+            "const": true
+          }
+        },
+        "required": ["ok"]
+      },
+      "then": {
+        "required": ["command"],
+        "not": {
+          "required": ["error"]
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "ok": {
+            "const": false
+          }
+        },
+        "required": ["ok"]
+      },
+      "then": {
+        "required": ["error"]
+      }
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "audit_id": "audit_30a29c87dabc0b4c4583941a6a58bb0db75e33d482a1f8c43cf79767724e1c76",
+  "cancelled": true,
+  "command": "event.cancel",
+  "command_receipt_id": "command_receipt_073bbf7e8346f63385ecc1a8f80d458749ec88d470b22d930455812f108827ae",
+  "current_version": "4",
+  "item_id": "item_0f3afe27f9de445de632f4a8348957214f5dd24aac0de81a0ee8566dd4e976d5",
+  "item_type": "event",
+  "ok": true,
+  "target_version": "3",
+  "updated_at_utc": "2026-06-06T10:30:00Z",
+  "version": "4"
+}
