@@ -246,4 +246,4 @@ Tests cover successful create/update/reschedule/lifecycle/reminder flows, post-a
 
 ## 17. Deferred Questions
 
-Deferred surfaces include full MCP server internals, full localhost HTTP route design, command-specific request/response schemas beyond the MVP shared response envelope, implementation of the accepted first-class delivery-target command revision, recurrence-rule update and occurrence-exception commands, Foreman/Threshold approval policy, broad ontology changes not required for the command contract, and external send execution semantics beyond preserving the authoring no-send boundary.
+Deferred surfaces include full MCP server internals, full localhost HTTP route design, command-specific request/response schemas beyond the MVP shared response envelope, recurrence-rule update and occurrence-exception commands, Foreman/Threshold approval policy, broad ontology changes not required for the command contract, and external send execution semantics beyond preserving the authoring no-send boundary.

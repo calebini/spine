@@ -1,0 +1,17 @@
+{
+  "adapter_name": "openclaw",
+  "channel": "whatsapp",
+  "command": "delivery_target.upsert",
+  "command_receipt_id": "command_receipt_4b1e33e772bd277c6abd7effadfefb39956b29b5e325c7b5455bfd2f0c2bdbe7",
+  "created": true,
+  "created_at_utc": "2026-06-06T10:00:45Z",
+  "delivery_target_id": "stage-whatsapp-target",
+  "display_name": "Stage WhatsApp group",
+  "ok": true,
+  "owner_group_id": "stage-group",
+  "owner_kind": "subject_group",
+  "status": "active",
+  "target_ref": "120363409469948475@g.us",
+  "updated": true,
+  "updated_at_utc": "2026-06-06T10:00:45Z"
+}

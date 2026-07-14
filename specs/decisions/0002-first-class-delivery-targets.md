@@ -32,10 +32,10 @@ Group delivery needs to be an ordinary routing case, not an exception. A househo
 
 `subjects` remains for people, agents, and durable subject identity anchors. `subject_groups` remains for households, teams, and other actor groupings.
 
-Reminder authoring must evolve from `work_subject_ref`-only routing to explicit recipient owner plus delivery target routing. A future production-like `reminder.create` shape should identify the recipient owner and the selected delivery target rather than relying on a vendor address as a subject ID.
+Reminder authoring has a production-like routed path that identifies the recipient owner and selected delivery target rather than relying on a vendor address as a subject ID. The legacy `work_subject_ref` branch remains compatibility-only for existing subject-recipient rows.
 
 Runtime notification adapters must resolve outbound destination from the selected delivery target. They must not treat `subjects.subject_id`, `subject_groups.group_id`, or `work_instances.work_subject_ref` as a transport `target_ref`.
 
 `side_effect_attempts` remains Spine's canonical adapter attempt ledger. Delivery target routing does not reintroduce Kinflow's notification-specific `delivery_attempts` as a second ledger.
 
-Existing canary paths that store a WhatsApp target as a `person` subject are legacy/disposable compatibility behavior and should be migrated before production-like use.
+Canary paths for production-like use should create or reuse an explicit recipient owner and delivery target. Any remaining path that stores a WhatsApp target as a `person` subject is legacy/disposable compatibility behavior.

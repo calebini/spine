@@ -29,6 +29,13 @@
       "schema": "contracts/schemas/command-response.schema.json"
     },
     {
+      "branch": "created",
+      "command": "delivery_target.upsert",
+      "expected_exit_code": 0,
+      "fixture": "tests/fixtures/command_responses/mvp/delivery_target_upsert_created.json",
+      "schema": "contracts/schemas/command-response.schema.json"
+    },
+    {
       "branch": "duplicate_conflict",
       "command": "relation.create",
       "expected_exit_code": 6,
@@ -113,6 +120,13 @@
       "schema": "contracts/schemas/command-response.schema.json"
     },
     {
+      "branch": "routed_group",
+      "command": "reminder.create",
+      "expected_exit_code": 0,
+      "fixture": "tests/fixtures/command_responses/mvp/reminder_create_routed_group.json",
+      "schema": "contracts/schemas/command-response.schema.json"
+    },
+    {
       "branch": "stale_version",
       "command": "task.update",
       "expected_exit_code": 5,
@@ -131,6 +145,13 @@
       "command": "subject.upsert",
       "expected_exit_code": 0,
       "fixture": "tests/fixtures/command_responses/mvp/subject_upsert_replay.json",
+      "schema": "contracts/schemas/command-response.schema.json"
+    },
+    {
+      "branch": "created",
+      "command": "subject_group.upsert",
+      "expected_exit_code": 0,
+      "fixture": "tests/fixtures/command_responses/mvp/subject_group_upsert_created.json",
       "schema": "contracts/schemas/command-response.schema.json"
     },
     {

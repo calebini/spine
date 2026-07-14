@@ -1227,6 +1227,34 @@ def build_mvp_fixture_responses() -> dict[str, object]:
     record("subject_upsert_replay.json", "subject.upsert", subject())
     record("subject_recipient.json", "subject.upsert", subject("recipient"))
     responses.pop("subject_recipient.json")
+    record(
+        "subject_group_upsert_created.json",
+        "subject_group.upsert",
+        {
+            "command_id": "cmd-fixture-subject-group",
+            "actor_subject_id": "agent",
+            "group_id": "stage-group",
+            "group_kind": "transport_group",
+            "display_name": "Stage group",
+            "updated_at_utc": "2026-06-06T10:00:30Z",
+        },
+    )
+    record(
+        "delivery_target_upsert_created.json",
+        "delivery_target.upsert",
+        {
+            "command_id": "cmd-fixture-delivery-target",
+            "actor_subject_id": "agent",
+            "delivery_target_id": "stage-whatsapp-target",
+            "owner_kind": "subject_group",
+            "owner_group_id": "stage-group",
+            "channel": "whatsapp",
+            "adapter_name": "openclaw",
+            "target_ref": "120363409469948475@g.us",
+            "display_name": "Stage WhatsApp group",
+            "updated_at_utc": "2026-06-06T10:00:45Z",
+        },
+    )
     event = record("event_create.json", "event.create", fixture_event_request("cmd-fixture-event-create"))
     task = record("task_create.json", "task.create", fixture_task_request("cmd-fixture-task-create"))
     record("item_show_event.json", "item.show", {"item_id": event["item_id"]})
@@ -1341,6 +1369,25 @@ def build_mvp_fixture_responses() -> dict[str, object]:
             "work_subject_ref": "recipient",
             "channel": "whatsapp",
             "eligible_at_utc": "2026-06-06T12:00:00Z",
+        },
+        CommandContext(ledger=connection, adapter_bindings=OPENCLAW),
+    )
+    routed_task = record("routed_reminder_task_source_create.json", "task.create", fixture_task_request("cmd-fixture-routed-reminder-task"))
+    responses.pop("routed_reminder_task_source_create.json")
+    record(
+        "reminder_create_routed_group.json",
+        "reminder.create",
+        {
+            "command_id": "cmd-fixture-routed-reminder",
+            "actor_subject_id": "agent",
+            "item_id": routed_task["item_id"],
+            "target_version": 1,
+            "created_at_utc": "2026-06-06T11:05:00Z",
+            "recipient_kind": "subject_group",
+            "recipient_group_id": "stage-group",
+            "delivery_target_id": "stage-whatsapp-target",
+            "channel": "whatsapp",
+            "eligible_at_utc": "2026-06-06T12:05:00Z",
         },
         CommandContext(ledger=connection, adapter_bindings=OPENCLAW),
     )
