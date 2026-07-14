@@ -28,6 +28,8 @@ class SubjectStatus(StrEnum):
 class SubjectGroupKind(StrEnum):
     HOUSEHOLD = "household"
     TEAM = "team"
+    PROJECT = "project"
+    TRANSPORT_GROUP = "transport_group"
 
 
 class SubjectMembershipRole(StrEnum):
@@ -96,6 +98,16 @@ class ItemSubjectRole(StrEnum):
 class NotificationPolicyStatus(StrEnum):
     ACTIVE = "active"
     DISABLED = "disabled"
+
+
+class DeliveryTargetOwnerKind(StrEnum):
+    SUBJECT = "subject"
+    SUBJECT_GROUP = "subject_group"
+
+
+class DeliveryTargetStatus(StrEnum):
+    ACTIVE = "active"
+    INACTIVE = "inactive"
 
 
 class GenerationSourceKind(StrEnum):

@@ -16,10 +16,13 @@ from spine.ledger.common import (
     require_utc_z,
 )
 from spine.models.enums import (
+    DeliveryTargetOwnerKind,
+    DeliveryTargetStatus,
     ItemLocationRole,
     ItemSubjectRole,
     LocationKind,
     NotificationPolicyStatus,
+    SubjectGroupKind,
 )
 
 
@@ -63,14 +66,47 @@ class ItemSubjectRoleInput:
 
 
 @dataclass(frozen=True)
+class SubjectGroupInput:
+    """Input row for a first-class subject group."""
+
+    group_id: str
+    group_kind: SubjectGroupKind | str
+    display_name: str
+    status: str = "active"
+    created_at_utc: str | None = None
+    updated_at_utc: str | None = None
+
+
+@dataclass(frozen=True)
+class DeliveryTargetInput:
+    """Input row for a subject- or group-owned delivery endpoint."""
+
+    delivery_target_id: str
+    owner_kind: DeliveryTargetOwnerKind | str
+    channel: str
+    adapter_name: str
+    target_ref: str
+    owner_subject_id: str | None = None
+    owner_group_id: str | None = None
+    account_id: str | None = None
+    display_name: str | None = None
+    status: DeliveryTargetStatus | str = DeliveryTargetStatus.ACTIVE
+    created_at_utc: str | None = None
+    updated_at_utc: str | None = None
+
+
+@dataclass(frozen=True)
 class NotificationPolicyInput:
     """Input row for inert durable notification intent."""
 
-    recipient_subject_id: str
+    recipient_subject_id: str | None = None
     trigger_anchor: TemporalAnchorInput | None = None
     trigger_anchor_id: str | None = None
     policy_id: str | None = None
+    recipient_kind: str = "subject"
+    recipient_group_id: str | None = None
     channel_preference_ref: str | None = None
+    delivery_target_id: str | None = None
     quiet_hours_policy_ref: str | None = None
     status: NotificationPolicyStatus | str = NotificationPolicyStatus.ACTIVE
     created_at_utc: str | None = None
@@ -177,7 +213,8 @@ def copy_forward_supporting_sets(
 
     for row in connection.execute(
         """
-        SELECT policy_id, recipient_subject_id, channel_preference_ref, trigger_anchor_id,
+        SELECT policy_id, recipient_kind, recipient_subject_id, recipient_group_id,
+               channel_preference_ref, delivery_target_id, trigger_anchor_id,
                quiet_hours_policy_ref, status
         FROM notification_policies
         WHERE item_id = ? AND version = ?
@@ -188,17 +225,21 @@ def copy_forward_supporting_sets(
         connection.execute(
             """
             INSERT INTO notification_policies (
-              policy_id, item_id, version, recipient_subject_id, channel_preference_ref,
+              policy_id, item_id, version, recipient_kind, recipient_subject_id,
+              recipient_group_id, channel_preference_ref, delivery_target_id,
               trigger_anchor_id, quiet_hours_policy_ref, status, created_at_utc
             )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
                 copy_id(row["policy_id"], next_version),
                 item_id,
                 next_version,
+                row["recipient_kind"],
                 row["recipient_subject_id"],
+                row["recipient_group_id"],
                 row["channel_preference_ref"],
+                row["delivery_target_id"],
                 row["trigger_anchor_id"],
                 row["quiet_hours_policy_ref"],
                 row["status"],
@@ -223,6 +264,86 @@ def current_locations(connection: sqlite3.Connection, *, item_id: str, version: 
         (item_id, version),
     ).fetchall()
     return [dict(row) for row in rows]
+
+
+def insert_subject_group(
+    connection: sqlite3.Connection,
+    *,
+    group: SubjectGroupInput,
+    default_created_at_utc: str,
+) -> None:
+    require_non_empty("group.group_id", group.group_id)
+    require_non_empty("group.display_name", group.display_name)
+    created_at_utc = group.created_at_utc or default_created_at_utc
+    updated_at_utc = group.updated_at_utc or created_at_utc
+    require_utc_z("group.created_at_utc", created_at_utc)
+    require_utc_z("group.updated_at_utc", updated_at_utc)
+    connection.execute(
+        """
+        INSERT INTO subject_groups (
+          group_id, group_kind, display_name, status, created_at_utc, updated_at_utc
+        )
+        VALUES (?, ?, ?, ?, ?, ?)
+        """,
+        (
+            group.group_id,
+            enum_value(group.group_kind),
+            group.display_name,
+            enum_value(group.status),
+            created_at_utc,
+            updated_at_utc,
+        ),
+    )
+
+
+def insert_delivery_target(
+    connection: sqlite3.Connection,
+    *,
+    target: DeliveryTargetInput,
+    default_created_at_utc: str,
+) -> None:
+    require_non_empty("target.delivery_target_id", target.delivery_target_id)
+    require_non_empty("target.channel", target.channel)
+    require_non_empty("target.adapter_name", target.adapter_name)
+    require_non_empty("target.target_ref", target.target_ref)
+    created_at_utc = target.created_at_utc or default_created_at_utc
+    updated_at_utc = target.updated_at_utc or created_at_utc
+    require_utc_z("target.created_at_utc", created_at_utc)
+    require_utc_z("target.updated_at_utc", updated_at_utc)
+    connection.execute(
+        """
+        INSERT INTO delivery_targets (
+          delivery_target_id, owner_kind, owner_subject_id, owner_group_id, channel,
+          adapter_name, account_id, target_ref, display_name, status, created_at_utc,
+          updated_at_utc
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """,
+        (
+            target.delivery_target_id,
+            enum_value(target.owner_kind),
+            target.owner_subject_id,
+            target.owner_group_id,
+            target.channel,
+            target.adapter_name,
+            target.account_id,
+            target.target_ref,
+            target.display_name,
+            enum_value(target.status),
+            created_at_utc,
+            updated_at_utc,
+        ),
+    )
+
+
+def get_delivery_target(connection: sqlite3.Connection, delivery_target_id: str) -> dict[str, object]:
+    row = connection.execute(
+        "SELECT * FROM delivery_targets WHERE delivery_target_id = ?",
+        (delivery_target_id,),
+    ).fetchone()
+    if row is None:
+        raise SpineValidationError("delivery_target_not_found", f"delivery target not found: {delivery_target_id}")
+    return dict(row)
 
 
 def current_subject_roles(connection: sqlite3.Connection, *, item_id: str, version: int) -> list[dict[str, object]]:
@@ -377,21 +498,38 @@ def insert_notification_policy(
         )
     if trigger_anchor_id is None:
         raise SpineValidationError("invalid_notification_policy", "notification policy requires a trigger anchor")
+    recipient_kind = enum_value(policy.recipient_kind)
+    if recipient_kind == "subject":
+        if policy.recipient_subject_id is None:
+            raise SpineValidationError("invalid_notification_policy", "subject recipient requires recipient_subject_id")
+        if policy.recipient_group_id is not None:
+            raise SpineValidationError("invalid_notification_policy", "subject recipient forbids recipient_group_id")
+    elif recipient_kind == "subject_group":
+        if policy.recipient_group_id is None:
+            raise SpineValidationError("invalid_notification_policy", "group recipient requires recipient_group_id")
+        if policy.recipient_subject_id is not None:
+            raise SpineValidationError("invalid_notification_policy", "group recipient forbids recipient_subject_id")
+    else:
+        raise SpineValidationError("invalid_notification_policy", f"unsupported recipient_kind: {recipient_kind}")
     require_utc_z("policy.created_at_utc", policy.created_at_utc or default_created_at_utc)
     connection.execute(
         """
         INSERT INTO notification_policies (
-          policy_id, item_id, version, recipient_subject_id, channel_preference_ref,
-          trigger_anchor_id, quiet_hours_policy_ref, status, created_at_utc
+          policy_id, item_id, version, recipient_kind, recipient_subject_id,
+          recipient_group_id, channel_preference_ref, delivery_target_id, trigger_anchor_id,
+          quiet_hours_policy_ref, status, created_at_utc
         )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """,
         (
             policy.policy_id or new_id("policy"),
             item_id,
             version,
+            recipient_kind,
             policy.recipient_subject_id,
+            policy.recipient_group_id,
             policy.channel_preference_ref,
+            policy.delivery_target_id,
             trigger_anchor_id,
             policy.quiet_hours_policy_ref,
             enum_value(policy.status),

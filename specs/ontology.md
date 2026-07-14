@@ -550,9 +550,9 @@ Current implemented MVP constraints:
 
 Accepted first-class routing extension:
 
-- `recipient_kind` (`text`, required after the routing migration) — enum: `subject`, `subject_group`.
-- `recipient_subject_id` (`id`, optional after the routing migration) — FK to `subjects.subject_id`; required when `recipient_kind=subject`; absent otherwise.
-- `recipient_group_id` (`id`, optional after the routing migration) — FK to `subject_groups.group_id`; required when `recipient_kind=subject_group`; absent otherwise.
+- `recipient_kind` (`text`, required) — enum: `subject`, `subject_group`.
+- `recipient_subject_id` (`id`, optional) — FK to `subjects.subject_id`; required when `recipient_kind=subject`; absent otherwise.
+- `recipient_group_id` (`id`, optional) — FK to `subject_groups.group_id`; required when `recipient_kind=subject_group`; absent otherwise.
 - `delivery_target_id` (`id`, required for production-like deliverable reminder policies; optional only for inert or legacy compatibility policies) — FK to `delivery_targets.delivery_target_id`; when present, the target owner MUST match the recipient owner.
 
 First-class routing constraints:
@@ -571,7 +571,7 @@ In MVP, `notification_policies` MUST NOT directly drive vendor delivery or hidde
 
 Compatibility note:
 
-- The current implemented MVP schema has only required `recipient_subject_id`. That is the legacy command-contract shortcut described in `specs/decisions/0002-first-class-delivery-targets.md`, not the production-like routing target. Until the routing migration lands, command-created reminder policies are valid under the current implemented MVP compatibility contract above. The next routing migration should add `recipient_kind`, `recipient_group_id`, and `delivery_target_id` rather than extending `subjects.subject_kind` with transport endpoint concepts.
+- Legacy subject-recipient rows remain valid as `recipient_kind=subject` with absent `delivery_target_id`. New production-like routed reminder rows use `recipient_kind`, the matching recipient owner reference, and `delivery_target_id`; implementations MUST NOT extend `subjects.subject_kind` with transport endpoint concepts to satisfy adapter routing.
 
 ## 9. Work, Candidate Actions, and Attempts
 

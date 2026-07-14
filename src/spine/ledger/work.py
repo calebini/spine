@@ -38,6 +38,7 @@ def create_work_instance(
     work_instance_id: str | None = None,
     notification_policy_id: str | None = None,
     notification_policy_item_version: int | None = None,
+    delivery_target_id: str | None = None,
     source_work_instance_id: str | None = None,
     generation_source_kind: GenerationSourceKind | str | None = None,
     generation_source_ref: str | None = None,
@@ -67,13 +68,13 @@ def create_work_instance(
                 """
                 INSERT INTO work_instances (
                   work_instance_id, item_id, item_version, notification_policy_id,
-                  notification_policy_item_version, source_work_instance_id,
+                  notification_policy_item_version, delivery_target_id, source_work_instance_id,
                   generation_source_kind, generation_source_ref, work_subject_ref,
                   work_kind, purpose_detail_ref, policy_basis_ref, eligible_at_utc,
                   status, attempt_count, next_attempt_at_utc, reason_code, created_at_utc,
                   updated_at_utc
                 )
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 (
                     work_instance_id,
@@ -81,6 +82,7 @@ def create_work_instance(
                     item_version,
                     notification_policy_id,
                     notification_policy_item_version,
+                    delivery_target_id,
                     source_work_instance_id,
                     enum_value(generation_source_kind) if generation_source_kind is not None else None,
                     generation_source_ref,

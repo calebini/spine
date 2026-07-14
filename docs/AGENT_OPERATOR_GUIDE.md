@@ -122,14 +122,15 @@ A deliverable reminder must eventually produce:
 
 - a current task/item row
 - a notification policy row
-- an eligible `work_instances` row with `work_kind=notification_reminder`
-- a stable `work_subject_ref` that OpenClaw accepts as gateway `to`
+- an explicit active `delivery_targets` row for the OpenClaw endpoint
+- an eligible `work_instances` row with `work_kind=notification_reminder` and matching `delivery_target_id`
 - a channel value, currently `whatsapp` for the OpenClaw gateway path
 
 Destination routing is explicit:
 
 - `channel_hint` becomes OpenClaw gateway param `channel`.
-- `work_subject_ref` becomes OpenClaw gateway param `to`.
+- `delivery_targets.target_ref` becomes OpenClaw gateway param `to`.
+- `work_subject_ref` is retained only as recipient-owner provenance for routed work.
 - `body_text` is currently derived as `Reminder: <current item title>`.
 - `dedupe_key` is currently `openclaw:<work_instance_id>:<attempt_count>`.
 

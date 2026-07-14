@@ -7,10 +7,12 @@ from spine.core.hashing import (
     coordination_item_version_normalized_fields_hash,
 )
 from spine.ledger import (
+    DeliveryTargetInput,
     ItemLocationInput,
     ItemSubjectRoleInput,
     LocationInput,
     NotificationPolicyInput,
+    SubjectGroupInput,
     TemporalAnchorInput,
     assert_ledger_invariants,
     connect,
@@ -20,9 +22,13 @@ from spine.ledger import (
     create_task_v1,
     get_active_relations,
     get_current_item,
+    get_delivery_target,
     get_derived_relations,
     initialize_schema,
+    insert_delivery_target,
+    insert_subject_group,
 )
+from spine.services import generate_notification_reminder_work
 
 
 NOW = "2026-06-06T10:00:00Z"
@@ -199,6 +205,105 @@ class LedgerSupportingSetTests(unittest.TestCase):
         self.assertEqual(policy["recipient_subject_id"], OTHER_SUBJECT_ID)
         self.assertEqual(policy["trigger_anchor_id"], "policy-event-notification-trigger")
         self.assertEqual(policy["status"], "active")
+
+    def test_group_owned_delivery_target_and_routed_work_snapshot(self) -> None:
+        with self.connection:
+            insert_subject_group(
+                self.connection,
+                group=SubjectGroupInput(
+                    group_id="stage-group",
+                    group_kind="transport_group",
+                    display_name="Stage WhatsApp",
+                ),
+                default_created_at_utc=NOW,
+            )
+            insert_delivery_target(
+                self.connection,
+                target=DeliveryTargetInput(
+                    delivery_target_id="target-stage-whatsapp",
+                    owner_kind="subject_group",
+                    owner_group_id="stage-group",
+                    channel="whatsapp",
+                    adapter_name="openclaw",
+                    target_ref="120363409469948475@g.us",
+                ),
+                default_created_at_utc=NOW,
+            )
+
+        target = get_delivery_target(self.connection, "target-stage-whatsapp")
+        self.assertEqual(target["owner_kind"], "subject_group")
+        self.assertEqual(target["owner_group_id"], "stage-group")
+
+        create_task_v1(
+            self.connection,
+            item_id="task-routed-group",
+            audit_id="audit-task-routed-group",
+            created_at_utc=NOW,
+            created_by_subject_id=SUBJECT_ID,
+            title="Check stage group",
+            notification_policies=(
+                NotificationPolicyInput(
+                    policy_id="policy-routed-group",
+                    recipient_kind="subject_group",
+                    recipient_group_id="stage-group",
+                    trigger_anchor=instant_anchor("policy-routed-group-trigger"),
+                    channel_preference_ref="whatsapp",
+                    delivery_target_id="target-stage-whatsapp",
+                ),
+            ),
+        )
+
+        work = generate_notification_reminder_work(
+            self.connection,
+            notification_policy_id="policy-routed-group",
+            work_instance_id="work-routed-group",
+            eligible_at_utc=NOW,
+            created_at_utc=NOW,
+        )
+        row = self.connection.execute(
+            "SELECT * FROM work_instances WHERE work_instance_id = ?",
+            (work.work_instance_id,),
+        ).fetchone()
+        self.assertEqual(row["delivery_target_id"], "target-stage-whatsapp")
+        self.assertEqual(row["work_subject_ref"], "subject_group:stage-group")
+
+    def test_group_policy_without_delivery_target_is_inert_for_work_generation(self) -> None:
+        with self.connection:
+            insert_subject_group(
+                self.connection,
+                group=SubjectGroupInput(
+                    group_id="unrouted-group",
+                    group_kind="team",
+                    display_name="Unrouted Team",
+                ),
+                default_created_at_utc=NOW,
+            )
+        create_task_v1(
+            self.connection,
+            item_id="task-unrouted-group",
+            audit_id="audit-task-unrouted-group",
+            created_at_utc=NOW,
+            created_by_subject_id=SUBJECT_ID,
+            title="Unrouted group",
+            notification_policies=(
+                NotificationPolicyInput(
+                    policy_id="policy-unrouted-group",
+                    recipient_kind="subject_group",
+                    recipient_group_id="unrouted-group",
+                    trigger_anchor=instant_anchor("policy-unrouted-group-trigger"),
+                    channel_preference_ref="whatsapp",
+                ),
+            ),
+        )
+
+        with self.assertRaisesRegex(SpineValidationError, "notification_policy_unrouted"):
+            generate_notification_reminder_work(
+                self.connection,
+                notification_policy_id="policy-unrouted-group",
+                work_instance_id="work-unrouted-group",
+                eligible_at_utc=NOW,
+                created_at_utc=NOW,
+            )
 
     def test_relation_depends_on_and_derived_blocks(self) -> None:
         create_task_pair(self.connection)

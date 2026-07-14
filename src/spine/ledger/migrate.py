@@ -16,7 +16,7 @@ from spine.core import SpineValidationError
 from spine.ledger.common import utc_z_from_datetime
 from spine.ledger.sqlite import assert_ledger_invariants, connect, initialize_schema
 
-CURRENT_SCHEMA_VERSION = 3
+CURRENT_SCHEMA_VERSION = 4
 
 EXPECTED_SCHEMA_TABLES = frozenset(
     {
@@ -26,6 +26,7 @@ EXPECTED_SCHEMA_TABLES = frozenset(
         "coordination_item_relations",
         "coordination_item_versions",
         "coordination_items",
+        "delivery_targets",
         "event_details",
         "external_projections",
         "item_locations",
@@ -34,6 +35,8 @@ EXPECTED_SCHEMA_TABLES = frozenset(
         "locations",
         "notification_policies",
         "side_effect_attempts",
+        "subject_groups",
+        "subject_memberships",
         "subjects",
         "task_details",
         "temporal_anchors",
@@ -56,12 +59,22 @@ EXPECTED_SCHEMA_INDEXES = frozenset(
         "external_projections_status_updated_idx",
         "item_locations_location_idx",
         "item_subject_roles_subject_idx",
+        "delivery_targets_active_account_unique",
+        "delivery_targets_active_no_account_unique",
+        "delivery_targets_owner_status_idx",
         "notification_policies_item_version_status_idx",
+        "notification_policies_delivery_target_idx",
+        "notification_policies_group_status_idx",
+        "notification_policies_group_unique",
         "notification_policies_recipient_status_idx",
+        "notification_policies_subject_unique",
         "side_effect_attempts_candidate_action_idx",
         "side_effect_attempts_item_adapter_status_idx",
         "side_effect_attempts_projection_idx",
         "side_effect_attempts_work_instance_idx",
+        "subject_memberships_group_status_idx",
+        "subject_memberships_subject_status_idx",
+        "work_instances_delivery_target_idx",
         "work_instances_eligible_due_idx",
         "work_instances_item_version_status_idx",
         "work_instances_source_work_idx",
@@ -239,6 +252,17 @@ def main(argv: Sequence[str] | None = None) -> int:
 
 
 def _apply_migration(connection: sqlite3.Connection, *, version: int, migration_name: str) -> None:
+    if version == 4 and _delivery_target_schema_present(connection):
+        with connection:
+            _ensure_delivery_target_schema_indexes(connection)
+            connection.execute(
+                """
+                INSERT OR IGNORE INTO ledger_schema (schema_version, applied_at_utc)
+                VALUES (?, ?)
+                """,
+                (version, _utc_now()),
+            )
+        return
     sql = _migration_sql(migration_name)
     with connection:
         connection.executescript(sql)
@@ -303,6 +327,71 @@ def _table_exists(connection: sqlite3.Connection, table_name: str) -> bool:
         (table_name,),
     ).fetchone()
     return row is not None
+
+
+def _column_exists(connection: sqlite3.Connection, table_name: str, column_name: str) -> bool:
+    if not _table_exists(connection, table_name):
+        return False
+    return any(row["name"] == column_name for row in connection.execute(f"PRAGMA table_info({table_name})"))
+
+
+def _delivery_target_schema_present(connection: sqlite3.Connection) -> bool:
+    return (
+        _table_exists(connection, "subject_groups")
+        and _table_exists(connection, "delivery_targets")
+        and _column_exists(connection, "notification_policies", "recipient_kind")
+        and _column_exists(connection, "notification_policies", "delivery_target_id")
+        and _column_exists(connection, "work_instances", "delivery_target_id")
+    )
+
+
+def _ensure_delivery_target_schema_indexes(connection: sqlite3.Connection) -> None:
+    connection.executescript(
+        """
+        CREATE INDEX IF NOT EXISTS subject_memberships_group_status_idx
+        ON subject_memberships (group_id, status, subject_id);
+
+        CREATE INDEX IF NOT EXISTS subject_memberships_subject_status_idx
+        ON subject_memberships (subject_id, status, group_id);
+
+        CREATE UNIQUE INDEX IF NOT EXISTS delivery_targets_active_no_account_unique
+        ON delivery_targets (adapter_name, channel, target_ref)
+        WHERE status = 'active' AND account_id IS NULL;
+
+        CREATE UNIQUE INDEX IF NOT EXISTS delivery_targets_active_account_unique
+        ON delivery_targets (adapter_name, account_id, channel, target_ref)
+        WHERE status = 'active' AND account_id IS NOT NULL;
+
+        CREATE INDEX IF NOT EXISTS delivery_targets_owner_status_idx
+        ON delivery_targets (owner_kind, owner_subject_id, owner_group_id, status);
+
+        CREATE UNIQUE INDEX IF NOT EXISTS notification_policies_subject_unique
+        ON notification_policies (item_id, version, recipient_subject_id, trigger_anchor_id)
+        WHERE recipient_kind = 'subject';
+
+        CREATE UNIQUE INDEX IF NOT EXISTS notification_policies_group_unique
+        ON notification_policies (item_id, version, recipient_group_id, trigger_anchor_id)
+        WHERE recipient_kind = 'subject_group';
+
+        CREATE INDEX IF NOT EXISTS notification_policies_item_version_status_idx
+        ON notification_policies (item_id, version, status, policy_id);
+
+        CREATE INDEX IF NOT EXISTS notification_policies_recipient_status_idx
+        ON notification_policies (recipient_subject_id, status, item_id, version);
+
+        CREATE INDEX IF NOT EXISTS notification_policies_group_status_idx
+        ON notification_policies (recipient_group_id, status, item_id, version)
+        WHERE recipient_kind = 'subject_group';
+
+        CREATE INDEX IF NOT EXISTS notification_policies_delivery_target_idx
+        ON notification_policies (delivery_target_id, status, item_id, version)
+        WHERE delivery_target_id IS NOT NULL;
+
+        CREATE INDEX IF NOT EXISTS work_instances_delivery_target_idx
+        ON work_instances (delivery_target_id, status, work_instance_id)
+        WHERE delivery_target_id IS NOT NULL;
+        """
+    )
 
 
 def _object_names(connection: sqlite3.Connection, *, object_type: str) -> frozenset[str]:

@@ -12,12 +12,16 @@ from typing import Mapping, Sequence
 
 from spine.adapters import DEFAULT_OPENCLAW_CHANNEL, build_openclaw_outbound_message
 from spine.ledger import (
+    DeliveryTargetInput,
     NotificationPolicyInput,
+    SubjectGroupInput,
     TemporalAnchorInput,
     connect,
     create_task_v1,
     get_work_instance,
     initialize_schema,
+    insert_delivery_target,
+    insert_subject_group,
 )
 from spine.ledger.common import require_utc_z, utc_z_from_datetime
 from spine.services import generate_notification_reminder_work
@@ -54,19 +58,48 @@ def seed_canary_reminder(
         work = get_work_instance(connection, ids["work_instance_id"])
         seeded = False
     else:
-        _insert_canary_subject(connection, subject_id=target_ref, created_at_utc=now_utc)
+        _insert_canary_subject(connection, subject_id=ids["actor_subject_id"], created_at_utc=now_utc)
+        insert_subject_group(
+            connection,
+            group=SubjectGroupInput(
+                group_id=ids["group_id"],
+                group_kind="transport_group",
+                display_name=f"{prefix} delivery group",
+                created_at_utc=now_utc,
+                updated_at_utc=now_utc,
+            ),
+            default_created_at_utc=now_utc,
+        )
+        insert_delivery_target(
+            connection,
+            target=DeliveryTargetInput(
+                delivery_target_id=ids["delivery_target_id"],
+                owner_kind="subject_group",
+                owner_group_id=ids["group_id"],
+                channel=openclaw_channel,
+                adapter_name="openclaw",
+                target_ref=target_ref,
+                display_name=f"{prefix} OpenClaw target",
+                created_at_utc=now_utc,
+                updated_at_utc=now_utc,
+            ),
+            default_created_at_utc=now_utc,
+        )
         create_task_v1(
             connection,
             item_id=ids["item_id"],
             audit_id=ids["audit_id"],
             created_at_utc=now_utc,
-            created_by_subject_id=target_ref,
+            created_by_subject_id=ids["actor_subject_id"],
             title=title,
             summary="Controlled Spine/OpenClaw canary reminder.",
             notification_policies=(
                 NotificationPolicyInput(
                     policy_id=ids["policy_id"],
-                    recipient_subject_id=target_ref,
+                    recipient_kind="subject_group",
+                    recipient_group_id=ids["group_id"],
+                    channel_preference_ref=openclaw_channel,
+                    delivery_target_id=ids["delivery_target_id"],
                     trigger_anchor=TemporalAnchorInput(
                         anchor_id=ids["anchor_id"],
                         anchor_kind="instant_utc",
@@ -96,6 +129,9 @@ def seed_canary_reminder(
     return {
         **ids,
         "target_ref": target_ref,
+        "actor_subject_id": ids["actor_subject_id"],
+        "group_id": ids["group_id"],
+        "delivery_target_id": ids["delivery_target_id"],
         "title": title,
         "eligible_at_utc": eligible_at_utc,
         "seeded": seeded,
@@ -138,6 +174,9 @@ def _canary_ids(prefix: str) -> dict[str, str]:
         "policy_id": f"{prefix}-policy",
         "anchor_id": f"{prefix}-anchor",
         "work_instance_id": f"{prefix}-work",
+        "actor_subject_id": f"{prefix}-actor",
+        "group_id": f"{prefix}-group",
+        "delivery_target_id": f"{prefix}-openclaw-target",
     }
 
 

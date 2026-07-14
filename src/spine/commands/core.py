@@ -47,6 +47,8 @@ from spine.ledger.work import create_work_instance
 MVP_COMMANDS = frozenset(
     {
         "subject.upsert",
+        "subject_group.upsert",
+        "delivery_target.upsert",
         "item.show",
         "item.list",
         "item.archive",
@@ -111,6 +113,10 @@ def handle(command: str, request: Mapping[str, Any], context: CommandContext) ->
 def _dispatch(command: str, request: Mapping[str, Any], context: CommandContext) -> dict[str, Any]:
     if command == "subject.upsert":
         return _handle_subject_upsert(request, context)
+    if command == "subject_group.upsert":
+        return _handle_subject_group_upsert(request, context)
+    if command == "delivery_target.upsert":
+        return _handle_delivery_target_upsert(request, context)
     if command == "item.show":
         return _handle_item_show(request, context)
     if command == "item.list":
@@ -213,6 +219,197 @@ def _handle_subject_upsert(request: Mapping[str, Any], context: CommandContext) 
             )
         insert_command_receipt(context.ledger, receipt)
     return _subject_response(_subject(context.ledger, subject_id), created=created, updated=updated, receipt_id=receipt["command_receipt_id"])
+
+
+def _handle_subject_group_upsert(request: Mapping[str, Any], context: CommandContext) -> dict[str, Any]:
+    _check_fields("subject_group.upsert", request, {"command_id", "actor_subject_id", "group_id", "group_kind", "display_name", "status", "updated_at_utc"})
+    command_id, actor, updated_at_utc = _write_identity("subject_group.upsert", request, "updated_at_utc", context)
+    group_id = _required_str(request, "group_id")
+    group_kind = _enum(request.get("group_kind"), "group_kind", {"household", "project", "team", "transport_group"})
+    display_name = _required_str(request, "display_name")
+    status = _enum(request.get("status", "active"), "status", {"active", "inactive"})
+    semantic_facts = {
+        "command": "subject_group.upsert",
+        "command_id": command_id,
+        "actor_subject_id": actor,
+        "action_timestamp_utc": updated_at_utc,
+        "group_id": group_id,
+        "group_kind": group_kind,
+        "display_name": display_name,
+        "status": status,
+    }
+    replay = _compatible_replay("subject_group.upsert", command_id, semantic_facts, context)
+    if replay is not None:
+        return _subject_group_response(_subject_group(context.ledger, group_id), created=False, updated=False, receipt_id=replay["command_receipt_id"])
+    existing = _subject_group(context.ledger, group_id, required=False)
+    created = existing is None
+    updated = created or any(
+        existing[key] != value
+        for key, value in {"group_kind": group_kind, "display_name": display_name, "status": status}.items()
+    )
+    effect = "subject_group_created" if created else "subject_group_updated" if updated else "subject_group_noop"
+    receipt = _make_receipt(
+        command="subject_group.upsert",
+        command_id=command_id,
+        actor_subject_id=actor,
+        action_timestamp_utc=updated_at_utc,
+        effect=effect,
+        semantic_facts={**semantic_facts, "created": created, "updated": updated},
+        result_identity_facts={
+            "command_receipt_id": _receipt_id("subject_group.upsert", command_id),
+            "group_id": group_id,
+            "created": created,
+            "updated": updated,
+        },
+    )
+    with context.ledger:
+        if created:
+            context.ledger.execute(
+                """
+                INSERT INTO subject_groups (
+                  group_id, group_kind, display_name, status, created_at_utc, updated_at_utc
+                )
+                VALUES (?, ?, ?, ?, ?, ?)
+                """,
+                (group_id, group_kind, display_name, status, updated_at_utc, updated_at_utc),
+            )
+        elif updated:
+            context.ledger.execute(
+                """
+                UPDATE subject_groups
+                SET group_kind = ?, display_name = ?, status = ?, updated_at_utc = ?
+                WHERE group_id = ?
+                """,
+                (group_kind, display_name, status, updated_at_utc, group_id),
+            )
+        insert_command_receipt(context.ledger, receipt)
+    return _subject_group_response(_subject_group(context.ledger, group_id), created=created, updated=updated, receipt_id=receipt["command_receipt_id"])
+
+
+def _handle_delivery_target_upsert(request: Mapping[str, Any], context: CommandContext) -> dict[str, Any]:
+    allowed = {
+        "command_id",
+        "actor_subject_id",
+        "delivery_target_id",
+        "owner_kind",
+        "owner_subject_id",
+        "owner_group_id",
+        "channel",
+        "adapter_name",
+        "account_id",
+        "target_ref",
+        "display_name",
+        "status",
+        "updated_at_utc",
+    }
+    _check_fields("delivery_target.upsert", request, allowed)
+    command_id, actor, updated_at_utc = _write_identity("delivery_target.upsert", request, "updated_at_utc", context)
+    delivery_target_id = _required_str(request, "delivery_target_id")
+    owner_kind = _enum(request.get("owner_kind"), "owner_kind", {"subject", "subject_group"})
+    owner_subject_id = _optional_str(request, "owner_subject_id")
+    owner_group_id = _optional_str(request, "owner_group_id")
+    channel = _required_str(request, "channel")
+    adapter_name = _required_str(request, "adapter_name")
+    account_id = _optional_str(request, "account_id")
+    target_ref = _required_str(request, "target_ref")
+    display_name = _optional_str(request, "display_name")
+    status = _enum(request.get("status", "active"), "status", {"active", "inactive"})
+    if owner_kind == "subject":
+        if owner_subject_id is None or owner_group_id is not None:
+            return _error("delivery_target.upsert", "invalid_request", "subject target requires owner_subject_id only", "owner_subject_id")
+        if not _subject_exists(context.ledger, owner_subject_id):
+            return _error("delivery_target.upsert", "referenced_row_not_found", "owner subject not found", "owner_subject_id")
+    else:
+        if owner_group_id is None or owner_subject_id is not None:
+            return _error("delivery_target.upsert", "invalid_request", "group target requires owner_group_id only", "owner_group_id")
+        if not _subject_group_exists(context.ledger, owner_group_id):
+            return _error("delivery_target.upsert", "referenced_row_not_found", "owner group not found", "owner_group_id")
+    semantic_facts = _semantic_request("delivery_target.upsert", command_id, actor, updated_at_utc, request, allowed)
+    replay = _compatible_replay("delivery_target.upsert", command_id, semantic_facts, context)
+    if replay is not None:
+        return _delivery_target_response(_delivery_target(context.ledger, delivery_target_id), created=False, updated=False, receipt_id=replay["command_receipt_id"])
+    existing = _delivery_target(context.ledger, delivery_target_id, required=False)
+    created = existing is None
+    desired = {
+        "owner_kind": owner_kind,
+        "owner_subject_id": owner_subject_id,
+        "owner_group_id": owner_group_id,
+        "channel": channel,
+        "adapter_name": adapter_name,
+        "account_id": account_id,
+        "target_ref": target_ref,
+        "display_name": display_name,
+        "status": status,
+    }
+    if existing is not None and _delivery_target_routing_changed(existing, desired) and _delivery_target_in_use(context.ledger, delivery_target_id):
+        return _error("delivery_target.upsert", "semantic_conflict", "delivery target routing cannot change while referenced", "delivery_target_id")
+    updated = created or any(existing[key] != value for key, value in desired.items())
+    effect = "delivery_target_created" if created else "delivery_target_updated" if updated else "delivery_target_noop"
+    receipt = _make_receipt(
+        command="delivery_target.upsert",
+        command_id=command_id,
+        actor_subject_id=actor,
+        action_timestamp_utc=updated_at_utc,
+        effect=effect,
+        semantic_facts={**semantic_facts, "created": created, "updated": updated},
+        result_identity_facts={
+            "command_receipt_id": _receipt_id("delivery_target.upsert", command_id),
+            "delivery_target_id": delivery_target_id,
+            "created": created,
+            "updated": updated,
+        },
+    )
+    with context.ledger:
+        if created:
+            context.ledger.execute(
+                """
+                INSERT INTO delivery_targets (
+                  delivery_target_id, owner_kind, owner_subject_id, owner_group_id, channel,
+                  adapter_name, account_id, target_ref, display_name, status, created_at_utc,
+                  updated_at_utc
+                )
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    delivery_target_id,
+                    owner_kind,
+                    owner_subject_id,
+                    owner_group_id,
+                    channel,
+                    adapter_name,
+                    account_id,
+                    target_ref,
+                    display_name,
+                    status,
+                    updated_at_utc,
+                    updated_at_utc,
+                ),
+            )
+        elif updated:
+            context.ledger.execute(
+                """
+                UPDATE delivery_targets
+                SET owner_kind = ?, owner_subject_id = ?, owner_group_id = ?, channel = ?,
+                    adapter_name = ?, account_id = ?, target_ref = ?, display_name = ?,
+                    status = ?, updated_at_utc = ?
+                WHERE delivery_target_id = ?
+                """,
+                (
+                    owner_kind,
+                    owner_subject_id,
+                    owner_group_id,
+                    channel,
+                    adapter_name,
+                    account_id,
+                    target_ref,
+                    display_name,
+                    status,
+                    updated_at_utc,
+                    delivery_target_id,
+                ),
+            )
+        insert_command_receipt(context.ledger, receipt)
+    return _delivery_target_response(_delivery_target(context.ledger, delivery_target_id), created=created, updated=updated, receipt_id=receipt["command_receipt_id"])
 
 
 def _handle_item_show(request: Mapping[str, Any], context: CommandContext) -> dict[str, Any]:
@@ -695,12 +892,26 @@ def _relation_matches_filters(
 
 
 def _handle_reminder_create(request: Mapping[str, Any], context: CommandContext) -> dict[str, Any]:
-    allowed = {"command_id", "actor_subject_id", "item_id", "target_version", "created_at_utc", "work_subject_ref", "channel", "eligible_at_utc", "trigger_anchor", "if_absent"}
+    allowed = {
+        "command_id",
+        "actor_subject_id",
+        "item_id",
+        "target_version",
+        "created_at_utc",
+        "work_subject_ref",
+        "recipient_kind",
+        "recipient_subject_id",
+        "recipient_group_id",
+        "delivery_target_id",
+        "channel",
+        "eligible_at_utc",
+        "trigger_anchor",
+        "if_absent",
+    }
     _check_fields("reminder.create", request, allowed)
     command_id, actor, created_at = _write_identity("reminder.create", request, "created_at_utc", context)
     item_id = _required_str(request, "item_id")
     target_version = _version(request, "target_version")
-    work_subject_ref = _required_str(request, "work_subject_ref")
     channel = _enum(request.get("channel"), "channel", {"whatsapp"})
     eligible_at = _timestamp(request, "eligible_at_utc")
     trigger_anchor = _anchor_input(request.get("trigger_anchor") or {"anchor_kind": "instant_utc", "utc_instant": eligible_at}, "trigger_anchor", _derived_id("reminder.create", command_id, "trigger_anchor", "/trigger_anchor"))
@@ -709,11 +920,22 @@ def _handle_reminder_create(request: Mapping[str, Any], context: CommandContext)
     replay = _compatible_replay("reminder.create", command_id, semantic, context)
     if replay is not None:
         return _reminder_response(replay["result_identity_facts"], created=False)
-    if not _subject_exists(context.ledger, work_subject_ref):
-        return _error("reminder.create", "referenced_row_not_found", "work subject not found", "work_subject_ref")
+
+    route = _reminder_route(request, context, channel)
+    if not route["ok"]:
+        return route
     if not _has_openclaw(context):
         return _error("reminder.create", "environment_failure", "OpenClaw whatsapp binding is required", "channel")
-    duplicate = _find_duplicate_reminder(context.ledger, item_id, work_subject_ref, eligible_at, channel)
+    duplicate = _find_duplicate_reminder(
+        context.ledger,
+        item_id,
+        eligible_at,
+        channel,
+        recipient_kind=str(route["recipient_kind"]),
+        recipient_subject_id=route.get("recipient_subject_id"),
+        recipient_group_id=route.get("recipient_group_id"),
+        delivery_target_id=route.get("delivery_target_id"),
+    )
     if duplicate is not None and if_absent:
         receipt = _store_write_receipt(
             context,
@@ -753,8 +975,11 @@ def _handle_reminder_create(request: Mapping[str, Any], context: CommandContext)
         version=next_version,
         policy=NotificationPolicyInput(
             policy_id=policy_id,
-            recipient_subject_id=work_subject_ref,
+            recipient_kind=str(route["recipient_kind"]),
+            recipient_subject_id=route.get("recipient_subject_id"),
+            recipient_group_id=route.get("recipient_group_id"),
             channel_preference_ref=channel,
+            delivery_target_id=route.get("delivery_target_id"),
             trigger_anchor_id=trigger_anchor.anchor_id,
         ),
         default_created_at_utc=created_at,
@@ -766,9 +991,10 @@ def _handle_reminder_create(request: Mapping[str, Any], context: CommandContext)
         item_version=next_version,
         notification_policy_id=policy_id,
         notification_policy_item_version=next_version,
+        delivery_target_id=route.get("delivery_target_id"),
         generation_source_kind="notification_policy",
         generation_source_ref=policy_id,
-        work_subject_ref=work_subject_ref,
+        work_subject_ref=str(route["work_subject_ref"]),
         policy_basis_ref=policy_id,
         eligible_at_utc=eligible_at,
         created_at_utc=created_at,
@@ -787,7 +1013,15 @@ def _handle_reminder_create(request: Mapping[str, Any], context: CommandContext)
         "trigger_anchor_id": trigger_anchor.anchor_id,
         "eligible_at_utc": eligible_at,
         "created": True,
-        "predicted_delivery": _predicted_delivery(channel, work_subject_ref, eligible_at),
+        "predicted_delivery": _predicted_delivery(
+            channel,
+            str(route["work_subject_ref"]),
+            eligible_at,
+            delivery_target=route.get("delivery_target"),
+            recipient_kind=str(route["recipient_kind"]),
+            recipient_subject_id=route.get("recipient_subject_id"),
+            recipient_group_id=route.get("recipient_group_id"),
+        ),
     }
     receipt = _store_write_receipt(
         context,
@@ -1155,6 +1389,88 @@ def _subject_response(subject: Mapping[str, Any] | None, *, created: bool, updat
     }
 
 
+def _subject_group_exists(connection: sqlite3.Connection, group_id: str) -> bool:
+    return connection.execute("SELECT 1 FROM subject_groups WHERE group_id = ?", (group_id,)).fetchone() is not None
+
+
+def _subject_group(connection: sqlite3.Connection, group_id: str, *, required: bool = True) -> dict[str, Any] | None:
+    row = connection.execute("SELECT * FROM subject_groups WHERE group_id = ?", (group_id,)).fetchone()
+    if row is None:
+        if required:
+            raise SpineValidationError("subject_group_not_found", f"subject group not found: {group_id}")
+        return None
+    return dict(row)
+
+
+def _subject_group_response(group: Mapping[str, Any] | None, *, created: bool, updated: bool, receipt_id: str) -> dict[str, Any]:
+    assert group is not None
+    return {
+        "ok": True,
+        "command": "subject_group.upsert",
+        "created": created,
+        "updated": updated,
+        "group_id": group["group_id"],
+        "group_kind": group["group_kind"],
+        "display_name": group["display_name"],
+        "status": group["status"],
+        "created_at_utc": group["created_at_utc"],
+        "updated_at_utc": group["updated_at_utc"],
+        "command_receipt_id": receipt_id,
+    }
+
+
+def _delivery_target(connection: sqlite3.Connection, delivery_target_id: str, *, required: bool = True) -> dict[str, Any] | None:
+    row = connection.execute("SELECT * FROM delivery_targets WHERE delivery_target_id = ?", (delivery_target_id,)).fetchone()
+    if row is None:
+        if required:
+            raise SpineValidationError("delivery_target_not_found", f"delivery target not found: {delivery_target_id}")
+        return None
+    return dict(row)
+
+
+def _delivery_target_routing_changed(existing: Mapping[str, Any], desired: Mapping[str, Any]) -> bool:
+    routing_fields = ("owner_kind", "owner_subject_id", "owner_group_id", "channel", "adapter_name", "account_id", "target_ref")
+    return any(existing[field] != desired[field] for field in routing_fields)
+
+
+def _delivery_target_in_use(connection: sqlite3.Connection, delivery_target_id: str) -> bool:
+    policy = connection.execute(
+        "SELECT 1 FROM notification_policies WHERE delivery_target_id = ? LIMIT 1",
+        (delivery_target_id,),
+    ).fetchone()
+    if policy is not None:
+        return True
+    work = connection.execute(
+        "SELECT 1 FROM work_instances WHERE delivery_target_id = ? LIMIT 1",
+        (delivery_target_id,),
+    ).fetchone()
+    return work is not None
+
+
+def _delivery_target_response(target: Mapping[str, Any] | None, *, created: bool, updated: bool, receipt_id: str) -> dict[str, Any]:
+    assert target is not None
+    response = {
+        "ok": True,
+        "command": "delivery_target.upsert",
+        "created": created,
+        "updated": updated,
+        "delivery_target_id": target["delivery_target_id"],
+        "owner_kind": target["owner_kind"],
+        "owner_subject_id": target["owner_subject_id"],
+        "owner_group_id": target["owner_group_id"],
+        "channel": target["channel"],
+        "adapter_name": target["adapter_name"],
+        "account_id": target["account_id"],
+        "target_ref": target["target_ref"],
+        "display_name": target["display_name"],
+        "status": target["status"],
+        "created_at_utc": target["created_at_utc"],
+        "updated_at_utc": target["updated_at_utc"],
+        "command_receipt_id": receipt_id,
+    }
+    return {key: value for key, value in response.items() if value is not None}
+
+
 def _hydrated_item(connection: sqlite3.Connection, item_id: str) -> dict[str, Any]:
     item = get_current_item(connection, item_id)
     detail = dict(item["detail"])
@@ -1417,25 +1733,120 @@ def _reminder_response(facts: Mapping[str, Any], *, created: bool) -> dict[str, 
     return response
 
 
-def _predicted_delivery(channel: str, work_subject_ref: str, eligible_at_utc: str) -> dict[str, str]:
+def _reminder_route(request: Mapping[str, Any], context: CommandContext, channel: str) -> dict[str, Any]:
+    routed_fields = {"recipient_kind", "recipient_subject_id", "recipient_group_id", "delivery_target_id"}
+    routed = any(field in request for field in routed_fields)
+    if not routed:
+        work_subject_ref = _required_str(request, "work_subject_ref")
+        if not _subject_exists(context.ledger, work_subject_ref):
+            return _error("reminder.create", "referenced_row_not_found", "work subject not found", "work_subject_ref")
+        return {
+            "ok": True,
+            "recipient_kind": "subject",
+            "recipient_subject_id": work_subject_ref,
+            "recipient_group_id": None,
+            "delivery_target_id": None,
+            "delivery_target": None,
+            "work_subject_ref": work_subject_ref,
+        }
+    if "work_subject_ref" in request:
+        return _error("reminder.create", "invalid_request", "work_subject_ref cannot be combined with delivery target routing", "work_subject_ref")
+    recipient_kind = _enum(request.get("recipient_kind"), "recipient_kind", {"subject", "subject_group"})
+    recipient_subject_id = _optional_str(request, "recipient_subject_id")
+    recipient_group_id = _optional_str(request, "recipient_group_id")
+    delivery_target_id = _required_str(request, "delivery_target_id")
+    if recipient_kind == "subject":
+        if recipient_subject_id is None or recipient_group_id is not None:
+            return _error("reminder.create", "invalid_request", "subject recipient requires recipient_subject_id only", "recipient_subject_id")
+        if not _subject_exists(context.ledger, recipient_subject_id):
+            return _error("reminder.create", "referenced_row_not_found", "recipient subject not found", "recipient_subject_id")
+        work_subject_ref = f"subject:{recipient_subject_id}"
+    else:
+        if recipient_group_id is None or recipient_subject_id is not None:
+            return _error("reminder.create", "invalid_request", "group recipient requires recipient_group_id only", "recipient_group_id")
+        if not _subject_group_exists(context.ledger, recipient_group_id):
+            return _error("reminder.create", "referenced_row_not_found", "recipient group not found", "recipient_group_id")
+        work_subject_ref = f"subject_group:{recipient_group_id}"
+
+    target = _delivery_target(context.ledger, delivery_target_id, required=False)
+    if target is None:
+        return _error("reminder.create", "referenced_row_not_found", "delivery target not found", "delivery_target_id")
+    if target["status"] != "active":
+        return _error("reminder.create", "invalid_state_transition", "delivery target is not active", "delivery_target_id")
+    if target["adapter_name"] != "openclaw":
+        return _error("reminder.create", "environment_failure", "OpenClaw delivery target is required", "delivery_target_id")
+    if target["channel"] != channel:
+        return _error("reminder.create", "semantic_conflict", "delivery target channel does not match reminder channel", "delivery_target_id")
+    if recipient_kind == "subject" and (target["owner_kind"] != "subject" or target["owner_subject_id"] != recipient_subject_id):
+        return _error("reminder.create", "semantic_conflict", "delivery target owner does not match recipient", "delivery_target_id")
+    if recipient_kind == "subject_group" and (target["owner_kind"] != "subject_group" or target["owner_group_id"] != recipient_group_id):
+        return _error("reminder.create", "semantic_conflict", "delivery target owner does not match recipient", "delivery_target_id")
     return {
+        "ok": True,
+        "recipient_kind": recipient_kind,
+        "recipient_subject_id": recipient_subject_id,
+        "recipient_group_id": recipient_group_id,
+        "delivery_target_id": delivery_target_id,
+        "delivery_target": target,
+        "work_subject_ref": work_subject_ref,
+    }
+
+
+def _predicted_delivery(
+    channel: str,
+    work_subject_ref: str,
+    eligible_at_utc: str,
+    *,
+    delivery_target: Mapping[str, Any] | None = None,
+    recipient_kind: str = "subject",
+    recipient_subject_id: Any = None,
+    recipient_group_id: Any = None,
+) -> dict[str, str]:
+    prediction = {
         "channel": channel,
         "work_subject_ref": work_subject_ref,
         "eligible_at_utc": eligible_at_utc,
         "adapter_binding": "openclaw",
         "send_boundary": "no_external_send_from_authoring_command",
     }
+    if delivery_target is not None:
+        prediction["delivery_target_id"] = str(delivery_target["delivery_target_id"])
+        prediction["target_ref"] = str(delivery_target["target_ref"])
+        prediction["recipient_kind"] = recipient_kind
+        if recipient_subject_id is not None:
+            prediction["recipient_subject_id"] = str(recipient_subject_id)
+        if recipient_group_id is not None:
+            prediction["recipient_group_id"] = str(recipient_group_id)
+    return prediction
 
 
-def _find_duplicate_reminder(connection: sqlite3.Connection, item_id: str, work_subject_ref: str, eligible_at_utc: str, channel: str) -> dict[str, Any] | None:
+def _find_duplicate_reminder(
+    connection: sqlite3.Connection,
+    item_id: str,
+    eligible_at_utc: str,
+    channel: str,
+    *,
+    recipient_kind: str,
+    recipient_subject_id: Any,
+    recipient_group_id: Any,
+    delivery_target_id: Any,
+) -> dict[str, Any] | None:
     row = connection.execute(
         """
-        SELECT p.policy_id, p.version, p.trigger_anchor_id, w.work_instance_id, i.item_type, i.current_version
+        SELECT
+          p.policy_id, p.version, p.trigger_anchor_id, p.recipient_kind,
+          p.recipient_subject_id, p.recipient_group_id, p.delivery_target_id,
+          w.work_instance_id, w.work_subject_ref, i.item_type, i.current_version,
+          dt.target_ref
         FROM notification_policies AS p
         JOIN work_instances AS w ON w.notification_policy_id = p.policy_id
         JOIN coordination_items AS i ON i.item_id = p.item_id
+        LEFT JOIN delivery_targets AS dt ON dt.delivery_target_id = p.delivery_target_id
         WHERE p.item_id = ?
-          AND p.recipient_subject_id = ?
+          AND p.recipient_kind = ?
+          AND ((? IS NULL AND p.recipient_subject_id IS NULL) OR p.recipient_subject_id = ?)
+          AND ((? IS NULL AND p.recipient_group_id IS NULL) OR p.recipient_group_id = ?)
+          AND ((? IS NULL AND p.delivery_target_id IS NULL) OR p.delivery_target_id = ?)
           AND p.channel_preference_ref = ?
           AND p.status = 'active'
           AND w.eligible_at_utc = ?
@@ -1443,10 +1854,27 @@ def _find_duplicate_reminder(connection: sqlite3.Connection, item_id: str, work_
         ORDER BY p.created_at_utc, p.policy_id
         LIMIT 1
         """,
-        (item_id, work_subject_ref, channel, eligible_at_utc),
+        (
+            item_id,
+            recipient_kind,
+            recipient_subject_id,
+            recipient_subject_id,
+            recipient_group_id,
+            recipient_group_id,
+            delivery_target_id,
+            delivery_target_id,
+            channel,
+            eligible_at_utc,
+        ),
     ).fetchone()
     if row is None:
         return None
+    delivery_target = None
+    if row["delivery_target_id"] is not None:
+        delivery_target = {
+            "delivery_target_id": row["delivery_target_id"],
+            "target_ref": row["target_ref"],
+        }
     return {
         "item_id": item_id,
         "item_type": row["item_type"],
@@ -1457,7 +1885,15 @@ def _find_duplicate_reminder(connection: sqlite3.Connection, item_id: str, work_
         "work_instance_id": row["work_instance_id"],
         "trigger_anchor_id": row["trigger_anchor_id"],
         "eligible_at_utc": eligible_at_utc,
-        "predicted_delivery": _predicted_delivery(channel, work_subject_ref, eligible_at_utc),
+        "predicted_delivery": _predicted_delivery(
+            channel,
+            row["work_subject_ref"],
+            eligible_at_utc,
+            delivery_target=delivery_target,
+            recipient_kind=row["recipient_kind"],
+            recipient_subject_id=row["recipient_subject_id"],
+            recipient_group_id=row["recipient_group_id"],
+        ),
     }
 
 

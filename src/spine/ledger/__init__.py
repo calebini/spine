@@ -36,10 +36,15 @@ from spine.ledger.projections import CreatedProjection, create_external_projecti
 from spine.ledger.relations import create_item_relation, get_active_relations, get_derived_relations
 from spine.ledger.sqlite import assert_ledger_invariants, connect, initialize_schema, schema_sql
 from spine.ledger.supporting import (
+    DeliveryTargetInput,
     ItemLocationInput,
     ItemSubjectRoleInput,
     LocationInput,
     NotificationPolicyInput,
+    SubjectGroupInput,
+    get_delivery_target,
+    insert_delivery_target,
+    insert_subject_group,
 )
 from spine.ledger.work import (
     CreatedWorkInstance,
@@ -60,6 +65,7 @@ __all__ = [
     "CreatedProjection",
     "CreatedWorkInstance",
     "CompletedAttempt",
+    "DeliveryTargetInput",
     "EventDraft",
     "ItemLocationInput",
     "ItemSubjectRoleInput",
@@ -68,6 +74,7 @@ __all__ = [
     "MutatedItem",
     "NotificationPolicyInput",
     "StartedAttempt",
+    "SubjectGroupInput",
     "TaskDraft",
     "TemporalAnchorInput",
     "UpdatedWorkInstance",
@@ -97,11 +104,14 @@ __all__ = [
     "get_active_relations",
     "get_candidate_action",
     "get_current_item",
+    "get_delivery_target",
     "get_derived_relations",
     "get_external_projection",
     "get_side_effect_attempt",
     "get_work_instance",
     "initialize_schema",
+    "insert_delivery_target",
+    "insert_subject_group",
     "mutation_audit_payload",
     "require_optional_utc_z",
     "require_utc_z",

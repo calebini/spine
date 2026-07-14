@@ -262,7 +262,7 @@ def build_openclaw_outbound_message(
     item = get_current_item(connection, str(work_row["item_id"]))
     work_instance_id = str(work_row["work_instance_id"])
     attempt_count = str(work_row["attempt_count"])
-    target_ref = str(work_row.get("work_subject_ref") or "")
+    target_ref = _openclaw_target_ref(connection, work_row=work_row, channel_hint=channel_hint)
     title = str(item["version"]["title"])  # type: ignore[index]
     return OpenClawOutboundMessage(
         delivery_id=work_instance_id,
@@ -275,6 +275,34 @@ def build_openclaw_outbound_message(
         dedupe_key=f"openclaw:{work_instance_id}:{attempt_count}",
         created_at_utc=created_at_utc,
     )
+
+
+def _openclaw_target_ref(
+    connection: sqlite3.Connection,
+    *,
+    work_row: Mapping[str, object],
+    channel_hint: str,
+) -> str:
+    delivery_target_id = work_row.get("delivery_target_id")
+    if delivery_target_id is None:
+        return str(work_row.get("work_subject_ref") or "")
+    row = connection.execute(
+        """
+        SELECT delivery_target_id, adapter_name, channel, target_ref, status
+        FROM delivery_targets
+        WHERE delivery_target_id = ?
+        """,
+        (str(delivery_target_id),),
+    ).fetchone()
+    if row is None:
+        raise OpenClawBindingError("delivery target not found")
+    if row["status"] != "active":
+        raise OpenClawBindingError("delivery target inactive")
+    if row["adapter_name"] != OPENCLAW_ADAPTER_NAME:
+        raise OpenClawBindingError("delivery target adapter mismatch")
+    if row["channel"] != channel_hint:
+        raise OpenClawBindingError("delivery target channel mismatch")
+    return str(row["target_ref"])
 
 
 def record_openclaw_result(

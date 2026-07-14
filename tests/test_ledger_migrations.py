@@ -52,9 +52,11 @@ class LedgerMigrationTests(unittest.TestCase):
 
         self.assertEqual(result.before_version, 1)
         self.assertEqual(result.after_version, CURRENT_SCHEMA_VERSION)
-        self.assertEqual(result.applied_versions, (2, 3))
+        self.assertEqual(result.applied_versions, (2, 3, 4))
         self.assertIn("work_instances_eligible_due_idx", index_names(self.connection))
         self.assertIn("command_receipts_item_created_idx", index_names(self.connection))
+        self.assertIn("delivery_targets_active_no_account_unique", index_names(self.connection))
+        self.assertIn("work_instances_delivery_target_idx", index_names(self.connection))
 
     def test_verify_schema_rejects_missing_required_index(self) -> None:
         initialize_schema(self.connection)

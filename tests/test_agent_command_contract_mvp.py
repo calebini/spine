@@ -33,6 +33,8 @@ class AgentCommandContractMvpTests(unittest.TestCase):
     def test_all_mvp_commands_dispatch_without_unsupported_command(self) -> None:
         commands = [
             "subject.upsert",
+            "subject_group.upsert",
+            "delivery_target.upsert",
             "item.show",
             "item.list",
             "item.archive",
@@ -704,6 +706,94 @@ class AgentCommandContractMvpTests(unittest.TestCase):
         self.assertEqual(stale_duplicate["error"]["field"], "target_version")
         self.assertEqual(created["predicted_delivery"]["send_boundary"], "no_external_send_from_authoring_command")
         self.assertEqual(attempts, 0)
+
+    def test_group_delivery_target_reminder_create_is_first_class(self) -> None:
+        task = handle("task.create", task_request("cmd-routed-reminder-task"), self.context)
+        group = handle(
+            "subject_group.upsert",
+            {
+                "command_id": "cmd-routed-group",
+                "actor_subject_id": "agent",
+                "group_id": "stage-group",
+                "group_kind": "transport_group",
+                "display_name": "Stage group",
+                "updated_at_utc": "2026-06-06T10:10:00Z",
+            },
+            self.context,
+        )
+        target = handle(
+            "delivery_target.upsert",
+            {
+                "command_id": "cmd-routed-target",
+                "actor_subject_id": "agent",
+                "delivery_target_id": "target-stage-whatsapp",
+                "owner_kind": "subject_group",
+                "owner_group_id": "stage-group",
+                "channel": "whatsapp",
+                "adapter_name": "openclaw",
+                "target_ref": "120363409469948475@g.us",
+                "display_name": "Stage WhatsApp group",
+                "updated_at_utc": "2026-06-06T10:11:00Z",
+            },
+            self.context,
+        )
+        request = {
+            "command_id": "cmd-routed-reminder",
+            "actor_subject_id": "agent",
+            "item_id": task["item_id"],
+            "target_version": 1,
+            "created_at_utc": "2026-06-06T11:00:00Z",
+            "recipient_kind": "subject_group",
+            "recipient_group_id": "stage-group",
+            "delivery_target_id": "target-stage-whatsapp",
+            "channel": "whatsapp",
+            "eligible_at_utc": "2026-06-06T12:00:00Z",
+        }
+
+        created = handle("reminder.create", request, CommandContext(ledger=self.connection, adapter_bindings=OPENCLAW))
+        duplicate = handle(
+            "reminder.create",
+            {**request, "command_id": "cmd-routed-reminder-if-absent", "if_absent": True},
+            CommandContext(ledger=self.connection, adapter_bindings=OPENCLAW),
+        )
+        mixed = handle(
+            "reminder.create",
+            {**request, "command_id": "cmd-routed-reminder-mixed", "work_subject_ref": "stage-group"},
+            CommandContext(ledger=self.connection, adapter_bindings=OPENCLAW),
+        )
+        retarget = handle(
+            "delivery_target.upsert",
+            {
+                "command_id": "cmd-routed-target-retarget",
+                "actor_subject_id": "agent",
+                "delivery_target_id": "target-stage-whatsapp",
+                "owner_kind": "subject_group",
+                "owner_group_id": "stage-group",
+                "channel": "whatsapp",
+                "adapter_name": "openclaw",
+                "target_ref": "changed@g.us",
+                "display_name": "Stage WhatsApp group",
+                "updated_at_utc": "2026-06-06T12:01:00Z",
+            },
+            self.context,
+        )
+        work = self.connection.execute(
+            "SELECT delivery_target_id, work_subject_ref FROM work_instances WHERE work_instance_id = ?",
+            (created["work_instance_id"],),
+        ).fetchone()
+
+        self.assertTrue(group["created"])
+        self.assertTrue(target["created"])
+        self.assertTrue(created["created"])
+        self.assertFalse(duplicate["created"])
+        self.assertEqual(mixed["error"]["code"], "invalid_request")
+        self.assertEqual(retarget["error"]["code"], "semantic_conflict")
+        self.assertEqual(created["predicted_delivery"]["delivery_target_id"], "target-stage-whatsapp")
+        self.assertEqual(created["predicted_delivery"]["target_ref"], "120363409469948475@g.us")
+        self.assertEqual(created["predicted_delivery"]["recipient_kind"], "subject_group")
+        self.assertEqual(created["predicted_delivery"]["recipient_group_id"], "stage-group")
+        self.assertEqual(work["delivery_target_id"], "target-stage-whatsapp")
+        self.assertEqual(work["work_subject_ref"], "subject_group:stage-group")
 
     def test_cli_returns_one_json_response_and_normative_exit_code(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
