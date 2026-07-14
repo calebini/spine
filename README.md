@@ -19,6 +19,7 @@ Authoritative starting points:
 - `specs/ontology.md` sketches the first durable ontology and data model.
 - `specs/agent-command-contract.md` defines the MVP agent command core and CLI contract.
 - `specs/decisions/0001-kinflow-is-donor-not-foundation.md` records the Kinflow relationship.
+- `specs/decisions/0002-first-class-delivery-targets.md` records the subject/group delivery target boundary.
 
 ## First Product Profiles
 
@@ -52,6 +53,7 @@ This repository follows the Cortext1 component scaffold standard incrementally:
 - `specs/`: normative design and compatibility promises
 - `specs/decisions/`: accepted decisions
 - `docs/IMPLEMENTATION_PLAN.md`: non-normative build sequence for moving from specs to executable behavior
+- `docs/DELIVERY_TARGET_ROUTING_IMPLEMENTATION_PLAN.md`: non-normative implementation sequence for first-class subject/group delivery targets
 - `docs/AGENT_OPERATOR_GUIDE.md`: agent-facing contract for operating current Spine runtime surfaces safely
 - `docs/OPENCLAW_DEPLOYMENT_RUNBOOK.md`: operational rollout notes for the first OpenClaw replacement path
 - `contracts/`: machine-readable command fixture manifest and shared response schema

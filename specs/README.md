@@ -10,6 +10,7 @@ Current spec surface:
 - `agent-command-contract.md`: draft agent-facing command/request contract for authoring and inspecting Spine coordination truth
 - `SPINE_SPEC_VERSIONING_AND_FREEZE_POLICY.md`: lightweight policy for spec versions, runtime declarations, and one-way freeze-manifest pinning
 - `decisions/0001-kinflow-is-donor-not-foundation.md`: accepted decision on the Kinflow relationship
+- `decisions/0002-first-class-delivery-targets.md`: accepted decision separating subject/group identity from delivery endpoints
 
 Executable contract artifacts:
 

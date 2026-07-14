@@ -374,6 +374,40 @@ Family scheduler mapping:
 - event attendees = `item_subject_roles` rows with `role=participant`
 - notification recipients = `notification_policies` rows (optionally aligned with an `item_subject_roles` row with `role=recipient`)
 
+### 5.4 delivery_targets
+
+Owns adapter-routable delivery endpoints for subjects and subject groups.
+
+Delivery targets are canonical routing facts, not actor identities. A transport-specific endpoint reference such as a WhatsApp group JID, Discord channel ID, email address, or direct-message handle MUST NOT be used as a `subjects.subject_id` or `subject_groups.group_id` solely to make delivery work.
+
+Minimum contract:
+
+- `delivery_target_id` (`id`, required) — primary key.
+- `owner_kind` (`text`, required) — enum: `subject`, `subject_group`.
+- `owner_subject_id` (`id`, optional) — FK to `subjects.subject_id`; required when `owner_kind=subject`; absent otherwise.
+- `owner_group_id` (`id`, optional) — FK to `subject_groups.group_id`; required when `owner_kind=subject_group`; absent otherwise.
+- `channel` (`text`, required) — channel family such as `whatsapp`, `discord`, or `email`.
+- `adapter_name` (`text`, required) — adapter binding that can deliver to this target, such as `openclaw`.
+- `account_id` (`text`, optional) — adapter account, tenant, workspace, or gateway binding when needed to disambiguate target refs.
+- `target_ref` (`text`, required) — adapter-routable endpoint reference, stored as an exact endpoint fact after the accepted validation/canonicalization boundary.
+- `display_name` (`text`, optional).
+- `status` (`text`, required) — enum: `active`, `inactive`.
+- `created_at_utc` (`utc_instant`, required).
+- `updated_at_utc` (`utc_instant`, required).
+
+Constraints:
+
+- Exactly one owner reference MUST be present and it MUST match `owner_kind`.
+- `target_ref` MUST be non-empty and MUST NOT contain control characters.
+- `(adapter_name, account_id, channel, target_ref)` SHOULD be unique for active targets when `account_id` is present; `(adapter_name, channel, target_ref)` SHOULD be unique for active targets when `account_id` is absent.
+- A delivery target MAY be inactive without deleting history. Inactive targets MUST NOT be selected for fresh external delivery.
+
+Group delivery posture:
+
+- Delivery to a household, team, project group, or transport group is first-class when represented by `owner_kind=subject_group`.
+- A group-owned target represents delivery to the group as a recipient owner. It is not a shortcut for selecting each group member's personal target.
+- Fanout from a group to individual member targets is a separate routing policy and MUST NOT be inferred from the existence of a group-owned delivery target.
+
 ## 6. Time Model
 
 Time MUST be explicit and deterministic.
@@ -498,7 +532,7 @@ Constraints:
 
 Owns durable notification intent, not vendor delivery state.
 
-Minimum contract:
+Current implemented MVP compatibility contract:
 
 - `policy_id` (`id`, required) — primary key.
 - `item_id` (`id`, required) — FK to `coordination_items.item_id`.
@@ -510,13 +544,34 @@ Minimum contract:
 - `status` (`text`, required) — enum: `active`, `disabled`.
 - `created_at_utc` (`utc_instant`, required).
 
-Constraints:
+Current implemented MVP constraints:
 
 - `(item_id, version, recipient_subject_id, trigger_anchor_id)` MUST be unique; duplicates MUST be rejected.
+
+Accepted first-class routing extension:
+
+- `recipient_kind` (`text`, required after the routing migration) — enum: `subject`, `subject_group`.
+- `recipient_subject_id` (`id`, optional after the routing migration) — FK to `subjects.subject_id`; required when `recipient_kind=subject`; absent otherwise.
+- `recipient_group_id` (`id`, optional after the routing migration) — FK to `subject_groups.group_id`; required when `recipient_kind=subject_group`; absent otherwise.
+- `delivery_target_id` (`id`, required for production-like deliverable reminder policies; optional only for inert or legacy compatibility policies) — FK to `delivery_targets.delivery_target_id`; when present, the target owner MUST match the recipient owner.
+
+First-class routing constraints:
+
+- Exactly one recipient reference MUST be present and it MUST match `recipient_kind`.
+- For `recipient_kind=subject`, `(item_id, version, recipient_subject_id, trigger_anchor_id)` MUST be unique; duplicates MUST be rejected.
+- For `recipient_kind=subject_group`, `(item_id, version, recipient_group_id, trigger_anchor_id)` MUST be unique; duplicates MUST be rejected.
+- Implementations MUST NOT rely on one nullable composite uniqueness constraint across `recipient_subject_id` and `recipient_group_id` to enforce duplicate rejection.
+- A policy with `delivery_target_id` set MUST reference an active delivery target whose owner matches the recipient owner at creation time.
+- In the first-class routing path, a notification policy without `delivery_target_id` is unrouted and inert for adapter delivery: it MUST NOT generate deliverable reminder work until a matching active delivery target is selected.
+- The routing migration MUST preserve compatibility for existing subject-recipient policies by treating legacy rows as `recipient_kind=subject` with absent `delivery_target_id` until they are explicitly upgraded or superseded.
 
 Generated reminders MUST become `work_instances` rows before any delivery attempt.
 
 In MVP, `notification_policies` MUST NOT directly drive vendor delivery or hidden scheduler delivery state. If reminder generation is not implemented in a slice, implementations MUST treat `notification_policies` rows as inert and MUST NOT deliver reminders without a corresponding `work_instances` row.
+
+Compatibility note:
+
+- The current implemented MVP schema has only required `recipient_subject_id`. That is the legacy command-contract shortcut described in `specs/decisions/0002-first-class-delivery-targets.md`, not the production-like routing target. Until the routing migration lands, command-created reminder policies are valid under the current implemented MVP compatibility contract above. The next routing migration should add `recipient_kind`, `recipient_group_id`, and `delivery_target_id` rather than extending `subjects.subject_kind` with transport endpoint concepts.
 
 ## 9. Work, Candidate Actions, and Attempts
 
@@ -533,10 +588,11 @@ Minimum contract:
 - `item_version` (`int`, required) — version of the item truth that generated this work.
 - `notification_policy_id` (`id`, optional) — FK to `notification_policies.policy_id`.
 - `notification_policy_item_version` (`int`, optional) — required when `notification_policy_id` is present.
+- `delivery_target_id` (`id`, optional for non-notification and legacy compatibility work; required for first-class routed notification reminder work) — FK to `delivery_targets.delivery_target_id`; for notification reminder work, this snapshots the selected delivery endpoint when routing is resolved.
 - `source_work_instance_id` (`id`, optional) — FK to `work_instances.work_instance_id`; required when `generation_source_kind=work_instance` and conditionally required for derivative rows sourced from prior work.
 - `generation_source_kind` (`text`, optional for non-derivative base work; conditionally required for derivative rows) — enum: `work_instance`, `notification_policy`, `schedule_tick`, `user_action`, `item_version`.
 - `generation_source_ref` (`text`, optional for non-derivative base work; conditionally required for derivative rows unless `source_work_instance_id` supplies the source).
-- `work_subject_ref` (`text`, optional for non-derivative base work; conditionally required for derivative rows).
+- `work_subject_ref` (`text`, optional for non-derivative base work; conditionally required for derivative rows; non-routing subject/provenance reference).
 - `work_kind` (`text`, required) — enum (minimum): `notification_reminder`.
 - `purpose_detail_ref` (`text`, optional) — reserved.
 - `policy_basis_ref` (`text`, optional for non-derivative base work; conditionally required for derivative rows).
@@ -555,8 +611,12 @@ Version binding (MVP):
   - `notification_policy_item_version` MUST be set and MUST match the `notification_policies.version` for that policy.
   - The referenced `notification_policies.item_id` MUST equal `work_instances.item_id`.
   - `notification_policy_item_version` MUST equal `work_instances.item_version`.
+  - In the first-class routing path, if the referenced notification policy has `delivery_target_id`, generated reminder work MUST set `work_instances.delivery_target_id` to the same value.
+  - In the first-class routing path, if the referenced notification policy lacks `delivery_target_id`, deliverable reminder work MUST NOT be generated from that policy.
+  - If `work_instances.delivery_target_id` is set for notification reminder work, it MUST match the referenced notification policy's `delivery_target_id` and the target owner MUST match the policy recipient owner.
 - The bound `item_version` and policy version are the creation-time source of truth for the work instance.
 - Work processing MUST NOT guess whether a work instance reflects current item truth. If `coordination_items.current_version` no longer equals `work_instances.item_version` before processing, the work instance is stale and MUST NOT be silently processed against the newer item version.
+- Adapter delivery MUST resolve outbound endpoint facts from `delivery_target_id` when present. `work_subject_ref` MUST NOT be interpreted as an adapter `target_ref` in production-like notification processing.
 
 Derivative work provenance (MVP):
 
@@ -567,10 +627,16 @@ Derivative work provenance (MVP):
 - If `source_work_instance_id` is present, `generation_source_kind` MUST be `work_instance`; if `generation_source_kind=work_instance`, `source_work_instance_id` MUST be present.
 - Every derivative work instance MUST declare:
   - source: `generation_source_kind` plus `generation_source_ref`, or `source_work_instance_id` when the source is prior work.
-  - subject: `work_subject_ref`, naming the item, work instance, person, recipient, or resource the work is for.
+  - subject: `work_subject_ref`, naming the item, work instance, person, recipient, group, or resource the work is for.
   - purpose: `work_kind` plus optional `purpose_detail_ref`.
   - policy basis: `policy_basis_ref`, naming the policy, rule, schedule, user action, or item version basis that justified generation.
 - Derivative work MUST remain bound to an explicit `item_id` and `item_version`; it MUST NOT inherit current item truth implicitly from its source work row.
+
+Notification reminder subject/provenance rule:
+
+- Legacy notification reminder work may store `work_subject_ref` as the resolved `subjects.subject_id` used by the legacy command contract.
+- First-class routed notification reminder work MUST store `work_subject_ref` as a non-routing recipient-owner reference: `subject:<subject_id>` when `recipient_kind=subject`, or `subject_group:<group_id>` when `recipient_kind=subject_group`.
+- `work_subject_ref` MUST NOT be interpreted as an adapter delivery endpoint. Adapter processors MUST derive outbound endpoint facts from `delivery_target_id` for first-class routed notification reminder work.
 Work lifecycle semantics (MVP):
 
 - Legal stored work status values are `eligible`, `in_progress`, `succeeded`, `failed`, and `cancelled`.
