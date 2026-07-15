@@ -74,12 +74,14 @@ class OpenClawGatewayConfig:
     gateway_token: str | None = None
     gateway_password: str | None = None
     gateway_timeout_ms: int = 10000
+    command_timeout_ms: int | None = None
     retry_delay_seconds: int = 300
 
     @classmethod
     def from_env(cls, env: Mapping[str, str] | None = None) -> "OpenClawGatewayConfig":
         source = env or os.environ
         timeout_raw = _env_first(source, "SPINE_OPENCLAW_GATEWAY_TIMEOUT_MS", "KINFLOW_GATEWAY_TIMEOUT_MS") or "10000"
+        command_timeout_raw = _env_first(source, "SPINE_OPENCLAW_COMMAND_TIMEOUT_MS")
         retry_raw = _env_first(source, "SPINE_OPENCLAW_RETRY_DELAY_SECONDS") or "300"
         return cls(
             command=_env_first(source, "SPINE_OPENCLAW_COMMAND") or "openclaw",
@@ -87,6 +89,7 @@ class OpenClawGatewayConfig:
             gateway_token=_env_first(source, "SPINE_OPENCLAW_GATEWAY_TOKEN", "KINFLOW_GATEWAY_TOKEN"),
             gateway_password=_env_first(source, "SPINE_OPENCLAW_GATEWAY_PASSWORD", "KINFLOW_GATEWAY_PASSWORD"),
             gateway_timeout_ms=int(timeout_raw),
+            command_timeout_ms=int(command_timeout_raw) if command_timeout_raw is not None else None,
             retry_delay_seconds=int(retry_raw),
         )
 
@@ -115,13 +118,13 @@ class OpenClawGatewaySender:
                 cmd,
                 capture_output=True,
                 text=True,
-                timeout=self.config.gateway_timeout_ms / 1000,
+                timeout=_effective_command_timeout_ms(self.config) / 1000,
             )
         except FileNotFoundError as exc:
             raise OpenClawBindingError("openclaw command unavailable") from exc
         except subprocess.TimeoutExpired:
             return NormalizedOpenClawResult.transient_failure(
-                reason_code="openclaw_gateway_timeout",
+                reason_code="openclaw_gateway_cli_timeout",
                 next_attempt_at_utc=_plus_seconds(message.created_at_utc, self.config.retry_delay_seconds),
             )
 
@@ -193,6 +196,13 @@ def build_openclaw_gateway_command(config: OpenClawGatewayConfig, params: Mappin
     if config.gateway_password:
         cmd.extend(["--password", config.gateway_password])
     return cmd
+
+
+def _effective_command_timeout_ms(config: OpenClawGatewayConfig) -> int:
+    minimum = config.gateway_timeout_ms + 5000
+    if config.command_timeout_ms is None:
+        return minimum
+    return max(config.command_timeout_ms, minimum)
 
 
 @dataclass(frozen=True)

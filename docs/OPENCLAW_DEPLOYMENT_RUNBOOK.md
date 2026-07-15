@@ -228,8 +228,15 @@ Environment variables:
 export SPINE_OPENCLAW_GATEWAY_URL="<gateway-url>"
 export SPINE_OPENCLAW_CHANNEL=whatsapp
 export SPINE_OPENCLAW_GATEWAY_TIMEOUT_MS=10000
+export SPINE_OPENCLAW_COMMAND_TIMEOUT_MS=15000
 export SPINE_OPENCLAW_RETRY_DELAY_SECONDS=300
 ```
+
+`SPINE_OPENCLAW_GATEWAY_TIMEOUT_MS` is passed to `openclaw gateway call send --timeout`.
+`SPINE_OPENCLAW_COMMAND_TIMEOUT_MS` wraps the local OpenClaw CLI subprocess and must remain
+larger than the gateway timeout. If it is omitted or set too low, Spine uses gateway timeout plus
+5000 ms of process headroom. A subprocess timeout records `openclaw_gateway_cli_timeout`; gateway
+or provider-side timeout failures are normalized separately from CLI wrapper expiry.
 
 Set exactly one gateway credential in the protected env file:
 
@@ -259,6 +266,11 @@ PYTHONPATH="$TICKERD_SRC" spine-worker \
 ```
 
 Do not run gateway mode against production reminder work until the target work row, recipient, message body, and idempotency key have been inspected.
+
+If an operator confirms that OpenClaw delivered a message but Spine recorded the attempt as
+`openclaw_gateway_cli_timeout`, do not rerun the active worker against that same work item until
+the already-delivered attempt is reconciled or the staging DB is reset. The work may still be
+eligible for retry, and rerunning it can duplicate the external WhatsApp send.
 
 ## Long-Running Runner
 

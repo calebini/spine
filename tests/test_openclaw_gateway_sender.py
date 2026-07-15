@@ -48,21 +48,85 @@ class OpenClawGatewaySenderTests(unittest.TestCase):
         self.assertEqual(params["channel"], "whatsapp")
         self.assertEqual(params["to"], "120363425701060269@g.us")
         self.assertEqual(params["idempotencyKey"], "idem-1")
+        self.assertEqual(cmd[cmd.index("--timeout") + 1], "12000")
+
+    def test_gateway_config_reads_distinct_command_timeout_from_env(self) -> None:
+        config = OpenClawGatewayConfig.from_env(
+            {
+                "SPINE_OPENCLAW_GATEWAY_TIMEOUT_MS": "12000",
+                "SPINE_OPENCLAW_COMMAND_TIMEOUT_MS": "19000",
+                "SPINE_OPENCLAW_RETRY_DELAY_SECONDS": "60",
+            }
+        )
+
+        self.assertEqual(config.gateway_timeout_ms, 12000)
+        self.assertEqual(config.command_timeout_ms, 19000)
+        self.assertEqual(config.retry_delay_seconds, 60)
 
     def test_gateway_sender_delivers_with_transport_meaningful_receipt(self) -> None:
         calls = []
+        timeouts = []
 
-        def runner(cmd, **_kwargs):
+        def runner(cmd, **kwargs):
             calls.append(cmd)
+            timeouts.append(kwargs["timeout"])
             return subprocess.CompletedProcess(cmd, 0, stdout=json.dumps({"messageId": "wamid.real"}), stderr="")
 
-        result = OpenClawGatewaySender(OpenClawGatewayConfig(), command_runner=runner)(outbound_message())
+        result = OpenClawGatewaySender(
+            OpenClawGatewayConfig(gateway_timeout_ms=12000, command_timeout_ms=19000),
+            command_runner=runner,
+        )(outbound_message())
 
         self.assertEqual(result.status, "delivered")
         self.assertEqual(result.reason_code, "openclaw_delivered")
         self.assertEqual(result.provider_ref, "wamid.real")
         params = json.loads(calls[0][calls[0].index("--params") + 1])
         self.assertEqual(params["message"], "Reminder")
+        self.assertEqual(calls[0][calls[0].index("--timeout") + 1], "12000")
+        self.assertEqual(timeouts, [19.0])
+
+    def test_gateway_sender_defaults_command_timeout_with_gateway_headroom(self) -> None:
+        timeouts = []
+
+        def runner(cmd, **kwargs):
+            timeouts.append(kwargs["timeout"])
+            return subprocess.CompletedProcess(cmd, 0, stdout=json.dumps({"messageId": "wamid.real"}), stderr="")
+
+        result = OpenClawGatewaySender(
+            OpenClawGatewayConfig(gateway_timeout_ms=12000),
+            command_runner=runner,
+        )(outbound_message())
+
+        self.assertEqual(result.status, "delivered")
+        self.assertEqual(timeouts, [17.0])
+
+    def test_gateway_sender_enforces_command_timeout_headroom(self) -> None:
+        timeouts = []
+
+        def runner(cmd, **kwargs):
+            timeouts.append(kwargs["timeout"])
+            return subprocess.CompletedProcess(cmd, 0, stdout=json.dumps({"messageId": "wamid.real"}), stderr="")
+
+        result = OpenClawGatewaySender(
+            OpenClawGatewayConfig(gateway_timeout_ms=12000, command_timeout_ms=12000),
+            command_runner=runner,
+        )(outbound_message())
+
+        self.assertEqual(result.status, "delivered")
+        self.assertEqual(timeouts, [17.0])
+
+    def test_gateway_sender_maps_subprocess_timeout_to_cli_timeout_reason(self) -> None:
+        def runner(cmd, **kwargs):
+            raise subprocess.TimeoutExpired(cmd=cmd, timeout=kwargs["timeout"])
+
+        result = OpenClawGatewaySender(
+            OpenClawGatewayConfig(gateway_timeout_ms=12000, command_timeout_ms=19000, retry_delay_seconds=60),
+            command_runner=runner,
+        )(outbound_message())
+
+        self.assertEqual(result.status, "failed_transient")
+        self.assertEqual(result.reason_code, "openclaw_gateway_cli_timeout")
+        self.assertEqual(result.next_attempt_at_utc, "2026-06-07T10:01:00Z")
 
     def test_gateway_sender_fails_closed_on_non_verifiable_receipt(self) -> None:
         def runner(cmd, **_kwargs):

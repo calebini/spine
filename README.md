@@ -114,7 +114,7 @@ PYTHONPATH="$TICKERD_SRC" spine-openclaw-smoke \
   --max-cycles 1
 ```
 
-The gateway sender calls `openclaw gateway call send --params ... --json`. It reads `SPINE_OPENCLAW_GATEWAY_URL`, `SPINE_OPENCLAW_GATEWAY_TOKEN`, `SPINE_OPENCLAW_GATEWAY_PASSWORD`, and `SPINE_OPENCLAW_GATEWAY_TIMEOUT_MS`, with Kinflow gateway env names accepted as migration fallback.
+The gateway sender calls `openclaw gateway call send --params ... --json`. It reads `SPINE_OPENCLAW_GATEWAY_URL`, `SPINE_OPENCLAW_GATEWAY_TOKEN`, `SPINE_OPENCLAW_GATEWAY_PASSWORD`, `SPINE_OPENCLAW_GATEWAY_TIMEOUT_MS`, and optional `SPINE_OPENCLAW_COMMAND_TIMEOUT_MS`, with Kinflow gateway env names accepted as migration fallback for gateway URL, credentials, and gateway timeout. The gateway timeout is passed to OpenClaw; the command timeout wraps the local CLI process and defaults to gateway timeout plus 5000 ms of headroom.
 
 ## Ledger Migrations
 
