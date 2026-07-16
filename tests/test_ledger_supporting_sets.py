@@ -452,6 +452,52 @@ class LedgerSupportingSetTests(unittest.TestCase):
         self.assertEqual(current["notification_policies"][0]["trigger_anchor_id"], "copy-forward-policy-trigger")
         assert_ledger_invariants(self.connection)
 
+    def test_selected_subject_role_replacement_preserves_other_role_kinds(self) -> None:
+        create_task_v1(
+            self.connection,
+            item_id="task-role-replacement",
+            audit_id="audit-task-role-replacement-create",
+            created_at_utc=NOW,
+            created_by_subject_id=SUBJECT_ID,
+            title="Submit forms",
+            subject_roles=(
+                ItemSubjectRoleInput(
+                    item_subject_role_id="role-task-participant",
+                    subject_id=SUBJECT_ID,
+                    role="participant",
+                ),
+                ItemSubjectRoleInput(
+                    item_subject_role_id="role-task-assignee-old",
+                    subject_id=OTHER_SUBJECT_ID,
+                    role="assignee",
+                ),
+            ),
+        )
+
+        create_next_item_version(
+            self.connection,
+            item_id="task-role-replacement",
+            target_version=1,
+            audit_id="audit-task-role-replacement-v2",
+            created_at_utc="2026-06-06T11:00:00Z",
+            created_by_subject_id=SUBJECT_ID,
+            subject_roles=(
+                ItemSubjectRoleInput(
+                    item_subject_role_id="role-task-owner-new",
+                    subject_id=SUBJECT_ID,
+                    role="owner",
+                ),
+            ),
+            subject_role_replacement_roles=("assignee", "owner"),
+        )
+
+        current = get_current_item(self.connection, "task-role-replacement")
+        self.assertEqual(
+            {(row["item_subject_role_id"], row["role"]) for row in current["subject_roles"]},
+            {("role-task-participant-v2", "participant"), ("role-task-owner-new", "owner")},
+        )
+        assert_ledger_invariants(self.connection)
+
     def test_current_reads_do_not_fallback_to_prior_supporting_sets(self) -> None:
         create_task_v1(
             self.connection,

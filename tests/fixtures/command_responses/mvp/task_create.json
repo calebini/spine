@@ -15,6 +15,22 @@
   "item_id": "item_94dc6f9f68de8a74eba98b7587a2821b389bfd1d5fb158d0c3714f5532023be8",
   "item_type": "task",
   "ok": true,
+  "subject_roles": [
+    {
+      "created_at_utc": "2026-06-06T10:02:00Z",
+      "item_subject_role_id": "item_subject_role_20305ba172d0ba1eea2ef7ba0a0ff40170d44caca7aefda03a5404e3b6c88eff",
+      "role": "assignee",
+      "status": "active",
+      "subject_id": "task-assignee"
+    },
+    {
+      "created_at_utc": "2026-06-06T10:02:00Z",
+      "item_subject_role_id": "item_subject_role_08da4db157831373f0a1964a06b4840440b1610c9c710593f4ac6904a960a07c",
+      "role": "owner",
+      "status": "active",
+      "subject_id": "agent"
+    }
+  ],
   "task_detail": {
     "task_status": "open"
   },

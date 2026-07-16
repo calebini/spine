@@ -33,6 +33,7 @@ from spine.ledger.supporting import (
     current_notification_policies,
     current_subject_roles,
     insert_supporting_sets,
+    replace_item_subject_roles,
 )
 from spine.models.enums import EventStatus, ItemStatus, ItemType, TaskStatus
 
@@ -348,6 +349,15 @@ def create_item_version_from_draft(connection: sqlite3.Connection, draft: ItemVe
                 next_version=next_version,
                 created_at_utc=draft.created_at_utc,
             )
+            if draft.subject_roles is not _UNSET:
+                replace_item_subject_roles(
+                    connection,
+                    item_id=draft.item_id,
+                    version=next_version,
+                    roles_to_replace=draft.subject_role_replacement_roles,
+                    subject_roles=cast(tuple[ItemSubjectRoleInput, ...], draft.subject_roles),
+                    default_created_at_utc=draft.created_at_utc,
+                )
             cursor = connection.execute(
                 """
                 UPDATE coordination_items
@@ -395,6 +405,8 @@ def create_next_item_version(
     source_ref: str | None | object = _UNSET,
     event_detail: dict[str, object] | None = None,
     task_detail: dict[str, object] | None = None,
+    subject_roles: tuple[ItemSubjectRoleInput, ...] | object = _UNSET,
+    subject_role_replacement_roles: tuple[str, ...] = (),
     audit_action: str = "version_created",
     reason_code: str = "item_version_created",
 ) -> MutatedItem:
@@ -413,6 +425,8 @@ def create_next_item_version(
             source_ref=source_ref,
             event_detail=event_detail,
             task_detail=task_detail,
+            subject_roles=subject_roles,
+            subject_role_replacement_roles=subject_role_replacement_roles,
             audit_action=audit_action,
             reason_code=reason_code,
         ),

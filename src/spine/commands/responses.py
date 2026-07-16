@@ -124,7 +124,7 @@ def task_update_response(
 ) -> dict[str, Any]:
     """Return the catalogued ``task.update`` success shape."""
 
-    return _mutation_response(
+    response = _mutation_response(
         command="task.update",
         effect_field="updated",
         effect_value=updated,
@@ -136,6 +136,8 @@ def task_update_response(
         audit_id=audit_id,
         command_receipt_id=command_receipt_id,
     )
+    response["subject_roles"] = [_subject_role_element(row) for row in _sequence(item.get("subject_roles"))]
+    return response
 
 
 def _mutation_response(

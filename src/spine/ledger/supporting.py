@@ -352,7 +352,7 @@ def current_subject_roles(connection: sqlite3.Connection, *, item_id: str, versi
         SELECT *
         FROM item_subject_roles
         WHERE item_id = ? AND version = ?
-        ORDER BY item_subject_role_id
+        ORDER BY role, created_at_utc, item_subject_role_id
         """,
         (item_id, version),
     ).fetchall()
@@ -477,6 +477,41 @@ def insert_item_subject_role(
             subject_role.created_at_utc or default_created_at_utc,
         ),
     )
+
+
+def replace_item_subject_roles(
+    connection: sqlite3.Connection,
+    *,
+    item_id: str,
+    version: int,
+    roles_to_replace: tuple[str, ...],
+    subject_roles: tuple[ItemSubjectRoleInput, ...],
+    default_created_at_utc: str,
+) -> None:
+    """Replace selected role kinds while preserving all other copied roles."""
+
+    if not roles_to_replace:
+        raise SpineValidationError("invalid_subject_roles", "roles_to_replace must not be empty")
+    accepted_roles = {enum_value(role) for role in roles_to_replace}
+    for subject_role in subject_roles:
+        if enum_value(subject_role.role) not in accepted_roles:
+            raise SpineValidationError(
+                "invalid_subject_roles",
+                "replacement subject role is outside roles_to_replace",
+            )
+    placeholders = ", ".join("?" for _ in accepted_roles)
+    connection.execute(
+        f"DELETE FROM item_subject_roles WHERE item_id = ? AND version = ? AND role IN ({placeholders})",
+        (item_id, version, *sorted(accepted_roles)),
+    )
+    for subject_role in subject_roles:
+        insert_item_subject_role(
+            connection,
+            item_id=item_id,
+            version=version,
+            subject_role=subject_role,
+            default_created_at_utc=default_created_at_utc,
+        )
 
 
 def insert_notification_policy(

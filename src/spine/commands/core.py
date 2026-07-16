@@ -36,6 +36,7 @@ from spine.ledger.items import (
 )
 from spine.ledger.relations import create_item_relation
 from spine.ledger.supporting import (
+    ItemSubjectRoleInput,
     NotificationPolicyInput,
     current_locations,
     current_notification_policies,
@@ -539,12 +540,20 @@ def _handle_event_create(request: Mapping[str, Any], context: CommandContext) ->
 
 
 def _handle_task_create(request: Mapping[str, Any], context: CommandContext) -> dict[str, Any]:
-    allowed = {"command_id", "actor_subject_id", "created_at_utc", "title", "summary", "source_ref", "due_anchor", "defer_until_anchor", "priority"}
+    allowed = {"command_id", "actor_subject_id", "created_at_utc", "title", "summary", "source_ref", "due_anchor", "defer_until_anchor", "priority", "subject_roles"}
     _check_fields("task.create", request, allowed)
     command_id, actor, created_at = _write_identity("task.create", request, "created_at_utc", context)
     title = _required_str(request, "title")
     due_anchor = _anchor_input(request.get("due_anchor"), "due_anchor", _derived_id("task.create", command_id, "due_anchor", "/due_anchor")) if request.get("due_anchor") is not None else None
     defer_anchor = _anchor_input(request.get("defer_until_anchor"), "defer_until_anchor", _derived_id("task.create", command_id, "defer_until_anchor", "/defer_until_anchor")) if request.get("defer_until_anchor") is not None else None
+    subject_roles = _task_subject_roles(
+        context.ledger,
+        command="task.create",
+        command_id=command_id,
+        value=request.get("subject_roles", []),
+        field="subject_roles",
+        request_path="/subject_roles",
+    )
     semantic = _semantic_request("task.create", command_id, actor, created_at, request, allowed)
     replay = _compatible_replay("task.create", command_id, semantic, context)
     if replay is not None:
@@ -563,6 +572,7 @@ def _handle_task_create(request: Mapping[str, Any], context: CommandContext) -> 
         priority=_optional_str(request, "priority"),
         due_anchor=due_anchor,
         defer_until_anchor=defer_anchor,
+        subject_roles=subject_roles,
     )
     receipt = _store_write_receipt(
         context,
@@ -593,7 +603,17 @@ def _handle_common_update(command: str, expected_type: str, request: Mapping[str
     target_version = _version(request, "target_version")
     if "patch" not in request:
         raise SpineValidationError("missing_patch", "patch is required")
-    patch = _patch(request["patch"])
+    patch = _patch(request["patch"], allow_subject_roles=expected_type == "task")
+    replacement_subject_roles: tuple[ItemSubjectRoleInput, ...] | None = None
+    if "subject_roles" in patch:
+        replacement_subject_roles = _task_subject_roles(
+            context.ledger,
+            command=command,
+            command_id=command_id,
+            value=patch["subject_roles"],
+            field="patch.subject_roles",
+            request_path="/patch/subject_roles",
+        )
     semantic = _semantic_request(command, command_id, actor, updated_at, request, allowed)
     replay = _compatible_replay(command, command_id, semantic, context)
     if replay is not None:
@@ -601,8 +621,9 @@ def _handle_common_update(command: str, expected_type: str, request: Mapping[str
         return response_fn(updated=False, item=_receipt_item(context.ledger, replay), target_version=str(target_version), audit_id=None, command_receipt_id=replay["command_receipt_id"])
     item = _require_item_for_write(context.ledger, command, item_id, expected_type, target_version)
     current_common = item["version"]
-    changes = _changed_common(current_common, patch)
-    if not changes:
+    common_changed = _changed_common(current_common, patch)
+    roles_changed = replacement_subject_roles is not None and _subject_role_facts(item["subject_roles"]) != _subject_role_facts(replacement_subject_roles)
+    if not common_changed and not roles_changed:
         receipt = _store_write_receipt(
             context,
             command=command,
@@ -634,6 +655,8 @@ def _handle_common_update(command: str, expected_type: str, request: Mapping[str
         title=patch.get("title"),
         summary=patch["summary"] if "summary" in patch else _UNSET,
         source_ref=patch["source_ref"] if "source_ref" in patch else _UNSET,
+        subject_roles=replacement_subject_roles if replacement_subject_roles is not None else _UNSET,
+        subject_role_replacement_roles=("assignee", "owner") if replacement_subject_roles is not None else (),
         audit_action=f"{expected_type}_updated",
         reason_code=f"{expected_type}_updated",
     )
@@ -1142,6 +1165,7 @@ def _derived_id(command: str, command_id: str, row_role: str, request_path: str)
         "due_anchor": "anchor",
         "defer_until_anchor": "anchor",
         "trigger_anchor": "anchor",
+        "item_subject_role": "item_subject_role",
         "notification_policy": "notification_policy",
         "work_instance": "work_instance",
     }
@@ -1234,11 +1258,14 @@ def _enum(value: Any, field: str, allowed: set[str]) -> str:
     return value
 
 
-def _patch(value: Any) -> dict[str, str | None]:
+def _patch(value: Any, *, allow_subject_roles: bool = False) -> dict[str, Any]:
     if not isinstance(value, Mapping):
         raise SpineValidationError("invalid_patch", "patch must be an object")
-    patch: dict[str, str | None] = {}
+    patch: dict[str, Any] = {}
     for key, val in value.items():
+        if key == "subject_roles" and allow_subject_roles:
+            patch[key] = val
+            continue
         if key not in {"title", "summary", "source_ref"}:
             raise SpineValidationError(f"unsupported_patch.{key}", f"unsupported patch field: {key}")
         if key == "title":
@@ -1252,8 +1279,8 @@ def _patch(value: Any) -> dict[str, str | None]:
     return patch
 
 
-def _changed_common(current: Mapping[str, Any], patch: Mapping[str, str | None]) -> bool:
-    return any(current.get(key) != value for key, value in patch.items())
+def _changed_common(current: Mapping[str, Any], patch: Mapping[str, Any]) -> bool:
+    return any(current.get(key) != patch[key] for key in ("title", "summary", "source_ref") if key in patch)
 
 
 def _anchor_input(value: Any, field: str, anchor_id: str) -> TemporalAnchorInput:
@@ -1361,6 +1388,73 @@ def _check_fields(command: str, request: Mapping[str, Any], allowed: set[str]) -
 
 def _subject_exists(connection: sqlite3.Connection, subject_id: str) -> bool:
     return connection.execute("SELECT 1 FROM subjects WHERE subject_id = ?", (subject_id,)).fetchone() is not None
+
+
+def _task_subject_roles(
+    connection: sqlite3.Connection,
+    *,
+    command: str,
+    command_id: str,
+    value: Any,
+    field: str,
+    request_path: str,
+) -> tuple[ItemSubjectRoleInput, ...]:
+    if not isinstance(value, Sequence) or isinstance(value, (str, bytes, bytearray)):
+        raise SpineValidationError(f"invalid_{field}", f"{field} must be an array")
+    result: list[ItemSubjectRoleInput] = []
+    seen: set[tuple[str, str]] = set()
+    for index, raw in enumerate(value):
+        element_field = f"{field}[{index}]"
+        if not isinstance(raw, Mapping):
+            raise SpineValidationError(f"invalid_{element_field}", f"{element_field} must be an object")
+        for key in raw:
+            if key not in {"subject_id", "role", "status"}:
+                raise SpineValidationError(
+                    f"unsupported_field:{element_field}.{key}",
+                    f"unsupported subject role field: {key}",
+                )
+        subject_id = raw.get("subject_id")
+        if subject_id is None:
+            raise SpineValidationError(f"missing_{element_field}.subject_id", f"{element_field}.subject_id is required")
+        if not isinstance(subject_id, str) or subject_id == "":
+            raise SpineValidationError(f"invalid_{element_field}.subject_id", f"{element_field}.subject_id must be a non-empty string")
+        role = raw.get("role")
+        if role is None:
+            raise SpineValidationError(f"missing_{element_field}.role", f"{element_field}.role is required")
+        if role not in {"assignee", "owner"}:
+            raise SpineValidationError(f"invalid_{element_field}.role", f"{element_field}.role must be assignee or owner")
+        status = raw.get("status", "active")
+        if status not in {"active", "inactive"}:
+            raise SpineValidationError(f"invalid_{element_field}.status", f"{element_field}.status must be active or inactive")
+        if not _subject_exists(connection, subject_id):
+            raise SpineValidationError(
+                f"subject_role_subject_not_found:{element_field}.subject_id",
+                f"subject not found: {subject_id}",
+            )
+        identity = (subject_id, role)
+        if identity in seen:
+            raise SpineValidationError(f"invalid_{field}", f"{field} contains a duplicate subject_id and role")
+        seen.add(identity)
+        result.append(
+            ItemSubjectRoleInput(
+                item_subject_role_id=_derived_id(command, command_id, "item_subject_role", f"{request_path}/{index}"),
+                subject_id=subject_id,
+                role=role,
+                status=status,
+            )
+        )
+    return tuple(result)
+
+
+def _subject_role_facts(subject_roles: Sequence[Any]) -> tuple[tuple[str, str, str], ...]:
+    facts = []
+    for row in subject_roles:
+        subject_id = row.subject_id if isinstance(row, ItemSubjectRoleInput) else row["subject_id"]
+        role = row.role if isinstance(row, ItemSubjectRoleInput) else row["role"]
+        status = row.status if isinstance(row, ItemSubjectRoleInput) else row["status"]
+        if role in {"assignee", "owner"}:
+            facts.append((str(subject_id), str(role), str(status)))
+    return tuple(sorted(facts))
 
 
 def _subject(connection: sqlite3.Connection, subject_id: str, *, required: bool = True) -> dict[str, Any] | None:
@@ -1584,6 +1678,7 @@ def _require_item_for_write(connection: sqlite3.Connection, command: str, item_i
 
 
 def _create_response(command: str, item: Mapping[str, Any], created: bool, receipt: Mapping[str, Any]) -> dict[str, Any]:
+    shown = item_show_response(item)
     result = {
         "ok": True,
         "command": command,
@@ -1592,14 +1687,15 @@ def _create_response(command: str, item: Mapping[str, Any], created: bool, recei
         "item_type": item["item_type"],
         "version": str(item["current_version"]),
         "current_version": str(item["current_version"]),
-        "current_common": item_show_response(item)["current_common"],
+        "current_common": shown["current_common"],
         "audit_id": receipt["result_identity_facts"].get("audit_id"),
         "command_receipt_id": receipt["command_receipt_id"],
     }
     if item["item_type"] == "event":
-        result["event_detail"] = item_show_response(item)["event_detail"]
+        result["event_detail"] = shown["event_detail"]
     if item["item_type"] == "task":
-        result["task_detail"] = item_show_response(item)["task_detail"]
+        result["task_detail"] = shown["task_detail"]
+        result["subject_roles"] = shown["subject_roles"]
     return {key: value for key, value in result.items() if value is not None}
 
 
@@ -1936,6 +2032,8 @@ def _validation_error(command: str, exc: SpineValidationError) -> dict[str, Any]
         _, expected, actual = code.split(":")
         return _wrong_type(command, "", expected, actual)
     if code.startswith("anchor_not_found:"):
+        return _error(command, "referenced_row_not_found", exc.message, code.split(":", 1)[1])
+    if code.startswith("subject_role_subject_not_found:"):
         return _error(command, "referenced_row_not_found", exc.message, code.split(":", 1)[1])
     if code == "actor_not_found":
         return _error(command, "referenced_row_not_found", exc.message, "actor_subject_id")

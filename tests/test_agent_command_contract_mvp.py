@@ -73,7 +73,7 @@ class AgentCommandContractMvpTests(unittest.TestCase):
         self.assertEqual(invalid_status["error"]["code"], "unsupported_field")
         self.assertEqual(invalid_status["error"]["field"], "status")
 
-    def test_create_supporting_set_inputs_are_deferred_unsupported_fields(self) -> None:
+    def test_deferred_supporting_set_inputs_remain_unsupported_fields(self) -> None:
         event_response = handle(
             "event.create",
             {**event_request("cmd-deferred-supporting-event"), "locations": []},
@@ -81,7 +81,7 @@ class AgentCommandContractMvpTests(unittest.TestCase):
         )
         task_response = handle(
             "task.create",
-            {**task_request("cmd-deferred-supporting-task"), "subject_roles": []},
+            {**task_request("cmd-deferred-supporting-task"), "notification_policies": []},
             self.context,
         )
 
@@ -90,7 +90,144 @@ class AgentCommandContractMvpTests(unittest.TestCase):
         self.assertEqual(event_response["error"]["field"], "locations")
         self.assertFalse(task_response["ok"])
         self.assertEqual(task_response["error"]["code"], "unsupported_field")
-        self.assertEqual(task_response["error"]["field"], "subject_roles")
+        self.assertEqual(task_response["error"]["field"], "notification_policies")
+
+    def test_task_create_and_update_author_assignee_and_owner_roles(self) -> None:
+        self.bootstrap_subject("assignee-1")
+        self.bootstrap_subject("assignee-2")
+        created = handle(
+            "task.create",
+            {
+                **task_request("cmd-task-role-create"),
+                "subject_roles": [
+                    {"subject_id": "assignee-1", "role": "assignee"},
+                    {"subject_id": "agent", "role": "owner"},
+                ],
+            },
+            self.context,
+        )
+
+        self.assertTrue(created["ok"])
+        self.assertEqual(
+            {(row["subject_id"], row["role"], row["status"]) for row in created["subject_roles"]},
+            {("assignee-1", "assignee", "active"), ("agent", "owner", "active")},
+        )
+        shown = handle("item.show", {"item_id": created["item_id"]}, self.context)
+        self.assertEqual(shown["subject_roles"], created["subject_roles"])
+
+        replacement_request = {
+            "command_id": "cmd-task-role-replace",
+            "actor_subject_id": "agent",
+            "item_id": created["item_id"],
+            "target_version": 1,
+            "updated_at_utc": "2026-06-06T10:10:00Z",
+            "patch": {
+                "subject_roles": [
+                    {"subject_id": "agent", "role": "owner"},
+                    {"subject_id": "assignee-2", "role": "assignee", "status": "inactive"},
+                ]
+            },
+        }
+        replaced = handle("task.update", replacement_request, self.context)
+
+        self.assertTrue(replaced["updated"])
+        self.assertEqual(replaced["version"], "2")
+        self.assertEqual(
+            {(row["subject_id"], row["role"], row["status"]) for row in replaced["subject_roles"]},
+            {("assignee-2", "assignee", "inactive"), ("agent", "owner", "active")},
+        )
+        cleared = handle(
+            "task.update",
+            {
+                "command_id": "cmd-task-role-clear",
+                "actor_subject_id": "agent",
+                "item_id": created["item_id"],
+                "target_version": 2,
+                "updated_at_utc": "2026-06-06T10:20:00Z",
+                "patch": {"subject_roles": []},
+            },
+            self.context,
+        )
+        self.assertTrue(cleared["updated"])
+        self.assertEqual(cleared["subject_roles"], [])
+        replayed = handle("task.update", replacement_request, self.context)
+        self.assertFalse(replayed["updated"])
+        self.assertEqual(replayed["version"], "2")
+        self.assertEqual(replayed["subject_roles"], replaced["subject_roles"])
+
+    def test_task_role_update_is_order_insensitive_noop(self) -> None:
+        self.bootstrap_subject("assignee")
+        created = handle(
+            "task.create",
+            {
+                **task_request("cmd-task-role-order-create"),
+                "subject_roles": [
+                    {"subject_id": "agent", "role": "owner"},
+                    {"subject_id": "assignee", "role": "assignee"},
+                ],
+            },
+            self.context,
+        )
+        response = handle(
+            "task.update",
+            {
+                "command_id": "cmd-task-role-order-noop",
+                "actor_subject_id": "agent",
+                "item_id": created["item_id"],
+                "target_version": 1,
+                "updated_at_utc": "2026-06-06T10:10:00Z",
+                "patch": {
+                    "subject_roles": [
+                        {"subject_id": "assignee", "role": "assignee"},
+                        {"subject_id": "agent", "role": "owner"},
+                    ]
+                },
+            },
+            self.context,
+        )
+
+        self.assertFalse(response["updated"])
+        self.assertEqual(response["version"], "1")
+        self.assertEqual(len(response["subject_roles"]), 2)
+
+    def test_task_role_validation_fails_before_mutation(self) -> None:
+        self.bootstrap_subject("assignee")
+        cases = [
+            (
+                "missing-subject",
+                [{"subject_id": "missing", "role": "assignee"}],
+                "referenced_row_not_found",
+                "subject_roles[0].subject_id",
+            ),
+            (
+                "duplicate",
+                [
+                    {"subject_id": "assignee", "role": "assignee"},
+                    {"subject_id": "assignee", "role": "assignee", "status": "inactive"},
+                ],
+                "invalid_request",
+                "subject_roles",
+            ),
+            (
+                "unsupported-role",
+                [{"subject_id": "assignee", "role": "watcher"}],
+                "invalid_request",
+                "subject_roles[0].role",
+            ),
+        ]
+
+        for name, subject_roles, code, field in cases:
+            with self.subTest(name=name):
+                response = handle(
+                    "task.create",
+                    {**task_request(f"cmd-task-role-invalid-{name}"), "subject_roles": subject_roles},
+                    self.context,
+                )
+                self.assertFalse(response["ok"])
+                self.assertEqual(response["error"]["code"], code)
+                self.assertEqual(response["error"]["field"], field)
+        count = self.connection.execute("SELECT COUNT(*) FROM coordination_items").fetchone()[0]
+        self.assertEqual(count, 0)
 
     def test_missing_required_field_uses_public_error_code(self) -> None:
         response = handle("event.create", {key: value for key, value in event_request("cmd-missing-field").items() if key != "command_id"}, self.context)
@@ -1221,12 +1358,18 @@ def build_mvp_fixture_responses() -> dict[str, object]:
             "actor_subject_id": "agent",
             "created_at_utc": "2026-06-06T10:02:00Z",
             "title": "Fixture task",
+            "subject_roles": [
+                {"subject_id": "task-assignee", "role": "assignee"},
+                {"subject_id": "agent", "role": "owner"},
+            ],
         }
 
     record("subject_upsert_created.json", "subject.upsert", subject())
     record("subject_upsert_replay.json", "subject.upsert", subject())
     record("subject_recipient.json", "subject.upsert", subject("recipient"))
     responses.pop("subject_recipient.json")
+    record("subject_task_assignee.json", "subject.upsert", subject("task-assignee"))
+    responses.pop("subject_task_assignee.json")
     record(
         "subject_group_upsert_created.json",
         "subject_group.upsert",
@@ -1315,7 +1458,13 @@ def build_mvp_fixture_responses() -> dict[str, object]:
             "item_id": task["item_id"],
             "target_version": 1,
             "updated_at_utc": "2026-06-06T10:15:00Z",
-            "patch": {"summary": "Updated task"},
+            "patch": {
+                "summary": "Updated task",
+                "subject_roles": [
+                    {"subject_id": "task-assignee", "role": "assignee", "status": "inactive"},
+                    {"subject_id": "agent", "role": "owner"},
+                ],
+            },
         },
     )
     record(

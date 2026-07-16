@@ -73,6 +73,43 @@ Current commands:
 - `spine-worker`: run the production-shaped worker in `observe_only`, `active`, or `suspended`.
 - `spine-openclaw-smoke`: run a bounded fake OpenClaw smoke.
 
+## Task Assignment Commands
+
+Use `task.create` with `subject_roles` to author task assignees and owners without direct SQL. Every referenced subject must already exist through `subject.upsert`.
+
+```json
+{
+  "command_id": "task-create-001",
+  "actor_subject_id": "agent",
+  "created_at_utc": "2026-07-16T16:00:00Z",
+  "title": "Prepare stage canary",
+  "subject_roles": [
+    {"subject_id": "operator", "role": "assignee"},
+    {"subject_id": "agent", "role": "owner"}
+  ]
+}
+```
+
+Use `task.update` with `patch.subject_roles` to replace the complete assignee/owner set. Omit `subject_roles` to preserve current assignments; pass an empty array to clear them. Accepted roles are `assignee` and `owner`, and optional `status` defaults to `active`.
+
+```json
+{
+  "command_id": "task-reassign-001",
+  "actor_subject_id": "agent",
+  "item_id": "<task-item-id>",
+  "target_version": 1,
+  "updated_at_utc": "2026-07-16T16:05:00Z",
+  "patch": {
+    "subject_roles": [
+      {"subject_id": "operator-2", "role": "assignee"},
+      {"subject_id": "agent", "role": "owner"}
+    ]
+  }
+}
+```
+
+Verify the returned `subject_roles` array or call `item.show` and inspect its current-version `subject_roles` before relying on the assignment.
+
 ## Quick Start
 
 Run from `SPINE_ROOT` after preflight.

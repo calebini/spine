@@ -70,5 +70,7 @@ class ItemVersionDraft:
     source_ref: str | None | object = _UNSET
     event_detail: dict[str, object] | None = None
     task_detail: dict[str, object] | None = None
+    subject_roles: tuple[ItemSubjectRoleInput, ...] | object = _UNSET
+    subject_role_replacement_roles: tuple[str, ...] = ()
     audit_action: str = "version_created"
     reason_code: str = "item_version_created"

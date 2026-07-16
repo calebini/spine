@@ -19,5 +19,6 @@
   "task_detail": {
     "task_status": "open"
   },
+  "subject_roles": [],
   "command_receipt_id": "command_receipt-task-update-replay"
 }
