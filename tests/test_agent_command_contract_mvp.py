@@ -11,6 +11,7 @@ from spine.commands import CommandContext, handle
 from spine.commands.cli import _generated_command_id, main as cli_main
 from spine.core.hashing import hash_canonical_json
 from spine.ledger import connect, initialize_schema
+from spine.services import list_eligible_work
 
 MVP_FIXTURE_DIR = Path(__file__).parent / "fixtures" / "command_responses" / "mvp"
 CONTRACT_MANIFEST = Path(__file__).parents[1] / "contracts" / "command-fixture-manifest.json"
@@ -843,6 +844,46 @@ class AgentCommandContractMvpTests(unittest.TestCase):
         self.assertEqual(stale_duplicate["error"]["field"], "target_version")
         self.assertEqual(created["predicted_delivery"]["send_boundary"], "no_external_send_from_authoring_command")
         self.assertEqual(attempts, 0)
+
+    def test_repeated_reminder_create_keeps_all_active_reminders_processable(self) -> None:
+        event = handle("event.create", event_request("cmd-multi-reminder-event"), self.context)
+        self.bootstrap_subject("multi-reminder-recipient")
+        command_context = CommandContext(ledger=self.connection, adapter_bindings=OPENCLAW)
+        created = []
+        for index, eligible_at in enumerate(
+            (
+                "2026-06-06T11:45:00Z",
+                "2026-06-06T11:50:00Z",
+                "2026-06-06T11:55:00Z",
+                "2026-06-06T12:00:00Z",
+            ),
+            start=1,
+        ):
+            created.append(
+                handle(
+                    "reminder.create",
+                    {
+                        "command_id": f"cmd-multi-reminder-{index}",
+                        "actor_subject_id": "agent",
+                        "item_id": event["item_id"],
+                        "target_version": index,
+                        "created_at_utc": f"2026-06-06T11:0{index}:00Z",
+                        "work_subject_ref": "multi-reminder-recipient",
+                        "channel": "whatsapp",
+                        "eligible_at_utc": eligible_at,
+                    },
+                    command_context,
+                )
+            )
+
+        eligible = list_eligible_work(self.connection, now_utc="2026-06-06T12:00:00Z")
+
+        self.assertTrue(all(response["ok"] and response["created"] for response in created))
+        self.assertEqual([response["version"] for response in created], ["2", "3", "4", "5"])
+        self.assertEqual(
+            [row["work_instance_id"] for row in eligible],
+            [response["work_instance_id"] for response in created],
+        )
 
     def test_group_delivery_target_reminder_create_is_first_class(self) -> None:
         task = handle("task.create", task_request("cmd-routed-reminder-task"), self.context)

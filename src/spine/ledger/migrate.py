@@ -16,7 +16,7 @@ from spine.core import SpineValidationError
 from spine.ledger.common import utc_z_from_datetime
 from spine.ledger.sqlite import assert_ledger_invariants, connect, initialize_schema
 
-CURRENT_SCHEMA_VERSION = 4
+CURRENT_SCHEMA_VERSION = 5
 
 EXPECTED_SCHEMA_TABLES = frozenset(
     {

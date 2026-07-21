@@ -5,6 +5,7 @@ from contextlib import redirect_stdout
 from io import StringIO
 from pathlib import Path
 
+from spine.commands import CommandContext, handle
 from spine.ledger import connect, get_side_effect_attempt, get_work_instance, initialize_schema
 from spine.runtime.worker import SpineWorkerPaths, main, run_spine_worker
 from spine.runtime.seed_demo import DEMO_WORK_INSTANCE_ID, seed_demo_ledger
@@ -170,6 +171,139 @@ class SpineWorkerRuntimeTests(unittest.TestCase):
             self.assertEqual(len(sends), 1)
             self.assertEqual(sends[0]["event"], "openclaw_fake_send")
             self.assertEqual(sends[0]["channel_hint"], "whatsapp")
+
+    def test_fake_runner_delivers_all_reminders_attached_to_one_event(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            db_path = root / "spine.sqlite"
+            state_dir = root / "state"
+            connection = connect(db_path)
+            try:
+                initialize_schema(connection)
+                base_context = CommandContext(ledger=connection)
+                routed_context = CommandContext(
+                    ledger=connection,
+                    adapter_bindings={
+                        "openclaw": {
+                            "binding_name": "openclaw",
+                            "channel": "whatsapp",
+                            "configured": True,
+                        }
+                    },
+                )
+                self.assertTrue(
+                    handle(
+                        "subject.upsert",
+                        {
+                            "command_id": "cmd-worker-multi-agent",
+                            "actor_subject_id": "worker-multi-agent",
+                            "subject_id": "worker-multi-agent",
+                            "subject_kind": "agent",
+                            "display_name": "Worker multi agent",
+                            "status": "active",
+                            "updated_at_utc": "2026-07-19T10:00:00Z",
+                        },
+                        base_context,
+                    )["ok"]
+                )
+                self.assertTrue(
+                    handle(
+                        "subject_group.upsert",
+                        {
+                            "command_id": "cmd-worker-multi-group",
+                            "actor_subject_id": "worker-multi-agent",
+                            "group_id": "worker-multi-group",
+                            "group_kind": "transport_group",
+                            "display_name": "Worker multi group",
+                            "updated_at_utc": "2026-07-19T10:01:00Z",
+                        },
+                        base_context,
+                    )["ok"]
+                )
+                self.assertTrue(
+                    handle(
+                        "delivery_target.upsert",
+                        {
+                            "command_id": "cmd-worker-multi-target",
+                            "actor_subject_id": "worker-multi-agent",
+                            "delivery_target_id": "worker-multi-target",
+                            "owner_kind": "subject_group",
+                            "owner_group_id": "worker-multi-group",
+                            "channel": "whatsapp",
+                            "adapter_name": "openclaw",
+                            "target_ref": "worker-multi@g.us",
+                            "updated_at_utc": "2026-07-19T10:02:00Z",
+                        },
+                        base_context,
+                    )["ok"]
+                )
+                event = handle(
+                    "event.create",
+                    {
+                        "command_id": "cmd-worker-multi-event",
+                        "actor_subject_id": "worker-multi-agent",
+                        "created_at_utc": "2026-07-19T10:03:00Z",
+                        "title": "Multi reminder canary",
+                        "all_day": False,
+                        "start_anchor": {
+                            "anchor_kind": "instant_utc",
+                            "utc_instant": "2026-07-21T12:00:00Z",
+                        },
+                    },
+                    base_context,
+                )
+                reminders = []
+                for index, eligible_at in enumerate(
+                    (
+                        "2026-07-19T11:45:00Z",
+                        "2026-07-19T11:50:00Z",
+                        "2026-07-19T11:55:00Z",
+                        "2026-07-19T12:00:00Z",
+                    ),
+                    start=1,
+                ):
+                    reminders.append(
+                        handle(
+                            "reminder.create",
+                            {
+                                "command_id": f"cmd-worker-multi-reminder-{index}",
+                                "actor_subject_id": "worker-multi-agent",
+                                "item_id": event["item_id"],
+                                "target_version": index,
+                                "created_at_utc": f"2026-07-19T10:0{index + 3}:00Z",
+                                "recipient_kind": "subject_group",
+                                "recipient_group_id": "worker-multi-group",
+                                "delivery_target_id": "worker-multi-target",
+                                "channel": "whatsapp",
+                                "eligible_at_utc": eligible_at,
+                            },
+                            routed_context,
+                        )
+                    )
+
+                result = run_spine_worker(
+                    connection,
+                    state_dir=state_dir,
+                    runtime_mode="active",
+                    trace_id="spine-worker-multi-reminder-test",
+                    max_cycles=1,
+                    tick_interval_ms=1,
+                    reconcile_interval_ms=1,
+                    bindings=("openclaw",),
+                    install_signal_handlers=False,
+                )
+                work_rows = [get_work_instance(connection, response["work_instance_id"]) for response in reminders]
+            finally:
+                connection.close()
+
+            paths = SpineWorkerPaths.from_state_dir(state_dir)
+            sends = [json.loads(line) for line in paths.sends_path.read_text(encoding="utf-8").splitlines()]
+            self.assertEqual(result.exit_code, 0)
+            self.assertTrue(all(response["ok"] and response["created"] for response in reminders))
+            self.assertEqual([row["item_version"] for row in work_rows], [2, 3, 4, 5])
+            self.assertTrue(all(row["status"] == "succeeded" and row["attempt_count"] == 1 for row in work_rows))
+            self.assertEqual(len(sends), 4)
+            self.assertEqual({send["target_ref"] for send in sends}, {"worker-multi@g.us"})
 
     def test_cli_can_initialize_empty_database_for_observe_only_trial(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

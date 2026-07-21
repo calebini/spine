@@ -116,6 +116,8 @@ spine-ledger-migrate \
   --verify-only
 ```
 
+Active multi-reminder processing requires ledger schema version 5 or later. Run the normal migration command before deploying the updated worker, then use `--verify-only` to confirm the current schema. A pre-v5 worker treats earlier reminders as stale after a later `reminder.create`; do not use repeated reminder creation for a live canary until both migration and worker deployment are complete.
+
 For persistent-ledger visibility checks, seed the deterministic demo row only when it is absent:
 
 ```bash

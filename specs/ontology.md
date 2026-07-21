@@ -615,7 +615,9 @@ Version binding (MVP):
   - In the first-class routing path, if the referenced notification policy lacks `delivery_target_id`, deliverable reminder work MUST NOT be generated from that policy.
   - If `work_instances.delivery_target_id` is set for notification reminder work, it MUST match the referenced notification policy's `delivery_target_id` and the target owner MUST match the policy recipient owner.
 - The bound `item_version` and policy version are the creation-time source of truth for the work instance.
-- Work processing MUST NOT guess whether a work instance reflects current item truth. If `coordination_items.current_version` no longer equals `work_instances.item_version` before processing, the work instance is stale and MUST NOT be silently processed against the newer item version.
+- Policy-backed `notification_reminder` work remains independently processable across later non-terminal item versions. It MUST NOT be marked stale solely because `coordination_items.current_version` no longer equals `work_instances.item_version`.
+- Before processing policy-backed `notification_reminder` work, implementations MUST verify that the bound `notification_policies` row remains `active`, the item shell remains `active`, the current event detail remains `scheduled` when the item is an event, and the current task detail remains `open` when the item is a task. A failed check MUST prevent the external side effect.
+- Work without a bound notification policy retains strict version freshness: if `coordination_items.current_version` no longer equals `work_instances.item_version` before processing, that work instance is stale and MUST NOT be silently processed against newer item truth.
 - Adapter delivery MUST resolve outbound endpoint facts from `delivery_target_id` when present. `work_subject_ref` MUST NOT be interpreted as an adapter `target_ref` in production-like notification processing.
 
 Derivative work provenance (MVP):
@@ -651,7 +653,9 @@ Work lifecycle semantics (MVP):
 
 Minimum stale-work safety (MVP):
 
-- If `coordination_items.current_version != work_instances.item_version` at attempt start time, starting an external side effect for that work instance MUST be rejected.
+- For policy-backed `notification_reminder` work, attempt-start safety is based on the active bound policy and current parent lifecycle, not item-version equality. Later reminder creation, title edits, rescheduling, or other non-terminal version changes MUST NOT invalidate an earlier active reminder merely by advancing `coordination_items.current_version`.
+- Starting an external side effect for policy-backed `notification_reminder` work MUST be rejected when its bound policy is not active, its item shell is archived, its current event is cancelled, or its current task is done or cancelled. Explicitly cancelled work remains non-processable under its terminal work status.
+- For every other work instance, if `coordination_items.current_version != work_instances.item_version` at attempt start time, starting an external side effect MUST be rejected.
 - The exact cleanup, cancellation, regeneration, retry, and replacement lifecycle for stale work is deferred to a later work-execution lifecycle decision.
 - Implementations MAY record a deterministic audit or reason for the rejection, but this MVP does not require a canonical stale-work recovery transaction.
 
@@ -866,7 +870,7 @@ Minimum validation categories:
 - Time-shape validity: reject temporal anchors, event details, and task details that violate the legal shapes in Sections 4.3, 4.4, and 6.1.
 - Relation validity: reject missing relation endpoints, query-only relation aliases that are not normalized, relation types outside the MVP stored enum, and active relation duplicates under Section 4.5.
 - Uniqueness and identity validity: reject rows that violate the uniqueness rules stated on their owning tables.
-- Work/action/projection staleness: reject external side-effect starts when the bound item version is stale; detailed cleanup and recovery handling is deferred.
+- Work/action/projection staleness: reject external side-effect starts when the applicable source-freshness rule fails; policy-backed notification reminders use active-policy/current-parent lifecycle checks, while other work, candidate actions, and projections retain strict version checks.
 - Derivative work provenance: reject derivative `work_instances` rows that omit the required source, subject, purpose, or policy-basis provenance fields defined in Section 9.1.
 - Reminder pre-work durability: reject any external notification delivery start unless a corresponding `work_instances` row already exists; `notification_policies` rows alone MUST NOT start delivery.
 - Attempt pre-write durability: reject any external side-effect start unless a `side_effect_attempts` row has already been durably persisted for that attempt with `attempt_status=started` and with the required request and origin linkage evidence.
@@ -901,7 +905,7 @@ The ontology is ready for a first implementation pass when all of the following 
 - Derivative work provenance is explicit: derivative `work_instances` rows declare their source, subject, purpose, and policy basis without inheriting current item truth implicitly from a source work row.
 - External projection records are buildable as MVP storage facts: `current` and `stale` projection states require a `last_projected_version`, and adapter reconciliation policy is explicitly deferred.
 - One generated `work_instances` row and one `side_effect_attempts` row can be represented without introducing a second attempt ledger, and attempts have non-ambiguous origin linkage plus deterministic request payload identity.
-- The validation and failure behavior section is implementable at MVP depth: invalid references are rejected, adapter failures are recorded as attempts, stale truth does not start external side effects, and canonical item truth is not mutated implicitly.
+- The validation and failure behavior section is implementable at MVP depth: invalid references are rejected, adapter failures are recorded as attempts, stale or inactive work truth does not start external side effects, active reminders survive unrelated later item versions, and canonical item truth is not mutated implicitly.
 
 ## 13. Near-Term Open Questions
 

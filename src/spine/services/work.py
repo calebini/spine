@@ -57,30 +57,38 @@ def generate_notification_reminder_work(
 
 
 def list_eligible_work(connection: sqlite3.Connection, *, now_utc: str, limit: int | None = None) -> list[dict[str, object]]:
-    """Return eligible, non-stale work rows ordered by eligibility time."""
+    """Return eligible, processable work rows ordered by eligibility time."""
 
     require_utc_z("now_utc", now_utc)
-    sql = """
+    if limit == 0:
+        return []
+    rows = connection.execute(
+        """
         SELECT w.*
         FROM work_instances AS w
-        JOIN coordination_items AS i ON i.item_id = w.item_id
         WHERE w.status = 'eligible'
           AND w.eligible_at_utc <= ?
           AND (w.next_attempt_at_utc IS NULL OR w.next_attempt_at_utc <= ?)
-          AND i.current_version = w.item_version
         ORDER BY w.eligible_at_utc, w.work_instance_id
-    """
-    params: tuple[object, ...]
-    if limit is not None:
-        sql += " LIMIT ?"
-        params = (now_utc, now_utc, limit)
-    else:
-        params = (now_utc, now_utc)
-    return [dict(row) for row in connection.execute(sql, params).fetchall()]
+        """,
+        (now_utc, now_utc),
+    ).fetchall()
+    processable: list[dict[str, object]] = []
+    for row in rows:
+        try:
+            assert_work_instance_not_stale(connection, str(row["work_instance_id"]))
+        except SpineValidationError as exc:
+            if exc.code == "stale_work_instance":
+                continue
+            raise
+        processable.append(dict(row))
+        if limit is not None and limit >= 0 and len(processable) >= limit:
+            break
+    return processable
 
 
 def require_processable_work(connection: sqlite3.Connection, work_instance_id: str) -> dict[str, object]:
-    """Return a work row only after stale-work safety has passed."""
+    """Return a work row only after work processability safety has passed."""
 
     assert_work_instance_not_stale(connection, work_instance_id)
     return get_work_instance(connection, work_instance_id)
@@ -93,7 +101,7 @@ def start_work(
     started_at_utc: str,
     reason_code: str | None = None,
 ) -> UpdatedWorkInstance:
-    """Mark eligible work in progress after stale-work safety passes."""
+    """Mark eligible work in progress after processability safety passes."""
 
     return start_work_instance(
         connection,

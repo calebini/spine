@@ -7,7 +7,16 @@ from dataclasses import dataclass
 
 from spine.core import SpineValidationError
 from spine.ledger.common import enum_value, new_id, require_non_empty, require_optional_utc_z, require_utc_z
-from spine.models.enums import GenerationSourceKind, WorkKind, WorkStatus
+from spine.models.enums import (
+    EventStatus,
+    GenerationSourceKind,
+    ItemStatus,
+    ItemType,
+    NotificationPolicyStatus,
+    TaskStatus,
+    WorkKind,
+    WorkStatus,
+)
 
 
 @dataclass(frozen=True)
@@ -234,17 +243,48 @@ def cancel_work_instance(
 def assert_work_instance_not_stale(connection: sqlite3.Connection, work_instance_id: str) -> None:
     row = connection.execute(
         """
-        SELECT w.item_version, i.current_version
+        SELECT w.item_version, w.work_kind, w.notification_policy_id,
+               i.current_version, i.status AS item_status, i.item_type,
+               p.status AS notification_policy_status,
+               ed.event_status, td.task_status
         FROM work_instances AS w
         JOIN coordination_items AS i ON i.item_id = w.item_id
+        LEFT JOIN notification_policies AS p
+          ON p.policy_id = w.notification_policy_id
+         AND p.item_id = w.item_id
+         AND p.version = w.notification_policy_item_version
+        LEFT JOIN event_details AS ed
+          ON i.item_type = 'event'
+         AND ed.item_id = i.item_id
+         AND ed.version = i.current_version
+        LEFT JOIN task_details AS td
+          ON i.item_type = 'task'
+         AND td.item_id = i.item_id
+         AND td.version = i.current_version
         WHERE w.work_instance_id = ?
         """,
         (work_instance_id,),
     ).fetchone()
     if row is None:
         raise SpineValidationError("work_instance_not_found", f"work instance not found: {work_instance_id}")
+
+    is_policy_reminder = (
+        row["work_kind"] == WorkKind.NOTIFICATION_REMINDER.value
+        and row["notification_policy_id"] is not None
+    )
+    if is_policy_reminder:
+        if row["item_status"] != ItemStatus.ACTIVE.value:
+            _raise_stale_work(work_instance_id, "item is not active")
+        if row["notification_policy_status"] != NotificationPolicyStatus.ACTIVE.value:
+            _raise_stale_work(work_instance_id, "notification policy is not active")
+        if row["item_type"] == ItemType.EVENT.value and row["event_status"] != EventStatus.SCHEDULED.value:
+            _raise_stale_work(work_instance_id, "event is not scheduled")
+        if row["item_type"] == ItemType.TASK.value and row["task_status"] != TaskStatus.OPEN.value:
+            _raise_stale_work(work_instance_id, "task is not open")
+        return
+
     if row["item_version"] != row["current_version"]:
-        raise SpineValidationError("stale_work_instance", f"work instance is stale: {work_instance_id}")
+        _raise_stale_work(work_instance_id, "bound item version is not current")
 
 
 def get_work_instance(connection: sqlite3.Connection, work_instance_id: str) -> dict[str, object]:
@@ -301,3 +341,10 @@ def _updated_work_result(row: dict[str, object]) -> UpdatedWorkInstance:
 def _require_reason(reason_code: str) -> None:
     if not isinstance(reason_code, str) or len(reason_code) == 0:
         raise SpineValidationError("work_outcome_rejected", "reason_code must be a non-empty string")
+
+
+def _raise_stale_work(work_instance_id: str, reason: str) -> None:
+    raise SpineValidationError(
+        "stale_work_instance",
+        f"work instance is not processable ({reason}): {work_instance_id}",
+    )

@@ -805,7 +805,47 @@ WHEN (
     FROM work_instances AS w
     JOIN coordination_items AS i ON i.item_id = w.item_id
     WHERE w.work_instance_id = NEW.work_instance_id
-      AND i.current_version != w.item_version
+      AND (
+        (
+          (w.work_kind != 'notification_reminder' OR w.notification_policy_id IS NULL)
+          AND i.current_version != w.item_version
+        )
+        OR (
+          w.work_kind = 'notification_reminder'
+          AND w.notification_policy_id IS NOT NULL
+          AND (
+            i.status != 'active'
+            OR NOT EXISTS (
+              SELECT 1
+              FROM notification_policies AS p
+              WHERE p.policy_id = w.notification_policy_id
+                AND p.item_id = w.item_id
+                AND p.version = w.notification_policy_item_version
+                AND p.status = 'active'
+            )
+            OR (
+              i.item_type = 'event'
+              AND NOT EXISTS (
+                SELECT 1
+                FROM event_details AS ed
+                WHERE ed.item_id = i.item_id
+                  AND ed.version = i.current_version
+                  AND ed.event_status = 'scheduled'
+              )
+            )
+            OR (
+              i.item_type = 'task'
+              AND NOT EXISTS (
+                SELECT 1
+                FROM task_details AS td
+                WHERE td.item_id = i.item_id
+                  AND td.version = i.current_version
+                  AND td.task_status = 'open'
+              )
+            )
+          )
+        )
+      )
   )
 )
 OR (
@@ -890,4 +930,4 @@ CREATE TABLE IF NOT EXISTS ledger_schema (
 );
 
 INSERT OR IGNORE INTO ledger_schema (schema_version, applied_at_utc)
-VALUES (4, '1970-01-01T00:00:00Z');
+VALUES (5, '1970-01-01T00:00:00Z');

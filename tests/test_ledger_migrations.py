@@ -52,11 +52,39 @@ class LedgerMigrationTests(unittest.TestCase):
 
         self.assertEqual(result.before_version, 1)
         self.assertEqual(result.after_version, CURRENT_SCHEMA_VERSION)
-        self.assertEqual(result.applied_versions, (2, 3, 4))
+        self.assertEqual(result.applied_versions, (2, 3, 4, 5))
         self.assertIn("work_instances_eligible_due_idx", index_names(self.connection))
         self.assertIn("command_receipts_item_created_idx", index_names(self.connection))
         self.assertIn("delivery_targets_active_no_account_unique", index_names(self.connection))
         self.assertIn("work_instances_delivery_target_idx", index_names(self.connection))
+
+    def test_migrate_v4_replaces_work_staleness_trigger(self) -> None:
+        initialize_schema(self.connection)
+        with self.connection:
+            self.connection.execute("DROP TRIGGER side_effect_attempts_staleness_insert")
+            self.connection.execute(
+                """
+                CREATE TRIGGER side_effect_attempts_staleness_insert
+                BEFORE INSERT ON side_effect_attempts
+                BEGIN
+                  SELECT 1;
+                END
+                """
+            )
+            self.connection.execute("DELETE FROM ledger_schema WHERE schema_version = 5")
+            self.connection.execute(
+                "INSERT INTO ledger_schema (schema_version, applied_at_utc) VALUES (4, '1970-01-01T00:00:00Z')"
+            )
+
+        result = migrate_schema(self.connection)
+
+        trigger_sql = self.connection.execute(
+            "SELECT sql FROM sqlite_master WHERE type = 'trigger' AND name = 'side_effect_attempts_staleness_insert'"
+        ).fetchone()["sql"]
+        self.assertEqual(result.before_version, 4)
+        self.assertEqual(result.applied_versions, (5,))
+        self.assertIn("notification_policy_id", trigger_sql)
+        self.assertIn("event_status = 'scheduled'", trigger_sql)
 
     def test_verify_schema_rejects_missing_required_index(self) -> None:
         initialize_schema(self.connection)

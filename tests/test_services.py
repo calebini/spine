@@ -4,6 +4,8 @@ from spine.core import SpineValidationError
 from spine.ledger import (
     NotificationPolicyInput,
     TemporalAnchorInput,
+    archive_item,
+    cancel_task,
     connect,
     create_external_projection,
     create_next_item_version,
@@ -85,7 +87,7 @@ class ServiceWorkflowTests(unittest.TestCase):
         self.assertEqual(attempt["attempt_status"], "started")
         self.assertEqual(attempt["work_instance_id"], "service-work-attempt")
 
-    def test_work_attempt_gate_rejects_stale_work(self) -> None:
+    def test_active_reminder_work_remains_processable_after_newer_item_version(self) -> None:
         create_task_with_policy(self.connection)
         generate_notification_reminder_work(
             self.connection,
@@ -103,17 +105,76 @@ class ServiceWorkflowTests(unittest.TestCase):
             created_by_subject_id=SUBJECT_ID,
         )
 
-        self.assertEqual(list_eligible_work(self.connection, now_utc="2026-06-07T12:00:00Z"), [])
+        eligible = list_eligible_work(self.connection, now_utc="2026-06-07T12:00:00Z")
+        self.assertEqual([row["work_instance_id"] for row in eligible], ["service-stale-work"])
+        gate = prepare_work_attempt(
+            self.connection,
+            attempt_id="service-stale-work-attempt",
+            work_instance_id="service-stale-work",
+            adapter_name="notification",
+            idempotency_key="service-stale-work",
+            request_envelope={"body": "Submit forms"},
+            attempted_at_utc="2026-06-07T12:00:00Z",
+        )
+        self.assertTrue(gate.may_start_external_write)
+
+    def test_disabled_policy_blocks_reminder_work(self) -> None:
+        create_task_with_policy(self.connection)
+        generate_notification_reminder_work(
+            self.connection,
+            work_instance_id="service-disabled-policy-work",
+            notification_policy_id="service-policy",
+            eligible_at_utc="2026-06-07T09:00:00Z",
+            created_at_utc=NOW,
+        )
+        with self.connection:
+            self.connection.execute(
+                "UPDATE notification_policies SET status = 'disabled' WHERE policy_id = 'service-policy'"
+            )
+
+        self.assertEqual(list_eligible_work(self.connection, now_utc=NOW), [])
         with self.assertRaisesRegex(SpineValidationError, "stale_work_instance"):
             prepare_work_attempt(
                 self.connection,
-                attempt_id="service-stale-work-attempt",
-                work_instance_id="service-stale-work",
+                work_instance_id="service-disabled-policy-work",
                 adapter_name="notification",
-                idempotency_key="service-stale-work",
+                idempotency_key="service-disabled-policy-work",
                 request_envelope={"body": "Submit forms"},
-                attempted_at_utc="2026-06-07T12:00:00Z",
+                attempted_at_utc=NOW,
             )
+
+    def test_cancelled_or_archived_item_blocks_reminder_work(self) -> None:
+        create_task_with_policy(self.connection)
+        generate_notification_reminder_work(
+            self.connection,
+            work_instance_id="service-terminal-item-work",
+            notification_policy_id="service-policy",
+            eligible_at_utc="2026-06-07T09:00:00Z",
+            created_at_utc=NOW,
+        )
+        cancel_task(
+            self.connection,
+            item_id="service-task",
+            target_version=1,
+            cancelled_at_utc="2026-06-07T11:00:00Z",
+            cancelled_by_subject_id=SUBJECT_ID,
+            audit_id="audit-service-task-cancel",
+        )
+
+        self.assertEqual(list_eligible_work(self.connection, now_utc="2026-06-07T12:00:00Z"), [])
+        with self.assertRaisesRegex(SpineValidationError, "stale_work_instance"):
+            require_processable_work(self.connection, "service-terminal-item-work")
+
+        archive_item(
+            self.connection,
+            item_id="service-task",
+            target_version=2,
+            archived_at_utc="2026-06-07T13:00:00Z",
+            archived_by_subject_id=SUBJECT_ID,
+            audit_id="audit-service-task-archive",
+        )
+        with self.assertRaisesRegex(SpineValidationError, "stale_work_instance"):
+            require_processable_work(self.connection, "service-terminal-item-work")
 
     def test_work_outcome_start_and_succeed(self) -> None:
         create_task_with_policy(self.connection)
@@ -211,7 +272,7 @@ class ServiceWorkflowTests(unittest.TestCase):
         self.assertEqual(cancelled["status"], "cancelled")
         self.assertEqual(cancelled["reason_code"], "policy_disabled")
 
-    def test_work_outcomes_reject_invalid_transitions_and_stale_work(self) -> None:
+    def test_work_outcomes_reject_invalid_transitions_and_allow_active_historical_reminders(self) -> None:
         create_task_with_policy(self.connection)
         generate_notification_reminder_work(
             self.connection,
@@ -236,12 +297,12 @@ class ServiceWorkflowTests(unittest.TestCase):
             created_at_utc="2026-06-07T11:00:00Z",
             created_by_subject_id=SUBJECT_ID,
         )
-        with self.assertRaisesRegex(SpineValidationError, "stale_work_instance"):
-            start_work(
-                self.connection,
-                work_instance_id="service-work-invalid",
-                started_at_utc="2026-06-07T11:01:00Z",
-            )
+        started = start_work(
+            self.connection,
+            work_instance_id="service-work-invalid",
+            started_at_utc="2026-06-07T11:01:00Z",
+        )
+        self.assertEqual(started.status, "in_progress")
 
     def test_plan_projection_sync_and_prepare_candidate_action_attempt(self) -> None:
         create_task_with_policy(self.connection)

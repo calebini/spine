@@ -85,7 +85,7 @@ class LedgerStage7Tests(unittest.TestCase):
                 attempted_at_utc=NOW,
             )
 
-    def test_reject_work_attempt_when_bound_item_version_is_stale(self) -> None:
+    def test_allow_active_policy_reminder_attempt_after_newer_item_version(self) -> None:
         create_task_with_policy(self.connection)
         create_work_instance(
             self.connection,
@@ -110,15 +110,78 @@ class LedgerStage7Tests(unittest.TestCase):
             created_by_subject_id=SUBJECT_ID,
         )
 
+        assert_work_instance_not_stale(self.connection, "work-stale")
+        started = create_started_attempt(
+            self.connection,
+            attempt_id="attempt-stale-work",
+            work_instance_id="work-stale",
+            adapter_name="notification",
+            idempotency_key="idem-stale-work",
+            request_envelope={"body": "Reminder"},
+            attempted_at_utc=NOW,
+        )
+        self.assertEqual(started.attempt_id, "attempt-stale-work")
+
+    def test_reject_policyless_work_when_bound_item_version_is_stale(self) -> None:
+        create_task_with_policy(self.connection)
+        create_work_instance(
+            self.connection,
+            work_instance_id="work-policyless-stale",
+            item_id="task-stage7",
+            item_version=1,
+            eligible_at_utc="2026-06-06T09:00:00Z",
+            created_at_utc=NOW,
+        )
+        create_next_item_version(
+            self.connection,
+            item_id="task-stage7",
+            target_version=1,
+            audit_id="audit-task-stage7-v2-policyless",
+            created_at_utc="2026-06-06T11:00:00Z",
+            created_by_subject_id=SUBJECT_ID,
+        )
+
         with self.assertRaisesRegex(SpineValidationError, "stale_work_instance"):
-            assert_work_instance_not_stale(self.connection, "work-stale")
+            assert_work_instance_not_stale(self.connection, "work-policyless-stale")
         with self.assertRaisesRegex(SpineValidationError, "side_effect_attempt_rejected"):
             create_started_attempt(
                 self.connection,
-                attempt_id="attempt-stale-work",
-                work_instance_id="work-stale",
+                attempt_id="attempt-policyless-stale",
+                work_instance_id="work-policyless-stale",
                 adapter_name="notification",
-                idempotency_key="idem-stale-work",
+                idempotency_key="idem-policyless-stale",
+                request_envelope={"body": "Reminder"},
+                attempted_at_utc=NOW,
+            )
+
+    def test_attempt_trigger_rejects_disabled_reminder_policy(self) -> None:
+        create_task_with_policy(self.connection)
+        create_work_instance(
+            self.connection,
+            work_instance_id="work-disabled-policy",
+            item_id="task-stage7",
+            item_version=1,
+            notification_policy_id="policy-stage7",
+            notification_policy_item_version=1,
+            generation_source_kind="notification_policy",
+            generation_source_ref="policy-stage7",
+            work_subject_ref=SUBJECT_ID,
+            policy_basis_ref="policy-stage7",
+            eligible_at_utc="2026-06-06T09:00:00Z",
+            created_at_utc=NOW,
+        )
+        with self.connection:
+            self.connection.execute(
+                "UPDATE notification_policies SET status = 'disabled' WHERE policy_id = 'policy-stage7'"
+            )
+
+        with self.assertRaisesRegex(SpineValidationError, "side_effect_attempt_rejected"):
+            create_started_attempt(
+                self.connection,
+                attempt_id="attempt-disabled-policy",
+                work_instance_id="work-disabled-policy",
+                adapter_name="notification",
+                idempotency_key="idem-disabled-policy",
                 request_envelope={"body": "Reminder"},
                 attempted_at_utc=NOW,
             )

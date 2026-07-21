@@ -163,6 +163,10 @@ A deliverable reminder must eventually produce:
 - an eligible `work_instances` row with `work_kind=notification_reminder` and matching `delivery_target_id`
 - a channel value, currently `whatsapp` for the OpenClaw gateway path
 
+Multiple reminders may be attached to one event or task by issuing repeated `reminder.create` commands. Use the `current_version` returned by each successful command as the next call's `target_version`. On schema version 5 or later, each policy-backed reminder remains independently processable when later reminder commands advance the item version. Do not run this canary in active mode on an older schema/runtime; migrate first with `spine-ledger-migrate --db "$SPINE_DB"`.
+
+For a multi-reminder canary, verify before active processing that every expected work row is still `status=eligible`, has its own `notification_policy_id`, and has the intended `eligible_at_utc`. After processing, require one terminal successful work row and one successful side-effect attempt per reminder. Cancelling or archiving the parent item must suppress all remaining reminders; disabling a bound policy or cancelling a work row must suppress that reminder only.
+
 Destination routing is explicit:
 
 - `channel_hint` becomes OpenClaw gateway param `channel`.
