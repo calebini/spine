@@ -1,6 +1,6 @@
 # Spine Ontology
 
-Status: Draft v3.0.1
+Status: Draft v4.0.0
 Scope: First durable ontology and minimum data contract sketch for Spine
 
 ## 1. Ontology Goal
@@ -419,7 +419,7 @@ Not every item has the same relationship to time. The first epoch should support
 - due date/time
 - due window
 - defer or snooze until
-- recurrence (reserved)
+- schedule-based recurrence
 - timeless task
 - generated reminder or work instance
 - timezone semantics
@@ -441,7 +441,7 @@ Minimum contract:
 - `utc_instant` (`utc_instant`, optional).
 - `window_start_utc` (`utc_instant`, optional).
 - `window_end_utc` (`utc_instant`, optional).
-- `recurrence_rule` (`text`, optional) — reserved, deferred to a future recurrence engine.
+- `recurrence_set_id` (`id`, optional) — canonical recurrence-set identity owned by this seed anchor.
 - `source` (`text`, optional).
 - `created_at_utc` (`utc_instant`, required).
 
@@ -460,10 +460,103 @@ Validation rules (minimum):
 
 - Any anchor missing its required fields MUST be rejected.
 - Any anchor that sets fields forbidden by its `anchor_kind` MUST be rejected.
+- A recurrence-bearing anchor MUST have `anchor_kind` in
+  `{local_date, local_instant, instant_utc}` and MUST reference exactly one
+  recurrence set whose `seed_anchor_id` equals the anchor id.
+- A recurrence-bearing event anchor MUST be the event start anchor. A
+  recurrence-bearing task anchor MUST be the task due anchor. Event end,
+  task defer-until, and notification trigger anchors MUST NOT carry
+  recurrence.
+- The recurrence set `time_basis` MUST agree with the anchor kind:
+  `local_date -> local_date`, `local_instant -> local_instant`, and
+  `instant_utc -> instant_utc`.
 
 Replay posture:
 
 - If a future system computes `utc_instant` or window fields from local values, that computed UTC MUST be written as a new `temporal_anchors` row; it MUST NOT overwrite or be recomputed implicitly during replay.
+
+### 6.2 Canonical recurrence sets and revisions
+
+`specs/recurrence.md` is the normative recurrence contract. The JSON Schemas
+under `contracts/schemas/recurrence-*.schema.json` are its machine-readable
+public shapes. This ontology defines storage ownership and lifecycle; it does
+not redefine the recurrence algorithms or identity preimages.
+
+The canonical recurrence aggregate has these durable record families:
+
+- `recurrence_sets`: immutable set identity with `recurrence_set_id`,
+  `source_item_id`, `created_item_version`, `seed_anchor_id`, `time_basis`,
+  optional `timezone`, and optional `timezone_database_version`.
+- `recurrence_revisions`: immutable normalized snapshots with
+  `recurrence_revision_id`, `recurrence_set_id`, decimal-string
+  `revision_number`, `source_item_version`, `normalized_recurrence_set_hash`,
+  optional `prior_recurrence_revision_id`, and optional producing
+  `command_id`.
+- `recurrence_segments`: immutable bounded or unbounded segment facts for one
+  revision.
+- `recurrence_rules`, `recurrence_rdates`, `recurrence_exdates`, and
+  `recurrence_overrides`: immutable normalized child facts for one revision.
+- `recurrence_lineage`: immutable command and replay evidence connecting
+  copied, replaced, superseded, retired, added, and retargeted facts.
+
+One recurrence set has exactly one active revision for the current owning item
+version. A changed recurrence command creates the next contiguous item version
+and the next recurrence revision atomically. It MUST NOT update a prior item
+version, detail row, anchor, recurrence revision, segment, or child semantic
+fact in place. The item detail for the new version references the same seed
+anchor when set-identity facts are unchanged. Changing the seed anchor,
+`time_basis`, timezone, timezone database version, source item, or created item
+version is not a revision of the same recurrence set.
+
+Normalized recurrence sets support `DAILY`, `WEEKLY`, `MONTHLY`, and `YEARLY`
+rules; positive intervals; `COUNT` and inclusive `UNTIL`; weekday, month,
+month-day, and set-position selectors; explicit inclusion dates; exclusions;
+occurrence overrides; and segmented series lineage. Those capabilities are
+one schema. Implementation slices do not create alternate persisted models.
+
+### 6.3 Recurrence authoring and command ownership
+
+Initial authoring accepts `recurrence_set` only on
+`event.create.start_anchor`, `event.reschedule.start_anchor` when attaching
+recurrence to a non-recurring event, and `task.create.due_anchor`. The
+authoring object is normalized into the durable aggregate above; generated
+ids, revision numbers, statuses, exclusions, overrides, and lineage facts are
+not caller inputs.
+
+The canonical recurrence mutation commands are
+`recurrence.instance.add`, `recurrence.instance.remove`,
+`recurrence.instance.override`, `recurrence.series.edit`, and
+`occurrence_provenance.regenerate`. Recurrence-truth changes are item-version
+mutations and use the same command-receipt, audit, replay, stale-version, and
+atomicity rules as other Spine writes. Provenance regeneration does not create
+an item version or recurrence revision. No recurrence command starts an
+external side effect.
+
+### 6.4 Occurrence expression and provenance
+
+`item.occurrences` performs explicit bounded read-only expansion from the
+current event start or task due recurrence set. Expansion MUST NOT persist
+items, anchors, recurrence facts, work, attempts, projections, provenance, or
+audit rows.
+
+Every returned occurrence has the deterministic original-schedule identity,
+source evidence, expressed schedule, lifecycle overlay, and actionability
+defined by `specs/recurrence.md`. Occurrence keys are stable while their
+revision-independent target selectors remain equal. Responses declare the
+item version, recurrence revision, normalization hash, range basis, and time
+resolution used for expansion.
+
+Durable downstream binding uses `occurrence_provenance` semantic snapshots.
+There is at most one active provenance row per generated provenance slot key.
+Equal content is retained; changed content atomically supersedes the prior row
+and writes a replacement; a disappeared full-range slot is superseded without
+replacement. The management envelope is the one-way
+`management_status=active|superseded` contract from `specs/recurrence.md`.
+
+Work, projections, reminders, candidate actions, and adapter requests MUST
+fail closed when their bound occurrence provenance is absent, superseded, or
+stale. External writes still require the canonical `side_effect_attempts`
+pre-write ledger. Recurrence does not create a second attempt lifecycle.
 
 ## 7. Location Model
 
@@ -896,6 +989,8 @@ The ontology is ready for a first implementation pass when all of the following 
 - A developer can implement `coordination_items` + `coordination_item_versions` + item-type detail legality without inventing new root concepts: an event version has exactly one `event_details` row and no `task_details` row, and a task version has exactly one `task_details` row and no `event_details` row.
 - Event/task canonical state transitions have an unambiguous version mutation posture: transitions create a new contiguous item version plus a matching detail row, and stale-version transition attempts are rejected.
 - Temporal anchors have explicit legal-field rules by `anchor_kind` (including a deterministic narrowed `local_window` shape), and historical persisted UTC values are treated as authoritative and not recomputed on read/replay.
+- Recurrence sets have one structured identity and revision model across every supported frequency and time basis; recurrence mutations produce immutable revision facts and contiguous item versions atomically.
+- Bounded occurrence reads, occurrence provenance replacement, stale-provenance blocking, and the `side_effect_attempts` boundary are defined without making virtual occurrences into coordination items.
 - Event time shapes are deterministic: `event_details.all_day` unambiguously constrains allowed `temporal_anchors.anchor_kind` values (and ordering/compatibility rules) for `start_anchor_id`/`end_anchor_id`.
 - Task due/defer time shapes are deterministic: `task_details.due_anchor_id` and `task_details.defer_until_anchor_id` have explicit allowed `temporal_anchors.anchor_kind` values and an explicit MVP posture for due-vs-defer ordering validation.
 - Locations and item relations can be created with deterministic validation and without ambiguous stored-vs-derived posture for dependency and containment inverses (`blocks`/`depends_on`, `contains`/`part_of`).

@@ -1,0 +1,40 @@
+{
+  "contract_version": "spine.recurrence.contract.v1",
+  "normalization_version": "spine.recurrence.normalization.v1",
+  "canonical_json_version": "spine.canonical-json.v1",
+  "recurrence_set_id": "recurrence_set_example_every_three_days",
+  "recurrence_revision_id": "recurrence_revision_example_1",
+  "revision_number": "1",
+  "source_item_id": "item_example_morning_routine",
+  "created_item_version": "1",
+  "source_item_version": "1",
+  "seed_anchor_id": "anchor_example_morning_routine",
+  "time_basis": "local_instant",
+  "timezone": "America/Denver",
+  "timezone_database_version": "2026a",
+  "normalized_recurrence_set_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "segments": [
+    {
+      "segment_id": "recurrence_segment_example_0",
+      "segment_index": "0",
+      "active_start": "2026-08-03T08:00:00",
+      "source_revision_id": "initial",
+      "status": "active"
+    }
+  ],
+  "rules": [
+    {
+      "rule_id": "recurrence_rule_example_every_three_days",
+      "segment_id": "recurrence_segment_example_0",
+      "frequency": "DAILY",
+      "interval": "3",
+      "seed": "2026-08-03T08:00:00",
+      "start_bound": "2026-08-03T08:00:00",
+      "end_condition": { "kind": "unbounded" },
+      "status": "active"
+    }
+  ],
+  "rdates": [],
+  "exdates": [],
+  "overrides": []
+}

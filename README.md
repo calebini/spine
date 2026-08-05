@@ -10,13 +10,15 @@ Spine owns coordination truth. Adapters make it visible, actionable, or enriched
 
 ## Current Status
 
-Seed-spec phase with an initial runtime scaffold, deterministic core primitives, a SQLite local ledger schema foundation, atomic event/task v1 creation workflows, versioned lifecycle mutation workflows, first supporting-set/relationship workflows, durable side-effect pressure ledgers, work outcome lifecycle services, provider-agnostic internal services, a Tickerd work adapter boundary with observe-only and explicit active processor outcome handling, generic attempt-backed side-effect processing, and an OpenClaw-style notification outbound specialization with fake-sender coverage. This repository intentionally starts with orientation and normative specs before adding broader runtime behavior.
+Seed-spec phase with an initial runtime scaffold, deterministic core primitives, a SQLite local ledger schema foundation, atomic event/task v1 creation workflows, versioned lifecycle mutation workflows, an implemented daily recurrence slice, and a newly landed structured flexible-recurrence contract family awaiting runtime implementation. The recurrence authority covers daily, weekly, monthly, yearly, interval, explicit-date, exclusion, override, local-time, local-date, and fixed-UTC schedules as one model; the current runtime does not yet claim full conformance. Spine also includes first supporting-set/relationship workflows, durable side-effect pressure ledgers, work outcome lifecycle services, provider-agnostic internal services, a Tickerd work adapter boundary, generic attempt-backed side-effect processing, and an OpenClaw-style notification outbound specialization with fake-sender coverage.
 
 Authoritative starting points:
 
 - `specs/overview.md` defines purpose, doctrine, and non-goals.
 - `specs/architecture.md` defines component boundaries and runtime relationships.
 - `specs/ontology.md` sketches the first durable ontology and data model.
+- `specs/recurrence.md` defines the canonical flexible recurrence-set model, deterministic identity and expansion, mutation, and occurrence-provenance boundaries.
+- `contracts/schemas/recurrence-*.schema.json` and `contracts/recurrence-fixture-manifest.json` define the machine-readable recurrence contract family and initial fixtures.
 - `specs/agent-command-contract.md` defines the MVP agent command core and CLI contract.
 - `specs/decisions/0001-kinflow-is-donor-not-foundation.md` records the Kinflow relationship.
 - `specs/decisions/0002-first-class-delivery-targets.md` records the subject/group delivery target boundary.

@@ -1,0 +1,79 @@
+{
+  "schema_version": "spine.recurrence-contract-fixtures.v1",
+  "fixture_scope": "structural_examples",
+  "fixture_scope_note": "These initial fixtures validate public shapes and representative combinations. Placeholder digests are not conformance vectors; computed preimage-and-digest vectors are governed by specs/recurrence.md Section 11.",
+  "fixtures": [
+    {
+      "fixture_id": "authoring.every_three_days_0800",
+      "kind": "authoring",
+      "fixture": "tests/fixtures/recurrence/contracts/authoring_every_three_days_0800.json",
+      "schema": "contracts/schemas/recurrence-authoring.schema.json"
+    },
+    {
+      "fixture_id": "authoring.weekly_selected_days",
+      "kind": "authoring",
+      "fixture": "tests/fixtures/recurrence/contracts/authoring_weekly_selected_days.json",
+      "schema": "contracts/schemas/recurrence-authoring.schema.json"
+    },
+    {
+      "fixture_id": "authoring.daily_fixed_utc",
+      "kind": "authoring",
+      "fixture": "tests/fixtures/recurrence/contracts/authoring_daily_fixed_utc.json",
+      "schema": "contracts/schemas/recurrence-authoring.schema.json"
+    },
+    {
+      "fixture_id": "authoring.monthly_last_day",
+      "kind": "authoring",
+      "fixture": "tests/fixtures/recurrence/contracts/authoring_monthly_last_day.json",
+      "schema": "contracts/schemas/recurrence-authoring.schema.json"
+    },
+    {
+      "fixture_id": "normalized.every_three_days_0800",
+      "kind": "normalized_set",
+      "fixture": "tests/fixtures/recurrence/contracts/normalized_every_three_days_0800.json",
+      "schema": "contracts/schemas/recurrence-set.schema.json"
+    },
+    {
+      "fixture_id": "command.instance_add",
+      "kind": "command",
+      "fixture": "tests/fixtures/recurrence/contracts/command_instance_add.json",
+      "schema": "contracts/schemas/recurrence-command.schema.json"
+    },
+    {
+      "fixture_id": "command.instance_remove",
+      "kind": "command",
+      "fixture": "tests/fixtures/recurrence/contracts/command_instance_remove.json",
+      "schema": "contracts/schemas/recurrence-command.schema.json"
+    },
+    {
+      "fixture_id": "command.instance_override",
+      "kind": "command",
+      "fixture": "tests/fixtures/recurrence/contracts/command_instance_override.json",
+      "schema": "contracts/schemas/recurrence-command.schema.json"
+    },
+    {
+      "fixture_id": "command.series_edit",
+      "kind": "command",
+      "fixture": "tests/fixtures/recurrence/contracts/command_series_edit.json",
+      "schema": "contracts/schemas/recurrence-command.schema.json"
+    },
+    {
+      "fixture_id": "command.series_edit_whole_segmented",
+      "kind": "command",
+      "fixture": "tests/fixtures/recurrence/contracts/command_series_edit_whole_segmented.json",
+      "schema": "contracts/schemas/recurrence-command.schema.json"
+    },
+    {
+      "fixture_id": "command.provenance_regenerate",
+      "kind": "command",
+      "fixture": "tests/fixtures/recurrence/contracts/command_provenance_regenerate.json",
+      "schema": "contracts/schemas/recurrence-command.schema.json"
+    },
+    {
+      "fixture_id": "response.every_three_days_page",
+      "kind": "occurrence_response",
+      "fixture": "tests/fixtures/recurrence/contracts/response_every_three_days_page.json",
+      "schema": "contracts/schemas/recurrence-occurrence-response.schema.json"
+    }
+  ]
+}

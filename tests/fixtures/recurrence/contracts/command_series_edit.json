@@ -1,0 +1,27 @@
+{
+  "command": "recurrence.series.edit",
+  "request": {
+    "command_id": "cmd_recurrence_series_edit_1",
+    "actor_subject_id": "subject_agent",
+    "item_id": "item_example_morning_routine",
+    "target_version": "4",
+    "recurrence_set_id": "recurrence_set_example_every_three_days",
+    "recurrence_revision_id": "recurrence_revision_example_4",
+    "edited_at_utc": "2026-08-03T18:15:00Z",
+    "edit_scope": "this_and_following",
+    "target_occurrence_key": "occurrence_key_example_aug_18",
+    "recurrence_patch": {
+      "rules": [
+        {
+          "frequency": "WEEKLY",
+          "interval": "1",
+          "seed": "2026-08-18T08:00:00",
+          "start_bound": "2026-08-18T08:00:00",
+          "end_condition": { "kind": "unbounded" },
+          "by_weekday": ["TU", "TH"],
+          "week_start": "MO"
+        }
+      ]
+    }
+  }
+}

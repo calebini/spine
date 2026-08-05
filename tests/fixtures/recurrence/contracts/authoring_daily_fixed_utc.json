@@ -1,0 +1,15 @@
+{
+  "time_basis": "instant_utc",
+  "rules": [
+    {
+      "frequency": "DAILY",
+      "interval": "1",
+      "seed": "2026-08-03T15:00:00Z",
+      "start_bound": "2026-08-03T15:00:00Z",
+      "end_condition": {
+        "kind": "count",
+        "count": "10"
+      }
+    }
+  ]
+}

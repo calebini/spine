@@ -1,0 +1,15 @@
+{
+  "time_basis": "local_date",
+  "timezone": "America/Los_Angeles",
+  "timezone_database_version": "2026a",
+  "rules": [
+    {
+      "frequency": "MONTHLY",
+      "interval": "1",
+      "seed": "2026-08-31",
+      "start_bound": "2026-08-31",
+      "end_condition": { "kind": "unbounded" },
+      "by_month_day": ["-1"]
+    }
+  ]
+}

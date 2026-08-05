@@ -1,0 +1,14 @@
+{
+  "command": "recurrence.instance.remove",
+  "request": {
+    "command_id": "cmd_recurrence_remove_1",
+    "actor_subject_id": "subject_agent",
+    "item_id": "item_example_morning_routine",
+    "target_version": "2",
+    "recurrence_set_id": "recurrence_set_example_every_three_days",
+    "recurrence_revision_id": "recurrence_revision_example_2",
+    "removed_at_utc": "2026-08-03T18:05:00Z",
+    "target_occurrence_key": "occurrence_key_example_aug_12",
+    "reason_code": "not_needed"
+  }
+}

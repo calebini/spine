@@ -1,0 +1,16 @@
+{
+  "command": "occurrence_provenance.regenerate",
+  "request": {
+    "command_id": "cmd_recurrence_provenance_1",
+    "actor_subject_id": "subject_agent",
+    "item_id": "item_example_morning_routine",
+    "target_version": "5",
+    "recurrence_set_id": "recurrence_set_example_every_three_days",
+    "recurrence_revision_id": "recurrence_revision_example_5",
+    "regenerated_at_utc": "2026-08-03T18:20:00Z",
+    "consumer": "spine.notification_planner",
+    "range_basis": "original_schedule",
+    "range_start": "2026-08-03T00:00:00",
+    "range_end": "2026-09-01T00:00:00"
+  }
+}

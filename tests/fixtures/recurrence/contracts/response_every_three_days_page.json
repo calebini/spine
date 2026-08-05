@@ -1,0 +1,113 @@
+{
+  "ok": true,
+  "command": "item.occurrences",
+  "response_contract": "spine.item-occurrences.recurrence.v1",
+  "item_id": "item_example_morning_routine",
+  "item_type": "event",
+  "current_version": "1",
+  "source_item_version": "1",
+  "status": "active",
+  "title": "Morning routine",
+  "recurrence_set_id": "recurrence_set_example_every_three_days",
+  "recurrence_revision_id": "recurrence_revision_example_1",
+  "revision_number": "1",
+  "normalized_recurrence_set_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "time_basis": "local_instant",
+  "timezone": "America/Denver",
+  "timezone_database_version": "2026a",
+  "range_basis": "original_schedule",
+  "range_start": "2026-08-03T00:00:00",
+  "range_end": "2026-08-07T00:00:00",
+  "limit": "4",
+  "has_more": false,
+  "next_cursor": null,
+  "occurrences": [
+    {
+      "occurrence_id": "occurrence_example_aug_03",
+      "occurrence_key": "occurrence_key_example_aug_03",
+      "recurrence_set_id": "recurrence_set_example_every_three_days",
+      "recurrence_revision_id": "recurrence_revision_example_1",
+      "segment_id": "recurrence_segment_example_0",
+      "origin_kind": "rule",
+      "normalized_recurrence_set_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "original_scheduled_fact": "2026-08-03T08:00:00",
+      "expressed_scheduled_fact": "2026-08-03T08:00:00",
+      "expressed_schedule_key": "expressed_schedule_key_example_aug_03",
+      "range_basis": "original_schedule",
+      "lifecycle": "active",
+      "source_entries": [
+        {
+          "source_kind": "rule",
+          "source_id": "recurrence_rule_example_every_three_days",
+          "rule_local_index": "0"
+        }
+      ],
+      "source_rule_ids": ["recurrence_rule_example_every_three_days"],
+      "source_rdate_ids": [],
+      "virtual": true,
+      "actionable": true,
+      "timezone_resolution": {
+        "timezone": "America/Denver",
+        "timezone_database_version": "2026a",
+        "resolution_kind": "unambiguous",
+        "local_datetime": "2026-08-03T08:00:00",
+        "utc_instant": "2026-08-03T14:00:00Z",
+        "offset_seconds": "-21600"
+      },
+      "occurrence_event_detail": {
+        "event_status": "scheduled",
+        "all_day": false,
+        "start_anchor": {
+          "anchor_kind": "local_instant",
+          "local_date": "2026-08-03",
+          "local_time": "08:00:00",
+          "timezone": "America/Denver"
+        }
+      }
+    },
+    {
+      "occurrence_id": "occurrence_example_aug_06",
+      "occurrence_key": "occurrence_key_example_aug_06",
+      "recurrence_set_id": "recurrence_set_example_every_three_days",
+      "recurrence_revision_id": "recurrence_revision_example_1",
+      "segment_id": "recurrence_segment_example_0",
+      "origin_kind": "rule",
+      "normalized_recurrence_set_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "original_scheduled_fact": "2026-08-06T08:00:00",
+      "expressed_scheduled_fact": "2026-08-06T08:00:00",
+      "expressed_schedule_key": "expressed_schedule_key_example_aug_06",
+      "range_basis": "original_schedule",
+      "lifecycle": "active",
+      "source_entries": [
+        {
+          "source_kind": "rule",
+          "source_id": "recurrence_rule_example_every_three_days",
+          "rule_local_index": "1"
+        }
+      ],
+      "source_rule_ids": ["recurrence_rule_example_every_three_days"],
+      "source_rdate_ids": [],
+      "virtual": true,
+      "actionable": true,
+      "timezone_resolution": {
+        "timezone": "America/Denver",
+        "timezone_database_version": "2026a",
+        "resolution_kind": "unambiguous",
+        "local_datetime": "2026-08-06T08:00:00",
+        "utc_instant": "2026-08-06T14:00:00Z",
+        "offset_seconds": "-21600"
+      },
+      "occurrence_event_detail": {
+        "event_status": "scheduled",
+        "all_day": false,
+        "start_anchor": {
+          "anchor_kind": "local_instant",
+          "local_date": "2026-08-06",
+          "local_time": "08:00:00",
+          "timezone": "America/Denver"
+        }
+      }
+    }
+  ],
+  "diagnostics": []
+}

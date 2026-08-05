@@ -7,6 +7,7 @@ Current spec surface:
 - `overview.md`: purpose, doctrine, ontology, and non-goals
 - `architecture.md`: component boundaries and relationships to tickerd, Foreman/Threshold, adapters, and projections
 - `ontology.md`: first durable ontology and data model sketch
+- `recurrence.md`: canonical flexible recurrence-set model, deterministic expansion and identity, mutation, and occurrence provenance
 - `agent-command-contract.md`: draft agent-facing command/request contract for authoring and inspecting Spine coordination truth
 - `SPINE_SPEC_VERSIONING_AND_FREEZE_POLICY.md`: lightweight policy for spec versions, runtime declarations, and one-way freeze-manifest pinning
 - `decisions/0001-kinflow-is-donor-not-foundation.md`: accepted decision on the Kinflow relationship
@@ -17,6 +18,9 @@ Executable contract artifacts:
 - `../contracts/command-fixture-manifest.json`: manifest for MVP golden command responses
 - `../contracts/schemas/command-response.schema.json`: shared command response envelope schema
 - `../tests/fixtures/command_responses/mvp/`: golden MVP command response examples
+- `../contracts/recurrence-fixture-manifest.json`: flexible recurrence contract fixture index
+- `../contracts/schemas/recurrence-*.schema.json`: recurrence authoring, normalized-set, command, and occurrence-response schemas
+- `../tests/fixtures/recurrence/contracts/`: initial flexible recurrence contract examples
 
 Spec status labels:
 

@@ -1,0 +1,18 @@
+{
+  "command": "recurrence.instance.override",
+  "request": {
+    "command_id": "cmd_recurrence_override_1",
+    "actor_subject_id": "subject_agent",
+    "item_id": "item_example_morning_routine",
+    "target_version": "3",
+    "recurrence_set_id": "recurrence_set_example_every_three_days",
+    "recurrence_revision_id": "recurrence_revision_example_3",
+    "overridden_at_utc": "2026-08-03T18:10:00Z",
+    "target_occurrence_key": "occurrence_key_example_aug_15",
+    "expressed_scheduled_fact": "2026-08-15T09:30:00",
+    "common_detail_patch": {
+      "title": "Late morning routine"
+    },
+    "reason_code": "one_time_move"
+  }
+}

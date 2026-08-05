@@ -1,0 +1,424 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cortext.local/spine/contracts/schemas/recurrence-command.schema.json",
+  "title": "Spine Recurrence Command Request Envelope v1",
+  "oneOf": [
+    { "$ref": "#/$defs/instanceAdd" },
+    { "$ref": "#/$defs/instanceRemove" },
+    { "$ref": "#/$defs/instanceOverride" },
+    { "$ref": "#/$defs/seriesEdit" },
+    { "$ref": "#/$defs/provenanceRegenerate" }
+  ],
+  "$defs": {
+    "truthWriteCommon": {
+      "type": "object",
+      "required": ["command_id", "actor_subject_id", "item_id", "target_version", "recurrence_set_id", "recurrence_revision_id"],
+      "properties": {
+        "command_id": { "$ref": "recurrence-types.schema.json#/$defs/id" },
+        "actor_subject_id": { "$ref": "recurrence-types.schema.json#/$defs/id" },
+        "item_id": { "$ref": "recurrence-types.schema.json#/$defs/id" },
+        "target_version": { "$ref": "recurrence-types.schema.json#/$defs/decimalPositive" },
+        "recurrence_set_id": { "$ref": "recurrence-types.schema.json#/$defs/id" },
+        "recurrence_revision_id": { "$ref": "recurrence-types.schema.json#/$defs/id" }
+      }
+    },
+    "instanceAdd": {
+      "type": "object",
+      "required": ["command", "request"],
+      "properties": {
+        "command": { "const": "recurrence.instance.add" },
+        "request": {
+          "allOf": [
+            { "$ref": "#/$defs/truthWriteCommon" },
+            {
+              "type": "object",
+              "required": ["added_at_utc", "scheduled_fact"],
+              "properties": {
+                "command_id": true,
+                "actor_subject_id": true,
+                "item_id": true,
+                "target_version": true,
+                "recurrence_set_id": true,
+                "recurrence_revision_id": true,
+                "added_at_utc": { "$ref": "recurrence-types.schema.json#/$defs/utcTimestamp" },
+                "scheduled_fact": { "$ref": "recurrence-types.schema.json#/$defs/scheduledFact" },
+                "segment_id": { "$ref": "recurrence-types.schema.json#/$defs/id" },
+                "common_detail_patch": { "$ref": "recurrence-types.schema.json#/$defs/commonDetailPatch" },
+                "event_detail_patch": { "$ref": "recurrence-types.schema.json#/$defs/eventDetailPatch" },
+                "task_detail_patch": { "$ref": "recurrence-types.schema.json#/$defs/taskDetailPatch" },
+                "reason_code": { "type": "string", "minLength": 1 }
+              },
+              "additionalProperties": false
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "instanceRemove": {
+      "type": "object",
+      "required": ["command", "request"],
+      "properties": {
+        "command": { "const": "recurrence.instance.remove" },
+        "request": {
+          "allOf": [
+            { "$ref": "#/$defs/truthWriteCommon" },
+            {
+              "type": "object",
+              "required": ["removed_at_utc", "target_occurrence_key", "reason_code"],
+              "properties": {
+                "command_id": true,
+                "actor_subject_id": true,
+                "item_id": true,
+                "target_version": true,
+                "recurrence_set_id": true,
+                "recurrence_revision_id": true,
+                "removed_at_utc": { "$ref": "recurrence-types.schema.json#/$defs/utcTimestamp" },
+                "target_occurrence_key": { "$ref": "recurrence-types.schema.json#/$defs/id" },
+                "segment_id": { "$ref": "recurrence-types.schema.json#/$defs/id" },
+                "reason_code": { "type": "string", "minLength": 1 }
+              },
+              "additionalProperties": false
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "instanceOverride": {
+      "type": "object",
+      "required": ["command", "request"],
+      "properties": {
+        "command": { "const": "recurrence.instance.override" },
+        "request": {
+          "allOf": [
+            { "$ref": "#/$defs/truthWriteCommon" },
+            {
+              "type": "object",
+              "required": ["overridden_at_utc", "target_occurrence_key"],
+              "properties": {
+                "command_id": true,
+                "actor_subject_id": true,
+                "item_id": true,
+                "target_version": true,
+                "recurrence_set_id": true,
+                "recurrence_revision_id": true,
+                "overridden_at_utc": { "$ref": "recurrence-types.schema.json#/$defs/utcTimestamp" },
+                "target_occurrence_key": { "$ref": "recurrence-types.schema.json#/$defs/id" },
+                "segment_id": { "$ref": "recurrence-types.schema.json#/$defs/id" },
+                "expressed_scheduled_fact": { "$ref": "recurrence-types.schema.json#/$defs/scheduledFact" },
+                "common_detail_patch": { "$ref": "recurrence-types.schema.json#/$defs/commonDetailPatch" },
+                "event_detail_patch": { "$ref": "recurrence-types.schema.json#/$defs/eventDetailPatch" },
+                "task_detail_patch": { "$ref": "recurrence-types.schema.json#/$defs/taskDetailPatch" },
+                "lifecycle": { "enum": ["active", "cancelled", "completed"] },
+                "reason_code": { "type": "string", "minLength": 1 }
+              },
+              "anyOf": [
+                { "required": ["expressed_scheduled_fact"] },
+                { "required": ["common_detail_patch"] },
+                { "required": ["event_detail_patch"] },
+                { "required": ["task_detail_patch"] },
+                { "required": ["lifecycle"] }
+              ],
+              "additionalProperties": false
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "seriesEdit": {
+      "type": "object",
+      "required": ["command", "request"],
+      "properties": {
+        "command": { "const": "recurrence.series.edit" },
+        "request": {
+          "allOf": [
+            { "$ref": "#/$defs/truthWriteCommon" },
+            {
+              "type": "object",
+              "required": ["edited_at_utc", "edit_scope", "recurrence_patch"],
+              "properties": {
+                "command_id": true,
+                "actor_subject_id": true,
+                "item_id": true,
+                "target_version": true,
+                "recurrence_set_id": true,
+                "recurrence_revision_id": true,
+                "edited_at_utc": { "$ref": "recurrence-types.schema.json#/$defs/utcTimestamp" },
+                "edit_scope": { "enum": ["one", "this_and_following", "whole_series"] },
+                "target_occurrence_key": { "$ref": "recurrence-types.schema.json#/$defs/id" },
+                "recurrence_patch": { "$ref": "#/$defs/recurrencePatch" }
+              },
+              "additionalProperties": false
+            },
+            {
+              "if": {
+                "properties": { "edit_scope": { "const": "one" } },
+                "required": ["edit_scope"]
+              },
+              "then": {
+                "required": ["target_occurrence_key"],
+                "properties": {
+                  "recurrence_patch": { "$ref": "#/$defs/oneRecurrencePatch" }
+                }
+              }
+            },
+            {
+              "if": {
+                "properties": { "edit_scope": { "const": "this_and_following" } },
+                "required": ["edit_scope"]
+              },
+              "then": {
+                "required": ["target_occurrence_key"],
+                "properties": {
+                  "recurrence_patch": { "$ref": "#/$defs/followingRecurrencePatch" }
+                }
+              }
+            },
+            {
+              "if": {
+                "properties": { "edit_scope": { "const": "whole_series" } },
+                "required": ["edit_scope"]
+              },
+              "then": {
+                "not": { "required": ["target_occurrence_key"] },
+                "properties": {
+                  "recurrence_patch": { "$ref": "#/$defs/wholeSeriesRecurrencePatch" }
+                }
+              }
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "recurrencePatch": {
+      "oneOf": [
+        { "$ref": "#/$defs/oneRecurrencePatch" },
+        { "$ref": "#/$defs/seriesRecurrencePatch" }
+      ]
+    },
+    "oneRecurrencePatch": {
+      "type": "object",
+      "oneOf": [
+        { "required": ["exclude"] },
+        { "required": ["override"] }
+      ],
+      "properties": {
+        "exclude": {
+          "type": "object",
+          "required": ["reason_code"],
+          "properties": { "reason_code": { "type": "string", "minLength": 1 } },
+          "additionalProperties": false
+        },
+        "override": { "$ref": "recurrence-types.schema.json#/$defs/overrideInput" }
+      },
+      "additionalProperties": false
+    },
+    "seriesRecurrencePatch": {
+      "type": "object",
+      "minProperties": 1,
+      "properties": {
+        "rules": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/seriesEditRule" }
+        },
+        "rdates": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/seriesEditRdate" }
+        },
+        "exdates": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["target_occurrence_key", "reason_code"],
+            "properties": {
+              "target_occurrence_key": { "$ref": "recurrence-types.schema.json#/$defs/id" },
+              "reason_code": { "type": "string", "minLength": 1 },
+              "segment_id": { "$ref": "recurrence-types.schema.json#/$defs/id" }
+            },
+            "additionalProperties": false
+          }
+        },
+        "overrides": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/seriesOverride" }
+        }
+      },
+      "additionalProperties": false
+    },
+    "followingRecurrencePatch": {
+      "allOf": [
+        { "$ref": "#/$defs/seriesRecurrencePatch" },
+        {
+          "properties": {
+            "rules": { "items": { "not": { "required": ["segment_id"] } } },
+            "rdates": { "items": { "not": { "required": ["segment_id"] } } },
+            "exdates": { "items": { "not": { "required": ["segment_id"] } } },
+            "overrides": { "items": { "not": { "required": ["segment_id"] } } }
+          }
+        }
+      ]
+    },
+    "wholeSeriesRecurrencePatch": {
+      "allOf": [
+        { "$ref": "#/$defs/seriesRecurrencePatch" },
+        {
+          "properties": {
+            "rules": { "items": { "required": ["segment_id"] } },
+            "rdates": { "items": { "required": ["segment_id"] } },
+            "exdates": { "items": { "required": ["segment_id"] } },
+            "overrides": { "items": { "required": ["segment_id"] } }
+          }
+        }
+      ]
+    },
+    "seriesEditRule": {
+      "type": "object",
+      "required": ["frequency", "seed", "start_bound", "end_condition"],
+      "properties": {
+        "frequency": { "enum": ["DAILY", "WEEKLY", "MONTHLY", "YEARLY"] },
+        "interval": { "$ref": "recurrence-types.schema.json#/$defs/decimalPositive" },
+        "seed": { "$ref": "recurrence-types.schema.json#/$defs/scheduledFact" },
+        "start_bound": { "$ref": "recurrence-types.schema.json#/$defs/scheduledFact" },
+        "end_condition": { "$ref": "recurrence-types.schema.json#/$defs/endCondition" },
+        "by_month": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "type": "string", "pattern": "^([1-9]|1[0-2])$" }
+        },
+        "by_month_day": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "type": "string", "pattern": "^-?([1-9]|[12][0-9]|3[01])$" }
+        },
+        "by_weekday": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "$ref": "recurrence-types.schema.json#/$defs/weekday" }
+        },
+        "by_set_position": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "type": "string", "pattern": "^-?([1-9]|[1-9][0-9]|[12][0-9]{2}|3[0-5][0-9]|36[0-6])$" }
+        },
+        "week_start": { "$ref": "recurrence-types.schema.json#/$defs/weekday" },
+        "segment_id": { "$ref": "recurrence-types.schema.json#/$defs/id" }
+      },
+      "allOf": [
+        { "$ref": "recurrence-types.schema.json#/$defs/selectorFamilyRules" },
+        {
+          "if": { "properties": { "frequency": { "const": "DAILY" } }, "required": ["frequency"] },
+          "then": {
+            "not": {
+              "anyOf": [
+                { "required": ["by_month"] },
+                { "required": ["by_month_day"] },
+                { "required": ["by_weekday"] },
+                { "required": ["by_set_position"] },
+                { "required": ["week_start"] }
+              ]
+            }
+          }
+        },
+        {
+          "if": { "properties": { "frequency": { "const": "WEEKLY" } }, "required": ["frequency"] },
+          "then": {
+            "not": {
+              "anyOf": [
+                { "required": ["by_month"] },
+                { "required": ["by_month_day"] },
+                { "required": ["by_set_position"] }
+              ]
+            }
+          }
+        },
+        {
+          "if": { "properties": { "frequency": { "const": "MONTHLY" } }, "required": ["frequency"] },
+          "then": {
+            "not": {
+              "anyOf": [
+                { "required": ["by_month"] },
+                { "required": ["week_start"] }
+              ]
+            }
+          }
+        },
+        {
+          "if": { "properties": { "frequency": { "const": "YEARLY" } }, "required": ["frequency"] },
+          "then": { "not": { "required": ["week_start"] } }
+        }
+      ],
+      "additionalProperties": false
+    },
+    "seriesEditRdate": {
+      "type": "object",
+      "required": ["scheduled_fact"],
+      "properties": {
+        "scheduled_fact": { "$ref": "recurrence-types.schema.json#/$defs/scheduledFact" },
+        "segment_id": { "$ref": "recurrence-types.schema.json#/$defs/id" }
+      },
+      "additionalProperties": false
+    },
+    "seriesOverride": {
+      "type": "object",
+      "required": ["target_occurrence_key"],
+      "properties": {
+        "target_occurrence_key": { "$ref": "recurrence-types.schema.json#/$defs/id" },
+        "segment_id": { "$ref": "recurrence-types.schema.json#/$defs/id" },
+        "expressed_scheduled_fact": { "$ref": "recurrence-types.schema.json#/$defs/scheduledFact" },
+        "common_detail_patch": { "$ref": "recurrence-types.schema.json#/$defs/commonDetailPatch" },
+        "event_detail_patch": { "$ref": "recurrence-types.schema.json#/$defs/eventDetailPatch" },
+        "task_detail_patch": { "$ref": "recurrence-types.schema.json#/$defs/taskDetailPatch" },
+        "lifecycle": { "enum": ["active", "cancelled", "completed"] },
+        "reason_code": { "type": "string", "minLength": 1 }
+      },
+      "anyOf": [
+        { "required": ["expressed_scheduled_fact"] },
+        { "required": ["common_detail_patch"] },
+        { "required": ["event_detail_patch"] },
+        { "required": ["task_detail_patch"] },
+        { "required": ["lifecycle"] }
+      ],
+      "additionalProperties": false
+    },
+    "provenanceRegenerate": {
+      "type": "object",
+      "required": ["command", "request"],
+      "properties": {
+        "command": { "const": "occurrence_provenance.regenerate" },
+        "request": {
+          "type": "object",
+          "required": ["command_id", "actor_subject_id", "item_id", "target_version", "recurrence_set_id", "recurrence_revision_id", "regenerated_at_utc", "consumer", "range_start", "range_end"],
+          "properties": {
+            "command_id": { "$ref": "recurrence-types.schema.json#/$defs/id" },
+            "actor_subject_id": { "$ref": "recurrence-types.schema.json#/$defs/id" },
+            "item_id": { "$ref": "recurrence-types.schema.json#/$defs/id" },
+            "target_version": { "$ref": "recurrence-types.schema.json#/$defs/decimalPositive" },
+            "recurrence_set_id": { "$ref": "recurrence-types.schema.json#/$defs/id" },
+            "recurrence_revision_id": { "$ref": "recurrence-types.schema.json#/$defs/id" },
+            "regenerated_at_utc": { "$ref": "recurrence-types.schema.json#/$defs/utcTimestamp" },
+            "consumer": { "type": "string", "minLength": 1 },
+            "producer": { "type": "string", "minLength": 1 },
+            "range_basis": { "enum": ["original_schedule", "expressed_time"] },
+            "range_start": { "$ref": "recurrence-types.schema.json#/$defs/scheduledFact" },
+            "range_end": { "$ref": "recurrence-types.schema.json#/$defs/scheduledFact" },
+            "occurrence_keys": {
+              "type": "array",
+              "minItems": 1,
+              "uniqueItems": true,
+              "items": { "$ref": "recurrence-types.schema.json#/$defs/id" }
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

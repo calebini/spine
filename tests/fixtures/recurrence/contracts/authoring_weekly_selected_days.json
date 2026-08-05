@@ -1,0 +1,16 @@
+{
+  "time_basis": "local_instant",
+  "timezone": "America/Los_Angeles",
+  "timezone_database_version": "2026a",
+  "rules": [
+    {
+      "frequency": "WEEKLY",
+      "interval": "1",
+      "seed": "2026-08-03T08:00:00",
+      "start_bound": "2026-08-03T08:00:00",
+      "end_condition": { "kind": "unbounded" },
+      "by_weekday": ["MO", "WE", "FR"],
+      "week_start": "MO"
+    }
+  ]
+}

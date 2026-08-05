@@ -1,0 +1,35 @@
+{
+  "command": "recurrence.series.edit",
+  "request": {
+    "command_id": "cmd_recurrence_series_edit_whole_1",
+    "actor_subject_id": "subject_agent",
+    "item_id": "item_example_morning_routine",
+    "target_version": "5",
+    "recurrence_set_id": "recurrence_set_example_every_three_days",
+    "recurrence_revision_id": "recurrence_revision_example_5",
+    "edited_at_utc": "2026-08-03T19:15:00Z",
+    "edit_scope": "whole_series",
+    "recurrence_patch": {
+      "rules": [
+        {
+          "frequency": "WEEKLY",
+          "interval": "1",
+          "seed": "2026-08-03T08:00:00",
+          "start_bound": "2026-08-03T08:00:00",
+          "end_condition": { "kind": "unbounded" },
+          "by_weekday": ["MO", "WE", "FR"],
+          "week_start": "MO",
+          "segment_id": "segment_example_first"
+        },
+        {
+          "frequency": "DAILY",
+          "interval": "3",
+          "seed": "2026-09-01T08:00:00",
+          "start_bound": "2026-09-01T08:00:00",
+          "end_condition": { "kind": "unbounded" },
+          "segment_id": "segment_example_second"
+        }
+      ]
+    }
+  }
+}
