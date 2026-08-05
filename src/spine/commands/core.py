@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import sqlite3
 from collections.abc import Mapping, Sequence
+from datetime import timedelta
 from typing import Any
 
 from spine.commands.context import CommandContext
@@ -22,6 +23,12 @@ from spine.commands.responses import (
 )
 from spine.core import SpineValidationError
 from spine.core.hashing import audit_log_payload_hash
+from spine.core.recurrence import (
+    MAX_EXPANSION_LIMIT,
+    expand_daily_local_occurrences,
+    normalize_daily_recurrence_rule,
+    parse_local_date,
+)
 from spine.ledger.common import TemporalAnchorInput, insert_temporal_anchor, require_utc_z
 from spine.ledger.item_drafts import _UNSET
 from spine.ledger.items import (
@@ -52,6 +59,7 @@ MVP_COMMANDS = frozenset(
         "delivery_target.upsert",
         "item.show",
         "item.list",
+        "item.occurrences",
         "item.archive",
         "event.create",
         "event.update",
@@ -67,7 +75,7 @@ MVP_COMMANDS = frozenset(
     }
 )
 
-WRITE_COMMANDS = MVP_COMMANDS - {"item.show", "item.list", "relation.list"}
+WRITE_COMMANDS = MVP_COMMANDS - {"item.show", "item.list", "item.occurrences", "relation.list"}
 
 
 def handle(command: str, request: Mapping[str, Any], context: CommandContext) -> dict[str, Any]:
@@ -122,6 +130,8 @@ def _dispatch(command: str, request: Mapping[str, Any], context: CommandContext)
         return _handle_item_show(request, context)
     if command == "item.list":
         return _handle_item_list(request, context)
+    if command == "item.occurrences":
+        return _handle_item_occurrences(request, context)
     if command == "event.create":
         return _handle_event_create(request, context)
     if command == "task.create":
@@ -487,13 +497,120 @@ def _handle_item_list(request: Mapping[str, Any], context: CommandContext) -> di
     return item_list_response(items, limit=str(limit), truncated=truncated)
 
 
+def _handle_item_occurrences(request: Mapping[str, Any], context: CommandContext) -> dict[str, Any]:
+    _check_fields(
+        "item.occurrences",
+        request,
+        {"item_id", "range_start_local_date", "range_end_local_date", "limit"},
+    )
+    item_id = _required_str(request, "item_id")
+    range_start = _required_str(request, "range_start_local_date")
+    range_end = _required_str(request, "range_end_local_date")
+    limit = _occurrence_limit(request.get("limit", 100))
+    item = _hydrated_item(context.ledger, item_id)
+    detail = item["detail"]
+
+    if item["item_type"] == "event":
+        seed = detail.get("start_anchor")
+        recurrence_field = "start_anchor.recurrence_rule"
+    elif item["item_type"] == "task":
+        seed = detail.get("due_anchor")
+        recurrence_field = "due_anchor.recurrence_rule"
+    else:
+        raise SpineValidationError(
+            "unsupported_recurrence_item",
+            "item.occurrences currently supports event and task items",
+        )
+    if not isinstance(seed, Mapping) or seed.get("recurrence_rule") is None:
+        raise SpineValidationError(
+            "recurrence_not_configured",
+            f"{item['item_type']} item has no configured recurrence",
+        )
+
+    expanded = expand_daily_local_occurrences(
+        item_id=item_id,
+        anchor_kind=str(seed["anchor_kind"]),
+        seed_local_date=str(seed["local_date"]),
+        seed_local_time=str(seed["local_time"]) if seed.get("local_time") is not None else None,
+        timezone=str(seed["timezone"]),
+        recurrence_rule=str(seed["recurrence_rule"]),
+        range_start_local_date=range_start,
+        range_end_local_date=range_end,
+        limit=limit,
+    )
+    seed_date = parse_local_date("seed.local_date", str(seed["local_date"]))
+    occurrences: list[dict[str, Any]] = []
+    for occurrence in expanded.occurrences:
+        occurrence_date = parse_local_date("occurrence.local_date", occurrence.local_date)
+        day_offset = (occurrence_date - seed_date).days
+        scheduled_anchor = {
+            "anchor_kind": seed["anchor_kind"],
+            "local_date": occurrence.local_date,
+            "timezone": occurrence.timezone,
+        }
+        if occurrence.local_time is not None:
+            scheduled_anchor["local_time"] = occurrence.local_time
+        row: dict[str, Any] = {
+            "occurrence_id": occurrence.occurrence_id,
+            "occurrence_key": occurrence.occurrence_key,
+            "ordinal": str(occurrence.ordinal),
+            "virtual": True,
+        }
+        if item["item_type"] == "event":
+            row["occurrence_event_detail"] = {
+                "event_status": detail["event_status"],
+                "all_day": bool(detail["all_day"]),
+                "start_anchor": scheduled_anchor,
+            }
+            if detail.get("end_anchor") is not None:
+                row["occurrence_event_detail"]["end_anchor"] = _shift_virtual_local_anchor(
+                    detail["end_anchor"],
+                    day_offset=day_offset,
+                )
+        else:
+            row["occurrence_task_detail"] = {
+                "task_status": detail["task_status"],
+                "due_anchor": scheduled_anchor,
+            }
+            if detail.get("defer_until_anchor") is not None:
+                shifted_defer = _shift_virtual_local_anchor(
+                    detail["defer_until_anchor"],
+                    day_offset=day_offset,
+                    required=False,
+                )
+                if shifted_defer is not None:
+                    row["occurrence_task_detail"]["defer_until_anchor"] = shifted_defer
+        occurrences.append(row)
+
+    return {
+        "ok": True,
+        "command": "item.occurrences",
+        "item_id": item_id,
+        "item_type": item["item_type"],
+        "current_version": str(item["current_version"]),
+        "title": item["version"]["title"],
+        "recurrence_field": recurrence_field,
+        "recurrence_rule": seed["recurrence_rule"],
+        "range_start_local_date": range_start,
+        "range_end_local_date": range_end,
+        "occurrences": occurrences,
+        "limit": str(limit),
+        "truncated": expanded.truncated,
+    }
+
+
 def _handle_event_create(request: Mapping[str, Any], context: CommandContext) -> dict[str, Any]:
     allowed = {"command_id", "actor_subject_id", "created_at_utc", "title", "summary", "source_ref", "all_day", "start_anchor", "end_anchor", "visibility", "attendance_policy_ref"}
     _check_fields("event.create", request, allowed)
     command_id, actor, created_at = _write_identity("event.create", request, "created_at_utc", context)
     title = _required_str(request, "title")
     all_day = _required_bool(request, "all_day")
-    start_anchor = _anchor_input(request.get("start_anchor"), "start_anchor", _derived_id("event.create", command_id, "start_anchor", "/start_anchor"))
+    start_anchor = _anchor_input(
+        request.get("start_anchor"),
+        "start_anchor",
+        _derived_id("event.create", command_id, "start_anchor", "/start_anchor"),
+        allow_recurrence=True,
+    )
     end_anchor = None
     if request.get("end_anchor") is not None:
         end_anchor = _anchor_input(request.get("end_anchor"), "end_anchor", _derived_id("event.create", command_id, "end_anchor", "/end_anchor"))
@@ -544,7 +661,16 @@ def _handle_task_create(request: Mapping[str, Any], context: CommandContext) -> 
     _check_fields("task.create", request, allowed)
     command_id, actor, created_at = _write_identity("task.create", request, "created_at_utc", context)
     title = _required_str(request, "title")
-    due_anchor = _anchor_input(request.get("due_anchor"), "due_anchor", _derived_id("task.create", command_id, "due_anchor", "/due_anchor")) if request.get("due_anchor") is not None else None
+    due_anchor = (
+        _anchor_input(
+            request.get("due_anchor"),
+            "due_anchor",
+            _derived_id("task.create", command_id, "due_anchor", "/due_anchor"),
+            allow_recurrence=True,
+        )
+        if request.get("due_anchor") is not None
+        else None
+    )
     defer_anchor = _anchor_input(request.get("defer_until_anchor"), "defer_until_anchor", _derived_id("task.create", command_id, "defer_until_anchor", "/defer_until_anchor")) if request.get("defer_until_anchor") is not None else None
     subject_roles = _task_subject_roles(
         context.ledger,
@@ -690,7 +816,12 @@ def _handle_event_reschedule(request: Mapping[str, Any], context: CommandContext
     item_id = _required_str(request, "item_id")
     target_version = _version(request, "target_version")
     all_day = _required_bool(request, "all_day")
-    start_anchor = _anchor_input(request.get("start_anchor"), "start_anchor", _derived_id("event.reschedule", command_id, "start_anchor", "/start_anchor"))
+    start_anchor = _anchor_input(
+        request.get("start_anchor"),
+        "start_anchor",
+        _derived_id("event.reschedule", command_id, "start_anchor", "/start_anchor"),
+        allow_recurrence=True,
+    )
     end_anchor = _anchor_input(request.get("end_anchor"), "end_anchor", _derived_id("event.reschedule", command_id, "end_anchor", "/end_anchor")) if request.get("end_anchor") is not None else None
     patch = _patch(request.get("patch", {}))
     semantic = _semantic_request("event.reschedule", command_id, actor, at, request, allowed)
@@ -701,7 +832,13 @@ def _handle_event_reschedule(request: Mapping[str, Any], context: CommandContext
     if item["detail"]["event_status"] == "cancelled":
         return _error("event.reschedule", "invalid_state_transition", "cancelled events cannot be rescheduled", "event_status")
     current = item["detail"]
-    anchor_noop = current["start_anchor"] == _anchor_output(start_anchor) and current.get("end_anchor") == (_anchor_output(end_anchor) if end_anchor is not None else None) and bool(current["all_day"]) == all_day
+    requested_end = _anchor_semantic_facts(_anchor_output(end_anchor)) if end_anchor is not None else None
+    anchor_noop = (
+        _anchor_semantic_facts(current["start_anchor"])
+        == _anchor_semantic_facts(_anchor_output(start_anchor))
+        and _anchor_semantic_facts(current.get("end_anchor")) == requested_end
+        and bool(current["all_day"]) == all_day
+    )
     common_noop = not _changed_common(item["version"], patch)
     if anchor_noop and common_noop:
         receipt = _store_write_receipt(
@@ -1247,6 +1384,22 @@ def _limit(value: Any) -> int:
     return value
 
 
+def _occurrence_limit(value: Any) -> int:
+    if isinstance(value, str) and value.isdigit():
+        value = int(value)
+    if (
+        not isinstance(value, int)
+        or isinstance(value, bool)
+        or value < 1
+        or value > MAX_EXPANSION_LIMIT
+    ):
+        raise SpineValidationError(
+            "invalid_limit",
+            f"limit must be between 1 and {MAX_EXPANSION_LIMIT}",
+        )
+    return value
+
+
 def _limit_sequence(values: Any, limit: int) -> tuple[list[Any], bool]:
     sequence = list(values if isinstance(values, Sequence) and not isinstance(values, (str, bytes, bytearray)) else ())
     return sequence[:limit], len(sequence) > limit
@@ -1283,7 +1436,13 @@ def _changed_common(current: Mapping[str, Any], patch: Mapping[str, Any]) -> boo
     return any(current.get(key) != patch[key] for key in ("title", "summary", "source_ref") if key in patch)
 
 
-def _anchor_input(value: Any, field: str, anchor_id: str) -> TemporalAnchorInput:
+def _anchor_input(
+    value: Any,
+    field: str,
+    anchor_id: str,
+    *,
+    allow_recurrence: bool = False,
+) -> TemporalAnchorInput:
     if not isinstance(value, Mapping):
         raise SpineValidationError(f"invalid_{field}", f"{field} must be an object")
     allowed = {
@@ -1302,6 +1461,25 @@ def _anchor_input(value: Any, field: str, anchor_id: str) -> TemporalAnchorInput
             raise SpineValidationError(f"unsupported_field:{field}.{key}", f"unsupported anchor field: {key}")
     kind = _enum(value.get("anchor_kind"), f"{field}.anchor_kind", {"instant_utc", "local_instant", "local_date", "utc_window", "local_window"})
     _validate_anchor_shape(value, field, kind)
+    recurrence_rule = _map_optional_str(value, "recurrence_rule")
+    if recurrence_rule is not None:
+        if not allow_recurrence:
+            raise SpineValidationError(
+                f"unsupported_field:{field}.recurrence_rule",
+                f"{field}.recurrence_rule is not supported on this anchor",
+            )
+        if kind not in {"local_date", "local_instant"}:
+            raise SpineValidationError(
+                f"unsupported_field:{field}.recurrence_rule",
+                f"{field}.recurrence_rule requires a local_date or local_instant anchor",
+            )
+        try:
+            recurrence_rule = normalize_daily_recurrence_rule(recurrence_rule)
+        except SpineValidationError as exc:
+            raise SpineValidationError(
+                f"invalid_{field}.recurrence_rule",
+                exc.message,
+            ) from exc
     return TemporalAnchorInput(
         anchor_id=anchor_id,
         anchor_kind=kind,
@@ -1311,7 +1489,7 @@ def _anchor_input(value: Any, field: str, anchor_id: str) -> TemporalAnchorInput
         utc_instant=_anchor_optional_utc(value, "utc_instant", field),
         window_start_utc=_anchor_optional_utc(value, "window_start_utc", field),
         window_end_utc=_anchor_optional_utc(value, "window_end_utc", field),
-        recurrence_rule=_map_optional_str(value, "recurrence_rule"),
+        recurrence_rule=recurrence_rule,
         source=_map_optional_str(value, "source"),
     )
 
@@ -1378,6 +1556,59 @@ def _anchor_output(anchor: TemporalAnchorInput) -> dict[str, Any]:
         "source": anchor.source,
     }
     return {key: value for key, value in row.items() if value is not None}
+
+
+def _anchor_semantic_facts(anchor: Any) -> dict[str, Any] | None:
+    if not isinstance(anchor, Mapping):
+        return None
+    return {
+        key: anchor[key]
+        for key in (
+            "anchor_kind",
+            "local_date",
+            "local_time",
+            "timezone",
+            "utc_instant",
+            "window_start_utc",
+            "window_end_utc",
+            "recurrence_rule",
+            "source",
+        )
+        if anchor.get(key) is not None
+    }
+
+
+def _shift_virtual_local_anchor(
+    anchor: Any,
+    *,
+    day_offset: int,
+    required: bool = True,
+) -> dict[str, Any] | None:
+    if not isinstance(anchor, Mapping):
+        if required:
+            raise SpineValidationError(
+                "invalid_recurrence_anchor",
+                "event end anchor must be available for recurrence expansion",
+            )
+        return None
+    if anchor.get("anchor_kind") not in {"local_date", "local_instant"}:
+        if required:
+            raise SpineValidationError(
+                "unsupported_recurrence_anchor",
+                "recurrence expansion requires local event start/end anchors",
+            )
+        return None
+    shifted_date = parse_local_date("anchor.local_date", str(anchor["local_date"])) + timedelta(
+        days=day_offset
+    )
+    result = {
+        "anchor_kind": anchor["anchor_kind"],
+        "local_date": shifted_date.isoformat(),
+        "timezone": anchor["timezone"],
+    }
+    if anchor.get("local_time") is not None:
+        result["local_time"] = anchor["local_time"]
+    return result
 
 
 def _check_fields(command: str, request: Mapping[str, Any], allowed: set[str]) -> None:
@@ -2020,6 +2251,10 @@ def _error(command: str, code: str, message: str, field: str | None = None) -> d
 
 def _validation_error(command: str, exc: SpineValidationError) -> dict[str, Any]:
     code = exc.code
+    if code == "recurrence_not_configured":
+        return _error(command, "invalid_request", exc.message, "recurrence_rule")
+    if code == "unsupported_recurrence_item":
+        return _error(command, "invalid_request", exc.message, "item_id")
     if code.startswith("unsupported_field:"):
         return _error(command, "unsupported_field", exc.message, code.split(":", 1)[1])
     if code.startswith("unsupported_patch."):

@@ -85,6 +85,13 @@
       "schema": "contracts/schemas/command-response.schema.json"
     },
     {
+      "branch": "daily_recurrence",
+      "command": "item.occurrences",
+      "expected_exit_code": 0,
+      "fixture": "tests/fixtures/command_responses/mvp/item_occurrences_daily.json",
+      "schema": "contracts/schemas/command-response.schema.json"
+    },
+    {
       "branch": "event",
       "command": "item.show",
       "expected_exit_code": 0,

@@ -210,6 +210,26 @@ BEGIN
   SELECT RAISE(ABORT, 'event_details time shape is invalid');
 END;
 
+CREATE TRIGGER IF NOT EXISTS event_details_recurrence_contract_insert
+BEFORE INSERT ON event_details
+FOR EACH ROW
+WHEN (
+  (
+    (SELECT recurrence_rule FROM temporal_anchors WHERE anchor_id = NEW.start_anchor_id)
+      IS NOT NULL
+    AND (SELECT anchor_kind FROM temporal_anchors WHERE anchor_id = NEW.start_anchor_id)
+      NOT IN ('local_date', 'local_instant')
+  )
+  OR (
+    NEW.end_anchor_id IS NOT NULL
+    AND (SELECT recurrence_rule FROM temporal_anchors WHERE anchor_id = NEW.end_anchor_id)
+      IS NOT NULL
+  )
+)
+BEGIN
+  SELECT RAISE(ABORT, 'event recurrence is valid only on a local start anchor');
+END;
+
 CREATE TABLE IF NOT EXISTS task_details (
   item_id TEXT NOT NULL,
   version INTEGER NOT NULL,
@@ -261,6 +281,27 @@ WHEN NOT (
 )
 BEGIN
   SELECT RAISE(ABORT, 'task_details time shape is invalid');
+END;
+
+CREATE TRIGGER IF NOT EXISTS task_details_recurrence_contract_insert
+BEFORE INSERT ON task_details
+FOR EACH ROW
+WHEN (
+  (
+    NEW.due_anchor_id IS NOT NULL
+    AND (SELECT recurrence_rule FROM temporal_anchors WHERE anchor_id = NEW.due_anchor_id)
+      IS NOT NULL
+    AND (SELECT anchor_kind FROM temporal_anchors WHERE anchor_id = NEW.due_anchor_id)
+      NOT IN ('local_date', 'local_instant')
+  )
+  OR (
+    NEW.defer_until_anchor_id IS NOT NULL
+    AND (SELECT recurrence_rule FROM temporal_anchors WHERE anchor_id = NEW.defer_until_anchor_id)
+      IS NOT NULL
+  )
+)
+BEGIN
+  SELECT RAISE(ABORT, 'task recurrence is valid only on a local due anchor');
 END;
 
 CREATE TABLE IF NOT EXISTS locations (
@@ -492,6 +533,18 @@ AND NOT EXISTS (
 )
 BEGIN
   SELECT RAISE(ABORT, 'notification_policies delivery target binding is invalid');
+END;
+
+CREATE TRIGGER IF NOT EXISTS notification_policies_recurrence_contract_insert
+BEFORE INSERT ON notification_policies
+FOR EACH ROW
+WHEN (
+  SELECT recurrence_rule
+  FROM temporal_anchors
+  WHERE anchor_id = NEW.trigger_anchor_id
+) IS NOT NULL
+BEGIN
+  SELECT RAISE(ABORT, 'notification trigger anchors cannot carry recurrence');
 END;
 
 CREATE TABLE IF NOT EXISTS coordination_item_relations (
@@ -930,4 +983,4 @@ CREATE TABLE IF NOT EXISTS ledger_schema (
 );
 
 INSERT OR IGNORE INTO ledger_schema (schema_version, applied_at_utc)
-VALUES (5, '1970-01-01T00:00:00Z');
+VALUES (6, '1970-01-01T00:00:00Z');

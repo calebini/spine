@@ -1,0 +1,82 @@
+{
+  "command": "item.occurrences",
+  "current_version": "1",
+  "item_id": "item_6f3316ba31155e44444d9a1f0d309a00e4d752917c85ae8dbadcc9f9a3d07b4f",
+  "item_type": "event",
+  "limit": "3",
+  "occurrences": [
+    {
+      "occurrence_event_detail": {
+        "all_day": false,
+        "end_anchor": {
+          "anchor_kind": "local_instant",
+          "local_date": "2026-07-27",
+          "local_time": "08:30",
+          "timezone": "America/Denver"
+        },
+        "event_status": "scheduled",
+        "start_anchor": {
+          "anchor_kind": "local_instant",
+          "local_date": "2026-07-27",
+          "local_time": "08:00:00",
+          "timezone": "America/Denver"
+        }
+      },
+      "occurrence_id": "occurrence-0258ae6ab4d848260df00696bf373bdbe9074b4cfcd2a2fc552cda87958aeb3d",
+      "occurrence_key": "local_instant:2026-07-27T08:00:00[America/Denver]",
+      "ordinal": "3",
+      "virtual": true
+    },
+    {
+      "occurrence_event_detail": {
+        "all_day": false,
+        "end_anchor": {
+          "anchor_kind": "local_instant",
+          "local_date": "2026-07-28",
+          "local_time": "08:30",
+          "timezone": "America/Denver"
+        },
+        "event_status": "scheduled",
+        "start_anchor": {
+          "anchor_kind": "local_instant",
+          "local_date": "2026-07-28",
+          "local_time": "08:00:00",
+          "timezone": "America/Denver"
+        }
+      },
+      "occurrence_id": "occurrence-6dfecfee070db0063853606e3af3fee549572ec78ce45752046bf38da65a7ff9",
+      "occurrence_key": "local_instant:2026-07-28T08:00:00[America/Denver]",
+      "ordinal": "4",
+      "virtual": true
+    },
+    {
+      "occurrence_event_detail": {
+        "all_day": false,
+        "end_anchor": {
+          "anchor_kind": "local_instant",
+          "local_date": "2026-07-29",
+          "local_time": "08:30",
+          "timezone": "America/Denver"
+        },
+        "event_status": "scheduled",
+        "start_anchor": {
+          "anchor_kind": "local_instant",
+          "local_date": "2026-07-29",
+          "local_time": "08:00:00",
+          "timezone": "America/Denver"
+        }
+      },
+      "occurrence_id": "occurrence-2775ab8542d9799ab37bb967615c5212ea7dafeecf53f401c69924b24815bdb9",
+      "occurrence_key": "local_instant:2026-07-29T08:00:00[America/Denver]",
+      "ordinal": "5",
+      "virtual": true
+    }
+  ],
+  "ok": true,
+  "range_end_local_date": "2026-07-30",
+  "range_start_local_date": "2026-07-27",
+  "recurrence_field": "start_anchor.recurrence_rule",
+  "recurrence_rule": "FREQ=DAILY;INTERVAL=1",
+  "title": "Daily standup",
+  "truncated": false
+}

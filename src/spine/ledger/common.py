@@ -10,6 +10,9 @@ from enum import StrEnum
 from uuid import uuid4
 
 from spine.core import SpineValidationError
+from spine.core.recurrence import (
+    validate_daily_local_recurrence_anchor,
+)
 from spine.models.enums import TemporalAnchorKind
 
 UTC_Z_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
@@ -46,6 +49,21 @@ def insert_temporal_anchor(
     require_optional_utc_z("anchor.utc_instant", anchor.utc_instant)
     require_optional_utc_z("anchor.window_start_utc", anchor.window_start_utc)
     require_optional_utc_z("anchor.window_end_utc", anchor.window_end_utc)
+    recurrence_rule = anchor.recurrence_rule
+    if recurrence_rule is not None:
+        anchor_kind = enum_value(anchor.anchor_kind)
+        if anchor.local_date is None or anchor.timezone is None:
+            raise SpineValidationError(
+                "invalid_recurrence_anchor",
+                "a recurrence-bearing anchor requires local_date and timezone",
+            )
+        recurrence_rule = validate_daily_local_recurrence_anchor(
+            anchor_kind=anchor_kind,
+            local_date_value=anchor.local_date,
+            local_time_value=anchor.local_time,
+            timezone=anchor.timezone,
+            recurrence_rule=recurrence_rule,
+        )
     connection.execute(
         """
         INSERT INTO temporal_anchors (
@@ -63,7 +81,7 @@ def insert_temporal_anchor(
             anchor.utc_instant,
             anchor.window_start_utc,
             anchor.window_end_utc,
-            anchor.recurrence_rule,
+            recurrence_rule,
             anchor.source,
             created_at_utc,
         ),

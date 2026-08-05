@@ -110,6 +110,40 @@ Use `task.update` with `patch.subject_roles` to replace the complete assignee/ow
 
 Verify the returned `subject_roles` array or call `item.show` and inspect its current-version `subject_roles` before relying on the assignment.
 
+## Daily Recurrence Commands
+
+Use a local start or due anchor with a daily recurrence rule for fixed schedules such as every day at 08:00. The timezone is part of the canonical schedule, so the local time remains 08:00 when the UTC offset changes.
+
+```json
+{
+  "command_id": "event-create-daily-0800-001",
+  "actor_subject_id": "agent",
+  "created_at_utc": "2026-07-25T14:00:00Z",
+  "title": "Daily planning",
+  "all_day": false,
+  "start_anchor": {
+    "anchor_kind": "local_instant",
+    "local_date": "2026-07-26",
+    "local_time": "08:00:00",
+    "timezone": "America/Denver",
+    "recurrence_rule": "FREQ=DAILY"
+  }
+}
+```
+
+Expand a bounded local date range with the read-only `item.occurrences` command:
+
+```json
+{
+  "item_id": "<event-item-id>",
+  "range_start_local_date": "2026-07-26",
+  "range_end_local_date": "2026-08-02",
+  "limit": 100
+}
+```
+
+Invoke those JSON bodies through `spine event create` and `spine item occurrences`, respectively. Expansion returns virtual occurrences and stable occurrence identities; it does not create reminders, work, projections, or external sends. The current slice supports only daily local recurrence with optional `INTERVAL` and `COUNT`. Per-occurrence changes, recurrence-aware reminders, and weekly/monthly rules remain deferred.
+
 ## Quick Start
 
 Run from `SPINE_ROOT` after preflight.

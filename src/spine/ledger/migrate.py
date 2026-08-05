@@ -16,7 +16,7 @@ from spine.core import SpineValidationError
 from spine.ledger.common import utc_z_from_datetime
 from spine.ledger.sqlite import assert_ledger_invariants, connect, initialize_schema
 
-CURRENT_SCHEMA_VERSION = 5
+CURRENT_SCHEMA_VERSION = 6
 
 EXPECTED_SCHEMA_TABLES = frozenset(
     {
@@ -78,6 +78,24 @@ EXPECTED_SCHEMA_INDEXES = frozenset(
         "work_instances_eligible_due_idx",
         "work_instances_item_version_status_idx",
         "work_instances_source_work_idx",
+    }
+)
+
+EXPECTED_SCHEMA_TRIGGERS = frozenset(
+    {
+        "coordination_item_versions_contiguous_insert",
+        "event_details_item_type_insert",
+        "event_details_time_shape_insert",
+        "event_details_recurrence_contract_insert",
+        "task_details_item_type_insert",
+        "task_details_time_shape_insert",
+        "task_details_recurrence_contract_insert",
+        "locations_referenced_canonical_fields_update",
+        "notification_policies_delivery_target_owner_insert",
+        "notification_policies_recurrence_contract_insert",
+        "work_instances_notification_policy_binding_insert",
+        "side_effect_attempts_origin_binding_insert",
+        "side_effect_attempts_staleness_insert",
     }
 )
 
@@ -191,6 +209,11 @@ def verify_schema(connection: sqlite3.Connection) -> SchemaVerificationResult:
     missing_indexes = sorted(EXPECTED_SCHEMA_INDEXES - index_names)
     if missing_indexes:
         raise SpineValidationError("ledger_schema_missing_indexes", ", ".join(missing_indexes))
+
+    trigger_names = _object_names(connection, object_type="trigger")
+    missing_triggers = sorted(EXPECTED_SCHEMA_TRIGGERS - trigger_names)
+    if missing_triggers:
+        raise SpineValidationError("ledger_schema_missing_triggers", ", ".join(missing_triggers))
 
     foreign_key_errors = connection.execute("PRAGMA foreign_key_check").fetchall()
     if foreign_key_errors:

@@ -52,7 +52,7 @@ class LedgerMigrationTests(unittest.TestCase):
 
         self.assertEqual(result.before_version, 1)
         self.assertEqual(result.after_version, CURRENT_SCHEMA_VERSION)
-        self.assertEqual(result.applied_versions, (2, 3, 4, 5))
+        self.assertEqual(result.applied_versions, (2, 3, 4, 5, 6))
         self.assertIn("work_instances_eligible_due_idx", index_names(self.connection))
         self.assertIn("command_receipts_item_created_idx", index_names(self.connection))
         self.assertIn("delivery_targets_active_no_account_unique", index_names(self.connection))
@@ -71,7 +71,7 @@ class LedgerMigrationTests(unittest.TestCase):
                 END
                 """
             )
-            self.connection.execute("DELETE FROM ledger_schema WHERE schema_version = 5")
+            self.connection.execute("DELETE FROM ledger_schema WHERE schema_version > 4")
             self.connection.execute(
                 "INSERT INTO ledger_schema (schema_version, applied_at_utc) VALUES (4, '1970-01-01T00:00:00Z')"
             )
@@ -82,15 +82,52 @@ class LedgerMigrationTests(unittest.TestCase):
             "SELECT sql FROM sqlite_master WHERE type = 'trigger' AND name = 'side_effect_attempts_staleness_insert'"
         ).fetchone()["sql"]
         self.assertEqual(result.before_version, 4)
-        self.assertEqual(result.applied_versions, (5,))
+        self.assertEqual(result.applied_versions, (5, 6))
         self.assertIn("notification_policy_id", trigger_sql)
         self.assertIn("event_status = 'scheduled'", trigger_sql)
+
+    def test_migrate_v5_adds_recurrence_contract_triggers(self) -> None:
+        initialize_schema(self.connection)
+        recurrence_triggers = {
+            "event_details_recurrence_contract_insert",
+            "task_details_recurrence_contract_insert",
+            "notification_policies_recurrence_contract_insert",
+        }
+        with self.connection:
+            for trigger_name in recurrence_triggers:
+                self.connection.execute(f"DROP TRIGGER {trigger_name}")
+            self.connection.execute("DELETE FROM ledger_schema")
+            self.connection.execute(
+                """
+                INSERT INTO ledger_schema (schema_version, applied_at_utc)
+                VALUES (5, '1970-01-01T00:00:00Z')
+                """
+            )
+
+        result = migrate_schema(self.connection)
+
+        installed = {
+            row["name"]
+            for row in self.connection.execute(
+                "SELECT name FROM sqlite_master WHERE type = 'trigger'"
+            )
+        }
+        self.assertEqual(result.before_version, 5)
+        self.assertEqual(result.applied_versions, (6,))
+        self.assertTrue(recurrence_triggers <= installed)
 
     def test_verify_schema_rejects_missing_required_index(self) -> None:
         initialize_schema(self.connection)
         self.connection.execute("DROP INDEX work_instances_eligible_due_idx")
 
         with self.assertRaisesRegex(SpineValidationError, "ledger_schema_missing_indexes"):
+            verify_schema(self.connection)
+
+    def test_verify_schema_rejects_missing_recurrence_trigger(self) -> None:
+        initialize_schema(self.connection)
+        self.connection.execute("DROP TRIGGER event_details_recurrence_contract_insert")
+
+        with self.assertRaisesRegex(SpineValidationError, "ledger_schema_missing_triggers"):
             verify_schema(self.connection)
 
     def test_verify_schema_rejects_old_schema_version(self) -> None:

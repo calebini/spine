@@ -38,6 +38,7 @@ class AgentCommandContractMvpTests(unittest.TestCase):
             "delivery_target.upsert",
             "item.show",
             "item.list",
+            "item.occurrences",
             "item.archive",
             "event.create",
             "event.update",
@@ -56,6 +57,264 @@ class AgentCommandContractMvpTests(unittest.TestCase):
             with self.subTest(command=command):
                 response = handle(command, {}, self.context)
                 self.assertNotEqual(response.get("error", {}).get("code"), "unsupported_command")
+
+    def test_daily_event_recurrence_expands_as_stable_virtual_occurrences(self) -> None:
+        created = handle(
+            "event.create",
+            {
+                "command_id": "cmd-daily-standup",
+                "actor_subject_id": "agent",
+                "created_at_utc": "2026-07-25T12:00:00Z",
+                "title": "Daily standup",
+                "all_day": False,
+                "start_anchor": {
+                    "anchor_kind": "local_instant",
+                    "local_date": "2026-07-25",
+                    "local_time": "08:00",
+                    "timezone": "America/Denver",
+                    "recurrence_rule": "freq=daily",
+                },
+                "end_anchor": {
+                    "anchor_kind": "local_instant",
+                    "local_date": "2026-07-25",
+                    "local_time": "08:30",
+                    "timezone": "America/Denver",
+                },
+            },
+            self.context,
+        )
+
+        self.assertTrue(created["ok"])
+        self.assertEqual(
+            created["event_detail"]["start_anchor"]["recurrence_rule"],
+            "FREQ=DAILY;INTERVAL=1",
+        )
+        rows_before_expansion = {
+            table: self.connection.execute(f"SELECT COUNT(*) FROM {table}").fetchone()[0]
+            for table in (
+                "coordination_items",
+                "temporal_anchors",
+                "audit_log",
+                "work_instances",
+                "side_effect_attempts",
+            )
+        }
+        expanded = handle(
+            "item.occurrences",
+            {
+                "item_id": created["item_id"],
+                "range_start_local_date": "2026-07-27",
+                "range_end_local_date": "2026-07-30",
+            },
+            self.context,
+        )
+        rows_after_expansion = {
+            table: self.connection.execute(f"SELECT COUNT(*) FROM {table}").fetchone()[0]
+            for table in rows_before_expansion
+        }
+
+        self.assertTrue(expanded["ok"])
+        self.assertEqual(rows_after_expansion, rows_before_expansion)
+        self.assertEqual(expanded["recurrence_rule"], "FREQ=DAILY;INTERVAL=1")
+        self.assertEqual(
+            [
+                row["occurrence_event_detail"]["start_anchor"]["local_date"]
+                for row in expanded["occurrences"]
+            ],
+            ["2026-07-27", "2026-07-28", "2026-07-29"],
+        )
+        self.assertEqual(
+            expanded["occurrences"][0]["occurrence_event_detail"]["end_anchor"]["local_date"],
+            "2026-07-27",
+        )
+        self.assertNotIn("event_detail", expanded["occurrences"][0])
+        self.assertNotIn(
+            "anchor_id",
+            expanded["occurrences"][0]["occurrence_event_detail"]["start_anchor"],
+        )
+        overlap = handle(
+            "item.occurrences",
+            {
+                "item_id": created["item_id"],
+                "range_start_local_date": "2026-07-28",
+                "range_end_local_date": "2026-07-29",
+            },
+            self.context,
+        )
+        self.assertEqual(
+            expanded["occurrences"][1]["occurrence_id"],
+            overlap["occurrences"][0]["occurrence_id"],
+        )
+
+    def test_equivalent_recurring_event_reschedule_is_a_noop(self) -> None:
+        created = handle(
+            "event.create",
+            {
+                **event_request("cmd-recurring-noop-create"),
+                "start_anchor": {
+                    "anchor_kind": "local_instant",
+                    "local_date": "2026-07-25",
+                    "local_time": "08:00",
+                    "timezone": "America/Denver",
+                    "recurrence_rule": "FREQ=DAILY",
+                },
+            },
+            self.context,
+        )
+
+        response = handle(
+            "event.reschedule",
+            {
+                "command_id": "cmd-recurring-noop-reschedule",
+                "actor_subject_id": "agent",
+                "item_id": created["item_id"],
+                "target_version": 1,
+                "rescheduled_at_utc": "2026-07-25T12:05:00Z",
+                "all_day": False,
+                "start_anchor": {
+                    "anchor_kind": "local_instant",
+                    "local_date": "2026-07-25",
+                    "local_time": "08:00",
+                    "timezone": "America/Denver",
+                    "recurrence_rule": "freq=daily;interval=1",
+                },
+            },
+            self.context,
+        )
+
+        self.assertTrue(response["ok"])
+        self.assertFalse(response["rescheduled"])
+        self.assertEqual(response["current_version"], "1")
+        self.assertEqual(
+            self.connection.execute(
+                "SELECT COUNT(*) FROM temporal_anchors"
+            ).fetchone()[0],
+            1,
+        )
+
+    def test_daily_task_due_recurrence_and_count_are_queryable(self) -> None:
+        created = handle(
+            "task.create",
+            {
+                **task_request("cmd-daily-task"),
+                "due_anchor": {
+                    "anchor_kind": "local_instant",
+                    "local_date": "2026-07-25",
+                    "local_time": "08:00",
+                    "timezone": "America/Denver",
+                    "recurrence_rule": "FREQ=DAILY;COUNT=2",
+                },
+            },
+            self.context,
+        )
+        expanded = handle(
+            "item.occurrences",
+            {
+                "item_id": created["item_id"],
+                "range_start_local_date": "2026-07-01",
+                "range_end_local_date": "2026-08-01",
+                "limit": "10",
+            },
+            self.context,
+        )
+
+        self.assertTrue(expanded["ok"])
+        self.assertEqual(len(expanded["occurrences"]), 2)
+        self.assertTrue(all(row["virtual"] for row in expanded["occurrences"]))
+        self.assertEqual(
+            expanded["occurrences"][1]["occurrence_task_detail"]["due_anchor"]["local_date"],
+            "2026-07-26",
+        )
+        self.assertNotIn("task_detail", expanded["occurrences"][1])
+
+    def test_recurrence_rejects_unsupported_rules_and_anchor_roles(self) -> None:
+        weekly = handle(
+            "event.create",
+            {
+                **event_request("cmd-weekly-not-yet"),
+                "start_anchor": {
+                    "anchor_kind": "local_instant",
+                    "local_date": "2026-07-25",
+                    "local_time": "08:00",
+                    "timezone": "America/Denver",
+                    "recurrence_rule": "FREQ=WEEKLY",
+                },
+            },
+            self.context,
+        )
+        recurring_end = handle(
+            "event.create",
+            {
+                **event_request("cmd-recurring-end"),
+                "end_anchor": {
+                    "anchor_kind": "local_instant",
+                    "local_date": "2026-07-25",
+                    "local_time": "09:00",
+                    "timezone": "America/Denver",
+                    "recurrence_rule": "FREQ=DAILY",
+                },
+            },
+            self.context,
+        )
+        utc_recurrence = handle(
+            "event.create",
+            {
+                **event_request("cmd-utc-recurrence"),
+                "start_anchor": {
+                    "anchor_kind": "instant_utc",
+                    "utc_instant": "2026-07-25T14:00:00Z",
+                    "recurrence_rule": "FREQ=DAILY",
+                },
+            },
+            self.context,
+        )
+
+        self.assertEqual(weekly["error"]["field"], "start_anchor.recurrence_rule")
+        self.assertEqual(recurring_end["error"]["field"], "end_anchor.recurrence_rule")
+        self.assertEqual(utc_recurrence["error"]["field"], "start_anchor.recurrence_rule")
+
+    def test_recurrence_rejects_a_nonexistent_seed_time_without_partial_write(self) -> None:
+        baseline_items = self.connection.execute(
+            "SELECT COUNT(*) FROM coordination_items"
+        ).fetchone()[0]
+
+        response = handle(
+            "event.create",
+            {
+                **event_request("cmd-dst-gap-seed"),
+                "start_anchor": {
+                    "anchor_kind": "local_instant",
+                    "local_date": "2026-03-08",
+                    "local_time": "02:30",
+                    "timezone": "America/Denver",
+                    "recurrence_rule": "FREQ=DAILY",
+                },
+            },
+            self.context,
+        )
+
+        item_count = self.connection.execute(
+            "SELECT COUNT(*) FROM coordination_items"
+        ).fetchone()[0]
+        self.assertFalse(response["ok"])
+        self.assertEqual(response["error"]["code"], "invalid_request")
+        self.assertEqual(item_count, baseline_items)
+
+    def test_occurrence_query_requires_configured_recurrence(self) -> None:
+        created = handle("event.create", event_request("cmd-single-event"), self.context)
+
+        response = handle(
+            "item.occurrences",
+            {
+                "item_id": created["item_id"],
+                "range_start_local_date": "2026-07-25",
+                "range_end_local_date": "2026-07-26",
+            },
+            self.context,
+        )
+
+        self.assertFalse(response["ok"])
+        self.assertEqual(response["error"]["code"], "invalid_request")
 
     def test_item_list_rejects_status_with_include_archived(self) -> None:
         response = handle("item.list", {"status": "active", "include_archived": False}, self.context)
@@ -1443,6 +1702,41 @@ def build_mvp_fixture_responses() -> dict[str, object]:
     task = record("task_create.json", "task.create", fixture_task_request("cmd-fixture-task-create"))
     record("item_show_event.json", "item.show", {"item_id": event["item_id"]})
     record("item_list_event.json", "item.list", {"item_type": "event"})
+    recurring_event = record(
+        "recurring_event_source_create.json",
+        "event.create",
+        {
+            "command_id": "cmd-fixture-recurring-event",
+            "actor_subject_id": "agent",
+            "created_at_utc": "2026-07-25T12:00:00Z",
+            "title": "Daily standup",
+            "all_day": False,
+            "start_anchor": {
+                "anchor_kind": "local_instant",
+                "local_date": "2026-07-25",
+                "local_time": "08:00",
+                "timezone": "America/Denver",
+                "recurrence_rule": "FREQ=DAILY",
+            },
+            "end_anchor": {
+                "anchor_kind": "local_instant",
+                "local_date": "2026-07-25",
+                "local_time": "08:30",
+                "timezone": "America/Denver",
+            },
+        },
+    )
+    record(
+        "item_occurrences_daily.json",
+        "item.occurrences",
+        {
+            "item_id": recurring_event["item_id"],
+            "range_start_local_date": "2026-07-27",
+            "range_end_local_date": "2026-07-30",
+            "limit": "3",
+        },
+    )
+    responses.pop("recurring_event_source_create.json")
     record(
         "event_update.json",
         "event.update",
