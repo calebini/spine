@@ -2,6 +2,7 @@
 
 Status: Planning guide  
 Scope: Practical build sequence for moving Spine from seed specs to executable behavior
+Last reconciled with repository state: 2026-08-06
 
 This document is a working implementation plan, not a normative spec. If it conflicts with `specs/`, the specs win. Update this plan as implementation teaches us better sequencing.
 
@@ -51,10 +52,17 @@ Already in place:
 - Provider-agnostic internal services for item commands, reminder work generation, work eligibility, projection planning, and pre-write attempt gates.
 - Initial Tickerd work adapter, active processor outcome handling, bounded observe-only runtime command, and foreground Tickerd runner with file lock, owner, health, and event outputs.
 - A small `src/spine/protocols/` surface for the Tickerd shapes Spine consumes while Tickerd packaging remains unsettled.
+- Agent-facing command contracts, golden command-response fixtures, and schema-backed contract tests.
+- The canonical flexible-recurrence authority in `specs/recurrence.md`, aligned ontology and command contracts, five public recurrence JSON Schemas, a fixture manifest, and structural contract fixtures.
+- A bounded daily local recurrence runtime slice with `INTERVAL` and `COUNT`, virtual `item.occurrences` reads, SQLite enforcement, migration coverage, and operator examples.
+- Two bounded Whetstone consistency audits over the flexible recurrence contract family; the verification audit preserved the intended boundary and reported no blocker or major findings. Its two minor artifact clarifications were applied manually.
 
 Not yet in place:
 
-- Public contracts or vendor adapters.
+- Canonical structured recurrence-set persistence in runtime. The implemented daily slice still uses the narrow `temporal_anchors.recurrence_rule` text field and its earlier occurrence request/response surface.
+- Runtime conformance with the flexible recurrence contract: recurrence revisions, normalized segments and rules, canonical recurrence identities and hashes, the `spine.item-occurrences.recurrence.v1` response, additional time bases/frequencies, instance exceptions, series edits, and occurrence provenance remain unimplemented.
+- Computed recurrence preimage-and-digest conformance vectors. Current recurrence fixtures are structural examples and intentionally contain placeholder hash-like values.
+- Broad vendor adapters beyond the current narrow OpenClaw replacement path.
 - A packaged tickerd dependency declaration; local integration currently runs against the sibling tickerd repo while packaging is settled.
 
 ## Build Strategy
@@ -71,6 +79,122 @@ Implement inside-out:
 8. Foreman/Threshold approval boundary and broader vendor adapters.
 
 Avoid starting with adapters, dashboards, or automation. Those should consume Spine truth only after Spine can create, version, validate, and audit its own canonical records.
+
+The numbered stages below record the broader inside-out build strategy. Stages 1 through 10 have meaningful implemented slices; they are no longer a literal sequential queue. The active implementation queue is the recurrence track below, followed by the remaining production-replacement and governance work.
+
+## Current Execution Track: Canonical Flexible Recurrence
+
+Normative authority:
+
+- `specs/recurrence.md` owns recurrence normalization, identity, expansion, mutation, and occurrence-provenance semantics.
+- `specs/ontology.md` owns persistence authority and immutable lifecycle boundaries.
+- `specs/agent-command-contract.md` owns public authoring, occurrence-read, and mutation-command surfaces.
+- `contracts/schemas/recurrence-*.schema.json` defines the machine-readable shapes. Structural fixtures do not replace the normative specs.
+
+Current seam:
+
+- The implemented daily runtime proves useful behavior for local `FREQ=DAILY` schedules with optional `INTERVAL` and `COUNT`.
+- That slice stores an RRULE-like text value on `temporal_anchors.recurrence_rule` and returns the earlier `item.occurrences` shape.
+- The canonical contract instead requires structured recurrence sets, immutable revisions, normalized segments and children, deterministic identities/hashes, canonical range facts, and `spine.item-occurrences.recurrence.v1`.
+- Do not add weekly, monthly, yearly, UTC, exception, or series-edit behavior to the narrow text representation. The next runtime work must cut over to the canonical model.
+- Spine recurrence is greenfield. Do not introduce dual-write, fallback-read, legacy profile, or compatibility-layer behavior. Repository schema migrations remain required for deterministic local-ledger evolution, but they must produce one active recurrence model.
+
+### Recurrence Milestone R1: Canonical persistence and structured authoring
+
+Purpose: establish the durable aggregate before expanding feature breadth.
+
+Implement one reviewable vertical slice:
+
+- Add only the persistence records used by the slice: recurrence sets, recurrence revisions, recurrence segments, and recurrence rules. Add later child/provenance tables when executable behavior needs them.
+- Bind recurrence-bearing event start and task due anchors through `recurrence_set_id`; recurrence remains forbidden on event end, task defer-until, notification trigger, and other anchor roles.
+- Accept `spine.recurrence-authoring.v1` at the three approved command paths.
+- Normalize the default segment, default interval, rule status, empty child collections, selector defaults used by the implemented subset, and recurrence version constants.
+- Derive and persist the canonical recurrence-set id, normalized-set hash, revision id, segment id, and rule id in the normative derivation order.
+- Initially implement `local_instant` and `local_date` `DAILY` rules with positive `interval` plus `unbounded` and `count` end conditions. Reject `until`, `instant_utc`, other frequencies, selectors, rdates, explicit segments, exclusions, overrides, and recurrence mutation commands with the contract-defined fail-closed ordering.
+- Make event/task creation, recurrence persistence, audit evidence, and command receipt atomic. Dry runs return the same deterministic would-be identities and persist nothing.
+- Remove the narrow recurrence text field from active authoring and read paths; do not preserve it as an alternate source of truth.
+
+Tests and vectors:
+
+- End-to-end event and task authoring with daily local recurrence.
+- Primary-use example: every three days at 08:00 in an IANA timezone.
+- Default interval and explicit interval normalization.
+- Count and unbounded end conditions.
+- Deterministic generated identities, normalized hash, replay, dry run, rollback, and command-id collision behavior.
+- Fail-closed rejection for each not-yet-implemented canonical field in the specified validation order.
+- First computed canonical-JSON preimage-and-digest vectors for every identity/hash implemented in this slice; replace placeholder values only for fixtures promoted to computed conformance vectors.
+
+Exit criteria:
+
+- Newly authored recurrence exists only as the canonical recurrence aggregate.
+- No runtime path reads or writes `temporal_anchors.recurrence_rule` as recurrence truth.
+- Two fresh ledgers given the same command produce byte-identical recurrence identities and hashes.
+- The every-three-days-at-08:00 recurrence is inspectable as normalized persisted truth before expansion.
+
+### Recurrence Milestone R2: Canonical bounded daily expansion
+
+Purpose: satisfy the primary daily-use flow through the new contract surface.
+
+Steps:
+
+- Replace the earlier local-date-only range request with canonical inclusive `range_start`, exclusive `range_end`, decimal-string `limit`, optional cursor, `range_basis`, and diagnostics fields.
+- Read only the current persisted recurrence revision and normalized children.
+- Emit the exact `spine.item-occurrences.recurrence.v1` response, including item/source freshness, recurrence identities, range facts, source evidence, lifecycle, actionability, and timezone resolution.
+- Implement `range_basis=original_schedule` first. Reject `expressed_time` until move overrides exist.
+- Omit nonexistent DST local candidates, choose the earliest valid UTC instant for ambiguous local values, and bind the pinned timezone database version.
+- Implement deterministic cursor creation/validation and remove ordinal and `truncated` from the public recurrence response.
+- Keep expansion read-only: no recurrence rows, provenance, work, attempts, projections, or audit facts are written.
+
+Acceptance flow:
+
+1. Create an event or task recurring every three days at 08:00 in a named timezone.
+2. Inspect its canonical recurrence set and revision.
+3. Expand a bounded range spanning a DST transition.
+4. Verify deterministic original occurrences, timezone resolution, occurrence keys/ids, cursor behavior, and an empty second page where applicable.
+
+### Recurrence Milestone R3: Remaining time bases and rule termination
+
+- Add `instant_utc` recurrence without timezone facts.
+- Complete `local_date` response behavior if any portion was deferred from R1/R2.
+- Add inclusive `until` handling in every supported time basis.
+- Add computed conformance vectors for time-basis validation, UTC fixed-instant behavior, DST resolution, and termination precedence.
+
+### Recurrence Milestone R4: Weekly schedules
+
+- Add `WEEKLY`, `by_weekday`, `week_start`, seed-weekday defaulting, and interval-aligned week periods.
+- Cover weekdays selected in different request order, default and non-default week starts, multi-week intervals, duplicate collapse, and pagination.
+
+### Recurrence Milestone R5: Monthly and yearly schedules
+
+- Add positive and negative `by_month_day`, `by_month`, `by_weekday`, and `by_set_position` under the closed selector-family rules.
+- Cover invalid-date omission, seed-derived defaults, year-period set positioning, and deterministic selector ordering.
+
+### Recurrence Milestone R6: Explicit inclusions and instance mutation
+
+- Add rdate persistence and source union/collapse.
+- Implement `recurrence.instance.add`, `recurrence.instance.remove`, and `recurrence.instance.override` with their closed request, effect, replay, and no-op contracts.
+- Add exdate and override persistence only when these commands become executable.
+- Add `range_basis=expressed_time` together with move overrides and cursor invalidation tests.
+
+### Recurrence Milestone R7: Series mutation and lineage
+
+- Implement `recurrence.series.edit` for `one`, `this_and_following`, and `whole_series`.
+- Add immutable lineage records, target-key resolution, segment splitting, `COUNT` subtraction, complete-replacement array semantics, and multi-segment validation.
+- Require atomic item-version and recurrence-revision advancement for changed recurrence truth.
+
+### Recurrence Milestone R8: Occurrence provenance and side-effect guards
+
+- Add occurrence-provenance persistence and `occurrence_provenance.regenerate`.
+- Implement active-slot replacement, stale-row supersession, unresolved-range reports, report resolution, and the closed regenerate effect enum.
+- Make recurrence-bound work, projections, reminders, candidate actions, and adapter starts fail closed on absent or stale occurrence provenance.
+- Preserve `side_effect_attempts` as the one canonical adapter-result/send ledger.
+
+### Recurrence Milestone R9: Contract declaration
+
+- Complete every required preimage-and-digest vector family from `specs/recurrence.md`.
+- Validate all JSON Schemas and fixtures with a full Draft 2020-12 validator in addition to focused local contract tests.
+- Declare implemented recurrence contract and normalization versions only for a runtime that passes the full required vector corpus.
+- Consider freeze-manifest promotion only after another component or release boundary depends on these exact artifacts.
 
 ## Stage 1: Runtime Scaffold
 
@@ -492,9 +616,16 @@ Exit criteria:
 
 - One adapter can perform a bounded side effect with full attempt accounting and replay evidence.
 
-## Stage 13: Contracts and Freeze Manifest
+## Stage 13: Contract Ratification and Freeze Manifest
 
-Purpose: promote stable public surfaces only when they deserve compatibility promises.
+Purpose: maintain the public contract families that now exist and promote exact artifacts only when they deserve frozen compatibility promises.
+
+Current state:
+
+- Human-readable command and recurrence contracts exist under `specs/`.
+- Machine-readable command and recurrence schemas/manifests exist under `contracts/` with executable fixtures and tests.
+- These surfaces remain draft contracts unless their owning spec and runtime version declarations say otherwise.
+- No recurrence freeze manifest should be created while the runtime implements only a partial slice.
 
 Triggers:
 
@@ -505,9 +636,10 @@ Triggers:
 
 Steps:
 
-- Add `contracts/` only for machine-readable public agreements.
+- Keep `contracts/` limited to machine-readable public agreements and keep semantic authority in `specs/`.
 - Add stable public protocols only when importable interfaces exist.
-- Add contract tests for promoted contracts.
+- Add or update contract tests with every public shape change.
+- Keep runtime support declarations narrower than the complete recurrence contract until the required behavior and vector families exist.
 - Introduce a freeze manifest only when there is at least one release-critical public artifact to pin.
 - Implement the lightweight freeze verifier from `specs/SPINE_SPEC_VERSIONING_AND_FREEZE_POLICY.md`.
 
@@ -545,11 +677,13 @@ Exit criteria:
 - Do not start with a daemon.
 - Do not start with Google Calendar or messenger writes.
 - Do not create a second adapter-result ledger.
-- Do not add a full contract/freezing system before public contracts exist.
+- Do not freeze draft recurrence artifacts before runtime conformance and computed vectors exist.
+- Do not extend flexible recurrence on top of the narrow RRULE-like persistence field.
+- Do not add a recurrence compatibility layer or dual source of truth for greenfield Spine data.
 - Do not build a broad web app before the local ledger can create and version records.
 - Do not make every planned future package directory before behavior exists.
 
-## First Three Checkpoints
+## Foundational Checkpoints (Complete)
 
 Checkpoint 1: package and deterministic primitives
 
@@ -576,4 +710,30 @@ Checkpoint 4: version mutation workflows
 - event/task status transitions
 - stale target rejection
 
-After these checkpoints, Spine has broken ground for real: it can persist canonical coordination truth, prove deterministic identity, and reject invalid state without relying on external systems.
+These checkpoints are complete. Spine can persist canonical coordination truth, prove deterministic identity, and reject invalid state without relying on external systems.
+
+## Next Three Checkpoints
+
+Checkpoint R1: canonical recurrence persistence
+
+- structured recurrence authoring on approved event/task anchor paths
+- recurrence set, revision, default segment, and daily rule persistence
+- deterministic recurrence ids and normalized hash
+- every-three-days-at-08:00 authoring fixture and computed vectors
+- no active runtime read/write of the narrow recurrence text field
+
+Checkpoint R2: canonical bounded daily expansion
+
+- canonical range request and `spine.item-occurrences.recurrence.v1` response
+- DST omission and ambiguity resolution
+- deterministic occurrence identities, source evidence, actionability, and cursor behavior
+- explicit rejection of unimplemented time bases, frequencies, selectors, exceptions, and range modes
+
+Checkpoint R3: flexible rule breadth
+
+- fixed UTC and remaining local-date behavior
+- inclusive `until`
+- weekly selected weekdays and week alignment
+- monthly/yearly selectors only after the weekly and time-basis vectors are stable
+
+After R1 and R2, Spine will satisfy the primary recurring-daily workflow on the canonical model rather than on a provisional representation. R3 then broadens schedule expression without changing persistence or public identity semantics.
