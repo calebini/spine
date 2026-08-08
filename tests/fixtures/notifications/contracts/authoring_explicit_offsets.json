@@ -1,0 +1,25 @@
+{
+  "authoring_contract": "spine.notification-schedule-authoring.v1",
+  "target": {
+    "anchor_role": "task_due",
+    "application_scope": "item"
+  },
+  "schedule": {
+    "kind": "offsets",
+    "at": [
+      {
+        "kind": "target_offset",
+        "offset_basis": "elapsed",
+        "offset_seconds": "-86400"
+      },
+      {
+        "kind": "target_offset",
+        "offset_basis": "elapsed",
+        "offset_seconds": "-3600"
+      }
+    ]
+  },
+  "late_handling": {
+    "kind": "skip"
+  }
+}

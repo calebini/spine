@@ -7,7 +7,7 @@ from pathlib import Path
 
 from spine.ledger import connect, get_side_effect_attempt, get_work_instance
 from spine.runtime.openclaw_smoke import OpenClawSmokePaths, main, run_openclaw_smoke
-from spine.runtime.seed_demo import DEMO_WORK_INSTANCE_ID, seed_demo_ledger
+from spine.runtime.seed_demo import seed_demo_ledger
 
 try:
     import tickerd  # noqa: F401
@@ -36,7 +36,8 @@ class OpenClawSmokeRuntimeTests(unittest.TestCase):
             state_dir = root / "state"
             connection = connect(db_path)
             try:
-                seed_demo_ledger(connection)
+                seeded = seed_demo_ledger(connection)
+                work_id = str(seeded["work_instance_id"])
                 result = run_openclaw_smoke(
                     connection,
                     state_dir=state_dir,
@@ -44,10 +45,10 @@ class OpenClawSmokeRuntimeTests(unittest.TestCase):
                     max_cycles=1,
                     install_signal_handlers=False,
                 )
-                work = get_work_instance(connection, DEMO_WORK_INSTANCE_ID)
+                work = get_work_instance(connection, work_id)
                 attempt = get_side_effect_attempt(
                     connection,
-                    f"openclaw-attempt-{DEMO_WORK_INSTANCE_ID}-1",
+                    f"openclaw-attempt-{work_id}-1",
                 )
             finally:
                 connection.close()
@@ -63,13 +64,13 @@ class OpenClawSmokeRuntimeTests(unittest.TestCase):
             self.assertEqual(attempt["reason_code"], "openclaw_delivered")
             self.assertEqual(
                 attempt["provider_ref"],
-                f"fake-openclaw:{DEMO_WORK_INSTANCE_ID}:openclaw-attempt-{DEMO_WORK_INSTANCE_ID}-1",
+                f"fake-openclaw:{work_id}:openclaw-attempt-{work_id}-1",
             )
 
             sends = [json.loads(line) for line in paths.sends_path.read_text(encoding="utf-8").splitlines()]
             self.assertEqual(len(sends), 1)
             self.assertEqual(sends[0]["event"], "openclaw_fake_send")
-            self.assertEqual(sends[0]["delivery_id"], DEMO_WORK_INSTANCE_ID)
+            self.assertEqual(sends[0]["delivery_id"], work_id)
             self.assertEqual(sends[0]["fake_result"], "delivered")
 
             events = [json.loads(line) for line in paths.runner.events_path.read_text(encoding="utf-8").splitlines()]

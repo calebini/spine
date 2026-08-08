@@ -3,9 +3,12 @@
 from __future__ import annotations
 
 import sqlite3
+from contextlib import nullcontext
 from dataclasses import dataclass
+from typing import NoReturn
 
 from spine.core import SpineValidationError
+from spine.core.schedule import resolve_local_instant
 from spine.ledger.common import enum_value, new_id, require_non_empty, require_optional_utc_z, require_utc_z
 from spine.models.enums import (
     EventStatus,
@@ -47,6 +50,15 @@ def create_work_instance(
     work_instance_id: str | None = None,
     notification_policy_id: str | None = None,
     notification_policy_item_version: int | None = None,
+    notification_intent_id: str | None = None,
+    notification_opportunity_id: str | None = None,
+    normalized_notification_schedule_hash: str | None = None,
+    occurrence_provenance_id: str | None = None,
+    target_anchor_role: str | None = None,
+    application_scope: str | None = None,
+    target_scheduled_fact: str | None = None,
+    target_at_utc: str | None = None,
+    occurrence_key: str | None = None,
     delivery_target_id: str | None = None,
     source_work_instance_id: str | None = None,
     generation_source_kind: GenerationSourceKind | str | None = None,
@@ -60,6 +72,7 @@ def create_work_instance(
     next_attempt_at_utc: str | None = None,
     reason_code: str | None = None,
     updated_at_utc: str | None = None,
+    manage_transaction: bool = True,
 ) -> CreatedWorkInstance:
     """Create a durable generated work row without executing side effects."""
 
@@ -72,18 +85,22 @@ def create_work_instance(
     if updated_at_utc is not None:
         require_utc_z("updated_at_utc", updated_at_utc)
     try:
-        with connection:
+        with connection if manage_transaction else nullcontext():
             connection.execute(
                 """
                 INSERT INTO work_instances (
                   work_instance_id, item_id, item_version, notification_policy_id,
-                  notification_policy_item_version, delivery_target_id, source_work_instance_id,
+                  notification_policy_item_version, notification_intent_id,
+                  notification_opportunity_id, normalized_notification_schedule_hash,
+                  occurrence_provenance_id, target_anchor_role, application_scope,
+                  target_scheduled_fact, target_at_utc, occurrence_key,
+                  delivery_target_id, source_work_instance_id,
                   generation_source_kind, generation_source_ref, work_subject_ref,
                   work_kind, purpose_detail_ref, policy_basis_ref, eligible_at_utc,
                   status, attempt_count, next_attempt_at_utc, reason_code, created_at_utc,
                   updated_at_utc
                 )
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 (
                     work_instance_id,
@@ -91,6 +108,15 @@ def create_work_instance(
                     item_version,
                     notification_policy_id,
                     notification_policy_item_version,
+                    notification_intent_id,
+                    notification_opportunity_id,
+                    normalized_notification_schedule_hash,
+                    occurrence_provenance_id,
+                    target_anchor_role,
+                    application_scope,
+                    target_scheduled_fact,
+                    target_at_utc,
+                    occurrence_key,
                     delivery_target_id,
                     source_work_instance_id,
                     enum_value(generation_source_kind) if generation_source_kind is not None else None,
@@ -243,16 +269,10 @@ def cancel_work_instance(
 def assert_work_instance_not_stale(connection: sqlite3.Connection, work_instance_id: str) -> None:
     row = connection.execute(
         """
-        SELECT w.item_version, w.work_kind, w.notification_policy_id,
-               i.current_version, i.status AS item_status, i.item_type,
-               p.status AS notification_policy_status,
+        SELECT w.*, i.current_version, i.status AS item_status, i.item_type,
                ed.event_status, td.task_status
         FROM work_instances AS w
         JOIN coordination_items AS i ON i.item_id = w.item_id
-        LEFT JOIN notification_policies AS p
-          ON p.policy_id = w.notification_policy_id
-         AND p.item_id = w.item_id
-         AND p.version = w.notification_policy_item_version
         LEFT JOIN event_details AS ed
           ON i.item_type = 'event'
          AND ed.item_id = i.item_id
@@ -268,23 +288,137 @@ def assert_work_instance_not_stale(connection: sqlite3.Connection, work_instance
     if row is None:
         raise SpineValidationError("work_instance_not_found", f"work instance not found: {work_instance_id}")
 
-    is_policy_reminder = (
-        row["work_kind"] == WorkKind.NOTIFICATION_REMINDER.value
-        and row["notification_policy_id"] is not None
-    )
-    if is_policy_reminder:
+    is_scheduled_notification = row["notification_opportunity_id"] is not None
+    if is_scheduled_notification:
         if row["item_status"] != ItemStatus.ACTIVE.value:
             _raise_stale_work(work_instance_id, "item is not active")
-        if row["notification_policy_status"] != NotificationPolicyStatus.ACTIVE.value:
-            _raise_stale_work(work_instance_id, "notification policy is not active")
         if row["item_type"] == ItemType.EVENT.value and row["event_status"] != EventStatus.SCHEDULED.value:
             _raise_stale_work(work_instance_id, "event is not scheduled")
         if row["item_type"] == ItemType.TASK.value and row["task_status"] != TaskStatus.OPEN.value:
             _raise_stale_work(work_instance_id, "task is not open")
+        policy = connection.execute(
+            """
+            SELECT p.*, dt.status AS delivery_target_status,
+                   dt.channel AS delivery_target_channel,
+                   dt.owner_kind AS delivery_target_owner_kind,
+                   dt.owner_subject_id AS delivery_target_owner_subject_id,
+                   dt.owner_group_id AS delivery_target_owner_group_id
+            FROM notification_policies AS p
+            JOIN delivery_targets AS dt ON dt.delivery_target_id = p.delivery_target_id
+            WHERE p.item_id = ? AND p.version = ? AND p.notification_intent_id = ?
+            """,
+            (row["item_id"], row["current_version"], row["notification_intent_id"]),
+        ).fetchone()
+        if policy is None or policy["status"] != NotificationPolicyStatus.ACTIVE.value:
+            _raise_stale_work(work_instance_id, "current notification intent is not active")
+        if policy["normalized_notification_schedule_hash"] != row["normalized_notification_schedule_hash"]:
+            _raise_stale_work(work_instance_id, "notification schedule changed")
+        if (
+            policy["delivery_target_id"] != row["delivery_target_id"]
+            or policy["delivery_target_status"] != "active"
+            or policy["channel"] != policy["delivery_target_channel"]
+        ):
+            _raise_stale_work(work_instance_id, "notification route changed or became inactive")
+        if (
+            policy["target_anchor_role"] != row["target_anchor_role"]
+            or policy["application_scope"] != row["application_scope"]
+        ):
+            _raise_stale_work(work_instance_id, "notification target binding changed")
+        if policy["recipient_kind"] == "subject":
+            owner_matches = (
+                policy["delivery_target_owner_kind"] == "subject"
+                and policy["recipient_subject_id"] == policy["delivery_target_owner_subject_id"]
+            )
+        else:
+            owner_matches = (
+                policy["delivery_target_owner_kind"] == "subject_group"
+                and policy["recipient_group_id"] == policy["delivery_target_owner_group_id"]
+            )
+        if not owner_matches:
+            _raise_stale_work(work_instance_id, "notification recipient route ownership changed")
+
+        if row["application_scope"] == "item":
+            scheduled_fact, target_at_utc = _current_item_target_snapshot(connection, row)
+            if (
+                row["target_scheduled_fact"] != scheduled_fact
+                or row["target_at_utc"] != target_at_utc
+                or row["occurrence_key"] is not None
+                or row["occurrence_provenance_id"] is not None
+            ):
+                _raise_stale_work(work_instance_id, "item target changed")
+        else:
+            provenance = connection.execute(
+                """
+                SELECT op.*, rr.source_item_version AS revision_item_version
+                FROM occurrence_provenance AS op
+                JOIN recurrence_revisions AS rr
+                  ON rr.recurrence_revision_id = op.recurrence_revision_id
+                WHERE op.occurrence_provenance_id = ?
+                """,
+                (row["occurrence_provenance_id"],),
+            ).fetchone()
+            latest = connection.execute(
+                """
+                SELECT rr.recurrence_revision_id, rr.normalized_recurrence_set_hash
+                FROM recurrence_sets AS rs
+                JOIN recurrence_revisions AS rr ON rr.recurrence_set_id = rs.recurrence_set_id
+                WHERE rs.source_item_id = ? AND rr.source_item_version <= ?
+                ORDER BY rr.source_item_version DESC, rr.revision_number DESC LIMIT 1
+                """,
+                (row["item_id"], row["current_version"]),
+            ).fetchone()
+            if (
+                provenance is None
+                or latest is None
+                or provenance["management_status"] != "active"
+                or provenance["actionable"] != 1
+                or provenance["recurrence_revision_id"] != latest["recurrence_revision_id"]
+                or provenance["normalized_recurrence_set_hash"] != latest["normalized_recurrence_set_hash"]
+                or provenance["occurrence_key"] != row["occurrence_key"]
+                or provenance["expressed_scheduled_fact"] != row["target_scheduled_fact"]
+                or (provenance["timezone_utc_instant"] or (
+                    provenance["expressed_scheduled_fact"]
+                    if str(provenance["expressed_scheduled_fact"]).endswith("Z") else None
+                )) != row["target_at_utc"]
+            ):
+                _raise_stale_work(work_instance_id, "recurrence occurrence changed or is not actionable")
         return
 
     if row["item_version"] != row["current_version"]:
         _raise_stale_work(work_instance_id, "bound item version is not current")
+
+
+def _current_item_target_snapshot(
+    connection: sqlite3.Connection, work: sqlite3.Row
+) -> tuple[str, str | None]:
+    detail_table, anchor_column = (
+        ("event_details", "start_anchor_id")
+        if work["target_anchor_role"] == "event_start"
+        else ("task_details", "due_anchor_id")
+    )
+    anchor = connection.execute(
+        f"""
+        SELECT a.* FROM {detail_table} AS d
+        JOIN temporal_anchors AS a ON a.anchor_id = d.{anchor_column}
+        WHERE d.item_id = ? AND d.version = ?
+        """,
+        (work["item_id"], work["current_version"]),
+    ).fetchone()
+    if anchor is None:
+        _raise_stale_work(str(work["work_instance_id"]), "notification target anchor is unavailable")
+    if anchor["anchor_kind"] == "instant_utc":
+        return str(anchor["utc_instant"]), str(anchor["utc_instant"])
+    if anchor["anchor_kind"] == "local_date":
+        return str(anchor["local_date"]), None
+    scheduled_fact = f"{anchor['local_date']}T{anchor['local_time']}"
+    resolution = resolve_local_instant(
+        scheduled_fact,
+        timezone=str(anchor["timezone"]),
+        timezone_database_version=str(anchor["timezone_database_version"]),
+    )
+    if resolution is None:
+        _raise_stale_work(str(work["work_instance_id"]), "notification target local instant no longer resolves")
+    return scheduled_fact, resolution.utc_instant
 
 
 def get_work_instance(connection: sqlite3.Connection, work_instance_id: str) -> dict[str, object]:
@@ -343,7 +477,7 @@ def _require_reason(reason_code: str) -> None:
         raise SpineValidationError("work_outcome_rejected", "reason_code must be a non-empty string")
 
 
-def _raise_stale_work(work_instance_id: str, reason: str) -> None:
+def _raise_stale_work(work_instance_id: str, reason: str) -> NoReturn:
     raise SpineValidationError(
         "stale_work_instance",
         f"work instance is not processable ({reason}): {work_instance_id}",

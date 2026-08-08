@@ -1,0 +1,14 @@
+{
+  "manifest_version": "spine.computed-contract-vectors.v1",
+  "canonical_json_version": "spine.canonical-json.v1",
+  "vectors": [
+    {
+      "vector_id": "recurrence.every_three_days_0800.v1",
+      "fixture": "tests/fixtures/recurrence/vectors/every_three_days_0800.json"
+    },
+    {
+      "vector_id": "notification.every_hour_six_hours_before.v1",
+      "fixture": "tests/fixtures/notifications/vectors/every_hour_six_hours_before.json"
+    }
+  ]
+}

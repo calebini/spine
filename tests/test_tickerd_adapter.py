@@ -8,8 +8,11 @@ from spine.adapters import (
     WorkProcessingOutcome,
     build_work_item_payload,
 )
-from spine.ledger import NotificationPolicyInput, TemporalAnchorInput, connect, create_task_v1, get_work_instance, initialize_schema
-from spine.services import generate_notification_reminder_work, list_eligible_work
+from spine.commands import CommandContext, handle
+from spine.core import SpineValidationError
+from spine.ledger import connect, get_work_instance, initialize_schema
+from spine.services import list_eligible_work
+from tests.canonical_helpers import seed_notification_work
 
 try:
     from tickerd import CycleEnvelope, RuntimeMode, TickerdConfig
@@ -33,7 +36,18 @@ class TickerdPayloadTests(unittest.TestCase):
                 "item_version": 2,
                 "work_kind": "notification_reminder",
                 "eligible_at_utc": "2026-06-07T09:00:00Z",
-                "notification_policy_id": None,
+                "notification_policy_id": "notification-policy-1",
+                "notification_policy_item_version": 2,
+                "notification_intent_id": "notification-intent-1",
+                "notification_opportunity_id": "notification-opportunity-1",
+                "normalized_notification_schedule_hash": "a" * 64,
+                "occurrence_provenance_id": "occurrence-provenance-1",
+                "target_anchor_role": "event_start",
+                "application_scope": "each_occurrence",
+                "target_scheduled_fact": "2026-06-07T10:00:00Z",
+                "target_at_utc": "2026-06-07T10:00:00Z",
+                "occurrence_key": "occurrence-key-1",
+                "delivery_target_id": "delivery-target-1",
                 "generation_source_kind": "notification_policy",
                 "generation_source_ref": "policy-1",
                 "work_subject_ref": "subject-1",
@@ -48,7 +62,9 @@ class TickerdPayloadTests(unittest.TestCase):
         self.assertEqual(payload["work_instance_id"], "work-1")
         self.assertEqual(payload["item_id"], "item-1")
         self.assertEqual(payload["item_version"], 2)
-        self.assertNotIn("notification_policy_id", payload)
+        self.assertEqual(payload["notification_opportunity_id"], "notification-opportunity-1")
+        self.assertEqual(payload["occurrence_provenance_id"], "occurrence-provenance-1")
+        self.assertEqual(payload["delivery_target_id"], "delivery-target-1")
         self.assertNotIn("next_attempt_at_utc", payload)
 
 
@@ -57,15 +73,15 @@ class TickerdAdapterTests(unittest.TestCase):
     def setUp(self) -> None:
         self.connection = connect()
         initialize_schema(self.connection)
-        insert_subject(self.connection)
-        create_task_with_policy(self.connection)
-        generate_notification_reminder_work(
+        self.seeded = seed_notification_work(
             self.connection,
-            work_instance_id="tickerd-work",
-            notification_policy_id="tickerd-policy",
+            prefix="tickerd",
+            subject_id=SUBJECT_ID,
+            now_utc="2026-06-07T08:00:00Z",
             eligible_at_utc="2026-06-07T09:00:00Z",
-            created_at_utc=NOW,
+            title="Submit forms",
         )
+        self.work_id = str(self.seeded["work_instance_id"])
 
     def tearDown(self) -> None:
         self.connection.close()
@@ -76,9 +92,9 @@ class TickerdAdapterTests(unittest.TestCase):
         items = adapter.list_work_items(cycle_envelope(), limit=10)
 
         self.assertEqual(adapter.read_mode(), RuntimeMode.OBSERVE_ONLY)
-        self.assertEqual([item.item_id for item in items], ["tickerd-work"])
-        self.assertEqual(items[0].payload["item_id"], "tickerd-task")
-        self.assertEqual(items[0].payload["policy_basis_ref"], "tickerd-policy")
+        self.assertEqual([item.item_id for item in items], [self.work_id])
+        self.assertEqual(items[0].payload["item_id"], self.seeded["item_id"])
+        self.assertEqual(items[0].payload["notification_intent_id"], self.seeded["notification_intent_id"])
 
     def test_observe_only_processing_blocks_side_effects(self) -> None:
         adapter = SpineTickerdWorkAdapter(self.connection)
@@ -96,9 +112,75 @@ class TickerdAdapterTests(unittest.TestCase):
 
         self.assertEqual(result.reason, NO_PROCESSOR_CONFIGURED)
 
+    def test_reconcile_materializes_structured_policy_before_work_selection(self) -> None:
+        context = CommandContext(ledger=self.connection)
+        event = handle(
+            "event.create",
+            {
+                "command_id": "cmd-tickerd-horizon-event",
+                "actor_subject_id": SUBJECT_ID,
+                "created_at_utc": "2026-06-07T08:00:00Z",
+                "title": "Horizon appointment",
+                "all_day": False,
+                "start_anchor": {"anchor_kind": "instant_utc", "utc_instant": "2026-06-07T12:00:00Z"},
+            },
+            context,
+        )
+        reminder = handle(
+            "reminder.create",
+            {
+                "command_id": "cmd-tickerd-horizon-reminder",
+                "actor_subject_id": SUBJECT_ID,
+                "item_id": event["item_id"],
+                "target_version": "1",
+                "created_at_utc": "2026-06-07T08:01:00Z",
+                "recipient_kind": "subject",
+                "recipient_subject_id": SUBJECT_ID,
+                "channel": "whatsapp",
+                "delivery_target_id": "tickerd-delivery-target",
+                "notification": {
+                    "authoring_contract": "spine.notification-schedule-authoring.v1",
+                    "target": {"anchor_role": "event_start", "application_scope": "item"},
+                    "schedule": {
+                        "kind": "once",
+                        "at": {"kind": "absolute_utc", "at_utc": "2026-06-07T11:00:00Z"},
+                    },
+                    "late_handling": {"kind": "skip"},
+                },
+            },
+            context,
+        )
+        self.assertTrue(reminder["ok"], reminder)
+        self.assertEqual(
+            self.connection.execute("SELECT COUNT(*) FROM work_instances WHERE item_id = ?", (event["item_id"],)).fetchone()[0],
+            0,
+        )
+
+        adapter = SpineTickerdWorkAdapter(
+            self.connection,
+            scheduler_actor_subject_id=SUBJECT_ID,
+            materialization_horizon_seconds=86_400,
+        )
+        result = adapter.reconcile(cycle_envelope(), max_batches=1)
+
+        self.assertTrue(result.ok)
+        work = self.connection.execute("SELECT * FROM work_instances WHERE item_id = ?", (event["item_id"],)).fetchone()
+        self.assertIsNotNone(work)
+        self.assertEqual(work["eligible_at_utc"], "2026-06-07T11:00:00Z")
+        self.assertEqual(work["notification_intent_id"], reminder["notification_intent_id"])
+
+    def test_reconcile_rejects_an_unbounded_materialization_horizon(self) -> None:
+        adapter = SpineTickerdWorkAdapter(
+            self.connection,
+            scheduler_actor_subject_id=SUBJECT_ID,
+            materialization_horizon_seconds=31_622_401,
+        )
+        with self.assertRaisesRegex(SpineValidationError, "366 days"):
+            adapter.reconcile(cycle_envelope(), max_batches=1)
+
     def test_active_processor_success_marks_work_succeeded(self) -> None:
         def processor(_connection, work_row, _envelope):
-            self.assertEqual(work_row["work_instance_id"], "tickerd-work")
+            self.assertEqual(work_row["work_instance_id"], self.work_id)
             self.assertEqual(work_row["status"], "in_progress")
             self.assertEqual(work_row["attempt_count"], 1)
             return WorkProcessingOutcome.succeeded("demo_processed")
@@ -108,7 +190,7 @@ class TickerdAdapterTests(unittest.TestCase):
 
         result = adapter.process_work_item(item, cycle_envelope(), side_effects_allowed=True)
 
-        work = get_work_instance(self.connection, "tickerd-work")
+        work = get_work_instance(self.connection, self.work_id)
         self.assertEqual(result.status.value, "processed")
         self.assertEqual(work["status"], "succeeded")
         self.assertEqual(work["attempt_count"], 1)
@@ -126,7 +208,7 @@ class TickerdAdapterTests(unittest.TestCase):
 
         result = adapter.process_work_item(item, cycle_envelope(), side_effects_allowed=True)
 
-        work = get_work_instance(self.connection, "tickerd-work")
+        work = get_work_instance(self.connection, self.work_id)
         self.assertEqual(result.status.value, "processed")
         self.assertEqual(work["status"], "eligible")
         self.assertEqual(work["attempt_count"], 1)
@@ -135,7 +217,7 @@ class TickerdAdapterTests(unittest.TestCase):
         self.assertEqual(list_eligible_work(self.connection, now_utc="2026-06-07T10:29:00Z"), [])
         self.assertEqual(
             [row["work_instance_id"] for row in list_eligible_work(self.connection, now_utc="2026-06-07T10:30:00Z")],
-            ["tickerd-work"],
+            [self.work_id],
         )
 
     def test_active_processor_failure_and_cancellation_persist_reason_codes(self) -> None:
@@ -145,25 +227,27 @@ class TickerdAdapterTests(unittest.TestCase):
         adapter = SpineTickerdWorkAdapter(self.connection, runtime_mode="active", processor=failure_processor)
         item = adapter.list_work_items(cycle_envelope(), limit=10)[0]
         adapter.process_work_item(item, cycle_envelope(), side_effects_allowed=True)
-        failed = get_work_instance(self.connection, "tickerd-work")
+        failed = get_work_instance(self.connection, self.work_id)
         self.assertEqual(failed["status"], "failed")
         self.assertEqual(failed["reason_code"], "hard_failure")
 
-        generate_notification_reminder_work(
+        cancel_seed = seed_notification_work(
             self.connection,
-            work_instance_id="tickerd-work-cancel",
-            notification_policy_id="tickerd-policy",
+            prefix="tickerd-cancel",
+            subject_id=SUBJECT_ID,
+            now_utc="2026-06-07T08:00:00Z",
             eligible_at_utc="2026-06-07T09:00:00Z",
-            created_at_utc=NOW,
+            title="Cancel reminder",
         )
+        cancel_work_id = str(cancel_seed["work_instance_id"])
 
         def cancel_processor(_connection, _work_row, _envelope):
             return WorkProcessingOutcome.cancelled("policy_disabled")
 
         cancel_adapter = SpineTickerdWorkAdapter(self.connection, runtime_mode="active", processor=cancel_processor)
-        cancel_item = next(item for item in cancel_adapter.list_work_items(cycle_envelope(), limit=10) if item.item_id == "tickerd-work-cancel")
+        cancel_item = next(item for item in cancel_adapter.list_work_items(cycle_envelope(), limit=10) if item.item_id == cancel_work_id)
         cancel_adapter.process_work_item(cancel_item, cycle_envelope(), side_effects_allowed=True)
-        cancelled = get_work_instance(self.connection, "tickerd-work-cancel")
+        cancelled = get_work_instance(self.connection, cancel_work_id)
         self.assertEqual(cancelled["status"], "cancelled")
         self.assertEqual(cancelled["reason_code"], "policy_disabled")
 
@@ -176,7 +260,7 @@ class TickerdAdapterTests(unittest.TestCase):
 
         result = adapter.process_work_item(item, cycle_envelope(), side_effects_allowed=False)
 
-        work = get_work_instance(self.connection, "tickerd-work")
+        work = get_work_instance(self.connection, self.work_id)
         self.assertEqual(result.reason, SIDE_EFFECTS_BLOCKED)
         self.assertEqual(work["status"], "eligible")
         self.assertEqual(work["attempt_count"], 0)
@@ -192,41 +276,6 @@ class TickerdAdapterTests(unittest.TestCase):
                 reconciler=adapter,
             ),
             config=TickerdConfig(max_work_items_per_tick=5),
-        )
-
-
-def create_task_with_policy(connection) -> None:
-    create_task_v1(
-        connection,
-        item_id="tickerd-task",
-        audit_id="audit-tickerd-task",
-        created_at_utc=NOW,
-        created_by_subject_id=SUBJECT_ID,
-        title="Submit forms",
-        notification_policies=(
-            NotificationPolicyInput(
-                policy_id="tickerd-policy",
-                recipient_subject_id=SUBJECT_ID,
-                trigger_anchor=TemporalAnchorInput(
-                    anchor_id="tickerd-policy-trigger",
-                    anchor_kind="instant_utc",
-                    utc_instant="2026-06-07T09:00:00Z",
-                ),
-            ),
-        ),
-    )
-
-
-def insert_subject(connection) -> None:
-    with connection:
-        connection.execute(
-            """
-            INSERT INTO subjects (
-              subject_id, subject_kind, display_name, status, created_at_utc, updated_at_utc
-            )
-            VALUES (?, 'person', 'Chris', 'active', ?, ?)
-            """,
-            (SUBJECT_ID, NOW, NOW),
         )
 
 

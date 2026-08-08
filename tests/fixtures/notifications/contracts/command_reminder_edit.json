@@ -1,0 +1,18 @@
+{
+  "command": "reminder.edit",
+  "request": {
+    "command_id": "cmd_example_hourly_countdown_edit",
+    "actor_subject_id": "subject_example_owner",
+    "item_id": "item_example_event",
+    "target_version": "2",
+    "notification_intent_id": "notification_intent_example_hourly_countdown",
+    "notification_policy_id": "notification_policy_example_hourly_countdown_v1",
+    "updated_at_utc": "2026-08-07T18:10:00Z",
+    "patch": {
+      "late_handling": {
+        "kind": "deliver_within",
+        "grace_seconds": "1800"
+      }
+    }
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "command": "reminder.create",
+  "request": {
+    "command_id": "cmd_example_hourly_countdown",
+    "actor_subject_id": "subject_example_owner",
+    "item_id": "item_example_event",
+    "target_version": "1",
+    "created_at_utc": "2026-08-07T18:00:00Z",
+    "recipient_kind": "subject",
+    "recipient_subject_id": "subject_example_owner",
+    "channel": "whatsapp",
+    "delivery_target_id": "delivery_target_example_whatsapp",
+    "if_absent": true,
+    "notification": {
+      "authoring_contract": "spine.notification-schedule-authoring.v1",
+      "target": {
+        "anchor_role": "event_start",
+        "application_scope": "item"
+      },
+      "schedule": {
+        "kind": "repeat_window",
+        "start": {
+          "kind": "target_offset",
+          "offset_basis": "elapsed",
+          "offset_seconds": "-21600"
+        },
+        "stop": {
+          "kind": "target_offset",
+          "offset_basis": "elapsed",
+          "offset_seconds": "0"
+        },
+        "stop_inclusive": false,
+        "cadence": {
+          "kind": "fixed_elapsed",
+          "interval_seconds": "3600"
+        }
+      },
+      "late_handling": {
+        "kind": "deliver_within",
+        "grace_seconds": "900"
+      }
+    }
+  }
+}

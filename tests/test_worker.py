@@ -7,8 +7,8 @@ from pathlib import Path
 
 from spine.commands import CommandContext, handle
 from spine.ledger import connect, get_side_effect_attempt, get_work_instance, initialize_schema
+from spine.runtime.seed_demo import seed_demo_ledger
 from spine.runtime.worker import SpineWorkerPaths, main, run_spine_worker
-from spine.runtime.seed_demo import DEMO_WORK_INSTANCE_ID, seed_demo_ledger
 
 try:
     import tickerd  # noqa: F401
@@ -109,7 +109,7 @@ class SpineWorkerRuntimeTests(unittest.TestCase):
             state_dir = root / "state"
             connection = connect(db_path)
             try:
-                seed_demo_ledger(connection)
+                seeded = seed_demo_ledger(connection)
                 result = run_spine_worker(
                     connection,
                     state_dir=state_dir,
@@ -121,7 +121,7 @@ class SpineWorkerRuntimeTests(unittest.TestCase):
                     bindings=("openclaw",),
                     install_signal_handlers=False,
                 )
-                work = get_work_instance(connection, DEMO_WORK_INSTANCE_ID)
+                work = get_work_instance(connection, str(seeded["work_instance_id"]))
             finally:
                 connection.close()
 
@@ -140,7 +140,7 @@ class SpineWorkerRuntimeTests(unittest.TestCase):
             state_dir = root / "state"
             connection = connect(db_path)
             try:
-                seed_demo_ledger(connection)
+                seeded = seed_demo_ledger(connection)
                 result = run_spine_worker(
                     connection,
                     state_dir=state_dir,
@@ -152,11 +152,14 @@ class SpineWorkerRuntimeTests(unittest.TestCase):
                     bindings=("openclaw",),
                     install_signal_handlers=False,
                 )
-                work = get_work_instance(connection, DEMO_WORK_INSTANCE_ID)
-                attempt = get_side_effect_attempt(
-                    connection,
-                    f"openclaw-attempt-{DEMO_WORK_INSTANCE_ID}-1",
-                )
+                work_id = str(seeded["work_instance_id"])
+                work = get_work_instance(connection, work_id)
+                attempt_row = connection.execute(
+                    "SELECT attempt_id FROM side_effect_attempts WHERE work_instance_id = ?",
+                    (work_id,),
+                ).fetchone()
+                self.assertIsNotNone(attempt_row)
+                attempt = get_side_effect_attempt(connection, attempt_row["attempt_id"])
             finally:
                 connection.close()
 
@@ -181,16 +184,6 @@ class SpineWorkerRuntimeTests(unittest.TestCase):
             try:
                 initialize_schema(connection)
                 base_context = CommandContext(ledger=connection)
-                routed_context = CommandContext(
-                    ledger=connection,
-                    adapter_bindings={
-                        "openclaw": {
-                            "binding_name": "openclaw",
-                            "channel": "whatsapp",
-                            "configured": True,
-                        }
-                    },
-                )
                 self.assertTrue(
                     handle(
                         "subject.upsert",
@@ -275,11 +268,40 @@ class SpineWorkerRuntimeTests(unittest.TestCase):
                                 "recipient_group_id": "worker-multi-group",
                                 "delivery_target_id": "worker-multi-target",
                                 "channel": "whatsapp",
-                                "eligible_at_utc": eligible_at,
+                                "notification": {
+                                    "authoring_contract": "spine.notification-schedule-authoring.v1",
+                                    "target": {
+                                        "anchor_role": "event_start",
+                                        "application_scope": "item",
+                                    },
+                                    "schedule": {
+                                        "kind": "once",
+                                        "at": {"kind": "absolute_utc", "at_utc": eligible_at},
+                                    },
+                                    "late_handling": {
+                                        "kind": "deliver_within",
+                                        "grace_seconds": "86400",
+                                    },
+                                },
                             },
-                            routed_context,
+                            base_context,
                         )
                     )
+                materialized = handle(
+                    "notification_work.materialize",
+                    {
+                        "command_id": "cmd-worker-multi-materialize",
+                        "actor_subject_id": "worker-multi-agent",
+                        "item_id": event["item_id"],
+                        "target_version": "5",
+                        "materialized_at_utc": "2026-07-19T10:08:00Z",
+                        "range_start_utc": "2026-07-19T11:00:00Z",
+                        "range_end_utc": "2026-07-19T13:00:00Z",
+                        "limit": "100",
+                    },
+                    base_context,
+                )
+                self.assertTrue(materialized["ok"], materialized)
 
                 result = run_spine_worker(
                     connection,
@@ -292,7 +314,10 @@ class SpineWorkerRuntimeTests(unittest.TestCase):
                     bindings=("openclaw",),
                     install_signal_handlers=False,
                 )
-                work_rows = [get_work_instance(connection, response["work_instance_id"]) for response in reminders]
+                work_rows = [
+                    get_work_instance(connection, work_id)
+                    for work_id in materialized["created_work_instance_ids"]
+                ]
             finally:
                 connection.close()
 
@@ -300,7 +325,7 @@ class SpineWorkerRuntimeTests(unittest.TestCase):
             sends = [json.loads(line) for line in paths.sends_path.read_text(encoding="utf-8").splitlines()]
             self.assertEqual(result.exit_code, 0)
             self.assertTrue(all(response["ok"] and response["created"] for response in reminders))
-            self.assertEqual([row["item_version"] for row in work_rows], [2, 3, 4, 5])
+            self.assertEqual({row["item_version"] for row in work_rows}, {5})
             self.assertTrue(all(row["status"] == "succeeded" and row["attempt_count"] == 1 for row in work_rows))
             self.assertEqual(len(sends), 4)
             self.assertEqual({send["target_ref"] for send in sends}, {"worker-multi@g.us"})

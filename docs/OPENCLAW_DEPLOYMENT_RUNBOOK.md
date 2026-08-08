@@ -245,13 +245,6 @@ Set exactly one gateway credential in the protected env file:
 - `SPINE_OPENCLAW_GATEWAY_TOKEN`
 - `SPINE_OPENCLAW_GATEWAY_PASSWORD`
 
-Legacy Kinflow gateway env names are accepted as migration fallback:
-
-- `KINFLOW_GATEWAY_URL`
-- `KINFLOW_GATEWAY_TOKEN`
-- `KINFLOW_GATEWAY_PASSWORD`
-- `KINFLOW_GATEWAY_TIMEOUT_MS`
-
 Bounded gateway smoke:
 
 ```bash

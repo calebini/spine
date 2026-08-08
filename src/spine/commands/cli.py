@@ -36,7 +36,10 @@ def main(argv: Sequence[str] | None = None) -> int:
         _dump({"ok": False, "error": {"code": "invalid_request", "message": "--db is required", "field": "db"}}, pretty=args.pretty)
         return 3
     if not args.command_words:
-        _dump({"ok": False, "error": {"code": "unsupported_command", "message": "command is required", "field": "command"}}, pretty=args.pretty)
+        _dump(
+            {"ok": False, "error": {"code": "unsupported_command", "message": "command is required", "field": "command"}},
+            pretty=args.pretty,
+        )
         return 2
     command = ".".join(args.command_words)
     if command not in MVP_COMMANDS:
@@ -81,7 +84,9 @@ def main(argv: Sequence[str] | None = None) -> int:
             request = {**request, "command_id": _generated_command_id(command, request, args.db)}
         connection = _open_ledger(args.db, writable=not args.dry_run and command in WRITE_COMMANDS)
     except CliPreflightError as exc:
-        _dump({"ok": False, "command": command, "error": {"code": exc.code, "message": exc.message, "field": exc.field}}, pretty=args.pretty)
+        _dump(
+            {"ok": False, "command": command, "error": {"code": exc.code, "message": exc.message, "field": exc.field}}, pretty=args.pretty
+        )
         return 3
     try:
         context = CommandContext(

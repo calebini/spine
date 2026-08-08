@@ -3,8 +3,9 @@
 from __future__ import annotations
 
 import sqlite3
+from collections.abc import Callable, Mapping
 from dataclasses import dataclass
-from typing import Any, Callable, Generic, Literal, Mapping, TypeVar
+from typing import Any, Generic, Literal, TypeVar
 
 from spine.adapters.tickerd import WorkProcessingOutcome
 from spine.services import (
@@ -29,7 +30,7 @@ class SideEffectBindingError(RuntimeError):
 
 
 @dataclass(frozen=True)
-class AttemptBackedSideEffectRequest(Generic[TMessage]):
+class AttemptBackedSideEffectRequest(Generic[TMessage]):  # noqa: UP046 -- public Python 3.12 typing surface
     """Prepared side-effect message plus the attempt identity needed before send."""
 
     message: TMessage
@@ -50,7 +51,7 @@ class NormalizedSideEffectResult:
     next_attempt_at_utc: str | None = None
 
     @classmethod
-    def succeeded(cls, *, reason_code: str, provider_ref: str | None = None) -> "NormalizedSideEffectResult":
+    def succeeded(cls, *, reason_code: str, provider_ref: str | None = None) -> NormalizedSideEffectResult:
         return cls("succeeded", reason_code=reason_code, provider_ref=provider_ref)
 
     @classmethod
@@ -60,7 +61,7 @@ class NormalizedSideEffectResult:
         reason_code: str,
         next_attempt_at_utc: str,
         provider_ref: str | None = None,
-    ) -> "NormalizedSideEffectResult":
+    ) -> NormalizedSideEffectResult:
         return cls(
             "retry",
             reason_code=reason_code,
@@ -69,20 +70,20 @@ class NormalizedSideEffectResult:
         )
 
     @classmethod
-    def failed(cls, *, reason_code: str, provider_ref: str | None = None) -> "NormalizedSideEffectResult":
+    def failed(cls, *, reason_code: str, provider_ref: str | None = None) -> NormalizedSideEffectResult:
         return cls("failed", reason_code=reason_code, provider_ref=provider_ref)
 
     @classmethod
-    def rejected(cls, *, reason_code: str, provider_ref: str | None = None) -> "NormalizedSideEffectResult":
+    def rejected(cls, *, reason_code: str, provider_ref: str | None = None) -> NormalizedSideEffectResult:
         return cls("rejected", reason_code=reason_code, provider_ref=provider_ref)
 
     @classmethod
-    def cancelled(cls, *, reason_code: str, provider_ref: str | None = None) -> "NormalizedSideEffectResult":
+    def cancelled(cls, *, reason_code: str, provider_ref: str | None = None) -> NormalizedSideEffectResult:
         return cls("cancelled", reason_code=reason_code, provider_ref=provider_ref)
 
 
 @dataclass(frozen=True)
-class AttemptBackedSideEffectProcessor(Generic[TMessage]):
+class AttemptBackedSideEffectProcessor(Generic[TMessage]):  # noqa: UP046 -- public Python 3.12 typing surface
     """Tickerd work processor wrapper for any attempt-backed side effect."""
 
     adapter_name: str

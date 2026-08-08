@@ -6,9 +6,10 @@ import json
 import os
 import sqlite3
 import subprocess
+from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass
 from datetime import datetime, timedelta
-from typing import Any, Callable, Literal, Mapping, Sequence
+from typing import Any, Literal
 
 from spine.adapters.side_effects import (
     AttemptBackedSideEffectProcessor,
@@ -78,16 +79,16 @@ class OpenClawGatewayConfig:
     retry_delay_seconds: int = 300
 
     @classmethod
-    def from_env(cls, env: Mapping[str, str] | None = None) -> "OpenClawGatewayConfig":
+    def from_env(cls, env: Mapping[str, str] | None = None) -> OpenClawGatewayConfig:
         source = env or os.environ
-        timeout_raw = _env_first(source, "SPINE_OPENCLAW_GATEWAY_TIMEOUT_MS", "KINFLOW_GATEWAY_TIMEOUT_MS") or "10000"
+        timeout_raw = _env_first(source, "SPINE_OPENCLAW_GATEWAY_TIMEOUT_MS") or "10000"
         command_timeout_raw = _env_first(source, "SPINE_OPENCLAW_COMMAND_TIMEOUT_MS")
         retry_raw = _env_first(source, "SPINE_OPENCLAW_RETRY_DELAY_SECONDS") or "300"
         return cls(
             command=_env_first(source, "SPINE_OPENCLAW_COMMAND") or "openclaw",
-            gateway_url=_env_first(source, "SPINE_OPENCLAW_GATEWAY_URL", "KINFLOW_GATEWAY_URL"),
-            gateway_token=_env_first(source, "SPINE_OPENCLAW_GATEWAY_TOKEN", "KINFLOW_GATEWAY_TOKEN"),
-            gateway_password=_env_first(source, "SPINE_OPENCLAW_GATEWAY_PASSWORD", "KINFLOW_GATEWAY_PASSWORD"),
+            gateway_url=_env_first(source, "SPINE_OPENCLAW_GATEWAY_URL"),
+            gateway_token=_env_first(source, "SPINE_OPENCLAW_GATEWAY_TOKEN"),
+            gateway_password=_env_first(source, "SPINE_OPENCLAW_GATEWAY_PASSWORD"),
             gateway_timeout_ms=int(timeout_raw),
             command_timeout_ms=int(command_timeout_raw) if command_timeout_raw is not None else None,
             retry_delay_seconds=int(retry_raw),
@@ -159,19 +160,19 @@ class NormalizedOpenClawResult:
     next_attempt_at_utc: str | None = None
 
     @classmethod
-    def delivered(cls, *, provider_ref: str, reason_code: str = "openclaw_delivered") -> "NormalizedOpenClawResult":
+    def delivered(cls, *, provider_ref: str, reason_code: str = "openclaw_delivered") -> NormalizedOpenClawResult:
         return cls("delivered", reason_code=reason_code, provider_ref=provider_ref)
 
     @classmethod
-    def transient_failure(cls, *, reason_code: str, next_attempt_at_utc: str) -> "NormalizedOpenClawResult":
+    def transient_failure(cls, *, reason_code: str, next_attempt_at_utc: str) -> NormalizedOpenClawResult:
         return cls("failed_transient", reason_code=reason_code, next_attempt_at_utc=next_attempt_at_utc)
 
     @classmethod
-    def permanent_failure(cls, *, reason_code: str, provider_ref: str | None = None) -> "NormalizedOpenClawResult":
+    def permanent_failure(cls, *, reason_code: str, provider_ref: str | None = None) -> NormalizedOpenClawResult:
         return cls("failed_permanent", reason_code=reason_code, provider_ref=provider_ref)
 
     @classmethod
-    def blocked(cls, *, reason_code: str) -> "NormalizedOpenClawResult":
+    def blocked(cls, *, reason_code: str) -> NormalizedOpenClawResult:
         return cls("blocked", reason_code=reason_code)
 
 

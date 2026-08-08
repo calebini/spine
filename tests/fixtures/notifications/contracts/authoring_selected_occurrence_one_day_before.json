@@ -1,0 +1,20 @@
+{
+  "authoring_contract": "spine.notification-schedule-authoring.v1",
+  "target": {
+    "anchor_role": "event_start",
+    "application_scope": "selected_occurrence",
+    "target_occurrence_key": "occurrence_key_example_selected_event"
+  },
+  "schedule": {
+    "kind": "once",
+    "at": {
+      "kind": "target_offset",
+      "offset_basis": "calendar_days",
+      "offset_days": "-1",
+      "local_time": "08:00:00"
+    }
+  },
+  "late_handling": {
+    "kind": "skip"
+  }
+}

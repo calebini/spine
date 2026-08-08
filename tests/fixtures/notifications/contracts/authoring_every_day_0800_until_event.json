@@ -1,0 +1,32 @@
+{
+  "authoring_contract": "spine.notification-schedule-authoring.v1",
+  "target": {
+    "anchor_role": "event_start",
+    "application_scope": "item"
+  },
+  "schedule": {
+    "kind": "repeat_window",
+    "start": {
+      "kind": "absolute_utc",
+      "at_utc": "2026-08-08T00:00:00Z"
+    },
+    "stop": {
+      "kind": "target_offset",
+      "offset_basis": "elapsed",
+      "offset_seconds": "0"
+    },
+    "stop_inclusive": false,
+    "cadence": {
+      "kind": "local_calendar",
+      "frequency": "DAILY",
+      "interval": "1",
+      "seed_local_date": "2026-08-08",
+      "local_time": "08:00:00",
+      "timezone": "America/Los_Angeles",
+      "timezone_database_version": "2026a"
+    }
+  },
+  "late_handling": {
+    "kind": "skip"
+  }
+}

@@ -7,7 +7,6 @@ from importlib import resources
 from pathlib import Path
 
 from spine.core.errors import SpineValidationError
-from spine.core.recurrence import validate_daily_local_recurrence_anchor
 
 DEFAULT_BUSY_TIMEOUT_MS = 5000
 
@@ -35,7 +34,42 @@ def initialize_schema(connection: sqlite3.Connection) -> None:
     """Initialize the schema on an open SQLite connection."""
 
     connection.execute("PRAGMA foreign_keys = ON")
+    existing = connection.execute(
+        "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'ledger_schema'"
+    ).fetchone()
+    if existing is not None:
+        version = connection.execute(
+            "SELECT MAX(schema_version) FROM ledger_schema"
+        ).fetchone()[0]
+        if version == 7:
+            return
+        raise SpineValidationError(
+            "ledger_schema_requires_migration",
+            "existing ledgers must be advanced with migrate_schema",
+        )
     connection.executescript(schema_sql())
+    # The seed schema remains the compact pre-fat-slice baseline; a fresh
+    # ledger immediately crosses the same one-shot boundary as an existing
+    # empty scheduling surface so both paths receive byte-identical DDL.
+    migration = (
+        resources.files("spine.ledger.migrations")
+        .joinpath("0007_canonical_scheduling_notifications.sql")
+        .read_text(encoding="utf-8")
+    )
+    connection.execute("PRAGMA foreign_keys = OFF")
+    try:
+        try:
+            connection.executescript(migration)
+        except Exception:
+            if connection.in_transaction:
+                connection.rollback()
+            raise
+        connection.execute(
+            "INSERT INTO ledger_schema (schema_version, applied_at_utc) VALUES (7, '1970-01-01T00:00:00Z')"
+        )
+        connection.commit()
+    finally:
+        connection.execute("PRAGMA foreign_keys = ON")
 
 
 def _is_file_backed_database(database: str) -> bool:
@@ -170,95 +204,57 @@ def _assert_detail_count(
 
 
 def _assert_recurrence_contract(connection: sqlite3.Connection, *, item_id: str | None) -> None:
-    where_event = "AND e.item_id = ?" if item_id is not None else ""
-    where_task = "AND t.item_id = ?" if item_id is not None else ""
-    where_policy = "AND p.item_id = ?" if item_id is not None else ""
+    if not _table_exists(connection, "recurrence_sets"):
+        return
+    where_set = "AND rs.source_item_id = ?" if item_id is not None else ""
     params = (item_id,) if item_id is not None else ()
 
-    invalid_event = connection.execute(
+    invalid_set = connection.execute(
         f"""
-        SELECT e.item_id, e.version
-        FROM event_details AS e
-        JOIN temporal_anchors AS start ON start.anchor_id = e.start_anchor_id
-        LEFT JOIN temporal_anchors AS finish ON finish.anchor_id = e.end_anchor_id
+        SELECT rs.recurrence_set_id, rs.source_item_id
+        FROM recurrence_sets AS rs
+        JOIN temporal_anchors AS seed ON seed.anchor_id = rs.seed_anchor_id
+        JOIN coordination_items AS item ON item.item_id = rs.source_item_id
         WHERE (
-          (start.recurrence_rule IS NOT NULL AND start.anchor_kind NOT IN ('local_date', 'local_instant'))
-          OR finish.recurrence_rule IS NOT NULL
+          seed.anchor_kind != rs.time_basis
+          OR EXISTS (
+            SELECT 1 FROM event_details AS e
+            WHERE e.end_anchor_id = rs.seed_anchor_id
+          )
+          OR EXISTS (
+            SELECT 1 FROM task_details AS t
+            WHERE t.defer_until_anchor_id = rs.seed_anchor_id
+          )
+          OR NOT EXISTS (
+            SELECT 1 FROM event_details AS e
+            WHERE item.item_type = 'event'
+              AND e.item_id = rs.source_item_id
+              AND e.start_anchor_id = rs.seed_anchor_id
+            UNION ALL
+            SELECT 1 FROM task_details AS t
+            WHERE item.item_type = 'task'
+              AND t.item_id = rs.source_item_id
+              AND t.due_anchor_id = rs.seed_anchor_id
+          )
+          OR NOT EXISTS (
+            SELECT 1 FROM recurrence_revisions AS rr
+            WHERE rr.recurrence_set_id = rs.recurrence_set_id
+              AND rr.source_item_version <= item.current_version
+          )
         )
-        {where_event}
+        {where_set}
         LIMIT 1
         """,
         params,
     ).fetchone()
-    if invalid_event is not None:
+    if invalid_set is not None:
         raise SpineValidationError(
             "ledger_invalid_recurrence",
-            f"event {invalid_event['item_id']} v{invalid_event['version']} has invalid recurrence placement",
+            f"recurrence set {invalid_set['recurrence_set_id']} has invalid ownership or current revision",
         )
 
-    invalid_task = connection.execute(
-        f"""
-        SELECT t.item_id, t.version
-        FROM task_details AS t
-        LEFT JOIN temporal_anchors AS due ON due.anchor_id = t.due_anchor_id
-        LEFT JOIN temporal_anchors AS deferred ON deferred.anchor_id = t.defer_until_anchor_id
-        WHERE (
-          (due.recurrence_rule IS NOT NULL AND due.anchor_kind NOT IN ('local_date', 'local_instant'))
-          OR deferred.recurrence_rule IS NOT NULL
-        )
-        {where_task}
-        LIMIT 1
-        """,
-        params,
-    ).fetchone()
-    if invalid_task is not None:
-        raise SpineValidationError(
-            "ledger_invalid_recurrence",
-            f"task {invalid_task['item_id']} v{invalid_task['version']} has invalid recurrence placement",
-        )
 
-    invalid_policy = connection.execute(
-        f"""
-        SELECT p.item_id, p.version, p.policy_id
-        FROM notification_policies AS p
-        JOIN temporal_anchors AS trigger ON trigger.anchor_id = p.trigger_anchor_id
-        WHERE trigger.recurrence_rule IS NOT NULL
-        {where_policy}
-        LIMIT 1
-        """,
-        params,
-    ).fetchone()
-    if invalid_policy is not None:
-        raise SpineValidationError(
-            "ledger_invalid_recurrence",
-            f"notification policy {invalid_policy['policy_id']} has a recurring trigger anchor",
-        )
-
-    recurring_rows = connection.execute(
-        f"""
-        SELECT DISTINCT anchor.anchor_id, anchor.anchor_kind, anchor.local_date,
-                        anchor.local_time, anchor.timezone, anchor.recurrence_rule
-        FROM temporal_anchors AS anchor
-        LEFT JOIN event_details AS e ON e.start_anchor_id = anchor.anchor_id
-        LEFT JOIN task_details AS t ON t.due_anchor_id = anchor.anchor_id
-        WHERE anchor.recurrence_rule IS NOT NULL
-          AND (e.item_id IS NOT NULL OR t.item_id IS NOT NULL)
-          {"AND (e.item_id = ? OR t.item_id = ?)" if item_id is not None else ""}
-        ORDER BY anchor.anchor_id
-        """,
-        (item_id, item_id) if item_id is not None else (),
-    )
-    for row in recurring_rows:
-        try:
-            validate_daily_local_recurrence_anchor(
-                anchor_kind=row["anchor_kind"],
-                local_date_value=row["local_date"],
-                local_time_value=row["local_time"],
-                timezone=row["timezone"],
-                recurrence_rule=row["recurrence_rule"],
-            )
-        except SpineValidationError as exc:
-            raise SpineValidationError(
-                "ledger_invalid_recurrence",
-                f"anchor {row['anchor_id']} has invalid recurrence: {exc.message}",
-            ) from exc
+def _table_exists(connection: sqlite3.Connection, table_name: str) -> bool:
+    return connection.execute(
+        "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = ?", (table_name,)
+    ).fetchone() is not None

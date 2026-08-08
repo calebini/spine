@@ -5,7 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from spine.ledger.common import TemporalAnchorInput
-from spine.ledger.supporting import ItemLocationInput, ItemSubjectRoleInput, NotificationPolicyInput
+from spine.ledger.supporting import ItemLocationInput, ItemSubjectRoleInput
 from spine.models.enums import EventStatus, TaskStatus
 
 _UNSET = object()
@@ -30,7 +30,6 @@ class EventDraft:
     attendance_policy_ref: str | None = None
     item_locations: tuple[ItemLocationInput, ...] = ()
     subject_roles: tuple[ItemSubjectRoleInput, ...] = ()
-    notification_policies: tuple[NotificationPolicyInput, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -53,7 +52,6 @@ class TaskDraft:
     completed_by_subject_id: str | None = None
     item_locations: tuple[ItemLocationInput, ...] = ()
     subject_roles: tuple[ItemSubjectRoleInput, ...] = ()
-    notification_policies: tuple[NotificationPolicyInput, ...] = ()
 
 
 @dataclass(frozen=True)

@@ -16,10 +16,10 @@ from spine.services.attempts import (
     record_attempt_success,
 )
 from spine.services.projections import plan_projection_sync
+from spine.services.scheduling import SchedulingCycleResult, materialize_notification_horizon
 from spine.services.work import (
     cancel_work,
     fail_work,
-    generate_notification_reminder_work,
     list_eligible_work,
     require_processable_work,
     retry_work,
@@ -31,8 +31,8 @@ __all__ = [
     "AttemptGate",
     "cancel_work",
     "fail_work",
-    "generate_notification_reminder_work",
     "list_eligible_work",
+    "materialize_notification_horizon",
     "plan_projection_sync",
     "prepare_candidate_action_attempt",
     "prepare_projection_attempt",
@@ -44,4 +44,5 @@ __all__ = [
     "retry_work",
     "start_work",
     "succeed_work",
+    "SchedulingCycleResult",
 ]

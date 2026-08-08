@@ -1,6 +1,6 @@
 # Spine Architecture
 
-Status: Draft v0.1.0  
+Status: Draft v0.2.0
 Scope: Component boundaries, module posture, and runtime relationships
 
 ## 1. Architectural Doctrine
@@ -27,6 +27,7 @@ Spine owns:
 - first-class location records
 - time models and temporal anchors
 - notification policy and work eligibility
+- deterministic notification-opportunity expansion and work materialization
 - generated work instances
 - candidate actions
 - external projection records
@@ -81,6 +82,7 @@ Spine owns:
 - which work instances are eligible
 - which candidate actions exist
 - which state transitions are valid
+- how canonical notification schedules produce bounded opportunities and durable work
 
 The Spine tickerd adapter SHOULD map eligible Spine work instances to tickerd work items.
 
@@ -128,7 +130,15 @@ Adapters MUST write outcomes back as projection records, side-effect attempts, a
 
 Projection drift MUST be recoverable by replaying or reconciling from Spine truth.
 
-## 7. Suggested Future Package Boundaries
+## 7. Notification Scheduling Boundary
+
+`specs/notifications.md` owns the canonical notification-scheduling semantics. A notification policy may express one notification, explicit target-relative offsets, or a bounded repeat window. Spine expands that intent into virtual notification opportunities and materializes selected actionable opportunities as durable `work_instances` rows.
+
+Calendar notification cadence may reuse the frequency, selector, timezone-version, invalid-date, and DST-resolution semantics of `specs/recurrence.md`, but it does not create a recurrence set or store recurrence on a notification trigger anchor. Recurring-item notification policies bind to canonical item occurrences through current occurrence provenance before work is created.
+
+Tickerd may initiate bounded materialization and process eligible work. It does not own notification schedule interpretation. Repeated notification opportunities are separate work instances; adapter retries remain attempts or retry state for one work instance. No policy or opportunity may invoke an adapter directly.
+
+## 8. Suggested Future Package Boundaries
 
 Implementation directories should be added when behavior exists:
 

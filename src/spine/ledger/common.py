@@ -10,9 +10,6 @@ from enum import StrEnum
 from uuid import uuid4
 
 from spine.core import SpineValidationError
-from spine.core.recurrence import (
-    validate_daily_local_recurrence_anchor,
-)
 from spine.models.enums import TemporalAnchorKind
 
 UTC_Z_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
@@ -28,10 +25,10 @@ class TemporalAnchorInput:
     local_date: str | None = None
     local_time: str | None = None
     timezone: str | None = None
+    timezone_database_version: str | None = None
     utc_instant: str | None = None
     window_start_utc: str | None = None
     window_end_utc: str | None = None
-    recurrence_rule: str | None = None
     source: str | None = None
     created_at_utc: str | None = None
 
@@ -49,26 +46,11 @@ def insert_temporal_anchor(
     require_optional_utc_z("anchor.utc_instant", anchor.utc_instant)
     require_optional_utc_z("anchor.window_start_utc", anchor.window_start_utc)
     require_optional_utc_z("anchor.window_end_utc", anchor.window_end_utc)
-    recurrence_rule = anchor.recurrence_rule
-    if recurrence_rule is not None:
-        anchor_kind = enum_value(anchor.anchor_kind)
-        if anchor.local_date is None or anchor.timezone is None:
-            raise SpineValidationError(
-                "invalid_recurrence_anchor",
-                "a recurrence-bearing anchor requires local_date and timezone",
-            )
-        recurrence_rule = validate_daily_local_recurrence_anchor(
-            anchor_kind=anchor_kind,
-            local_date_value=anchor.local_date,
-            local_time_value=anchor.local_time,
-            timezone=anchor.timezone,
-            recurrence_rule=recurrence_rule,
-        )
     connection.execute(
         """
         INSERT INTO temporal_anchors (
-          anchor_id, anchor_kind, local_date, local_time, timezone, utc_instant,
-          window_start_utc, window_end_utc, recurrence_rule, source, created_at_utc
+          anchor_id, anchor_kind, local_date, local_time, timezone, timezone_database_version, utc_instant,
+          window_start_utc, window_end_utc, source, created_at_utc
         )
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """,
@@ -78,10 +60,10 @@ def insert_temporal_anchor(
             anchor.local_date,
             anchor.local_time,
             anchor.timezone,
+            anchor.timezone_database_version,
             anchor.utc_instant,
             anchor.window_start_utc,
             anchor.window_end_utc,
-            recurrence_rule,
             anchor.source,
             created_at_utc,
         ),

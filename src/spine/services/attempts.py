@@ -5,6 +5,7 @@ from __future__ import annotations
 import sqlite3
 from dataclasses import dataclass
 
+from spine.core.errors import SpineValidationError
 from spine.ledger import (
     CompletedAttempt,
     StartedAttempt,
@@ -13,6 +14,7 @@ from spine.ledger import (
     complete_side_effect_attempt,
     create_started_attempt,
 )
+from spine.ledger.provenance import record_stale_work_provenance_report
 from spine.models.enums import AttemptStatus
 
 
@@ -36,7 +38,24 @@ def prepare_work_attempt(
 ) -> AttemptGate:
     """Persist a started attempt for processable work before any external write."""
 
-    assert_work_instance_not_stale(connection, work_instance_id)
+    try:
+        assert_work_instance_not_stale(connection, work_instance_id)
+    except SpineValidationError as exc:
+        if exc.code != "stale_work_instance":
+            raise
+        with connection:
+            report_id = record_stale_work_provenance_report(
+                connection,
+                work_instance_id=work_instance_id,
+                operation="side_effect_attempt.start",
+                blocked_at_utc=attempted_at_utc,
+            )
+        if report_id is None:
+            raise
+        raise SpineValidationError(
+            "stale_work_instance",
+            f"{exc.message}; occurrence provenance recovery report: {report_id}",
+        ) from exc
     attempt = create_started_attempt(
         connection,
         attempt_id=attempt_id,

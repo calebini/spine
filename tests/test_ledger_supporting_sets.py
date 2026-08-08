@@ -1,6 +1,7 @@
 import sqlite3
 import unittest
 
+from spine.commands import CommandContext, handle
 from spine.core import SpineValidationError
 from spine.core.hashing import (
     coordination_item_version_intent_hash,
@@ -11,7 +12,6 @@ from spine.ledger import (
     ItemLocationInput,
     ItemSubjectRoleInput,
     LocationInput,
-    NotificationPolicyInput,
     SubjectGroupInput,
     TemporalAnchorInput,
     assert_ledger_invariants,
@@ -28,8 +28,8 @@ from spine.ledger import (
     insert_delivery_target,
     insert_subject_group,
 )
-from spine.services import generate_notification_reminder_work
-
+from spine.runtime.canonical_seed import seed_canonical_notification_work
+from tests.canonical_helpers import ensure_subject_and_route
 
 NOW = "2026-06-06T10:00:00Z"
 SUBJECT_ID = "subject-1"
@@ -180,30 +180,61 @@ class LedgerSupportingSetTests(unittest.TestCase):
         assert_ledger_invariants(self.connection)
 
     def test_create_notification_policy_as_inert_versioned_intent(self) -> None:
-        create_event_v1(
+        ensure_subject_and_route(
             self.connection,
-            item_id="event-notification",
-            audit_id="audit-event-notification",
-            created_at_utc=NOW,
-            created_by_subject_id=SUBJECT_ID,
-            title="Dentist",
-            all_day=False,
-            start_anchor=instant_anchor("event-notification-start"),
-            notification_policies=(
-                NotificationPolicyInput(
-                    policy_id="policy-event-notification",
-                    recipient_subject_id=OTHER_SUBJECT_ID,
-                    trigger_anchor=instant_anchor("policy-event-notification-trigger"),
-                    channel_preference_ref="sms",
-                ),
-            ),
+            prefix="supporting-policy",
+            subject_id=OTHER_SUBJECT_ID,
+            delivery_target_id="supporting-policy-target",
+            at_utc=NOW,
         )
+        context = CommandContext(ledger=self.connection)
+        created = handle(
+            "event.create",
+            {
+                "command_id": "cmd-supporting-policy-event",
+                "actor_subject_id": SUBJECT_ID,
+                "created_at_utc": NOW,
+                "title": "Dentist",
+                "all_day": False,
+                "start_anchor": {
+                    "anchor_kind": "instant_utc",
+                    "utc_instant": "2026-06-06T14:00:00Z",
+                },
+            },
+            context,
+        )
+        policy_created = handle(
+            "reminder.create",
+            {
+                "command_id": "cmd-supporting-policy-reminder",
+                "actor_subject_id": SUBJECT_ID,
+                "item_id": created["item_id"],
+                "target_version": "1",
+                "created_at_utc": "2026-06-06T10:01:00Z",
+                "recipient_kind": "subject",
+                "recipient_subject_id": OTHER_SUBJECT_ID,
+                "channel": "whatsapp",
+                "delivery_target_id": "supporting-policy-target",
+                "notification": {
+                    "authoring_contract": "spine.notification-schedule-authoring.v1",
+                    "target": {"anchor_role": "event_start", "application_scope": "item"},
+                    "schedule": {
+                        "kind": "once",
+                        "at": {"kind": "absolute_utc", "at_utc": "2026-06-06T13:00:00Z"},
+                    },
+                    "late_handling": {"kind": "skip"},
+                },
+            },
+            context,
+        )
+        self.assertTrue(policy_created["ok"], policy_created)
 
-        current = get_current_item(self.connection, "event-notification")
+        current = get_current_item(self.connection, str(created["item_id"]))
         self.assertEqual(len(current["notification_policies"]), 1)
         policy = current["notification_policies"][0]
         self.assertEqual(policy["recipient_subject_id"], OTHER_SUBJECT_ID)
-        self.assertEqual(policy["trigger_anchor_id"], "policy-event-notification-trigger")
+        self.assertEqual(policy["schedule"]["kind"], "once")
+        self.assertEqual(policy["notification_intent_id"], policy_created["notification_intent_id"])
         self.assertEqual(policy["status"], "active")
 
     def test_group_owned_delivery_target_and_routed_work_snapshot(self) -> None:
@@ -234,40 +265,26 @@ class LedgerSupportingSetTests(unittest.TestCase):
         self.assertEqual(target["owner_kind"], "subject_group")
         self.assertEqual(target["owner_group_id"], "stage-group")
 
-        create_task_v1(
+        seeded = seed_canonical_notification_work(
             self.connection,
-            item_id="task-routed-group",
-            audit_id="audit-task-routed-group",
-            created_at_utc=NOW,
-            created_by_subject_id=SUBJECT_ID,
+            prefix="supporting-routed-group",
+            actor_subject_id=SUBJECT_ID,
             title="Check stage group",
-            notification_policies=(
-                NotificationPolicyInput(
-                    policy_id="policy-routed-group",
-                    recipient_kind="subject_group",
-                    recipient_group_id="stage-group",
-                    trigger_anchor=instant_anchor("policy-routed-group-trigger"),
-                    channel_preference_ref="whatsapp",
-                    delivery_target_id="target-stage-whatsapp",
-                ),
-            ),
-        )
-
-        work = generate_notification_reminder_work(
-            self.connection,
-            notification_policy_id="policy-routed-group",
-            work_instance_id="work-routed-group",
-            eligible_at_utc=NOW,
-            created_at_utc=NOW,
+            delivery_target_id="target-stage-whatsapp",
+            channel="whatsapp",
+            recipient_kind="subject_group",
+            recipient_id="stage-group",
+            now_utc=NOW,
+            eligible_at_utc="2026-06-06T11:00:00Z",
         )
         row = self.connection.execute(
             "SELECT * FROM work_instances WHERE work_instance_id = ?",
-            (work.work_instance_id,),
+            (seeded["work_instance_id"],),
         ).fetchone()
         self.assertEqual(row["delivery_target_id"], "target-stage-whatsapp")
         self.assertEqual(row["work_subject_ref"], "subject_group:stage-group")
 
-    def test_group_policy_without_delivery_target_is_inert_for_work_generation(self) -> None:
+    def test_group_policy_without_delivery_target_is_rejected_at_authoring(self) -> None:
         with self.connection:
             insert_subject_group(
                 self.connection,
@@ -278,32 +295,40 @@ class LedgerSupportingSetTests(unittest.TestCase):
                 ),
                 default_created_at_utc=NOW,
             )
-        create_task_v1(
+        task = create_task_v1(
             self.connection,
             item_id="task-unrouted-group",
             audit_id="audit-task-unrouted-group",
             created_at_utc=NOW,
             created_by_subject_id=SUBJECT_ID,
             title="Unrouted group",
-            notification_policies=(
-                NotificationPolicyInput(
-                    policy_id="policy-unrouted-group",
-                    recipient_kind="subject_group",
-                    recipient_group_id="unrouted-group",
-                    trigger_anchor=instant_anchor("policy-unrouted-group-trigger"),
-                    channel_preference_ref="whatsapp",
-                ),
-            ),
         )
-
-        with self.assertRaisesRegex(SpineValidationError, "notification_policy_unrouted"):
-            generate_notification_reminder_work(
-                self.connection,
-                notification_policy_id="policy-unrouted-group",
-                work_instance_id="work-unrouted-group",
-                eligible_at_utc=NOW,
-                created_at_utc=NOW,
-            )
+        response = handle(
+            "reminder.create",
+            {
+                "command_id": "cmd-unrouted-group-reminder",
+                "actor_subject_id": SUBJECT_ID,
+                "item_id": task.item_id,
+                "target_version": "1",
+                "created_at_utc": NOW,
+                "recipient_kind": "subject_group",
+                "recipient_group_id": "unrouted-group",
+                "channel": "whatsapp",
+                "delivery_target_id": "missing-delivery-target",
+                "notification": {
+                    "authoring_contract": "spine.notification-schedule-authoring.v1",
+                    "target": {"anchor_role": "task_due", "application_scope": "item"},
+                    "schedule": {
+                        "kind": "once",
+                        "at": {"kind": "absolute_utc", "at_utc": "2026-06-06T11:00:00Z"},
+                    },
+                    "late_handling": {"kind": "skip"},
+                },
+            },
+            CommandContext(ledger=self.connection),
+        )
+        self.assertFalse(response["ok"])
+        self.assertEqual(response["error"]["code"], "referenced_row_not_found")
 
     def test_relation_depends_on_and_derived_blocks(self) -> None:
         create_task_pair(self.connection)
@@ -406,6 +431,7 @@ class LedgerSupportingSetTests(unittest.TestCase):
             created_at_utc=NOW,
             created_by_subject_id=SUBJECT_ID,
             title="Submit forms",
+            due_anchor=instant_anchor("copy-forward-due"),
             item_locations=(
                 ItemLocationInput(
                     item_location_id="copy-forward-location-role",
@@ -424,32 +450,64 @@ class LedgerSupportingSetTests(unittest.TestCase):
                     role="assignee",
                 ),
             ),
-            notification_policies=(
-                NotificationPolicyInput(
-                    policy_id="copy-forward-policy",
-                    recipient_subject_id=OTHER_SUBJECT_ID,
-                    trigger_anchor=instant_anchor("copy-forward-policy-trigger"),
-                ),
-            ),
         )
+
+        ensure_subject_and_route(
+            self.connection,
+            prefix="copy-forward",
+            subject_id=OTHER_SUBJECT_ID,
+            delivery_target_id="copy-forward-target",
+            at_utc=NOW,
+        )
+        policy = handle(
+            "reminder.create",
+            {
+                "command_id": "cmd-copy-forward-policy",
+                "actor_subject_id": SUBJECT_ID,
+                "item_id": "task-copy-forward",
+                "target_version": "1",
+                "created_at_utc": "2026-06-06T10:30:00Z",
+                "recipient_kind": "subject",
+                "recipient_subject_id": OTHER_SUBJECT_ID,
+                "channel": "whatsapp",
+                "delivery_target_id": "copy-forward-target",
+                "notification": {
+                    "authoring_contract": "spine.notification-schedule-authoring.v1",
+                    "target": {"anchor_role": "task_due", "application_scope": "item"},
+                    "schedule": {
+                        "kind": "once",
+                        "at": {"kind": "absolute_utc", "at_utc": "2026-06-06T14:00:00Z"},
+                    },
+                    "late_handling": {"kind": "skip"},
+                },
+            },
+            CommandContext(ledger=self.connection),
+        )
+        self.assertTrue(policy["ok"], policy)
 
         create_next_item_version(
             self.connection,
             item_id="task-copy-forward",
-            target_version=1,
-            audit_id="audit-task-copy-forward-v2",
+            target_version=2,
+            audit_id="audit-task-copy-forward-v3",
             created_at_utc="2026-06-06T11:00:00Z",
             created_by_subject_id=SUBJECT_ID,
             title="Submit updated forms",
+            supporting_command_id="cmd-copy-forward-v3",
         )
 
         current = get_current_item(self.connection, "task-copy-forward")
-        self.assertEqual(current["current_version"], 2)
-        self.assertEqual(current["locations"][0]["item_location_id"], "copy-forward-location-role-v2")
+        self.assertEqual(current["current_version"], 3)
         self.assertEqual(current["locations"][0]["location_id"], "copy-forward-location")
-        self.assertEqual(current["subject_roles"][0]["item_subject_role_id"], "copy-forward-subject-role-v2")
-        self.assertEqual(current["notification_policies"][0]["policy_id"], "copy-forward-policy-v2")
-        self.assertEqual(current["notification_policies"][0]["trigger_anchor_id"], "copy-forward-policy-trigger")
+        self.assertEqual(current["subject_roles"][0]["subject_id"], OTHER_SUBJECT_ID)
+        self.assertEqual(
+            current["notification_policies"][0]["notification_intent_id"],
+            policy["notification_intent_id"],
+        )
+        self.assertNotEqual(
+            current["notification_policies"][0]["notification_policy_id"],
+            policy["notification_policy_id"],
+        )
         assert_ledger_invariants(self.connection)
 
     def test_selected_subject_role_replacement_preserves_other_role_kinds(self) -> None:

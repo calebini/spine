@@ -1,6 +1,6 @@
 # Spine Schedule-Based Recurrence
 
-Status: Draft v0.4.0
+Status: Draft v0.4.0; executable v1 contract family implemented
 Scope: Canonical recurrence-set model, deterministic expansion, occurrence mutation, command alignment, and downstream provenance
 Authority: Normative flexible-recurrence target; runtime conformance requires matching persistence, command, fixture, and implementation declarations
 

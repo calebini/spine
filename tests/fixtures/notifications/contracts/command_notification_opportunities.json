@@ -1,0 +1,12 @@
+{
+  "command": "notification.opportunities",
+  "request": {
+    "item_id": "item_example_event",
+    "evaluated_at_utc": "2026-08-08T10:00:00Z",
+    "notification_intent_id": "notification_intent_example_hourly_countdown",
+    "range_start_utc": "2026-08-08T10:00:00Z",
+    "range_end_utc": "2026-08-08T18:00:00Z",
+    "limit": "100",
+    "include_diagnostics": true
+  }
+}

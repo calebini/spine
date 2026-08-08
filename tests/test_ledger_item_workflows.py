@@ -30,7 +30,6 @@ from spine.ledger import (
     mutation_audit_payload,
 )
 
-
 NOW = "2026-06-06T10:00:00Z"
 SUBJECT_ID = "subject-1"
 

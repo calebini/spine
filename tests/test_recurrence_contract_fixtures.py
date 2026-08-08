@@ -5,7 +5,6 @@ from copy import deepcopy
 from pathlib import Path
 from typing import Any
 
-
 ROOT = Path(__file__).parents[1]
 MANIFEST_PATH = ROOT / "contracts" / "recurrence-fixture-manifest.json"
 SCHEMA_DIR = ROOT / "contracts" / "schemas"
@@ -14,10 +13,7 @@ SCHEMA_DIR = ROOT / "contracts" / "schemas"
 class RecurrenceContractFixtureTests(unittest.TestCase):
     def test_manifest_is_complete_and_every_fixture_matches_its_schema(self) -> None:
         manifest = _load_json(MANIFEST_PATH)
-        schemas = {
-            path.name: _load_json(path)
-            for path in sorted(SCHEMA_DIR.glob("recurrence-*.schema.json"))
-        }
+        schemas = {path.name: _load_json(path) for path in sorted(SCHEMA_DIR.glob("recurrence-*.schema.json"))}
 
         self.assertEqual(manifest["schema_version"], "spine.recurrence-contract-fixtures.v1")
         self.assertEqual(manifest["fixture_scope"], "structural_examples")
@@ -42,10 +38,7 @@ class RecurrenceContractFixtureTests(unittest.TestCase):
         )
 
     def test_schema_family_has_stable_ids_and_resolvable_file_references(self) -> None:
-        schemas = {
-            path.name: _load_json(path)
-            for path in sorted(SCHEMA_DIR.glob("recurrence-*.schema.json"))
-        }
+        schemas = {path.name: _load_json(path) for path in sorted(SCHEMA_DIR.glob("recurrence-*.schema.json"))}
         self.assertEqual(
             set(schemas),
             {
@@ -72,10 +65,7 @@ class RecurrenceContractFixtureTests(unittest.TestCase):
 
     def test_initial_fixtures_cover_flexible_authoring_and_all_recurrence_commands(self) -> None:
         manifest = _load_json(MANIFEST_PATH)
-        fixtures = {
-            entry["fixture_id"]: _load_json(ROOT / entry["fixture"])
-            for entry in manifest["fixtures"]
-        }
+        fixtures = {entry["fixture_id"]: _load_json(ROOT / entry["fixture"]) for entry in manifest["fixtures"]}
         authoring = [payload for key, payload in fixtures.items() if key.startswith("authoring.")]
         self.assertEqual({payload["time_basis"] for payload in authoring}, {"local_date", "local_instant", "instant_utc"})
         self.assertTrue(any(rule["frequency"] == "WEEKLY" for payload in authoring for rule in payload["rules"]))
@@ -84,11 +74,7 @@ class RecurrenceContractFixtureTests(unittest.TestCase):
         self.assertEqual(every_three_days["rules"][0]["interval"], "3")
         self.assertEqual(every_three_days["rules"][0]["seed"], "2026-08-03T08:00:00")
 
-        command_fixtures = {
-            payload["command"]
-            for key, payload in fixtures.items()
-            if key.startswith("command.")
-        }
+        command_fixtures = {payload["command"] for key, payload in fixtures.items() if key.startswith("command.")}
         self.assertEqual(
             command_fixtures,
             {
@@ -104,27 +90,16 @@ class RecurrenceContractFixtureTests(unittest.TestCase):
         self.assertEqual(response["response_contract"], "spine.item-occurrences.recurrence.v1")
         normalized = fixtures["normalized.every_three_days_0800"]
         normalized_segment_ids = {segment["segment_id"] for segment in normalized["segments"]}
-        self.assertTrue(
-            all(
-                occurrence["segment_id"] in normalized_segment_ids
-                for occurrence in response["occurrences"]
-            )
-        )
+        self.assertTrue(all(occurrence["segment_id"] in normalized_segment_ids for occurrence in response["occurrences"]))
         self.assertNotIn("recurrence_rule", response)
         self.assertNotIn("recurrence_field", response)
         self.assertNotIn("truncated", response)
         self.assertTrue(all("ordinal" not in occurrence for occurrence in response["occurrences"]))
 
     def test_closed_schema_rules_reject_cross_frequency_and_scope_leakage(self) -> None:
-        schemas = {
-            path.name: _load_json(path)
-            for path in sorted(SCHEMA_DIR.glob("recurrence-*.schema.json"))
-        }
+        schemas = {path.name: _load_json(path) for path in sorted(SCHEMA_DIR.glob("recurrence-*.schema.json"))}
         manifest = _load_json(MANIFEST_PATH)
-        fixtures = {
-            entry["fixture_id"]: _load_json(ROOT / entry["fixture"])
-            for entry in manifest["fixtures"]
-        }
+        fixtures = {entry["fixture_id"]: _load_json(ROOT / entry["fixture"]) for entry in manifest["fixtures"]}
 
         invalid_daily = deepcopy(fixtures["authoring.every_three_days_0800"])
         invalid_daily["rules"][0]["by_weekday"] = ["MO"]
@@ -176,15 +151,9 @@ class RecurrenceContractFixtureTests(unittest.TestCase):
         )
 
     def test_audit_alignment_rules_are_executable(self) -> None:
-        schemas = {
-            path.name: _load_json(path)
-            for path in sorted(SCHEMA_DIR.glob("recurrence-*.schema.json"))
-        }
+        schemas = {path.name: _load_json(path) for path in sorted(SCHEMA_DIR.glob("recurrence-*.schema.json"))}
         manifest = _load_json(MANIFEST_PATH)
-        fixtures = {
-            entry["fixture_id"]: _load_json(ROOT / entry["fixture"])
-            for entry in manifest["fixtures"]
-        }
+        fixtures = {entry["fixture_id"]: _load_json(ROOT / entry["fixture"]) for entry in manifest["fixtures"]}
 
         response_schema = schemas["recurrence-occurrence-response.schema.json"]
         response = fixtures["response.every_three_days_page"]
@@ -322,9 +291,7 @@ class RecurrenceContractFixtureTests(unittest.TestCase):
         )
 
         segmented_without_label = deepcopy(fixtures["authoring.every_three_days_0800"])
-        segmented_without_label["segments"] = [
-            {"segment_label": "primary", "active_start": "2026-08-03T08:00:00"}
-        ]
+        segmented_without_label["segments"] = [{"segment_label": "primary", "active_start": "2026-08-03T08:00:00"}]
         self.assertFalse(
             _is_valid(
                 segmented_without_label,
@@ -400,12 +367,10 @@ def _validate(
         _validate(instance, resolved, external, schemas, path=path)
         return
 
-    if "allOf" in schema:
-        for child in schema["allOf"]:
-            _validate(instance, child, root_schema, schemas, path=path)
-    if "anyOf" in schema:
-        if not any(_is_valid(instance, child, root_schema, schemas, path) for child in schema["anyOf"]):
-            raise AssertionError(f"{path}: no anyOf branch matched")
+    for child in schema.get("allOf", []):
+        _validate(instance, child, root_schema, schemas, path=path)
+    if "anyOf" in schema and not any(_is_valid(instance, child, root_schema, schemas, path) for child in schema["anyOf"]):
+        raise AssertionError(f"{path}: no anyOf branch matched")
     if "oneOf" in schema:
         matches = sum(_is_valid(instance, child, root_schema, schemas, path) for child in schema["oneOf"])
         if matches != 1:

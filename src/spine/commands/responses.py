@@ -277,17 +277,9 @@ def _subject_role_element(row: Mapping[str, Any]) -> dict[str, Any]:
 
 
 def _notification_policy_element(row: Mapping[str, Any]) -> dict[str, Any]:
-    return _omit_none(
-        {
-            "notification_policy_id": row.get("notification_policy_id", row.get("policy_id")),
-            "recipient_subject_id": row["recipient_subject_id"],
-            "channel_preference_ref": row.get("channel_preference_ref"),
-            "trigger_anchor_id": row["trigger_anchor_id"],
-            "trigger_anchor": row.get("trigger_anchor"),
-            "status": row["status"],
-            "created_at_utc": row["created_at_utc"],
-        }
-    )
+    """Return the canonical structured policy value exposed by the ledger loader."""
+
+    return dict(row)
 
 
 def _omit_none(value: Mapping[str, Any]) -> dict[str, Any]:

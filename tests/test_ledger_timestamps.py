@@ -11,7 +11,6 @@ from spine.ledger import (
 )
 from spine.services import list_eligible_work
 
-
 NOW = "2026-06-06T10:00:00Z"
 SUBJECT_ID = "subject-1"
 
@@ -36,9 +35,8 @@ class LedgerTimestampTests(unittest.TestCase):
         )
 
         for value in invalid_values:
-            with self.subTest(value=value):
-                with self.assertRaisesRegex(SpineValidationError, "invalid_utc_timestamp"):
-                    require_utc_z("created_at_utc", value)
+            with self.subTest(value=value), self.assertRaisesRegex(SpineValidationError, "invalid_utc_timestamp"):
+                require_utc_z("created_at_utc", value)
 
     def test_item_creation_rejects_non_canonical_created_at_utc(self) -> None:
         with self.assertRaisesRegex(SpineValidationError, "invalid_utc_timestamp"):

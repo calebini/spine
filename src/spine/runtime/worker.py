@@ -6,9 +6,10 @@ import argparse
 import json
 import sqlite3
 import sys
+from collections.abc import Sequence
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Sequence
+from typing import Any
 
 from spine.adapters import (
     DEFAULT_OPENCLAW_CHANNEL,
@@ -24,7 +25,6 @@ from spine.ledger import connect, initialize_schema
 from spine.runtime.tickerd_observe import RUNTIME_MODES
 from spine.runtime.tickerd_runner import SpineRunnerPaths, _tickerd_runner_types
 
-
 FAKE_OPENCLAW_RESULTS = ("delivered", "transient", "permanent", "blocked", "binding_error", "send_exception")
 OPENCLAW_SENDERS = ("fake", "gateway")
 WORKER_BINDINGS = ("openclaw",)
@@ -38,7 +38,7 @@ class SpineWorkerPaths:
     sends_path: Path
 
     @classmethod
-    def from_state_dir(cls, state_dir: Path | str) -> "SpineWorkerPaths":
+    def from_state_dir(cls, state_dir: Path | str) -> SpineWorkerPaths:
         runner_paths = SpineRunnerPaths.from_state_dir(state_dir)
         return cls(runner=runner_paths, sends_path=runner_paths.state_dir / "openclaw_sends.jsonl")
 
@@ -269,7 +269,7 @@ def _parse_args(argv: Sequence[str] | None) -> argparse.Namespace:
     parser.add_argument(
         "--openclaw-channel",
         default=DEFAULT_OPENCLAW_CHANNEL,
-        help="OpenClaw gateway channel value. Kinflow-compatible default: whatsapp.",
+        help="OpenClaw gateway channel value (default: whatsapp).",
     )
     parser.add_argument("--allow-real-send", action="store_true", help="Required with --openclaw-sender gateway.")
     parser.add_argument(

@@ -6,17 +6,18 @@ import argparse
 import json
 import sqlite3
 import sys
+from collections.abc import Sequence
 from pathlib import Path
-from typing import Any, Sequence
+from typing import Any
 
 from spine.ledger import connect, initialize_schema
+from spine.runtime.seed_demo import seed_demo_ledger
 from spine.runtime.worker import (
     FAKE_OPENCLAW_RESULTS,
     OPENCLAW_SENDERS,
     SpineWorkerPaths,
     run_spine_worker,
 )
-from spine.runtime.seed_demo import seed_demo_ledger
 
 OpenClawSmokePaths = SpineWorkerPaths
 

@@ -1,15 +1,15 @@
 # Spine Ontology
 
-Status: Draft v4.0.0
+Status: Draft v4.1.0; schema version 7 implementation aligned
 Scope: First durable ontology and minimum data contract sketch for Spine
 
 ## 1. Ontology Goal
 
 This document defines the first durable ontology for Spine.
 
-It is intentionally a conceptual data model, not a full migration.
+It is the conceptual and relational data contract; executable migration details live in the schema migration bundle.
 
-The goal is to make ownership, entity boundaries, and near-term compatibility clear enough for the first persistence/model slice to be implemented without inventing root concepts, duplicate attempt ledgers, hidden authority boundaries, or incompatible event/task/location/relation shapes.
+The goal is to make ownership, entity boundaries, and near-term interoperability clear enough for persistence and runtime work to proceed without inventing root concepts, duplicate attempt ledgers, hidden authority boundaries, or inconsistent event/task/location/relation shapes.
 
 ## 2. Design Principles
 
@@ -264,7 +264,7 @@ Task time shape validation (MVP):
 - `due_anchor_id` MAY reference a window anchor to represent a due window:
   - If `anchor_kind=utc_window`, the due window is `[window_start_utc, window_end_utc)`.
   - If `anchor_kind=local_window`, the due window is the full local-day window defined for `anchor_kind=local_window` in Section 6.1 (no persisted `window_start_utc`/`window_end_utc` fields in MVP).
-- Ordering/compatibility posture (MVP):
+- Due/defer ordering posture (MVP):
   - Spine MUST accept tasks where both `due_anchor_id` and `defer_until_anchor_id` are set; a task may be "deferred" while still having a due constraint.
   - Spine MUST NOT enforce a due-vs-defer ordering constraint in MVP. Implementations MUST NOT silently rewrite either anchor to satisfy ordering.
 
@@ -625,46 +625,74 @@ Constraints:
 
 Owns durable notification intent, not vendor delivery state.
 
-Current implemented MVP compatibility contract:
+`specs/notifications.md` is the normative authority for structured notification schedules, notification-opportunity identity, bounded work materialization, and schedule reconciliation. A runtime MUST use exactly one authoritative schedule representation for a newly authored policy row; it MUST NOT treat a trigger anchor and a structured schedule as competing sources of truth.
 
-- `policy_id` (`id`, required) — primary key.
-- `item_id` (`id`, required) — FK to `coordination_items.item_id`.
-- `version` (`int`, required) — must match an existing `coordination_item_versions` row.
-- `recipient_subject_id` (`id`, required) — FK to `subjects.subject_id`.
-- `channel_preference_ref` (`text`, optional) — reserved.
-- `trigger_anchor_id` (`id`, required) — FK to `temporal_anchors.anchor_id`.
-- `quiet_hours_policy_ref` (`text`, optional) — reserved.
-- `status` (`text`, required) — enum: `active`, `disabled`.
-- `created_at_utc` (`utc_instant`, required).
+Canonical policy and routing contract:
 
-Current implemented MVP constraints:
-
-- `(item_id, version, recipient_subject_id, trigger_anchor_id)` MUST be unique; duplicates MUST be rejected.
-
-Accepted first-class routing extension:
-
+- `policy_id` (`id`, required) — primary key and public `notification_policy_id` alias.
+- `item_id` (`id`, required) and `version` (`int`, required) — FK to the owning immutable item version.
 - `recipient_kind` (`text`, required) — enum: `subject`, `subject_group`.
 - `recipient_subject_id` (`id`, optional) — FK to `subjects.subject_id`; required when `recipient_kind=subject`; absent otherwise.
 - `recipient_group_id` (`id`, optional) — FK to `subject_groups.group_id`; required when `recipient_kind=subject_group`; absent otherwise.
-- `delivery_target_id` (`id`, required for production-like deliverable reminder policies; optional only for inert or legacy compatibility policies) — FK to `delivery_targets.delivery_target_id`; when present, the target owner MUST match the recipient owner.
+- `channel` (`text`, required) and `delivery_target_id` (`id`, required) — the selected active delivery route. The target owner and channel MUST match the policy recipient and channel.
+- `status` (`text`, required) — enum: `active`, `disabled`.
+- `created_at_utc` (`utc_instant`, required).
 
-First-class routing constraints:
+Routing constraints:
 
 - Exactly one recipient reference MUST be present and it MUST match `recipient_kind`.
-- For `recipient_kind=subject`, `(item_id, version, recipient_subject_id, trigger_anchor_id)` MUST be unique; duplicates MUST be rejected.
-- For `recipient_kind=subject_group`, `(item_id, version, recipient_group_id, trigger_anchor_id)` MUST be unique; duplicates MUST be rejected.
+- For `recipient_kind=subject`, `(item_id, version, recipient_subject_id, delivery_target_id, normalized_notification_schedule_hash)` MUST be unique.
+- For `recipient_kind=subject_group`, `(item_id, version, recipient_group_id, delivery_target_id, normalized_notification_schedule_hash)` MUST be unique.
 - Implementations MUST NOT rely on one nullable composite uniqueness constraint across `recipient_subject_id` and `recipient_group_id` to enforce duplicate rejection.
-- A policy with `delivery_target_id` set MUST reference an active delivery target whose owner matches the recipient owner at creation time.
-- In the first-class routing path, a notification policy without `delivery_target_id` is unrouted and inert for adapter delivery: it MUST NOT generate deliverable reminder work until a matching active delivery target is selected.
-- The routing migration MUST preserve compatibility for existing subject-recipient policies by treating legacy rows as `recipient_kind=subject` with absent `delivery_target_id` until they are explicitly upgraded or superseded.
+- Every policy MUST reference an active delivery target whose owner and channel match at creation time.
 
 Generated reminders MUST become `work_instances` rows before any delivery attempt.
 
-In MVP, `notification_policies` MUST NOT directly drive vendor delivery or hidden scheduler delivery state. If reminder generation is not implemented in a slice, implementations MUST treat `notification_policies` rows as inert and MUST NOT deliver reminders without a corresponding `work_instances` row.
+`notification_policies` MUST NOT directly drive vendor delivery or hidden scheduler delivery state. A virtual opportunity does not authorize delivery; an active `work_instances` row and started `side_effect_attempts` row are required.
 
-Compatibility note:
+### 8.3 Structured notification schedules
 
-- Legacy subject-recipient rows remain valid as `recipient_kind=subject` with absent `delivery_target_id`. New production-like routed reminder rows use `recipient_kind`, the matching recipient owner reference, and `delivery_target_id`; implementations MUST NOT extend `subjects.subject_kind` with transport endpoint concepts to satisfy adapter routing.
+The canonical structured target adds these policy facts:
+
+- `notification_intent_id` (`id`, required) — stable logical notification identity carried across item-version copy-forward and policy edits.
+- `intent_created_item_version` (`int`, required) and `intent_created_by_command_id` (`id`, required) — immutable creation facts carried with `notification_intent_id`.
+- `source_notification_policy_id` (`id`, optional) — prior immutable `notification_policies.policy_id`; required on copied or edited successor rows.
+- `schedule_id` (`id`, required) — FK to `notification_schedules.schedule_id`; public contract alias `notification_schedule_id`.
+- `target_anchor_role` (`text`, required) — enum: `event_start`, `task_due`.
+- `application_scope` (`text`, required) — enum: `item`, `each_occurrence`, `selected_occurrence`.
+- `target_occurrence_key` (`id`, optional) and `target_occurrence_selector_ref` (`id`, optional) — required exactly for `selected_occurrence`.
+- `normalized_notification_schedule_hash` (`hash`, required).
+- `late_handling_kind` (`text`, required) — enum: `skip`, `deliver_within`.
+- `late_grace_seconds` (`int`, optional) — required exactly for `deliver_within`.
+- `created_by_command_id` (`id`, required).
+- `disabled_at_utc` (`utc_instant`, optional) — required exactly for `status=disabled`.
+
+Structured-policy constraints:
+
+- Unchanged copy-forward MUST preserve `notification_intent_id`, target semantics, normalized schedule hash, routing semantics, and late-handling semantics while deriving a new version-scoped `policy_id` and recording `source_notification_policy_id`.
+- `application_scope=item` is legal only for a non-recurring target. `each_occurrence` and `selected_occurrence` require a recurrence-bearing target and the provenance rules in `specs/recurrence.md` and `specs/notifications.md`.
+- Structured policy schedules are the sole notification schedule authority.
+- Target, schedule, routing, late-handling, status, and lineage facts are immutable within one policy row. A change creates a new item version and successor policy row.
+
+`notification_schedules` owns one normalized schedule header per structured policy:
+
+- `schedule_id` (`id`, required) — primary key.
+- `policy_id` (`id`, required) — FK to `notification_policies.policy_id`; unique.
+- `schedule_kind` (`text`, required) — enum: `once`, `offsets`, `repeat_window`.
+- start/stop boundary kinds and normalized scalar boundary facts required by the selected schedule kind.
+- `stop_inclusive` (`bool`, optional) — required exactly for `repeat_window`.
+- `cadence_kind` (`text`, optional) — enum: `fixed_elapsed`, `local_calendar`; required exactly for `repeat_window`.
+- `interval_seconds` (`int`, optional) — required exactly for `fixed_elapsed`.
+- local-calendar frequency, interval, seed date, local time, timezone, timezone-database version, and week-start facts when applicable.
+- `normalized_notification_schedule_hash` (`hash`, required) — must equal the owning policy fact.
+
+`notification_schedule_offsets` owns normalized `offsets` children and normalized target-relative repeat-window boundaries. It stores `schedule_id`, deterministic `offset_index`, boundary role, offset basis, and exactly the elapsed-seconds or calendar-days/local-time fields legal for that basis. Byte-identical offsets collapse before indexes and identities are assigned.
+
+`notification_schedule_selectors` owns normalized local-calendar selector values. It stores `schedule_id`, `selector_kind`, canonical `selector_value`, and deterministic `selector_index`. It MUST NOT store a JSON identity blob. Selector legality, ordering, defaulting, and value domains are those imported by `specs/notifications.md` from `specs/recurrence.md`.
+
+`notification_target_occurrence_selectors` stores the revision-independent selected-occurrence target as normalized relational facts and exposes the storage-only `target_occurrence_selector_ref` used by a policy row. It stores the recurrence-set id, normalized segment reference, canonical original scheduled fact, origin kind, and ordered normalized rule/rdate selector children required to reconstruct the exact `target_occurrence_selector` object from `specs/recurrence.md`. It MUST NOT store that selector as an opaque JSON identity blob. Hashing expands the reference back to the normative selector object; the storage reference itself is never substituted into a schedule-hash, slot-key, or opportunity-id preimage.
+
+`notification_opportunity_provenance` MAY be persisted when a consumer needs durable pre-work evidence. Its minimum facts are opportunity id and slot key, notification intent and policy identities, item/source version, target and nominal eligibility facts, normalized schedule hash and version constants, recipient/routing snapshot, lifecycle/actionability, and recurrence occurrence/provenance facts when applicable. A virtual opportunity alone never authorizes adapter delivery.
 
 ## 9. Work, Candidate Actions, and Attempts
 
@@ -681,7 +709,11 @@ Minimum contract:
 - `item_version` (`int`, required) — version of the item truth that generated this work.
 - `notification_policy_id` (`id`, optional) — FK to `notification_policies.policy_id`.
 - `notification_policy_item_version` (`int`, optional) — required when `notification_policy_id` is present.
-- `delivery_target_id` (`id`, optional for non-notification and legacy compatibility work; required for first-class routed notification reminder work) — FK to `delivery_targets.delivery_target_id`; for notification reminder work, this snapshots the selected delivery endpoint when routing is resolved.
+- `notification_intent_id` (`id`, optional) — required for structured schedule-generated reminder work.
+- `notification_opportunity_id` (`id`, optional) — required for structured schedule-generated reminder work; unique with the delivery target for active work.
+- `normalized_notification_schedule_hash` (`hash`, optional) — required when `notification_opportunity_id` is present.
+- `occurrence_provenance_id` (`id`, optional) — required when the notification opportunity is recurrence-bound.
+- `delivery_target_id` (`id`, required for notification reminder work) — FK to `delivery_targets.delivery_target_id`; snapshots the selected delivery endpoint.
 - `source_work_instance_id` (`id`, optional) — FK to `work_instances.work_instance_id`; required when `generation_source_kind=work_instance` and conditionally required for derivative rows sourced from prior work.
 - `generation_source_kind` (`text`, optional for non-derivative base work; conditionally required for derivative rows) — enum: `work_instance`, `notification_policy`, `schedule_tick`, `user_action`, `item_version`.
 - `generation_source_ref` (`text`, optional for non-derivative base work; conditionally required for derivative rows unless `source_work_instance_id` supplies the source).
@@ -704,11 +736,11 @@ Version binding (MVP):
   - `notification_policy_item_version` MUST be set and MUST match the `notification_policies.version` for that policy.
   - The referenced `notification_policies.item_id` MUST equal `work_instances.item_id`.
   - `notification_policy_item_version` MUST equal `work_instances.item_version`.
-  - In the first-class routing path, if the referenced notification policy has `delivery_target_id`, generated reminder work MUST set `work_instances.delivery_target_id` to the same value.
-  - In the first-class routing path, if the referenced notification policy lacks `delivery_target_id`, deliverable reminder work MUST NOT be generated from that policy.
-  - If `work_instances.delivery_target_id` is set for notification reminder work, it MUST match the referenced notification policy's `delivery_target_id` and the target owner MUST match the policy recipient owner.
+  - Generated reminder work MUST set `work_instances.delivery_target_id` to the current policy route.
+  - The delivery target owner and channel MUST match the policy recipient owner and channel.
 - The bound `item_version` and policy version are the creation-time source of truth for the work instance.
 - Policy-backed `notification_reminder` work remains independently processable across later non-terminal item versions. It MUST NOT be marked stale solely because `coordination_items.current_version` no longer equals `work_instances.item_version`.
+- Schedule-generated work may survive copy-forward only when the current policy row carries the same `notification_intent_id`, normalized schedule hash, target facts, routing facts, and occurrence provenance facts. Any changed semantic fact fails freshness and requires reconciliation before delivery.
 - Before processing policy-backed `notification_reminder` work, implementations MUST verify that the bound `notification_policies` row remains `active`, the item shell remains `active`, the current event detail remains `scheduled` when the item is an event, and the current task detail remains `open` when the item is a task. A failed check MUST prevent the external side effect.
 - Work without a bound notification policy retains strict version freshness: if `coordination_items.current_version` no longer equals `work_instances.item_version` before processing, that work instance is stale and MUST NOT be silently processed against newer item truth.
 - Adapter delivery MUST resolve outbound endpoint facts from `delivery_target_id` when present. `work_subject_ref` MUST NOT be interpreted as an adapter `target_ref` in production-like notification processing.
@@ -729,9 +761,8 @@ Derivative work provenance (MVP):
 
 Notification reminder subject/provenance rule:
 
-- Legacy notification reminder work may store `work_subject_ref` as the resolved `subjects.subject_id` used by the legacy command contract.
-- First-class routed notification reminder work MUST store `work_subject_ref` as a non-routing recipient-owner reference: `subject:<subject_id>` when `recipient_kind=subject`, or `subject_group:<group_id>` when `recipient_kind=subject_group`.
-- `work_subject_ref` MUST NOT be interpreted as an adapter delivery endpoint. Adapter processors MUST derive outbound endpoint facts from `delivery_target_id` for first-class routed notification reminder work.
+- Notification reminder work MUST store `work_subject_ref` as a non-routing recipient-owner reference: `subject:<subject_id>` when `recipient_kind=subject`, or `subject_group:<group_id>` when `recipient_kind=subject_group`.
+- `work_subject_ref` MUST NOT be interpreted as an adapter delivery endpoint. Adapter processors derive outbound endpoint facts from `delivery_target_id`.
 Work lifecycle semantics (MVP):
 
 - Legal stored work status values are `eligible`, `in_progress`, `succeeded`, `failed`, and `cancelled`.
@@ -746,16 +777,15 @@ Work lifecycle semantics (MVP):
 
 Minimum stale-work safety (MVP):
 
-- For policy-backed `notification_reminder` work, attempt-start safety is based on the active bound policy and current parent lifecycle, not item-version equality. Later reminder creation, title edits, rescheduling, or other non-terminal version changes MUST NOT invalidate an earlier active reminder merely by advancing `coordination_items.current_version`.
-- Starting an external side effect for policy-backed `notification_reminder` work MUST be rejected when its bound policy is not active, its item shell is archived, its current event is cancelled, or its current task is done or cancelled. Explicitly cancelled work remains non-processable under its terminal work status.
+- For `notification_reminder` work, attempt-start safety is based on the current intent row's schedule, target, route, occurrence provenance, and parent lifecycle, not item-version equality alone.
+- Starting an external side effect MUST be rejected when the current intent is disabled or changed, its route is inactive or changed, its target snapshot changed, recurrence provenance is stale or non-actionable, its shell is archived, its current event is cancelled, or its current task is done or cancelled.
 - For every other work instance, if `coordination_items.current_version != work_instances.item_version` at attempt start time, starting an external side effect MUST be rejected.
-- The exact cleanup, cancellation, regeneration, retry, and replacement lifecycle for stale work is deferred to a later work-execution lifecycle decision.
-- Implementations MAY record a deterministic audit or reason for the rejection, but this MVP does not require a canonical stale-work recovery transaction.
+- Stale recurrence-bound attempt starts MUST persist the canonical provenance-block report and recovery handoff before returning the failure.
 
 Deterministic eligibility rule (MVP):
 
 - `eligible_at_utc` MUST be written once when generating the work instance. It MUST NOT be recomputed on read/replay.
-- If eligibility needs to change due to a canonical change, the MVP MUST NOT silently recalculate it on read. The canonical replacement or rescheduling policy is deferred.
+- If eligibility changes, reconciliation cancels only unstarted work and materializes the replacement opportunity; it never silently recalculates an existing row.
 
 Deferred lifecycle posture (MVP):
 
@@ -893,8 +923,6 @@ Terminal attempt mechanics (MVP):
 
 A separate durable `adapter_results` store MUST NOT be introduced without an accepted decision.
 
-`delivery_attempts` MAY be introduced only as a notification-specific view, alias, or derived compatibility surface over `side_effect_attempts`. It MUST NOT become a second canonical attempt ledger.
-
 ## 10. Projections and Audit
 
 ### 10.1 external_projections
@@ -966,6 +994,7 @@ Minimum validation categories:
 - Work/action/projection staleness: reject external side-effect starts when the applicable source-freshness rule fails; policy-backed notification reminders use active-policy/current-parent lifecycle checks, while other work, candidate actions, and projections retain strict version checks.
 - Derivative work provenance: reject derivative `work_instances` rows that omit the required source, subject, purpose, or policy-basis provenance fields defined in Section 9.1.
 - Reminder pre-work durability: reject any external notification delivery start unless a corresponding `work_instances` row already exists; `notification_policies` rows alone MUST NOT start delivery.
+- Notification schedule durability: reject direct policy-to-adapter execution, unbounded materialization, schedule-generated work without a notification opportunity identity, and recurrence-bound notification work without current occurrence provenance.
 - Attempt pre-write durability: reject any external side-effect start unless a `side_effect_attempts` row has already been durably persisted for that attempt with `attempt_status=started` and with the required request and origin linkage evidence.
 - Attempt origin version binding: reject `side_effect_attempts` rows where `source_item_version` (required when `projection_id` is present) disagrees with the bound `item_version` of a referenced `work_instances` or `candidate_actions` origin.
 - Status-transition validity: when this document defines transition rules for a table, reject transitions outside those listed rules.
@@ -991,7 +1020,8 @@ The ontology is ready for a first implementation pass when all of the following 
 - Temporal anchors have explicit legal-field rules by `anchor_kind` (including a deterministic narrowed `local_window` shape), and historical persisted UTC values are treated as authoritative and not recomputed on read/replay.
 - Recurrence sets have one structured identity and revision model across every supported frequency and time basis; recurrence mutations produce immutable revision facts and contiguous item versions atomically.
 - Bounded occurrence reads, occurrence provenance replacement, stale-provenance blocking, and the `side_effect_attempts` boundary are defined without making virtual occurrences into coordination items.
-- Event time shapes are deterministic: `event_details.all_day` unambiguously constrains allowed `temporal_anchors.anchor_kind` values (and ordering/compatibility rules) for `start_anchor_id`/`end_anchor_id`.
+- Notification policies express one-time, explicit-offset, and bounded repeat-window schedules without recurrence on trigger anchors; bounded notification opportunities materialize idempotently into work, and retries remain within one work instance.
+- Event time shapes are deterministic: `event_details.all_day` unambiguously constrains allowed `temporal_anchors.anchor_kind` values and ordering rules for `start_anchor_id`/`end_anchor_id`.
 - Task due/defer time shapes are deterministic: `task_details.due_anchor_id` and `task_details.defer_until_anchor_id` have explicit allowed `temporal_anchors.anchor_kind` values and an explicit MVP posture for due-vs-defer ordering validation.
 - Locations and item relations can be created with deterministic validation and without ambiguous stored-vs-derived posture for dependency and containment inverses (`blocks`/`depends_on`, `contains`/`part_of`).
 - Locations have an unambiguous mutation posture: canonical location facts do not retroactively change historical item versions, and corrections are represented by creating a new `location_id` plus a new item version that points at it.

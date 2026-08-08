@@ -6,59 +6,70 @@ import argparse
 import json
 import sqlite3
 import sys
+from collections.abc import Sequence
 from pathlib import Path
-from typing import Sequence
 
-from spine.ledger import NotificationPolicyInput, TemporalAnchorInput, connect, create_task_v1, initialize_schema
-from spine.services import generate_notification_reminder_work
+from spine.commands import CommandContext, handle
+from spine.ledger import connect, initialize_schema
+from spine.runtime.canonical_seed import seed_canonical_notification_work
 
 DEMO_NOW = "2026-06-07T10:00:00Z"
 DEMO_SUBJECT_ID = "demo-subject-chris"
-DEMO_TASK_ID = "demo-task-submit-forms"
-DEMO_AUDIT_ID = "demo-audit-task-submit-forms-v1"
-DEMO_POLICY_ID = "demo-policy-submit-forms-reminder"
-DEMO_POLICY_ANCHOR_ID = "demo-anchor-submit-forms-reminder"
-DEMO_WORK_INSTANCE_ID = "demo-work-submit-forms-reminder"
+DEMO_TASK_ID = "demo-task"
+DEMO_DELIVERY_TARGET_ID = "demo-openclaw-target"
 
 
 def seed_demo_ledger(connection: sqlite3.Connection) -> dict[str, object]:
     """Initialize and seed a deterministic demo ledger with one eligible work row."""
 
     initialize_schema(connection)
-    _insert_demo_subject(connection)
-    create_task_v1(
-        connection,
-        item_id=DEMO_TASK_ID,
-        audit_id=DEMO_AUDIT_ID,
-        created_at_utc=DEMO_NOW,
-        created_by_subject_id=DEMO_SUBJECT_ID,
-        title="Submit school forms",
-        summary="Demo task used to show Tickerd observing eligible Spine work.",
-        notification_policies=(
-            NotificationPolicyInput(
-                policy_id=DEMO_POLICY_ID,
-                recipient_subject_id=DEMO_SUBJECT_ID,
-                trigger_anchor=TemporalAnchorInput(
-                    anchor_id=DEMO_POLICY_ANCHOR_ID,
-                    anchor_kind="instant_utc",
-                    utc_instant="2026-06-07T09:00:00Z",
-                ),
-            ),
-        ),
+    context = CommandContext(ledger=connection)
+    subject = handle(
+        "subject.upsert",
+        {
+            "command_id": "demo-subject-upsert",
+            "actor_subject_id": DEMO_SUBJECT_ID,
+            "subject_id": DEMO_SUBJECT_ID,
+            "subject_kind": "person",
+            "display_name": "Chris",
+            "updated_at_utc": DEMO_NOW,
+        },
+        context,
     )
-    work = generate_notification_reminder_work(
+    if not subject["ok"]:
+        raise RuntimeError(subject)
+    route = handle(
+        "delivery_target.upsert",
+        {
+            "command_id": "demo-delivery-target-upsert",
+            "actor_subject_id": DEMO_SUBJECT_ID,
+            "delivery_target_id": DEMO_DELIVERY_TARGET_ID,
+            "owner_kind": "subject",
+            "owner_subject_id": DEMO_SUBJECT_ID,
+            "channel": "whatsapp",
+            "adapter_name": "openclaw",
+            "target_ref": "demo-subject",
+            "updated_at_utc": DEMO_NOW,
+        },
+        context,
+    )
+    if not route["ok"]:
+        raise RuntimeError(route)
+    seeded = seed_canonical_notification_work(
         connection,
-        work_instance_id=DEMO_WORK_INSTANCE_ID,
-        notification_policy_id=DEMO_POLICY_ID,
+        prefix="demo",
+        actor_subject_id=DEMO_SUBJECT_ID,
+        title="Submit school forms",
+        delivery_target_id=DEMO_DELIVERY_TARGET_ID,
+        channel="whatsapp",
+        recipient_kind="subject",
+        recipient_id=DEMO_SUBJECT_ID,
+        now_utc=DEMO_NOW,
         eligible_at_utc="2026-06-07T09:00:00Z",
-        created_at_utc=DEMO_NOW,
     )
     return {
         "subject_id": DEMO_SUBJECT_ID,
-        "item_id": DEMO_TASK_ID,
-        "notification_policy_id": DEMO_POLICY_ID,
-        "work_instance_id": work.work_instance_id,
-        "eligible_at_utc": "2026-06-07T09:00:00Z",
+        **seeded,
     }
 
 
@@ -74,7 +85,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         if args.if_absent:
             initialize_schema(connection)
             if _demo_work_exists(connection):
-                result = _existing_demo_result()
+                result = _existing_demo_result(connection)
                 seeded = False
             else:
                 result = seed_demo_ledger(connection)
@@ -92,34 +103,36 @@ def main(argv: Sequence[str] | None = None) -> int:
     return 0
 
 
-def _insert_demo_subject(connection: sqlite3.Connection) -> None:
-    with connection:
-        connection.execute(
-            """
-            INSERT INTO subjects (
-              subject_id, subject_kind, display_name, status, created_at_utc, updated_at_utc
-            )
-            VALUES (?, 'person', 'Chris', 'active', ?, ?)
-            """,
-            (DEMO_SUBJECT_ID, DEMO_NOW, DEMO_NOW),
-        )
-
-
 def _demo_work_exists(connection: sqlite3.Connection) -> bool:
     row = connection.execute(
-        "SELECT 1 FROM work_instances WHERE work_instance_id = ?",
-        (DEMO_WORK_INSTANCE_ID,),
+        """
+        SELECT 1 FROM work_instances AS w
+        JOIN notification_policies AS p ON p.policy_id = w.notification_policy_id
+        WHERE p.intent_created_by_command_id = 'demo-reminder-create'
+        LIMIT 1
+        """
     ).fetchone()
     return row is not None
 
 
-def _existing_demo_result() -> dict[str, object]:
+def _existing_demo_result(connection: sqlite3.Connection) -> dict[str, object]:
+    row = connection.execute(
+        """
+        SELECT w.item_id, w.work_instance_id, w.eligible_at_utc, w.notification_policy_id
+        FROM work_instances AS w
+        JOIN notification_policies AS p ON p.policy_id = w.notification_policy_id
+        WHERE p.intent_created_by_command_id = 'demo-reminder-create'
+        ORDER BY w.work_instance_id LIMIT 1
+        """
+    ).fetchone()
+    if row is None:
+        raise RuntimeError("demo item exists without canonical notification work")
     return {
         "subject_id": DEMO_SUBJECT_ID,
-        "item_id": DEMO_TASK_ID,
-        "notification_policy_id": DEMO_POLICY_ID,
-        "work_instance_id": DEMO_WORK_INSTANCE_ID,
-        "eligible_at_utc": "2026-06-07T09:00:00Z",
+        "item_id": row["item_id"],
+        "notification_policy_id": row["notification_policy_id"],
+        "work_instance_id": row["work_instance_id"],
+        "eligible_at_utc": row["eligible_at_utc"],
     }
 
 

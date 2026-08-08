@@ -1,0 +1,79 @@
+{
+  "schema_version": "spine.notification-contract-fixtures.v1",
+  "fixture_scope": "structural_examples",
+  "fixture_scope_note": "These initial fixtures validate public shapes and representative combinations. Placeholder digests and generated ids are not conformance vectors; computed vectors are governed by specs/notifications.md Section 13. The response.every_hour_six_hours_before fixture is a structural response-shape example only and is not computed expansion evidence.",
+  "fixtures": [
+    {
+      "fixture_id": "authoring.every_hour_six_hours_before",
+      "kind": "authoring",
+      "fixture": "tests/fixtures/notifications/contracts/authoring_every_hour_six_hours_before.json",
+      "schema": "contracts/schemas/notification-authoring.schema.json"
+    },
+    {
+      "fixture_id": "authoring.every_day_0800_until_event",
+      "kind": "authoring",
+      "fixture": "tests/fixtures/notifications/contracts/authoring_every_day_0800_until_event.json",
+      "schema": "contracts/schemas/notification-authoring.schema.json"
+    },
+    {
+      "fixture_id": "authoring.explicit_offsets",
+      "kind": "authoring",
+      "fixture": "tests/fixtures/notifications/contracts/authoring_explicit_offsets.json",
+      "schema": "contracts/schemas/notification-authoring.schema.json"
+    },
+    {
+      "fixture_id": "authoring.each_occurrence_six_hours_before",
+      "kind": "authoring",
+      "fixture": "tests/fixtures/notifications/contracts/authoring_each_occurrence_six_hours_before.json",
+      "schema": "contracts/schemas/notification-authoring.schema.json"
+    },
+    {
+      "fixture_id": "authoring.selected_occurrence_one_day_before",
+      "kind": "authoring",
+      "fixture": "tests/fixtures/notifications/contracts/authoring_selected_occurrence_one_day_before.json",
+      "schema": "contracts/schemas/notification-authoring.schema.json"
+    },
+    {
+      "fixture_id": "policy.every_hour_six_hours_before",
+      "kind": "normalized_policy",
+      "fixture": "tests/fixtures/notifications/contracts/policy_every_hour_six_hours_before.json",
+      "schema": "contracts/schemas/notification-policy.schema.json"
+    },
+    {
+      "fixture_id": "command.reminder_create",
+      "kind": "command",
+      "fixture": "tests/fixtures/notifications/contracts/command_reminder_create.json",
+      "schema": "contracts/schemas/notification-command.schema.json"
+    },
+    {
+      "fixture_id": "command.reminder_edit",
+      "kind": "command",
+      "fixture": "tests/fixtures/notifications/contracts/command_reminder_edit.json",
+      "schema": "contracts/schemas/notification-command.schema.json"
+    },
+    {
+      "fixture_id": "command.reminder_disable",
+      "kind": "command",
+      "fixture": "tests/fixtures/notifications/contracts/command_reminder_disable.json",
+      "schema": "contracts/schemas/notification-command.schema.json"
+    },
+    {
+      "fixture_id": "command.notification_work_materialize",
+      "kind": "command",
+      "fixture": "tests/fixtures/notifications/contracts/command_notification_work_materialize.json",
+      "schema": "contracts/schemas/notification-command.schema.json"
+    },
+    {
+      "fixture_id": "command.notification_opportunities",
+      "kind": "command",
+      "fixture": "tests/fixtures/notifications/contracts/command_notification_opportunities.json",
+      "schema": "contracts/schemas/notification-command.schema.json"
+    },
+    {
+      "fixture_id": "response.every_hour_six_hours_before",
+      "kind": "opportunity_response",
+      "fixture": "tests/fixtures/notifications/contracts/response_every_hour_six_hours_before.json",
+      "schema": "contracts/schemas/notification-opportunity-response.schema.json"
+    }
+  ]
+}

@@ -10,7 +10,7 @@ Spine owns coordination truth. Adapters make it visible, actionable, or enriched
 
 ## Current Status
 
-Seed-spec phase with an initial runtime scaffold, deterministic core primitives, a SQLite local ledger schema foundation, atomic event/task v1 creation workflows, versioned lifecycle mutation workflows, an implemented daily recurrence slice, and a newly landed structured flexible-recurrence contract family awaiting runtime implementation. The recurrence authority covers daily, weekly, monthly, yearly, interval, explicit-date, exclusion, override, local-time, local-date, and fixed-UTC schedules as one model; the current runtime does not yet claim full conformance. Spine also includes first supporting-set/relationship workflows, durable side-effect pressure ledgers, work outcome lifecycle services, provider-agnostic internal services, a Tickerd work adapter boundary, generic attempt-backed side-effect processing, and an OpenClaw-style notification outbound specialization with fake-sender coverage.
+Seed-spec phase with an acceptance-verified canonical scheduling and notification fat slice. The runtime now implements structured recurrence across local-date, local-instant, and fixed-UTC bases; daily, weekly, monthly, and yearly frequencies; selectors, exceptions, overrides, series edits, bounded occurrence reads, lineage, and occurrence provenance. It also implements one-time, offset, fixed-elapsed, and local-calendar notification schedules; bounded opportunities; durable work materialization and reconciliation; Tickerd horizon repair; and fake OpenClaw delivery through `side_effect_attempts`. Schema version 7 is the single relational scheduling authority. Computed vectors, Draft 2020-12 fixture validation, migration/rollback tests, no-skip Tickerd integration tests, and a bounded fake-delivery canary are complete; production deployment and any real send remain separate operator actions.
 
 Authoritative starting points:
 
@@ -19,6 +19,8 @@ Authoritative starting points:
 - `specs/ontology.md` sketches the first durable ontology and data model.
 - `specs/recurrence.md` defines the canonical flexible recurrence-set model, deterministic identity and expansion, mutation, and occurrence-provenance boundaries.
 - `contracts/schemas/recurrence-*.schema.json` and `contracts/recurrence-fixture-manifest.json` define the machine-readable recurrence contract family and initial fixtures.
+- `specs/notifications.md` defines canonical notification schedules, opportunity expansion, durable work materialization, recurrence binding, and lifecycle reconciliation.
+- `contracts/schemas/notification-*.schema.json` and `contracts/notification-fixture-manifest.json` define the machine-readable notification contract family and initial fixtures.
 - `specs/agent-command-contract.md` defines the MVP agent command core and CLI contract.
 - `specs/decisions/0001-kinflow-is-donor-not-foundation.md` records the Kinflow relationship.
 - `specs/decisions/0002-first-class-delivery-targets.md` records the subject/group delivery target boundary.
@@ -55,10 +57,9 @@ This repository follows the Cortext1 component scaffold standard incrementally:
 - `specs/`: normative design and compatibility promises
 - `specs/decisions/`: accepted decisions
 - `docs/IMPLEMENTATION_PLAN.md`: non-normative build sequence for moving from specs to executable behavior
-- `docs/DELIVERY_TARGET_ROUTING_IMPLEMENTATION_PLAN.md`: non-normative implementation sequence for first-class subject/group delivery targets
 - `docs/AGENT_OPERATOR_GUIDE.md`: agent-facing contract for operating current Spine runtime surfaces safely
 - `docs/OPENCLAW_DEPLOYMENT_RUNBOOK.md`: operational rollout notes for the first OpenClaw replacement path
-- `contracts/`: machine-readable command fixture manifest and shared response schema
+- `contracts/`: machine-readable command, recurrence, and notification agreements plus fixture manifests
 - `deploy/`: deployment templates for systemd and environment files
 - `src/spine/`: initial Python package scaffold
 - `src/spine/ledger/`: canonical local persistence boundary
@@ -116,7 +117,7 @@ PYTHONPATH="$TICKERD_SRC" spine-openclaw-smoke \
   --max-cycles 1
 ```
 
-The gateway sender calls `openclaw gateway call send --params ... --json`. It reads `SPINE_OPENCLAW_GATEWAY_URL`, `SPINE_OPENCLAW_GATEWAY_TOKEN`, `SPINE_OPENCLAW_GATEWAY_PASSWORD`, `SPINE_OPENCLAW_GATEWAY_TIMEOUT_MS`, and optional `SPINE_OPENCLAW_COMMAND_TIMEOUT_MS`, with Kinflow gateway env names accepted as migration fallback for gateway URL, credentials, and gateway timeout. The gateway timeout is passed to OpenClaw; the command timeout wraps the local CLI process and defaults to gateway timeout plus 5000 ms of headroom.
+The gateway sender calls `openclaw gateway call send --params ... --json`. It reads `SPINE_OPENCLAW_GATEWAY_URL`, `SPINE_OPENCLAW_GATEWAY_TOKEN`, `SPINE_OPENCLAW_GATEWAY_PASSWORD`, `SPINE_OPENCLAW_GATEWAY_TIMEOUT_MS`, and optional `SPINE_OPENCLAW_COMMAND_TIMEOUT_MS`. The gateway timeout is passed to OpenClaw; the command timeout wraps the local CLI process and defaults to gateway timeout plus 5000 ms of headroom.
 
 ## Ledger Migrations
 

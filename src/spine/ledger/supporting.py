@@ -7,10 +7,8 @@ from dataclasses import dataclass
 
 from spine.core import SpineValidationError
 from spine.ledger.common import (
-    TemporalAnchorInput,
     copy_id,
     enum_value,
-    insert_temporal_anchor,
     new_id,
     require_non_empty,
     require_utc_z,
@@ -21,7 +19,6 @@ from spine.models.enums import (
     ItemLocationRole,
     ItemSubjectRole,
     LocationKind,
-    NotificationPolicyStatus,
     SubjectGroupKind,
 )
 
@@ -95,23 +92,6 @@ class DeliveryTargetInput:
     updated_at_utc: str | None = None
 
 
-@dataclass(frozen=True)
-class NotificationPolicyInput:
-    """Input row for inert durable notification intent."""
-
-    recipient_subject_id: str | None = None
-    trigger_anchor: TemporalAnchorInput | None = None
-    trigger_anchor_id: str | None = None
-    policy_id: str | None = None
-    recipient_kind: str = "subject"
-    recipient_group_id: str | None = None
-    channel_preference_ref: str | None = None
-    delivery_target_id: str | None = None
-    quiet_hours_policy_ref: str | None = None
-    status: NotificationPolicyStatus | str = NotificationPolicyStatus.ACTIVE
-    created_at_utc: str | None = None
-
-
 def insert_supporting_sets(
     connection: sqlite3.Connection,
     *,
@@ -120,7 +100,6 @@ def insert_supporting_sets(
     default_created_at_utc: str,
     item_locations: tuple[ItemLocationInput, ...],
     subject_roles: tuple[ItemSubjectRoleInput, ...],
-    notification_policies: tuple[NotificationPolicyInput, ...],
 ) -> None:
     require_utc_z("default_created_at_utc", default_created_at_utc)
     for item_location in item_locations:
@@ -139,15 +118,6 @@ def insert_supporting_sets(
             subject_role=subject_role,
             default_created_at_utc=default_created_at_utc,
         )
-    for policy in notification_policies:
-        insert_notification_policy(
-            connection,
-            item_id=item_id,
-            version=version,
-            policy=policy,
-            default_created_at_utc=default_created_at_utc,
-        )
-
 
 def copy_forward_supporting_sets(
     connection: sqlite3.Connection,
@@ -156,6 +126,7 @@ def copy_forward_supporting_sets(
     previous_version: int,
     next_version: int,
     created_at_utc: str,
+    created_by_command_id: str,
 ) -> None:
     require_utc_z("created_at_utc", created_at_utc)
     for row in connection.execute(
@@ -211,41 +182,16 @@ def copy_forward_supporting_sets(
             ),
         )
 
-    for row in connection.execute(
-        """
-        SELECT policy_id, recipient_kind, recipient_subject_id, recipient_group_id,
-               channel_preference_ref, delivery_target_id, trigger_anchor_id,
-               quiet_hours_policy_ref, status
-        FROM notification_policies
-        WHERE item_id = ? AND version = ?
-        ORDER BY policy_id
-        """,
-        (item_id, previous_version),
-    ):
-        connection.execute(
-            """
-            INSERT INTO notification_policies (
-              policy_id, item_id, version, recipient_kind, recipient_subject_id,
-              recipient_group_id, channel_preference_ref, delivery_target_id,
-              trigger_anchor_id, quiet_hours_policy_ref, status, created_at_utc
-            )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """,
-            (
-                copy_id(row["policy_id"], next_version),
-                item_id,
-                next_version,
-                row["recipient_kind"],
-                row["recipient_subject_id"],
-                row["recipient_group_id"],
-                row["channel_preference_ref"],
-                row["delivery_target_id"],
-                row["trigger_anchor_id"],
-                row["quiet_hours_policy_ref"],
-                row["status"],
-                created_at_utc,
-            ),
-        )
+    from spine.ledger.notifications import copy_forward_notification_policies
+
+    copy_forward_notification_policies(
+        connection,
+        item_id=item_id,
+        previous_version=previous_version,
+        next_version=next_version,
+        created_at_utc=created_at_utc,
+        created_by_command_id=created_by_command_id,
+    )
 
 
 def current_locations(connection: sqlite3.Connection, *, item_id: str, version: int) -> list[dict[str, object]]:
@@ -365,16 +311,14 @@ def current_notification_policies(
     item_id: str,
     version: int,
 ) -> list[dict[str, object]]:
-    rows = connection.execute(
-        """
-        SELECT *
-        FROM notification_policies
-        WHERE item_id = ? AND version = ?
-        ORDER BY policy_id
-        """,
-        (item_id, version),
-    ).fetchall()
-    return [dict(row) for row in rows]
+    from spine.ledger.notifications import load_current_notification_policies
+
+    current = connection.execute(
+        "SELECT current_version FROM coordination_items WHERE item_id = ?", (item_id,)
+    ).fetchone()
+    if current is not None and current["current_version"] == version:
+        return load_current_notification_policies(connection, item_id=item_id)
+    return []
 
 
 def insert_item_location(
@@ -512,62 +456,3 @@ def replace_item_subject_roles(
             subject_role=subject_role,
             default_created_at_utc=default_created_at_utc,
         )
-
-
-def insert_notification_policy(
-    connection: sqlite3.Connection,
-    *,
-    item_id: str,
-    version: int,
-    policy: NotificationPolicyInput,
-    default_created_at_utc: str,
-) -> None:
-    trigger_anchor_id = policy.trigger_anchor_id
-    if policy.trigger_anchor is not None:
-        trigger_anchor_id = policy.trigger_anchor.anchor_id or trigger_anchor_id or new_id("anchor")
-        insert_temporal_anchor(
-            connection,
-            anchor=policy.trigger_anchor,
-            anchor_id=trigger_anchor_id,
-            default_created_at_utc=default_created_at_utc,
-        )
-    if trigger_anchor_id is None:
-        raise SpineValidationError("invalid_notification_policy", "notification policy requires a trigger anchor")
-    recipient_kind = enum_value(policy.recipient_kind)
-    if recipient_kind == "subject":
-        if policy.recipient_subject_id is None:
-            raise SpineValidationError("invalid_notification_policy", "subject recipient requires recipient_subject_id")
-        if policy.recipient_group_id is not None:
-            raise SpineValidationError("invalid_notification_policy", "subject recipient forbids recipient_group_id")
-    elif recipient_kind == "subject_group":
-        if policy.recipient_group_id is None:
-            raise SpineValidationError("invalid_notification_policy", "group recipient requires recipient_group_id")
-        if policy.recipient_subject_id is not None:
-            raise SpineValidationError("invalid_notification_policy", "group recipient forbids recipient_subject_id")
-    else:
-        raise SpineValidationError("invalid_notification_policy", f"unsupported recipient_kind: {recipient_kind}")
-    require_utc_z("policy.created_at_utc", policy.created_at_utc or default_created_at_utc)
-    connection.execute(
-        """
-        INSERT INTO notification_policies (
-          policy_id, item_id, version, recipient_kind, recipient_subject_id,
-          recipient_group_id, channel_preference_ref, delivery_target_id, trigger_anchor_id,
-          quiet_hours_policy_ref, status, created_at_utc
-        )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        """,
-        (
-            policy.policy_id or new_id("policy"),
-            item_id,
-            version,
-            recipient_kind,
-            policy.recipient_subject_id,
-            policy.recipient_group_id,
-            policy.channel_preference_ref,
-            policy.delivery_target_id,
-            trigger_anchor_id,
-            policy.quiet_hours_policy_ref,
-            enum_value(policy.status),
-            policy.created_at_utc or default_created_at_utc,
-        ),
-    )

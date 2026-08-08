@@ -1,15 +1,13 @@
+from __future__ import annotations
+
 import unittest
 
+from spine.commands import CommandContext, handle
 from spine.core import SpineValidationError
 from spine.ledger import (
-    NotificationPolicyInput,
-    TemporalAnchorInput,
-    archive_item,
-    cancel_task,
     connect,
     create_external_projection,
     create_next_item_version,
-    create_task_v1,
     get_candidate_action,
     get_current_item,
     get_side_effect_attempt,
@@ -19,7 +17,6 @@ from spine.ledger import (
 from spine.services import (
     cancel_work,
     fail_work,
-    generate_notification_reminder_work,
     list_eligible_work,
     plan_projection_sync,
     prepare_candidate_action_attempt,
@@ -30,382 +27,228 @@ from spine.services import (
     start_work,
     succeed_work,
 )
+from tests.canonical_helpers import seed_notification_work
 
-
-NOW = "2026-06-07T10:00:00Z"
-SUBJECT_ID = "subject-1"
+NOW = "2026-08-01T00:00:00Z"
+ELIGIBLE = "2026-08-01T01:00:00Z"
+SUBJECT_ID = "subject-services"
 
 
 class ServiceWorkflowTests(unittest.TestCase):
     def setUp(self) -> None:
         self.connection = connect()
         initialize_schema(self.connection)
-        insert_subject(self.connection)
 
     def tearDown(self) -> None:
         self.connection.close()
 
-    def test_generate_notification_work_and_list_eligible_work(self) -> None:
-        create_task_with_policy(self.connection)
+    def test_materialized_work_is_eligible_and_processable(self) -> None:
+        seeded = self._seed("service-eligible")
+        eligible = list_eligible_work(self.connection, now_utc=ELIGIBLE)
 
-        created = generate_notification_reminder_work(
-            self.connection,
-            work_instance_id="service-work",
-            notification_policy_id="service-policy",
-            eligible_at_utc="2026-06-07T09:00:00Z",
-            created_at_utc=NOW,
+        self.assertEqual(
+            [row["work_instance_id"] for row in eligible], [seeded["work_instance_id"]]
         )
-
-        self.assertEqual(created.work_instance_id, "service-work")
-        eligible = list_eligible_work(self.connection, now_utc=NOW)
-        self.assertEqual([row["work_instance_id"] for row in eligible], ["service-work"])
-        processable = require_processable_work(self.connection, "service-work")
-        self.assertEqual(processable["item_version"], 1)
-
-    def test_work_attempt_gate_persists_started_attempt_before_write(self) -> None:
-        create_task_with_policy(self.connection)
-        generate_notification_reminder_work(
-            self.connection,
-            work_instance_id="service-work-attempt",
-            notification_policy_id="service-policy",
-            eligible_at_utc="2026-06-07T09:00:00Z",
-            created_at_utc=NOW,
+        processable = require_processable_work(
+            self.connection, str(seeded["work_instance_id"])
         )
+        self.assertEqual(processable["notification_intent_id"], seeded["notification_intent_id"])
 
+    def test_work_attempt_gate_requires_started_work_and_persists_attempt(self) -> None:
+        seeded = self._seed("service-attempt")
+        work_id = str(seeded["work_instance_id"])
+        start_work(self.connection, work_instance_id=work_id, started_at_utc=ELIGIBLE)
         gate = prepare_work_attempt(
             self.connection,
-            attempt_id="service-work-attempt-row",
-            work_instance_id="service-work-attempt",
+            attempt_id="service-attempt-row",
+            work_instance_id=work_id,
             adapter_name="notification",
-            idempotency_key="service-work-attempt",
-            request_envelope={"body": "Submit forms", "to": SUBJECT_ID},
-            attempted_at_utc="2026-06-07T10:01:00Z",
+            idempotency_key="service-attempt",
+            request_envelope={"body": "Canonical notification test", "to": SUBJECT_ID},
+            attempted_at_utc=ELIGIBLE,
         )
 
         self.assertTrue(gate.may_start_external_write)
         attempt = get_side_effect_attempt(self.connection, gate.attempt.attempt_id)
         self.assertEqual(attempt["attempt_status"], "started")
-        self.assertEqual(attempt["work_instance_id"], "service-work-attempt")
+        self.assertEqual(attempt["work_instance_id"], work_id)
 
-    def test_active_reminder_work_remains_processable_after_newer_item_version(self) -> None:
-        create_task_with_policy(self.connection)
-        generate_notification_reminder_work(
-            self.connection,
-            work_instance_id="service-stale-work",
-            notification_policy_id="service-policy",
-            eligible_at_utc="2026-06-07T09:00:00Z",
-            created_at_utc=NOW,
-        )
-        create_next_item_version(
-            self.connection,
-            item_id="service-task",
-            target_version=1,
-            audit_id="audit-service-task-v2",
-            created_at_utc="2026-06-07T11:00:00Z",
-            created_by_subject_id=SUBJECT_ID,
-        )
-
-        eligible = list_eligible_work(self.connection, now_utc="2026-06-07T12:00:00Z")
-        self.assertEqual([row["work_instance_id"] for row in eligible], ["service-stale-work"])
-        gate = prepare_work_attempt(
-            self.connection,
-            attempt_id="service-stale-work-attempt",
-            work_instance_id="service-stale-work",
-            adapter_name="notification",
-            idempotency_key="service-stale-work",
-            request_envelope={"body": "Submit forms"},
-            attempted_at_utc="2026-06-07T12:00:00Z",
-        )
-        self.assertTrue(gate.may_start_external_write)
-
-    def test_disabled_policy_blocks_reminder_work(self) -> None:
-        create_task_with_policy(self.connection)
-        generate_notification_reminder_work(
-            self.connection,
-            work_instance_id="service-disabled-policy-work",
-            notification_policy_id="service-policy",
-            eligible_at_utc="2026-06-07T09:00:00Z",
-            created_at_utc=NOW,
-        )
-        with self.connection:
-            self.connection.execute(
-                "UPDATE notification_policies SET status = 'disabled' WHERE policy_id = 'service-policy'"
-            )
-
-        self.assertEqual(list_eligible_work(self.connection, now_utc=NOW), [])
-        with self.assertRaisesRegex(SpineValidationError, "stale_work_instance"):
-            prepare_work_attempt(
-                self.connection,
-                work_instance_id="service-disabled-policy-work",
-                adapter_name="notification",
-                idempotency_key="service-disabled-policy-work",
-                request_envelope={"body": "Submit forms"},
-                attempted_at_utc=NOW,
-            )
-
-    def test_cancelled_or_archived_item_blocks_reminder_work(self) -> None:
-        create_task_with_policy(self.connection)
-        generate_notification_reminder_work(
-            self.connection,
-            work_instance_id="service-terminal-item-work",
-            notification_policy_id="service-policy",
-            eligible_at_utc="2026-06-07T09:00:00Z",
-            created_at_utc=NOW,
-        )
-        cancel_task(
-            self.connection,
-            item_id="service-task",
-            target_version=1,
-            cancelled_at_utc="2026-06-07T11:00:00Z",
-            cancelled_by_subject_id=SUBJECT_ID,
-            audit_id="audit-service-task-cancel",
-        )
-
-        self.assertEqual(list_eligible_work(self.connection, now_utc="2026-06-07T12:00:00Z"), [])
-        with self.assertRaisesRegex(SpineValidationError, "stale_work_instance"):
-            require_processable_work(self.connection, "service-terminal-item-work")
-
-        archive_item(
-            self.connection,
-            item_id="service-task",
-            target_version=2,
-            archived_at_utc="2026-06-07T13:00:00Z",
-            archived_by_subject_id=SUBJECT_ID,
-            audit_id="audit-service-task-archive",
-        )
-        with self.assertRaisesRegex(SpineValidationError, "stale_work_instance"):
-            require_processable_work(self.connection, "service-terminal-item-work")
-
-    def test_work_outcome_start_and_succeed(self) -> None:
-        create_task_with_policy(self.connection)
-        generate_notification_reminder_work(
-            self.connection,
-            work_instance_id="service-work-success",
-            notification_policy_id="service-policy",
-            eligible_at_utc="2026-06-07T09:00:00Z",
-            created_at_utc=NOW,
-        )
-
+    def test_work_lifecycle_success_retry_failure_and_cancel(self) -> None:
+        succeeded_seed = self._seed("service-success")
+        succeeded_id = str(succeeded_seed["work_instance_id"])
         started = start_work(
             self.connection,
-            work_instance_id="service-work-success",
-            started_at_utc="2026-06-07T10:01:00Z",
+            work_instance_id=succeeded_id,
+            started_at_utc=ELIGIBLE,
             reason_code="processor_started",
         )
         self.assertEqual(started.status, "in_progress")
-        self.assertEqual(started.attempt_count, 1)
-
         succeeded = succeed_work(
             self.connection,
-            work_instance_id="service-work-success",
-            succeeded_at_utc="2026-06-07T10:02:00Z",
+            work_instance_id=succeeded_id,
+            succeeded_at_utc="2026-08-01T01:01:00Z",
             reason_code="delivered",
         )
-        work = get_work_instance(self.connection, "service-work-success")
         self.assertEqual(succeeded.status, "succeeded")
-        self.assertEqual(work["status"], "succeeded")
-        self.assertEqual(work["reason_code"], "delivered")
-        self.assertEqual(list_eligible_work(self.connection, now_utc="2026-06-07T10:03:00Z"), [])
 
-    def test_work_retry_returns_in_progress_work_to_eligible_after_retry_time(self) -> None:
-        create_task_with_policy(self.connection)
-        generate_notification_reminder_work(
-            self.connection,
-            work_instance_id="service-work-retry",
-            notification_policy_id="service-policy",
-            eligible_at_utc="2026-06-07T09:00:00Z",
-            created_at_utc=NOW,
-        )
-        start_work(
-            self.connection,
-            work_instance_id="service-work-retry",
-            started_at_utc="2026-06-07T10:01:00Z",
-        )
-
+        retry_seed = self._seed("service-retry")
+        retry_id = str(retry_seed["work_instance_id"])
+        start_work(self.connection, work_instance_id=retry_id, started_at_utc=ELIGIBLE)
         retried = retry_work(
             self.connection,
-            work_instance_id="service-work-retry",
-            next_attempt_at_utc="2026-06-07T10:30:00Z",
-            updated_at_utc="2026-06-07T10:02:00Z",
+            work_instance_id=retry_id,
+            next_attempt_at_utc="2026-08-01T01:30:00Z",
+            updated_at_utc="2026-08-01T01:01:00Z",
             reason_code="transient_adapter_failure",
         )
-
         self.assertEqual(retried.status, "eligible")
-        self.assertEqual(retried.attempt_count, 1)
-        self.assertEqual(list_eligible_work(self.connection, now_utc="2026-06-07T10:29:00Z"), [])
-        eligible = list_eligible_work(self.connection, now_utc="2026-06-07T10:30:00Z")
-        self.assertEqual([row["work_instance_id"] for row in eligible], ["service-work-retry"])
-
-    def test_work_fail_and_cancel_record_reason_codes(self) -> None:
-        create_task_with_policy(self.connection)
-        generate_notification_reminder_work(
-            self.connection,
-            work_instance_id="service-work-fail",
-            notification_policy_id="service-policy",
-            eligible_at_utc="2026-06-07T09:00:00Z",
-            created_at_utc=NOW,
+        self.assertNotIn(
+            retry_id,
+            [row["work_instance_id"] for row in list_eligible_work(
+                self.connection, now_utc="2026-08-01T01:29:59Z"
+            )],
         )
+        self.assertIn(
+            retry_id,
+            [row["work_instance_id"] for row in list_eligible_work(
+                self.connection, now_utc="2026-08-01T01:30:00Z"
+            )],
+        )
+
+        failed_seed = self._seed("service-fail")
+        failed_id = str(failed_seed["work_instance_id"])
         fail_work(
             self.connection,
-            work_instance_id="service-work-fail",
-            failed_at_utc="2026-06-07T10:01:00Z",
+            work_instance_id=failed_id,
+            failed_at_utc="2026-08-01T01:01:00Z",
             reason_code="recipient_unreachable",
         )
-        failed = get_work_instance(self.connection, "service-work-fail")
-        self.assertEqual(failed["status"], "failed")
-        self.assertEqual(failed["reason_code"], "recipient_unreachable")
+        self.assertEqual(get_work_instance(self.connection, failed_id)["reason_code"], "recipient_unreachable")
 
-        generate_notification_reminder_work(
-            self.connection,
-            work_instance_id="service-work-cancel",
-            notification_policy_id="service-policy",
-            eligible_at_utc="2026-06-07T09:00:00Z",
-            created_at_utc=NOW,
-        )
+        cancelled_seed = self._seed("service-cancel")
+        cancelled_id = str(cancelled_seed["work_instance_id"])
         cancel_work(
             self.connection,
-            work_instance_id="service-work-cancel",
-            cancelled_at_utc="2026-06-07T10:02:00Z",
+            work_instance_id=cancelled_id,
+            cancelled_at_utc="2026-08-01T01:01:00Z",
             reason_code="policy_disabled",
         )
-        cancelled = get_work_instance(self.connection, "service-work-cancel")
-        self.assertEqual(cancelled["status"], "cancelled")
-        self.assertEqual(cancelled["reason_code"], "policy_disabled")
+        self.assertEqual(get_work_instance(self.connection, cancelled_id)["status"], "cancelled")
 
-    def test_work_outcomes_reject_invalid_transitions_and_allow_active_historical_reminders(self) -> None:
-        create_task_with_policy(self.connection)
-        generate_notification_reminder_work(
-            self.connection,
-            work_instance_id="service-work-invalid",
-            notification_policy_id="service-policy",
-            eligible_at_utc="2026-06-07T09:00:00Z",
-            created_at_utc=NOW,
-        )
-
+    def test_invalid_work_transition_is_rejected(self) -> None:
+        seeded = self._seed("service-invalid-transition")
         with self.assertRaisesRegex(SpineValidationError, "work_outcome_rejected"):
             succeed_work(
                 self.connection,
-                work_instance_id="service-work-invalid",
-                succeeded_at_utc="2026-06-07T10:01:00Z",
+                work_instance_id=str(seeded["work_instance_id"]),
+                succeeded_at_utc=ELIGIBLE,
             )
 
-        create_next_item_version(
-            self.connection,
-            item_id="service-task",
-            target_version=1,
-            audit_id="audit-service-task-v2-outcomes",
-            created_at_utc="2026-06-07T11:00:00Z",
-            created_by_subject_id=SUBJECT_ID,
+    def test_policy_disable_removes_work_from_eligibility(self) -> None:
+        seeded = self._seed("service-disabled")
+        current = self._current_version(seeded["item_id"])
+        response = handle(
+            "reminder.disable",
+            {
+                "command_id": "cmd-service-disable",
+                "actor_subject_id": SUBJECT_ID,
+                "item_id": seeded["item_id"],
+                "target_version": str(current),
+                "notification_intent_id": seeded["notification_intent_id"],
+                "notification_policy_id": seeded["notification_policy_id"],
+                "disabled_at_utc": "2026-08-01T00:10:00Z",
+            },
+            CommandContext(ledger=self.connection),
         )
-        started = start_work(
-            self.connection,
-            work_instance_id="service-work-invalid",
-            started_at_utc="2026-06-07T11:01:00Z",
-        )
-        self.assertEqual(started.status, "in_progress")
+        self.assertTrue(response["ok"], response)
+        self.assertEqual(list_eligible_work(self.connection, now_utc=ELIGIBLE), [])
+        with self.assertRaisesRegex(SpineValidationError, "stale_work_instance"):
+            require_processable_work(self.connection, str(seeded["work_instance_id"]))
 
-    def test_plan_projection_sync_and_prepare_candidate_action_attempt(self) -> None:
-        create_task_with_policy(self.connection)
-
+    def test_projection_and_candidate_attempt_gates_remain_fail_closed(self) -> None:
+        seeded = self._seed("service-projection")
+        item_id = str(seeded["item_id"])
+        current = self._current_version(item_id)
         planned = plan_projection_sync(
             self.connection,
             candidate_action_id="service-candidate",
-            item_id="service-task",
+            item_id=item_id,
             created_at_utc=NOW,
             evidence_ref="service-plan",
         )
-        self.assertEqual(planned.item_version, 1)
-        self.assertEqual(get_candidate_action(self.connection, "service-candidate")["action_kind"], "sync_projection")
-
+        self.assertEqual(planned.item_version, current)
         gate = prepare_candidate_action_attempt(
             self.connection,
             attempt_id="service-candidate-attempt",
             candidate_action_id="service-candidate",
             adapter_name="projection-planner",
             idempotency_key="service-candidate",
-            request_envelope={"item_id": "service-task"},
-            attempted_at_utc="2026-06-07T10:01:00Z",
+            request_envelope={"item_id": item_id},
+            attempted_at_utc=NOW,
         )
-        attempt = get_side_effect_attempt(self.connection, gate.attempt.attempt_id)
-        self.assertEqual(attempt["candidate_action_id"], "service-candidate")
-        self.assertEqual(attempt["item_id"], "service-task")
+        self.assertEqual(
+            get_side_effect_attempt(self.connection, gate.attempt.attempt_id)["candidate_action_id"],
+            "service-candidate",
+        )
+        self.assertEqual(get_candidate_action(self.connection, "service-candidate")["status"], "open")
 
-    def test_prepare_projection_attempt_rejects_stale_source_version(self) -> None:
-        create_task_with_policy(self.connection)
         create_external_projection(
             self.connection,
             projection_id="service-projection",
-            item_id="service-task",
+            item_id=item_id,
             adapter_name="calendar",
             external_ref="external-service-task",
             projection_status="current",
-            last_projected_version=1,
+            last_projected_version=current,
             updated_at_utc=NOW,
         )
         create_next_item_version(
             self.connection,
-            item_id="service-task",
-            target_version=1,
-            audit_id="audit-service-task-v2",
-            created_at_utc="2026-06-07T11:00:00Z",
+            item_id=item_id,
+            target_version=current,
+            audit_id="audit-service-projection-vnext",
+            created_at_utc="2026-08-01T00:10:00Z",
             created_by_subject_id=SUBJECT_ID,
+            supporting_command_id="cmd-service-projection-forward",
         )
-
         with self.assertRaisesRegex(SpineValidationError, "side_effect_attempt_rejected"):
             prepare_projection_attempt(
                 self.connection,
                 attempt_id="service-stale-projection-attempt",
                 projection_id="service-projection",
-                item_id="service-task",
-                source_item_version=1,
+                item_id=item_id,
+                source_item_version=current,
                 adapter_name="calendar",
                 idempotency_key="service-stale-projection",
-                request_envelope={"summary": "Submit forms"},
-                attempted_at_utc="2026-06-07T12:00:00Z",
+                request_envelope={"summary": "Canonical notification test"},
+                attempted_at_utc="2026-08-01T00:11:00Z",
             )
 
-    def test_item_service_read_surface_returns_current_truth(self) -> None:
-        create_task_with_policy(self.connection)
+    def test_item_read_surface_returns_canonical_policy_truth(self) -> None:
+        seeded = self._seed("service-read")
+        current = get_current_item(self.connection, str(seeded["item_id"]))
 
-        current = get_current_item(self.connection, "service-task")
+        self.assertEqual(current["item_id"], seeded["item_id"])
+        policy = current["notification_policies"][0]
+        self.assertEqual(policy["notification_intent_id"], seeded["notification_intent_id"])
+        self.assertEqual(policy["notification_policy_id"], seeded["notification_policy_id"])
+        self.assertEqual(policy["schedule"]["kind"], "once")
 
-        self.assertEqual(current["item_id"], "service-task")
-        self.assertEqual(current["current_version"], 1)
-        self.assertEqual(current["notification_policies"][0]["policy_id"], "service-policy")
+    def _seed(self, prefix: str) -> dict[str, object]:
+        return seed_notification_work(
+            self.connection,
+            prefix=prefix,
+            subject_id=SUBJECT_ID,
+            now_utc=NOW,
+            eligible_at_utc=ELIGIBLE,
+        )
 
-
-def create_task_with_policy(connection) -> None:
-    create_task_v1(
-        connection,
-        item_id="service-task",
-        audit_id="audit-service-task",
-        created_at_utc=NOW,
-        created_by_subject_id=SUBJECT_ID,
-        title="Submit forms",
-        notification_policies=(
-            NotificationPolicyInput(
-                policy_id="service-policy",
-                recipient_subject_id=SUBJECT_ID,
-                trigger_anchor=TemporalAnchorInput(
-                    anchor_id="service-policy-trigger",
-                    anchor_kind="instant_utc",
-                    utc_instant="2026-06-07T09:00:00Z",
-                ),
-            ),
-        ),
-    )
-
-
-def insert_subject(connection) -> None:
-    with connection:
-        connection.execute(
-            """
-            INSERT INTO subjects (
-              subject_id, subject_kind, display_name, status, created_at_utc, updated_at_utc
-            )
-            VALUES (?, 'person', 'Chris', 'active', ?, ?)
-            """,
-            (SUBJECT_ID, NOW, NOW),
+    def _current_version(self, item_id: object) -> int:
+        return int(
+            self.connection.execute(
+                "SELECT current_version FROM coordination_items WHERE item_id = ?",
+                (str(item_id),),
+            ).fetchone()[0]
         )
 
 

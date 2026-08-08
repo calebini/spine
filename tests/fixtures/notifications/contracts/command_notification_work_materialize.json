@@ -1,0 +1,14 @@
+{
+  "command": "notification_work.materialize",
+  "request": {
+    "command_id": "cmd_example_hourly_countdown_materialize",
+    "actor_subject_id": "subject_example_owner",
+    "item_id": "item_example_event",
+    "target_version": "2",
+    "materialized_at_utc": "2026-08-08T00:00:00Z",
+    "notification_intent_id": "notification_intent_example_hourly_countdown",
+    "range_start_utc": "2026-08-08T00:00:00Z",
+    "range_end_utc": "2026-08-09T00:00:00Z",
+    "limit": "100"
+  }
+}

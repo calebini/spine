@@ -8,17 +8,14 @@ import unittest
 from pathlib import Path
 
 from spine.commands import CommandContext, handle
-from spine.commands.cli import _generated_command_id, main as cli_main
+from spine.commands.cli import _generated_command_id
+from spine.commands.cli import main as cli_main
 from spine.core.hashing import hash_canonical_json
 from spine.ledger import connect, initialize_schema
-from spine.services import list_eligible_work
 
 MVP_FIXTURE_DIR = Path(__file__).parent / "fixtures" / "command_responses" / "mvp"
 CONTRACT_MANIFEST = Path(__file__).parents[1] / "contracts" / "command-fixture-manifest.json"
 COMMAND_RESPONSE_SCHEMA = Path(__file__).parents[1] / "contracts" / "schemas" / "command-response.schema.json"
-
-
-OPENCLAW = {"openclaw": {"binding_name": "openclaw", "channel": "whatsapp", "configured": True}}
 
 
 class AgentCommandContractMvpTests(unittest.TestCase):
@@ -58,248 +55,6 @@ class AgentCommandContractMvpTests(unittest.TestCase):
                 response = handle(command, {}, self.context)
                 self.assertNotEqual(response.get("error", {}).get("code"), "unsupported_command")
 
-    def test_daily_event_recurrence_expands_as_stable_virtual_occurrences(self) -> None:
-        created = handle(
-            "event.create",
-            {
-                "command_id": "cmd-daily-standup",
-                "actor_subject_id": "agent",
-                "created_at_utc": "2026-07-25T12:00:00Z",
-                "title": "Daily standup",
-                "all_day": False,
-                "start_anchor": {
-                    "anchor_kind": "local_instant",
-                    "local_date": "2026-07-25",
-                    "local_time": "08:00",
-                    "timezone": "America/Denver",
-                    "recurrence_rule": "freq=daily",
-                },
-                "end_anchor": {
-                    "anchor_kind": "local_instant",
-                    "local_date": "2026-07-25",
-                    "local_time": "08:30",
-                    "timezone": "America/Denver",
-                },
-            },
-            self.context,
-        )
-
-        self.assertTrue(created["ok"])
-        self.assertEqual(
-            created["event_detail"]["start_anchor"]["recurrence_rule"],
-            "FREQ=DAILY;INTERVAL=1",
-        )
-        rows_before_expansion = {
-            table: self.connection.execute(f"SELECT COUNT(*) FROM {table}").fetchone()[0]
-            for table in (
-                "coordination_items",
-                "temporal_anchors",
-                "audit_log",
-                "work_instances",
-                "side_effect_attempts",
-            )
-        }
-        expanded = handle(
-            "item.occurrences",
-            {
-                "item_id": created["item_id"],
-                "range_start_local_date": "2026-07-27",
-                "range_end_local_date": "2026-07-30",
-            },
-            self.context,
-        )
-        rows_after_expansion = {
-            table: self.connection.execute(f"SELECT COUNT(*) FROM {table}").fetchone()[0]
-            for table in rows_before_expansion
-        }
-
-        self.assertTrue(expanded["ok"])
-        self.assertEqual(rows_after_expansion, rows_before_expansion)
-        self.assertEqual(expanded["recurrence_rule"], "FREQ=DAILY;INTERVAL=1")
-        self.assertEqual(
-            [
-                row["occurrence_event_detail"]["start_anchor"]["local_date"]
-                for row in expanded["occurrences"]
-            ],
-            ["2026-07-27", "2026-07-28", "2026-07-29"],
-        )
-        self.assertEqual(
-            expanded["occurrences"][0]["occurrence_event_detail"]["end_anchor"]["local_date"],
-            "2026-07-27",
-        )
-        self.assertNotIn("event_detail", expanded["occurrences"][0])
-        self.assertNotIn(
-            "anchor_id",
-            expanded["occurrences"][0]["occurrence_event_detail"]["start_anchor"],
-        )
-        overlap = handle(
-            "item.occurrences",
-            {
-                "item_id": created["item_id"],
-                "range_start_local_date": "2026-07-28",
-                "range_end_local_date": "2026-07-29",
-            },
-            self.context,
-        )
-        self.assertEqual(
-            expanded["occurrences"][1]["occurrence_id"],
-            overlap["occurrences"][0]["occurrence_id"],
-        )
-
-    def test_equivalent_recurring_event_reschedule_is_a_noop(self) -> None:
-        created = handle(
-            "event.create",
-            {
-                **event_request("cmd-recurring-noop-create"),
-                "start_anchor": {
-                    "anchor_kind": "local_instant",
-                    "local_date": "2026-07-25",
-                    "local_time": "08:00",
-                    "timezone": "America/Denver",
-                    "recurrence_rule": "FREQ=DAILY",
-                },
-            },
-            self.context,
-        )
-
-        response = handle(
-            "event.reschedule",
-            {
-                "command_id": "cmd-recurring-noop-reschedule",
-                "actor_subject_id": "agent",
-                "item_id": created["item_id"],
-                "target_version": 1,
-                "rescheduled_at_utc": "2026-07-25T12:05:00Z",
-                "all_day": False,
-                "start_anchor": {
-                    "anchor_kind": "local_instant",
-                    "local_date": "2026-07-25",
-                    "local_time": "08:00",
-                    "timezone": "America/Denver",
-                    "recurrence_rule": "freq=daily;interval=1",
-                },
-            },
-            self.context,
-        )
-
-        self.assertTrue(response["ok"])
-        self.assertFalse(response["rescheduled"])
-        self.assertEqual(response["current_version"], "1")
-        self.assertEqual(
-            self.connection.execute(
-                "SELECT COUNT(*) FROM temporal_anchors"
-            ).fetchone()[0],
-            1,
-        )
-
-    def test_daily_task_due_recurrence_and_count_are_queryable(self) -> None:
-        created = handle(
-            "task.create",
-            {
-                **task_request("cmd-daily-task"),
-                "due_anchor": {
-                    "anchor_kind": "local_instant",
-                    "local_date": "2026-07-25",
-                    "local_time": "08:00",
-                    "timezone": "America/Denver",
-                    "recurrence_rule": "FREQ=DAILY;COUNT=2",
-                },
-            },
-            self.context,
-        )
-        expanded = handle(
-            "item.occurrences",
-            {
-                "item_id": created["item_id"],
-                "range_start_local_date": "2026-07-01",
-                "range_end_local_date": "2026-08-01",
-                "limit": "10",
-            },
-            self.context,
-        )
-
-        self.assertTrue(expanded["ok"])
-        self.assertEqual(len(expanded["occurrences"]), 2)
-        self.assertTrue(all(row["virtual"] for row in expanded["occurrences"]))
-        self.assertEqual(
-            expanded["occurrences"][1]["occurrence_task_detail"]["due_anchor"]["local_date"],
-            "2026-07-26",
-        )
-        self.assertNotIn("task_detail", expanded["occurrences"][1])
-
-    def test_recurrence_rejects_unsupported_rules_and_anchor_roles(self) -> None:
-        weekly = handle(
-            "event.create",
-            {
-                **event_request("cmd-weekly-not-yet"),
-                "start_anchor": {
-                    "anchor_kind": "local_instant",
-                    "local_date": "2026-07-25",
-                    "local_time": "08:00",
-                    "timezone": "America/Denver",
-                    "recurrence_rule": "FREQ=WEEKLY",
-                },
-            },
-            self.context,
-        )
-        recurring_end = handle(
-            "event.create",
-            {
-                **event_request("cmd-recurring-end"),
-                "end_anchor": {
-                    "anchor_kind": "local_instant",
-                    "local_date": "2026-07-25",
-                    "local_time": "09:00",
-                    "timezone": "America/Denver",
-                    "recurrence_rule": "FREQ=DAILY",
-                },
-            },
-            self.context,
-        )
-        utc_recurrence = handle(
-            "event.create",
-            {
-                **event_request("cmd-utc-recurrence"),
-                "start_anchor": {
-                    "anchor_kind": "instant_utc",
-                    "utc_instant": "2026-07-25T14:00:00Z",
-                    "recurrence_rule": "FREQ=DAILY",
-                },
-            },
-            self.context,
-        )
-
-        self.assertEqual(weekly["error"]["field"], "start_anchor.recurrence_rule")
-        self.assertEqual(recurring_end["error"]["field"], "end_anchor.recurrence_rule")
-        self.assertEqual(utc_recurrence["error"]["field"], "start_anchor.recurrence_rule")
-
-    def test_recurrence_rejects_a_nonexistent_seed_time_without_partial_write(self) -> None:
-        baseline_items = self.connection.execute(
-            "SELECT COUNT(*) FROM coordination_items"
-        ).fetchone()[0]
-
-        response = handle(
-            "event.create",
-            {
-                **event_request("cmd-dst-gap-seed"),
-                "start_anchor": {
-                    "anchor_kind": "local_instant",
-                    "local_date": "2026-03-08",
-                    "local_time": "02:30",
-                    "timezone": "America/Denver",
-                    "recurrence_rule": "FREQ=DAILY",
-                },
-            },
-            self.context,
-        )
-
-        item_count = self.connection.execute(
-            "SELECT COUNT(*) FROM coordination_items"
-        ).fetchone()[0]
-        self.assertFalse(response["ok"])
-        self.assertEqual(response["error"]["code"], "invalid_request")
-        self.assertEqual(item_count, baseline_items)
-
     def test_occurrence_query_requires_configured_recurrence(self) -> None:
         created = handle("event.create", event_request("cmd-single-event"), self.context)
 
@@ -307,8 +62,8 @@ class AgentCommandContractMvpTests(unittest.TestCase):
             "item.occurrences",
             {
                 "item_id": created["item_id"],
-                "range_start_local_date": "2026-07-25",
-                "range_end_local_date": "2026-07-26",
+                "range_start": "2026-07-25T00:00:00Z",
+                "range_end": "2026-07-26T00:00:00Z",
             },
             self.context,
         )
@@ -490,7 +245,9 @@ class AgentCommandContractMvpTests(unittest.TestCase):
         self.assertEqual(count, 0)
 
     def test_missing_required_field_uses_public_error_code(self) -> None:
-        response = handle("event.create", {key: value for key, value in event_request("cmd-missing-field").items() if key != "command_id"}, self.context)
+        response = handle(
+            "event.create", {key: value for key, value in event_request("cmd-missing-field").items() if key != "command_id"}, self.context
+        )
 
         self.assertFalse(response["ok"])
         self.assertEqual(response["error"]["code"], "missing_required_field")
@@ -541,14 +298,24 @@ class AgentCommandContractMvpTests(unittest.TestCase):
                 "unsupported_field",
                 "start_anchor.utc_instant",
             ),
-            ("local_date_missing", {"anchor_kind": "local_date", "local_date": "2026-06-06"}, "missing_required_field", "start_anchor.timezone"),
+            (
+                "local_date_missing",
+                {"anchor_kind": "local_date", "local_date": "2026-06-06"},
+                "missing_required_field",
+                "start_anchor.timezone",
+            ),
             (
                 "local_date_forbidden",
                 {"anchor_kind": "local_date", "local_date": "2026-06-06", "timezone": "Europe/Paris", "local_time": "09:00"},
                 "unsupported_field",
                 "start_anchor.local_time",
             ),
-            ("utc_window_missing", {"anchor_kind": "utc_window", "window_start_utc": "2026-06-06T07:00:00Z"}, "missing_required_field", "start_anchor.window_end_utc"),
+            (
+                "utc_window_missing",
+                {"anchor_kind": "utc_window", "window_start_utc": "2026-06-06T07:00:00Z"},
+                "missing_required_field",
+                "start_anchor.window_end_utc",
+            ),
             (
                 "utc_window_forbidden",
                 {
@@ -560,10 +327,20 @@ class AgentCommandContractMvpTests(unittest.TestCase):
                 "unsupported_field",
                 "start_anchor.timezone",
             ),
-            ("local_window_missing", {"anchor_kind": "local_window", "local_date": "2026-06-06"}, "missing_required_field", "start_anchor.timezone"),
+            (
+                "local_window_missing",
+                {"anchor_kind": "local_window", "local_date": "2026-06-06"},
+                "missing_required_field",
+                "start_anchor.timezone",
+            ),
             (
                 "local_window_forbidden",
-                {"anchor_kind": "local_window", "local_date": "2026-06-06", "timezone": "Europe/Paris", "utc_instant": "2026-06-06T07:00:00Z"},
+                {
+                    "anchor_kind": "local_window",
+                    "local_date": "2026-06-06",
+                    "timezone": "Europe/Paris",
+                    "utc_instant": "2026-06-06T07:00:00Z",
+                },
                 "unsupported_field",
                 "start_anchor.utc_instant",
             ),
@@ -942,8 +719,23 @@ class AgentCommandContractMvpTests(unittest.TestCase):
         task_for_cancel = handle("task.create", task_request("cmd-receipt-task-cancel-target"), self.context)
         relation_source = handle("task.create", task_request("cmd-receipt-relation-source"), self.context)
         relation_target = handle("event.create", event_request("cmd-receipt-relation-target"), self.context)
-        reminder_target = handle("task.create", task_request("cmd-receipt-reminder-target"), self.context)
+        reminder_target = handle("event.create", event_request("cmd-receipt-reminder-target"), self.context)
         self.bootstrap_subject("receipt-recipient")
+        handle(
+            "delivery_target.upsert",
+            {
+                "command_id": "cmd-receipt-delivery-target",
+                "actor_subject_id": "agent",
+                "delivery_target_id": "receipt-recipient-whatsapp",
+                "owner_kind": "subject",
+                "owner_subject_id": "receipt-recipient",
+                "channel": "whatsapp",
+                "adapter_name": "openclaw",
+                "target_ref": "receipt-recipient@example",
+                "updated_at_utc": "2026-06-06T10:17:30Z",
+            },
+            self.context,
+        )
         writes.extend(
             [
                 (
@@ -990,11 +782,28 @@ class AgentCommandContractMvpTests(unittest.TestCase):
                         "item_id": reminder_target["item_id"],
                         "target_version": 1,
                         "created_at_utc": "2026-06-06T10:18:00Z",
-                        "work_subject_ref": "receipt-recipient",
+                        "recipient_kind": "subject",
+                        "recipient_subject_id": "receipt-recipient",
+                        "delivery_target_id": "receipt-recipient-whatsapp",
                         "channel": "whatsapp",
-                        "eligible_at_utc": "2026-06-06T11:18:00Z",
+                        "notification": {
+                            "authoring_contract": "spine.notification-schedule-authoring.v1",
+                            "target": {
+                                "anchor_role": "event_start",
+                                "application_scope": "item",
+                            },
+                            "schedule": {
+                                "kind": "once",
+                                "at": {
+                                    "kind": "target_offset",
+                                    "offset_basis": "elapsed",
+                                    "offset_seconds": "-3600",
+                                },
+                            },
+                            "late_handling": {"kind": "skip"},
+                        },
                     },
-                    CommandContext(ledger=self.connection, adapter_bindings=OPENCLAW),
+                    self.context,
                 ),
             ]
         )
@@ -1055,7 +864,9 @@ class AgentCommandContractMvpTests(unittest.TestCase):
         metadata = handle("relation.create", {**request, "command_id": "cmd-relation-metadata", "metadata_json": "{}"}, self.context)
         duplicate = handle("relation.create", {**request, "command_id": "cmd-relation-dup"}, self.context)
         listed = handle("relation.list", {"item_id": event["item_id"], "include_derived_aliases": True}, self.context)
-        blocks = handle("relation.list", {"item_id": event["item_id"], "relation_type": "blocks", "include_derived_aliases": True}, self.context)
+        blocks = handle(
+            "relation.list", {"item_id": event["item_id"], "relation_type": "blocks", "include_derived_aliases": True}, self.context
+        )
 
         self.assertTrue(created["created"])
         self.assertFalse(metadata["ok"])
@@ -1067,170 +878,6 @@ class AgentCommandContractMvpTests(unittest.TestCase):
         self.assertEqual(blocks["relations"][0]["source_item_id"], event["item_id"])
         self.assertEqual(blocks["relations"][0]["target_item_id"], task["item_id"])
         self.assertEqual(blocks["relations"][0]["result_kind"], "derived_alias")
-
-    def test_reminder_create_is_durable_only_duplicate_safe_and_never_sends(self) -> None:
-        event = handle("event.create", event_request("cmd-reminder-event"), self.context)
-        self.bootstrap_subject("recipient")
-        request = {
-            "command_id": "cmd-reminder",
-            "actor_subject_id": "agent",
-            "item_id": event["item_id"],
-            "target_version": 1,
-            "created_at_utc": "2026-06-06T11:00:00Z",
-            "work_subject_ref": "recipient",
-            "channel": "whatsapp",
-            "eligible_at_utc": "2026-06-06T12:00:00Z",
-        }
-
-        missing_binding = handle("reminder.create", request, self.context)
-        created = handle("reminder.create", request, CommandContext(ledger=self.connection, adapter_bindings=OPENCLAW))
-        duplicate = handle(
-            "reminder.create",
-            {**request, "command_id": "cmd-reminder-if-absent", "if_absent": True},
-            CommandContext(ledger=self.connection, adapter_bindings=OPENCLAW),
-        )
-        stale_duplicate = handle(
-            "reminder.create",
-            {**request, "command_id": "cmd-reminder-stale-duplicate"},
-            CommandContext(ledger=self.connection, adapter_bindings=OPENCLAW),
-        )
-        attempts = self.connection.execute("SELECT COUNT(*) FROM side_effect_attempts").fetchone()[0]
-
-        self.assertEqual(missing_binding["error"]["code"], "environment_failure")
-        self.assertTrue(created["created"])
-        self.assertFalse(duplicate["created"])
-        self.assertEqual(stale_duplicate["error"]["code"], "stale_version")
-        self.assertEqual(stale_duplicate["error"]["field"], "target_version")
-        self.assertEqual(created["predicted_delivery"]["send_boundary"], "no_external_send_from_authoring_command")
-        self.assertEqual(attempts, 0)
-
-    def test_repeated_reminder_create_keeps_all_active_reminders_processable(self) -> None:
-        event = handle("event.create", event_request("cmd-multi-reminder-event"), self.context)
-        self.bootstrap_subject("multi-reminder-recipient")
-        command_context = CommandContext(ledger=self.connection, adapter_bindings=OPENCLAW)
-        created = []
-        for index, eligible_at in enumerate(
-            (
-                "2026-06-06T11:45:00Z",
-                "2026-06-06T11:50:00Z",
-                "2026-06-06T11:55:00Z",
-                "2026-06-06T12:00:00Z",
-            ),
-            start=1,
-        ):
-            created.append(
-                handle(
-                    "reminder.create",
-                    {
-                        "command_id": f"cmd-multi-reminder-{index}",
-                        "actor_subject_id": "agent",
-                        "item_id": event["item_id"],
-                        "target_version": index,
-                        "created_at_utc": f"2026-06-06T11:0{index}:00Z",
-                        "work_subject_ref": "multi-reminder-recipient",
-                        "channel": "whatsapp",
-                        "eligible_at_utc": eligible_at,
-                    },
-                    command_context,
-                )
-            )
-
-        eligible = list_eligible_work(self.connection, now_utc="2026-06-06T12:00:00Z")
-
-        self.assertTrue(all(response["ok"] and response["created"] for response in created))
-        self.assertEqual([response["version"] for response in created], ["2", "3", "4", "5"])
-        self.assertEqual(
-            [row["work_instance_id"] for row in eligible],
-            [response["work_instance_id"] for response in created],
-        )
-
-    def test_group_delivery_target_reminder_create_is_first_class(self) -> None:
-        task = handle("task.create", task_request("cmd-routed-reminder-task"), self.context)
-        group = handle(
-            "subject_group.upsert",
-            {
-                "command_id": "cmd-routed-group",
-                "actor_subject_id": "agent",
-                "group_id": "stage-group",
-                "group_kind": "transport_group",
-                "display_name": "Stage group",
-                "updated_at_utc": "2026-06-06T10:10:00Z",
-            },
-            self.context,
-        )
-        target = handle(
-            "delivery_target.upsert",
-            {
-                "command_id": "cmd-routed-target",
-                "actor_subject_id": "agent",
-                "delivery_target_id": "target-stage-whatsapp",
-                "owner_kind": "subject_group",
-                "owner_group_id": "stage-group",
-                "channel": "whatsapp",
-                "adapter_name": "openclaw",
-                "target_ref": "120363409469948475@g.us",
-                "display_name": "Stage WhatsApp group",
-                "updated_at_utc": "2026-06-06T10:11:00Z",
-            },
-            self.context,
-        )
-        request = {
-            "command_id": "cmd-routed-reminder",
-            "actor_subject_id": "agent",
-            "item_id": task["item_id"],
-            "target_version": 1,
-            "created_at_utc": "2026-06-06T11:00:00Z",
-            "recipient_kind": "subject_group",
-            "recipient_group_id": "stage-group",
-            "delivery_target_id": "target-stage-whatsapp",
-            "channel": "whatsapp",
-            "eligible_at_utc": "2026-06-06T12:00:00Z",
-        }
-
-        created = handle("reminder.create", request, CommandContext(ledger=self.connection, adapter_bindings=OPENCLAW))
-        duplicate = handle(
-            "reminder.create",
-            {**request, "command_id": "cmd-routed-reminder-if-absent", "if_absent": True},
-            CommandContext(ledger=self.connection, adapter_bindings=OPENCLAW),
-        )
-        mixed = handle(
-            "reminder.create",
-            {**request, "command_id": "cmd-routed-reminder-mixed", "work_subject_ref": "stage-group"},
-            CommandContext(ledger=self.connection, adapter_bindings=OPENCLAW),
-        )
-        retarget = handle(
-            "delivery_target.upsert",
-            {
-                "command_id": "cmd-routed-target-retarget",
-                "actor_subject_id": "agent",
-                "delivery_target_id": "target-stage-whatsapp",
-                "owner_kind": "subject_group",
-                "owner_group_id": "stage-group",
-                "channel": "whatsapp",
-                "adapter_name": "openclaw",
-                "target_ref": "changed@g.us",
-                "display_name": "Stage WhatsApp group",
-                "updated_at_utc": "2026-06-06T12:01:00Z",
-            },
-            self.context,
-        )
-        work = self.connection.execute(
-            "SELECT delivery_target_id, work_subject_ref FROM work_instances WHERE work_instance_id = ?",
-            (created["work_instance_id"],),
-        ).fetchone()
-
-        self.assertTrue(group["created"])
-        self.assertTrue(target["created"])
-        self.assertTrue(created["created"])
-        self.assertFalse(duplicate["created"])
-        self.assertEqual(mixed["error"]["code"], "invalid_request")
-        self.assertEqual(retarget["error"]["code"], "semantic_conflict")
-        self.assertEqual(created["predicted_delivery"]["delivery_target_id"], "target-stage-whatsapp")
-        self.assertEqual(created["predicted_delivery"]["target_ref"], "120363409469948475@g.us")
-        self.assertEqual(created["predicted_delivery"]["recipient_kind"], "subject_group")
-        self.assertEqual(created["predicted_delivery"]["recipient_group_id"], "stage-group")
-        self.assertEqual(work["delivery_target_id"], "target-stage-whatsapp")
-        self.assertEqual(work["work_subject_ref"], "subject_group:stage-group")
 
     def test_cli_returns_one_json_response_and_normative_exit_code(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -1392,6 +1039,21 @@ class AgentCommandContractMvpTests(unittest.TestCase):
             event = handle("event.create", event_request("cmd-cli-exit-event"), context)
             task = handle("task.create", task_request("cmd-cli-exit-task"), context)
             handle(
+                "delivery_target.upsert",
+                {
+                    "command_id": "cmd-cli-unavailable-target",
+                    "actor_subject_id": "agent",
+                    "delivery_target_id": "cli-unavailable-target",
+                    "owner_kind": "subject",
+                    "owner_subject_id": "recipient",
+                    "channel": "whatsapp",
+                    "adapter_name": "unavailable-adapter",
+                    "target_ref": "recipient@example",
+                    "updated_at_utc": "2026-06-06T10:00:30Z",
+                },
+                context,
+            )
+            handle(
                 "relation.create",
                 {
                     "command_id": "cmd-cli-exit-relation",
@@ -1460,9 +1122,26 @@ class AgentCommandContractMvpTests(unittest.TestCase):
                     "item_id": event["item_id"],
                     "target_version": 1,
                     "created_at_utc": "2026-06-06T11:00:00Z",
-                    "work_subject_ref": "recipient",
+                    "recipient_kind": "subject",
+                    "recipient_subject_id": "recipient",
+                    "delivery_target_id": "cli-unavailable-target",
                     "channel": "whatsapp",
-                    "eligible_at_utc": "2026-06-06T12:00:00Z",
+                    "notification": {
+                        "authoring_contract": "spine.notification-schedule-authoring.v1",
+                        "target": {
+                            "anchor_role": "event_start",
+                            "application_scope": "item",
+                        },
+                        "schedule": {
+                            "kind": "once",
+                            "at": {
+                                "kind": "target_offset",
+                                "offset_basis": "elapsed",
+                                "offset_seconds": "-3600",
+                            },
+                        },
+                        "late_handling": {"kind": "skip"},
+                    },
                 },
             )
             invalid_json_exit, invalid_json_payload, _ = self.run_cli(
@@ -1702,41 +1381,6 @@ def build_mvp_fixture_responses() -> dict[str, object]:
     task = record("task_create.json", "task.create", fixture_task_request("cmd-fixture-task-create"))
     record("item_show_event.json", "item.show", {"item_id": event["item_id"]})
     record("item_list_event.json", "item.list", {"item_type": "event"})
-    recurring_event = record(
-        "recurring_event_source_create.json",
-        "event.create",
-        {
-            "command_id": "cmd-fixture-recurring-event",
-            "actor_subject_id": "agent",
-            "created_at_utc": "2026-07-25T12:00:00Z",
-            "title": "Daily standup",
-            "all_day": False,
-            "start_anchor": {
-                "anchor_kind": "local_instant",
-                "local_date": "2026-07-25",
-                "local_time": "08:00",
-                "timezone": "America/Denver",
-                "recurrence_rule": "FREQ=DAILY",
-            },
-            "end_anchor": {
-                "anchor_kind": "local_instant",
-                "local_date": "2026-07-25",
-                "local_time": "08:30",
-                "timezone": "America/Denver",
-            },
-        },
-    )
-    record(
-        "item_occurrences_daily.json",
-        "item.occurrences",
-        {
-            "item_id": recurring_event["item_id"],
-            "range_start_local_date": "2026-07-27",
-            "range_end_local_date": "2026-07-30",
-            "limit": "3",
-        },
-    )
-    responses.pop("recurring_event_source_create.json")
     record(
         "event_update.json",
         "event.update",
@@ -1842,40 +1486,6 @@ def build_mvp_fixture_responses() -> dict[str, object]:
     )
     record("relation_list.json", "relation.list", {"item_id": task["item_id"], "include_derived_aliases": True})
     record(
-        "reminder_create.json",
-        "reminder.create",
-        {
-            "command_id": "cmd-fixture-reminder",
-            "actor_subject_id": "agent",
-            "item_id": task2["item_id"],
-            "target_version": 2,
-            "created_at_utc": "2026-06-06T11:00:00Z",
-            "work_subject_ref": "recipient",
-            "channel": "whatsapp",
-            "eligible_at_utc": "2026-06-06T12:00:00Z",
-        },
-        CommandContext(ledger=connection, adapter_bindings=OPENCLAW),
-    )
-    routed_task = record("routed_reminder_task_source_create.json", "task.create", fixture_task_request("cmd-fixture-routed-reminder-task"))
-    responses.pop("routed_reminder_task_source_create.json")
-    record(
-        "reminder_create_routed_group.json",
-        "reminder.create",
-        {
-            "command_id": "cmd-fixture-routed-reminder",
-            "actor_subject_id": "agent",
-            "item_id": routed_task["item_id"],
-            "target_version": 1,
-            "created_at_utc": "2026-06-06T11:05:00Z",
-            "recipient_kind": "subject_group",
-            "recipient_group_id": "stage-group",
-            "delivery_target_id": "stage-whatsapp-target",
-            "channel": "whatsapp",
-            "eligible_at_utc": "2026-06-06T12:05:00Z",
-        },
-        CommandContext(ledger=connection, adapter_bindings=OPENCLAW),
-    )
-    record(
         "dry_run_event_create.json",
         "event.create",
         fixture_event_request("cmd-fixture-dry-run-event"),
@@ -1907,22 +1517,6 @@ def build_mvp_fixture_responses() -> dict[str, object]:
             "all_day": False,
         },
         CommandContext(ledger=connection, dry_run=True),
-    )
-    record(
-        "reminder_duplicate_if_absent.json",
-        "reminder.create",
-        {
-            "command_id": "cmd-fixture-reminder-if-absent",
-            "actor_subject_id": "agent",
-            "item_id": task2["item_id"],
-            "target_version": 2,
-            "created_at_utc": "2026-06-06T11:30:00Z",
-            "work_subject_ref": "recipient",
-            "channel": "whatsapp",
-            "eligible_at_utc": "2026-06-06T12:00:00Z",
-            "if_absent": True,
-        },
-        CommandContext(ledger=connection, adapter_bindings=OPENCLAW),
     )
     record(
         "stale_version_failure.json",
@@ -1967,7 +1561,7 @@ def build_mvp_fixture_responses() -> dict[str, object]:
             "command_id": "cmd-fixture-relation-dup",
             "actor_subject_id": "agent",
             "source_item_id": task2["item_id"],
-            "source_target_version": 3,
+            "source_target_version": 2,
             "target_item_id": task["item_id"],
             "target_target_version": 3,
             "relation_type": "depends_on",

@@ -1,0 +1,61 @@
+{
+  "vector_version": "spine.recurrence-computed-vector.v1",
+  "authoring": {
+    "time_basis": "local_instant",
+    "timezone": "America/Denver",
+    "timezone_database_version": "2026a",
+    "rules": [
+      {
+        "frequency": "DAILY",
+        "interval": "3",
+        "seed": "2026-08-03T08:00:00",
+        "start_bound": "2026-08-03T08:00:00",
+        "end_condition": { "kind": "unbounded" }
+      }
+    ]
+  },
+  "normalization_context": {
+    "source_item_id": "item_vector_morning",
+    "seed_anchor_id": "anchor_vector_start",
+    "seed_scheduled_fact": "2026-08-03T08:00:00",
+    "created_item_version": "1",
+    "source_item_version": "1",
+    "command_id": "cmd_vector_recurrence"
+  },
+  "expected": {
+    "recurrence_set_id": "recurrence_set_72dee1f164f80fcdf5ba4625634b68bf2b8127f357eb48175d2c7d351ee4b9ee",
+    "normalized_recurrence_set_hash": "84966173221364e4eee23d3c1f47547b466d1a2a4f1fb8d7d09ffb2e6cc3fa0a",
+    "recurrence_revision_id": "recurrence_revision_74b873f7820db21433970611cb71835dabd757eb35b92a31ae86ee6e40b1e8ce",
+    "segment_ids": [
+      "recurrence_segment_a2e7a32af253e9e187bbe858beec24ad9816ca95a3368a723d3845bdd11d2419"
+    ],
+    "rule_ids": [
+      "recurrence_rule_cf1ed89b99537b6ad5c95a119ec26aec18c5ea837b839e6a40151350bd698faf"
+    ],
+    "rdate_ids": [],
+    "scheduled_facts": [
+      "2026-08-03T08:00:00",
+      "2026-08-06T08:00:00",
+      "2026-08-09T08:00:00",
+      "2026-08-12T08:00:00"
+    ],
+    "utc_instants": [
+      "2026-08-03T14:00:00Z",
+      "2026-08-06T14:00:00Z",
+      "2026-08-09T14:00:00Z",
+      "2026-08-12T14:00:00Z"
+    ]
+  },
+  "canonical_preimage_bytes": {
+    "recurrence_set_id": "{\"canonical_json_version\":\"spine.canonical-json.v1\",\"contract_version\":\"spine.recurrence.contract.v1\",\"created_item_version\":\"1\",\"derivation_version\":\"spine.recurrence-set-id.v1\",\"normalization_version\":\"spine.recurrence.normalization.v1\",\"seed_anchor_id\":\"anchor_vector_start\",\"source_item_id\":\"item_vector_morning\",\"time_basis\":\"local_instant\",\"timezone\":\"America/Denver\",\"timezone_database_version\":\"2026a\"}",
+    "normalized_recurrence_set_hash": "{\"canonical_json_version\":\"spine.canonical-json.v1\",\"contract_version\":\"spine.recurrence.contract.v1\",\"created_item_version\":\"1\",\"derivation_version\":\"normalized_recurrence_set_hash.v1\",\"exdates\":[],\"normalization_version\":\"spine.recurrence.normalization.v1\",\"overrides\":[],\"rdates\":[],\"recurrence_set_id\":\"recurrence_set_72dee1f164f80fcdf5ba4625634b68bf2b8127f357eb48175d2c7d351ee4b9ee\",\"revision_number\":\"1\",\"rules\":[{\"end_condition\":{\"kind\":\"unbounded\"},\"frequency\":\"DAILY\",\"interval\":\"3\",\"seed\":\"2026-08-03T08:00:00\",\"segment_ref\":\"0\",\"start_bound\":\"2026-08-03T08:00:00\",\"status\":\"active\"}],\"seed_anchor_id\":\"anchor_vector_start\",\"segments\":[{\"active_start\":\"2026-08-03T08:00:00\",\"segment_index\":\"0\",\"source_revision_id\":\"initial\",\"status\":\"active\"}],\"source_item_id\":\"item_vector_morning\",\"source_item_version\":\"1\",\"time_basis\":\"local_instant\",\"timezone\":\"America/Denver\",\"timezone_database_version\":\"2026a\"}",
+    "recurrence_revision_id": "{\"canonical_json_version\":\"spine.canonical-json.v1\",\"command_id\":\"cmd_vector_recurrence\",\"contract_version\":\"spine.recurrence.contract.v1\",\"derivation_version\":\"spine.recurrence-revision-id.v1\",\"normalization_version\":\"spine.recurrence.normalization.v1\",\"normalized_recurrence_set_hash\":\"84966173221364e4eee23d3c1f47547b466d1a2a4f1fb8d7d09ffb2e6cc3fa0a\",\"recurrence_set_id\":\"recurrence_set_72dee1f164f80fcdf5ba4625634b68bf2b8127f357eb48175d2c7d351ee4b9ee\",\"revision_number\":\"1\"}",
+    "segment_ids": [
+      "{\"active_start\":\"2026-08-03T08:00:00\",\"canonical_json_version\":\"spine.canonical-json.v1\",\"contract_version\":\"spine.recurrence.contract.v1\",\"derivation_version\":\"spine.recurrence-segment-id.v1\",\"normalization_version\":\"spine.recurrence.normalization.v1\",\"recurrence_revision_id\":\"recurrence_revision_74b873f7820db21433970611cb71835dabd757eb35b92a31ae86ee6e40b1e8ce\",\"segment_index\":\"0\",\"source_revision_id\":\"initial\",\"status\":\"active\"}"
+    ],
+    "rule_ids": [
+      "{\"canonical_json_version\":\"spine.canonical-json.v1\",\"contract_version\":\"spine.recurrence.contract.v1\",\"derivation_version\":\"spine.recurrence-rule-id.v1\",\"end_condition\":{\"kind\":\"unbounded\"},\"frequency\":\"DAILY\",\"interval\":\"3\",\"normalization_version\":\"spine.recurrence.normalization.v1\",\"recurrence_revision_id\":\"recurrence_revision_74b873f7820db21433970611cb71835dabd757eb35b92a31ae86ee6e40b1e8ce\",\"seed\":\"2026-08-03T08:00:00\",\"segment_ref\":\"0\",\"start_bound\":\"2026-08-03T08:00:00\",\"status\":\"active\"}"
+    ],
+    "rdate_ids": []
+  }
+}

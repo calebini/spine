@@ -1,0 +1,13 @@
+{
+  "command": "reminder.disable",
+  "request": {
+    "command_id": "cmd_example_hourly_countdown_disable",
+    "actor_subject_id": "subject_example_owner",
+    "item_id": "item_example_event",
+    "target_version": "3",
+    "notification_intent_id": "notification_intent_example_hourly_countdown",
+    "notification_policy_id": "notification_policy_example_hourly_countdown_v2",
+    "disabled_at_utc": "2026-08-07T18:20:00Z",
+    "reason_code": "user_disabled"
+  }
+}

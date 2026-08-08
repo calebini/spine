@@ -3,9 +3,9 @@ import tempfile
 import unittest
 from pathlib import Path
 
+from spine.ledger import connect
 from spine.runtime.seed_demo import seed_demo_ledger
 from spine.runtime.tickerd_runner import SpineRunnerPaths, main, run_foreground
-from spine.ledger import connect
 
 try:
     import tickerd  # noqa: F401
@@ -34,7 +34,7 @@ class TickerdRunnerTests(unittest.TestCase):
             state_dir = root / "state"
             connection = connect(db_path)
             try:
-                seed_demo_ledger(connection)
+                seeded = seed_demo_ledger(connection)
                 result = run_foreground(
                     connection,
                     state_dir=state_dir,
@@ -68,7 +68,7 @@ class TickerdRunnerTests(unittest.TestCase):
             self.assertIn("cycle_summary", events)
             self.assertIn("shutdown", events)
             blocked = next(record for record in records if record["event"] == "work_item_blocked")
-            self.assertEqual(blocked["item_id"], "demo-work-submit-forms-reminder")
+            self.assertEqual(blocked["item_id"], seeded["work_instance_id"])
             self.assertEqual(blocked["reason"], "SIDE_EFFECTS_BLOCKED")
             summary = next(record for record in records if record["event"] == "cycle_summary")
             self.assertEqual(summary["items_scanned"], 1)

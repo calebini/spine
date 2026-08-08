@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import contextlib
 import io
 import json
@@ -5,20 +7,20 @@ import sqlite3
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 from spine.core import SpineValidationError
-from spine.ledger import (
-    connect,
-    initialize_schema,
-)
+from spine.ledger import connect, initialize_schema
 from spine.ledger.migrate import (
     CURRENT_SCHEMA_VERSION,
     current_schema_version,
-    EXPECTED_SCHEMA_INDEXES,
-    main as migrate_main,
     migrate_schema,
     verify_schema,
 )
+from spine.ledger.migrate import (
+    main as migrate_main,
+)
+from spine.ledger.sqlite import schema_sql
 
 
 class LedgerMigrationTests(unittest.TestCase):
@@ -28,121 +30,154 @@ class LedgerMigrationTests(unittest.TestCase):
     def tearDown(self) -> None:
         self.connection.close()
 
-    def test_migrate_empty_database_initializes_latest_when_allowed(self) -> None:
+    def test_empty_database_initializes_and_verifies_latest_schema(self) -> None:
         result = migrate_schema(self.connection, initialize_if_empty=True)
 
         self.assertEqual(result.before_version, 0)
         self.assertEqual(result.after_version, CURRENT_SCHEMA_VERSION)
         self.assertTrue(result.initialized)
         self.assertTrue(result.verified)
-        self.assertEqual(current_schema_version(self.connection), CURRENT_SCHEMA_VERSION)
+        verification = verify_schema(self.connection)
+        self.assertEqual(verification.schema_version, 7)
+        self.assertEqual(verification.integrity_check, "ok")
 
-    def test_migrate_empty_database_rejects_without_initialization_opt_in(self) -> None:
+    def test_empty_database_requires_explicit_initialization(self) -> None:
         with self.assertRaisesRegex(SpineValidationError, "ledger_schema_uninitialized"):
             migrate_schema(self.connection)
 
-    def test_migrate_v1_database_applies_pending_migrations(self) -> None:
-        initialize_schema(self.connection)
-        rewind_to_v1_without_access_indexes(self.connection)
-        self.assertEqual(current_schema_version(self.connection), 1)
-        self.assertNotIn("work_instances_eligible_due_idx", index_names(self.connection))
-        self.connection.execute("DROP TABLE command_receipts")
+    def test_true_v6_schema_crosses_the_one_shot_boundary(self) -> None:
+        self._initialize_v6()
 
         result = migrate_schema(self.connection)
 
-        self.assertEqual(result.before_version, 1)
-        self.assertEqual(result.after_version, CURRENT_SCHEMA_VERSION)
-        self.assertEqual(result.applied_versions, (2, 3, 4, 5, 6))
-        self.assertIn("work_instances_eligible_due_idx", index_names(self.connection))
-        self.assertIn("command_receipts_item_created_idx", index_names(self.connection))
-        self.assertIn("delivery_targets_active_no_account_unique", index_names(self.connection))
-        self.assertIn("work_instances_delivery_target_idx", index_names(self.connection))
+        self.assertEqual(result.before_version, 6)
+        self.assertEqual(result.applied_versions, (7,))
+        self.assertEqual(result.after_version, 7)
+        self.assertTrue(result.verified)
+        columns = {row["name"] for row in self.connection.execute("PRAGMA table_info(temporal_anchors)")}
+        self.assertNotIn("recurrence_rule", columns)
+        self.assertIn("timezone_database_version", columns)
+        self.assertIsNotNone(
+            self.connection.execute("SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'notification_schedules'").fetchone()
+        )
 
-    def test_migrate_v4_replaces_work_staleness_trigger(self) -> None:
+    def test_preflight_rejects_each_populated_provisional_scheduling_surface(self) -> None:
+        for surface in ("recurrence_rule", "notification_policy", "work_instance"):
+            with self.subTest(surface=surface):
+                connection = connect()
+                try:
+                    connection.executescript(schema_sql())
+                    if surface == "recurrence_rule":
+                        connection.execute(
+                            """
+                            INSERT INTO temporal_anchors (
+                              anchor_id, anchor_kind, local_date, local_time, timezone,
+                              recurrence_rule, created_at_utc
+                            ) VALUES (
+                              'anchor-provisional', 'local_instant', '2026-08-08', '08:00:00',
+                              'America/Los_Angeles', 'FREQ=DAILY', '2026-08-01T00:00:00Z'
+                            )
+                            """
+                        )
+                    else:
+                        self._seed_v6_item(connection)
+                        if surface == "notification_policy":
+                            connection.execute(
+                                """
+                                INSERT INTO temporal_anchors (
+                                  anchor_id, anchor_kind, utc_instant, created_at_utc
+                                ) VALUES (
+                                  'anchor-provisional', 'instant_utc',
+                                  '2026-08-08T08:00:00Z', '2026-08-01T00:00:00Z'
+                                )
+                                """
+                            )
+                            connection.execute(
+                                """
+                                INSERT INTO notification_policies (
+                                  policy_id, item_id, version, recipient_subject_id,
+                                  trigger_anchor_id, status, created_at_utc
+                                ) VALUES (
+                                  'policy-provisional', 'item-migration', 1, 'subject-owner',
+                                  'anchor-provisional', 'active', '2026-08-01T00:00:00Z'
+                                )
+                                """
+                            )
+                        else:
+                            connection.execute(
+                                """
+                                INSERT INTO work_instances (
+                                  work_instance_id, item_id, item_version, work_kind,
+                                  eligible_at_utc, status, attempt_count,
+                                  created_at_utc, updated_at_utc
+                                ) VALUES (
+                                  'work-provisional', 'item-migration', 1,
+                                  'notification_reminder', '2026-08-08T08:00:00Z',
+                                  'eligible', 0, '2026-08-01T00:00:00Z',
+                                  '2026-08-01T00:00:00Z'
+                                )
+                                """
+                            )
+                    connection.commit()
+
+                    with self.assertRaisesRegex(SpineValidationError, "ledger_migration_provisional_scheduling_data"):
+                        migrate_schema(connection)
+                    self.assertEqual(current_schema_version(connection), 6)
+                    self.assertIn(
+                        "recurrence_rule",
+                        {row["name"] for row in connection.execute("PRAGMA table_info(temporal_anchors)")},
+                    )
+                finally:
+                    connection.close()
+
+    def test_failed_v7_ddl_rolls_back_every_schema_change(self) -> None:
+        self._initialize_v6()
+        from spine.ledger.migrate import _migration_sql
+
+        migration = _migration_sql("0007_canonical_scheduling_notifications.sql")
+        broken = migration.replace(
+            "\nCOMMIT;\n",
+            "\nCREATE TABLE recurrence_sets (duplicate TEXT);\nCOMMIT;\n",
+        )
+        with patch("spine.ledger.migrate._migration_sql", return_value=broken), self.assertRaises(sqlite3.OperationalError):
+            migrate_schema(self.connection)
+
+        self.assertEqual(current_schema_version(self.connection), 6)
+        self.assertIn(
+            "recurrence_rule",
+            {row["name"] for row in self.connection.execute("PRAGMA table_info(temporal_anchors)")},
+        )
+        self.assertIsNone(
+            self.connection.execute("SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'recurrence_sets'").fetchone()
+        )
+        self.assertEqual(self.connection.execute("PRAGMA foreign_keys").fetchone()[0], 1)
+
+    def test_latest_constraints_reject_noncanonical_rows(self) -> None:
         initialize_schema(self.connection)
-        with self.connection:
-            self.connection.execute("DROP TRIGGER side_effect_attempts_staleness_insert")
+        with self.assertRaises(sqlite3.IntegrityError):
             self.connection.execute(
                 """
-                CREATE TRIGGER side_effect_attempts_staleness_insert
-                BEFORE INSERT ON side_effect_attempts
-                BEGIN
-                  SELECT 1;
-                END
-                """
-            )
-            self.connection.execute("DELETE FROM ledger_schema WHERE schema_version > 4")
-            self.connection.execute(
-                "INSERT INTO ledger_schema (schema_version, applied_at_utc) VALUES (4, '1970-01-01T00:00:00Z')"
+                INSERT INTO notification_schedules (
+                  schedule_id, policy_id, schedule_kind,
+                  normalized_notification_schedule_hash
+                ) VALUES ('schedule-invalid', 'policy-missing', 'unbounded', ?)
+                """,
+                ("a" * 64,),
             )
 
-        result = migrate_schema(self.connection)
-
-        trigger_sql = self.connection.execute(
-            "SELECT sql FROM sqlite_master WHERE type = 'trigger' AND name = 'side_effect_attempts_staleness_insert'"
-        ).fetchone()["sql"]
-        self.assertEqual(result.before_version, 4)
-        self.assertEqual(result.applied_versions, (5, 6))
-        self.assertIn("notification_policy_id", trigger_sql)
-        self.assertIn("event_status = 'scheduled'", trigger_sql)
-
-    def test_migrate_v5_adds_recurrence_contract_triggers(self) -> None:
-        initialize_schema(self.connection)
-        recurrence_triggers = {
-            "event_details_recurrence_contract_insert",
-            "task_details_recurrence_contract_insert",
-            "notification_policies_recurrence_contract_insert",
-        }
-        with self.connection:
-            for trigger_name in recurrence_triggers:
-                self.connection.execute(f"DROP TRIGGER {trigger_name}")
-            self.connection.execute("DELETE FROM ledger_schema")
-            self.connection.execute(
-                """
-                INSERT INTO ledger_schema (schema_version, applied_at_utc)
-                VALUES (5, '1970-01-01T00:00:00Z')
-                """
-            )
-
-        result = migrate_schema(self.connection)
-
-        installed = {
-            row["name"]
-            for row in self.connection.execute(
-                "SELECT name FROM sqlite_master WHERE type = 'trigger'"
-            )
-        }
-        self.assertEqual(result.before_version, 5)
-        self.assertEqual(result.applied_versions, (6,))
-        self.assertTrue(recurrence_triggers <= installed)
-
-    def test_verify_schema_rejects_missing_required_index(self) -> None:
+    def test_verify_rejects_missing_required_object_and_old_version(self) -> None:
         initialize_schema(self.connection)
         self.connection.execute("DROP INDEX work_instances_eligible_due_idx")
-
         with self.assertRaisesRegex(SpineValidationError, "ledger_schema_missing_indexes"):
             verify_schema(self.connection)
 
-    def test_verify_schema_rejects_missing_recurrence_trigger(self) -> None:
-        initialize_schema(self.connection)
-        self.connection.execute("DROP TRIGGER event_details_recurrence_contract_insert")
-
-        with self.assertRaisesRegex(SpineValidationError, "ledger_schema_missing_triggers"):
-            verify_schema(self.connection)
-
-    def test_verify_schema_rejects_old_schema_version(self) -> None:
-        initialize_schema(self.connection)
-        with self.connection:
-            self.connection.execute("DELETE FROM ledger_schema")
-            self.connection.execute(
-                """
-                INSERT INTO ledger_schema (schema_version, applied_at_utc)
-                VALUES (1, '1970-01-01T00:00:00Z')
-                """
-            )
-
-        with self.assertRaisesRegex(SpineValidationError, "ledger_schema_version_mismatch"):
-            verify_schema(self.connection)
+        connection = connect()
+        try:
+            connection.executescript(schema_sql())
+            with self.assertRaisesRegex(SpineValidationError, "ledger_schema_version_mismatch"):
+                verify_schema(connection)
+        finally:
+            connection.close()
 
     def test_migration_cli_initializes_empty_database(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -154,35 +189,53 @@ class LedgerMigrationTests(unittest.TestCase):
             payload = json.loads(output.getvalue())
             self.assertEqual(exit_code, 0)
             self.assertEqual(payload["before_version"], 0)
-            self.assertEqual(payload["after_version"], CURRENT_SCHEMA_VERSION)
+            self.assertEqual(payload["after_version"], 7)
             self.assertTrue(payload["initialized"])
-            connection = connect(db_path)
-            try:
-                self.assertEqual(current_schema_version(connection), CURRENT_SCHEMA_VERSION)
-            finally:
-                connection.close()
 
+    def _initialize_v6(self) -> None:
+        self.connection.executescript(schema_sql())
+        self.assertEqual(current_schema_version(self.connection), 6)
 
-def rewind_to_v1_without_access_indexes(connection: sqlite3.Connection) -> None:
-    with connection:
-        for index_name in sorted(EXPECTED_SCHEMA_INDEXES - {"coordination_item_relations_active_unique"}):
-            connection.execute(f"DROP INDEX IF EXISTS {index_name}")
-        connection.execute("DELETE FROM ledger_schema")
-        connection.execute(
-            """
-            INSERT INTO ledger_schema (schema_version, applied_at_utc)
-            VALUES (1, '1970-01-01T00:00:00Z')
-            """
-        )
-
-
-def index_names(connection: sqlite3.Connection) -> set[str]:
-    return {
-        row["name"]
-        for row in connection.execute(
-            "SELECT name FROM sqlite_master WHERE type = 'index'"
-        )
-    }
+    def _seed_v6_item(self, connection) -> None:
+        with connection:
+            connection.execute(
+                """
+                INSERT INTO subjects (
+                  subject_id, subject_kind, display_name, status, created_at_utc, updated_at_utc
+                ) VALUES (
+                  'subject-owner', 'person', 'Owner', 'active',
+                  '2026-08-01T00:00:00Z', '2026-08-01T00:00:00Z'
+                )
+                """
+            )
+            connection.execute(
+                """
+                INSERT INTO coordination_items (
+                  item_id, item_type, current_version, status, created_at_utc, updated_at_utc
+                ) VALUES (
+                  'item-migration', 'task', 1, 'active',
+                  '2026-08-01T00:00:00Z', '2026-08-01T00:00:00Z'
+                )
+                """
+            )
+            connection.execute(
+                """
+                INSERT INTO coordination_item_versions (
+                  item_id, version, title, intent_hash, normalized_fields_hash,
+                  created_at_utc, created_by_subject_id
+                ) VALUES (
+                  'item-migration', 1, 'Migration fixture', ?, ?,
+                  '2026-08-01T00:00:00Z', 'subject-owner'
+                )
+                """,
+                ("a" * 64, "b" * 64),
+            )
+            connection.execute(
+                """
+                INSERT INTO task_details (item_id, version, task_status)
+                VALUES ('item-migration', 1, 'open')
+                """
+            )
 
 
 if __name__ == "__main__":

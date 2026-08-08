@@ -5,9 +5,10 @@ from __future__ import annotations
 import argparse
 import sqlite3
 import sys
+from collections.abc import Sequence
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Sequence
+from typing import Any
 
 from spine.adapters import SpineTickerdWorkAdapter
 from spine.ledger import connect, initialize_schema
@@ -25,7 +26,7 @@ class SpineRunnerPaths:
     events_path: Path
 
     @classmethod
-    def from_state_dir(cls, state_dir: Path | str) -> "SpineRunnerPaths":
+    def from_state_dir(cls, state_dir: Path | str) -> SpineRunnerPaths:
         root = Path(state_dir)
         return cls(
             state_dir=root,
@@ -47,6 +48,8 @@ def run_foreground(
     reconcile_interval_ms: int = 5000,
     max_work_items_per_tick: int = 100,
     install_signal_handlers: bool = True,
+    scheduler_actor_subject_id: str | None = None,
+    materialization_horizon_seconds: int = 86_400,
 ) -> Any:
     """Run Spine work through Tickerd's foreground runner."""
 
@@ -65,7 +68,12 @@ def run_foreground(
         reconcile_interval_ms=reconcile_interval_ms,
         max_work_items_per_tick=max_work_items_per_tick,
     )
-    adapter = SpineTickerdWorkAdapter(connection, runtime_mode=runtime_mode)
+    adapter = SpineTickerdWorkAdapter(
+        connection,
+        runtime_mode=runtime_mode,
+        scheduler_actor_subject_id=scheduler_actor_subject_id,
+        materialization_horizon_seconds=materialization_horizon_seconds,
+    )
     events = JsonlFileEventSink(paths.events_path)
     kernel = RuntimeKernel(
         config,
@@ -93,6 +101,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         raise SystemExit("--max-cycles must be at least 1 when provided")
     if args.max_work_items < 1:
         raise SystemExit("--max-work-items must be at least 1")
+    if args.materialization_horizon_seconds < 1 or args.materialization_horizon_seconds > 31_622_400:
+        raise SystemExit("--materialization-horizon-seconds must be between 1 and 31622400")
 
     db_path = Path(args.db)
     if not db_path.exists() and not args.initialize_schema:
@@ -112,6 +122,8 @@ def main(argv: Sequence[str] | None = None) -> int:
             reconcile_interval_ms=args.reconcile_interval_ms,
             max_work_items_per_tick=args.max_work_items,
             install_signal_handlers=True,
+            scheduler_actor_subject_id=args.scheduler_actor_subject_id,
+            materialization_horizon_seconds=args.materialization_horizon_seconds,
         )
     finally:
         connection.close()
@@ -129,6 +141,10 @@ def _parse_args(argv: Sequence[str] | None) -> argparse.Namespace:
     parser.add_argument("--tick-interval-ms", type=int, default=1000, help="Tickerd tick interval.")
     parser.add_argument("--reconcile-interval-ms", type=int, default=5000, help="Tickerd reconcile cadence.")
     parser.add_argument("--max-work-items", type=int, default=100, help="Maximum work items to process per cycle.")
+    parser.add_argument("--scheduler-actor-subject-id", help="Existing subject used for deterministic scheduler receipts.")
+    parser.add_argument(
+        "--materialization-horizon-seconds", type=int, default=86400, help="Bounded future notification horizon per reconcile cycle."
+    )
     return parser.parse_args(argv)
 
 
@@ -140,9 +156,7 @@ def _tickerd_runner_types() -> tuple[Any, Any, Any, Any, Any, Any]:
         from tickerd.runner import ForegroundRunner
         from tickerd.sinks import JsonFileHealthSink
     except ImportError as exc:
-        raise RuntimeError(
-            "Tickerd is required for this runtime; install tickerd or put Tickerd's src directory on PYTHONPATH."
-        ) from exc
+        raise RuntimeError("Tickerd is required for this runtime; install tickerd or put Tickerd's src directory on PYTHONPATH.") from exc
     return TickerdConfig, RuntimeKernel, FileLockBackend, JsonFileHealthSink, JsonlFileEventSink, ForegroundRunner
 
 

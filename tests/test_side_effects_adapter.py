@@ -1,7 +1,7 @@
 import unittest
+from collections.abc import Mapping
 from dataclasses import dataclass
 from datetime import UTC, datetime
-from typing import Mapping
 
 from spine.adapters import (
     AttemptBackedSideEffectProcessor,
@@ -9,17 +9,9 @@ from spine.adapters import (
     NormalizedSideEffectResult,
     SideEffectBindingError,
 )
-from spine.ledger import (
-    NotificationPolicyInput,
-    TemporalAnchorInput,
-    connect,
-    create_task_v1,
-    get_side_effect_attempt,
-    get_work_instance,
-    initialize_schema,
-)
-from spine.services import generate_notification_reminder_work, start_work
-
+from spine.ledger import connect, get_side_effect_attempt, get_work_instance, initialize_schema
+from spine.services import start_work
+from tests.canonical_helpers import seed_notification_work
 
 NOW = "2026-06-07T10:00:00Z"
 SUBJECT_ID = "subject-1"
@@ -36,18 +28,17 @@ class SideEffectsAdapterTests(unittest.TestCase):
     def setUp(self) -> None:
         self.connection = connect()
         initialize_schema(self.connection)
-        insert_subject(self.connection)
-        create_task_with_policy(self.connection)
-        generate_notification_reminder_work(
+        self.seeded = seed_notification_work(
             self.connection,
-            work_instance_id="generic-work",
-            notification_policy_id="generic-policy",
+            prefix="generic-side-effect",
+            subject_id=SUBJECT_ID,
+            now_utc="2026-06-07T08:00:00Z",
             eligible_at_utc="2026-06-07T09:00:00Z",
-            created_at_utc=NOW,
         )
+        self.work_id = str(self.seeded["work_instance_id"])
         start_work(
             self.connection,
-            work_instance_id="generic-work",
+            work_instance_id=self.work_id,
             started_at_utc=NOW,
         )
 
@@ -69,9 +60,9 @@ class SideEffectsAdapterTests(unittest.TestCase):
             build_request=build_generic_request,
             sender=sender,
         )
-        outcome = processor(self.connection, get_work_instance(self.connection, "generic-work"), FakeEnvelope())
+        outcome = processor(self.connection, get_work_instance(self.connection, self.work_id), FakeEnvelope())
 
-        attempt = get_side_effect_attempt(self.connection, "generic-attempt-generic-work-1")
+        attempt = get_side_effect_attempt(self.connection, f"generic-attempt-{self.work_id}-1")
         self.assertEqual(outcome.status, "succeeded")
         self.assertEqual(attempt["adapter_name"], "generic-notifier")
         self.assertEqual(attempt["attempt_status"], "succeeded")
@@ -88,9 +79,9 @@ class SideEffectsAdapterTests(unittest.TestCase):
             sender=sender,
             binding_failure_reason_code="generic_binding_failed",
         )
-        outcome = processor(self.connection, get_work_instance(self.connection, "generic-work"), FakeEnvelope())
+        outcome = processor(self.connection, get_work_instance(self.connection, self.work_id), FakeEnvelope())
 
-        attempt = get_side_effect_attempt(self.connection, "generic-attempt-generic-work-1")
+        attempt = get_side_effect_attempt(self.connection, f"generic-attempt-{self.work_id}-1")
         self.assertEqual(outcome.status, "failed")
         self.assertEqual(outcome.reason_code, "generic_binding_failed")
         self.assertEqual(attempt["attempt_status"], "rejected")
@@ -117,41 +108,6 @@ def build_generic_request(
         request_envelope=message,
         attempted_at_utc=attempted_at_utc,
     )
-
-
-def create_task_with_policy(connection) -> None:
-    create_task_v1(
-        connection,
-        item_id="generic-task",
-        audit_id="audit-generic-task",
-        created_at_utc=NOW,
-        created_by_subject_id=SUBJECT_ID,
-        title="Submit forms",
-        notification_policies=(
-            NotificationPolicyInput(
-                policy_id="generic-policy",
-                recipient_subject_id=SUBJECT_ID,
-                trigger_anchor=TemporalAnchorInput(
-                    anchor_id="generic-policy-trigger",
-                    anchor_kind="instant_utc",
-                    utc_instant="2026-06-07T09:00:00Z",
-                ),
-            ),
-        ),
-    )
-
-
-def insert_subject(connection) -> None:
-    with connection:
-        connection.execute(
-            """
-            INSERT INTO subjects (
-              subject_id, subject_kind, display_name, status, created_at_utc, updated_at_utc
-            )
-            VALUES (?, 'person', 'Chris', 'active', ?, ?)
-            """,
-            (SUBJECT_ID, NOW, NOW),
-        )
 
 
 if __name__ == "__main__":

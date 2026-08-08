@@ -12,7 +12,6 @@ from spine.core.hashing import (
 from spine.ledger import assert_ledger_invariants, connect, initialize_schema, schema_sql
 from spine.ledger.migrate import CURRENT_SCHEMA_VERSION, current_schema_version
 
-
 NOW = "2026-06-06T10:00:00Z"
 
 
@@ -25,12 +24,7 @@ class LedgerSqliteTests(unittest.TestCase):
         self.connection.close()
 
     def test_schema_initializes_expected_tables_and_foreign_keys(self) -> None:
-        table_names = {
-            row["name"]
-            for row in self.connection.execute(
-                "SELECT name FROM sqlite_master WHERE type = 'table'"
-            )
-        }
+        table_names = {row["name"] for row in self.connection.execute("SELECT name FROM sqlite_master WHERE type = 'table'")}
 
         self.assertIn("subjects", table_names)
         self.assertIn("temporal_anchors", table_names)
@@ -68,12 +62,7 @@ class LedgerSqliteTests(unittest.TestCase):
                 connection.close()
 
     def test_schema_initializes_expected_indexes(self) -> None:
-        index_names = {
-            row["name"]
-            for row in self.connection.execute(
-                "SELECT name FROM sqlite_master WHERE type = 'index'"
-            )
-        }
+        index_names = {row["name"] for row in self.connection.execute("SELECT name FROM sqlite_master WHERE type = 'index'")}
 
         expected_indexes = {
             "audit_log_causation_idx",
@@ -148,28 +137,27 @@ class LedgerSqliteTests(unittest.TestCase):
             assert_ledger_invariants(self.connection)
 
     def test_event_bundle_with_task_detail_is_rejected_by_trigger(self) -> None:
-        with self.assertRaisesRegex(sqlite3.IntegrityError, "task_details requires"):
-            with self.connection:
-                insert_subject(self.connection)
-                insert_instant_anchor(self.connection, "task-anchor")
-                insert_item_shell(
-                    self.connection,
-                    item_id="event-with-task-detail",
-                    item_type="event",
-                )
-                insert_item_version(
-                    self.connection,
-                    item_id="event-with-task-detail",
-                    title="Wrong detail",
-                )
-                self.connection.execute(
-                    """
+        with self.assertRaisesRegex(sqlite3.IntegrityError, "task_details requires"), self.connection:
+            insert_subject(self.connection)
+            insert_instant_anchor(self.connection, "task-anchor")
+            insert_item_shell(
+                self.connection,
+                item_id="event-with-task-detail",
+                item_type="event",
+            )
+            insert_item_version(
+                self.connection,
+                item_id="event-with-task-detail",
+                title="Wrong detail",
+            )
+            self.connection.execute(
+                """
                     INSERT INTO task_details (
                       item_id, version, task_status, due_anchor_id
                     )
                     VALUES ('event-with-task-detail', 1, 'open', 'task-anchor')
                     """
-                )
+            )
 
     def test_non_contiguous_version_is_rejected_by_trigger(self) -> None:
         insert_valid_event_bundle(self.connection)
@@ -245,20 +233,19 @@ class LedgerSqliteTests(unittest.TestCase):
             assert_ledger_invariants(self.connection)
 
     def test_event_time_shape_is_rejected_by_trigger(self) -> None:
-        with self.assertRaisesRegex(sqlite3.IntegrityError, "event_details time shape"):
-            with self.connection:
-                insert_subject(self.connection)
-                insert_instant_anchor(self.connection, "event-start")
-                insert_item_shell(self.connection, item_id="bad-event", item_type="event")
-                insert_item_version(self.connection, item_id="bad-event", title="Bad event")
-                self.connection.execute(
-                    """
+        with self.assertRaisesRegex(sqlite3.IntegrityError, "event_details time shape"), self.connection:
+            insert_subject(self.connection)
+            insert_instant_anchor(self.connection, "event-start")
+            insert_item_shell(self.connection, item_id="bad-event", item_type="event")
+            insert_item_version(self.connection, item_id="bad-event", title="Bad event")
+            self.connection.execute(
+                """
                     INSERT INTO event_details (
                       item_id, version, event_status, all_day, start_anchor_id
                     )
                     VALUES ('bad-event', 1, 'scheduled', 1, 'event-start')
                     """
-                )
+            )
 
 
 def insert_subject(connection: sqlite3.Connection, subject_id: str = "subject-1") -> None:

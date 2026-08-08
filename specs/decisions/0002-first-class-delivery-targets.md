@@ -20,7 +20,7 @@ Exactly one owner reference is valid for a delivery target. Group delivery is fi
 
 Spine owns coordination truth. Adapters own vendor projection and side-effect execution details. A transport target is the address of a side effect, not the durable identity of the recipient.
 
-The current MVP command path overloaded `work_subject_ref` as both canonical recipient identity and OpenClaw delivery target. That was acceptable for disposable canary evidence, but it is not acceptable for production-like agent use because it conflates:
+The model must keep three distinct facts separate:
 
 - who or what the reminder is for
 - which channel should be used
@@ -32,10 +32,10 @@ Group delivery needs to be an ordinary routing case, not an exception. A househo
 
 `subjects` remains for people, agents, and durable subject identity anchors. `subject_groups` remains for households, teams, and other actor groupings.
 
-Reminder authoring has a production-like routed path that identifies the recipient owner and selected delivery target rather than relying on a vendor address as a subject ID. The legacy `work_subject_ref` branch remains compatibility-only for existing subject-recipient rows.
+Reminder authoring identifies both the recipient owner and the selected delivery target. `work_subject_ref` records recipient-owner provenance; it is never a transport destination.
 
 Runtime notification adapters must resolve outbound destination from the selected delivery target. They must not treat `subjects.subject_id`, `subject_groups.group_id`, or `work_instances.work_subject_ref` as a transport `target_ref`.
 
 `side_effect_attempts` remains Spine's canonical adapter attempt ledger. Delivery target routing does not reintroduce Kinflow's notification-specific `delivery_attempts` as a second ledger.
 
-Canary paths for production-like use should create or reuse an explicit recipient owner and delivery target. Any remaining path that stores a WhatsApp target as a `person` subject is legacy/disposable compatibility behavior.
+Canary paths create or reuse an explicit recipient owner and delivery target. A transport address MUST NOT be stored as a `person` subject.

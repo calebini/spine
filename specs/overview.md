@@ -1,7 +1,7 @@
 # Spine Overview
 
-Status: Draft v0.1.0  
-Scope: Canonical coordination ledger and planning fabric  
+Status: Draft v0.2.0
+Scope: Canonical coordination ledger and planning fabric
 Created: 2026-05-31
 
 ## 1. Purpose
@@ -24,6 +24,7 @@ Spine MUST own:
 - time semantics
 - location semantics
 - notification and work eligibility
+- deterministic notification schedule expansion and durable reminder materialization
 - projection state
 - adapter attempt outcomes
 - audit and replay facts
@@ -90,7 +91,7 @@ Only `event`, `task`, `project`, and `collection` need to be treated as near-ter
 
 Spine does not own:
 
-- daemon heartbeat, singleton locks, runtime modes, or cadence semantics
+- daemon heartbeat, singleton locks, runtime modes, or daemon-cycle cadence semantics
 - third-party calendar, map, messenger, or dashboard state
 - approval policy for unsafe or boundary-crossing actions
 - vendor-specific contact identity as canonical subject identity

@@ -1,0 +1,76 @@
+{
+  "vector_version": "spine.notification-computed-vector.v1",
+  "authoring": {
+    "authoring_contract": "spine.notification-schedule-authoring.v1",
+    "target": {
+      "anchor_role": "event_start",
+      "application_scope": "item"
+    },
+    "schedule": {
+      "kind": "repeat_window",
+      "start": {
+        "kind": "target_offset",
+        "offset_basis": "elapsed",
+        "offset_seconds": "-21600"
+      },
+      "stop": {
+        "kind": "target_offset",
+        "offset_basis": "elapsed",
+        "offset_seconds": "0"
+      },
+      "stop_inclusive": false,
+      "cadence": {
+        "kind": "fixed_elapsed",
+        "interval_seconds": "3600"
+      }
+    },
+    "late_handling": {
+      "kind": "deliver_within",
+      "grace_seconds": "900"
+    }
+  },
+  "normalization_context": {
+    "item_id": "item_vector_event",
+    "item_version": "1",
+    "command_id": "cmd_vector_notification",
+    "created_at_utc": "2026-08-01T00:00:00Z",
+    "recipient_kind": "subject",
+    "recipient_id": "subject_vector_owner",
+    "channel": "whatsapp",
+    "delivery_target_id": "delivery_target_vector"
+  },
+  "expansion_context": {
+    "targets": [
+      {
+        "target_scheduled_fact": "2026-08-08T18:00:00Z",
+        "target_utc_instant": "2026-08-08T18:00:00Z",
+        "lifecycle": "scheduled",
+        "actionable": true
+      }
+    ],
+    "evaluated_at_utc": "2026-08-08T11:59:00Z",
+    "range_start_utc": "2026-08-08T11:00:00Z",
+    "range_end_utc": "2026-08-08T19:00:00Z"
+  },
+  "expected": {
+    "notification_intent_id": "notification_intent_27e0817865268012bda8417def6c6531a5d6abc34d1e5a37a179caa76048ada4",
+    "normalized_notification_schedule_hash": "9e9a01cfa64d8066b18ab69929e7291428a613622e9b6ad380b4d5139bddf809",
+    "notification_schedule_id": "notification_schedule_eb154ee995878285e9db9cc650ed12a8fda5bac9feffd23c7288601295f07012",
+    "notification_policy_id": "notification_policy_9dbb3c08096faa4487648a358c9b9fcf4a7cee60076e094ff4c181b6253b12cc",
+    "opportunities": [
+      ["2026-08-08T12:00:00Z", "notification_schedule_slot_1ea2c9923ad23035663185eacfc77e1ebc68a725708dbf3cc4dc4b34052b74c6", "notification_opportunity_af78018ead4b66aeaac248a9e46d4fb2b8d4f2b85b37ea8d258a23724ec2282d"],
+      ["2026-08-08T13:00:00Z", "notification_schedule_slot_fc96bb8d3a71933bd83c4c3b50f5a23d0f5e8f75bbb4c973223cfd1651f45455", "notification_opportunity_d338682f1201695d28c83f1e85c3720c74a55e6be58d1db556111c8e9e7a2809"],
+      ["2026-08-08T14:00:00Z", "notification_schedule_slot_fe9fc4bc190d7c9319d6b1c7a1fce23d55fd955aebdb9c16e2b39d117b0f7894", "notification_opportunity_df2fc4ef08e5e1ec6bb5ec4d61aea8106a9b09ea9f3f30fed742383893ffbaa4"],
+      ["2026-08-08T15:00:00Z", "notification_schedule_slot_4fa96909b7efb100d4e144eb43d2548b322c91b105067026c5ea139ef9714117", "notification_opportunity_3dc28d5384d36b610df53150ae1350d16ea5e48f2fd1a655f94664275e1673c7"],
+      ["2026-08-08T16:00:00Z", "notification_schedule_slot_83f642d287d84fdf8a2f40661418517e6bb02bc0afbd5812bdbe9ae1e3a998fe", "notification_opportunity_2b18a630af37036a5be68a7350bca174c97a5248da0843ae48c03faad7b20afb"],
+      ["2026-08-08T17:00:00Z", "notification_schedule_slot_46dbaeb09d0bc4d3e6ccbe253bf58d5efb0670ba00b53d05a767f05e4bf4b7cd", "notification_opportunity_93b859d15881b57ca829189cd1574887ba5f9c1be8f751a54750db6221485c28"]
+    ],
+    "diagnostics": []
+  },
+  "canonical_preimage_bytes": {
+    "notification_intent_id": "{\"canonical_json_version\":\"spine.canonical-json.v1\",\"contract_version\":\"spine.notification-schedule.contract.v1\",\"derivation_version\":\"spine.notification-intent-id.v1\",\"intent_created_by_command_id\":\"cmd_vector_notification\",\"intent_created_item_version\":\"1\",\"item_id\":\"item_vector_event\",\"normalization_version\":\"spine.notification-schedule.normalization.v1\"}",
+    "normalized_notification_schedule_hash": "{\"canonical_json_version\":\"spine.canonical-json.v1\",\"contract_version\":\"spine.notification-schedule.contract.v1\",\"derivation_version\":\"spine.normalized-notification-schedule-hash.v1\",\"late_handling\":{\"grace_seconds\":\"900\",\"kind\":\"deliver_within\"},\"normalization_version\":\"spine.notification-schedule.normalization.v1\",\"schedule\":{\"cadence\":{\"interval_seconds\":\"3600\",\"kind\":\"fixed_elapsed\"},\"kind\":\"repeat_window\",\"start\":{\"kind\":\"target_offset\",\"offset_basis\":\"elapsed\",\"offset_seconds\":\"-21600\"},\"stop\":{\"kind\":\"target_offset\",\"offset_basis\":\"elapsed\",\"offset_seconds\":\"0\"},\"stop_inclusive\":false},\"target\":{\"anchor_role\":\"event_start\",\"application_scope\":\"item\"}}",
+    "notification_schedule_id": "{\"canonical_json_version\":\"spine.canonical-json.v1\",\"contract_version\":\"spine.notification-schedule.contract.v1\",\"derivation_version\":\"spine.notification-schedule-id.v1\",\"item_id\":\"item_vector_event\",\"item_version\":\"1\",\"normalization_version\":\"spine.notification-schedule.normalization.v1\",\"normalized_notification_schedule_hash\":\"9e9a01cfa64d8066b18ab69929e7291428a613622e9b6ad380b4d5139bddf809\",\"notification_intent_id\":\"notification_intent_27e0817865268012bda8417def6c6531a5d6abc34d1e5a37a179caa76048ada4\"}",
+    "notification_policy_id": "{\"canonical_json_version\":\"spine.canonical-json.v1\",\"channel\":\"whatsapp\",\"contract_version\":\"spine.notification-schedule.contract.v1\",\"created_at_utc\":\"2026-08-01T00:00:00Z\",\"created_by_command_id\":\"cmd_vector_notification\",\"delivery_target_id\":\"delivery_target_vector\",\"derivation_version\":\"spine.notification-policy-id.v1\",\"intent_created_by_command_id\":\"cmd_vector_notification\",\"intent_created_item_version\":\"1\",\"item_id\":\"item_vector_event\",\"item_version\":\"1\",\"normalization_version\":\"spine.notification-schedule.normalization.v1\",\"normalized_notification_schedule_hash\":\"9e9a01cfa64d8066b18ab69929e7291428a613622e9b6ad380b4d5139bddf809\",\"notification_intent_id\":\"notification_intent_27e0817865268012bda8417def6c6531a5d6abc34d1e5a37a179caa76048ada4\",\"notification_schedule_id\":\"notification_schedule_eb154ee995878285e9db9cc650ed12a8fda5bac9feffd23c7288601295f07012\",\"recipient_kind\":\"subject\",\"recipient_subject_id\":\"subject_vector_owner\",\"status\":\"active\",\"target\":{\"anchor_role\":\"event_start\",\"application_scope\":\"item\"}}"
+  }
+}

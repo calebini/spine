@@ -5,9 +5,10 @@ from __future__ import annotations
 import argparse
 import sqlite3
 import sys
+from collections.abc import Sequence
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
-from typing import Any, Sequence, TextIO
+from typing import Any, TextIO
 
 from spine.adapters import SpineTickerdWorkAdapter
 from spine.ledger import connect, initialize_schema
@@ -26,6 +27,8 @@ def run_observe_cycles(
     tick_interval_ms: int = 1000,
     reconcile_interval_ms: int = 5000,
     max_work_items_per_tick: int = 100,
+    scheduler_actor_subject_id: str | None = None,
+    materialization_horizon_seconds: int = 86_400,
 ) -> list[dict[str, Any]]:
     """Run a bounded Tickerd kernel loop against Spine eligible work."""
 
@@ -36,7 +39,12 @@ def run_observe_cycles(
         max_work_items_per_tick=max_work_items_per_tick,
     )
     events = JsonLineEventSink(stream)
-    adapter = SpineTickerdWorkAdapter(connection, runtime_mode=runtime_mode)
+    adapter = SpineTickerdWorkAdapter(
+        connection,
+        runtime_mode=runtime_mode,
+        scheduler_actor_subject_id=scheduler_actor_subject_id,
+        materialization_horizon_seconds=materialization_horizon_seconds,
+    )
     kernel = RuntimeKernel(
         config,
         mode_reader=adapter,
@@ -81,6 +89,8 @@ def main(argv: Sequence[str] | None = None) -> int:
             tick_interval_ms=args.tick_interval_ms,
             reconcile_interval_ms=args.reconcile_interval_ms,
             max_work_items_per_tick=args.max_work_items,
+            scheduler_actor_subject_id=args.scheduler_actor_subject_id,
+            materialization_horizon_seconds=args.materialization_horizon_seconds,
         )
     finally:
         connection.close()
@@ -97,6 +107,10 @@ def _parse_args(argv: Sequence[str] | None) -> argparse.Namespace:
     parser.add_argument("--tick-interval-ms", type=int, default=1000, help="Synthetic interval between bounded cycles.")
     parser.add_argument("--reconcile-interval-ms", type=int, default=5000, help="Tickerd reconcile cadence.")
     parser.add_argument("--max-work-items", type=int, default=100, help="Maximum work items to observe per cycle.")
+    parser.add_argument("--scheduler-actor-subject-id", help="Existing subject used for deterministic scheduler receipts.")
+    parser.add_argument(
+        "--materialization-horizon-seconds", type=int, default=86400, help="Bounded future notification horizon per reconcile cycle."
+    )
     return parser.parse_args(argv)
 
 
@@ -105,9 +119,7 @@ def _tickerd_runtime_types() -> tuple[Any, Any, Any]:
         from tickerd import RuntimeKernel, TickerdConfig
         from tickerd.events import JsonLineEventSink
     except ImportError as exc:
-        raise RuntimeError(
-            "Tickerd is required for this runtime; install tickerd or put Tickerd's src directory on PYTHONPATH."
-        ) from exc
+        raise RuntimeError("Tickerd is required for this runtime; install tickerd or put Tickerd's src directory on PYTHONPATH.") from exc
     return TickerdConfig, JsonLineEventSink, RuntimeKernel
 
 

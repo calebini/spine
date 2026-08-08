@@ -85,13 +85,6 @@
       "schema": "contracts/schemas/command-response.schema.json"
     },
     {
-      "branch": "daily_recurrence",
-      "command": "item.occurrences",
-      "expected_exit_code": 0,
-      "fixture": "tests/fixtures/command_responses/mvp/item_occurrences_daily.json",
-      "schema": "contracts/schemas/command-response.schema.json"
-    },
-    {
       "branch": "event",
       "command": "item.show",
       "expected_exit_code": 0,
@@ -110,27 +103,6 @@
       "command": "relation.list",
       "expected_exit_code": 0,
       "fixture": "tests/fixtures/command_responses/mvp/relation_list.json",
-      "schema": "contracts/schemas/command-response.schema.json"
-    },
-    {
-      "branch": "created_no_external_send",
-      "command": "reminder.create",
-      "expected_exit_code": 0,
-      "fixture": "tests/fixtures/command_responses/mvp/reminder_create.json",
-      "schema": "contracts/schemas/command-response.schema.json"
-    },
-    {
-      "branch": "duplicate_if_absent",
-      "command": "reminder.create",
-      "expected_exit_code": 0,
-      "fixture": "tests/fixtures/command_responses/mvp/reminder_duplicate_if_absent.json",
-      "schema": "contracts/schemas/command-response.schema.json"
-    },
-    {
-      "branch": "routed_group",
-      "command": "reminder.create",
-      "expected_exit_code": 0,
-      "fixture": "tests/fixtures/command_responses/mvp/reminder_create_routed_group.json",
       "schema": "contracts/schemas/command-response.schema.json"
     },
     {

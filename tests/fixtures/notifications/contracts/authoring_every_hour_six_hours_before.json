@@ -1,0 +1,29 @@
+{
+  "authoring_contract": "spine.notification-schedule-authoring.v1",
+  "target": {
+    "anchor_role": "event_start",
+    "application_scope": "item"
+  },
+  "schedule": {
+    "kind": "repeat_window",
+    "start": {
+      "kind": "target_offset",
+      "offset_basis": "elapsed",
+      "offset_seconds": "-21600"
+    },
+    "stop": {
+      "kind": "target_offset",
+      "offset_basis": "elapsed",
+      "offset_seconds": "0"
+    },
+    "stop_inclusive": false,
+    "cadence": {
+      "kind": "fixed_elapsed",
+      "interval_seconds": "3600"
+    }
+  },
+  "late_handling": {
+    "kind": "deliver_within",
+    "grace_seconds": "900"
+  }
+}

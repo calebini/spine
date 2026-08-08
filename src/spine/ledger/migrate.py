@@ -16,7 +16,7 @@ from spine.core import SpineValidationError
 from spine.ledger.common import utc_z_from_datetime
 from spine.ledger.sqlite import assert_ledger_invariants, connect, initialize_schema
 
-CURRENT_SCHEMA_VERSION = 6
+CURRENT_SCHEMA_VERSION = 7
 
 EXPECTED_SCHEMA_TABLES = frozenset(
     {
@@ -34,6 +34,30 @@ EXPECTED_SCHEMA_TABLES = frozenset(
         "ledger_schema",
         "locations",
         "notification_policies",
+        "notification_schedules",
+        "notification_schedule_offsets",
+        "notification_schedule_selectors",
+        "notification_target_occurrence_selectors",
+        "notification_target_rule_sources",
+        "notification_target_rule_source_selectors",
+        "notification_target_rdate_sources",
+        "occurrence_provenance",
+        "occurrence_provenance_rule_sources",
+        "occurrence_provenance_rdate_sources",
+        "recurrence_exdates",
+        "recurrence_lineage",
+        "recurrence_overrides",
+        "recurrence_provenance_block_reports",
+        "recurrence_rdates",
+        "recurrence_revisions",
+        "recurrence_rule_selectors",
+        "recurrence_rules",
+        "recurrence_segments",
+        "recurrence_sets",
+        "recurrence_target_occurrence_selectors",
+        "recurrence_target_rdate_sources",
+        "recurrence_target_rule_source_selectors",
+        "recurrence_target_rule_sources",
         "side_effect_attempts",
         "subject_groups",
         "subject_memberships",
@@ -92,7 +116,7 @@ EXPECTED_SCHEMA_TRIGGERS = frozenset(
         "task_details_recurrence_contract_insert",
         "locations_referenced_canonical_fields_update",
         "notification_policies_delivery_target_owner_insert",
-        "notification_policies_recurrence_contract_insert",
+        "notification_policies_structured_contract_insert",
         "work_instances_notification_policy_binding_insert",
         "side_effect_attempts_origin_binding_insert",
         "side_effect_attempts_staleness_insert",
@@ -286,16 +310,59 @@ def _apply_migration(connection: sqlite3.Connection, *, version: int, migration_
                 (version, _utc_now()),
             )
         return
+    if version == 7 and _canonical_scheduling_schema_present(connection):
+        with connection:
+            connection.execute(
+                """
+                INSERT OR IGNORE INTO ledger_schema (schema_version, applied_at_utc)
+                VALUES (?, ?)
+                """,
+                (version, _utc_now()),
+            )
+        return
+    if version == 7:
+        _preflight_canonical_scheduling_migration(connection)
     sql = _migration_sql(migration_name)
-    with connection:
-        connection.executescript(sql)
-        connection.execute(
-            """
-            INSERT OR IGNORE INTO ledger_schema (schema_version, applied_at_utc)
-            VALUES (?, ?)
-            """,
-            (version, _utc_now()),
-        )
+    if version == 7:
+        connection.commit()
+        connection.execute("PRAGMA foreign_keys = OFF")
+    try:
+        try:
+            connection.executescript(sql)
+        except Exception:
+            if connection.in_transaction:
+                connection.rollback()
+            raise
+        with connection:
+            connection.execute(
+                """
+                INSERT OR IGNORE INTO ledger_schema (schema_version, applied_at_utc)
+                VALUES (?, ?)
+                """,
+                (version, _utc_now()),
+            )
+    finally:
+        if version == 7:
+            connection.execute("PRAGMA foreign_keys = ON")
+
+
+def _preflight_canonical_scheduling_migration(connection: sqlite3.Connection) -> None:
+    """Reject provisional scheduling truth that cannot be converted losslessly."""
+
+    checks = (
+        ("temporal_anchors", "recurrence_rule IS NOT NULL", "temporal_anchors.recurrence_rule"),
+        ("notification_policies", "1 = 1", "notification_policies"),
+        ("work_instances", "1 = 1", "work_instances"),
+    )
+    for table, predicate, field in checks:
+        if not _table_exists(connection, table):
+            continue
+        row = connection.execute(f"SELECT 1 FROM {table} WHERE {predicate} LIMIT 1").fetchone()
+        if row is not None:
+            raise SpineValidationError(
+                "ledger_migration_provisional_scheduling_data",
+                f"cannot losslessly migrate populated {field}; inspect and clear or export it before retrying",
+            )
 
 
 def _available_migrations() -> tuple[tuple[int, str], ...]:
@@ -364,7 +431,19 @@ def _delivery_target_schema_present(connection: sqlite3.Connection) -> bool:
         and _table_exists(connection, "delivery_targets")
         and _column_exists(connection, "notification_policies", "recipient_kind")
         and _column_exists(connection, "notification_policies", "delivery_target_id")
+        and _column_exists(connection, "notification_policies", "trigger_anchor_id")
         and _column_exists(connection, "work_instances", "delivery_target_id")
+    )
+
+
+def _canonical_scheduling_schema_present(connection: sqlite3.Connection) -> bool:
+    return (
+        _table_exists(connection, "recurrence_sets")
+        and _table_exists(connection, "notification_schedules")
+        and _table_exists(connection, "occurrence_provenance")
+        and _column_exists(connection, "notification_policies", "notification_intent_id")
+        and _column_exists(connection, "work_instances", "notification_opportunity_id")
+        and not _column_exists(connection, "temporal_anchors", "recurrence_rule")
     )
 
 

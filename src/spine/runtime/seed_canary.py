@@ -6,25 +6,15 @@ import argparse
 import json
 import sqlite3
 import sys
+from collections.abc import Mapping, Sequence
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import Mapping, Sequence
 
 from spine.adapters import DEFAULT_OPENCLAW_CHANNEL, build_openclaw_outbound_message
-from spine.ledger import (
-    DeliveryTargetInput,
-    NotificationPolicyInput,
-    SubjectGroupInput,
-    TemporalAnchorInput,
-    connect,
-    create_task_v1,
-    get_work_instance,
-    initialize_schema,
-    insert_delivery_target,
-    insert_subject_group,
-)
+from spine.commands import CommandContext, handle
+from spine.ledger import connect, get_work_instance, initialize_schema
 from spine.ledger.common import require_utc_z, utc_z_from_datetime
-from spine.services import generate_notification_reminder_work
+from spine.runtime.canonical_seed import seed_canonical_notification_work
 
 DEFAULT_CANARY_PREFIX = "operator-canary"
 
@@ -51,71 +41,63 @@ def seed_canary_reminder(
     ids = _canary_ids(prefix)
 
     initialize_schema(connection)
-    existing_work = _work_exists(connection, ids["work_instance_id"])
+    existing = _existing_canary_work(connection, prefix)
+    existing_work = existing is not None
     if existing_work and not if_absent:
-        raise SystemExit(f"canary work already exists: {ids['work_instance_id']}; pass --if-absent to reuse it")
+        raise SystemExit(f"canary work already exists: {existing['work_instance_id']}; pass --if-absent to reuse it")
     if existing_work:
-        work = get_work_instance(connection, ids["work_instance_id"])
+        assert existing is not None
+        work = get_work_instance(connection, str(existing["work_instance_id"]))
+        seeded_ids = existing
         seeded = False
     else:
         _insert_canary_subject(connection, subject_id=ids["actor_subject_id"], created_at_utc=now_utc)
-        insert_subject_group(
-            connection,
-            group=SubjectGroupInput(
-                group_id=ids["group_id"],
-                group_kind="transport_group",
-                display_name=f"{prefix} delivery group",
-                created_at_utc=now_utc,
-                updated_at_utc=now_utc,
-            ),
-            default_created_at_utc=now_utc,
+        context = CommandContext(ledger=connection)
+        group = handle(
+            "subject_group.upsert",
+            {
+                "command_id": f"{prefix}-group-upsert",
+                "actor_subject_id": ids["actor_subject_id"],
+                "group_id": ids["group_id"],
+                "group_kind": "transport_group",
+                "display_name": f"{prefix} delivery group",
+                "updated_at_utc": now_utc,
+            },
+            context,
         )
-        insert_delivery_target(
-            connection,
-            target=DeliveryTargetInput(
-                delivery_target_id=ids["delivery_target_id"],
-                owner_kind="subject_group",
-                owner_group_id=ids["group_id"],
-                channel=openclaw_channel,
-                adapter_name="openclaw",
-                target_ref=target_ref,
-                display_name=f"{prefix} OpenClaw target",
-                created_at_utc=now_utc,
-                updated_at_utc=now_utc,
-            ),
-            default_created_at_utc=now_utc,
+        if not group["ok"]:
+            raise RuntimeError(group)
+        route = handle(
+            "delivery_target.upsert",
+            {
+                "command_id": f"{prefix}-target-upsert",
+                "actor_subject_id": ids["actor_subject_id"],
+                "delivery_target_id": ids["delivery_target_id"],
+                "owner_kind": "subject_group",
+                "owner_group_id": ids["group_id"],
+                "channel": openclaw_channel,
+                "adapter_name": "openclaw",
+                "target_ref": target_ref,
+                "display_name": f"{prefix} OpenClaw target",
+                "updated_at_utc": now_utc,
+            },
+            context,
         )
-        create_task_v1(
+        if not route["ok"]:
+            raise RuntimeError(route)
+        seeded_ids = seed_canonical_notification_work(
             connection,
-            item_id=ids["item_id"],
-            audit_id=ids["audit_id"],
-            created_at_utc=now_utc,
-            created_by_subject_id=ids["actor_subject_id"],
+            prefix=prefix,
+            actor_subject_id=ids["actor_subject_id"],
             title=title,
-            summary="Controlled Spine/OpenClaw canary reminder.",
-            notification_policies=(
-                NotificationPolicyInput(
-                    policy_id=ids["policy_id"],
-                    recipient_kind="subject_group",
-                    recipient_group_id=ids["group_id"],
-                    channel_preference_ref=openclaw_channel,
-                    delivery_target_id=ids["delivery_target_id"],
-                    trigger_anchor=TemporalAnchorInput(
-                        anchor_id=ids["anchor_id"],
-                        anchor_kind="instant_utc",
-                        utc_instant=eligible_at_utc,
-                    ),
-                ),
-            ),
-        )
-        generate_notification_reminder_work(
-            connection,
-            work_instance_id=ids["work_instance_id"],
-            notification_policy_id=ids["policy_id"],
+            delivery_target_id=ids["delivery_target_id"],
+            channel=openclaw_channel,
+            recipient_kind="subject_group",
+            recipient_id=ids["group_id"],
+            now_utc=now_utc,
             eligible_at_utc=eligible_at_utc,
-            created_at_utc=now_utc,
         )
-        work = get_work_instance(connection, ids["work_instance_id"])
+        work = get_work_instance(connection, str(seeded_ids["work_instance_id"]))
         seeded = True
 
     preview = _predicted_openclaw_envelope(
@@ -128,10 +110,8 @@ def seed_canary_reminder(
     )
     return {
         **ids,
+        **seeded_ids,
         "target_ref": target_ref,
-        "actor_subject_id": ids["actor_subject_id"],
-        "group_id": ids["group_id"],
-        "delivery_target_id": ids["delivery_target_id"],
         "title": title,
         "eligible_at_utc": eligible_at_utc,
         "seeded": seeded,
@@ -169,11 +149,6 @@ def main(argv: Sequence[str] | None = None) -> int:
 def _canary_ids(prefix: str) -> dict[str, str]:
     _require_identifier("prefix", prefix)
     return {
-        "item_id": f"{prefix}-task",
-        "audit_id": f"{prefix}-audit-task-v1",
-        "policy_id": f"{prefix}-policy",
-        "anchor_id": f"{prefix}-anchor",
-        "work_instance_id": f"{prefix}-work",
         "actor_subject_id": f"{prefix}-actor",
         "group_id": f"{prefix}-group",
         "delivery_target_id": f"{prefix}-openclaw-target",
@@ -203,12 +178,19 @@ def _insert_canary_subject(connection: sqlite3.Connection, *, subject_id: str, c
         )
 
 
-def _work_exists(connection: sqlite3.Connection, work_instance_id: str) -> bool:
+def _existing_canary_work(connection: sqlite3.Connection, prefix: str) -> dict[str, object] | None:
     row = connection.execute(
-        "SELECT 1 FROM work_instances WHERE work_instance_id = ?",
-        (work_instance_id,),
+        """
+        SELECT w.item_id, w.work_instance_id, w.notification_policy_id,
+               w.notification_intent_id, w.eligible_at_utc
+        FROM work_instances AS w
+        JOIN notification_policies AS p ON p.policy_id = w.notification_policy_id
+        WHERE p.intent_created_by_command_id = ?
+        ORDER BY w.work_instance_id LIMIT 1
+        """,
+        (f"{prefix}-reminder-create",),
     ).fetchone()
-    return row is not None
+    return dict(row) if row is not None else None
 
 
 def _predicted_openclaw_envelope(
@@ -243,7 +225,7 @@ def _parse_args(argv: Sequence[str] | None) -> argparse.Namespace:
     parser.add_argument(
         "--openclaw-channel",
         default=DEFAULT_OPENCLAW_CHANNEL,
-        help="OpenClaw gateway channel preview value. Kinflow-compatible default: whatsapp.",
+        help="OpenClaw gateway channel preview value. Default: whatsapp.",
     )
     parser.add_argument("--if-absent", action="store_true", help="Reuse the canary if its work row already exists.")
     return parser.parse_args(argv)

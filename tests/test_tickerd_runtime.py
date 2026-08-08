@@ -5,9 +5,9 @@ from datetime import UTC, datetime
 from io import StringIO
 from pathlib import Path
 
-from spine.ledger import NotificationPolicyInput, TemporalAnchorInput, connect, create_task_v1, initialize_schema
+from spine.ledger import connect, initialize_schema
 from spine.runtime.tickerd_observe import main, run_observe_cycles
-from spine.services import generate_notification_reminder_work
+from tests.canonical_helpers import seed_notification_work
 
 try:
     import tickerd  # noqa: F401
@@ -35,14 +35,13 @@ class TickerdObserveRuntimeTests(unittest.TestCase):
     def setUp(self) -> None:
         self.connection = connect()
         initialize_schema(self.connection)
-        insert_subject(self.connection)
-        create_task_with_policy(self.connection)
-        generate_notification_reminder_work(
+        self.seeded = seed_notification_work(
             self.connection,
-            work_instance_id="runtime-work",
-            notification_policy_id="runtime-policy",
+            prefix="tickerd-runtime",
+            subject_id=SUBJECT_ID,
+            now_utc="2026-06-07T08:00:00Z",
             eligible_at_utc="2026-06-07T09:00:00Z",
-            created_at_utc=NOW,
+            title="Submit forms",
         )
 
     def tearDown(self) -> None:
@@ -66,7 +65,7 @@ class TickerdObserveRuntimeTests(unittest.TestCase):
         self.assertIn("work_item_blocked", [record["event"] for record in records])
         self.assertIn("cycle_summary", [record["event"] for record in records])
         blocked = next(record for record in records if record["event"] == "work_item_blocked")
-        self.assertEqual(blocked["item_id"], "runtime-work")
+        self.assertEqual(blocked["item_id"], self.seeded["work_instance_id"])
         self.assertEqual(blocked["reason"], "SIDE_EFFECTS_BLOCKED")
 
     def test_cli_can_initialize_empty_database_and_emit_summary(self) -> None:
@@ -88,41 +87,6 @@ class TickerdObserveRuntimeTests(unittest.TestCase):
         self.assertEqual(exit_code, 0)
         self.assertEqual(records[-2]["event"], "cycle_summary")
         self.assertEqual(records[-2]["items_scanned"], 0)
-
-
-def create_task_with_policy(connection) -> None:
-    create_task_v1(
-        connection,
-        item_id="runtime-task",
-        audit_id="audit-runtime-task",
-        created_at_utc=NOW,
-        created_by_subject_id=SUBJECT_ID,
-        title="Submit forms",
-        notification_policies=(
-            NotificationPolicyInput(
-                policy_id="runtime-policy",
-                recipient_subject_id=SUBJECT_ID,
-                trigger_anchor=TemporalAnchorInput(
-                    anchor_id="runtime-policy-trigger",
-                    anchor_kind="instant_utc",
-                    utc_instant="2026-06-07T09:00:00Z",
-                ),
-            ),
-        ),
-    )
-
-
-def insert_subject(connection) -> None:
-    with connection:
-        connection.execute(
-            """
-            INSERT INTO subjects (
-              subject_id, subject_kind, display_name, status, created_at_utc, updated_at_utc
-            )
-            VALUES (?, 'person', 'Chris', 'active', ?, ?)
-            """,
-            (SUBJECT_ID, NOW, NOW),
-        )
 
 
 if __name__ == "__main__":

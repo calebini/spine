@@ -1,0 +1,46 @@
+{
+  "contract_version": "spine.notification-schedule.contract.v1",
+  "normalization_version": "spine.notification-schedule.normalization.v1",
+  "canonical_json_version": "spine.canonical-json.v1",
+  "notification_intent_id": "notification_intent_example_hourly_countdown",
+  "notification_policy_id": "notification_policy_example_hourly_countdown_v1",
+  "notification_schedule_id": "notification_schedule_example_hourly_countdown_v1",
+  "item_id": "item_example_event",
+  "item_version": "2",
+  "intent_created_item_version": "2",
+  "intent_created_by_command_id": "cmd_example_hourly_countdown",
+  "recipient_kind": "subject",
+  "recipient_subject_id": "subject_example_owner",
+  "channel": "whatsapp",
+  "delivery_target_id": "delivery_target_example_whatsapp",
+  "target": {
+    "anchor_role": "event_start",
+    "application_scope": "item"
+  },
+  "schedule": {
+    "kind": "repeat_window",
+    "start": {
+      "kind": "target_offset",
+      "offset_basis": "elapsed",
+      "offset_seconds": "-21600"
+    },
+    "stop": {
+      "kind": "target_offset",
+      "offset_basis": "elapsed",
+      "offset_seconds": "0"
+    },
+    "stop_inclusive": false,
+    "cadence": {
+      "kind": "fixed_elapsed",
+      "interval_seconds": "3600"
+    }
+  },
+  "normalized_notification_schedule_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "late_handling": {
+    "kind": "deliver_within",
+    "grace_seconds": "900"
+  },
+  "status": "active",
+  "created_at_utc": "2026-08-07T18:00:00Z",
+  "created_by_command_id": "cmd_example_hourly_countdown"
+}

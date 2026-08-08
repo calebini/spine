@@ -7,7 +7,6 @@ from io import StringIO
 from pathlib import Path
 
 from spine.adapters import (
-    NormalizedOpenClawResult,
     OpenClawBindingError,
     OpenClawGatewayConfig,
     OpenClawGatewaySender,

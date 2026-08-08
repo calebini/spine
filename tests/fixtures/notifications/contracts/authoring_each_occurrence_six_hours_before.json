@@ -1,0 +1,19 @@
+{
+  "authoring_contract": "spine.notification-schedule-authoring.v1",
+  "target": {
+    "anchor_role": "event_start",
+    "application_scope": "each_occurrence"
+  },
+  "schedule": {
+    "kind": "once",
+    "at": {
+      "kind": "target_offset",
+      "offset_basis": "elapsed",
+      "offset_seconds": "-21600"
+    }
+  },
+  "late_handling": {
+    "kind": "deliver_within",
+    "grace_seconds": "600"
+  }
+}

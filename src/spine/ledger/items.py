@@ -27,7 +27,6 @@ from spine.ledger.sqlite import assert_ledger_invariants
 from spine.ledger.supporting import (
     ItemLocationInput,
     ItemSubjectRoleInput,
-    NotificationPolicyInput,
     copy_forward_supporting_sets,
     current_locations,
     current_notification_policies,
@@ -56,7 +55,12 @@ class MutatedItem:
     version: int
     audit_id: str
 
-def create_event_from_draft(connection: sqlite3.Connection, draft: EventDraft) -> CreatedItem:
+def create_event_from_draft(
+    connection: sqlite3.Connection,
+    draft: EventDraft,
+    *,
+    insert_canonical_extension: Callable[[sqlite3.Connection], None] | None = None,
+) -> CreatedItem:
     """Create a brand-new event item from an input bundle."""
 
     item_id = draft.item_id or new_id("item")
@@ -118,9 +122,9 @@ def create_event_from_draft(connection: sqlite3.Connection, draft: EventDraft) -
         source_ref=draft.source_ref,
         item_locations=draft.item_locations,
         subject_roles=draft.subject_roles,
-        notification_policies=draft.notification_policies,
         insert_anchors=insert_anchors,
         insert_detail=insert_detail,
+        insert_canonical_extension=insert_canonical_extension,
     )
 
 
@@ -142,7 +146,7 @@ def create_event_v1(
     attendance_policy_ref: str | None = None,
     item_locations: tuple[ItemLocationInput, ...] = (),
     subject_roles: tuple[ItemSubjectRoleInput, ...] = (),
-    notification_policies: tuple[NotificationPolicyInput, ...] = (),
+    insert_canonical_extension: Callable[[sqlite3.Connection], None] | None = None,
 ) -> CreatedItem:
     """Create a brand-new event item and its v1 facts in one transaction."""
 
@@ -164,12 +168,17 @@ def create_event_v1(
             attendance_policy_ref=attendance_policy_ref,
             item_locations=item_locations,
             subject_roles=subject_roles,
-            notification_policies=notification_policies,
         ),
+        insert_canonical_extension=insert_canonical_extension,
     )
 
 
-def create_task_from_draft(connection: sqlite3.Connection, draft: TaskDraft) -> CreatedItem:
+def create_task_from_draft(
+    connection: sqlite3.Connection,
+    draft: TaskDraft,
+    *,
+    insert_canonical_extension: Callable[[sqlite3.Connection], None] | None = None,
+) -> CreatedItem:
     """Create a brand-new task item from an input bundle."""
 
     item_id = draft.item_id or new_id("item")
@@ -237,9 +246,9 @@ def create_task_from_draft(connection: sqlite3.Connection, draft: TaskDraft) -> 
         source_ref=draft.source_ref,
         item_locations=draft.item_locations,
         subject_roles=draft.subject_roles,
-        notification_policies=draft.notification_policies,
         insert_anchors=insert_anchors,
         insert_detail=insert_detail,
+        insert_canonical_extension=insert_canonical_extension,
     )
 
 
@@ -262,7 +271,7 @@ def create_task_v1(
     completed_by_subject_id: str | None = None,
     item_locations: tuple[ItemLocationInput, ...] = (),
     subject_roles: tuple[ItemSubjectRoleInput, ...] = (),
-    notification_policies: tuple[NotificationPolicyInput, ...] = (),
+    insert_canonical_extension: Callable[[sqlite3.Connection], None] | None = None,
 ) -> CreatedItem:
     """Create a brand-new task item and its v1 facts in one transaction."""
 
@@ -285,12 +294,19 @@ def create_task_v1(
             completed_by_subject_id=completed_by_subject_id,
             item_locations=item_locations,
             subject_roles=subject_roles,
-            notification_policies=notification_policies,
         ),
+        insert_canonical_extension=insert_canonical_extension,
     )
 
 
-def create_item_version_from_draft(connection: sqlite3.Connection, draft: ItemVersionDraft) -> MutatedItem:
+def create_item_version_from_draft(
+    connection: sqlite3.Connection,
+    draft: ItemVersionDraft,
+    *,
+    insert_prerequisites: Callable[[sqlite3.Connection, int], None] | None = None,
+    insert_canonical_extension: Callable[[sqlite3.Connection, int], None] | None = None,
+    supporting_command_id: str | None = None,
+) -> MutatedItem:
     """Create the next immutable item version from an input bundle."""
 
     audit_id = draft.audit_id or new_id("audit")
@@ -323,6 +339,9 @@ def create_item_version_from_draft(connection: sqlite3.Connection, draft: ItemVe
                 else _optional_string("source_ref", draft.source_ref)
             )
 
+            if insert_prerequisites is not None:
+                insert_prerequisites(connection, next_version)
+
             _insert_item_version(
                 connection,
                 item_id=draft.item_id,
@@ -348,6 +367,7 @@ def create_item_version_from_draft(connection: sqlite3.Connection, draft: ItemVe
                 previous_version=draft.target_version,
                 next_version=next_version,
                 created_at_utc=draft.created_at_utc,
+                created_by_command_id=supporting_command_id or audit_id,
             )
             if draft.subject_roles is not _UNSET:
                 replace_item_subject_roles(
@@ -358,6 +378,8 @@ def create_item_version_from_draft(connection: sqlite3.Connection, draft: ItemVe
                     subject_roles=cast(tuple[ItemSubjectRoleInput, ...], draft.subject_roles),
                     default_created_at_utc=draft.created_at_utc,
                 )
+            if insert_canonical_extension is not None:
+                insert_canonical_extension(connection, next_version)
             cursor = connection.execute(
                 """
                 UPDATE coordination_items
@@ -409,6 +431,9 @@ def create_next_item_version(
     subject_role_replacement_roles: tuple[str, ...] = (),
     audit_action: str = "version_created",
     reason_code: str = "item_version_created",
+    insert_prerequisites: Callable[[sqlite3.Connection, int], None] | None = None,
+    insert_canonical_extension: Callable[[sqlite3.Connection, int], None] | None = None,
+    supporting_command_id: str | None = None,
 ) -> MutatedItem:
     """Create the next immutable item version from the current version."""
 
@@ -430,6 +455,9 @@ def create_next_item_version(
             audit_action=audit_action,
             reason_code=reason_code,
         ),
+        insert_prerequisites=insert_prerequisites,
+        insert_canonical_extension=insert_canonical_extension,
+        supporting_command_id=supporting_command_id,
     )
 
 
@@ -441,6 +469,7 @@ def cancel_event(
     cancelled_at_utc: str,
     cancelled_by_subject_id: str,
     audit_id: str | None = None,
+    supporting_command_id: str | None = None,
 ) -> MutatedItem:
     """Transition an event from scheduled to cancelled by creating a new version."""
 
@@ -460,6 +489,7 @@ def cancel_event(
         event_detail={"event_status": EventStatus.CANCELLED.value},
         audit_action="event_cancelled",
         reason_code="event_cancelled",
+        supporting_command_id=supporting_command_id,
     )
 
 
@@ -472,6 +502,7 @@ def complete_task(
     completed_by_subject_id: str,
     audit_id: str | None = None,
     completion_state: str | None = None,
+    supporting_command_id: str | None = None,
 ) -> MutatedItem:
     """Transition an open task to done by creating a new version."""
 
@@ -496,6 +527,7 @@ def complete_task(
         },
         audit_action="task_completed",
         reason_code="task_completed",
+        supporting_command_id=supporting_command_id,
     )
 
 
@@ -507,6 +539,7 @@ def cancel_task(
     cancelled_at_utc: str,
     cancelled_by_subject_id: str,
     audit_id: str | None = None,
+    supporting_command_id: str | None = None,
 ) -> MutatedItem:
     """Transition an open task to cancelled by creating a new version."""
 
@@ -526,6 +559,7 @@ def cancel_task(
         task_detail={"task_status": TaskStatus.CANCELLED.value},
         audit_action="task_cancelled",
         reason_code="task_cancelled",
+        supporting_command_id=supporting_command_id,
     )
 
 
@@ -677,9 +711,9 @@ def _create_item_v1(
     source_ref: str | None,
     item_locations: tuple[ItemLocationInput, ...],
     subject_roles: tuple[ItemSubjectRoleInput, ...],
-    notification_policies: tuple[NotificationPolicyInput, ...],
     insert_anchors: Callable[[sqlite3.Connection], None],
     insert_detail: Callable[[sqlite3.Connection], None],
+    insert_canonical_extension: Callable[[sqlite3.Connection], None] | None = None,
 ) -> CreatedItem:
     try:
         with connection:
@@ -701,6 +735,8 @@ def _create_item_v1(
                 created_by_subject_id=created_by_subject_id,
             )
             insert_detail(connection)
+            if insert_canonical_extension is not None:
+                insert_canonical_extension(connection)
             insert_supporting_sets(
                 connection,
                 item_id=item_id,
@@ -708,7 +744,6 @@ def _create_item_v1(
                 default_created_at_utc=created_at_utc,
                 item_locations=item_locations,
                 subject_roles=subject_roles,
-                notification_policies=notification_policies,
             )
             _insert_creation_audit(
                 connection,

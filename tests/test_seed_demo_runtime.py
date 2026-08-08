@@ -6,12 +6,7 @@ from io import StringIO
 from pathlib import Path
 
 from spine.ledger import connect
-from spine.runtime.seed_demo import (
-    DEMO_TASK_ID,
-    DEMO_WORK_INSTANCE_ID,
-    main,
-    seed_demo_ledger,
-)
+from spine.runtime.seed_demo import main, seed_demo_ledger
 from spine.services import list_eligible_work
 
 
@@ -22,10 +17,10 @@ class SeedDemoRuntimeTests(unittest.TestCase):
             result = seed_demo_ledger(connection)
 
             eligible = list_eligible_work(connection, now_utc="2026-06-07T10:00:00Z")
-            self.assertEqual(result["item_id"], DEMO_TASK_ID)
-            self.assertEqual(result["work_instance_id"], DEMO_WORK_INSTANCE_ID)
-            self.assertEqual([row["work_instance_id"] for row in eligible], [DEMO_WORK_INSTANCE_ID])
-            self.assertEqual(eligible[0]["item_id"], DEMO_TASK_ID)
+            self.assertTrue(str(result["item_id"]).startswith("item_"))
+            self.assertTrue(str(result["work_instance_id"]).startswith("work_instance_"))
+            self.assertEqual([row["work_instance_id"] for row in eligible], [result["work_instance_id"]])
+            self.assertEqual(eligible[0]["item_id"], result["item_id"])
         finally:
             connection.close()
 
@@ -47,7 +42,7 @@ class SeedDemoRuntimeTests(unittest.TestCase):
             payload = json.loads(stream.getvalue())
             self.assertEqual(exit_code, 0)
             self.assertEqual(payload["database"], str(db_path))
-            self.assertEqual(payload["work_instance_id"], DEMO_WORK_INSTANCE_ID)
+            self.assertTrue(payload["work_instance_id"].startswith("work_instance_"))
             self.assertTrue(db_path.exists())
 
     def test_cli_refuses_existing_database_path(self) -> None:
@@ -77,12 +72,12 @@ class SeedDemoRuntimeTests(unittest.TestCase):
             payload = json.loads(stream.getvalue())
             self.assertEqual(exit_code, 0)
             self.assertTrue(payload["seeded"])
-            self.assertEqual(payload["work_instance_id"], DEMO_WORK_INSTANCE_ID)
+            self.assertTrue(payload["work_instance_id"].startswith("work_instance_"))
 
             connection = connect(db_path)
             try:
                 eligible = list_eligible_work(connection, now_utc="2026-06-07T10:00:00Z")
-                self.assertEqual([row["work_instance_id"] for row in eligible], [DEMO_WORK_INSTANCE_ID])
+                self.assertEqual([row["work_instance_id"] for row in eligible], [payload["work_instance_id"]])
             finally:
                 connection.close()
 
@@ -110,7 +105,7 @@ class SeedDemoRuntimeTests(unittest.TestCase):
             payload = json.loads(stream.getvalue())
             self.assertEqual(exit_code, 0)
             self.assertFalse(payload["seeded"])
-            self.assertEqual(payload["work_instance_id"], DEMO_WORK_INSTANCE_ID)
+            self.assertTrue(payload["work_instance_id"].startswith("work_instance_"))
 
 
 if __name__ == "__main__":

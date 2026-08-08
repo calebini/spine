@@ -110,9 +110,9 @@ Use `task.update` with `patch.subject_roles` to replace the complete assignee/ow
 
 Verify the returned `subject_roles` array or call `item.show` and inspect its current-version `subject_roles` before relying on the assignment.
 
-## Daily Recurrence Commands
+## Flexible Recurrence Commands
 
-Use a local start or due anchor with a daily recurrence rule for fixed schedules such as every day at 08:00. The timezone is part of the canonical schedule, so the local time remains 08:00 when the UTC offset changes.
+Attach a structured recurrence set to an event start or task due anchor. This example schedules every three days at 08:00 local. The IANA timezone and pinned timezone-database version are canonical facts, so the expressed local time remains 08:00 when the UTC offset changes.
 
 ```json
 {
@@ -126,23 +126,39 @@ Use a local start or due anchor with a daily recurrence rule for fixed schedules
     "local_date": "2026-07-26",
     "local_time": "08:00:00",
     "timezone": "America/Denver",
-    "recurrence_rule": "FREQ=DAILY"
+    "timezone_database_version": "2026a",
+    "recurrence_set": {
+      "time_basis": "local_instant",
+      "timezone": "America/Denver",
+      "timezone_database_version": "2026a",
+      "rules": [
+        {
+          "frequency": "DAILY",
+          "interval": "3",
+          "seed": "2026-07-26T08:00:00",
+          "start_bound": "2026-07-26T08:00:00",
+          "end_condition": {"kind": "unbounded"}
+        }
+      ]
+    }
   }
 }
 ```
 
-Expand a bounded local date range with the read-only `item.occurrences` command:
+Expand a bounded range with the read-only `item.occurrences` command:
 
 ```json
 {
   "item_id": "<event-item-id>",
-  "range_start_local_date": "2026-07-26",
-  "range_end_local_date": "2026-08-02",
-  "limit": 100
+  "range_start": "2026-07-26T00:00:00",
+  "range_end": "2026-08-08T00:00:00",
+  "range_basis": "original_schedule",
+  "limit": "100",
+  "include_diagnostics": true
 }
 ```
 
-Invoke those JSON bodies through `spine event create` and `spine item occurrences`, respectively. Expansion returns virtual occurrences and stable occurrence identities; it does not create reminders, work, projections, or external sends. The current slice supports only daily local recurrence with optional `INTERVAL` and `COUNT`. Per-occurrence changes, recurrence-aware reminders, and weekly/monthly rules remain deferred.
+Invoke those JSON bodies through `spine event create` and `spine item occurrences`, respectively. Expansion returns virtual occurrences and stable occurrence identities; it does not create reminders, work, projections, or external sends. The canonical engine supports local dates, local instants, fixed UTC instants, daily/weekly/monthly/yearly rules, selectors, exceptions, moves, and bounded cursor pagination. Use the `recurrence.instance.*` commands for one occurrence and `recurrence.series.edit` for one, following, or whole-series changes.
 
 ## Quick Start
 
@@ -185,9 +201,50 @@ PYTHONPATH="$TICKERD_SRC" spine-worker \
   --max-cycles 1
 ```
 
-## Reminder Handoff Shape
+## One-Patch Migration and Verification
 
-The current agent-operable reminder path is canary/demo seeding, not a general Anchor ingest API. For production integration work, Anchor should map its reminder intent into an equivalent supported Spine command or a future narrow ingest command.
+Apply this delivery while the worker is stopped. Take a recoverable copy of the ledger first; a committed schema migration is rolled back operationally by restoring that copy together with the prior application build.
+
+```bash
+cp "$SPINE_DB" "$SPINE_DB.pre-canonical-scheduling"
+spine-ledger-migrate --db "$SPINE_DB"
+spine-ledger-migrate --db "$SPINE_DB" --verify-only
+```
+
+The migration is transactional. A failed attempt leaves the prior schema intact. It also fails closed when it finds scheduling rows whose missing canonical facts cannot be inferred exactly; inspect the reported table/count inventory instead of editing around the preflight.
+
+Verify the committed surface before restarting Tickerd:
+
+```bash
+sqlite3 "$SPINE_DB" "SELECT MAX(schema_version) AS schema_version FROM ledger_schema;"
+sqlite3 "$SPINE_DB" "SELECT name FROM sqlite_master WHERE type='table' AND name IN ('recurrence_sets','recurrence_revisions','notification_policies','notification_schedules','occurrence_provenance') ORDER BY name;"
+sqlite3 "$SPINE_DB" "PRAGMA foreign_key_check;"
+```
+
+Expected schema version is `7`, all five named tables are present, and `foreign_key_check` returns no rows. Then run `spine-seed-canary`, one observe-only worker cycle, and one active cycle with the fake sender. Do not enable the gateway sender during migration verification.
+
+## Notification Schedule Handoff
+
+Use `reminder.create` to persist a policy without creating work. Use `notification.opportunities` to inspect a bounded virtual schedule, then `notification_work.materialize` to persist actionable work. Authoring never sends and opportunity output never authorizes delivery by itself.
+
+For “every hour during the six hours before an event,” use this notification body inside `reminder.create`:
+
+```json
+{
+  "authoring_contract": "spine.notification-schedule-authoring.v1",
+  "target": {"anchor_role": "event_start", "application_scope": "item"},
+  "schedule": {
+    "kind": "repeat_window",
+    "start": {"kind": "target_offset", "offset_basis": "elapsed", "offset_seconds": "-21600"},
+    "stop": {"kind": "target_offset", "offset_basis": "elapsed", "offset_seconds": "0"},
+    "stop_inclusive": false,
+    "cadence": {"kind": "fixed_elapsed", "interval_seconds": "3600"}
+  },
+  "late_handling": {"kind": "deliver_within", "grace_seconds": "900"}
+}
+```
+
+The full request also supplies the item/version, recipient owner, channel, and explicit `delivery_target_id`. For recurring items, use `application_scope=each_occurrence` or `selected_occurrence`; regenerate current occurrence provenance before materializing recurrence-bound work.
 
 A deliverable reminder must eventually produce:
 
@@ -197,7 +254,7 @@ A deliverable reminder must eventually produce:
 - an eligible `work_instances` row with `work_kind=notification_reminder` and matching `delivery_target_id`
 - a channel value, currently `whatsapp` for the OpenClaw gateway path
 
-Multiple reminders may be attached to one event or task by issuing repeated `reminder.create` commands. Use the `current_version` returned by each successful command as the next call's `target_version`. On schema version 5 or later, each policy-backed reminder remains independently processable when later reminder commands advance the item version. Do not run this canary in active mode on an older schema/runtime; migrate first with `spine-ledger-migrate --db "$SPINE_DB"`.
+Multiple reminders may be attached to one event or task by issuing repeated `reminder.create` commands. Use the `current_version` returned by each successful command as the next call's `target_version`. Each intent remains independently addressable as later policy commands advance the item version. Run notification scheduling only after the schema-version-7 migration verifies successfully.
 
 For a multi-reminder canary, verify before active processing that every expected work row is still `status=eligible`, has its own `notification_policy_id`, and has the intended `eligible_at_utc`. After processing, require one terminal successful work row and one successful side-effect attempt per reminder. Cancelling or archiving the parent item must suppress all remaining reminders; disabling a bound policy or cancelling a work row must suppress that reminder only.
 
@@ -318,6 +375,57 @@ This command can send a real message. Confirm the exact work row, target, body, 
 
 ## Verification Queries
 
+Inspect current recurrence identity and revision state:
+
+```bash
+sqlite3 "$SPINE_DB" "
+SELECT rs.source_item_id, rs.recurrence_set_id, rr.recurrence_revision_id,
+       rr.revision_number, rr.source_item_version,
+       rr.normalized_recurrence_set_hash
+FROM recurrence_sets AS rs
+JOIN recurrence_revisions AS rr ON rr.recurrence_set_id = rs.recurrence_set_id
+WHERE rs.source_item_id = '<item-id>'
+  AND rr.revision_number = (
+    SELECT MAX(current_rr.revision_number)
+    FROM recurrence_revisions AS current_rr
+    WHERE current_rr.recurrence_set_id = rs.recurrence_set_id
+  );
+"
+```
+
+Inspect current notification policy and schedule state:
+
+```bash
+sqlite3 "$SPINE_DB" "
+SELECT p.notification_intent_id, p.policy_id, p.version, p.status,
+       p.application_scope, p.delivery_target_id,
+       p.normalized_notification_schedule_hash,
+       s.schedule_kind, s.cadence_kind
+FROM notification_policies AS p
+JOIN notification_schedules AS s ON s.schedule_id = p.schedule_id
+JOIN coordination_items AS i
+  ON i.item_id = p.item_id AND i.current_version = p.version
+WHERE p.item_id = '<item-id>'
+ORDER BY p.notification_intent_id;
+"
+```
+
+For recurrence-bound policies, inspect active authorization evidence and open recovery reports:
+
+```bash
+sqlite3 "$SPINE_DB" "
+SELECT occurrence_provenance_id, occurrence_key, recurrence_revision_id,
+       lifecycle, actionable, management_status
+FROM occurrence_provenance
+WHERE item_id = '<item-id>' AND management_status = 'active'
+ORDER BY original_scheduled_fact, occurrence_key;
+SELECT block_report_id, consumer, range_start, range_end, reason_code
+FROM recurrence_provenance_block_reports
+WHERE item_id = '<item-id>' AND status = 'open'
+ORDER BY block_report_id;
+"
+```
+
 Inspect a work row:
 
 ```bash
@@ -433,6 +541,6 @@ Unexpected duplicate send risk:
 - Check `side_effect_attempts.idempotency_key`.
 - Do not rerun active/gateway with a changed key for the same semantic send unless the operator explicitly approves.
 
-## Current Integration Gap
+## Integration Boundary
 
-There is not yet a general Anchor-to-Spine reminder ingest command. Until that exists, Anchor should not infer table writes from the schema. The next integration surface should be a narrow, supported command or module that accepts Anchor reminder facts and creates the equivalent Spine item, notification policy, and work instance.
+An ingest agent should translate user intent into the public structured recurrence and notification command families. It must not infer direct table writes from the relational schema. Keep recurrence cadence, notification cadence, and delivery retry as three distinct facts and let Spine derive their canonical identities.
