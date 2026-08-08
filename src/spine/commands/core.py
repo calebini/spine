@@ -9,6 +9,7 @@ from collections.abc import Callable, Mapping, Sequence
 from datetime import UTC, date, datetime, timedelta
 from typing import Any
 
+from spine import IMPLEMENTED_CONTRACT_VERSIONS, IMPLEMENTED_LEDGER_SCHEMA_VERSION, __version__
 from spine.commands.context import CommandContext
 from spine.commands.receipts import (
     command_derived_id,
@@ -62,6 +63,7 @@ from spine.ledger.items import (
     create_task_v1,
     get_current_item,
 )
+from spine.ledger.migrate import current_schema_version
 from spine.ledger.notifications import (
     insert_notification_schedule_policy,
     load_current_notification_policies,
@@ -96,6 +98,7 @@ MVP_COMMANDS = frozenset(
         "subject.upsert",
         "subject_group.upsert",
         "delivery_target.upsert",
+        "system.info",
         "item.show",
         "item.list",
         "item.occurrences",
@@ -129,6 +132,7 @@ WRITE_COMMANDS = MVP_COMMANDS - {
     "item.occurrences",
     "relation.list",
     "notification.opportunities",
+    "system.info",
 }
 
 
@@ -180,6 +184,8 @@ def _dispatch(command: str, request: Mapping[str, Any], context: CommandContext)
         return _handle_subject_group_upsert(request, context)
     if command == "delivery_target.upsert":
         return _handle_delivery_target_upsert(request, context)
+    if command == "system.info":
+        return _handle_system_info(request, context)
     if command == "item.show":
         return _handle_item_show(request, context)
     if command == "item.list":
@@ -379,6 +385,28 @@ def _handle_subject_group_upsert(request: Mapping[str, Any], context: CommandCon
     return _subject_group_response(
         _subject_group(context.ledger, group_id), created=created, updated=updated, receipt_id=receipt["command_receipt_id"]
     )
+
+
+def _handle_system_info(request: Mapping[str, Any], context: CommandContext) -> dict[str, Any]:
+    """Report the exact local authority versions needed for safe authoring."""
+
+    _check_fields("system.info", request, set())
+    ledger_version = current_schema_version(context.ledger)
+    if ledger_version != IMPLEMENTED_LEDGER_SCHEMA_VERSION:
+        raise SpineValidationError(
+            "environment_failure:ledger_schema_version",
+            f"runtime requires ledger schema {IMPLEMENTED_LEDGER_SCHEMA_VERSION}; found {ledger_version}",
+        )
+    return {
+        "ok": True,
+        "command": "system.info",
+        "response_contract": "spine.system-info.v1",
+        "runtime_version": __version__,
+        "implemented_ledger_schema_version": str(IMPLEMENTED_LEDGER_SCHEMA_VERSION),
+        "ledger_schema_version": str(ledger_version),
+        "timezone_database_version": system_timezone_database_version(),
+        "implemented_contract_versions": sorted(IMPLEMENTED_CONTRACT_VERSIONS),
+    }
 
 
 def _handle_delivery_target_upsert(request: Mapping[str, Any], context: CommandContext) -> dict[str, Any]:

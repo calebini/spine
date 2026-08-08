@@ -10,6 +10,7 @@ from pathlib import Path
 from spine.commands import CommandContext, handle
 from spine.commands.cli import _generated_command_id
 from spine.commands.cli import main as cli_main
+from spine.commands.core import MVP_COMMANDS
 from spine.core.hashing import hash_canonical_json
 from spine.ledger import connect, initialize_schema
 
@@ -29,28 +30,7 @@ class AgentCommandContractMvpTests(unittest.TestCase):
         self.connection.close()
 
     def test_all_mvp_commands_dispatch_without_unsupported_command(self) -> None:
-        commands = [
-            "subject.upsert",
-            "subject_group.upsert",
-            "delivery_target.upsert",
-            "item.show",
-            "item.list",
-            "item.occurrences",
-            "item.archive",
-            "event.create",
-            "event.update",
-            "event.reschedule",
-            "event.cancel",
-            "task.create",
-            "task.update",
-            "task.complete",
-            "task.cancel",
-            "relation.create",
-            "relation.list",
-            "reminder.create",
-        ]
-
-        for command in commands:
+        for command in sorted(MVP_COMMANDS):
             with self.subTest(command=command):
                 response = handle(command, {}, self.context)
                 self.assertNotEqual(response.get("error", {}).get("code"), "unsupported_command")

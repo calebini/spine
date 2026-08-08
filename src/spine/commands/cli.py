@@ -63,7 +63,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         )
         return 2
     try:
-        request = _load_request(args.input)
+        request = {} if command == "system.info" and args.input == "-" else _load_request(args.input)
         if args.if_absent:
             request = {**request, "if_absent": True}
         if args.generate_command_id:

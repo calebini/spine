@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cortext.local/spine/contracts/schemas/system-info-response.schema.json",
+  "title": "Spine System Information Response v1",
+  "type": "object",
+  "required": [
+    "ok",
+    "command",
+    "response_contract",
+    "runtime_version",
+    "implemented_ledger_schema_version",
+    "ledger_schema_version",
+    "timezone_database_version",
+    "implemented_contract_versions"
+  ],
+  "properties": {
+    "ok": { "const": true },
+    "command": { "const": "system.info" },
+    "response_contract": { "const": "spine.system-info.v1" },
+    "runtime_version": { "type": "string", "minLength": 1 },
+    "implemented_ledger_schema_version": {
+      "type": "string",
+      "pattern": "^[1-9][0-9]*$"
+    },
+    "ledger_schema_version": {
+      "type": "string",
+      "pattern": "^[1-9][0-9]*$"
+    },
+    "timezone_database_version": { "type": "string", "minLength": 1 },
+    "implemented_contract_versions": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1 }
+    }
+  },
+  "additionalProperties": false
+}

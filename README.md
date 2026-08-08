@@ -22,6 +22,7 @@ Authoritative starting points:
 - `specs/notifications.md` defines canonical notification schedules, opportunity expansion, durable work materialization, recurrence binding, and lifecycle reconciliation.
 - `contracts/schemas/notification-*.schema.json` and `contracts/notification-fixture-manifest.json` define the machine-readable notification contract family and initial fixtures.
 - `specs/agent-command-contract.md` defines the MVP agent command core and CLI contract.
+- `docs/AGENT_QUICKSTART.md` gives a zero-context agent one executable, fake-only path through recurrence and recurring notifications.
 - `specs/decisions/0001-kinflow-is-donor-not-foundation.md` records the Kinflow relationship.
 - `specs/decisions/0002-first-class-delivery-targets.md` records the subject/group delivery target boundary.
 
@@ -57,6 +58,7 @@ This repository follows the Cortext1 component scaffold standard incrementally:
 - `specs/`: normative design and compatibility promises
 - `specs/decisions/`: accepted decisions
 - `docs/IMPLEMENTATION_PLAN.md`: non-normative build sequence for moving from specs to executable behavior
+- `docs/AGENT_QUICKSTART.md`: executable cold-start path for a new agent
 - `docs/AGENT_OPERATOR_GUIDE.md`: agent-facing contract for operating current Spine runtime surfaces safely
 - `docs/OPENCLAW_DEPLOYMENT_RUNBOOK.md`: operational rollout notes for the first OpenClaw replacement path
 - `contracts/`: machine-readable command, recurrence, and notification agreements plus fixture manifests

@@ -27,6 +27,7 @@ class ImplementedContractDeclarationTests(unittest.TestCase):
                 NOTIFICATION_AUTHORING_VERSION,
                 NOTIFICATION_CONTRACT_VERSION,
                 NOTIFICATION_NORMALIZATION_VERSION,
+                "spine.system-info.v1",
             }.issubset(IMPLEMENTED_CONTRACT_VERSIONS)
         )
 

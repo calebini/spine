@@ -16,5 +16,6 @@ IMPLEMENTED_CONTRACT_VERSIONS = frozenset(
         "spine.notification-schedule.contract.v1",
         "spine.notification-schedule.normalization.v1",
         "spine.notification-opportunities.v1",
+        "spine.system-info.v1",
     }
 )

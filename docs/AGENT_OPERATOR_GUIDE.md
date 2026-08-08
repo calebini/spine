@@ -5,6 +5,18 @@ Audience: local agents and agent operators integrating with Spine
 
 This guide tells an agent how to interact with Spine safely. It is intentionally narrower than the ontology and architecture specs. If this guide and implementation behavior disagree, stop and ask an operator before writing or sending.
 
+New agents start with `docs/AGENT_QUICKSTART.md`. Its checked-in `examples/agent-first-success.sh` path proves recurrence, recurring notifications, provenance, materialization, observe-only behavior, and one fake delivery on a disposable ledger. Return here for existing-ledger migration, production-shaped operation, inspection, and failure handling.
+
+## Contents
+
+- Operating posture and safety rules
+- Environment prerequisites and ledger entry paths
+- Public command and runtime surfaces
+- Flexible recurrence and notification workflows
+- Migration, rollback, and worker modes
+- Verification queries and success evidence
+- Failure taxonomy and troubleshooting
+
 ## Operating Posture
 
 Spine is the canonical coordination ledger. Agents may propose or create coordination records through supported Spine APIs and commands, then verify the resulting ledger rows. Agents must not treat calendars, messengers, local dashboards, or prior reminder runners as canonical truth once Spine owns a record.
@@ -29,27 +41,39 @@ Agents must follow these rules:
 - Treat `side_effect_attempts` as the source of truth for external send attempts.
 - Keep private deployment evidence out of git. Use `ops/private/` or `*.private.md`.
 
-## Preflight Sanity Check
+## Environment and Ledger Entry Paths
 
-Run this before mutation, worker, or gateway commands:
+Spine requires Python 3.12 or newer. Operator workflows also use `sqlite3`; the executable first-success example uses `jq`. Tickerd must be installed or importable through `PYTHONPATH` before worker commands.
+
+Set explicit paths rather than relying on host defaults:
 
 ```bash
-export SPINE_ROOT="${SPINE_ROOT:-/opt/spine}"
-export TICKERD_SRC="${TICKERD_SRC:-/opt/tickerd/src}"
-export SPINE_DB="${SPINE_DB:-/var/lib/spine/ledger.sqlite}"
-export SPINE_STATE_DIR="${SPINE_STATE_DIR:-/var/lib/spine/worker}"
+export SPINE_ROOT=/absolute/path/to/spine
+export SPINE_DB=/absolute/path/to/ledger.sqlite
+export SPINE_STATE_DIR=/absolute/path/to/spine-worker-state
+export TICKERD_SRC=/absolute/path/to/tickerd/src
 
-echo "SPINE_ROOT=${SPINE_ROOT}"
-test -d "${SPINE_ROOT}" || { echo "ERROR: invalid SPINE_ROOT"; exit 1; }
-test -d "${SPINE_ROOT}/src" || { echo "ERROR: Spine src path missing"; exit 1; }
-test -f "${SPINE_DB}" || { echo "ERROR: Spine DB missing: ${SPINE_DB}"; exit 1; }
-python3 --version || { echo "ERROR: python3 not available"; exit 1; }
-cd "${SPINE_ROOT}" || { echo "ERROR: cannot cd to SPINE_ROOT"; exit 1; }
+test -d "$SPINE_ROOT/src"
+python3 --version
+sqlite3 --version
+cd "$SPINE_ROOT"
 git status --short
-spine-ledger-migrate --db "${SPINE_DB}" --verify-only
 ```
 
-If preflight fails, stop and fix the environment before running mutation or send commands.
+Then choose exactly one ledger entry path:
+
+- New disposable ledger: `spine-ledger-migrate --db "$SPINE_DB" --initialize-if-empty`.
+- Existing current ledger: `spine-ledger-migrate --db "$SPINE_DB" --verify-only`.
+- Existing older ledger: stop its worker, take a recoverable copy, run `spine-ledger-migrate --db "$SPINE_DB"`, and only then run `--verify-only`.
+
+Do not require current-schema verification before an intended migration; an older valid schema is expected to fail that check. After initialization or migration, run:
+
+```bash
+spine-ledger-migrate --db "$SPINE_DB" --verify-only
+spine --db "$SPINE_DB" --pretty system info
+```
+
+Require equal `implemented_ledger_schema_version` and `ledger_schema_version`. Use the returned `timezone_database_version` exactly for every local-date or local-instant schedule. Never copy that value from an example or another machine.
 
 ## Supported CLI Surfaces
 
@@ -67,11 +91,15 @@ export TICKERD_SRC=/path/to/tickerd/src
 
 Current commands:
 
+- `spine`: public structured command adapter. Stable syntax is `spine --db <path> --input <path-or-> [options] <resource> <verb>`; CLI options precede command words.
+- `spine --db <path> system info`: read exact runtime, schema, timezone-data, and contract versions without mutation.
 - `spine-ledger-migrate`: initialize, migrate, and verify a ledger.
 - `spine-seed-demo`: create or reuse a deterministic demo reminder.
 - `spine-seed-canary`: create or reuse a controlled canary reminder and print the predicted OpenClaw envelope.
 - `spine-worker`: run the production-shaped worker in `observe_only`, `active`, or `suspended`.
 - `spine-openclaw-smoke`: run a bounded fake OpenClaw smoke.
+
+The new scheduling command surface is `event.create`, `event.reschedule`, `task.create`, `item.occurrences`, `recurrence.instance.add`, `recurrence.instance.remove`, `recurrence.instance.override`, `recurrence.series.edit`, `occurrence_provenance.regenerate`, `reminder.create`, `reminder.edit`, `reminder.disable`, `notification.opportunities`, and `notification_work.materialize`. See `docs/AGENT_QUICKSTART.md` for the ordered command matrix and complete executable path; see `specs/agent-command-contract.md` for normative request, response, replay, and failure behavior.
 
 ## Task Assignment Commands
 
@@ -114,6 +142,15 @@ Verify the returned `subject_roles` array or call `item.show` and inspect its cu
 
 Attach a structured recurrence set to an event start or task due anchor. This example schedules every three days at 08:00 local. The IANA timezone and pinned timezone-database version are canonical facts, so the expressed local time remains 08:00 when the UTC offset changes.
 
+First discover and capture the exact installed timezone-data version:
+
+```bash
+export SPINE_TZ_VERSION="$(spine --db "$SPINE_DB" system info | jq -r '.timezone_database_version')"
+test -n "$SPINE_TZ_VERSION"
+```
+
+The placeholders below mean the exact value in `SPINE_TZ_VERSION`; no literal version from this guide is portable across hosts.
+
 ```json
 {
   "command_id": "event-create-daily-0800-001",
@@ -126,11 +163,11 @@ Attach a structured recurrence set to an event start or task due anchor. This ex
     "local_date": "2026-07-26",
     "local_time": "08:00:00",
     "timezone": "America/Denver",
-    "timezone_database_version": "2026a",
+    "timezone_database_version": "<SPINE_TZ_VERSION>",
     "recurrence_set": {
       "time_basis": "local_instant",
       "timezone": "America/Denver",
-      "timezone_database_version": "2026a",
+      "timezone_database_version": "<SPINE_TZ_VERSION>",
       "rules": [
         {
           "frequency": "DAILY",
@@ -158,11 +195,18 @@ Expand a bounded range with the read-only `item.occurrences` command:
 }
 ```
 
-Invoke those JSON bodies through `spine event create` and `spine item occurrences`, respectively. Expansion returns virtual occurrences and stable occurrence identities; it does not create reminders, work, projections, or external sends. The canonical engine supports local dates, local instants, fixed UTC instants, daily/weekly/monthly/yearly rules, selectors, exceptions, moves, and bounded cursor pagination. Use the `recurrence.instance.*` commands for one occurrence and `recurrence.series.edit` for one, following, or whole-series changes.
+Invoke a request file with options before the command words:
 
-## Quick Start
+```bash
+spine --db "$SPINE_DB" --input /absolute/path/event-create.json --pretty event create
+spine --db "$SPINE_DB" --input /absolute/path/occurrences.json --pretty item occurrences
+```
 
-Run from `SPINE_ROOT` after preflight.
+For a directly executable variable-expanded request, use the event command in `examples/agent-first-success.sh`. Expansion returns virtual occurrences and stable occurrence identities; it does not create reminders, work, projections, or external sends. The canonical engine supports local dates, local instants, fixed UTC instants, daily/weekly/monthly/yearly rules, selectors, exceptions, moves, and bounded cursor pagination. Use the `recurrence.instance.*` commands for one occurrence and `recurrence.series.edit` for one, following, or whole-series changes.
+
+## Worker Quick Reference
+
+Run from `SPINE_ROOT` only after choosing and completing the correct ledger entry path above. For a complete first-use sequence, run `docs/AGENT_QUICKSTART.md` instead of starting here.
 
 Observe current eligible work without side effects:
 
@@ -244,7 +288,16 @@ For “every hour during the six hours before an event,” use this notification
 }
 ```
 
-The full request also supplies the item/version, recipient owner, channel, and explicit `delivery_target_id`. For recurring items, use `application_scope=each_occurrence` or `selected_occurrence`; regenerate current occurrence provenance before materializing recurrence-bound work.
+The full request also supplies the item/version, recipient owner, channel, and explicit `delivery_target_id`. Invoke WhatsApp policy authoring with the local binding switch before the command words:
+
+```bash
+spine --db "$SPINE_DB" --input /absolute/path/reminder-create.json \
+  --pretty --openclaw-whatsapp reminder create
+```
+
+That command persists policy truth and cannot send. `examples/agent-first-success.sh` contains a complete executable request with every required outer field; `tests/fixtures/notifications/contracts/command_reminder_create.json` is the corresponding structural contract example.
+
+For recurring items, use `application_scope=each_occurrence` or `selected_occurrence`. After policy authoring and before the first `notification.opportunities` read, run `occurrence_provenance.regenerate` with `consumer=notification_schedule` over the target recurrence range. Opportunity expansion reads current active provenance; without it, recurrence-bound policies have no authorized targets. Regenerate again after recurrence truth changes, then recompute opportunities before materializing work.
 
 A deliverable reminder must eventually produce:
 
@@ -544,3 +597,12 @@ Unexpected duplicate send risk:
 ## Integration Boundary
 
 An ingest agent should translate user intent into the public structured recurrence and notification command families. It must not infer direct table writes from the relational schema. Keep recurrence cadence, notification cadence, and delivery retry as three distinct facts and let Spine derive their canonical identities.
+
+Use repository evidence in this order:
+
+1. `docs/AGENT_QUICKSTART.md` and `examples/agent-first-success.sh` for cold-start execution.
+2. This guide for operations and failure handling.
+3. `specs/agent-command-contract.md`, `specs/recurrence.md`, and `specs/notifications.md` for normative behavior.
+4. `contracts/schemas/` for machine-readable request and response shapes.
+5. `tests/fixtures/recurrence/contracts/` and `tests/fixtures/notifications/contracts/` for structural examples.
+6. `tests/fixtures/recurrence/vectors/` and `tests/fixtures/notifications/vectors/` for computed identity evidence.

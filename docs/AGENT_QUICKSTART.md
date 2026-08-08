@@ -1,0 +1,255 @@
+# Spine Agent Quickstart
+
+Status: executable cold-start path for the current schema-7 runtime
+Audience: an agent with repository access and no prior Spine context
+
+Use this document to reach a verified first success. Use `docs/AGENT_OPERATOR_GUIDE.md` afterward for migration, long-running operation, real-send controls, inspection, and troubleshooting.
+
+## The Five Facts to Retain
+
+1. Spine is the canonical coordination ledger; calendars, messengers, and dashboards are projections.
+2. Authoring commands never send. Notification work must be materialized before a worker can process it.
+3. Recurring-item cadence, notification cadence, and delivery retry are separate facts.
+4. Recurrence-bound notifications require current `occurrence_provenance` before opportunity expansion.
+5. Real delivery requires an explicit target, active worker mode, gateway sender, and `--allow-real-send`. This quickstart uses only the fake sender.
+
+## Prerequisites
+
+From the Spine repository root, require:
+
+- Python 3.12 or newer;
+- `sqlite3` and `jq` on `PATH`;
+- Spine installed into the active Python environment;
+- Tickerd installed into that environment or a `TICKERD_SRC` path pointing to its `src` directory.
+
+Verify and install Spine:
+
+```bash
+python3 --version
+sqlite3 --version
+jq --version
+python3 -m pip install -e ".[test,dev]"
+```
+
+If Tickerd is not installed, point Python at a sibling checkout:
+
+```bash
+export TICKERD_SRC=/absolute/path/to/tickerd/src
+export PYTHONPATH="$TICKERD_SRC${PYTHONPATH:+:$PYTHONPATH}"
+python3 -c 'import tickerd; print("tickerd import ok")'
+```
+
+Do not continue to worker commands until that import succeeds.
+
+## Choose the Correct Ledger Entry Path
+
+### New disposable ledger
+
+Create a unique directory and initialize a new schema-7 ledger:
+
+```bash
+export SPINE_DEMO_ROOT="$(mktemp -d /tmp/spine-agent-quickstart.XXXXXX)"
+export SPINE_DB="$SPINE_DEMO_ROOT/spine.sqlite"
+export SPINE_STATE_DIR="$SPINE_DEMO_ROOT/worker-state"
+spine-ledger-migrate --db "$SPINE_DB" --initialize-if-empty
+```
+
+### Existing current ledger
+
+Do not initialize or migrate it. Verify it without mutation:
+
+```bash
+export SPINE_DB=/absolute/path/to/ledger.sqlite
+spine-ledger-migrate --db "$SPINE_DB" --verify-only
+```
+
+### Existing older ledger that requires migration
+
+Stop its worker first. Do not run current-schema `--verify-only` as a prerequisite because an older schema is expected to fail that check. Back up, migrate once, then verify:
+
+```bash
+export SPINE_DB=/absolute/path/to/ledger.sqlite
+cp "$SPINE_DB" "$SPINE_DB.pre-schema-7"
+spine-ledger-migrate --db "$SPINE_DB"
+spine-ledger-migrate --db "$SPINE_DB" --verify-only
+```
+
+If migration preflight rejects provisional scheduling rows, stop and inspect the reported inventory. Do not edit around it.
+
+## Discover the Exact Local Authoring Context
+
+Never copy a timezone-data version from documentation or another host. Read it from the executing runtime and ledger:
+
+```bash
+spine --db "$SPINE_DB" --pretty system info
+```
+
+Successful output includes:
+
+- `runtime_version`;
+- equal `implemented_ledger_schema_version` and `ledger_schema_version`;
+- `timezone_database_version`, which must be copied exactly into local-date and local-instant authoring;
+- `implemented_contract_versions`.
+
+To capture the timezone-data version:
+
+```bash
+export SPINE_TZ_VERSION="$(spine --db "$SPINE_DB" system info | jq -r '.timezone_database_version')"
+test -n "$SPINE_TZ_VERSION"
+```
+
+## Ten-Minute Automated First Success
+
+The checked-in example exercises the complete safe path on a new disposable ledger:
+
+- bootstrap one agent subject and explicit fake-only delivery target;
+- author an event every three days at 08:00 local using the installed timezone-data version;
+- expand four occurrences;
+- author six hourly notification opportunities before every occurrence;
+- regenerate recurrence provenance before opportunity expansion;
+- expand 24 opportunities and materialize 24 future work rows;
+- seed one immediately eligible canary;
+- prove observe-only creates zero send evidence;
+- process exactly one fake send in bounded active mode;
+- verify one successful attempt and zero foreign-key errors.
+
+Run it from the repository root:
+
+```bash
+PATH="$PWD/.venv/bin:$PATH" \
+TICKERD_SRC="${TICKERD_SRC:-$PWD/../tickerd/src}" \
+examples/agent-first-success.sh
+```
+
+It creates a unique directory under `/tmp` and prints a summary like:
+
+```json
+{
+  "ok": true,
+  "recurrence_occurrences": 4,
+  "notification_opportunities": 24,
+  "materialized_notification_work": 24,
+  "observe_only_fake_sends": 0,
+  "active_fake_sends": 1,
+  "item_id": "item_...",
+  "timezone_database_version": "<installed-version>",
+  "evidence_root": "/tmp/spine-agent-first-success...."
+}
+```
+
+No gateway sender or external destination is used. Preserve the printed evidence directory while reviewing the generated request and response JSON.
+
+## Stable CLI Invocation Shape
+
+CLI options precede command words. A request may come from a file:
+
+```bash
+spine --db "$SPINE_DB" --input /absolute/path/request.json --pretty event create
+```
+
+Or from stdin:
+
+```bash
+spine --db "$SPINE_DB" --input - --pretty item occurrences <<JSON
+{
+  "item_id": "<item-id>",
+  "range_start": "2035-01-01T00:00:00",
+  "range_end": "2035-01-12T00:00:00",
+  "range_basis": "original_schedule",
+  "limit": "100",
+  "include_diagnostics": true
+}
+JSON
+```
+
+For `reminder.create` with `channel=whatsapp`, include the local binding switch before the command words:
+
+```bash
+spine --db "$SPINE_DB" --input - --pretty --openclaw-whatsapp reminder create
+```
+
+That switch validates authoring context only. It does not send.
+
+## Canonical Scheduling Command Order
+
+For a recurring item with recurrence-bound notifications, use this order:
+
+1. `subject.upsert`
+2. `delivery_target.upsert`
+3. `event.create` or `task.create` with a structured recurrence set
+4. `item.occurrences` to inspect current virtual occurrences and capture recurrence identities
+5. `reminder.create` with `application_scope=each_occurrence` or `selected_occurrence`
+6. `occurrence_provenance.regenerate` for `consumer=notification_schedule`
+7. `notification.opportunities`
+8. `notification_work.materialize`
+9. `spine-worker --mode observe_only ... --max-cycles 1`
+10. `spine-worker --mode active --openclaw-sender fake ... --max-cycles 1`
+
+Do not reverse steps 6 and 7. Recurrence-bound opportunity expansion reads current active provenance; without it, no recurrence targets authorize opportunities.
+
+Every successful item-version mutation returns `current_version`. Use that exact value as the next write's `target_version`. After a recurrence mutation, call `item.occurrences` again and use the returned current `recurrence_revision_id`; occurrence keys and provenance are revision-bound.
+
+Capture these response facts rather than reconstructing them:
+
+| Response | Facts needed by the next operation |
+|---|---|
+| `event.create` or `task.create` | `item_id`, `current_version` |
+| `item.occurrences` | `recurrence_set_id`, `recurrence_revision_id`, `occurrences[].occurrence_key` |
+| `reminder.create` | new `current_version`, `notification_intent_id`, `notification_policy_id` |
+| `occurrence_provenance.regenerate` | `effect`, `selected_count`, unresolved or closed report facts |
+| `notification.opportunities` | `notification_opportunity_id`, `eligible_at_utc`, `actionable`, `next_cursor` |
+| `notification_work.materialize` | `effect`, created/retained/cancelled work-instance IDs |
+
+The executable example captures these with `jq` and stops when any expected count or success fact is missing.
+
+## Public Command Map
+
+| Purpose | Command | Writes? | External send? |
+|---|---|---:|---:|
+| Inspect local authority | `system.info` | No | No |
+| Bootstrap/update actor | `subject.upsert` | Yes | No |
+| Create/update delivery endpoint | `delivery_target.upsert` | Yes | No |
+| Author recurring event | `event.create` | Yes | No |
+| Attach recurrence to non-recurring event | `event.reschedule` | Yes | No |
+| Author recurring task | `task.create` | Yes | No |
+| Expand occurrences | `item.occurrences` | No | No |
+| Add one occurrence | `recurrence.instance.add` | Yes | No |
+| Remove one occurrence | `recurrence.instance.remove` | Yes | No |
+| Move/change one occurrence | `recurrence.instance.override` | Yes | No |
+| Edit one/following/whole series | `recurrence.series.edit` | Yes | No |
+| Refresh occurrence authorization | `occurrence_provenance.regenerate` | Yes | No |
+| Author notification policy | `reminder.create` | Yes | No |
+| Revise notification policy | `reminder.edit` | Yes | No |
+| Disable notification policy | `reminder.disable` | Yes | No |
+| Expand virtual opportunities | `notification.opportunities` | No | No |
+| Persist actionable work | `notification_work.materialize` | Yes | No |
+
+The complete command catalog, including ordinary item and relation commands, is normative in `specs/agent-command-contract.md`.
+
+## Evidence and Source Map
+
+Use these in order when more detail is needed:
+
+1. `docs/AGENT_OPERATOR_GUIDE.md` — operations, migration, worker modes, inspection, and troubleshooting.
+2. `specs/agent-command-contract.md` — exact public command behavior and errors.
+3. `specs/recurrence.md` and `specs/notifications.md` — scheduling semantics and identity.
+4. `contracts/schemas/recurrence-*.schema.json` and `contracts/schemas/notification-*.schema.json` — machine-readable shapes.
+5. `tests/fixtures/recurrence/contracts/` and `tests/fixtures/notifications/contracts/` — copyable structural examples.
+6. `tests/fixtures/recurrence/vectors/` and `tests/fixtures/notifications/vectors/` — computed identity and expansion evidence.
+
+Never infer a write from the relational schema. Use public commands and verify the structured response plus ledger readback.
+
+## Handoff Checklist
+
+An agent is ready to operate when it can truthfully report all of the following:
+
+- the ledger verifies at schema 7;
+- `system.info` reports matching implemented and actual schema versions;
+- it used the locally reported timezone-data version for local schedules;
+- it can explain recurrence cadence versus notification cadence versus retry;
+- it can author and expand a recurring item;
+- it regenerates provenance before recurrence-bound opportunity expansion;
+- it can materialize work without claiming that materialization sent anything;
+- observe-only produced no attempt and no fake-send evidence;
+- bounded active fake mode produced a durable `side_effect_attempts` row;
+- it knows that gateway mode requires separate explicit approval.
