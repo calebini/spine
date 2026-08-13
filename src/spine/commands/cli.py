@@ -82,6 +82,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                 )
                 return 2
             request = {**request, "command_id": _generated_command_id(command, request, args.db)}
+        delivery_target_defaults = _delivery_target_defaults(args.delivery_target_default)
         connection = _open_ledger(args.db, writable=not args.dry_run and command in WRITE_COMMANDS)
     except CliPreflightError as exc:
         _dump(
@@ -95,6 +96,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             dry_run=args.dry_run,
             transport_metadata={"adapter": "cli"},
             adapter_bindings=_adapter_bindings(args),
+            delivery_target_defaults=delivery_target_defaults,
         )
         response = handle(command, request, context)
     except Exception as exc:  # pragma: no cover - final transport fallback
@@ -127,7 +129,34 @@ def _parser() -> argparse.ArgumentParser:
     parser.add_argument("--if-absent", action="store_true")
     parser.add_argument("--generate-command-id", action="store_true")
     parser.add_argument("--openclaw-whatsapp", action="store_true")
+    parser.add_argument(
+        "--delivery-target-default",
+        action="append",
+        default=[],
+        metavar="KEY=DELIVERY_TARGET_ID",
+        help="bind one named schedule.create delivery-target default; may be repeated",
+    )
     return parser
+
+
+def _delivery_target_defaults(values: Sequence[str]) -> dict[str, str | list[str]]:
+    result: dict[str, str | list[str]] = {}
+    for value in values:
+        key, separator, target_id = value.partition("=")
+        if separator == "" or key == "" or target_id == "":
+            raise CliPreflightError(
+                "invalid_request",
+                "--delivery-target-default must use KEY=DELIVERY_TARGET_ID",
+                "delivery_target_default",
+            )
+        current = result.get(key)
+        if current is None:
+            result[key] = target_id
+        elif isinstance(current, str):
+            result[key] = [current, target_id]
+        else:
+            current.append(target_id)
+    return result
 
 
 def _load_request(input_ref: str) -> dict[str, Any]:

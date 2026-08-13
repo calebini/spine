@@ -99,7 +99,32 @@ Current commands:
 - `spine-worker`: run the production-shaped worker in `observe_only`, `active`, or `suspended`.
 - `spine-openclaw-smoke`: run a bounded fake OpenClaw smoke.
 
-The new scheduling command surface is `event.create`, `event.reschedule`, `task.create`, `item.occurrences`, `recurrence.instance.add`, `recurrence.instance.remove`, `recurrence.instance.override`, `recurrence.series.edit`, `occurrence_provenance.regenerate`, `reminder.create`, `reminder.edit`, `reminder.disable`, `notification.opportunities`, and `notification_work.materialize`. See `docs/AGENT_QUICKSTART.md` for the ordered command matrix and complete executable path; see `specs/agent-command-contract.md` for normative request, response, replay, and failure behavior.
+The scheduling command surface is `schedule.create`, `event.create`, `event.reschedule`, `task.create`, `item.occurrences`, `recurrence.instance.add`, `recurrence.instance.remove`, `recurrence.instance.override`, `recurrence.series.edit`, `occurrence_provenance.regenerate`, `reminder.create`, `reminder.edit`, `reminder.disable`, `notification.opportunities`, and `notification_work.materialize`. Prefer `schedule.create` for a new scheduled item plus its initial reminders. Use the lower-level family for independent authoring, reads, and later mutations. See `docs/AGENT_QUICKSTART.md` for the complete executable path; see `specs/agent-command-contract.md` for normative request, response, replay, and failure behavior.
+
+## Atomic Event or Task Scheduling
+
+`schedule.create` is the safest operator-facing creation path when item and reminder authoring belong to one intent. One accepted request can create:
+
+- item version 1 and its local-instant start/due anchor;
+- optional recurrence on that anchor;
+- one to 32 canonically ordered reminder policies;
+- current occurrence provenance when recurrence and bounded materialization are both requested; and
+- zero to 1000 bounded eligible work rows.
+
+The command writes exactly one composite `schedule_created` audit and one command receipt. It invokes no public subcommands, creates no lower-level receipts, starts no work, makes no adapter call, and records no side-effect attempt. A failure in policy normalization, provenance, opportunity expansion, work creation, audit, receipt, or a commit invariant rolls the complete bundle back.
+
+Use an already-active `delivery_target_id`, or supply a named context default at invocation:
+
+```bash
+spine --db "$SPINE_DB" \
+  --delivery-target-default owner_whatsapp=delivery_target_owner_whatsapp \
+  --input /absolute/path/schedule-create-request.json \
+  --dry-run --pretty schedule create
+```
+
+After inspecting the preview, remove `--dry-run` without changing the request or `command_id`. The committed response must distinguish `policies=authored`, `opportunities=expanded` or `not_requested`, `work=materialized`, `completed_zero_selected`, or `not_requested`, and always `delivery=not_attempted`. Replay returns the stored delivery and timezone snapshots even if current environment defaults later change; it does not repair missing evidence or re-resolve the route.
+
+Structural request examples live in `tests/fixtures/schedule_create/contracts/`. The repeat-window event fixture is the quickest complete bounded example, and the recurring-task fixture shows inherited recurrence plus named route resolution without immediate work.
 
 ## Task Assignment Commands
 

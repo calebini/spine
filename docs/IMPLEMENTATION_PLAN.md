@@ -1,9 +1,28 @@
 # Spine Implementation Plan
 
-Status: Canonical scheduling and notification fat slice acceptance verified
-Last reconciled with repository state: 2026-08-07
+Status: Atomic `schedule.create` fat slice acceptance verified
+Last reconciled with repository state: 2026-08-13
 
 This is a non-normative delivery plan. The specifications and machine-readable contracts remain authoritative.
+
+## Delivered Fat Slice: Atomic Schedule Creation
+
+The audited `spine.schedule-create.v1` contract is implemented as one environment-sized delivery. The operator-facing `schedule.create` command creates an event or task, its local-instant anchor, optional inherited recurrence, complete initial reminder-policy set, optional occurrence provenance, and optional bounded notification work in one transaction and returns one replay-safe composite receipt.
+
+The delivery includes:
+
+- transport-neutral command registration plus the `spine-command ... schedule create` CLI alias;
+- normalized `CommandContext.delivery_target_defaults` resolution without route creation or approval;
+- exact timezone-version pinning, fail-closed initial local-time resolution, and internal UTC horizon normalization;
+- direct reuse of canonical recurrence, notification, provenance, opportunity, and work engines without public subcommand chaining;
+- one version-`1` item, one composite audit, and one composite command receipt with full rollback on any child failure;
+- compatible replay from stored result evidence, deterministic dry run, and post-commit receipt/evidence verification;
+- behavioral coverage for event/task, recurrence, policy-only/materialized branches, routes, DST, replay, semantic uniqueness, injected rollback, and the no-send boundary; and
+- runtime command/version declarations plus agent/operator documentation aligned with the executable surface.
+
+Behavioral proof covers non-recurring events, recurring tasks, policy-only and bounded branches, named and explicit routes, recurrence provenance, response-schema conformance, replay without current-environment re-resolution, dry-run identity equivalence, DST ambiguity rejection, task-role semantic uniqueness, injected failure after each write phase, and the no-send boundary.
+
+No schema migration is planned: schema 7 already owns every canonical row required by this orchestration. A migration is introduced only if implementation proves that a required invariant cannot be represented safely by the existing relational contract.
 
 ## Delivery Goal
 

@@ -18,3 +18,4 @@ class CommandContext:
     transport_metadata: Mapping[str, Any] = field(default_factory=dict)
     correlation_id: str | None = None
     adapter_bindings: Mapping[str, Any] = field(default_factory=dict)
+    delivery_target_defaults: Mapping[str, Any] = field(default_factory=dict)

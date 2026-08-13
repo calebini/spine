@@ -150,6 +150,45 @@ spine --db "$SPINE_DB" --input /absolute/path/request.json --pretty event create
 Or from stdin:
 
 ```bash
+spine --db "$SPINE_DB" --pretty schedule create < /absolute/path/schedule-create-request.json
+```
+
+## Preferred Atomic Scheduling Path
+
+Use `schedule.create` for a new event or task that must receive reminders. It is one transaction and one receipt: the item, optional recurrence, all initial policies, optional occurrence provenance, and optional bounded work either commit together or all roll back. It never sends and never creates a `side_effect_attempts` row.
+
+Start from the checked-in executable event request:
+
+```bash
+cp tests/fixtures/schedule_create/contracts/request_event_repeat_window_materialized.json \
+  "$SPINE_DEMO_ROOT/schedule-create-request.json"
+```
+
+Before invocation, replace its actor, recipient, and explicit `delivery_target_id` with active rows from this ledger. The request uses `timezone_database_version.kind=system_current`, so the command pins the executing runtime's exact local timezone-data version and returns that resolved version in its receipt. Then preview and commit using the same request:
+
+```bash
+spine --db "$SPINE_DB" --input "$SPINE_DEMO_ROOT/schedule-create-request.json" \
+  --dry-run --pretty schedule create
+spine --db "$SPINE_DB" --input "$SPINE_DEMO_ROOT/schedule-create-request.json" \
+  --pretty schedule create
+```
+
+The example creates a two-hour countdown every 20 minutes and materializes six work rows. Require `effect=schedule_created`, `phases.delivery=not_attempted`, `materialization.work_instance_count=6`, and six returned work IDs. Repeating the committed request with the same `command_id` returns `effect=schedule_create_replay` and no new rows.
+
+For a request that uses `delivery.target.resolution=context_default`, bind the name explicitly in the CLI context:
+
+```bash
+spine --db "$SPINE_DB" \
+  --delivery-target-default owner_whatsapp=delivery_target_owner_whatsapp \
+  --input /absolute/path/context-default-schedule-request.json \
+  --pretty schedule create
+```
+
+The option only resolves an existing active route. It cannot create, approve, reactivate, or authorize sending through that route. Zero or multiple values for the requested default key fail closed.
+
+A separate read request can also come from stdin; for example:
+
+```bash
 spine --db "$SPINE_DB" --input - --pretty item occurrences <<JSON
 {
   "item_id": "<item-id>",
@@ -209,6 +248,7 @@ The executable example captures these with `jq` and stops when any expected coun
 | Inspect local authority | `system.info` | No | No |
 | Bootstrap/update actor | `subject.upsert` | Yes | No |
 | Create/update delivery endpoint | `delivery_target.upsert` | Yes | No |
+| Atomically create scheduled item + reminders | `schedule.create` | Yes | No |
 | Author recurring event | `event.create` | Yes | No |
 | Attach recurrence to non-recurring event | `event.reschedule` | Yes | No |
 | Author recurring task | `task.create` | Yes | No |
@@ -232,9 +272,9 @@ Use these in order when more detail is needed:
 
 1. `docs/AGENT_OPERATOR_GUIDE.md` — operations, migration, worker modes, inspection, and troubleshooting.
 2. `specs/agent-command-contract.md` — exact public command behavior and errors.
-3. `specs/recurrence.md` and `specs/notifications.md` — scheduling semantics and identity.
-4. `contracts/schemas/recurrence-*.schema.json` and `contracts/schemas/notification-*.schema.json` — machine-readable shapes.
-5. `tests/fixtures/recurrence/contracts/` and `tests/fixtures/notifications/contracts/` — copyable structural examples.
+3. `specs/schedule-create.md`, `specs/recurrence.md`, and `specs/notifications.md` — atomic orchestration, scheduling semantics, and identity.
+4. `contracts/schemas/*schedule-create*.json`, `contracts/schemas/recurrence-*.schema.json`, and `contracts/schemas/notification-*.schema.json` — machine-readable shapes.
+5. `tests/fixtures/schedule_create/contracts/`, `tests/fixtures/recurrence/contracts/`, and `tests/fixtures/notifications/contracts/` — copyable structural examples.
 6. `tests/fixtures/recurrence/vectors/` and `tests/fixtures/notifications/vectors/` — computed identity and expansion evidence.
 
 Never infer a write from the relational schema. Use public commands and verify the structured response plus ledger readback.

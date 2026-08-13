@@ -8,7 +8,7 @@ Current spec surface:
 - `architecture.md`: component boundaries and relationships to tickerd, Foreman/Threshold, adapters, and projections
 - `ontology.md`: first durable ontology and data model sketch
 - `recurrence.md`: canonical flexible recurrence-set model, deterministic expansion and identity, mutation, and occurrence provenance
-- `schedule-create.md`: specified atomic operator-facing creation of one scheduled event/task, initial reminder policies, and optional bounded work; runtime implementation deferred
+- `schedule-create.md`: implemented atomic operator-facing creation of one scheduled event/task, initial reminder policies, and optional bounded work
 - `agent-command-contract.md`: draft agent-facing command/request contract for authoring and inspecting Spine coordination truth
 - `SPINE_SPEC_VERSIONING_AND_FREEZE_POLICY.md`: lightweight policy for spec versions, runtime declarations, and one-way freeze-manifest pinning
 - `decisions/0001-kinflow-is-donor-not-foundation.md`: accepted decision on the Kinflow relationship

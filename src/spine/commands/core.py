@@ -4,10 +4,12 @@ from __future__ import annotations
 
 import base64
 import json
+import re
 import sqlite3
 from collections.abc import Callable, Mapping, Sequence
 from datetime import UTC, date, datetime, timedelta
 from typing import Any
+from zoneinfo import ZoneInfo
 
 from spine import IMPLEMENTED_CONTRACT_VERSIONS, IMPLEMENTED_LEDGER_SCHEMA_VERSION, __version__
 from spine.commands.context import CommandContext
@@ -28,6 +30,7 @@ from spine.core import SpineValidationError
 from spine.core.canonical_json import canonical_json_bytes
 from spine.core.hashing import audit_log_payload_hash, hash_canonical_json
 from spine.core.notifications import (
+    NormalizedNotificationPolicy,
     expand_notification_policy,
     normalize_notification_policy,
     notification_id,
@@ -108,6 +111,7 @@ MVP_COMMANDS = frozenset(
         "event.reschedule",
         "event.cancel",
         "task.create",
+        "schedule.create",
         "task.update",
         "task.complete",
         "task.cancel",
@@ -158,6 +162,7 @@ def handle(command: str, request: Mapping[str, Any], context: CommandContext) ->
                     transport_metadata=context.transport_metadata,
                     correlation_id=context.correlation_id,
                     adapter_bindings=context.adapter_bindings,
+                    delivery_target_defaults=context.delivery_target_defaults,
                 )
                 result = _dispatch(command, request, preview_context)
             finally:
@@ -196,6 +201,8 @@ def _dispatch(command: str, request: Mapping[str, Any], context: CommandContext)
         return _handle_event_create(request, context)
     if command == "task.create":
         return _handle_task_create(request, context)
+    if command == "schedule.create":
+        return _handle_schedule_create(request, context)
     if command == "event.update":
         return _handle_common_update("event.update", "event", request, context)
     if command == "task.update":
@@ -887,6 +894,435 @@ def _handle_task_create(request: Mapping[str, Any], context: CommandContext) -> 
         },
     )
     return _create_response("task.create", _hydrated_item(context.ledger, result.item_id), True, receipt)
+
+
+def _handle_schedule_create(request: Mapping[str, Any], context: CommandContext) -> dict[str, Any]:
+    command = "schedule.create"
+    allowed = {
+        "contract_version",
+        "command_id",
+        "actor_subject_id",
+        "created_at_utc",
+        "item",
+        "scheduled_time",
+        "delivery",
+        "reminders",
+        "materialization",
+    }
+    _check_fields(command, request, allowed)
+    for required_field in (
+        "contract_version",
+        "command_id",
+        "actor_subject_id",
+        "created_at_utc",
+        "item",
+        "scheduled_time",
+        "delivery",
+        "reminders",
+        "materialization",
+    ):
+        if required_field not in request:
+            raise SpineValidationError(f"missing_{required_field}", f"{required_field} is required")
+    if request.get("contract_version") != "spine.schedule-create.v1":
+        raise SpineValidationError("invalid_request:contract_version", "contract_version must be spine.schedule-create.v1")
+    command_id, actor, created_at = _write_identity(command, request, "created_at_utc", context)
+    semantic = _schedule_semantic_request(command_id, actor, created_at, request, allowed)
+    replay = _compatible_replay(command, command_id, semantic, context)
+    if replay is not None:
+        if not _schedule_create_evidence_matches(context.ledger, replay):
+            return _error(command, "runtime_failure", "stored schedule.create evidence is incomplete or inconsistent")
+        return _schedule_create_response(replay, response_effect="schedule_create_replay")
+
+    if current_schema_version(context.ledger) != IMPLEMENTED_LEDGER_SCHEMA_VERSION:
+        raise SpineValidationError(
+            "environment_failure:ledger_schema_version",
+            f"schedule.create requires ledger schema {IMPLEMENTED_LEDGER_SCHEMA_VERSION}",
+        )
+    required_contracts = {
+        "spine.schedule-create.v1",
+        "spine.schedule-create-normalization.v1",
+        "spine.schedule-create-response.v1",
+        "spine.schedule-create-receipt.v1",
+    }
+    if not required_contracts.issubset(IMPLEMENTED_CONTRACT_VERSIONS):
+        raise SpineValidationError(
+            "environment_failure:contract_version",
+            "runtime does not declare the complete schedule.create contract family",
+        )
+
+    item_request = _schedule_object(request.get("item"), "item")
+    item_type = _enum(item_request.get("item_type"), "item.item_type", {"event", "task"})
+    title = _nested_required_str(item_request, "title", "item.title")
+    _schedule_validate_item_fields(item_request, item_type=item_type)
+
+    scheduled_request = _schedule_object(request.get("scheduled_time"), "scheduled_time")
+    scheduled = _schedule_resolve_initial_time(scheduled_request)
+    anchor_id = _derived_id(command, command_id, "start_anchor" if item_type == "event" else "due_anchor", "/scheduled_time")
+    anchor = TemporalAnchorInput(
+        anchor_id=anchor_id,
+        anchor_kind="local_instant",
+        local_date=scheduled["local_date"],
+        local_time=scheduled["local_time"],
+        timezone=scheduled["timezone"],
+        timezone_database_version=scheduled["timezone_database_version"],
+    )
+
+    delivery = _schedule_resolve_delivery(request.get("delivery"), context)
+    materialization = _schedule_normalize_materialization(
+        request.get("materialization"),
+        scheduled=scheduled,
+    )
+    item_id = _derived_id(command, command_id, "item", "/item")
+    audit_id = _derived_id(command, command_id, "audit", "/audit")
+
+    recurrence_authoring = scheduled_request.get("recurrence")
+    raw_anchor: dict[str, object] = {
+        "anchor_kind": "local_instant",
+        "local_date": scheduled["local_date"],
+        "local_time": scheduled["local_time"],
+        "timezone": scheduled["timezone"],
+        "timezone_database_version": scheduled["timezone_database_version"],
+    }
+    if recurrence_authoring is not None:
+        recurrence_fields = _schedule_object(recurrence_authoring, "scheduled_time.recurrence")
+        raw_anchor["recurrence_set"] = {
+            "time_basis": "local_instant",
+            "timezone": scheduled["timezone"],
+            "timezone_database_version": scheduled["timezone_database_version"],
+            **_canonical_value(recurrence_fields),
+        }
+    recurrence = _normalize_authored_recurrence(
+        raw_anchor,
+        field="scheduled_time",
+        anchor=anchor,
+        item_id=item_id,
+        command_id=command_id,
+    )
+
+    subject_roles: tuple[ItemSubjectRoleInput, ...] = ()
+    if item_type == "task":
+        task_detail = _schedule_object(item_request.get("task_detail"), "item.task_detail")
+        raw_roles = task_detail.get("subject_roles", [])
+        if isinstance(raw_roles, Sequence) and not isinstance(raw_roles, (str, bytes, bytearray)):
+            raw_roles = sorted(
+                raw_roles,
+                key=lambda value: (
+                    str(value.get("role", "")) if isinstance(value, Mapping) else "",
+                    str(value.get("subject_id", "")) if isinstance(value, Mapping) else "",
+                    str(value.get("status", "active")) if isinstance(value, Mapping) else "",
+                ),
+            )
+        subject_roles = _task_subject_roles(
+            context.ledger,
+            command=command,
+            command_id=command_id,
+            value=raw_roles,
+            field="item.task_detail.subject_roles",
+            request_path="/item/task_detail/subject_roles",
+        )
+
+    normalized_policies = _schedule_normalize_policies(
+        request.get("reminders"),
+        item_id=item_id,
+        item_type=item_type,
+        recurring=recurrence is not None,
+        command_id=command_id,
+        created_at_utc=created_at,
+        delivery=delivery,
+    )
+    audit_payload: dict[str, object] = {
+        "action": "schedule_created",
+        "item_id": item_id,
+        "item_type": item_type,
+        "version": "1",
+        "command_id": command_id,
+    }
+    receipt_holder: list[dict[str, Any]] = []
+
+    def insert_schedule_bundle(connection: sqlite3.Connection) -> None:
+        if recurrence is not None:
+            insert_initial_recurrence_set(connection, normalized=recurrence, command_id=command_id, created_at_utc=created_at)
+        _schedule_fail_if_requested(context, "item")
+        for _, policy in normalized_policies:
+            insert_notification_schedule_policy(connection, normalized=policy)
+        _schedule_fail_if_requested(context, "policies")
+
+        provenance_ids: list[str] = []
+        opportunity_work: list[dict[str, object]] = []
+        work_instance_ids: list[str] = []
+        materialization_facts: dict[str, object]
+        if materialization["mode"] == "none":
+            materialization_facts = {
+                "mode": "none",
+                "state": "not_requested",
+                "opportunity_count": "0",
+                "work_instance_count": "0",
+                "opportunity_work": [],
+                "work_instance_ids": [],
+            }
+        else:
+            item = _hydrated_item(connection, item_id)
+            if recurrence is not None:
+                source_start, source_end = _schedule_recurrence_source_range(
+                    recurrence.value,
+                    policies=[policy.value for _, policy in normalized_policies],
+                    eligibility_start=_parse_utc_datetime(str(materialization["range_start_utc"])),
+                    eligibility_end=_parse_utc_datetime(str(materialization["range_end_utc"])),
+                )
+                expanded = expand_recurrence_set(
+                    recurrence.value,
+                    range_basis="expressed_time",
+                    range_start=source_start,
+                    range_end=source_end,
+                )
+                for occurrence in expanded.occurrences:
+                    decorated = _decorate_occurrence(item, recurrence.value, dict(occurrence), include_internal=True)
+                    derived = derive_occurrence_provenance(
+                        occurrence=decorated,
+                        recurrence=recurrence.value,
+                        item=item,
+                        consumer="notification_schedule",
+                        producer=command,
+                        range_basis="expressed_time",
+                        range_start=source_start,
+                        range_end=source_end,
+                        created_at_utc=created_at,
+                    )
+                    insert_occurrence_provenance(connection, derived=derived)
+                    provenance_ids.append(str(derived.value["occurrence_provenance_id"]))
+            _schedule_fail_if_requested(context, "provenance")
+
+            opportunities_response = _handle_notification_opportunities(
+                {
+                    "item_id": item_id,
+                    "evaluated_at_utc": materialization["evaluated_at_utc"],
+                    "range_start_utc": materialization["range_start_utc"],
+                    "range_end_utc": materialization["range_end_utc"],
+                    "limit": materialization["limit"],
+                },
+                CommandContext(ledger=connection),
+            )
+            if opportunities_response["has_more"]:
+                raise SpineValidationError(
+                    "invalid_request:materialization.limit",
+                    "materialization.limit is smaller than the complete actionable opportunity set",
+                )
+            opportunities = [dict(value) for value in opportunities_response["opportunities"]]
+            if any(not bool(value["actionable"]) for value in opportunities):
+                raise SpineValidationError(
+                    "semantic_conflict:materialization",
+                    "new schedule.create opportunities must all be actionable",
+                )
+            policy_key_by_id = {
+                str(policy.value["notification_policy_id"]): policy_key for policy_key, policy in normalized_policies
+            }
+            for opportunity in opportunities:
+                work_id, _ = notification_id(
+                    "work_instance",
+                    "spine.notification-work-instance-id.v1",
+                    {
+                        "notification_opportunity_id": opportunity["notification_opportunity_id"],
+                        "delivery_target_id": opportunity["delivery_target_id"],
+                    },
+                )
+                recipient_id = opportunity.get("recipient_subject_id") or opportunity.get("recipient_group_id")
+                create_work_instance(
+                    connection,
+                    work_instance_id=work_id,
+                    item_id=item_id,
+                    item_version=1,
+                    notification_policy_id=str(opportunity["notification_policy_id"]),
+                    notification_policy_item_version=1,
+                    notification_intent_id=str(opportunity["notification_intent_id"]),
+                    notification_opportunity_id=str(opportunity["notification_opportunity_id"]),
+                    normalized_notification_schedule_hash=str(opportunity["normalized_notification_schedule_hash"]),
+                    occurrence_provenance_id=(
+                        str(opportunity["occurrence_provenance_id"])
+                        if opportunity.get("occurrence_provenance_id") is not None
+                        else None
+                    ),
+                    target_anchor_role=str(opportunity["anchor_role"]),
+                    application_scope=str(opportunity["application_scope"]),
+                    target_scheduled_fact=str(opportunity["target_scheduled_fact"]),
+                    target_at_utc=(str(opportunity["target_at_utc"]) if opportunity.get("target_at_utc") is not None else None),
+                    occurrence_key=(str(opportunity["occurrence_key"]) if opportunity.get("occurrence_key") is not None else None),
+                    delivery_target_id=str(opportunity["delivery_target_id"]),
+                    generation_source_kind="schedule_tick",
+                    generation_source_ref=str(opportunity["notification_opportunity_id"]),
+                    work_subject_ref=f"{opportunity['recipient_kind']}:{recipient_id}",
+                    policy_basis_ref=str(opportunity["normalized_notification_schedule_hash"]),
+                    eligible_at_utc=str(opportunity["eligible_at_utc"]),
+                    created_at_utc=created_at,
+                    manage_transaction=False,
+                )
+                work_instance_ids.append(work_id)
+                evidence: dict[str, object] = {
+                    "policy_key": policy_key_by_id[str(opportunity["notification_policy_id"])],
+                    "notification_intent_id": opportunity["notification_intent_id"],
+                    "notification_policy_id": opportunity["notification_policy_id"],
+                    "notification_opportunity_id": opportunity["notification_opportunity_id"],
+                    "eligible_at_utc": opportunity["eligible_at_utc"],
+                    "work_instance_id": work_id,
+                }
+                if opportunity.get("occurrence_key") is not None:
+                    evidence["occurrence_key"] = opportunity["occurrence_key"]
+                    provenance_row = connection.execute(
+                        """
+                        SELECT original_scheduled_fact, expressed_scheduled_fact
+                        FROM occurrence_provenance
+                        WHERE occurrence_provenance_id = ?
+                        """,
+                        (opportunity["occurrence_provenance_id"],),
+                    ).fetchone()
+                    if provenance_row is not None:
+                        evidence["original_scheduled_fact"] = provenance_row["original_scheduled_fact"]
+                        evidence["expressed_scheduled_fact"] = provenance_row["expressed_scheduled_fact"]
+                opportunity_work.append(evidence)
+            _schedule_fail_if_requested(context, "work")
+            materialization_facts = {
+                "mode": "bounded",
+                "state": "materialized" if work_instance_ids else "completed_zero_selected",
+                "evaluated_at_utc": materialization["evaluated_at_utc"],
+                "range_start_utc": materialization["range_start_utc"],
+                "range_end_utc": materialization["range_end_utc"],
+                "limit": materialization["limit"],
+                "opportunity_count": str(len(opportunities)),
+                "work_instance_count": str(len(work_instance_ids)),
+                "opportunity_work": opportunity_work,
+                "work_instance_ids": work_instance_ids,
+            }
+
+        policies_facts = [
+            {
+                "policy_key": policy_key,
+                "notification_intent_id": policy.value["notification_intent_id"],
+                "notification_policy_id": policy.value["notification_policy_id"],
+                "notification_schedule_id": policy.value["notification_schedule_id"],
+                "normalized_notification_schedule_hash": policy.value["normalized_notification_schedule_hash"],
+                "status": "active",
+            }
+            for policy_key, policy in normalized_policies
+        ]
+        phases = {
+            "item": "created",
+            "policies": "authored",
+            "provenance": (
+                "regenerated" if recurrence is not None and materialization["mode"] == "bounded" else
+                "not_requested" if recurrence is not None else
+                "not_applicable"
+            ),
+            "opportunities": "expanded" if materialization["mode"] == "bounded" else "not_requested",
+            "work": (
+                str(materialization_facts["state"])
+                if materialization["mode"] == "bounded"
+                else "not_requested"
+            ),
+            "delivery": "not_attempted",
+        }
+        result_facts: dict[str, Any] = {
+            "command_id": command_id,
+            "command_receipt_id": _receipt_id(command, command_id),
+            "audit_id": audit_id,
+            "created_at_utc": created_at,
+            "item_id": item_id,
+            "item_type": item_type,
+            "current_version": "1",
+            "title": title,
+            "scheduled_time": {
+                "anchor_id": anchor_id,
+                "time_basis": "local_instant",
+                "local_date": scheduled["local_date"],
+                "local_time": scheduled["local_time"],
+                "timezone": scheduled["timezone"],
+                "timezone_database_version": scheduled["timezone_database_version"],
+                "resolution_kind": "unambiguous",
+                "utc_instant": scheduled["utc_instant"],
+                "offset_seconds": scheduled["offset_seconds"],
+            },
+            "delivery": delivery["snapshot"],
+            "policies": policies_facts,
+            "materialization": materialization_facts,
+            "phases": phases,
+        }
+        if recurrence is not None:
+            result_facts["recurrence"] = {
+                "recurrence_set_id": recurrence.value["recurrence_set_id"],
+                "recurrence_revision_id": recurrence.value["recurrence_revision_id"],
+                "revision_number": recurrence.value["revision_number"],
+                "normalized_recurrence_set_hash": recurrence.value["normalized_recurrence_set_hash"],
+                "diagnostics": [],
+            }
+        receipt = _make_receipt(
+            command=command,
+            command_id=command_id,
+            actor_subject_id=actor,
+            action_timestamp_utc=created_at,
+            effect="schedule_created",
+            item_id=item_id,
+            target_version="0",
+            semantic_facts={
+                **semantic,
+                "resolved_timezone_database_version": scheduled["timezone_database_version"],
+                "resolved_initial_utc_instant": scheduled["utc_instant"],
+                "resolved_delivery": delivery["snapshot"],
+                "normalized_result": result_facts,
+            },
+            result_identity_facts=result_facts,
+        )
+        insert_command_receipt(connection, receipt)
+        _schedule_fail_if_requested(context, "receipt")
+        receipt_holder.append(receipt)
+        audit_payload.update(
+            {
+                "notification_policy_ids": [value["notification_policy_id"] for value in policies_facts],
+                "occurrence_provenance_ids": sorted(provenance_ids),
+                "work_instance_ids": work_instance_ids,
+                "command_receipt_id": receipt["command_receipt_id"],
+            }
+        )
+
+    common_create = {
+        "item_id": item_id,
+        "audit_id": audit_id,
+        "created_at_utc": created_at,
+        "created_by_subject_id": actor,
+        "title": title,
+        "summary": _nested_optional_str(item_request, "summary", "item.summary"),
+        "source_ref": _nested_optional_str(item_request, "source_ref", "item.source_ref"),
+        "insert_canonical_extension": insert_schedule_bundle,
+        "audit_action": "schedule_created",
+        "audit_reason_code": "schedule_created",
+        "audit_payload": audit_payload,
+    }
+    if item_type == "event":
+        event_detail = _schedule_object(item_request.get("event_detail"), "item.event_detail")
+        create_event_v1(
+            context.ledger,
+            **common_create,
+            all_day=False,
+            start_anchor=anchor,
+            visibility=_nested_optional_str(event_detail, "visibility", "item.event_detail.visibility"),
+            attendance_policy_ref=_nested_optional_str(
+                event_detail,
+                "attendance_policy_ref",
+                "item.event_detail.attendance_policy_ref",
+            ),
+        )
+    else:
+        task_detail = _schedule_object(item_request.get("task_detail"), "item.task_detail")
+        create_task_v1(
+            context.ledger,
+            **common_create,
+            priority=_nested_optional_str(task_detail, "priority", "item.task_detail.priority"),
+            due_anchor=anchor,
+            subject_roles=subject_roles,
+        )
+    if len(receipt_holder) != 1:
+        return _error(command, "runtime_failure", "schedule.create did not produce exactly one command receipt")
+    receipt = receipt_holder[0]
+    if not _schedule_create_evidence_matches(context.ledger, receipt):
+        return _error(command, "runtime_failure", "committed schedule.create evidence does not match its receipt")
+    return _schedule_create_response(receipt, response_effect="schedule_created")
 
 
 def _handle_common_update(command: str, expected_type: str, request: Mapping[str, Any], context: CommandContext) -> dict[str, Any]:
@@ -3491,6 +3927,600 @@ def _write_identity(command: str, request: Mapping[str, Any], timestamp_field: s
     return command_id, actor, action_timestamp
 
 
+def _schedule_semantic_request(
+    command_id: str,
+    actor: str,
+    created_at: str,
+    request: Mapping[str, Any],
+    allowed: set[str],
+) -> dict[str, Any]:
+    semantic = _semantic_request("schedule.create", command_id, actor, created_at, request, allowed)
+    reminders = semantic.get("reminders")
+    if isinstance(reminders, list) and all(isinstance(entry, dict) for entry in reminders):
+        semantic["reminders"] = sorted(reminders, key=lambda entry: str(entry.get("policy_key", "")))
+    item = semantic.get("item")
+    if isinstance(item, dict):
+        task_detail = item.get("task_detail")
+        if isinstance(task_detail, dict):
+            roles = task_detail.get("subject_roles")
+            if isinstance(roles, list) and all(isinstance(entry, dict) for entry in roles):
+                normalized_roles = [
+                    {**entry, **({"status": "active"} if "status" not in entry else {})}
+                    for entry in roles
+                ]
+                task_detail["subject_roles"] = sorted(
+                    normalized_roles,
+                    key=lambda entry: (
+                        str(entry.get("role", "")),
+                        str(entry.get("subject_id", "")),
+                        str(entry.get("status", "")),
+                    ),
+                )
+    return semantic
+
+
+def _schedule_object(value: object, field: str) -> dict[str, Any]:
+    if not isinstance(value, Mapping):
+        raise SpineValidationError(f"invalid_request:{field}", f"{field} must be an object")
+    return dict(value)
+
+
+def _schedule_exact_fields(value: Mapping[str, Any], allowed: set[str], field: str) -> None:
+    unknown = sorted(set(value) - allowed)
+    if unknown:
+        raise SpineValidationError(
+            f"unsupported_field:{field}.{unknown[0]}",
+            f"unsupported field for {field}: {unknown[0]}",
+        )
+
+
+def _nested_required_str(value: Mapping[str, Any], key: str, field: str) -> str:
+    result = value.get(key)
+    if not isinstance(result, str) or result == "":
+        raise SpineValidationError(f"invalid_request:{field}", f"{field} must be a non-empty string")
+    return result
+
+
+def _nested_optional_str(value: Mapping[str, Any], key: str, field: str) -> str | None:
+    result = value.get(key)
+    if result is None:
+        return None
+    if not isinstance(result, str):
+        raise SpineValidationError(f"invalid_request:{field}", f"{field} must be a string")
+    return result
+
+
+def _schedule_validate_item_fields(item: Mapping[str, Any], *, item_type: str) -> None:
+    _schedule_exact_fields(item, {"item_type", "title", "summary", "source_ref", "event_detail", "task_detail"}, "item")
+    if item_type == "event":
+        if "task_detail" in item:
+            raise SpineValidationError("invalid_request:item.task_detail", "event items cannot contain task_detail")
+        detail = _schedule_object(item.get("event_detail"), "item.event_detail")
+        _schedule_exact_fields(detail, {"all_day", "visibility", "attendance_policy_ref"}, "item.event_detail")
+        if detail.get("all_day") is not False:
+            raise SpineValidationError("invalid_request:item.event_detail.all_day", "schedule.create events require all_day=false")
+    else:
+        if "event_detail" in item:
+            raise SpineValidationError("invalid_request:item.event_detail", "task items cannot contain event_detail")
+        detail = _schedule_object(item.get("task_detail"), "item.task_detail")
+        _schedule_exact_fields(detail, {"priority", "subject_roles"}, "item.task_detail")
+
+
+def _schedule_resolve_initial_time(value: Mapping[str, Any]) -> dict[str, str]:
+    _schedule_exact_fields(
+        value,
+        {"time_basis", "local_date", "local_time", "timezone", "timezone_database_version", "recurrence"},
+        "scheduled_time",
+    )
+    if value.get("time_basis") != "local_instant":
+        raise SpineValidationError("invalid_request:scheduled_time.time_basis", "scheduled_time.time_basis must be local_instant")
+    local_date = _nested_required_str(value, "local_date", "scheduled_time.local_date")
+    local_time = _nested_required_str(value, "local_time", "scheduled_time.local_time")
+    timezone = _nested_required_str(value, "timezone", "scheduled_time.timezone")
+    local_datetime = f"{local_date}T{local_time}"
+    try:
+        parse_scheduled_fact(local_datetime, time_basis="local_instant", field="scheduled_time.local_time")
+    except SpineValidationError as exc:
+        if len(local_date) != 10 or local_datetime[:10] != local_date:
+            raise SpineValidationError("invalid_request:scheduled_time.local_date", "scheduled_time.local_date is invalid") from exc
+        raise
+    directive = _schedule_object(value.get("timezone_database_version"), "scheduled_time.timezone_database_version")
+    kind = directive.get("kind")
+    if kind == "explicit":
+        _schedule_exact_fields(directive, {"kind", "version"}, "scheduled_time.timezone_database_version")
+        version = _nested_required_str(directive, "version", "scheduled_time.timezone_database_version.version")
+    elif kind == "system_current":
+        _schedule_exact_fields(directive, {"kind"}, "scheduled_time.timezone_database_version")
+        version = system_timezone_database_version()
+    else:
+        raise SpineValidationError(
+            "invalid_request:scheduled_time.timezone_database_version.kind",
+            "timezone_database_version.kind must be explicit or system_current",
+        )
+    try:
+        resolution = resolve_local_instant(local_datetime, timezone=timezone, timezone_database_version=version)
+    except SpineValidationError as exc:
+        if exc.code == "invalid_request:timezone":
+            raise SpineValidationError("invalid_request:scheduled_time.timezone", exc.message) from exc
+        if exc.code == "environment_failure:timezone_database_version":
+            raise SpineValidationError("environment_failure:scheduled_time.timezone_database_version", exc.message) from exc
+        raise
+    if resolution is None:
+        raise SpineValidationError(
+            "invalid_request:scheduled_time.local_time",
+            "initial local time does not exist in the pinned timezone data",
+        )
+    if resolution.resolution_kind != "unambiguous":
+        raise SpineValidationError(
+            "invalid_request:scheduled_time.local_time",
+            "initial local time is ambiguous in the pinned timezone data",
+        )
+    return {
+        "local_date": local_date,
+        "local_time": local_time,
+        "timezone": timezone,
+        "timezone_database_version": version,
+        "utc_instant": resolution.utc_instant,
+        "offset_seconds": resolution.offset_seconds,
+    }
+
+
+def _schedule_resolve_delivery(value: object, context: CommandContext) -> dict[str, Any]:
+    delivery = _schedule_object(value, "delivery")
+    _schedule_exact_fields(
+        delivery,
+        {"recipient_kind", "recipient_subject_id", "recipient_group_id", "channel", "target"},
+        "delivery",
+    )
+    recipient_kind = _enum(delivery.get("recipient_kind"), "delivery.recipient_kind", {"subject", "subject_group"})
+    channel = _nested_required_str(delivery, "channel", "delivery.channel")
+    subject_id = _nested_optional_str(delivery, "recipient_subject_id", "delivery.recipient_subject_id")
+    group_id = _nested_optional_str(delivery, "recipient_group_id", "delivery.recipient_group_id")
+    if recipient_kind == "subject":
+        if subject_id is None or group_id is not None:
+            raise SpineValidationError(
+                "invalid_request:delivery.recipient_subject_id",
+                "subject recipient requires recipient_subject_id only",
+            )
+        if not _subject_exists(context.ledger, subject_id):
+            raise SpineValidationError("referenced_row_not_found:delivery.recipient_subject_id", "recipient subject not found")
+        recipient_id = subject_id
+    else:
+        if group_id is None or subject_id is not None:
+            raise SpineValidationError(
+                "invalid_request:delivery.recipient_group_id",
+                "subject_group recipient requires recipient_group_id only",
+            )
+        if not _subject_group_exists(context.ledger, group_id):
+            raise SpineValidationError("referenced_row_not_found:delivery.recipient_group_id", "recipient group not found")
+        recipient_id = group_id
+
+    target_request = _schedule_object(delivery.get("target"), "delivery.target")
+    resolution_source = target_request.get("resolution")
+    default_key: str | None = None
+    if resolution_source == "explicit":
+        _schedule_exact_fields(target_request, {"resolution", "delivery_target_id"}, "delivery.target")
+        delivery_target_id = _nested_required_str(
+            target_request,
+            "delivery_target_id",
+            "delivery.target.delivery_target_id",
+        )
+    elif resolution_source == "context_default":
+        _schedule_exact_fields(target_request, {"resolution", "default_key"}, "delivery.target")
+        default_key = _nested_required_str(target_request, "default_key", "delivery.target.default_key")
+        if re.fullmatch(r"[a-z][a-z0-9_-]{0,63}", default_key) is None:
+            raise SpineValidationError("invalid_request:delivery.target.default_key", "default_key has an invalid format")
+        default_value = context.delivery_target_defaults.get(default_key)
+        if default_value is None:
+            raise SpineValidationError("referenced_row_not_found:delivery.target.default_key", "delivery target default not found")
+        if isinstance(default_value, str):
+            delivery_target_id = default_value
+        elif isinstance(default_value, Sequence) and not isinstance(default_value, (bytes, bytearray, str)):
+            matches = [candidate for candidate in default_value if isinstance(candidate, str) and candidate]
+            if len(matches) == 0:
+                raise SpineValidationError("referenced_row_not_found:delivery.target.default_key", "delivery target default not found")
+            if len(matches) != 1:
+                raise SpineValidationError("semantic_conflict:delivery.target.default_key", "delivery target default is ambiguous")
+            delivery_target_id = matches[0]
+        else:
+            raise SpineValidationError("semantic_conflict:delivery.target.default_key", "delivery target default is invalid")
+    else:
+        raise SpineValidationError(
+            "invalid_request:delivery.target.resolution",
+            "delivery.target.resolution must be explicit or context_default",
+        )
+
+    target = _delivery_target(context.ledger, delivery_target_id, required=False)
+    missing_field = "delivery.target.delivery_target_id" if resolution_source == "explicit" else "delivery.target.default_key"
+    if target is None:
+        raise SpineValidationError(f"referenced_row_not_found:{missing_field}", "delivery target not found")
+    if target["status"] != "active":
+        raise SpineValidationError(f"semantic_conflict:{missing_field}", "delivery target is inactive")
+    if target["channel"] != channel:
+        raise SpineValidationError("semantic_conflict:delivery.channel", "delivery target channel does not match delivery.channel")
+    expected_owner = target["owner_subject_id"] if recipient_kind == "subject" else target["owner_group_id"]
+    if target["owner_kind"] != recipient_kind or expected_owner != recipient_id:
+        raise SpineValidationError(
+            f"semantic_conflict:delivery.{'recipient_subject_id' if recipient_kind == 'subject' else 'recipient_group_id'}",
+            "delivery target owner does not match recipient",
+        )
+    snapshot: dict[str, object] = {
+        "delivery_target_id": delivery_target_id,
+        "resolution_source": resolution_source,
+        "recipient_kind": recipient_kind,
+        "channel": channel,
+        "adapter_name": target["adapter_name"],
+        "target_ref": target["target_ref"],
+        "delivery_state": "not_attempted_by_command",
+        ("recipient_subject_id" if recipient_kind == "subject" else "recipient_group_id"): recipient_id,
+    }
+    if default_key is not None:
+        snapshot["default_key"] = default_key
+    return {
+        "recipient_kind": recipient_kind,
+        "recipient_id": recipient_id,
+        "recipient_subject_id": subject_id,
+        "recipient_group_id": group_id,
+        "channel": channel,
+        "delivery_target_id": delivery_target_id,
+        "snapshot": snapshot,
+    }
+
+
+def _schedule_normalize_materialization(value: object, *, scheduled: Mapping[str, str]) -> dict[str, object]:
+    materialization = _schedule_object(value, "materialization")
+    mode = materialization.get("mode")
+    if mode == "none":
+        _schedule_exact_fields(materialization, {"mode"}, "materialization")
+        return {"mode": "none"}
+    if mode != "bounded":
+        raise SpineValidationError("invalid_request:materialization.mode", "materialization.mode must be none or bounded")
+    _schedule_exact_fields(materialization, {"mode", "evaluated_at_utc", "range", "limit"}, "materialization")
+    evaluated_at = _nested_required_str(materialization, "evaluated_at_utc", "materialization.evaluated_at_utc")
+    try:
+        require_utc_z("materialization.evaluated_at_utc", evaluated_at)
+    except SpineValidationError as exc:
+        raise SpineValidationError("invalid_request:materialization.evaluated_at_utc", exc.message) from exc
+    raw_limit = materialization.get("limit")
+    if not isinstance(raw_limit, str) or not raw_limit.isdigit() or not 1 <= int(raw_limit) <= 1000:
+        raise SpineValidationError("invalid_request:materialization.limit", "materialization.limit must be 1 through 1000")
+    range_request = _schedule_object(materialization.get("range"), "materialization.range")
+    range_kind = range_request.get("kind")
+    if range_kind == "item_relative":
+        _schedule_exact_fields(
+            range_request,
+            {"kind", "start_offset_seconds", "end_offset_seconds"},
+            "materialization.range",
+        )
+        start_offset = _schedule_signed_decimal(
+            range_request.get("start_offset_seconds"),
+            "materialization.range.start_offset_seconds",
+        )
+        end_offset = _schedule_signed_decimal(
+            range_request.get("end_offset_seconds"),
+            "materialization.range.end_offset_seconds",
+        )
+        initial = _parse_utc_datetime(scheduled["utc_instant"])
+        start = initial + timedelta(seconds=start_offset)
+        end = initial + timedelta(seconds=end_offset)
+    elif range_kind == "local_range":
+        _schedule_exact_fields(
+            range_request,
+            {"kind", "range_start_local", "range_end_local"},
+            "materialization.range",
+        )
+        start_local = _nested_required_str(
+            range_request,
+            "range_start_local",
+            "materialization.range.range_start_local",
+        )
+        end_local = _nested_required_str(
+            range_request,
+            "range_end_local",
+            "materialization.range.range_end_local",
+        )
+        start = _schedule_resolve_range_boundary(start_local, "range_start_local", scheduled)
+        end = _schedule_resolve_range_boundary(end_local, "range_end_local", scheduled)
+    else:
+        raise SpineValidationError(
+            "invalid_request:materialization.range.kind",
+            "materialization.range.kind must be local_range or item_relative",
+        )
+    if end <= start:
+        raise SpineValidationError(
+            "invalid_request:materialization.range",
+            "materialization range end must be later than its start",
+        )
+    if end - start > timedelta(days=366):
+        raise SpineValidationError(
+            "invalid_request:materialization.range",
+            "materialization range must not exceed 366 elapsed days",
+        )
+    return {
+        "mode": "bounded",
+        "evaluated_at_utc": evaluated_at,
+        "range_start_utc": _schedule_utc_text(start),
+        "range_end_utc": _schedule_utc_text(end),
+        "limit": raw_limit,
+    }
+
+
+def _schedule_signed_decimal(value: object, field: str) -> int:
+    if not isinstance(value, str) or re.fullmatch(r"0|-?[1-9][0-9]*", value) is None:
+        raise SpineValidationError(f"invalid_request:{field}", f"{field} must be a canonical signed decimal string")
+    return int(value)
+
+
+def _schedule_resolve_range_boundary(value: str, name: str, scheduled: Mapping[str, str]) -> datetime:
+    field = f"materialization.range.{name}"
+    try:
+        parse_scheduled_fact(value, time_basis="local_instant", field=field)
+        resolution = resolve_local_instant(
+            value,
+            timezone=scheduled["timezone"],
+            timezone_database_version=scheduled["timezone_database_version"],
+        )
+    except SpineValidationError as exc:
+        if exc.code == "invalid_request:timezone":
+            raise SpineValidationError("invalid_request:scheduled_time.timezone", exc.message) from exc
+        if exc.code == "environment_failure:timezone_database_version":
+            raise SpineValidationError("environment_failure:scheduled_time.timezone_database_version", exc.message) from exc
+        raise
+    if resolution is None:
+        raise SpineValidationError(f"invalid_request:{field}", f"{field} does not exist in the pinned timezone data")
+    if resolution.resolution_kind != "unambiguous":
+        raise SpineValidationError(f"invalid_request:{field}", f"{field} is ambiguous in the pinned timezone data")
+    return _parse_utc_datetime(resolution.utc_instant)
+
+
+def _schedule_normalize_policies(
+    value: object,
+    *,
+    item_id: str,
+    item_type: str,
+    recurring: bool,
+    command_id: str,
+    created_at_utc: str,
+    delivery: Mapping[str, Any],
+) -> tuple[tuple[str, NormalizedNotificationPolicy], ...]:
+    if not isinstance(value, Sequence) or isinstance(value, (str, bytes, bytearray)):
+        raise SpineValidationError("invalid_request:reminders", "reminders must be an array")
+    if not 1 <= len(value) <= 32:
+        raise SpineValidationError("invalid_request:reminders", "reminders must contain 1 through 32 policies")
+    keyed: list[tuple[str, int, Mapping[str, Any]]] = []
+    seen_keys: set[str] = set()
+    for index, raw in enumerate(value):
+        reminder = _schedule_object(raw, f"reminders[{index}]")
+        _schedule_exact_fields(reminder, {"policy_key", "schedule", "late_handling"}, f"reminders[{index}]")
+        policy_key = _nested_required_str(reminder, "policy_key", f"reminders[{index}].policy_key")
+        if re.fullmatch(r"[a-z][a-z0-9_-]{0,63}", policy_key) is None:
+            raise SpineValidationError(
+                f"invalid_request:reminders[{index}].policy_key",
+                "policy_key has an invalid format",
+            )
+        if policy_key in seen_keys:
+            raise SpineValidationError(
+                f"semantic_conflict:reminders[{index}].policy_key",
+                "policy_key must be unique",
+            )
+        seen_keys.add(policy_key)
+        keyed.append((policy_key, index, reminder))
+    result: list[tuple[str, NormalizedNotificationPolicy]] = []
+    seen_schedules: set[str] = set()
+    for policy_key, index, reminder in sorted(keyed, key=lambda entry: entry[0]):
+        normalized = normalize_notification_policy(
+            {
+                "authoring_contract": "spine.notification-schedule-authoring.v1",
+                "target": {
+                    "anchor_role": "event_start" if item_type == "event" else "task_due",
+                    "application_scope": "each_occurrence" if recurring else "item",
+                },
+                "schedule": reminder.get("schedule"),
+                "late_handling": reminder.get("late_handling"),
+            },
+            item_id=item_id,
+            item_version="1",
+            command_id=command_id,
+            created_at_utc=created_at_utc,
+            recipient_kind=str(delivery["recipient_kind"]),
+            recipient_id=str(delivery["recipient_id"]),
+            channel=str(delivery["channel"]),
+            delivery_target_id=str(delivery["delivery_target_id"]),
+        )
+        schedule_hash = str(normalized.value["normalized_notification_schedule_hash"])
+        if schedule_hash in seen_schedules:
+            raise SpineValidationError(
+                f"semantic_conflict:reminders[{index}]",
+                "reminder duplicates another normalized policy",
+            )
+        seen_schedules.add(schedule_hash)
+        result.append((policy_key, normalized))
+    return tuple(result)
+
+
+def _schedule_recurrence_source_range(
+    recurrence: Mapping[str, object],
+    *,
+    policies: list[dict[str, object]],
+    eligibility_start: datetime,
+    eligibility_end: datetime,
+) -> tuple[str, str]:
+    minimum_offset = 0
+    maximum_offset = 0
+    for policy in policies:
+        target = _schedule_object(policy.get("target"), "notification policy target")
+        if target.get("application_scope") == "item":
+            continue
+        offsets = _schedule_policy_offsets(policy)
+        minimum_offset = min(minimum_offset, *offsets)
+        maximum_offset = max(maximum_offset, *offsets)
+    conservative = timedelta(days=2)
+    target_start = eligibility_start - timedelta(seconds=maximum_offset) - conservative
+    target_end = eligibility_end - timedelta(seconds=minimum_offset) + conservative
+    basis = str(recurrence["time_basis"])
+    if basis == "instant_utc":
+        return _schedule_utc_text(target_start), _schedule_utc_text(target_end)
+    zone = ZoneInfo(str(recurrence["timezone"]))
+    local_start = target_start.astimezone(zone)
+    local_end = target_end.astimezone(zone)
+    if basis == "local_date":
+        return local_start.date().isoformat(), (local_end.date() + timedelta(days=1)).isoformat()
+    return (
+        local_start.replace(tzinfo=None).strftime("%Y-%m-%dT%H:%M:%S"),
+        (local_end.replace(tzinfo=None) + timedelta(seconds=1)).strftime("%Y-%m-%dT%H:%M:%S"),
+    )
+
+
+def _schedule_policy_offsets(policy: Mapping[str, object]) -> list[int]:
+    schedule = _schedule_object(policy.get("schedule"), "notification policy schedule")
+    kind = schedule.get("kind")
+    if kind == "once":
+        boundaries = [_schedule_object(schedule.get("at"), "notification schedule boundary")]
+    elif kind == "offsets":
+        raw_boundaries = schedule.get("at")
+        if not isinstance(raw_boundaries, Sequence) or isinstance(raw_boundaries, (str, bytes, bytearray)):
+            raise SpineValidationError("invalid_request:reminders", "notification offsets must be an array")
+        boundaries = [_schedule_object(entry, "notification schedule boundary") for entry in raw_boundaries]
+    else:
+        boundaries = [
+            _schedule_object(schedule.get("start"), "notification schedule start"),
+            _schedule_object(schedule.get("stop"), "notification schedule stop"),
+        ]
+    values = [0]
+    for boundary in boundaries:
+        if boundary.get("kind") != "target_offset":
+            continue
+        if boundary.get("offset_basis") == "elapsed":
+            values.append(int(str(boundary["offset_seconds"])))
+        else:
+            values.append(int(str(boundary["offset_days"])) * 86_400)
+    return values
+
+
+def _parse_utc_datetime(value: str) -> datetime:
+    try:
+        return datetime.strptime(value, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=UTC)
+    except ValueError as exc:
+        raise SpineValidationError("invalid_request:timestamp", "timestamp must be canonical UTC with trailing Z") from exc
+
+
+def _schedule_utc_text(value: datetime) -> str:
+    return value.astimezone(UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
+def _schedule_fail_if_requested(context: CommandContext, phase: str) -> None:
+    if context.transport_metadata.get("schedule_create_fail_after") == phase:
+        raise SpineValidationError(
+            "runtime_failure:schedule_create_injected_failure",
+            f"injected schedule.create failure after {phase}",
+        )
+
+
+def _schedule_create_response(receipt: Mapping[str, Any], *, response_effect: str) -> dict[str, Any]:
+    facts = receipt.get("result_identity_facts")
+    if not isinstance(facts, Mapping):
+        raise SpineValidationError("runtime_failure:schedule_create_receipt", "schedule.create receipt result is invalid")
+    return {
+        "ok": True,
+        "command": "schedule.create",
+        "response_contract": "spine.schedule-create-response.v1",
+        "effect": response_effect,
+        **dict(facts),
+        "receipt": {
+            "receipt_contract": "spine.schedule-create-receipt.v1",
+            "command_receipt_id": receipt["command_receipt_id"],
+            "effect": "schedule_created",
+            "semantic_facts_hash": receipt["semantic_facts_hash"],
+            "created_at_utc": receipt["created_at_utc"],
+        },
+    }
+
+
+def _schedule_create_evidence_matches(connection: sqlite3.Connection, receipt: Mapping[str, Any]) -> bool:
+    facts = receipt.get("result_identity_facts")
+    if not isinstance(facts, Mapping):
+        return False
+    try:
+        item_id = str(facts["item_id"])
+        command_receipt_id = str(facts["command_receipt_id"])
+        audit_id = str(facts["audit_id"])
+        policies = facts["policies"]
+        materialization = facts["materialization"]
+    except (KeyError, TypeError):
+        return False
+    if not isinstance(policies, Sequence) or isinstance(policies, (str, bytes, bytearray)):
+        return False
+    if not isinstance(materialization, Mapping):
+        return False
+    item_row = connection.execute(
+        "SELECT item_type FROM coordination_items WHERE item_id = ?",
+        (item_id,),
+    ).fetchone()
+    version_row = connection.execute(
+        "SELECT 1 FROM coordination_item_versions WHERE item_id = ? AND version = 1",
+        (item_id,),
+    ).fetchone()
+    audit_row = connection.execute(
+        "SELECT action, reason_code FROM audit_log WHERE audit_id = ? AND item_id = ?",
+        (audit_id, item_id),
+    ).fetchone()
+    receipt_row = connection.execute(
+        "SELECT command_id, command, effect FROM command_receipts WHERE command_receipt_id = ?",
+        (command_receipt_id,),
+    ).fetchone()
+    if (
+        item_row is None
+        or version_row is None
+        or str(item_row["item_type"]) != str(facts.get("item_type"))
+        or audit_row is None
+        or audit_row["action"] != "schedule_created"
+        or audit_row["reason_code"] != "schedule_created"
+        or receipt_row is None
+        or receipt_row["command"] != "schedule.create"
+        or receipt_row["effect"] != "schedule_created"
+        or receipt_row["command_id"] != receipt.get("command_id")
+    ):
+        return False
+    for policy in policies:
+        if not isinstance(policy, Mapping):
+            return False
+        row = connection.execute(
+            """
+            SELECT notification_intent_id, schedule_id, normalized_notification_schedule_hash, status
+            FROM notification_policies
+            WHERE policy_id = ? AND item_id = ? AND version = 1
+            """,
+            (policy.get("notification_policy_id"), item_id),
+        ).fetchone()
+        if row is None or any(
+            str(row[column]) != str(policy[expected])
+            for column, expected in (
+                ("notification_intent_id", "notification_intent_id"),
+                ("schedule_id", "notification_schedule_id"),
+                ("normalized_notification_schedule_hash", "normalized_notification_schedule_hash"),
+                ("status", "status"),
+            )
+        ):
+            return False
+    work_ids = materialization.get("work_instance_ids")
+    if not isinstance(work_ids, Sequence) or isinstance(work_ids, (str, bytes, bytearray)):
+        return False
+    for work_id in work_ids:
+        work_row = connection.execute(
+            "SELECT item_id, item_version FROM work_instances WHERE work_instance_id = ?",
+            (work_id,),
+        ).fetchone()
+        if work_row is None or work_row["item_id"] != item_id or int(work_row["item_version"]) != 1:
+            return False
+        attempt = connection.execute(
+            "SELECT 1 FROM side_effect_attempts WHERE work_instance_id = ? LIMIT 1",
+            (work_id,),
+        ).fetchone()
+        if attempt is not None:
+            return False
+    return True
+
+
 def _compatible_replay(command: str, command_id: str, semantic_facts: Mapping[str, Any], context: CommandContext) -> dict[str, Any] | None:
     existing = get_command_receipt(context.ledger, command_id)
     if existing is None:
@@ -5435,8 +6465,14 @@ def _error(command: str, code: str, message: str, field: str | None = None) -> d
 
 def _validation_error(command: str, exc: SpineValidationError) -> dict[str, Any]:
     code = exc.code
+    if code.startswith("runtime_failure:"):
+        return _error(command, "runtime_failure", exc.message)
     if code.startswith("environment_failure:"):
         return _error(command, "environment_failure", exc.message, code.split(":", 1)[1])
+    if code.startswith("referenced_row_not_found:"):
+        return _error(command, "referenced_row_not_found", exc.message, code.split(":", 1)[1])
+    if code.startswith("semantic_conflict:"):
+        return _error(command, "semantic_conflict", exc.message, code.split(":", 1)[1])
     if code.startswith("invalid_request:"):
         return _error(command, "invalid_request", exc.message, code.split(":", 1)[1])
     if code == "recurrence_not_configured":

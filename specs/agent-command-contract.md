@@ -1,6 +1,6 @@
 # Spine Agent Command Contract
 
-Status: Draft v0.4.1; executable low-level scheduling family implemented; atomic `schedule.create` specified but not implemented
+Status: Draft v0.4.2; executable low-level scheduling family and atomic `schedule.create` implemented
 Scope: Agent-facing command/request contract for authoring and inspecting Spine coordination truth
 Created: 2026-06-19
 
@@ -20,13 +20,11 @@ Spine is the canonical coordination ledger and planning fabric. External tools a
 
 ## 3. Command Core Shape
 
-The stable command core lives behind the importable Python handler signature `spine.commands.handle(command: str, request: Mapping, context: CommandContext) -> Mapping`. The canonical command identifier is the dotted `resource.verb` value. Currently implemented contract command identifiers are `system.info`, `subject.upsert`, `subject_group.upsert`, `delivery_target.upsert`, `item.show`, `item.list`, `item.occurrences`, `item.archive`, `event.create`, `event.update`, `event.reschedule`, `event.cancel`, `task.create`, `task.update`, `task.complete`, `task.cancel`, `relation.create`, `relation.list`, `reminder.create`, `reminder.edit`, `reminder.disable`, `notification.opportunities`, `notification_work.materialize`, `recurrence.instance.add`, `recurrence.instance.remove`, `recurrence.instance.override`, `recurrence.series.edit`, and `occurrence_provenance.regenerate`.
-
-`schedule.create` is the specified composite authoring identifier governed by `specs/schedule-create.md`. It is reserved but not implemented in the current runtime. Until its runtime, version declaration, fixtures, and behavioral tests land atomically, it is excluded from the implemented command set and `system.info.implemented_contract_versions`; invocation follows the normal `unsupported_command` result. Contract-only schemas and structural fixtures MUST NOT be interpreted as an implementation declaration.
+The stable command core lives behind the importable Python handler signature `spine.commands.handle(command: str, request: Mapping, context: CommandContext) -> Mapping`. The canonical command identifier is the dotted `resource.verb` value. Currently implemented contract command identifiers are `system.info`, `subject.upsert`, `subject_group.upsert`, `delivery_target.upsert`, `item.show`, `item.list`, `item.occurrences`, `item.archive`, `event.create`, `event.update`, `event.reschedule`, `event.cancel`, `task.create`, `schedule.create`, `task.update`, `task.complete`, `task.cancel`, `relation.create`, `relation.list`, `reminder.create`, `reminder.edit`, `reminder.disable`, `notification.opportunities`, `notification_work.materialize`, `recurrence.instance.add`, `recurrence.instance.remove`, `recurrence.instance.override`, `recurrence.series.edit`, and `occurrence_provenance.regenerate`.
 
 CLI invocations such as `spine event create` are transport aliases. MCP tools and localhost HTTP routes may use local names, but each request and response maps to exactly one canonical command and returns that command in the `command` field.
 
-`CommandContext` contains the ledger connection or path, `dry_run` boolean defaulting to `false`, transport metadata, optional `correlation_id`, optional runtime adapter bindings, and the future normalized `delivery_target_defaults` mapping defined by `specs/schedule-create.md`. A delivery-target default maps a request key to an existing canonical delivery-target ID; it is not adapter configuration, route creation, approval, or permission to send. Command authoring and bounded scheduling reads require only the ledger and explicitly declared normalized context; they never invoke an external adapter. Runtime workers resolve configured bindings only after durable work exists and the pre-write attempt gate succeeds. The command core does not depend on argparse, FastAPI, MCP server APIs, or another transport framework.
+`CommandContext` contains the ledger connection or path, `dry_run` boolean defaulting to `false`, transport metadata, optional `correlation_id`, optional runtime adapter bindings, and the normalized `delivery_target_defaults` mapping defined by `specs/schedule-create.md`. A delivery-target default maps a request key to an existing canonical delivery-target ID; it is not adapter configuration, route creation, approval, or permission to send. Command authoring and bounded scheduling reads require only the ledger and explicitly declared normalized context; they never invoke an external adapter. Runtime workers resolve configured bindings only after durable work exists and the pre-write attempt gate succeeds. The command core does not depend on argparse, FastAPI, MCP server APIs, or another transport framework.
 
 An unsupported canonical command identifier is a deterministic request failure and never mutates canonical rows. If the supplied identifier is syntactically dotted but not one of the MVP command identifiers, the command core returns `ok=false`, echoes that identifier in `command`, and reports `error.code=unsupported_command`, `error.field=command`. If a transport cannot resolve an invocation to a syntactically valid canonical command identifier, it returns `ok=false` without a `command` field and reports `error.code=unsupported_command`, `error.field=command`. The CLI maps both cases to exit `2` when transport control is recovered.
 
@@ -242,7 +240,7 @@ The command creates policies directly on item version `1` and returns one compos
 
 Delivery resolution accepts an existing explicit target or a named normalized context default. It never creates or approves a route. Materialization accepts a bounded local or item-relative horizon and performs UTC normalization internally. No branch starts work, writes a side-effect attempt, invokes an adapter, or reports delivery.
 
-This subsection specifies future behavior only. The current MVP runtime acceptance boundary below remains the implemented low-level command family until `schedule.create` is separately declared implemented.
+The schema-7 runtime implements this subsection. It resolves named CLI defaults from repeatable `--delivery-target-default KEY=DELIVERY_TARGET_ID` options and exposes all schedule-create version facts through `system.info`.
 
 ## 15. Dry Run and External Send Boundary
 
@@ -270,7 +268,7 @@ The flexible recurrence contract package lives under `contracts/schemas/recurren
 
 The notification-scheduling contract package lives under `contracts/schemas/notification-*.schema.json`, `contracts/notification-fixture-manifest.json`, `contracts/vector-manifest.json`, and `tests/fixtures/notifications/`. Those artifacts define structured authoring, normalized policy materialization, notification command envelopes, bounded opportunity responses, and computed identity/expansion evidence; `specs/notifications.md` remains the semantic authority.
 
-The atomic schedule-creation contract package lives under `contracts/schemas/schedule-create-*.schema.json`, `contracts/schedule-create-fixture-manifest.json`, and `tests/fixtures/schedule_create/contracts/`. Those artifacts are structural specification evidence only. `specs/schedule-create.md` remains the semantic authority, and the package MUST NOT be added to runtime implemented-version declarations until matching behavior and conformance tests land.
+The atomic schedule-creation contract package lives under `contracts/schemas/schedule-create-*.schema.json`, `contracts/schedule-create-fixture-manifest.json`, and `tests/fixtures/schedule_create/contracts/`. `specs/schedule-create.md` remains the semantic authority. Behavioral conformance, including atomic rollback, replay, dry run, recurrence provenance, bounded work, and no-send behavior, lives in `tests/test_schedule_create_command.py`.
 
 ## 17. MVP Acceptance Criteria
 

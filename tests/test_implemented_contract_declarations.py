@@ -27,6 +27,10 @@ class ImplementedContractDeclarationTests(unittest.TestCase):
                 NOTIFICATION_AUTHORING_VERSION,
                 NOTIFICATION_CONTRACT_VERSION,
                 NOTIFICATION_NORMALIZATION_VERSION,
+                "spine.schedule-create.v1",
+                "spine.schedule-create-normalization.v1",
+                "spine.schedule-create-response.v1",
+                "spine.schedule-create-receipt.v1",
                 "spine.system-info.v1",
             }.issubset(IMPLEMENTED_CONTRACT_VERSIONS)
         )

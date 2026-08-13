@@ -55,11 +55,15 @@ class MutatedItem:
     version: int
     audit_id: str
 
+
 def create_event_from_draft(
     connection: sqlite3.Connection,
     draft: EventDraft,
     *,
     insert_canonical_extension: Callable[[sqlite3.Connection], None] | None = None,
+    audit_action: str = "created",
+    audit_reason_code: str = "created",
+    audit_payload: dict[str, object] | None = None,
 ) -> CreatedItem:
     """Create a brand-new event item from an input bundle."""
 
@@ -125,6 +129,9 @@ def create_event_from_draft(
         insert_anchors=insert_anchors,
         insert_detail=insert_detail,
         insert_canonical_extension=insert_canonical_extension,
+        audit_action=audit_action,
+        audit_reason_code=audit_reason_code,
+        audit_payload=audit_payload,
     )
 
 
@@ -147,6 +154,9 @@ def create_event_v1(
     item_locations: tuple[ItemLocationInput, ...] = (),
     subject_roles: tuple[ItemSubjectRoleInput, ...] = (),
     insert_canonical_extension: Callable[[sqlite3.Connection], None] | None = None,
+    audit_action: str = "created",
+    audit_reason_code: str = "created",
+    audit_payload: dict[str, object] | None = None,
 ) -> CreatedItem:
     """Create a brand-new event item and its v1 facts in one transaction."""
 
@@ -170,6 +180,9 @@ def create_event_v1(
             subject_roles=subject_roles,
         ),
         insert_canonical_extension=insert_canonical_extension,
+        audit_action=audit_action,
+        audit_reason_code=audit_reason_code,
+        audit_payload=audit_payload,
     )
 
 
@@ -178,6 +191,9 @@ def create_task_from_draft(
     draft: TaskDraft,
     *,
     insert_canonical_extension: Callable[[sqlite3.Connection], None] | None = None,
+    audit_action: str = "created",
+    audit_reason_code: str = "created",
+    audit_payload: dict[str, object] | None = None,
 ) -> CreatedItem:
     """Create a brand-new task item from an input bundle."""
 
@@ -249,6 +265,9 @@ def create_task_from_draft(
         insert_anchors=insert_anchors,
         insert_detail=insert_detail,
         insert_canonical_extension=insert_canonical_extension,
+        audit_action=audit_action,
+        audit_reason_code=audit_reason_code,
+        audit_payload=audit_payload,
     )
 
 
@@ -272,6 +291,9 @@ def create_task_v1(
     item_locations: tuple[ItemLocationInput, ...] = (),
     subject_roles: tuple[ItemSubjectRoleInput, ...] = (),
     insert_canonical_extension: Callable[[sqlite3.Connection], None] | None = None,
+    audit_action: str = "created",
+    audit_reason_code: str = "created",
+    audit_payload: dict[str, object] | None = None,
 ) -> CreatedItem:
     """Create a brand-new task item and its v1 facts in one transaction."""
 
@@ -296,6 +318,9 @@ def create_task_v1(
             subject_roles=subject_roles,
         ),
         insert_canonical_extension=insert_canonical_extension,
+        audit_action=audit_action,
+        audit_reason_code=audit_reason_code,
+        audit_payload=audit_payload,
     )
 
 
@@ -714,6 +739,9 @@ def _create_item_v1(
     insert_anchors: Callable[[sqlite3.Connection], None],
     insert_detail: Callable[[sqlite3.Connection], None],
     insert_canonical_extension: Callable[[sqlite3.Connection], None] | None = None,
+    audit_action: str = "created",
+    audit_reason_code: str = "created",
+    audit_payload: dict[str, object] | None = None,
 ) -> CreatedItem:
     try:
         with connection:
@@ -745,14 +773,36 @@ def _create_item_v1(
                 item_locations=item_locations,
                 subject_roles=subject_roles,
             )
-            _insert_creation_audit(
-                connection,
-                audit_id=audit_id,
-                item_id=item_id,
-                item_type=item_type,
-                created_by_subject_id=created_by_subject_id,
-                created_at_utc=created_at_utc,
-            )
+            if audit_action == "created" and audit_reason_code == "created" and audit_payload is None:
+                _insert_creation_audit(
+                    connection,
+                    audit_id=audit_id,
+                    item_id=item_id,
+                    item_type=item_type,
+                    created_by_subject_id=created_by_subject_id,
+                    created_at_utc=created_at_utc,
+                )
+            else:
+                require_non_empty("audit_action", audit_action)
+                require_non_empty("audit_reason_code", audit_reason_code)
+                payload = audit_payload or creation_audit_payload(item_id=item_id, item_type=item_type, version=1)
+                connection.execute(
+                    """
+                    INSERT INTO audit_log (
+                      audit_id, item_id, stage, action, reason_code, actor_ref,
+                      payload_hash, created_at_utc
+                    ) VALUES (?, ?, 'item', ?, ?, ?, ?, ?)
+                    """,
+                    (
+                        audit_id,
+                        item_id,
+                        audit_action,
+                        audit_reason_code,
+                        created_by_subject_id,
+                        audit_log_payload_hash(payload),
+                        created_at_utc,
+                    ),
+                )
             assert_ledger_invariants(connection, item_id=item_id)
     except sqlite3.IntegrityError as exc:
         raise SpineValidationError("item_create_rejected", str(exc)) from exc

@@ -54,6 +54,7 @@ class AgentDocumentationTests(unittest.TestCase):
             self.assertIn(heading, document)
         for command in (
             "system.info",
+            "schedule.create",
             "event.create",
             "task.create",
             "item.occurrences",
