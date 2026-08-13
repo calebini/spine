@@ -1,0 +1,64 @@
+{
+  "contract_version": "spine.schedule-create.v1",
+  "command_id": "schedule-create-duplicate-task-role-001",
+  "actor_subject_id": "subject_agent",
+  "created_at_utc": "2035-02-01T12:00:00Z",
+  "item": {
+    "item_type": "task",
+    "title": "Review household plan",
+    "task_detail": {
+      "priority": "normal",
+      "subject_roles": [
+        {
+          "subject_id": "subject_owner",
+          "role": "assignee",
+          "status": "active"
+        },
+        {
+          "subject_id": "subject_owner",
+          "role": "assignee",
+          "status": "inactive"
+        }
+      ]
+    }
+  },
+  "scheduled_time": {
+    "time_basis": "local_instant",
+    "local_date": "2035-02-03",
+    "local_time": "08:00:00",
+    "timezone": "America/Toronto",
+    "timezone_database_version": {
+      "kind": "explicit",
+      "version": "2035a"
+    }
+  },
+  "delivery": {
+    "recipient_kind": "subject",
+    "recipient_subject_id": "subject_owner",
+    "channel": "whatsapp",
+    "target": {
+      "resolution": "context_default",
+      "default_key": "owner_whatsapp"
+    }
+  },
+  "reminders": [
+    {
+      "policy_key": "one_hour_before",
+      "schedule": {
+        "kind": "once",
+        "at": {
+          "kind": "target_offset",
+          "offset_basis": "elapsed",
+          "offset_seconds": "-3600"
+        }
+      },
+      "late_handling": {
+        "kind": "deliver_within",
+        "grace_seconds": "900"
+      }
+    }
+  ],
+  "materialization": {
+    "mode": "none"
+  }
+}

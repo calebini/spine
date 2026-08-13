@@ -138,7 +138,15 @@ Calendar notification cadence may reuse the frequency, selector, timezone-versio
 
 Tickerd may initiate bounded materialization and process eligible work. It does not own notification schedule interpretation. Repeated notification opportunities are separate work instances; adapter retries remain attempts or retry state for one work instance. No policy or opportunity may invoke an adapter directly.
 
-## 8. Suggested Future Package Boundaries
+## 8. Composite Schedule Authoring Boundary
+
+`specs/schedule-create.md` defines `schedule.create`, a provider-independent orchestration service over existing item, recurrence, notification, provenance, work, audit, and receipt authorities. It introduces no new canonical entity and MUST live in the service/command layer rather than core schedule normalization or an adapter.
+
+One fresh success is one database transaction containing the complete new item bundle, initial policies, requested recurrence provenance and bounded work, one audit, and one command receipt. The orchestration service reuses internal deterministic domain and persistence functions; it MUST NOT chain public command handlers whose independent commits would expose partial state or synthetic subcommand receipts.
+
+An explicit or named context-default delivery target resolves only to an existing canonical route. Transport context cannot approve, create, update, or send through that route. Foreman/Threshold retains approval authority, and adapters remain inaccessible until later durable work processing passes the ordinary side-effect-attempt gate.
+
+## 9. Suggested Future Package Boundaries
 
 Implementation directories should be added when behavior exists:
 

@@ -1,0 +1,128 @@
+{
+  "ok": true,
+  "command": "schedule.create",
+  "response_contract": "spine.schedule-create-response.v1",
+  "effect": "schedule_created",
+  "command_id": "schedule-create-event-countdown-001",
+  "command_receipt_id": "command_receipt_schedule_create_event_countdown_001",
+  "audit_id": "audit_schedule_create_event_countdown_001",
+  "created_at_utc": "2035-02-01T12:00:00Z",
+  "item_id": "item_schedule_create_event_countdown_001",
+  "item_type": "event",
+  "current_version": "1",
+  "title": "Dentist appointment",
+  "scheduled_time": {
+    "anchor_id": "anchor_schedule_create_event_countdown_001",
+    "time_basis": "local_instant",
+    "local_date": "2035-02-14",
+    "local_time": "10:00:00",
+    "timezone": "America/Toronto",
+    "timezone_database_version": "2035a",
+    "resolution_kind": "unambiguous",
+    "utc_instant": "2035-02-14T15:00:00Z",
+    "offset_seconds": "-18000"
+  },
+  "delivery": {
+    "delivery_target_id": "delivery_target_owner_whatsapp",
+    "resolution_source": "explicit",
+    "recipient_kind": "subject",
+    "recipient_subject_id": "subject_owner",
+    "channel": "whatsapp",
+    "adapter_name": "openclaw",
+    "target_ref": "owner-whatsapp-example",
+    "delivery_state": "not_attempted_by_command"
+  },
+  "policies": [
+    {
+      "policy_key": "countdown",
+      "notification_intent_id": "notification_intent_countdown",
+      "notification_policy_id": "notification_policy_countdown",
+      "notification_schedule_id": "notification_schedule_countdown",
+      "normalized_notification_schedule_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "status": "active"
+    }
+  ],
+  "materialization": {
+    "mode": "bounded",
+    "state": "materialized",
+    "evaluated_at_utc": "2035-02-01T12:00:00Z",
+    "range_start_utc": "2035-02-14T13:00:00Z",
+    "range_end_utc": "2035-02-14T15:00:01Z",
+    "limit": "100",
+    "opportunity_count": "6",
+    "work_instance_count": "6",
+    "opportunity_work": [
+      {
+        "policy_key": "countdown",
+        "notification_intent_id": "notification_intent_countdown",
+        "notification_policy_id": "notification_policy_countdown",
+        "notification_opportunity_id": "notification_opportunity_countdown_01",
+        "eligible_at_utc": "2035-02-14T13:00:00Z",
+        "work_instance_id": "work_instance_countdown_01"
+      },
+      {
+        "policy_key": "countdown",
+        "notification_intent_id": "notification_intent_countdown",
+        "notification_policy_id": "notification_policy_countdown",
+        "notification_opportunity_id": "notification_opportunity_countdown_02",
+        "eligible_at_utc": "2035-02-14T13:20:00Z",
+        "work_instance_id": "work_instance_countdown_02"
+      },
+      {
+        "policy_key": "countdown",
+        "notification_intent_id": "notification_intent_countdown",
+        "notification_policy_id": "notification_policy_countdown",
+        "notification_opportunity_id": "notification_opportunity_countdown_03",
+        "eligible_at_utc": "2035-02-14T13:40:00Z",
+        "work_instance_id": "work_instance_countdown_03"
+      },
+      {
+        "policy_key": "countdown",
+        "notification_intent_id": "notification_intent_countdown",
+        "notification_policy_id": "notification_policy_countdown",
+        "notification_opportunity_id": "notification_opportunity_countdown_04",
+        "eligible_at_utc": "2035-02-14T14:00:00Z",
+        "work_instance_id": "work_instance_countdown_04"
+      },
+      {
+        "policy_key": "countdown",
+        "notification_intent_id": "notification_intent_countdown",
+        "notification_policy_id": "notification_policy_countdown",
+        "notification_opportunity_id": "notification_opportunity_countdown_05",
+        "eligible_at_utc": "2035-02-14T14:20:00Z",
+        "work_instance_id": "work_instance_countdown_05"
+      },
+      {
+        "policy_key": "countdown",
+        "notification_intent_id": "notification_intent_countdown",
+        "notification_policy_id": "notification_policy_countdown",
+        "notification_opportunity_id": "notification_opportunity_countdown_06",
+        "eligible_at_utc": "2035-02-14T14:40:00Z",
+        "work_instance_id": "work_instance_countdown_06"
+      }
+    ],
+    "work_instance_ids": [
+      "work_instance_countdown_01",
+      "work_instance_countdown_02",
+      "work_instance_countdown_03",
+      "work_instance_countdown_04",
+      "work_instance_countdown_05",
+      "work_instance_countdown_06"
+    ]
+  },
+  "phases": {
+    "item": "created",
+    "policies": "authored",
+    "provenance": "not_applicable",
+    "opportunities": "expanded",
+    "work": "materialized",
+    "delivery": "not_attempted"
+  },
+  "receipt": {
+    "receipt_contract": "spine.schedule-create-receipt.v1",
+    "command_receipt_id": "command_receipt_schedule_create_event_countdown_001",
+    "effect": "schedule_created",
+    "semantic_facts_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "created_at_utc": "2035-02-01T12:00:00Z"
+  }
+}

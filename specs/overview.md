@@ -25,6 +25,7 @@ Spine MUST own:
 - location semantics
 - notification and work eligibility
 - deterministic notification schedule expansion and durable reminder materialization
+- atomic high-level creation of one scheduled event or task with its initial reminder policies and optional bounded work
 - projection state
 - adapter attempt outcomes
 - audit and replay facts
@@ -109,3 +110,5 @@ Every external write MUST be represented by a persisted side-effect attempt with
 State transitions MUST be reason-coded once a reason-code catalog exists.
 
 Adapter failures MUST NOT mutate canonical coordination truth unless the domain transition itself is explicitly represented and valid.
+
+High-level authoring convenience MUST compose canonical item, recurrence, notification, work, audit, and receipt models without becoming a second authority. A composite command either commits its complete requested canonical bundle or none of it, and it MUST remain separate from external delivery.

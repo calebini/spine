@@ -22,6 +22,7 @@ class Draft202012ContractValidationTests(unittest.TestCase):
             "command-fixture-manifest.json",
             "recurrence-fixture-manifest.json",
             "notification-fixture-manifest.json",
+            "schedule-create-fixture-manifest.json",
         ):
             manifest = _load(ROOT / "contracts" / manifest_name)
             for entry in manifest["fixtures"]:

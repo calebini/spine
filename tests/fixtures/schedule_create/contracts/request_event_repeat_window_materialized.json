@@ -1,0 +1,69 @@
+{
+  "contract_version": "spine.schedule-create.v1",
+  "command_id": "schedule-create-event-countdown-001",
+  "actor_subject_id": "subject_agent",
+  "created_at_utc": "2035-02-01T12:00:00Z",
+  "item": {
+    "item_type": "event",
+    "title": "Dentist appointment",
+    "summary": "Routine checkup",
+    "event_detail": {
+      "all_day": false,
+      "visibility": "private"
+    }
+  },
+  "scheduled_time": {
+    "time_basis": "local_instant",
+    "local_date": "2035-02-14",
+    "local_time": "10:00:00",
+    "timezone": "America/Toronto",
+    "timezone_database_version": {
+      "kind": "system_current"
+    }
+  },
+  "delivery": {
+    "recipient_kind": "subject",
+    "recipient_subject_id": "subject_owner",
+    "channel": "whatsapp",
+    "target": {
+      "resolution": "explicit",
+      "delivery_target_id": "delivery_target_owner_whatsapp"
+    }
+  },
+  "reminders": [
+    {
+      "policy_key": "countdown",
+      "schedule": {
+        "kind": "repeat_window",
+        "start": {
+          "kind": "target_offset",
+          "offset_basis": "elapsed",
+          "offset_seconds": "-7200"
+        },
+        "stop": {
+          "kind": "target_offset",
+          "offset_basis": "elapsed",
+          "offset_seconds": "0"
+        },
+        "stop_inclusive": false,
+        "cadence": {
+          "kind": "fixed_elapsed",
+          "interval_seconds": "1200"
+        }
+      },
+      "late_handling": {
+        "kind": "skip"
+      }
+    }
+  ],
+  "materialization": {
+    "mode": "bounded",
+    "evaluated_at_utc": "2035-02-01T12:00:00Z",
+    "range": {
+      "kind": "item_relative",
+      "start_offset_seconds": "-7200",
+      "end_offset_seconds": "1"
+    },
+    "limit": "100"
+  }
+}

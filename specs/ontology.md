@@ -151,6 +151,8 @@ MVP item creation flow (bootstrap):
   - At least one `audit_log` row recording the item creation.
 - Cross-row constraints MUST be enforced deterministically at transaction commit. Implementations MAY use deferrable foreign keys, service-level precommit validation, or both, but they MUST fail closed: if any required row is missing (e.g., required detail row for an event/task), the transaction MUST be rejected and MUST leave no partially created canonical rows behind.
 
+`schedule.create` is a command/service projection of this existing bootstrap bundle, not a new ontology object. It may create the item, initial recurrence facts, complete version-`1` notification-policy set, bounded occurrence provenance, and bounded work in the same transaction. It still produces one `coordination_item` at version `1`; it MUST NOT create intermediate item versions or synthetic lower-level command receipts. Any requested composite child failure rejects the complete transaction.
+
 Version mutation posture (MVP):
 
 - `coordination_item_versions` rows are immutable.
@@ -673,6 +675,7 @@ Structured-policy constraints:
 - `application_scope=item` is legal only for a non-recurring target. `each_occurrence` and `selected_occurrence` require a recurrence-bearing target and the provenance rules in `specs/recurrence.md` and `specs/notifications.md`.
 - Structured policy schedules are the sole notification schedule authority.
 - Target, schedule, routing, late-handling, status, and lineage facts are immutable within one policy row. A change creates a new item version and successor policy row.
+- A composite initial-authoring command MAY create multiple policies directly as the complete version-`1` set. Request-local policy keys are receipt mappings only and do not become new policy-table identity or schedule-hash facts.
 
 `notification_schedules` owns one normalized schedule header per structured policy:
 

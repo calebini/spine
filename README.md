@@ -21,6 +21,8 @@ Authoritative starting points:
 - `contracts/schemas/recurrence-*.schema.json` and `contracts/recurrence-fixture-manifest.json` define the machine-readable recurrence contract family and initial fixtures.
 - `specs/notifications.md` defines canonical notification schedules, opportunity expansion, durable work materialization, recurrence binding, and lifecycle reconciliation.
 - `contracts/schemas/notification-*.schema.json` and `contracts/notification-fixture-manifest.json` define the machine-readable notification contract family and initial fixtures.
+- `specs/schedule-create.md` specifies the future atomic `schedule.create` operator contract over item creation, reminder policies, recurrence provenance, and bounded work; it is not yet a runtime capability.
+- `contracts/schemas/schedule-create-*.schema.json` and `contracts/schedule-create-fixture-manifest.json` define its structural request/response package without declaring implementation.
 - `specs/agent-command-contract.md` defines the MVP agent command core and CLI contract.
 - `docs/AGENT_QUICKSTART.md` gives a zero-context agent one executable, fake-only path through recurrence and recurring notifications.
 - `specs/decisions/0001-kinflow-is-donor-not-foundation.md` records the Kinflow relationship.
@@ -61,7 +63,7 @@ This repository follows the Cortext1 component scaffold standard incrementally:
 - `docs/AGENT_QUICKSTART.md`: executable cold-start path for a new agent
 - `docs/AGENT_OPERATOR_GUIDE.md`: agent-facing contract for operating current Spine runtime surfaces safely
 - `docs/OPENCLAW_DEPLOYMENT_RUNBOOK.md`: operational rollout notes for the first OpenClaw replacement path
-- `contracts/`: machine-readable command, recurrence, and notification agreements plus fixture manifests
+- `contracts/`: machine-readable command, recurrence, notification, and specified atomic schedule-create agreements plus fixture manifests
 - `deploy/`: deployment templates for systemd and environment files
 - `src/spine/`: initial Python package scaffold
 - `src/spine/ledger/`: canonical local persistence boundary

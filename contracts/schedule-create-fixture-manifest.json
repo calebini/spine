@@ -1,0 +1,47 @@
+{
+  "schema_version": "spine.schedule-create-contract-fixtures.v1",
+  "fixture_scope": "structural_examples",
+  "fixture_scope_note": "These fixtures validate request and response shape. Entries with kind semantic_failure_request are intentionally schema-valid request shapes whose expected_error records required post-schema semantic rejection. Generated ids, digests, UTC resolutions, and opportunity times are illustrative until the computed vector family and runtime implementation land.",
+  "fixtures": [
+    {
+      "fixture_id": "request.event_repeat_window_materialized",
+      "kind": "request",
+      "fixture": "tests/fixtures/schedule_create/contracts/request_event_repeat_window_materialized.json",
+      "schema": "contracts/schemas/schedule-create-request.schema.json"
+    },
+    {
+      "fixture_id": "request.recurring_task_policy_only",
+      "kind": "request",
+      "fixture": "tests/fixtures/schedule_create/contracts/request_recurring_task_policy_only.json",
+      "schema": "contracts/schemas/schedule-create-request.schema.json"
+    },
+    {
+      "fixture_id": "failure.duplicate_task_subject_role",
+      "kind": "semantic_failure_request",
+      "fixture": "tests/fixtures/schedule_create/contracts/request_duplicate_task_subject_role.json",
+      "schema": "contracts/schemas/schedule-create-request.schema.json",
+      "expected_error": {
+        "code": "invalid_request",
+        "field": "item.task_detail.subject_roles"
+      }
+    },
+    {
+      "fixture_id": "response.event_repeat_window_materialized",
+      "kind": "success_response",
+      "fixture": "tests/fixtures/schedule_create/contracts/response_event_repeat_window_materialized.json",
+      "schema": "contracts/schemas/schedule-create-response.schema.json"
+    },
+    {
+      "fixture_id": "failure.ambiguous_initial_time",
+      "kind": "failure_response",
+      "fixture": "tests/fixtures/schedule_create/contracts/failure_ambiguous_initial_time.json",
+      "schema": "contracts/schemas/schedule-create-response.schema.json"
+    },
+    {
+      "fixture_id": "failure.delivery_target_missing",
+      "kind": "failure_response",
+      "fixture": "tests/fixtures/schedule_create/contracts/failure_delivery_target_missing.json",
+      "schema": "contracts/schemas/schedule-create-response.schema.json"
+    }
+  ]
+}

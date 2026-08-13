@@ -1,0 +1,9 @@
+{
+  "ok": false,
+  "command": "schedule.create",
+  "error": {
+    "code": "invalid_request",
+    "message": "initial local time is ambiguous in the pinned timezone data",
+    "field": "scheduled_time.local_time"
+  }
+}

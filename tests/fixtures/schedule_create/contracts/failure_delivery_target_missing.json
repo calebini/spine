@@ -1,0 +1,9 @@
+{
+  "ok": false,
+  "command": "schedule.create",
+  "error": {
+    "code": "referenced_row_not_found",
+    "message": "delivery target not found",
+    "field": "delivery.target.delivery_target_id"
+  }
+}
