@@ -10,6 +10,7 @@ from pathlib import Path
 ROOT = Path(__file__).parents[1]
 QUICKSTART = ROOT / "docs" / "AGENT_QUICKSTART.md"
 OPERATOR_GUIDE = ROOT / "docs" / "AGENT_OPERATOR_GUIDE.md"
+DEPLOYMENT_RUNBOOK = ROOT / "docs" / "OPENCLAW_DEPLOYMENT_RUNBOOK.md"
 EXAMPLE = ROOT / "examples" / "agent-first-success.sh"
 
 
@@ -22,6 +23,15 @@ class AgentDocumentationTests(unittest.TestCase):
             for index, example in enumerate(examples, start=1):
                 with self.subTest(path=path.name, example=index):
                     json.loads(example)
+
+    def test_all_operational_bash_examples_parse(self) -> None:
+        for path in (QUICKSTART, OPERATOR_GUIDE, DEPLOYMENT_RUNBOOK):
+            document = path.read_text(encoding="utf-8")
+            examples = re.findall(r"```bash\n(.*?)\n```", document, flags=re.DOTALL)
+            self.assertTrue(examples, path)
+            for index, example in enumerate(examples, start=1):
+                with self.subTest(path=path.name, example=index):
+                    subprocess.run(["bash", "-n"], input=example, text=True, check=True)
 
     def test_first_success_example_is_executable_fake_only_shell(self) -> None:
         self.assertTrue(os.access(EXAMPLE, os.X_OK))
@@ -43,6 +53,26 @@ class AgentDocumentationTests(unittest.TestCase):
             self.assertIn("timezone_database_version", document)
             self.assertNotIn('"timezone_database_version": "2026a"', document)
         self.assertIn("<SPINE_TZ_VERSION>", guide)
+
+    def test_operational_docs_use_host_neutral_checkout_local_entrypoints(self) -> None:
+        documents = [
+            path.read_text(encoding="utf-8")
+            for path in (QUICKSTART, OPERATOR_GUIDE, DEPLOYMENT_RUNBOOK)
+        ]
+        for document in documents:
+            self.assertIn("SPINE_CHECKOUT", document)
+            self.assertIn('.venv/bin/spine-ledger-migrate', document)
+            self.assertNotIn("/home/agent/", document)
+            self.assertNotIn("cortext1", document.lower())
+            self.assertNotRegex(document, r"(?m)^spine --db ")
+            self.assertNotRegex(document, r"(?m)^spine-ledger-migrate ")
+            self.assertNotRegex(document, r'PYTHONPATH="\$TICKERD_SRC" spine-worker')
+        for document in documents[:2]:
+            self.assertIn('.venv/bin/spine-command', document)
+        for document in documents[1:]:
+            self.assertIn("EXPECTED_SPINE_REVISION", document)
+        self.assertNotIn("schema version 5", documents[2].lower())
+        self.assertNotIn("pre-v5", documents[2].lower())
 
     def test_quickstart_covers_entry_paths_and_scheduling_command_family(self) -> None:
         document = QUICKSTART.read_text(encoding="utf-8")

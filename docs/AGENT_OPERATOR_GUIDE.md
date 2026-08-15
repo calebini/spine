@@ -45,43 +45,60 @@ Agents must follow these rules:
 
 Spine requires Python 3.12 or newer. Operator workflows also use `sqlite3`; the executable first-success example uses `jq`. Tickerd must be installed or importable through `PYTHONPATH` before worker commands.
 
-Set explicit paths rather than relying on host defaults:
+Set explicit paths rather than relying on host defaults. `SPINE_CHECKOUT` is host-supplied; no checked-in path is authoritative for a deployment:
 
 ```bash
-export SPINE_ROOT=/absolute/path/to/spine
+export SPINE_CHECKOUT=/absolute/path/to/spine
+export EXPECTED_SPINE_REVISION=approved-commit-or-tag
 export SPINE_DB=/absolute/path/to/ledger.sqlite
 export SPINE_STATE_DIR=/absolute/path/to/spine-worker-state
 export TICKERD_SRC=/absolute/path/to/tickerd/src
 
-test -d "$SPINE_ROOT/src"
-python3 --version
+export SPINE_PYTHON="$SPINE_CHECKOUT/.venv/bin/python"
+export SPINE_COMMAND="$SPINE_CHECKOUT/.venv/bin/spine-command"
+export SPINE_MIGRATE="$SPINE_CHECKOUT/.venv/bin/spine-ledger-migrate"
+export SPINE_SEED_CANARY="$SPINE_CHECKOUT/.venv/bin/spine-seed-canary"
+export SPINE_WORKER="$SPINE_CHECKOUT/.venv/bin/spine-worker"
+
+test -d "$SPINE_CHECKOUT/src"
+test -x "$SPINE_PYTHON"
+test -x "$SPINE_COMMAND"
+test -x "$SPINE_MIGRATE"
+"$SPINE_PYTHON" --version
 sqlite3 --version
-cd "$SPINE_ROOT"
-git status --short
+git -C "$SPINE_CHECKOUT" status --short
 ```
 
 Then choose exactly one ledger entry path:
 
-- New disposable ledger: `spine-ledger-migrate --db "$SPINE_DB" --initialize-if-empty`.
-- Existing current ledger: `spine-ledger-migrate --db "$SPINE_DB" --verify-only`.
-- Existing older ledger: stop its worker, take a recoverable copy, run `spine-ledger-migrate --db "$SPINE_DB"`, and only then run `--verify-only`.
+- New disposable ledger: `"$SPINE_MIGRATE" --db "$SPINE_DB" --initialize-if-empty`.
+- Existing current ledger: `"$SPINE_MIGRATE" --db "$SPINE_DB" --verify-only`.
+- Existing older ledger: stop its worker, take a recoverable copy, run `"$SPINE_MIGRATE" --db "$SPINE_DB"`, and only then run `--verify-only`.
 
 Do not require current-schema verification before an intended migration; an older valid schema is expected to fail that check. After initialization or migration, run:
 
 ```bash
-spine-ledger-migrate --db "$SPINE_DB" --verify-only
-spine --db "$SPINE_DB" --pretty system info
+"$SPINE_MIGRATE" --db "$SPINE_DB" --verify-only
+"$SPINE_COMMAND" --db "$SPINE_DB" --pretty system info
 ```
 
-Require equal `implemented_ledger_schema_version` and `ledger_schema_version`. Use the returned `timezone_database_version` exactly for every local-date or local-instant schedule. Never copy that value from an example or another machine.
+Require equal `implemented_ledger_schema_version` and `ledger_schema_version`. Before using the atomic surface, also require `implemented_contract_versions` to include `spine.schedule-create.v1`, `spine.schedule-create-normalization.v1`, `spine.schedule-create-response.v1`, and `spine.schedule-create-receipt.v1`. Use the returned `timezone_database_version` exactly for every local-date or local-instant schedule. Never copy that value from an example or another machine.
 
 ## Supported CLI Surfaces
 
-Install or refresh Spine from the repository root:
+Update only a clean checkout and refresh that checkout's existing virtual environment. If `git status --short` is non-empty, stop rather than overwriting or mixing local work. A deployment-specific supervisor remains stopped until schema and runtime verification complete.
 
 ```bash
-python3 -m pip install -e .
+git -C "$SPINE_CHECKOUT" status --short
+git -C "$SPINE_CHECKOUT" pull --ff-only
+"$SPINE_PYTHON" -m pip install -e "$SPINE_CHECKOUT"
+test "$(git -C "$SPINE_CHECKOUT" rev-parse HEAD)" = \
+  "$(git -C "$SPINE_CHECKOUT" rev-parse "$EXPECTED_SPINE_REVISION^{commit}")"
+"$SPINE_COMMAND" --help
+"$SPINE_MIGRATE" --help
 ```
+
+`EXPECTED_SPINE_REVISION` is deployment input supplied outside the repository. The equality check prevents a successful pull on the wrong branch or tracking target from being mistaken for the approved build.
 
 If Tickerd is not installed as a package, include its source path for runtime commands:
 
@@ -91,13 +108,13 @@ export TICKERD_SRC=/path/to/tickerd/src
 
 Current commands:
 
-- `spine`: public structured command adapter. Stable syntax is `spine --db <path> --input <path-or-> [options] <resource> <verb>`; CLI options precede command words.
-- `spine --db <path> system info`: read exact runtime, schema, timezone-data, and contract versions without mutation.
-- `spine-ledger-migrate`: initialize, migrate, and verify a ledger.
-- `spine-seed-demo`: create or reuse a deterministic demo reminder.
-- `spine-seed-canary`: create or reuse a controlled canary reminder and print the predicted OpenClaw envelope.
-- `spine-worker`: run the production-shaped worker in `observe_only`, `active`, or `suspended`.
-- `spine-openclaw-smoke`: run a bounded fake OpenClaw smoke.
+- `"$SPINE_COMMAND"`: public structured command adapter. Stable syntax is `"$SPINE_COMMAND" --db <path> --input <path-or-> [options] <resource> <verb>`; CLI options precede command words.
+- `"$SPINE_COMMAND" --db <path> system info`: read exact runtime, schema, timezone-data, and contract versions without mutation.
+- `"$SPINE_MIGRATE"`: initialize, migrate, and verify a ledger.
+- `"$SPINE_CHECKOUT/.venv/bin/spine-seed-demo"`: create or reuse a deterministic demo reminder.
+- `"$SPINE_SEED_CANARY"`: create or reuse a controlled canary reminder and print the predicted OpenClaw envelope.
+- `"$SPINE_WORKER"`: run the production-shaped worker in `observe_only`, `active`, or `suspended`.
+- `"$SPINE_CHECKOUT/.venv/bin/spine-openclaw-smoke"`: run a bounded fake OpenClaw smoke.
 
 The scheduling command surface is `schedule.create`, `event.create`, `event.reschedule`, `task.create`, `item.occurrences`, `recurrence.instance.add`, `recurrence.instance.remove`, `recurrence.instance.override`, `recurrence.series.edit`, `occurrence_provenance.regenerate`, `reminder.create`, `reminder.edit`, `reminder.disable`, `notification.opportunities`, and `notification_work.materialize`. Prefer `schedule.create` for a new scheduled item plus its initial reminders. Use the lower-level family for independent authoring, reads, and later mutations. See `docs/AGENT_QUICKSTART.md` for the complete executable path; see `specs/agent-command-contract.md` for normative request, response, replay, and failure behavior.
 
@@ -116,7 +133,7 @@ The command writes exactly one composite `schedule_created` audit and one comman
 Use an already-active `delivery_target_id`, or supply a named context default at invocation:
 
 ```bash
-spine --db "$SPINE_DB" \
+"$SPINE_COMMAND" --db "$SPINE_DB" \
   --delivery-target-default owner_whatsapp=delivery_target_owner_whatsapp \
   --input /absolute/path/schedule-create-request.json \
   --dry-run --pretty schedule create
@@ -223,20 +240,20 @@ Expand a bounded range with the read-only `item.occurrences` command:
 Invoke a request file with options before the command words:
 
 ```bash
-spine --db "$SPINE_DB" --input /absolute/path/event-create.json --pretty event create
-spine --db "$SPINE_DB" --input /absolute/path/occurrences.json --pretty item occurrences
+"$SPINE_COMMAND" --db "$SPINE_DB" --input /absolute/path/event-create.json --pretty event create
+"$SPINE_COMMAND" --db "$SPINE_DB" --input /absolute/path/occurrences.json --pretty item occurrences
 ```
 
 For a directly executable variable-expanded request, use the event command in `examples/agent-first-success.sh`. Expansion returns virtual occurrences and stable occurrence identities; it does not create reminders, work, projections, or external sends. The canonical engine supports local dates, local instants, fixed UTC instants, daily/weekly/monthly/yearly rules, selectors, exceptions, moves, and bounded cursor pagination. Use the `recurrence.instance.*` commands for one occurrence and `recurrence.series.edit` for one, following, or whole-series changes.
 
 ## Worker Quick Reference
 
-Run from `SPINE_ROOT` only after choosing and completing the correct ledger entry path above. For a complete first-use sequence, run `docs/AGENT_QUICKSTART.md` instead of starting here.
+Run from `SPINE_CHECKOUT` only after choosing and completing the correct ledger entry path above. For a complete first-use sequence, run `docs/AGENT_QUICKSTART.md` instead of starting here.
 
 Observe current eligible work without side effects:
 
 ```bash
-PYTHONPATH="$TICKERD_SRC" spine-worker \
+PYTHONPATH="$TICKERD_SRC" "$SPINE_WORKER" \
   --db "$SPINE_DB" \
   --state-dir "$SPINE_STATE_DIR" \
   --mode observe_only \
@@ -249,7 +266,7 @@ PYTHONPATH="$TICKERD_SRC" spine-worker \
 Seed a controlled canary without sending it:
 
 ```bash
-spine-seed-canary "$SPINE_DB" \
+"$SPINE_SEED_CANARY" "$SPINE_DB" \
   --prefix "<canary-prefix>" \
   --target-ref "<openclaw-target>" \
   --title "<canary-title>" \
@@ -260,7 +277,7 @@ spine-seed-canary "$SPINE_DB" \
 Run one fake active cycle:
 
 ```bash
-PYTHONPATH="$TICKERD_SRC" spine-worker \
+PYTHONPATH="$TICKERD_SRC" "$SPINE_WORKER" \
   --db "$SPINE_DB" \
   --state-dir "$SPINE_STATE_DIR" \
   --mode active \
@@ -276,8 +293,8 @@ Apply this delivery while the worker is stopped. Take a recoverable copy of the 
 
 ```bash
 cp "$SPINE_DB" "$SPINE_DB.pre-canonical-scheduling"
-spine-ledger-migrate --db "$SPINE_DB"
-spine-ledger-migrate --db "$SPINE_DB" --verify-only
+"$SPINE_MIGRATE" --db "$SPINE_DB"
+"$SPINE_MIGRATE" --db "$SPINE_DB" --verify-only
 ```
 
 The migration is transactional. A failed attempt leaves the prior schema intact. It also fails closed when it finds scheduling rows whose missing canonical facts cannot be inferred exactly; inspect the reported table/count inventory instead of editing around the preflight.
@@ -290,7 +307,7 @@ sqlite3 "$SPINE_DB" "SELECT name FROM sqlite_master WHERE type='table' AND name 
 sqlite3 "$SPINE_DB" "PRAGMA foreign_key_check;"
 ```
 
-Expected schema version is `7`, all five named tables are present, and `foreign_key_check` returns no rows. Then run `spine-seed-canary`, one observe-only worker cycle, and one active cycle with the fake sender. Do not enable the gateway sender during migration verification.
+Expected schema version is `7`, all five named tables are present, and `foreign_key_check` returns no rows. Then run `"$SPINE_SEED_CANARY"`, one observe-only worker cycle, and one active cycle with the fake sender. Do not enable the gateway sender during migration verification.
 
 ## Notification Schedule Handoff
 
@@ -316,7 +333,7 @@ For “every hour during the six hours before an event,” use this notification
 The full request also supplies the item/version, recipient owner, channel, and explicit `delivery_target_id`. Invoke WhatsApp policy authoring with the local binding switch before the command words:
 
 ```bash
-spine --db "$SPINE_DB" --input /absolute/path/reminder-create.json \
+"$SPINE_COMMAND" --db "$SPINE_DB" --input /absolute/path/reminder-create.json \
   --pretty --openclaw-whatsapp reminder create
 ```
 
@@ -349,7 +366,7 @@ The agent must persist or pass the destination intentionally. It must not infer 
 For controlled canary preparation:
 
 ```bash
-spine-seed-canary "$SPINE_DB" \
+"$SPINE_SEED_CANARY" "$SPINE_DB" \
   --prefix operator-canary \
   --target-ref "<openclaw-target>" \
   --title "Spine canary reminder" \
@@ -398,7 +415,7 @@ Gateway active success:
 Use `observe_only` for visibility checks:
 
 ```bash
-PYTHONPATH="$TICKERD_SRC" spine-worker \
+PYTHONPATH="$TICKERD_SRC" "$SPINE_WORKER" \
   --db "$SPINE_DB" \
   --state-dir "$SPINE_STATE_DIR" \
   --mode observe_only \
@@ -419,7 +436,7 @@ Expected behavior:
 Use `active` with fake sender for bounded dry runs:
 
 ```bash
-PYTHONPATH="$TICKERD_SRC" spine-worker \
+PYTHONPATH="$TICKERD_SRC" "$SPINE_WORKER" \
   --db "$SPINE_DB" \
   --state-dir "$SPINE_STATE_DIR" \
   --mode active \
@@ -438,7 +455,7 @@ Expected behavior:
 Use `active` with gateway only after explicit approval:
 
 ```bash
-PYTHONPATH="$TICKERD_SRC" spine-worker \
+PYTHONPATH="$TICKERD_SRC" "$SPINE_WORKER" \
   --db "$SPINE_DB" \
   --state-dir "$SPINE_STATE_DIR" \
   --mode active \
@@ -627,7 +644,7 @@ Use repository evidence in this order:
 
 1. `docs/AGENT_QUICKSTART.md` and `examples/agent-first-success.sh` for cold-start execution.
 2. This guide for operations and failure handling.
-3. `specs/agent-command-contract.md`, `specs/recurrence.md`, and `specs/notifications.md` for normative behavior.
+3. `specs/agent-command-contract.md`, `specs/schedule-create.md`, `specs/recurrence.md`, and `specs/notifications.md` for normative behavior.
 4. `contracts/schemas/` for machine-readable request and response shapes.
-5. `tests/fixtures/recurrence/contracts/` and `tests/fixtures/notifications/contracts/` for structural examples.
+5. `tests/fixtures/schedule_create/contracts/`, `tests/fixtures/recurrence/contracts/`, and `tests/fixtures/notifications/contracts/` for structural examples.
 6. `tests/fixtures/recurrence/vectors/` and `tests/fixtures/notifications/vectors/` for computed identity evidence.

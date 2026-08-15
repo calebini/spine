@@ -27,12 +27,33 @@ On the deployment host:
 - OpenClaw CLI only for real gateway sends
 - SQLite CLI for operator readbacks
 
-Install or refresh Spine from the repository root:
+Bind the host-selected checkout and its local entrypoints. No checked-in path is authoritative for a deployment:
 
 ```bash
-git pull --ff-only
-python3 -m pip install -e ".[dev,test]"
+export SPINE_CHECKOUT=/absolute/path/to/spine
+export EXPECTED_SPINE_REVISION=approved-commit-or-tag
+export SPINE_PYTHON="$SPINE_CHECKOUT/.venv/bin/python"
+export SPINE_COMMAND="$SPINE_CHECKOUT/.venv/bin/spine-command"
+export SPINE_MIGRATE="$SPINE_CHECKOUT/.venv/bin/spine-ledger-migrate"
+export SPINE_SEED_DEMO="$SPINE_CHECKOUT/.venv/bin/spine-seed-demo"
+export SPINE_SEED_CANARY="$SPINE_CHECKOUT/.venv/bin/spine-seed-canary"
+export SPINE_WORKER="$SPINE_CHECKOUT/.venv/bin/spine-worker"
+export SPINE_OPENCLAW_SMOKE="$SPINE_CHECKOUT/.venv/bin/spine-openclaw-smoke"
+export SPINE_TICKERD_RUNNER="$SPINE_CHECKOUT/.venv/bin/spine-tickerd-runner"
 ```
+
+Update only a clean checkout, then refresh that checkout's virtual environment:
+
+```bash
+git -C "$SPINE_CHECKOUT" status --short
+git -C "$SPINE_CHECKOUT" pull --ff-only
+test -x "$SPINE_PYTHON" || python3 -m venv "$SPINE_CHECKOUT/.venv"
+"$SPINE_PYTHON" -m pip install -e "$SPINE_CHECKOUT[dev,test]"
+test "$(git -C "$SPINE_CHECKOUT" rev-parse HEAD)" = \
+  "$(git -C "$SPINE_CHECKOUT" rev-parse "$EXPECTED_SPINE_REVISION^{commit}")"
+```
+
+If the initial status output is non-empty, stop instead of mixing deployment changes with local work. `EXPECTED_SPINE_REVISION` is release input supplied outside the repository; the equality check fails a pull of the wrong branch or tracking target. Keep the deployment-specific service stopped until installation, schema, and fake-path verification complete.
 
 If Tickerd is not installed as a package, export its source directory for runtime commands:
 
@@ -75,20 +96,21 @@ The database file is the canonical ledger. Back it up before migration or active
 Run the local suite after pulling changes:
 
 ```bash
-python3 -m unittest discover -s tests
-ruff check src/spine/core src/spine/ledger
-mypy --strict src/spine/core src/spine/ledger
+cd "$SPINE_CHECKOUT"
+"$SPINE_PYTHON" -m unittest discover -s tests
+"$SPINE_CHECKOUT/.venv/bin/ruff" check src/spine/core src/spine/ledger
+"$SPINE_CHECKOUT/.venv/bin/mypy" --strict src/spine/core src/spine/ledger
 ```
 
 Run the installed-script smoke help checks:
 
 ```bash
-spine-ledger-migrate --help
-spine-seed-canary --help
-spine-seed-demo --help
-PYTHONPATH="$TICKERD_SRC" spine-worker --help
-PYTHONPATH="$TICKERD_SRC" spine-openclaw-smoke --help
-PYTHONPATH="$TICKERD_SRC" spine-tickerd-runner --help
+"$SPINE_MIGRATE" --help
+"$SPINE_SEED_CANARY" --help
+"$SPINE_SEED_DEMO" --help
+PYTHONPATH="$TICKERD_SRC" "$SPINE_WORKER" --help
+PYTHONPATH="$TICKERD_SRC" "$SPINE_OPENCLAW_SMOKE" --help
+PYTHONPATH="$TICKERD_SRC" "$SPINE_TICKERD_RUNNER" --help
 ```
 
 ## Schema Migration
@@ -96,7 +118,7 @@ PYTHONPATH="$TICKERD_SRC" spine-tickerd-runner --help
 For a new ledger:
 
 ```bash
-spine-ledger-migrate \
+"$SPINE_MIGRATE" \
   --db "$SPINE_DB" \
   --initialize-if-empty
 ```
@@ -104,32 +126,39 @@ spine-ledger-migrate \
 For an existing ledger:
 
 ```bash
-spine-ledger-migrate \
+"$SPINE_MIGRATE" \
   --db "$SPINE_DB"
 ```
 
 For verification only:
 
 ```bash
-spine-ledger-migrate \
+"$SPINE_MIGRATE" \
   --db "$SPINE_DB" \
   --verify-only
 ```
 
-Active multi-reminder processing requires ledger schema version 5 or later. Run the normal migration command before deploying the updated worker, then use `--verify-only` to confirm the current schema. A pre-v5 worker treats earlier reminders as stale after a later `reminder.create`; do not use repeated reminder creation for a live canary until both migration and worker deployment are complete.
+The current runtime requires ledger schema version 7. Run the normal migration command before deploying the updated worker, then require `--verify-only` and `system.info` to report schema 7 before any worker restart. Do not run a current worker against an older ledger or an older worker against a migrated ledger.
+
+```bash
+"$SPINE_MIGRATE" --db "$SPINE_DB" --verify-only
+"$SPINE_COMMAND" --db "$SPINE_DB" --pretty system info
+```
+
+Require equal implemented and actual schema versions. If this deployment will use atomic scheduling, also require `spine.schedule-create.v1`, `spine.schedule-create-normalization.v1`, `spine.schedule-create-response.v1`, and `spine.schedule-create-receipt.v1` before accepting authoring traffic.
 
 For persistent-ledger visibility checks, seed the deterministic demo row only when it is absent:
 
 ```bash
-spine-seed-demo --if-absent "$SPINE_DB"
+"$SPINE_SEED_DEMO" --if-absent "$SPINE_DB"
 ```
 
-Without `--if-absent`, `spine-seed-demo` refuses existing database paths.
+Without `--if-absent`, the seed-demo command refuses existing database paths.
 
 For real gateway canary preparation, seed a controlled reminder and inspect the predicted OpenClaw envelope before any active/gateway run:
 
 ```bash
-spine-seed-canary "$SPINE_DB" \
+"$SPINE_SEED_CANARY" "$SPINE_DB" \
   --prefix operator-canary \
   --target-ref "<openclaw-target>" \
   --title "Spine canary reminder" \
@@ -144,7 +173,7 @@ The command returns `predicted_openclaw_envelope`, including `channel_hint`, `ta
 Use fake mode before any real gateway send. This performs active Spine/Tickerd processing but writes only fake send evidence.
 
 ```bash
-PYTHONPATH="$TICKERD_SRC" spine-openclaw-smoke \
+PYTHONPATH="$TICKERD_SRC" "$SPINE_OPENCLAW_SMOKE" \
   --db /tmp/spine-openclaw-smoke.sqlite \
   --state-dir /tmp/spine-openclaw-state \
   --seed-demo \
@@ -195,7 +224,7 @@ The expected successful ledger terminal state is:
 Use observe-only mode to verify runtime cadence and work visibility without side effects:
 
 ```bash
-PYTHONPATH="$TICKERD_SRC" spine-worker \
+PYTHONPATH="$TICKERD_SRC" "$SPINE_WORKER" \
   --db "$SPINE_DB" \
   --state-dir "$SPINE_STATE_DIR" \
   --mode observe_only \
@@ -248,7 +277,7 @@ Set exactly one gateway credential in the protected env file:
 Bounded gateway smoke:
 
 ```bash
-PYTHONPATH="$TICKERD_SRC" spine-worker \
+PYTHONPATH="$TICKERD_SRC" "$SPINE_WORKER" \
   --db "$SPINE_DB" \
   --state-dir "$SPINE_STATE_DIR" \
   --mode active \
@@ -272,7 +301,7 @@ eligible for retry, and rerunning it can duplicate the external WhatsApp send.
 The long-running command shape is:
 
 ```bash
-PYTHONPATH="$TICKERD_SRC" spine-worker \
+PYTHONPATH="$TICKERD_SRC" "$SPINE_WORKER" \
   --db "$SPINE_DB" \
   --state-dir "$SPINE_STATE_DIR" \
   --mode active \
@@ -351,7 +380,7 @@ Before production cutover:
 
 - CI is passing on `main`.
 - Deployment host has pulled the intended commit.
-- `spine-ledger-migrate --verify-only` passes on the target ledger.
+- `"$SPINE_MIGRATE" --verify-only` passes on the target ledger.
 - Fake OpenClaw smoke passes on host.
 - Observe-only runner pass is understood.
 - Gateway credentials are configured outside git.

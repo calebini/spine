@@ -15,20 +15,34 @@ Use this document to reach a verified first success. Use `docs/AGENT_OPERATOR_GU
 
 ## Prerequisites
 
-From the Spine repository root, require:
+Bind the host-selected checkout first. No checked-in path is authoritative for a deployment:
+
+```bash
+export SPINE_CHECKOUT=/absolute/path/to/spine
+export SPINE_PYTHON="$SPINE_CHECKOUT/.venv/bin/python"
+export SPINE_COMMAND="$SPINE_CHECKOUT/.venv/bin/spine-command"
+export SPINE_MIGRATE="$SPINE_CHECKOUT/.venv/bin/spine-ledger-migrate"
+export SPINE_WORKER="$SPINE_CHECKOUT/.venv/bin/spine-worker"
+```
+
+From that Spine checkout, require:
 
 - Python 3.12 or newer;
 - `sqlite3` and `jq` on `PATH`;
-- Spine installed into the active Python environment;
+- Spine installed into the checkout-local virtual environment;
 - Tickerd installed into that environment or a `TICKERD_SRC` path pointing to its `src` directory.
 
-Verify and install Spine:
+Verify the checkout-local installation. Create the virtual environment first only when provisioning a new checkout:
 
 ```bash
-python3 --version
+test -d "$SPINE_CHECKOUT/src"
+test -x "$SPINE_PYTHON" || python3 -m venv "$SPINE_CHECKOUT/.venv"
+"$SPINE_PYTHON" --version
 sqlite3 --version
 jq --version
-python3 -m pip install -e ".[test,dev]"
+"$SPINE_PYTHON" -m pip install -e "$SPINE_CHECKOUT[test,dev]"
+test -x "$SPINE_COMMAND"
+test -x "$SPINE_MIGRATE"
 ```
 
 If Tickerd is not installed, point Python at a sibling checkout:
@@ -36,7 +50,7 @@ If Tickerd is not installed, point Python at a sibling checkout:
 ```bash
 export TICKERD_SRC=/absolute/path/to/tickerd/src
 export PYTHONPATH="$TICKERD_SRC${PYTHONPATH:+:$PYTHONPATH}"
-python3 -c 'import tickerd; print("tickerd import ok")'
+"$SPINE_PYTHON" -c 'import tickerd; print("tickerd import ok")'
 ```
 
 Do not continue to worker commands until that import succeeds.
@@ -51,7 +65,7 @@ Create a unique directory and initialize a new schema-7 ledger:
 export SPINE_DEMO_ROOT="$(mktemp -d /tmp/spine-agent-quickstart.XXXXXX)"
 export SPINE_DB="$SPINE_DEMO_ROOT/spine.sqlite"
 export SPINE_STATE_DIR="$SPINE_DEMO_ROOT/worker-state"
-spine-ledger-migrate --db "$SPINE_DB" --initialize-if-empty
+"$SPINE_MIGRATE" --db "$SPINE_DB" --initialize-if-empty
 ```
 
 ### Existing current ledger
@@ -60,7 +74,7 @@ Do not initialize or migrate it. Verify it without mutation:
 
 ```bash
 export SPINE_DB=/absolute/path/to/ledger.sqlite
-spine-ledger-migrate --db "$SPINE_DB" --verify-only
+"$SPINE_MIGRATE" --db "$SPINE_DB" --verify-only
 ```
 
 ### Existing older ledger that requires migration
@@ -70,8 +84,8 @@ Stop its worker first. Do not run current-schema `--verify-only` as a prerequisi
 ```bash
 export SPINE_DB=/absolute/path/to/ledger.sqlite
 cp "$SPINE_DB" "$SPINE_DB.pre-schema-7"
-spine-ledger-migrate --db "$SPINE_DB"
-spine-ledger-migrate --db "$SPINE_DB" --verify-only
+"$SPINE_MIGRATE" --db "$SPINE_DB"
+"$SPINE_MIGRATE" --db "$SPINE_DB" --verify-only
 ```
 
 If migration preflight rejects provisional scheduling rows, stop and inspect the reported inventory. Do not edit around it.
@@ -81,7 +95,7 @@ If migration preflight rejects provisional scheduling rows, stop and inspect the
 Never copy a timezone-data version from documentation or another host. Read it from the executing runtime and ledger:
 
 ```bash
-spine --db "$SPINE_DB" --pretty system info
+"$SPINE_COMMAND" --db "$SPINE_DB" --pretty system info
 ```
 
 Successful output includes:
@@ -94,7 +108,7 @@ Successful output includes:
 To capture the timezone-data version:
 
 ```bash
-export SPINE_TZ_VERSION="$(spine --db "$SPINE_DB" system info | jq -r '.timezone_database_version')"
+export SPINE_TZ_VERSION="$("$SPINE_COMMAND" --db "$SPINE_DB" system info | jq -r '.timezone_database_version')"
 test -n "$SPINE_TZ_VERSION"
 ```
 
@@ -116,9 +130,9 @@ The checked-in example exercises the complete safe path on a new disposable ledg
 Run it from the repository root:
 
 ```bash
-PATH="$PWD/.venv/bin:$PATH" \
-TICKERD_SRC="${TICKERD_SRC:-$PWD/../tickerd/src}" \
-examples/agent-first-success.sh
+PATH="$SPINE_CHECKOUT/.venv/bin:$PATH" \
+TICKERD_SRC="${TICKERD_SRC:-$SPINE_CHECKOUT/../tickerd/src}" \
+"$SPINE_CHECKOUT/examples/agent-first-success.sh"
 ```
 
 It creates a unique directory under `/tmp` and prints a summary like:
@@ -144,13 +158,13 @@ No gateway sender or external destination is used. Preserve the printed evidence
 CLI options precede command words. A request may come from a file:
 
 ```bash
-spine --db "$SPINE_DB" --input /absolute/path/request.json --pretty event create
+"$SPINE_COMMAND" --db "$SPINE_DB" --input /absolute/path/request.json --pretty event create
 ```
 
 Or from stdin:
 
 ```bash
-spine --db "$SPINE_DB" --pretty schedule create < /absolute/path/schedule-create-request.json
+"$SPINE_COMMAND" --db "$SPINE_DB" --pretty schedule create < /absolute/path/schedule-create-request.json
 ```
 
 ## Preferred Atomic Scheduling Path
@@ -160,16 +174,16 @@ Use `schedule.create` for a new event or task that must receive reminders. It is
 Start from the checked-in executable event request:
 
 ```bash
-cp tests/fixtures/schedule_create/contracts/request_event_repeat_window_materialized.json \
+cp "$SPINE_CHECKOUT/tests/fixtures/schedule_create/contracts/request_event_repeat_window_materialized.json" \
   "$SPINE_DEMO_ROOT/schedule-create-request.json"
 ```
 
 Before invocation, replace its actor, recipient, and explicit `delivery_target_id` with active rows from this ledger. The request uses `timezone_database_version.kind=system_current`, so the command pins the executing runtime's exact local timezone-data version and returns that resolved version in its receipt. Then preview and commit using the same request:
 
 ```bash
-spine --db "$SPINE_DB" --input "$SPINE_DEMO_ROOT/schedule-create-request.json" \
+"$SPINE_COMMAND" --db "$SPINE_DB" --input "$SPINE_DEMO_ROOT/schedule-create-request.json" \
   --dry-run --pretty schedule create
-spine --db "$SPINE_DB" --input "$SPINE_DEMO_ROOT/schedule-create-request.json" \
+"$SPINE_COMMAND" --db "$SPINE_DB" --input "$SPINE_DEMO_ROOT/schedule-create-request.json" \
   --pretty schedule create
 ```
 
@@ -178,7 +192,7 @@ The example creates a two-hour countdown every 20 minutes and materializes six w
 For a request that uses `delivery.target.resolution=context_default`, bind the name explicitly in the CLI context:
 
 ```bash
-spine --db "$SPINE_DB" \
+"$SPINE_COMMAND" --db "$SPINE_DB" \
   --delivery-target-default owner_whatsapp=delivery_target_owner_whatsapp \
   --input /absolute/path/context-default-schedule-request.json \
   --pretty schedule create
@@ -189,7 +203,7 @@ The option only resolves an existing active route. It cannot create, approve, re
 A separate read request can also come from stdin; for example:
 
 ```bash
-spine --db "$SPINE_DB" --input - --pretty item occurrences <<JSON
+"$SPINE_COMMAND" --db "$SPINE_DB" --input - --pretty item occurrences <<JSON
 {
   "item_id": "<item-id>",
   "range_start": "2035-01-01T00:00:00",
@@ -204,7 +218,7 @@ JSON
 For `reminder.create` with `channel=whatsapp`, include the local binding switch before the command words:
 
 ```bash
-spine --db "$SPINE_DB" --input - --pretty --openclaw-whatsapp reminder create
+"$SPINE_COMMAND" --db "$SPINE_DB" --input - --pretty --openclaw-whatsapp reminder create
 ```
 
 That switch validates authoring context only. It does not send.
@@ -221,8 +235,8 @@ For a recurring item with recurrence-bound notifications, use this order:
 6. `occurrence_provenance.regenerate` for `consumer=notification_schedule`
 7. `notification.opportunities`
 8. `notification_work.materialize`
-9. `spine-worker --mode observe_only ... --max-cycles 1`
-10. `spine-worker --mode active --openclaw-sender fake ... --max-cycles 1`
+9. `"$SPINE_WORKER" --mode observe_only ... --max-cycles 1`
+10. `"$SPINE_WORKER" --mode active --openclaw-sender fake ... --max-cycles 1`
 
 Do not reverse steps 6 and 7. Recurrence-bound opportunity expansion reads current active provenance; without it, no recurrence targets authorize opportunities.
 
