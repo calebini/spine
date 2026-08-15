@@ -1,0 +1,120 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cortext.local/spine/contracts/schemas/schedule-compact-response.schema.json",
+  "title": "Spine Compact Schedule Operator Projection v1",
+  "type": "object",
+  "required": [
+    "ok", "command", "projection_contract", "action", "effect", "dry_run", "item_id", "item_type", "status",
+    "command_id", "command_receipt_id", "scheduled_times", "timezone", "timezone_database_version",
+    "notification_intent_ids", "notification_policy_ids", "notification_policy_count",
+    "notification_policy_ids_truncated", "work", "lifecycle", "delivery_targets"
+  ],
+  "properties": {
+    "ok": { "const": true },
+    "command": { "enum": ["schedule.create", "schedule.show"] },
+    "projection_contract": { "const": "spine.schedule-compact.v1" },
+    "action": { "enum": ["schedule.create", "schedule.show"] },
+    "effect": { "type": "string", "minLength": 1 },
+    "dry_run": { "type": "boolean" },
+    "item_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+    "item_type": { "enum": ["event", "task", "project", "collection"] },
+    "status": { "enum": ["active", "archived"] },
+    "command_id": { "type": ["string", "null"] },
+    "command_receipt_id": { "type": ["string", "null"] },
+    "scheduled_times": {
+      "type": "array",
+      "maxItems": 4,
+      "items": {
+        "type": "object",
+        "required": ["anchor_role"],
+        "properties": {
+          "anchor_role": { "enum": ["event_start", "event_end", "task_due", "task_defer_until"] }
+        }
+      }
+    },
+    "timezone": { "type": ["string", "null"] },
+    "timezone_database_version": { "type": ["string", "null"] },
+    "notification_intent_ids": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "$ref": "notification-types.schema.json#/$defs/id" }
+    },
+    "notification_policy_ids": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "$ref": "notification-types.schema.json#/$defs/id" }
+    },
+    "notification_policy_count": { "$ref": "#/$defs/decimalNonNegative" },
+    "notification_policy_ids_truncated": { "type": "boolean" },
+    "work": { "$ref": "#/$defs/work" },
+    "lifecycle": { "$ref": "#/$defs/lifecycle" },
+    "delivery_targets": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/deliveryTarget" }
+    }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "command": { "const": "schedule.create" } }, "required": ["command"] },
+      "then": {
+        "properties": {
+          "action": { "const": "schedule.create" },
+          "item_type": { "enum": ["event", "task"] },
+          "scheduled_times": { "minItems": 1 },
+          "timezone": { "type": "string", "minLength": 1 },
+          "timezone_database_version": { "type": "string", "minLength": 1 }
+        }
+      },
+      "else": {
+        "properties": {
+          "action": { "const": "schedule.show" },
+          "effect": { "const": "readback" },
+          "dry_run": { "const": false }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "decimalNonNegative": { "type": "string", "pattern": "^(0|[1-9][0-9]*)$" },
+    "work": {
+      "type": "object",
+      "required": ["state", "count", "work_instance_ids", "work_instance_ids_truncated"],
+      "properties": {
+        "state": { "type": "string", "minLength": 1 },
+        "count": { "$ref": "#/$defs/decimalNonNegative" },
+        "work_instance_ids": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "notification-types.schema.json#/$defs/id" }
+        },
+        "work_instance_ids_truncated": { "type": "boolean" }
+      },
+      "additionalProperties": false
+    },
+    "lifecycle": {
+      "type": "object",
+      "required": ["authored", "opportunities", "work", "delivery_attempt", "delivery_outcome"],
+      "properties": {
+        "authored": { "type": "string", "minLength": 1 },
+        "opportunities": { "type": "string", "minLength": 1 },
+        "work": { "type": "string", "minLength": 1 },
+        "delivery_attempt": { "enum": ["not_attempted", "attempted"] },
+        "delivery_outcome": { "enum": ["none", "pending", "succeeded", "failed", "rejected", "mixed"] }
+      },
+      "additionalProperties": false
+    },
+    "deliveryTarget": {
+      "type": "object",
+      "required": ["delivery_target_id", "channel", "destination_source_ref", "destination_target_ref", "state"],
+      "properties": {
+        "delivery_target_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+        "channel": { "type": "string", "minLength": 1 },
+        "destination_source_ref": { "type": "string", "minLength": 1 },
+        "destination_target_ref": { "type": "string", "minLength": 1 },
+        "state": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": false
+    }
+  }
+}

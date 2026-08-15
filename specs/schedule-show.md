@@ -31,6 +31,8 @@ The CLI accepts the ordinary JSON request transport. It also accepts the equival
 
 `--item-id` and `--include` are transport projections into the same canonical request. They are valid only for `schedule.show` and conflict with the same field supplied in an input object.
 
+CLI `--compact` applies the additive `spine.schedule-compact.v1` projection defined by `specs/schedule-operator-tools.md`. Compact mode ensures policy and work detail are included so its required identity fields are populated. Omitting the option returns this contract's unchanged full response.
+
 ## 3. Current Item and Time View
 
 The response embeds the current `item.show` shell, common version, event/task detail, locations, and subject-role view under `item`, excluding the separately returned notification-policy collection. It does not return a historical item version as current.

@@ -10,6 +10,7 @@ from collections.abc import Mapping, Sequence
 from pathlib import Path
 from typing import Any
 
+from spine.commands.compact import compact_schedule_response
 from spine.commands.context import CommandContext
 from spine.commands.core import MVP_COMMANDS, WRITE_COMMANDS, handle
 from spine.ledger.migrate import verify_schema
@@ -76,6 +77,20 @@ def main(argv: Sequence[str] | None = None) -> int:
             pretty=args.pretty,
         )
         return 2
+    if args.compact and command not in {"schedule.create", "schedule.show"}:
+        _dump(
+            {
+                "ok": False,
+                "command": command,
+                "error": {
+                    "code": "unsupported_field",
+                    "message": "--compact is only supported for schedule.create and schedule.show",
+                    "field": "compact",
+                },
+            },
+            pretty=args.pretty,
+        )
+        return 2
     try:
         direct_schedule_show = command == "schedule.show" and (args.item_id is not None or args.include is not None)
         request = {} if args.input == "-" and (command == "system.info" or direct_schedule_show) else _load_request(args.input)
@@ -87,6 +102,10 @@ def main(argv: Sequence[str] | None = None) -> int:
             if "include" in request:
                 raise CliPreflightError("invalid_request", "--include conflicts with input include", "include")
             request["include"] = _schedule_show_include(args.include)
+        if args.compact and command == "schedule.show":
+            raw_include = request.get("include", ["policies", "work", "attempts"])
+            if isinstance(raw_include, list):
+                request["include"] = sorted(set(raw_include) | {"policies", "work"})
         if args.if_absent:
             request = {**request, "if_absent": True}
         if args.generate_command_id:
@@ -122,6 +141,8 @@ def main(argv: Sequence[str] | None = None) -> int:
             delivery_target_defaults=delivery_target_defaults,
         )
         response = handle(command, request, context)
+        if args.compact and response.get("ok") is True:
+            response = compact_schedule_response(response)
     except Exception as exc:  # pragma: no cover - final transport fallback
         response = {"ok": False, "command": command, "error": {"code": "runtime_failure", "message": str(exc)}}
     finally:
@@ -148,6 +169,7 @@ def _parser() -> argparse.ArgumentParser:
     parser.add_argument("--db")
     parser.add_argument("--input", default="-")
     parser.add_argument("--pretty", action="store_true")
+    parser.add_argument("--compact", action="store_true", help="project schedule.create or schedule.show as a compact operator receipt")
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--if-absent", action="store_true")
     parser.add_argument("--generate-command-id", action="store_true")

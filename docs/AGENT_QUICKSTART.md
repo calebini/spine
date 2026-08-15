@@ -203,6 +203,16 @@ export ITEM_ID=item-id-from-schedule-create
 
 The four lifecycle sections are independent: authored, opportunities, work, and delivery. Immediately after authoring, delivery remains `attempt_state=not_attempted`; after a worker runs, the same readback exposes attempts and terminal outcome evidence.
 
+For chat-sized audit output, add `--compact` to either command. Full JSON remains the default:
+
+```bash
+"$SPINE_COMMAND" --db "$SPINE_DB" --input "$SPINE_DEMO_ROOT/schedule-create-request.json" \
+  --compact schedule create
+"$SPINE_COMMAND" --db "$SPINE_DB" --item-id "$ITEM_ID" --compact schedule show
+```
+
+For the common relative intent “event in two hours; every 30 minutes until it starts,” use the read-only `schedule.build` request defined in `specs/schedule-operator-tools.md`. Supply an explicit `reference_time_utc`, `event_delay_seconds=7200`, and `reminder_interval_seconds=1800`; inspect `effect=schedule_create_request_built`, then submit the returned `schedule_create_request` unchanged. The builder pins the executing timezone-data version and resolves any context-default delivery route to an explicit target before authoring.
+
 For a request that uses `delivery.target.resolution=context_default`, bind the name explicitly in the CLI context:
 
 ```bash

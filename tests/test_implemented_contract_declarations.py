@@ -31,6 +31,9 @@ class ImplementedContractDeclarationTests(unittest.TestCase):
                 "spine.schedule-create-normalization.v1",
                 "spine.schedule-create-response.v1",
                 "spine.schedule-create-receipt.v1",
+                "spine.schedule-compact.v1",
+                "spine.schedule-countdown-builder.v1",
+                "spine.schedule-countdown-builder-response.v1",
                 "spine.schedule-show.v1",
                 "spine.system-info.v1",
             }.issubset(IMPLEMENTED_CONTRACT_VERSIONS)

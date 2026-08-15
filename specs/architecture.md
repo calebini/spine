@@ -144,6 +144,8 @@ Tickerd may initiate bounded materialization and process eligible work. It does 
 
 `specs/schedule-show.md` defines the matching provider-independent read model. `schedule.show` aggregates current item and schedule truth with bounded policy, work, route, receipt, and side-effect-attempt evidence. It introduces no persistence and never treats its projection as a second authority. In particular, authoring commitment, virtual opportunity expansion, durable work materialization, delivery attempt, and delivery outcome remain separate observable lifecycle dimensions.
 
+`specs/schedule-operator-tools.md` defines provider-independent operator compilation and projection conveniences. `schedule.build` resolves explicit input facts into a normal `schedule.create` request without consuming its command ID or writing ledger state. CLI `--compact` projects canonical schedule responses after command handling; it cannot replace, mutate, or become an alternate source for their full receipts and read models.
+
 One fresh success is one database transaction containing the complete new item bundle, initial policies, requested recurrence provenance and bounded work, one audit, and one command receipt. The orchestration service reuses internal deterministic domain and persistence functions; it MUST NOT chain public command handlers whose independent commits would expose partial state or synthetic subcommand receipts.
 
 An explicit or named context-default delivery target resolves only to an existing canonical route. Transport context cannot approve, create, update, or send through that route. Foreman/Threshold retains approval authority, and adapters remain inaccessible until later durable work processing passes the ordinary side-effect-attempt gate.

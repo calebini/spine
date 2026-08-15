@@ -14,7 +14,7 @@ The CLI is the first expected transport adapter. Future MCP and localhost HTTP a
 
 ## 2. Authority
 
-This contract depends on `specs/overview.md`, `specs/architecture.md`, `specs/ontology.md`, `specs/recurrence.md`, `specs/notifications.md`, `specs/schedule-create.md`, `specs/schedule-show.md`, and `specs/SPINE_SPEC_VERSIONING_AND_FREEZE_POLICY.md`. If this document conflicts with `specs/ontology.md`, the ontology wins for ledger truth and this document must be corrected.
+This contract depends on `specs/overview.md`, `specs/architecture.md`, `specs/ontology.md`, `specs/recurrence.md`, `specs/notifications.md`, `specs/schedule-create.md`, `specs/schedule-show.md`, `specs/schedule-operator-tools.md`, and `specs/SPINE_SPEC_VERSIONING_AND_FREEZE_POLICY.md`. If this document conflicts with `specs/ontology.md`, the ontology wins for ledger truth and this document must be corrected.
 
 Spine is the canonical coordination ledger and planning fabric. External tools are projections or side-effect targets. The authoring commands in this contract do not send externally.
 
@@ -158,6 +158,8 @@ Fresh insert success returns `ok=true`, `command=subject.upsert`, `created=true`
 
 `schedule.show` is the read-only aggregate verification command defined by `specs/schedule-show.md`. It requires `item_id`; optional `include` values select policy, work, and attempt detail collections, and optional per-collection limits bound those arrays. It always returns current item facts, stored and resolved schedule facts, recurrence when present, explicit authored/opportunity/work/delivery lifecycle dimensions, delivery-target snapshots, and complete summary counts. The exact request and response shapes are `contracts/schemas/schedule-show-request.schema.json` and `contracts/schemas/schedule-show-response.schema.json`. It creates no ledger row, invokes no adapter, and is the preferred operator readback after `schedule.create` or later worker processing.
 
+`schedule.build` is the read-only relative-event countdown compiler defined by `specs/schedule-operator-tools.md`. It requires an explicit reference instant, relative event delay, fixed-elapsed reminder cadence, timezone-data directive, actor, eventual `schedule.create` command ID, and delivery request. It resolves environment-dependent timezone and route facts into a concrete `spine.schedule-create.v1` request, consumes no command ID, creates no receipt, and writes nothing. Its exact request and response shapes are `contracts/schemas/schedule-countdown-builder-request.schema.json` and `contracts/schemas/schedule-countdown-builder-response.schema.json`.
+
 `item.list` accepts optional request fields `item_type`, `status`, `limit`, and `include_archived`. Valid `item_type` filter values are `event`, `task`, `project`, and `collection`. Valid `status` filter values are shell statuses `active` and `archived`. Invalid filters fail before read execution with `unsupported_field`, `field=item_type` or `field=status`, and CLI exit `2`. `include_archived` defaults to `false`; when `status` is absent, `include_archived=false` returns only active items and `include_archived=true` returns both active and archived items. `status` and `include_archived` are mutually exclusive request fields: if `status` is supplied and `include_archived` is also supplied, the command fails before read execution with `invalid_request`, `field=include_archived`, and CLI exit `2`. `limit` defaults to `50`, may be any integer from `0` through `100`, and fails with `invalid_request`, `field=limit`, and CLI exit `2` when invalid. Items order by `coordination_items.updated_at_utc` descending, then `item_id` ascending. The success response is the exact `item.list` response shape from the Section 4 Response Shape Catalog. It does not mutate.
 
 `item.occurrences` requires `item_id`, canonical inclusive `range_start`, and canonical exclusive `range_end`; optional fields are decimal-string `limit`, `cursor`, `range_basis`, and `include_diagnostics`. `range_basis` is `original_schedule` or `expressed_time` and defaults to `original_schedule`. `limit` defaults to `"100"` and is bounded by `1..1000`. Endpoint formats, the 3660-day or UTC-equivalent range limit, timezone behavior, diagnostic order, pagination order, and cursor binding follow `specs/recurrence.md`. The item must be an event with recurrence on its current start anchor or a task with recurrence on its current due anchor. Expansion is read-only and bounded; it creates no item versions, recurrence rows, provenance rows, work, projections, audit rows, or side-effect attempts.
@@ -244,6 +246,8 @@ Delivery resolution accepts an existing explicit target or a named normalized co
 
 The schema-7 runtime implements this subsection. It resolves named CLI defaults from repeatable `--delivery-target-default KEY=DELIVERY_TARGET_ID` options and exposes all schedule-create version facts through `system.info`.
 
+The CLI accepts `--compact` only with `schedule.create` and `schedule.show`. On success it applies the `spine.schedule-compact.v1` projection defined in `specs/schedule-operator-tools.md`; omission returns the existing full JSON unchanged. Compact mode is transport presentation and does not alter core command semantics, receipt persistence, or readback authority.
+
 ## 15. Dry Run and External Send Boundary
 
 Every MVP write command must support the common `dry_run` context flag. Dry run runs the same deterministic validation, replay compatibility checks, stale-version checks, archived-item immutability checks, lifecycle validation, duplicate detection, generated-ID derivation, and output construction that the corresponding non-dry-run write would run before commit. Dry runs persist nothing and call no external systems.
@@ -271,6 +275,8 @@ The flexible recurrence contract package lives under `contracts/schemas/recurren
 The notification-scheduling contract package lives under `contracts/schemas/notification-*.schema.json`, `contracts/notification-fixture-manifest.json`, `contracts/vector-manifest.json`, and `tests/fixtures/notifications/`. Those artifacts define structured authoring, normalized policy materialization, notification command envelopes, bounded opportunity responses, and computed identity/expansion evidence; `specs/notifications.md` remains the semantic authority.
 
 The atomic schedule-creation contract package lives under `contracts/schemas/schedule-create-*.schema.json`, `contracts/schedule-create-fixture-manifest.json`, and `tests/fixtures/schedule_create/contracts/`. `specs/schedule-create.md` remains the semantic authority. Behavioral conformance, including atomic rollback, replay, dry run, recurrence provenance, bounded work, and no-send behavior, lives in `tests/test_schedule_create_command.py`.
+
+The operator-helper contracts live at `contracts/schemas/schedule-countdown-builder-*.schema.json` and `contracts/schemas/schedule-compact-response.schema.json`. `specs/schedule-operator-tools.md` remains their semantic authority, and end-to-end builder plus compact-CLI behavior lives in `tests/test_schedule_operator_tools.py`.
 
 ## 17. MVP Acceptance Criteria
 

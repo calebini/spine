@@ -98,6 +98,7 @@ class AgentDocumentationTests(unittest.TestCase):
         for command in (
             "system.info",
             "schedule.create",
+            "schedule.build",
             "schedule.show",
             "event.create",
             "task.create",

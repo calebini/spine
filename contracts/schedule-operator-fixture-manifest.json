@@ -1,0 +1,10 @@
+{
+  "schema_version": "spine.schedule-operator-contract-fixtures.v1",
+  "fixtures": [
+    {
+      "name": "relative event plus 30-minute countdown builder request",
+      "schema": "contracts/schemas/schedule-countdown-builder-request.schema.json",
+      "fixture": "tests/fixtures/schedule_operator/countdown_builder_request.json"
+    }
+  ]
+}

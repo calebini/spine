@@ -82,7 +82,7 @@ Do not require current-schema verification before an intended migration; an olde
 "$SPINE_COMMAND" --db "$SPINE_DB" --pretty system info
 ```
 
-Require equal `implemented_ledger_schema_version` and `ledger_schema_version`. Before using the atomic surface, also require `implemented_contract_versions` to include `spine.schedule-create.v1`, `spine.schedule-create-normalization.v1`, `spine.schedule-create-response.v1`, `spine.schedule-create-receipt.v1`, and `spine.schedule-show.v1`.
+Require equal `implemented_ledger_schema_version` and `ledger_schema_version`. Before using the atomic and operator surfaces, also require `implemented_contract_versions` to include `spine.schedule-create.v1`, `spine.schedule-create-normalization.v1`, `spine.schedule-create-response.v1`, `spine.schedule-create-receipt.v1`, `spine.schedule-show.v1`, `spine.schedule-compact.v1`, `spine.schedule-countdown-builder.v1`, and `spine.schedule-countdown-builder-response.v1`.
 
 For `schedule.create`, prefer the request directive `"timezone_database_version":{"kind":"system_current"}`. Spine resolves it once during fresh execution, stores the concrete installed version, and returns that concrete value in receipts and readback. A compatible replay returns the original resolved version even if the host later installs newer timezone data. Operators may instead use `{"kind":"explicit","version":"<exact-version>"}`. Omission is invalid; Spine never chooses timezone data through a hidden default. For lower-level local-time commands that require the concrete string directly, use the value returned by `system.info`. Never copy a version from an example or another machine.
 
@@ -118,7 +118,7 @@ Current commands:
 - `"$SPINE_WORKER"`: run the production-shaped worker in `observe_only`, `active`, or `suspended`.
 - `"$SPINE_CHECKOUT/.venv/bin/spine-openclaw-smoke"`: run a bounded fake OpenClaw smoke.
 
-The scheduling command surface is `schedule.create`, `schedule.show`, `event.create`, `event.reschedule`, `task.create`, `item.occurrences`, `recurrence.instance.add`, `recurrence.instance.remove`, `recurrence.instance.override`, `recurrence.series.edit`, `occurrence_provenance.regenerate`, `reminder.create`, `reminder.edit`, `reminder.disable`, `notification.opportunities`, and `notification_work.materialize`. Prefer `schedule.create` for a new scheduled item plus its initial reminders and `schedule.show` for canonical verification. Use the lower-level family for independent authoring, reads, and later mutations. See `docs/AGENT_QUICKSTART.md` for the complete executable path; see `specs/agent-command-contract.md` for normative request, response, replay, and failure behavior.
+The scheduling command surface is `schedule.build`, `schedule.create`, `schedule.show`, `event.create`, `event.reschedule`, `task.create`, `item.occurrences`, `recurrence.instance.add`, `recurrence.instance.remove`, `recurrence.instance.override`, `recurrence.series.edit`, `occurrence_provenance.regenerate`, `reminder.create`, `reminder.edit`, `reminder.disable`, `notification.opportunities`, and `notification_work.materialize`. Prefer `schedule.build` for the relative-event countdown profile, `schedule.create` for a new scheduled item plus its initial reminders, and `schedule.show` for canonical verification. Use the lower-level family for independent authoring, reads, and later mutations. See `docs/AGENT_QUICKSTART.md` for the complete executable path; see `specs/agent-command-contract.md` for normative request, response, replay, and failure behavior.
 
 ## Atomic Event or Task Scheduling
 
@@ -156,6 +156,59 @@ export ITEM_ID=item-id-from-schedule-create
 Require `lifecycle.authored.state=committed`. Treat `lifecycle.opportunities`, `lifecycle.work`, `lifecycle.delivery.attempt_state`, and `lifecycle.delivery.outcome_state` as separate evidence. Authoring never implies delivery.
 
 Structural request examples live in `tests/fixtures/schedule_create/contracts/`. The repeat-window event fixture is the quickest complete bounded example, and the recurring-task fixture shows inherited recurrence plus named route resolution without immediate work.
+
+### Relative event plus countdown builder
+
+Use `schedule.build` when the operator intent is relative and the current reference instant is known. The command below compiles “event in two hours; remind every 30 minutes until it starts” and writes nothing:
+
+```json
+{
+  "contract_version": "spine.schedule-countdown-builder.v1",
+  "command_id": "appointment-countdown-001",
+  "actor_subject_id": "agent",
+  "reference_time_utc": "2026-08-15T14:00:00Z",
+  "title": "Leave for appointment",
+  "timezone": "America/Toronto",
+  "timezone_database_version": {"kind": "system_current"},
+  "event_delay_seconds": "7200",
+  "reminder_interval_seconds": "1800",
+  "delivery": {
+    "recipient_kind": "subject",
+    "recipient_subject_id": "agent",
+    "channel": "whatsapp",
+    "target": {"resolution": "context_default", "default_key": "owner_whatsapp"}
+  }
+}
+```
+
+Invoke it with the named existing route bound in context:
+
+```bash
+"$SPINE_COMMAND" --db "$SPINE_DB" \
+  --delivery-target-default owner_whatsapp=delivery_target_owner_whatsapp \
+  --input /absolute/path/countdown-builder-request.json \
+  --pretty schedule build > /absolute/path/countdown-builder-response.json
+jq '.schedule_create_request' /absolute/path/countdown-builder-response.json \
+  > /absolute/path/countdown-schedule-create.json
+"$SPINE_COMMAND" --db "$SPINE_DB" \
+  --input /absolute/path/countdown-schedule-create.json \
+  --compact schedule create
+```
+
+Require `effect=schedule_create_request_built` before extracting the generated request. The generated request uses an explicit timezone-data version and delivery target, and it is the artifact whose `command_id` is consumed by `schedule.create`.
+
+### Compact receipts
+
+Add `--compact` to successful create or readback commands when the consumer needs the stable audit subset rather than the full JSON:
+
+```bash
+"$SPINE_COMMAND" --db "$SPINE_DB" --input /absolute/path/schedule-create-request.json \
+  --compact schedule create
+"$SPINE_COMMAND" --db "$SPINE_DB" --item-id "$ITEM_ID" \
+  --compact schedule show
+```
+
+The compact projection retains scheduled times, concrete timezone version, policy/intent IDs, work count/IDs, route adapter and target references, command identity, and separate lifecycle states. It does not mean delivery occurred. A preview explicitly returns `dry_run=true` and `lifecycle.authored=preview`; committed output returns `dry_run=false`. Omit `--compact` whenever the complete canonical receipt or readback is required.
 
 ## Task Assignment Commands
 

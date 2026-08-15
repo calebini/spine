@@ -10,6 +10,8 @@ Created: 2026-08-12
 
 This command removes transport and agent choreography. It does not replace the lower-level `event.create`, `task.create`, `reminder.create`, `occurrence_provenance.regenerate`, `notification.opportunities`, or `notification_work.materialize` contracts. Those commands remain independently useful for explicit workflows and later mutations. `schedule.create` composes the same canonical models without invoking those public handlers as subcommands.
 
+`specs/schedule-operator-tools.md` defines an additive read-only `schedule.build` compiler for relative-event countdown intent and a CLI compact success projection. The compiler produces this contract's ordinary request; the projection consumes this contract's ordinary response. Neither changes the authoring semantics or authority defined here.
+
 The command is an authoring boundary only. It MUST NOT start work, persist a `side_effect_attempts` row, invoke an adapter, or claim delivery.
 
 ## 2. Authority and Version Constants
@@ -269,6 +271,8 @@ The mapping is exact: without recurrence, provenance is `not_applicable`; with r
 The opportunity/work evidence array orders by `eligible_at_utc`, `notification_opportunity_id`, then `work_instance_id`. It returns each policy key, notification identities, scheduled eligibility time, optional recurrence occurrence key and scheduled facts, and materialized work identity. `work_instance_ids` uses that same order.
 
 The response never uses `delivered`, `sent`, or an adapter-success value. Delivery is later worker state proven by `side_effect_attempts` and work lifecycle evidence.
+
+CLI callers may request `--compact`, which projects this successful response under `spine.schedule-compact.v1`. Full `spine.schedule-create-response.v1` JSON remains the default, and projection occurs only after canonical command handling. A compact dry run is explicitly marked as a preview.
 
 ## 9. Validation and Failure Ordering
 

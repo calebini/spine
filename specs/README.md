@@ -10,6 +10,7 @@ Current spec surface:
 - `recurrence.md`: canonical flexible recurrence-set model, deterministic expansion and identity, mutation, and occurrence provenance
 - `schedule-create.md`: implemented atomic operator-facing creation of one scheduled event/task, initial reminder policies, and optional bounded work
 - `schedule-show.md`: implemented canonical readback of current schedule, notification, work, route, and delivery-attempt evidence
+- `schedule-operator-tools.md`: implemented relative-event countdown request building and compact schedule operator projections
 - `agent-command-contract.md`: draft agent-facing command/request contract for authoring and inspecting Spine coordination truth
 - `SPINE_SPEC_VERSIONING_AND_FREEZE_POLICY.md`: lightweight policy for spec versions, runtime declarations, and one-way freeze-manifest pinning
 - `decisions/0001-kinflow-is-donor-not-foundation.md`: accepted decision on the Kinflow relationship
@@ -27,6 +28,10 @@ Executable contract artifacts:
 - `../contracts/schemas/schedule-create-*.schema.json`: atomic schedule-create request and response schemas
 - `../tests/fixtures/schedule_create/contracts/`: initial atomic schedule-create structural examples
 - `../contracts/schemas/schedule-show-*.schema.json`: canonical schedule-readback request and response contracts
+- `../contracts/schemas/schedule-countdown-builder-*.schema.json`: deterministic relative-event countdown builder request and response contracts
+- `../contracts/schemas/schedule-compact-response.schema.json`: compact schedule create/readback operator projection
+- `../contracts/schedule-operator-fixture-manifest.json`: relative-countdown builder fixture index
+- `../tests/fixtures/schedule_operator/`: checked-in operator-builder request examples
 
 Spec status labels:
 

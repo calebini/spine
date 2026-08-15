@@ -9,7 +9,7 @@ import sqlite3
 from collections.abc import Callable, Mapping, Sequence
 from datetime import UTC, date, datetime, timedelta
 from typing import Any
-from zoneinfo import ZoneInfo
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from spine import IMPLEMENTED_CONTRACT_VERSIONS, IMPLEMENTED_LEDGER_SCHEMA_VERSION, __version__
 from spine.commands.context import CommandContext
@@ -112,6 +112,7 @@ MVP_COMMANDS = frozenset(
         "event.cancel",
         "task.create",
         "schedule.create",
+        "schedule.build",
         "schedule.show",
         "task.update",
         "task.complete",
@@ -134,6 +135,7 @@ MVP_COMMANDS = frozenset(
 WRITE_COMMANDS = MVP_COMMANDS - {
     "item.show",
     "schedule.show",
+    "schedule.build",
     "item.list",
     "item.occurrences",
     "relation.list",
@@ -197,6 +199,8 @@ def _dispatch(command: str, request: Mapping[str, Any], context: CommandContext)
         return _handle_item_show(request, context)
     if command == "schedule.show":
         return _handle_schedule_show(request, context)
+    if command == "schedule.build":
+        return _handle_schedule_build(request, context)
     if command == "item.list":
         return _handle_item_list(request, context)
     if command == "item.occurrences":
@@ -644,6 +648,144 @@ def _handle_schedule_show(request: Mapping[str, Any], context: CommandContext) -
         work_limit=work_limit,
         attempts_limit=attempts_limit,
     )
+
+
+def _handle_schedule_build(request: Mapping[str, Any], context: CommandContext) -> dict[str, Any]:
+    from spine.services.schedule_builder import build_relative_event_countdown
+
+    command = "schedule.build"
+    allowed = {
+        "contract_version",
+        "command_id",
+        "actor_subject_id",
+        "reference_time_utc",
+        "title",
+        "summary",
+        "source_ref",
+        "event_detail",
+        "timezone",
+        "timezone_database_version",
+        "event_delay_seconds",
+        "reminder_start_before_seconds",
+        "reminder_interval_seconds",
+        "policy_key",
+        "materialization_limit",
+        "delivery",
+    }
+    _check_fields(command, request, allowed)
+    if request.get("contract_version") != "spine.schedule-countdown-builder.v1":
+        raise SpineValidationError(
+            "invalid_request:contract_version",
+            "contract_version must be spine.schedule-countdown-builder.v1",
+        )
+    command_id = _required_str(request, "command_id")
+    actor = _required_str(request, "actor_subject_id")
+    if not _subject_exists(context.ledger, actor):
+        raise SpineValidationError("actor_not_found", "actor subject not found")
+    reference_text = _timestamp(request, "reference_time_utc")
+    reference_time = _parse_utc_datetime(reference_text)
+    title = _required_str(request, "title")
+    timezone = _required_str(request, "timezone")
+    directive = _schedule_object(request.get("timezone_database_version"), "timezone_database_version")
+    kind = directive.get("kind")
+    if kind == "explicit":
+        _schedule_exact_fields(directive, {"kind", "version"}, "timezone_database_version")
+        timezone_version = _nested_required_str(directive, "version", "timezone_database_version.version")
+    elif kind == "system_current":
+        _schedule_exact_fields(directive, {"kind"}, "timezone_database_version")
+        timezone_version = system_timezone_database_version()
+    else:
+        raise SpineValidationError(
+            "invalid_request:timezone_database_version.kind",
+            "timezone_database_version.kind must be explicit or system_current",
+        )
+    try:
+        ZoneInfo(timezone)
+    except ZoneInfoNotFoundError as exc:
+        raise SpineValidationError("invalid_request:timezone", f"timezone is unavailable: {timezone}") from exc
+
+    event_delay = _schedule_builder_positive(request.get("event_delay_seconds"), "event_delay_seconds")
+    reminder_interval = _schedule_builder_positive(
+        request.get("reminder_interval_seconds"),
+        "reminder_interval_seconds",
+    )
+    reminder_start = _schedule_builder_positive(
+        request.get("reminder_start_before_seconds", str(event_delay)),
+        "reminder_start_before_seconds",
+    )
+    if reminder_start > event_delay:
+        raise SpineValidationError(
+            "invalid_request:reminder_start_before_seconds",
+            "reminder_start_before_seconds must not exceed event_delay_seconds",
+        )
+    if reminder_start > 366 * 86_400:
+        raise SpineValidationError(
+            "invalid_request:reminder_start_before_seconds",
+            "reminder_start_before_seconds must fit the 366-day materialization bound",
+        )
+    materialization_limit = _schedule_builder_positive(
+        request.get("materialization_limit", "1000"),
+        "materialization_limit",
+    )
+    if materialization_limit > 1000:
+        raise SpineValidationError("invalid_request:materialization_limit", "materialization_limit must not exceed 1000")
+    reminder_count = (reminder_start + reminder_interval - 1) // reminder_interval
+    if reminder_count > materialization_limit:
+        raise SpineValidationError(
+            "invalid_request:materialization_limit",
+            "materialization_limit is smaller than the complete countdown opportunity set",
+        )
+    policy_key = request.get("policy_key", "countdown")
+    if not isinstance(policy_key, str) or re.fullmatch(r"[a-z][a-z0-9_-]{0,63}", policy_key) is None:
+        raise SpineValidationError("invalid_request:policy_key", "policy_key has an invalid format")
+    event_detail = _schedule_object(request.get("event_detail", {"all_day": False}), "event_detail")
+    _schedule_exact_fields(event_detail, {"all_day", "visibility", "attendance_policy_ref"}, "event_detail")
+    if event_detail.get("all_day") is not False:
+        raise SpineValidationError("invalid_request:event_detail.all_day", "countdown builder events require all_day=false")
+
+    resolved_delivery = _schedule_resolve_delivery(request.get("delivery"), context)
+    delivery: dict[str, Any] = {
+        "recipient_kind": resolved_delivery["recipient_kind"],
+        "channel": resolved_delivery["channel"],
+        "target": {
+            "resolution": "explicit",
+            "delivery_target_id": resolved_delivery["delivery_target_id"],
+        },
+    }
+    recipient_field = "recipient_subject_id" if resolved_delivery["recipient_kind"] == "subject" else "recipient_group_id"
+    delivery[recipient_field] = resolved_delivery[recipient_field]
+    try:
+        response = build_relative_event_countdown(
+            command_id=command_id,
+            actor_subject_id=actor,
+            reference_time=reference_time,
+            title=title,
+            summary=_optional_str(request, "summary"),
+            source_ref=_optional_str(request, "source_ref"),
+            event_detail=event_detail,
+            timezone=timezone,
+            timezone_database_version=timezone_version,
+            event_delay_seconds=event_delay,
+            reminder_start_before_seconds=reminder_start,
+            reminder_interval_seconds=reminder_interval,
+            policy_key=policy_key,
+            materialization_limit=materialization_limit,
+            delivery=delivery,
+        )
+    except (OverflowError, ValueError) as exc:
+        raise SpineValidationError(
+            "invalid_request:event_delay_seconds",
+            "event_delay_seconds produces an unrepresentable event instant",
+        ) from exc
+    generated = _schedule_object(response["schedule_create_request"], "schedule_create_request")
+    generated_time = _schedule_object(generated["scheduled_time"], "schedule_create_request.scheduled_time")
+    resolved_time = _schedule_resolve_initial_time(generated_time)
+    if resolved_time["utc_instant"] != response["event_at_utc"]:
+        raise SpineValidationError(
+            "environment_failure:timezone_database_version",
+            "pinned timezone resolution does not reproduce the relative event instant",
+        )
+    return response
 
 
 def _handle_item_list(request: Mapping[str, Any], context: CommandContext) -> dict[str, Any]:
@@ -4302,6 +4444,12 @@ def _schedule_normalize_materialization(value: object, *, scheduled: Mapping[str
 def _schedule_signed_decimal(value: object, field: str) -> int:
     if not isinstance(value, str) or re.fullmatch(r"0|-?[1-9][0-9]*", value) is None:
         raise SpineValidationError(f"invalid_request:{field}", f"{field} must be a canonical signed decimal string")
+    return int(value)
+
+
+def _schedule_builder_positive(value: object, field: str) -> int:
+    if not isinstance(value, str) or re.fullmatch(r"[1-9][0-9]*", value) is None:
+        raise SpineValidationError(f"invalid_request:{field}", f"{field} must be a canonical positive decimal string")
     return int(value)
 
 

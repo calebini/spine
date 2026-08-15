@@ -1,6 +1,6 @@
 # Spine Implementation Plan
 
-Status: Atomic scheduling plus canonical `schedule.show` readback acceptance verified
+Status: Atomic scheduling, canonical readback, and operator-tooling acceptance verified
 Last reconciled with repository state: 2026-08-15
 
 This is a non-normative delivery plan. The specifications and machine-readable contracts remain authoritative.
@@ -30,6 +30,12 @@ The `spine.schedule-show.v1` read model is implemented as the operator verificat
 
 The related documentation audit treats `notification_policies.policy_id` and the public `notification_policy_id` alias as distinct intentional surfaces, replaces item-specific operator SQL with `schedule.show`, and documents `timezone_database_version.kind=system_current` as a one-time pin to a concrete version. Omission remains invalid and compatible replay retains the original resolved version.
 
+## Delivered Operator Layer: Compact Receipts and Countdown Builder
+
+The `spine.schedule-compact.v1` CLI projection provides audit-complete, chat-sized success output for `schedule.create` and `schedule.show` while retaining full JSON as the default. It carries item/command/receipt identity, scheduled time and pinned timezone data, policy and intent IDs, bounded work identity, route source/target references, and separate authoring, expansion, materialization, attempt, and outcome states.
+
+The read-only `schedule.build` command implements `spine.schedule-countdown-builder.v1`. It compiles an explicit reference instant plus relative event delay and reminder cadence into a normal, fully pinned `schedule.create` request. Its first tested profile—event in two hours, remind every 30 minutes until start—resolves the route and timezone version, bounds four work opportunities, performs no write, and feeds the existing atomic authoring path unchanged.
+
 ## Delivery Goal
 
 Ship one environment-sized implementation that supports the complete path from a structured recurrence or notification command to deterministic virtual results, canonical relational state, durable notification work, Tickerd processing, and a recorded adapter attempt.
@@ -43,6 +49,7 @@ The delivery is intentionally broad because recurrence identity, occurrence prov
 - `specs/ontology.md`: relational authority and lifecycle invariants.
 - `specs/agent-command-contract.md`: public command and receipt behavior.
 - `specs/schedule-show.md`: canonical aggregate schedule and delivery-lifecycle readback.
+- `specs/schedule-operator-tools.md`: relative countdown compilation and compact operator projection.
 - `contracts/schemas/recurrence-*.schema.json` and `contracts/schemas/notification-*.schema.json`: public machine shapes.
 - `contracts/vector-manifest.json`: computed identity and behavior evidence.
 
