@@ -1,7 +1,7 @@
 # Spine Implementation Plan
 
-Status: Atomic `schedule.create` fat slice acceptance verified
-Last reconciled with repository state: 2026-08-13
+Status: Atomic scheduling plus canonical `schedule.show` readback acceptance verified
+Last reconciled with repository state: 2026-08-15
 
 This is a non-normative delivery plan. The specifications and machine-readable contracts remain authoritative.
 
@@ -24,6 +24,12 @@ Behavioral proof covers non-recurring events, recurring tasks, policy-only and b
 
 No schema migration is planned: schema 7 already owns every canonical row required by this orchestration. A migration is introduced only if implementation proves that a required invariant cannot be represented safely by the existing relational contract.
 
+## Delivered P0: Canonical Schedule Verification
+
+The `spine.schedule-show.v1` read model is implemented as the operator verification boundary over schema 7. It returns current item and schedule facts, concrete timezone-version and UTC-resolution evidence, recurrence, current notification policies and intent IDs, bounded work and attempt detail, route snapshots, complete status counts, and separate authored/opportunity/work/delivery lifecycle dimensions. The direct CLI `--item-id` and `--include` form maps to the same transport-neutral command request.
+
+The related documentation audit treats `notification_policies.policy_id` and the public `notification_policy_id` alias as distinct intentional surfaces, replaces item-specific operator SQL with `schedule.show`, and documents `timezone_database_version.kind=system_current` as a one-time pin to a concrete version. Omission remains invalid and compatible replay retains the original resolved version.
+
 ## Delivery Goal
 
 Ship one environment-sized implementation that supports the complete path from a structured recurrence or notification command to deterministic virtual results, canonical relational state, durable notification work, Tickerd processing, and a recorded adapter attempt.
@@ -36,6 +42,7 @@ The delivery is intentionally broad because recurrence identity, occurrence prov
 - `specs/notifications.md`: notification schedules, opportunities, late handling, materialization, and reconciliation.
 - `specs/ontology.md`: relational authority and lifecycle invariants.
 - `specs/agent-command-contract.md`: public command and receipt behavior.
+- `specs/schedule-show.md`: canonical aggregate schedule and delivery-lifecycle readback.
 - `contracts/schemas/recurrence-*.schema.json` and `contracts/schemas/notification-*.schema.json`: public machine shapes.
 - `contracts/vector-manifest.json`: computed identity and behavior evidence.
 
@@ -68,6 +75,7 @@ The delivery is intentionally broad because recurrence identity, occurrence prov
 - `occurrence_provenance.regenerate` with closed effects and report behavior.
 - `reminder.create`, `.edit`, and `.disable` for structured notification policies.
 - `notification.opportunities` and `notification_work.materialize`.
+- `schedule.show` with bounded policy, work, route, receipt, and attempt evidence.
 - Deterministic replay, stale-version checks, dry runs, receipts, and atomic item/supporting-set writes.
 
 ### Notification and delivery path

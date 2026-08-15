@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cortext.local/spine/contracts/schemas/schedule-show-request.schema.json",
+  "title": "Spine Canonical Schedule Readback Request v1",
+  "type": "object",
+  "required": ["item_id"],
+  "properties": {
+    "item_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+    "include": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "enum": ["policies", "work", "attempts"] }
+    },
+    "notification_policies_limit": { "$ref": "#/$defs/policyLimit" },
+    "work_instances_limit": { "$ref": "#/$defs/evidenceLimit" },
+    "side_effect_attempts_limit": { "$ref": "#/$defs/evidenceLimit" }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "policyLimit": {
+      "oneOf": [
+        { "type": "integer", "minimum": 0, "maximum": 100 },
+        { "type": "string", "pattern": "^(0|[1-9][0-9]?|100)$" }
+      ]
+    },
+    "evidenceLimit": {
+      "oneOf": [
+        { "type": "integer", "minimum": 0, "maximum": 1000 },
+        { "type": "string", "pattern": "^(0|[1-9][0-9]{0,2}|1000)$" }
+      ]
+    }
+  }
+}

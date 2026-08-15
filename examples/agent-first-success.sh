@@ -203,7 +203,17 @@ spine-worker \
   --max-cycles 1 >"$SPINE_EXAMPLE_ROOT/active.json"
 
 test "$(wc -l <"$SPINE_EXAMPLE_ACTIVE_STATE/openclaw_sends.jsonl")" -eq 1
-test "$(sqlite3 "$SPINE_EXAMPLE_DB" "SELECT COUNT(*) FROM side_effect_attempts WHERE attempt_status='succeeded';")" -eq 1
+spine --db "$SPINE_EXAMPLE_DB" \
+  --item-id "$SPINE_EXAMPLE_ITEM_ID" \
+  --include policies,work,attempts \
+  schedule show >"$SPINE_EXAMPLE_ROOT/schedule-show.json"
+jq -e '
+  .ok == true
+  and .lifecycle.authored.state == "committed"
+  and .lifecycle.delivery.attempt_state == "attempted"
+  and .lifecycle.delivery.outcome_state == "succeeded"
+  and .lifecycle.delivery.status_counts.succeeded == "1"
+' "$SPINE_EXAMPLE_ROOT/schedule-show.json" >/dev/null
 test "$(sqlite3 "$SPINE_EXAMPLE_DB" "SELECT COUNT(*) FROM pragma_foreign_key_check;")" -eq 0
 
 jq -n \

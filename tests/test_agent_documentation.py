@@ -53,6 +53,19 @@ class AgentDocumentationTests(unittest.TestCase):
             self.assertIn("timezone_database_version", document)
             self.assertNotIn('"timezone_database_version": "2026a"', document)
         self.assertIn("<SPINE_TZ_VERSION>", guide)
+        for document in (quickstart, guide):
+            self.assertIn('"timezone_database_version":{"kind":"system_current"}', document)
+            self.assertIn("concrete", document)
+            self.assertIn("omission", document.lower())
+
+    def test_operator_schedule_verification_uses_public_schema_7_surface(self) -> None:
+        guide = OPERATOR_GUIDE.read_text(encoding="utf-8")
+        self.assertIn("schedule show", guide)
+        self.assertIn("lifecycle.delivery.attempt_state", guide)
+        self.assertIn("notification_policies.policy_id", guide)
+        self.assertIn("work_instances.notification_policy_id", guide)
+        self.assertNotIn("FROM items", guide)
+        self.assertNotIn("JOIN items", guide)
 
     def test_operational_docs_use_host_neutral_checkout_local_entrypoints(self) -> None:
         documents = [
@@ -85,6 +98,7 @@ class AgentDocumentationTests(unittest.TestCase):
         for command in (
             "system.info",
             "schedule.create",
+            "schedule.show",
             "event.create",
             "task.create",
             "item.occurrences",

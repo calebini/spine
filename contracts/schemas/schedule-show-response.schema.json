@@ -1,0 +1,259 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cortext.local/spine/contracts/schemas/schedule-show-response.schema.json",
+  "title": "Spine Canonical Schedule Readback Response v1",
+  "type": "object",
+  "required": [
+    "ok",
+    "command",
+    "response_contract",
+    "item",
+    "scheduled_times",
+    "lifecycle",
+    "delivery_targets",
+    "included"
+  ],
+  "properties": {
+    "ok": { "const": true },
+    "command": { "const": "schedule.show" },
+    "response_contract": { "const": "spine.schedule-show.v1" },
+    "item": { "$ref": "#/$defs/item" },
+    "scheduled_times": {
+      "type": "array",
+      "maxItems": 4,
+      "items": { "$ref": "#/$defs/scheduledTime" }
+    },
+    "recurrence": { "$ref": "recurrence-set.schema.json" },
+    "authoring_receipt": { "$ref": "#/$defs/authoringReceipt" },
+    "lifecycle": { "$ref": "#/$defs/lifecycle" },
+    "delivery_targets": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/deliveryTarget" }
+    },
+    "included": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "enum": ["attempts", "policies", "work"] }
+    },
+    "notification_policies": {
+      "type": "array",
+      "maxItems": 100,
+      "items": { "$ref": "notification-policy.schema.json" }
+    },
+    "notification_policies_count": { "$ref": "#/$defs/decimalNonNegative" },
+    "notification_policies_limit": { "$ref": "#/$defs/decimalNonNegative" },
+    "notification_policies_truncated": { "type": "boolean" },
+    "work_instances": {
+      "type": "array",
+      "maxItems": 1000,
+      "items": { "$ref": "#/$defs/work" }
+    },
+    "work_instances_count": { "$ref": "#/$defs/decimalNonNegative" },
+    "work_instances_limit": { "$ref": "#/$defs/decimalNonNegative" },
+    "work_instances_truncated": { "type": "boolean" },
+    "side_effect_attempts": {
+      "type": "array",
+      "maxItems": 1000,
+      "items": { "$ref": "#/$defs/attempt" }
+    },
+    "side_effect_attempts_count": { "$ref": "#/$defs/decimalNonNegative" },
+    "side_effect_attempts_limit": { "$ref": "#/$defs/decimalNonNegative" },
+    "side_effect_attempts_truncated": { "type": "boolean" }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "decimalNonNegative": { "type": "string", "pattern": "^(0|[1-9][0-9]*)$" },
+    "signedDecimal": { "type": "string", "pattern": "^(0|-?[1-9][0-9]*)$" },
+    "item": {
+      "type": "object",
+      "required": ["item_id", "item_type", "current_version", "status", "created_at_utc", "updated_at_utc", "current_common"],
+      "properties": {
+        "item_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+        "item_type": { "enum": ["event", "task", "project", "collection"] },
+        "current_version": { "$ref": "notification-types.schema.json#/$defs/decimalPositive" },
+        "status": { "enum": ["active", "archived"] },
+        "created_at_utc": { "$ref": "notification-types.schema.json#/$defs/utcTimestamp" },
+        "updated_at_utc": { "$ref": "notification-types.schema.json#/$defs/utcTimestamp" },
+        "archived_at_utc": { "$ref": "notification-types.schema.json#/$defs/utcTimestamp" },
+        "current_common": { "type": "object" },
+        "event_detail": { "type": "object" },
+        "task_detail": { "type": "object" },
+        "locations": { "type": "array" },
+        "locations_limit": { "$ref": "#/$defs/decimalNonNegative" },
+        "locations_truncated": { "type": "boolean" },
+        "subject_roles": { "type": "array" },
+        "subject_roles_limit": { "$ref": "#/$defs/decimalNonNegative" },
+        "subject_roles_truncated": { "type": "boolean" }
+      },
+      "additionalProperties": false
+    },
+    "scheduledTime": {
+      "type": "object",
+      "required": ["anchor_role", "anchor_id", "anchor_kind", "created_at_utc", "resolution_state"],
+      "properties": {
+        "anchor_role": { "enum": ["event_start", "event_end", "task_due", "task_defer_until"] },
+        "anchor_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+        "anchor_kind": { "enum": ["instant_utc", "local_instant", "local_date", "utc_window", "local_window"] },
+        "created_at_utc": { "$ref": "notification-types.schema.json#/$defs/utcTimestamp" },
+        "local_date": { "type": "string" },
+        "local_time": { "type": "string" },
+        "timezone": { "type": "string", "minLength": 1 },
+        "timezone_database_version": { "type": "string", "minLength": 1 },
+        "utc_instant": { "$ref": "notification-types.schema.json#/$defs/utcTimestamp" },
+        "window_start_utc": { "$ref": "notification-types.schema.json#/$defs/utcTimestamp" },
+        "window_end_utc": { "$ref": "notification-types.schema.json#/$defs/utcTimestamp" },
+        "source": { "type": "string" },
+        "recurrence_set_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+        "resolution_state": { "enum": ["resolved", "not_applicable", "unavailable"] },
+        "resolution_source": { "enum": ["authoring_receipt", "stored_anchor", "pinned_timezone_database"] },
+        "resolution_kind": { "enum": ["unambiguous", "ambiguous_earliest_instant"] },
+        "resolution_error_code": { "enum": ["timezone_database_version_unavailable", "nonexistent_local_time"] },
+        "offset_seconds": { "$ref": "#/$defs/signedDecimal" }
+      },
+      "additionalProperties": false
+    },
+    "authoringReceipt": {
+      "type": "object",
+      "required": ["command_receipt_id", "command_id", "command", "effect", "semantic_facts_hash", "created_at_utc"],
+      "properties": {
+        "command_receipt_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+        "command_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+        "command": { "enum": ["schedule.create", "event.create", "task.create"] },
+        "effect": { "type": "string", "minLength": 1 },
+        "semantic_facts_hash": { "$ref": "notification-types.schema.json#/$defs/sha256" },
+        "created_at_utc": { "$ref": "notification-types.schema.json#/$defs/utcTimestamp" }
+      },
+      "additionalProperties": false
+    },
+    "lifecycle": {
+      "type": "object",
+      "required": ["authored", "opportunities", "work", "delivery"],
+      "properties": {
+        "authored": {
+          "type": "object",
+          "required": ["state", "item_version", "policy_count"],
+          "properties": {
+            "state": { "const": "committed" },
+            "item_version": { "$ref": "notification-types.schema.json#/$defs/decimalPositive" },
+            "policy_count": { "$ref": "#/$defs/decimalNonNegative" }
+          },
+          "additionalProperties": false
+        },
+        "opportunities": {
+          "type": "object",
+          "required": ["state", "count"],
+          "properties": {
+            "state": { "enum": ["expanded", "expanded_zero_selected", "not_requested", "evidence_not_persisted"] },
+            "count": { "$ref": "#/$defs/decimalNonNegative" }
+          },
+          "additionalProperties": false
+        },
+        "work": {
+          "type": "object",
+          "required": ["state", "count", "status_counts"],
+          "properties": {
+            "state": { "enum": ["materialized", "completed_zero_selected", "not_requested", "none"] },
+            "count": { "$ref": "#/$defs/decimalNonNegative" },
+            "status_counts": { "$ref": "#/$defs/workStatusCounts" }
+          },
+          "additionalProperties": false
+        },
+        "delivery": {
+          "type": "object",
+          "required": ["attempt_state", "outcome_state", "attempt_count", "status_counts"],
+          "properties": {
+            "attempt_state": { "enum": ["not_attempted", "attempted"] },
+            "outcome_state": { "enum": ["none", "pending", "succeeded", "failed", "rejected", "mixed"] },
+            "attempt_count": { "$ref": "#/$defs/decimalNonNegative" },
+            "status_counts": { "$ref": "#/$defs/attemptStatusCounts" }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "workStatusCounts": {
+      "type": "object",
+      "required": ["eligible", "in_progress", "succeeded", "failed", "cancelled"],
+      "properties": {
+        "eligible": { "$ref": "#/$defs/decimalNonNegative" },
+        "in_progress": { "$ref": "#/$defs/decimalNonNegative" },
+        "succeeded": { "$ref": "#/$defs/decimalNonNegative" },
+        "failed": { "$ref": "#/$defs/decimalNonNegative" },
+        "cancelled": { "$ref": "#/$defs/decimalNonNegative" }
+      },
+      "additionalProperties": false
+    },
+    "attemptStatusCounts": {
+      "type": "object",
+      "required": ["started", "succeeded", "failed", "rejected"],
+      "properties": {
+        "started": { "$ref": "#/$defs/decimalNonNegative" },
+        "succeeded": { "$ref": "#/$defs/decimalNonNegative" },
+        "failed": { "$ref": "#/$defs/decimalNonNegative" },
+        "rejected": { "$ref": "#/$defs/decimalNonNegative" }
+      },
+      "additionalProperties": false
+    },
+    "deliveryTarget": {
+      "type": "object",
+      "required": ["delivery_target_id", "current_snapshot"],
+      "properties": {
+        "delivery_target_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+        "current_snapshot": { "type": "object" },
+        "authored_snapshot": { "type": "object" },
+        "routing_facts_match_authored": { "type": "boolean" }
+      },
+      "additionalProperties": false
+    },
+    "work": {
+      "type": "object",
+      "required": ["work_instance_id", "item_id", "item_version", "work_kind", "eligible_at_utc", "status", "attempt_count", "created_at_utc", "updated_at_utc"],
+      "properties": {
+        "work_instance_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+        "item_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+        "item_version": { "$ref": "notification-types.schema.json#/$defs/decimalPositive" },
+        "notification_policy_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+        "notification_policy_item_version": { "$ref": "notification-types.schema.json#/$defs/decimalPositive" },
+        "notification_intent_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+        "notification_opportunity_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+        "occurrence_provenance_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+        "target_anchor_role": { "enum": ["event_start", "task_due"] },
+        "application_scope": { "enum": ["item", "each_occurrence", "selected_occurrence"] },
+        "target_scheduled_fact": { "type": "string" },
+        "target_at_utc": { "$ref": "notification-types.schema.json#/$defs/utcTimestamp" },
+        "occurrence_key": { "$ref": "notification-types.schema.json#/$defs/id" },
+        "delivery_target_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+        "work_kind": { "const": "notification_reminder" },
+        "eligible_at_utc": { "$ref": "notification-types.schema.json#/$defs/utcTimestamp" },
+        "status": { "enum": ["eligible", "in_progress", "succeeded", "failed", "cancelled"] },
+        "attempt_count": { "$ref": "#/$defs/decimalNonNegative" },
+        "next_attempt_at_utc": { "$ref": "notification-types.schema.json#/$defs/utcTimestamp" },
+        "reason_code": { "type": "string" },
+        "created_at_utc": { "$ref": "notification-types.schema.json#/$defs/utcTimestamp" },
+        "updated_at_utc": { "$ref": "notification-types.schema.json#/$defs/utcTimestamp" }
+      },
+      "additionalProperties": false
+    },
+    "attempt": {
+      "type": "object",
+      "required": ["attempt_id", "work_instance_id", "item_id", "adapter_name", "idempotency_key", "attempt_status", "request_payload_hash", "request_hash", "attempted_at_utc"],
+      "properties": {
+        "attempt_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+        "work_instance_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+        "item_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+        "adapter_name": { "type": "string", "minLength": 1 },
+        "idempotency_key": { "type": "string", "minLength": 1 },
+        "attempt_status": { "enum": ["started", "succeeded", "failed", "rejected"] },
+        "provider_ref": { "type": "string" },
+        "request_payload_hash": { "$ref": "notification-types.schema.json#/$defs/sha256" },
+        "request_hash": { "$ref": "notification-types.schema.json#/$defs/sha256" },
+        "response_hash": { "$ref": "notification-types.schema.json#/$defs/sha256" },
+        "reason_code": { "type": "string" },
+        "attempted_at_utc": { "$ref": "notification-types.schema.json#/$defs/utcTimestamp" },
+        "completed_at_utc": { "$ref": "notification-types.schema.json#/$defs/utcTimestamp" }
+      },
+      "additionalProperties": false
+    }
+  }
+}

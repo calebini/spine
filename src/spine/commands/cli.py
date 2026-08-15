@@ -62,8 +62,31 @@ def main(argv: Sequence[str] | None = None) -> int:
             pretty=args.pretty,
         )
         return 2
+    if (args.item_id is not None or args.include is not None) and command != "schedule.show":
+        _dump(
+            {
+                "ok": False,
+                "command": command,
+                "error": {
+                    "code": "unsupported_field",
+                    "message": "--item-id and --include are only supported for schedule.show",
+                    "field": "item_id" if args.item_id is not None else "include",
+                },
+            },
+            pretty=args.pretty,
+        )
+        return 2
     try:
-        request = {} if command == "system.info" and args.input == "-" else _load_request(args.input)
+        direct_schedule_show = command == "schedule.show" and (args.item_id is not None or args.include is not None)
+        request = {} if args.input == "-" and (command == "system.info" or direct_schedule_show) else _load_request(args.input)
+        if args.item_id is not None:
+            if "item_id" in request:
+                raise CliPreflightError("invalid_request", "--item-id conflicts with input item_id", "item_id")
+            request["item_id"] = args.item_id
+        if args.include is not None:
+            if "include" in request:
+                raise CliPreflightError("invalid_request", "--include conflicts with input include", "include")
+            request["include"] = _schedule_show_include(args.include)
         if args.if_absent:
             request = {**request, "if_absent": True}
         if args.generate_command_id:
@@ -128,6 +151,11 @@ def _parser() -> argparse.ArgumentParser:
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--if-absent", action="store_true")
     parser.add_argument("--generate-command-id", action="store_true")
+    parser.add_argument("--item-id", help="schedule.show item identity; may be used without --input")
+    parser.add_argument(
+        "--include",
+        help="schedule.show comma-separated detail sets: policies,work,attempts",
+    )
     parser.add_argument("--openclaw-whatsapp", action="store_true")
     parser.add_argument(
         "--delivery-target-default",
@@ -157,6 +185,19 @@ def _delivery_target_defaults(values: Sequence[str]) -> dict[str, str | list[str
         else:
             current.append(target_id)
     return result
+
+
+def _schedule_show_include(value: str) -> list[str]:
+    values = value.split(",")
+    if not values or any(candidate not in {"policies", "work", "attempts"} for candidate in values):
+        raise CliPreflightError(
+            "invalid_request",
+            "--include must be a comma-separated subset of policies,work,attempts",
+            "include",
+        )
+    if len(values) != len(set(values)):
+        raise CliPreflightError("invalid_request", "--include values must be unique", "include")
+    return values
 
 
 def _load_request(input_ref: str) -> dict[str, Any]:

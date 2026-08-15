@@ -105,6 +105,8 @@ Successful output includes:
 - `timezone_database_version`, which must be copied exactly into local-date and local-instant authoring;
 - `implemented_contract_versions`.
 
+For `schedule.create`, callers do not need to copy the concrete timezone version into the request. Use `"timezone_database_version":{"kind":"system_current"}` and Spine pins the executing runtime's concrete version before mutation. The response and later `schedule.show` return that concrete version. Replaying the same `command_id` retains the originally pinned version; omission is not a default and remains invalid. Lower-level local-time authoring continues to use the concrete value discovered here.
+
 To capture the timezone-data version:
 
 ```bash
@@ -189,6 +191,18 @@ Before invocation, replace its actor, recipient, and explicit `delivery_target_i
 
 The example creates a two-hour countdown every 20 minutes and materializes six work rows. Require `effect=schedule_created`, `phases.delivery=not_attempted`, `materialization.work_instance_count=6`, and six returned work IDs. Repeating the committed request with the same `command_id` returns `effect=schedule_create_replay` and no new rows.
 
+Read the committed schedule back without SQL:
+
+```bash
+export ITEM_ID=item-id-from-schedule-create
+"$SPINE_COMMAND" --db "$SPINE_DB" \
+  --item-id "$ITEM_ID" \
+  --include policies,work,attempts \
+  --pretty schedule show
+```
+
+The four lifecycle sections are independent: authored, opportunities, work, and delivery. Immediately after authoring, delivery remains `attempt_state=not_attempted`; after a worker runs, the same readback exposes attempts and terminal outcome evidence.
+
 For a request that uses `delivery.target.resolution=context_default`, bind the name explicitly in the CLI context:
 
 ```bash
@@ -260,6 +274,7 @@ The executable example captures these with `jq` and stops when any expected coun
 | Purpose | Command | Writes? | External send? |
 |---|---|---:|---:|
 | Inspect local authority | `system.info` | No | No |
+| Verify one complete schedule lifecycle | `schedule.show` | No | No |
 | Bootstrap/update actor | `subject.upsert` | Yes | No |
 | Create/update delivery endpoint | `delivery_target.upsert` | Yes | No |
 | Atomically create scheduled item + reminders | `schedule.create` | Yes | No |
@@ -286,8 +301,8 @@ Use these in order when more detail is needed:
 
 1. `docs/AGENT_OPERATOR_GUIDE.md` — operations, migration, worker modes, inspection, and troubleshooting.
 2. `specs/agent-command-contract.md` — exact public command behavior and errors.
-3. `specs/schedule-create.md`, `specs/recurrence.md`, and `specs/notifications.md` — atomic orchestration, scheduling semantics, and identity.
-4. `contracts/schemas/*schedule-create*.json`, `contracts/schemas/recurrence-*.schema.json`, and `contracts/schemas/notification-*.schema.json` — machine-readable shapes.
+3. `specs/schedule-create.md`, `specs/schedule-show.md`, `specs/recurrence.md`, and `specs/notifications.md` — atomic orchestration, readback, scheduling semantics, and identity.
+4. `contracts/schemas/schedule-*.schema.json`, `contracts/schemas/recurrence-*.schema.json`, and `contracts/schemas/notification-*.schema.json` — machine-readable shapes.
 5. `tests/fixtures/schedule_create/contracts/`, `tests/fixtures/recurrence/contracts/`, and `tests/fixtures/notifications/contracts/` — copyable structural examples.
 6. `tests/fixtures/recurrence/vectors/` and `tests/fixtures/notifications/vectors/` — computed identity and expansion evidence.
 

@@ -10,7 +10,7 @@ Spine owns coordination truth. Adapters make it visible, actionable, or enriched
 
 ## Current Status
 
-Seed-spec phase with an acceptance-verified canonical scheduling and notification fat slice. The runtime implements structured recurrence across local-date, local-instant, and fixed-UTC bases; daily, weekly, monthly, and yearly frequencies; selectors, exceptions, overrides, series edits, bounded occurrence reads, lineage, and occurrence provenance. It also implements one-time, offset, fixed-elapsed, and local-calendar notification schedules; bounded opportunities; durable work materialization and reconciliation; the atomic `schedule.create` event/task + reminders surface; Tickerd horizon repair; and fake OpenClaw delivery through `side_effect_attempts`. Schema version 7 is the single relational scheduling authority. Computed vectors, Draft 2020-12 fixture validation, migration/rollback tests, no-skip Tickerd integration tests, and a bounded fake-delivery canary are complete; production deployment and any real send remain separate operator actions.
+Seed-spec phase with an acceptance-verified canonical scheduling and notification fat slice. The runtime implements structured recurrence across local-date, local-instant, and fixed-UTC bases; daily, weekly, monthly, and yearly frequencies; selectors, exceptions, overrides, series edits, bounded occurrence reads, lineage, and occurrence provenance. It also implements one-time, offset, fixed-elapsed, and local-calendar notification schedules; bounded opportunities; durable work materialization and reconciliation; the atomic `schedule.create` event/task + reminders surface; canonical `schedule.show` verification; Tickerd horizon repair; and fake OpenClaw delivery through `side_effect_attempts`. Schema version 7 is the single relational scheduling authority. Computed vectors, Draft 2020-12 fixture validation, migration/rollback tests, no-skip Tickerd integration tests, and a bounded fake-delivery canary are complete; production deployment and any real send remain separate operator actions.
 
 Authoritative starting points:
 
@@ -23,6 +23,7 @@ Authoritative starting points:
 - `contracts/schemas/notification-*.schema.json` and `contracts/notification-fixture-manifest.json` define the machine-readable notification contract family and initial fixtures.
 - `specs/schedule-create.md` defines the implemented atomic `schedule.create` operator contract over item creation, reminder policies, recurrence provenance, and bounded work.
 - `contracts/schemas/schedule-create-*.schema.json` and `contracts/schedule-create-fixture-manifest.json` define its request/response package and structural examples; behavioral coverage lives in `tests/test_schedule_create_command.py`.
+- `specs/schedule-show.md` and `contracts/schemas/schedule-show-*.schema.json` define the implemented read-only aggregate verification surface; behavioral coverage lives in `tests/test_schedule_show_command.py`.
 - `specs/agent-command-contract.md` defines the MVP agent command core and CLI contract.
 - `docs/AGENT_QUICKSTART.md` gives a zero-context agent one executable, fake-only path through recurrence and recurring notifications.
 - `specs/decisions/0001-kinflow-is-donor-not-foundation.md` records the Kinflow relationship.
@@ -63,7 +64,7 @@ This repository follows the Cortext1 component scaffold standard incrementally:
 - `docs/AGENT_QUICKSTART.md`: executable cold-start path for a new agent
 - `docs/AGENT_OPERATOR_GUIDE.md`: agent-facing contract for operating current Spine runtime surfaces safely
 - `docs/OPENCLAW_DEPLOYMENT_RUNBOOK.md`: operational rollout notes for the first OpenClaw replacement path
-- `contracts/`: machine-readable command, recurrence, notification, and atomic schedule-create agreements plus fixture manifests
+- `contracts/`: machine-readable command, recurrence, notification, atomic schedule-create, and canonical schedule-readback agreements plus fixture manifests
 - `deploy/`: deployment templates for systemd and environment files
 - `src/spine/`: initial Python package scaffold
 - `src/spine/ledger/`: canonical local persistence boundary

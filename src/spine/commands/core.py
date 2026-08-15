@@ -112,6 +112,7 @@ MVP_COMMANDS = frozenset(
         "event.cancel",
         "task.create",
         "schedule.create",
+        "schedule.show",
         "task.update",
         "task.complete",
         "task.cancel",
@@ -132,6 +133,7 @@ MVP_COMMANDS = frozenset(
 
 WRITE_COMMANDS = MVP_COMMANDS - {
     "item.show",
+    "schedule.show",
     "item.list",
     "item.occurrences",
     "relation.list",
@@ -193,6 +195,8 @@ def _dispatch(command: str, request: Mapping[str, Any], context: CommandContext)
         return _handle_system_info(request, context)
     if command == "item.show":
         return _handle_item_show(request, context)
+    if command == "schedule.show":
+        return _handle_schedule_show(request, context)
     if command == "item.list":
         return _handle_item_list(request, context)
     if command == "item.occurrences":
@@ -589,6 +593,56 @@ def _handle_item_show(request: Mapping[str, Any], context: CommandContext) -> di
         notification_policies_truncated=notification_policies[1],
         relations_limit=str(relations_limit),
         relations_truncated=relations[1],
+    )
+
+
+def _handle_schedule_show(request: Mapping[str, Any], context: CommandContext) -> dict[str, Any]:
+    from spine.services.schedule_readback import build_schedule_readback
+
+    _check_fields(
+        "schedule.show",
+        request,
+        {"item_id", "include", "notification_policies_limit", "work_instances_limit", "side_effect_attempts_limit"},
+    )
+    item_id = _required_str(request, "item_id")
+    raw_include = request.get("include", ["policies", "work", "attempts"])
+    if not isinstance(raw_include, Sequence) or isinstance(raw_include, (str, bytes, bytearray)):
+        raise SpineValidationError("invalid_request:include", "include must be an array")
+    include_values: list[str] = []
+    for value in raw_include:
+        if not isinstance(value, str) or value not in {"policies", "work", "attempts"}:
+            raise SpineValidationError(
+                "invalid_request:include",
+                "include values must be policies, work, or attempts",
+            )
+        include_values.append(value)
+    if len(include_values) != len(set(include_values)):
+        raise SpineValidationError("invalid_request:include", "include values must be unique")
+    policies_limit = _limit(request.get("notification_policies_limit", 100))
+    work_limit = _schedule_show_limit(request.get("work_instances_limit", 1000), "work_instances_limit")
+    attempts_limit = _schedule_show_limit(request.get("side_effect_attempts_limit", 1000), "side_effect_attempts_limit")
+    item = _hydrated_item(context.ledger, item_id)
+    item_response = item_show_response(item, notification_policies_limit="0")
+    item_view = {
+        key: value
+        for key, value in item_response.items()
+        if key
+        not in {
+            "ok",
+            "command",
+            "notification_policies",
+            "notification_policies_limit",
+            "notification_policies_truncated",
+        }
+    }
+    return build_schedule_readback(
+        context.ledger,
+        item=item,
+        item_view=item_view,
+        include=frozenset(include_values),
+        policies_limit=policies_limit,
+        work_limit=work_limit,
+        attempts_limit=attempts_limit,
     )
 
 
@@ -4652,6 +4706,14 @@ def _occurrence_limit(value: Any) -> int:
             "invalid_limit",
             "limit must be between 1 and 1000",
         )
+    return value
+
+
+def _schedule_show_limit(value: Any, field: str) -> int:
+    if isinstance(value, str) and value.isdigit():
+        value = int(value)
+    if not isinstance(value, int) or isinstance(value, bool) or value < 0 or value > 1000:
+        raise SpineValidationError(f"invalid_request:{field}", f"{field} must be between 0 and 1000")
     return value
 
 

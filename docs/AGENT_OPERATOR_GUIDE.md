@@ -82,7 +82,9 @@ Do not require current-schema verification before an intended migration; an olde
 "$SPINE_COMMAND" --db "$SPINE_DB" --pretty system info
 ```
 
-Require equal `implemented_ledger_schema_version` and `ledger_schema_version`. Before using the atomic surface, also require `implemented_contract_versions` to include `spine.schedule-create.v1`, `spine.schedule-create-normalization.v1`, `spine.schedule-create-response.v1`, and `spine.schedule-create-receipt.v1`. Use the returned `timezone_database_version` exactly for every local-date or local-instant schedule. Never copy that value from an example or another machine.
+Require equal `implemented_ledger_schema_version` and `ledger_schema_version`. Before using the atomic surface, also require `implemented_contract_versions` to include `spine.schedule-create.v1`, `spine.schedule-create-normalization.v1`, `spine.schedule-create-response.v1`, `spine.schedule-create-receipt.v1`, and `spine.schedule-show.v1`.
+
+For `schedule.create`, prefer the request directive `"timezone_database_version":{"kind":"system_current"}`. Spine resolves it once during fresh execution, stores the concrete installed version, and returns that concrete value in receipts and readback. A compatible replay returns the original resolved version even if the host later installs newer timezone data. Operators may instead use `{"kind":"explicit","version":"<exact-version>"}`. Omission is invalid; Spine never chooses timezone data through a hidden default. For lower-level local-time commands that require the concrete string directly, use the value returned by `system.info`. Never copy a version from an example or another machine.
 
 ## Supported CLI Surfaces
 
@@ -116,7 +118,7 @@ Current commands:
 - `"$SPINE_WORKER"`: run the production-shaped worker in `observe_only`, `active`, or `suspended`.
 - `"$SPINE_CHECKOUT/.venv/bin/spine-openclaw-smoke"`: run a bounded fake OpenClaw smoke.
 
-The scheduling command surface is `schedule.create`, `event.create`, `event.reschedule`, `task.create`, `item.occurrences`, `recurrence.instance.add`, `recurrence.instance.remove`, `recurrence.instance.override`, `recurrence.series.edit`, `occurrence_provenance.regenerate`, `reminder.create`, `reminder.edit`, `reminder.disable`, `notification.opportunities`, and `notification_work.materialize`. Prefer `schedule.create` for a new scheduled item plus its initial reminders. Use the lower-level family for independent authoring, reads, and later mutations. See `docs/AGENT_QUICKSTART.md` for the complete executable path; see `specs/agent-command-contract.md` for normative request, response, replay, and failure behavior.
+The scheduling command surface is `schedule.create`, `schedule.show`, `event.create`, `event.reschedule`, `task.create`, `item.occurrences`, `recurrence.instance.add`, `recurrence.instance.remove`, `recurrence.instance.override`, `recurrence.series.edit`, `occurrence_provenance.regenerate`, `reminder.create`, `reminder.edit`, `reminder.disable`, `notification.opportunities`, and `notification_work.materialize`. Prefer `schedule.create` for a new scheduled item plus its initial reminders and `schedule.show` for canonical verification. Use the lower-level family for independent authoring, reads, and later mutations. See `docs/AGENT_QUICKSTART.md` for the complete executable path; see `specs/agent-command-contract.md` for normative request, response, replay, and failure behavior.
 
 ## Atomic Event or Task Scheduling
 
@@ -140,6 +142,18 @@ Use an already-active `delivery_target_id`, or supply a named context default at
 ```
 
 After inspecting the preview, remove `--dry-run` without changing the request or `command_id`. The committed response must distinguish `policies=authored`, `opportunities=expanded` or `not_requested`, `work=materialized`, `completed_zero_selected`, or `not_requested`, and always `delivery=not_attempted`. Replay returns the stored delivery and timezone snapshots even if current environment defaults later change; it does not repair missing evidence or re-resolve the route.
+
+Verify the result without SQL:
+
+```bash
+export ITEM_ID=item-id-from-schedule-create
+"$SPINE_COMMAND" --db "$SPINE_DB" \
+  --item-id "$ITEM_ID" \
+  --include policies,work,attempts \
+  --pretty schedule show
+```
+
+Require `lifecycle.authored.state=committed`. Treat `lifecycle.opportunities`, `lifecycle.work`, `lifecycle.delivery.attempt_state`, and `lifecycle.delivery.outcome_state` as separate evidence. Authoring never implies delivery.
 
 Structural request examples live in `tests/fixtures/schedule_create/contracts/`. The repeat-window event fixture is the quickest complete bounded example, and the recurring-task fixture shows inherited recurrence plus named route resolution without immediate work.
 
@@ -187,7 +201,7 @@ Attach a structured recurrence set to an event start or task due anchor. This ex
 First discover and capture the exact installed timezone-data version:
 
 ```bash
-export SPINE_TZ_VERSION="$(spine --db "$SPINE_DB" system info | jq -r '.timezone_database_version')"
+export SPINE_TZ_VERSION="$("$SPINE_COMMAND" --db "$SPINE_DB" system info | jq -r '.timezone_database_version')"
 test -n "$SPINE_TZ_VERSION"
 ```
 
@@ -468,81 +482,20 @@ PYTHONPATH="$TICKERD_SRC" "$SPINE_WORKER" \
 
 This command can send a real message. Confirm the exact work row, target, body, channel, attempt id, and dedupe key before running it.
 
-## Verification Queries
+## Canonical Schedule Verification
 
-Inspect current recurrence identity and revision state:
-
-```bash
-sqlite3 "$SPINE_DB" "
-SELECT rs.source_item_id, rs.recurrence_set_id, rr.recurrence_revision_id,
-       rr.revision_number, rr.source_item_version,
-       rr.normalized_recurrence_set_hash
-FROM recurrence_sets AS rs
-JOIN recurrence_revisions AS rr ON rr.recurrence_set_id = rs.recurrence_set_id
-WHERE rs.source_item_id = '<item-id>'
-  AND rr.revision_number = (
-    SELECT MAX(current_rr.revision_number)
-    FROM recurrence_revisions AS current_rr
-    WHERE current_rr.recurrence_set_id = rs.recurrence_set_id
-  );
-"
-```
-
-Inspect current notification policy and schedule state:
+Use one read-only command after schedule creation, reminder mutation, work materialization, or worker processing:
 
 ```bash
-sqlite3 "$SPINE_DB" "
-SELECT p.notification_intent_id, p.policy_id, p.version, p.status,
-       p.application_scope, p.delivery_target_id,
-       p.normalized_notification_schedule_hash,
-       s.schedule_kind, s.cadence_kind
-FROM notification_policies AS p
-JOIN notification_schedules AS s ON s.schedule_id = p.schedule_id
-JOIN coordination_items AS i
-  ON i.item_id = p.item_id AND i.current_version = p.version
-WHERE p.item_id = '<item-id>'
-ORDER BY p.notification_intent_id;
-"
+"$SPINE_COMMAND" --db "$SPINE_DB" \
+  --item-id "$ITEM_ID" \
+  --include policies,work,attempts \
+  --pretty schedule show
 ```
 
-For recurrence-bound policies, inspect active authorization evidence and open recovery reports:
+The response provides current item state; stored local time, concrete timezone-data version, and UTC resolution; current recurrence; policy and intent identities; work status; delivery route snapshots; and side-effect attempts. Collection counts and lifecycle summaries cover all matching evidence even when a detail limit truncates an array. The public field `notification_policy_id` intentionally aliases schema-7 `notification_policies.policy_id`; `work_instances.notification_policy_id` is also the canonical foreign-key column.
 
-```bash
-sqlite3 "$SPINE_DB" "
-SELECT occurrence_provenance_id, occurrence_key, recurrence_revision_id,
-       lifecycle, actionable, management_status
-FROM occurrence_provenance
-WHERE item_id = '<item-id>' AND management_status = 'active'
-ORDER BY original_scheduled_fact, occurrence_key;
-SELECT block_report_id, consumer, range_start, range_end, reason_code
-FROM recurrence_provenance_block_reports
-WHERE item_id = '<item-id>' AND status = 'open'
-ORDER BY block_report_id;
-"
-```
-
-Inspect a work row:
-
-```bash
-sqlite3 "$SPINE_DB" "
-SELECT work_instance_id, status, eligible_at_utc, next_attempt_at_utc,
-       attempt_count, reason_code, work_subject_ref
-FROM work_instances
-WHERE work_instance_id = '<work-instance-id>';
-"
-```
-
-Inspect OpenClaw attempts for a work row:
-
-```bash
-sqlite3 "$SPINE_DB" "
-SELECT attempt_id, adapter_name, attempt_status, provider_ref,
-       reason_code, idempotency_key
-FROM side_effect_attempts
-WHERE work_instance_id = '<work-instance-id>'
-ORDER BY attempt_id;
-"
-```
+Do not infer delivery from authoring or materialization. Require `lifecycle.delivery.attempt_state=attempted` before claiming that a worker tried delivery, and inspect `lifecycle.delivery.outcome_state` plus `side_effect_attempts` before claiming success or failure. For virtual occurrence inspection, continue to use bounded `item.occurrences`; for provenance repair, use `occurrence_provenance.regenerate` and inspect its structured receipt.
 
 Inspect worker health and events:
 
@@ -644,7 +597,7 @@ Use repository evidence in this order:
 
 1. `docs/AGENT_QUICKSTART.md` and `examples/agent-first-success.sh` for cold-start execution.
 2. This guide for operations and failure handling.
-3. `specs/agent-command-contract.md`, `specs/schedule-create.md`, `specs/recurrence.md`, and `specs/notifications.md` for normative behavior.
+3. `specs/agent-command-contract.md`, `specs/schedule-create.md`, `specs/schedule-show.md`, `specs/recurrence.md`, and `specs/notifications.md` for normative behavior.
 4. `contracts/schemas/` for machine-readable request and response shapes.
 5. `tests/fixtures/schedule_create/contracts/`, `tests/fixtures/recurrence/contracts/`, and `tests/fixtures/notifications/contracts/` for structural examples.
 6. `tests/fixtures/recurrence/vectors/` and `tests/fixtures/notifications/vectors/` for computed identity evidence.
