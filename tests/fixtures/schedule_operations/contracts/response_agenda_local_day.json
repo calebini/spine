@@ -1,0 +1,96 @@
+{
+  "ok": true,
+  "command": "agenda.show",
+  "response_contract": "spine.schedule-agenda-response.v1",
+  "evaluated_at_utc": "2035-02-14T12:00:00Z",
+  "normalized_range": {
+    "range_start_local": "2035-02-14T00:00:00",
+    "range_end_local": "2035-02-15T00:00:00",
+    "timezone": "America/Toronto",
+    "timezone_database_version": "2035a",
+    "range_start_utc": "2035-02-14T05:00:00Z",
+    "range_end_utc": "2035-02-15T05:00:00Z"
+  },
+  "query_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "source_snapshot_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "entries": [
+    {
+      "item_id": "item_recurring_plan",
+      "current_version": "3",
+      "item_type": "task",
+      "title": "Review household plan",
+      "shell_status": "active",
+      "detail_status": "open",
+      "occurrence_kind": "recurring",
+      "anchor_role": "task_due",
+      "anchor_kind": "local_instant",
+      "actionable": true,
+      "all_day": false,
+      "original_scheduled_fact": "2035-02-14T08:00:00",
+      "expressed_scheduled_fact": "2035-02-14T08:00:00",
+      "view_local_date": "2035-02-14",
+      "view_local_time": "08:00:00",
+      "source_timezone": "America/Toronto",
+      "source_timezone_database_version": "2035a",
+      "sort_at_utc": "2035-02-14T13:00:00Z",
+      "start_at_utc": "2035-02-14T13:00:00Z",
+      "recurrence_revision_id": "recurrence_revision_plan_003",
+      "occurrence_key": "occurrence_plan_2035_02_14",
+      "defer_state": "not_deferred",
+      "notification_summary": {
+        "active_policy_count": "1",
+        "next_actionable_opportunity_at_utc": "2035-02-14T12:00:00Z"
+      },
+      "work_summary": {
+        "count": "1",
+        "status_counts": {
+          "eligible": "1",
+          "in_progress": "0",
+          "succeeded": "0",
+          "failed": "0",
+          "cancelled": "0"
+        },
+        "next_eligible_at_utc": "2035-02-14T12:00:00Z"
+      }
+    },
+    {
+      "item_id": "item_dentist",
+      "current_version": "1",
+      "item_type": "event",
+      "title": "Dentist appointment",
+      "shell_status": "active",
+      "detail_status": "scheduled",
+      "occurrence_kind": "single",
+      "anchor_role": "event_start",
+      "anchor_kind": "local_instant",
+      "actionable": true,
+      "all_day": false,
+      "original_scheduled_fact": "2035-02-14T10:00:00",
+      "expressed_scheduled_fact": "2035-02-14T10:00:00",
+      "view_local_date": "2035-02-14",
+      "view_local_time": "10:00:00",
+      "source_timezone": "America/Toronto",
+      "source_timezone_database_version": "2035a",
+      "sort_at_utc": "2035-02-14T15:00:00Z",
+      "start_at_utc": "2035-02-14T15:00:00Z",
+      "notification_summary": {
+        "active_policy_count": "1",
+        "next_actionable_opportunity_at_utc": "2035-02-14T14:00:00Z"
+      },
+      "work_summary": {
+        "count": "0",
+        "status_counts": {
+          "eligible": "0",
+          "in_progress": "0",
+          "succeeded": "0",
+          "failed": "0",
+          "cancelled": "0"
+        }
+      }
+    }
+  ],
+  "included": ["notification_summary", "work_summary"],
+  "limit": "100",
+  "has_more": false,
+  "diagnostics": []
+}

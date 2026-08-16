@@ -1,0 +1,43 @@
+{
+  "schema_version": "spine.schedule-operations-contract-fixtures.v1",
+  "fixture_scope": "structural_examples",
+  "fixture_scope_note": "These fixtures validate proposed request and response shapes only. Generated identities, hashes, timezone resolutions, occurrence facts, reconciliation selections, and effects are illustrative until behavioral implementation and computed vectors land.",
+  "fixtures": [
+    {
+      "fixture_id": "request.agenda_local_day",
+      "kind": "request",
+      "fixture": "tests/fixtures/schedule_operations/contracts/request_agenda_local_day.json",
+      "schema": "contracts/schemas/schedule-agenda-request.schema.json"
+    },
+    {
+      "fixture_id": "response.agenda_local_day",
+      "kind": "success_response",
+      "fixture": "tests/fixtures/schedule_operations/contracts/response_agenda_local_day.json",
+      "schema": "contracts/schemas/schedule-agenda-response.schema.json"
+    },
+    {
+      "fixture_id": "request.update_recurring_event",
+      "kind": "request",
+      "fixture": "tests/fixtures/schedule_operations/contracts/request_update_recurring_event.json",
+      "schema": "contracts/schemas/schedule-update-request.schema.json"
+    },
+    {
+      "fixture_id": "response.update_recurring_event",
+      "kind": "success_response",
+      "fixture": "tests/fixtures/schedule_operations/contracts/response_update_recurring_event.json",
+      "schema": "contracts/schemas/schedule-update-response.schema.json"
+    },
+    {
+      "fixture_id": "request.cancel_event",
+      "kind": "request",
+      "fixture": "tests/fixtures/schedule_operations/contracts/request_cancel_event.json",
+      "schema": "contracts/schemas/schedule-cancel-request.schema.json"
+    },
+    {
+      "fixture_id": "response.cancel_event",
+      "kind": "success_response",
+      "fixture": "tests/fixtures/schedule_operations/contracts/response_cancel_event.json",
+      "schema": "contracts/schemas/schedule-cancel-response.schema.json"
+    }
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cortext.local/spine/contracts/schemas/schedule-update-request.schema.json",
+  "title": "Spine Atomic Schedule Update Request v1",
+  "type": "object",
+  "required": [
+    "contract_version", "command_id", "actor_subject_id", "item_id", "target_version",
+    "updated_at_utc", "patch", "materialization"
+  ],
+  "properties": {
+    "contract_version": { "const": "spine.schedule-update.v1" },
+    "command_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+    "actor_subject_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+    "item_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+    "target_version": { "$ref": "notification-types.schema.json#/$defs/decimalPositive" },
+    "updated_at_utc": { "$ref": "notification-types.schema.json#/$defs/utcTimestamp" },
+    "patch": {
+      "type": "object",
+      "minProperties": 1,
+      "properties": {
+        "item": { "$ref": "schedule-operations-types.schema.json#/$defs/itemPatch" },
+        "scheduled_time": { "$ref": "schedule-operations-types.schema.json#/$defs/scheduledTimeReplacement" },
+        "recurrence": { "$ref": "schedule-operations-types.schema.json#/$defs/recurrenceReplacement" },
+        "delivery": { "$ref": "schedule-create-request.schema.json#/$defs/delivery" },
+        "reminders": {
+          "type": "array",
+          "maxItems": 32,
+          "items": { "$ref": "schedule-operations-types.schema.json#/$defs/desiredReminder" }
+        }
+      },
+      "additionalProperties": false
+    },
+    "materialization": { "$ref": "schedule-create-request.schema.json#/$defs/materialization" }
+  },
+  "additionalProperties": false
+}

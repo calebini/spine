@@ -1,0 +1,77 @@
+{
+  "contract_version": "spine.schedule-update.v1",
+  "command_id": "schedule-update-recurring-event-001",
+  "actor_subject_id": "subject_agent",
+  "item_id": "item_recurring_event",
+  "target_version": "3",
+  "updated_at_utc": "2035-02-10T12:00:00Z",
+  "patch": {
+    "item": {
+      "title": "Updated planning session"
+    },
+    "scheduled_time": {
+      "time_basis": "local_instant",
+      "local_date": "2035-02-14",
+      "local_time": "11:00:00",
+      "timezone": "America/Toronto",
+      "timezone_database_version": {
+        "kind": "explicit",
+        "version": "2035a"
+      }
+    },
+    "recurrence": {
+      "mode": "replace",
+      "rules": [
+        {
+          "frequency": "DAILY",
+          "interval": "1",
+          "seed": "2035-02-14T11:00:00",
+          "start_bound": "2035-02-14T11:00:00",
+          "end_condition": {
+            "kind": "unbounded"
+          }
+        }
+      ]
+    },
+    "delivery": {
+      "recipient_kind": "subject",
+      "recipient_subject_id": "subject_owner",
+      "channel": "whatsapp",
+      "target": {
+        "resolution": "explicit",
+        "delivery_target_id": "delivery_target_owner_whatsapp_new"
+      }
+    },
+    "reminders": [
+      {
+        "policy_key": "countdown",
+        "notification_intent_id": "notification_intent_countdown",
+        "notification_policy_id": "notification_policy_countdown_v3",
+        "schedule": {
+          "kind": "repeat_window",
+          "start": {
+            "kind": "target_offset",
+            "offset_basis": "elapsed",
+            "offset_seconds": "-3600"
+          },
+          "stop": {
+            "kind": "target_offset",
+            "offset_basis": "elapsed",
+            "offset_seconds": "0"
+          },
+          "stop_inclusive": false,
+          "cadence": {
+            "kind": "fixed_elapsed",
+            "interval_seconds": "900"
+          }
+        },
+        "late_handling": {
+          "kind": "skip"
+        }
+      }
+    ]
+  },
+  "materialization": {
+    "mode": "none"
+  }
+}

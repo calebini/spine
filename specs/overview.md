@@ -26,6 +26,7 @@ Spine MUST own:
 - notification and work eligibility
 - deterministic notification schedule expansion and durable reminder materialization
 - atomic high-level creation of one scheduled event or task with its initial reminder policies and optional bounded work
+- atomic high-level update and cancellation of scheduled events or tasks with mandatory stale-work reconciliation
 - projection state
 - adapter attempt outcomes
 - audit and replay facts
@@ -112,3 +113,5 @@ State transitions MUST be reason-coded once a reason-code catalog exists.
 Adapter failures MUST NOT mutate canonical coordination truth unless the domain transition itself is explicitly represented and valid.
 
 High-level authoring convenience MUST compose canonical item, recurrence, notification, work, audit, and receipt models without becoming a second authority. A composite command either commits its complete requested canonical bundle or none of it, and it MUST remain separate from external delivery.
+
+Cross-item agenda views MUST remain bounded read models over canonical current truth. They MUST NOT introduce a second schedule store or silently paginate across changed source facts.

@@ -1,0 +1,159 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cortext.local/spine/contracts/schemas/schedule-agenda-response.schema.json",
+  "title": "Spine Agenda Show Response v1",
+  "type": "object",
+  "required": [
+    "ok", "command", "response_contract", "evaluated_at_utc", "normalized_range",
+    "query_hash", "source_snapshot_hash", "entries", "included", "limit", "has_more"
+  ],
+  "properties": {
+    "ok": { "const": true },
+    "command": { "const": "agenda.show" },
+    "response_contract": { "const": "spine.schedule-agenda-response.v1" },
+    "evaluated_at_utc": { "$ref": "notification-types.schema.json#/$defs/utcTimestamp" },
+    "normalized_range": { "$ref": "#/$defs/normalizedRange" },
+    "query_hash": { "$ref": "notification-types.schema.json#/$defs/sha256" },
+    "source_snapshot_hash": { "$ref": "notification-types.schema.json#/$defs/sha256" },
+    "entries": {
+      "type": "array",
+      "maxItems": 1000,
+      "items": { "$ref": "#/$defs/entry" }
+    },
+    "included": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "enum": ["notification_summary", "work_summary"] }
+    },
+    "limit": {
+      "type": "string",
+      "pattern": "^([1-9]|[1-9][0-9]|[1-9][0-9]{2}|1000)$"
+    },
+    "has_more": { "type": "boolean" },
+    "next_cursor": { "type": "string", "minLength": 1 },
+    "diagnostics": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/diagnostic" }
+    }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "has_more": { "const": true } }, "required": ["has_more"] },
+      "then": { "required": ["next_cursor"] },
+      "else": { "not": { "required": ["next_cursor"] } }
+    }
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "normalizedRange": {
+      "type": "object",
+      "required": [
+        "range_start_local", "range_end_local", "timezone", "timezone_database_version",
+        "range_start_utc", "range_end_utc"
+      ],
+      "properties": {
+        "range_start_local": { "$ref": "schedule-create-request.schema.json#/$defs/localDateTime" },
+        "range_end_local": { "$ref": "schedule-create-request.schema.json#/$defs/localDateTime" },
+        "timezone": { "type": "string", "minLength": 1 },
+        "timezone_database_version": { "type": "string", "minLength": 1 },
+        "range_start_utc": { "$ref": "notification-types.schema.json#/$defs/utcTimestamp" },
+        "range_end_utc": { "$ref": "notification-types.schema.json#/$defs/utcTimestamp" }
+      },
+      "additionalProperties": false
+    },
+    "entry": {
+      "type": "object",
+      "required": [
+        "item_id", "current_version", "item_type", "title", "shell_status", "detail_status",
+        "occurrence_kind", "anchor_role", "anchor_kind", "actionable", "all_day",
+        "original_scheduled_fact", "expressed_scheduled_fact", "view_local_date",
+        "sort_at_utc", "start_at_utc"
+      ],
+      "properties": {
+        "item_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+        "current_version": { "$ref": "notification-types.schema.json#/$defs/decimalPositive" },
+        "item_type": { "enum": ["event", "task"] },
+        "title": { "type": "string", "minLength": 1 },
+        "shell_status": { "enum": ["active", "archived"] },
+        "detail_status": { "enum": ["scheduled", "cancelled", "open", "done"] },
+        "occurrence_kind": { "enum": ["single", "recurring"] },
+        "anchor_role": { "enum": ["event_start", "task_due"] },
+        "anchor_kind": {
+          "enum": ["local_date", "local_instant", "instant_utc", "utc_window", "local_window"]
+        },
+        "actionable": { "type": "boolean" },
+        "all_day": { "type": "boolean" },
+        "original_scheduled_fact": { "type": "string", "minLength": 1 },
+        "expressed_scheduled_fact": { "type": "string", "minLength": 1 },
+        "view_local_date": { "$ref": "schedule-create-request.schema.json#/$defs/localDate" },
+        "view_local_time": { "$ref": "schedule-create-request.schema.json#/$defs/localTime" },
+        "source_timezone": { "type": "string", "minLength": 1 },
+        "source_timezone_database_version": { "type": "string", "minLength": 1 },
+        "sort_at_utc": { "$ref": "notification-types.schema.json#/$defs/utcTimestamp" },
+        "start_at_utc": { "$ref": "notification-types.schema.json#/$defs/utcTimestamp" },
+        "end_at_utc": { "$ref": "notification-types.schema.json#/$defs/utcTimestamp" },
+        "recurrence_revision_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+        "occurrence_key": { "$ref": "notification-types.schema.json#/$defs/id" },
+        "defer_state": { "enum": ["not_deferred", "deferred", "defer_elapsed"] },
+        "defer_until_utc": { "$ref": "notification-types.schema.json#/$defs/utcTimestamp" },
+        "notification_summary": { "$ref": "#/$defs/notificationSummary" },
+        "work_summary": { "$ref": "#/$defs/workSummary" }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "occurrence_kind": { "const": "recurring" } }, "required": ["occurrence_kind"] },
+          "then": { "required": ["recurrence_revision_id", "occurrence_key"] },
+          "else": { "not": { "anyOf": [{ "required": ["recurrence_revision_id"] }, { "required": ["occurrence_key"] }] } }
+        },
+        {
+          "if": { "properties": { "all_day": { "const": false } }, "required": ["all_day"] },
+          "then": { "required": ["view_local_time"] }
+        }
+      ],
+      "additionalProperties": false
+    },
+    "notificationSummary": {
+      "type": "object",
+      "required": ["active_policy_count"],
+      "properties": {
+        "active_policy_count": { "$ref": "schedule-operations-types.schema.json#/$defs/decimalNonNegative" },
+        "next_actionable_opportunity_at_utc": { "$ref": "notification-types.schema.json#/$defs/utcTimestamp" }
+      },
+      "additionalProperties": false
+    },
+    "workSummary": {
+      "type": "object",
+      "required": ["count", "status_counts"],
+      "properties": {
+        "count": { "$ref": "schedule-operations-types.schema.json#/$defs/decimalNonNegative" },
+        "status_counts": {
+          "type": "object",
+          "required": ["eligible", "in_progress", "succeeded", "failed", "cancelled"],
+          "properties": {
+            "eligible": { "$ref": "schedule-operations-types.schema.json#/$defs/decimalNonNegative" },
+            "in_progress": { "$ref": "schedule-operations-types.schema.json#/$defs/decimalNonNegative" },
+            "succeeded": { "$ref": "schedule-operations-types.schema.json#/$defs/decimalNonNegative" },
+            "failed": { "$ref": "schedule-operations-types.schema.json#/$defs/decimalNonNegative" },
+            "cancelled": { "$ref": "schedule-operations-types.schema.json#/$defs/decimalNonNegative" }
+          },
+          "additionalProperties": false
+        },
+        "next_eligible_at_utc": { "$ref": "notification-types.schema.json#/$defs/utcTimestamp" }
+      },
+      "additionalProperties": false
+    },
+    "diagnostic": {
+      "type": "object",
+      "required": ["diagnostic_code", "item_id"],
+      "properties": {
+        "diagnostic_code": {
+          "enum": ["agenda_item_unscheduled", "agenda_recurrence_candidate_omitted", "agenda_terminal_excluded"]
+        },
+        "item_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+        "occurrence_key": { "$ref": "notification-types.schema.json#/$defs/id" },
+        "field": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": false
+    }
+  }
+}

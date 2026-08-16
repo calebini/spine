@@ -1,0 +1,43 @@
+{
+  "ok": true,
+  "command": "schedule.cancel",
+  "response_contract": "spine.schedule-cancel-response.v1",
+  "effect": "schedule_cancelled",
+  "command_id": "schedule-cancel-event-001",
+  "command_receipt_id": "command_receipt_schedule_cancel_event_001",
+  "audit_id": "audit_schedule_cancel_event_001",
+  "item_id": "item_recurring_event",
+  "item_type": "event",
+  "target_version": "4",
+  "current_version": "5",
+  "detail_status": "cancelled",
+  "recurrence_ids": {
+    "recurrence_set_id": "recurrence_set_recurring_event",
+    "recurrence_revision_id": "recurrence_revision_recurring_event_004"
+  },
+  "notification_intent_ids": [
+    "notification_intent_countdown"
+  ],
+  "notification_policy_ids": [
+    "notification_policy_countdown_v5"
+  ],
+  "cancelled_work_instance_ids": [
+    "work_countdown_future_001",
+    "work_countdown_future_002"
+  ],
+  "protected_stale_work_instance_ids": [
+    "work_countdown_in_progress_001"
+  ],
+  "phases": {
+    "item": "cancelled",
+    "work": "reconciled",
+    "delivery": "not_attempted"
+  },
+  "receipt": {
+    "receipt_contract": "spine.schedule-cancel-receipt.v1",
+    "command_receipt_id": "command_receipt_schedule_cancel_event_001",
+    "effect": "schedule_cancelled",
+    "semantic_facts_hash": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+    "created_at_utc": "2035-02-11T12:00:00Z"
+  }
+}

@@ -1,0 +1,178 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cortext.local/spine/contracts/schemas/schedule-operations-types.schema.json",
+  "title": "Spine Operational Schedule Lifecycle Shared Types v1",
+  "$defs": {
+    "decimalNonNegative": { "type": "string", "pattern": "^(0|[1-9][0-9]*)$" },
+    "itemPatch": {
+      "type": "object",
+      "minProperties": 1,
+      "properties": {
+        "title": { "type": "string", "minLength": 1 },
+        "summary": { "type": ["string", "null"] },
+        "source_ref": { "type": ["string", "null"] },
+        "event_detail": {
+          "type": "object",
+          "minProperties": 1,
+          "properties": {
+            "visibility": { "type": ["string", "null"] },
+            "attendance_policy_ref": { "type": ["string", "null"] }
+          },
+          "additionalProperties": false
+        },
+        "task_detail": {
+          "type": "object",
+          "minProperties": 1,
+          "properties": {
+            "priority": { "type": ["string", "null"] },
+            "subject_roles": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": { "$ref": "schedule-create-request.schema.json#/$defs/subjectRole" }
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "not": { "required": ["event_detail", "task_detail"] },
+      "additionalProperties": false
+    },
+    "scheduledTimeReplacement": {
+      "type": "object",
+      "required": ["time_basis", "local_date", "local_time", "timezone", "timezone_database_version"],
+      "properties": {
+        "time_basis": { "const": "local_instant" },
+        "local_date": { "$ref": "schedule-create-request.schema.json#/$defs/localDate" },
+        "local_time": { "$ref": "schedule-create-request.schema.json#/$defs/localTime" },
+        "timezone": { "type": "string", "minLength": 1 },
+        "timezone_database_version": { "$ref": "schedule-create-request.schema.json#/$defs/timezoneDatabaseVersionDirective" }
+      },
+      "additionalProperties": false
+    },
+    "recurrenceReplacement": {
+      "type": "object",
+      "required": ["mode", "rules"],
+      "properties": {
+        "mode": { "const": "replace" },
+        "rules": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "recurrence-types.schema.json#/$defs/authoringRule" }
+        },
+        "rdates": {
+          "type": "array",
+          "items": { "$ref": "recurrence-types.schema.json#/$defs/authoringRdate" }
+        },
+        "segments": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "recurrence-types.schema.json#/$defs/authoringSegment" }
+        }
+      },
+      "allOf": [
+        {
+          "if": { "required": ["segments"] },
+          "then": {
+            "properties": {
+              "rules": { "items": { "required": ["segment_label"] } },
+              "rdates": { "items": { "required": ["segment_label"] } }
+            }
+          },
+          "else": {
+            "properties": {
+              "rules": { "items": { "not": { "required": ["segment_label"] } } },
+              "rdates": { "items": { "not": { "required": ["segment_label"] } } }
+            }
+          }
+        }
+      ],
+      "additionalProperties": false
+    },
+    "desiredReminder": {
+      "type": "object",
+      "required": ["policy_key", "schedule", "late_handling"],
+      "properties": {
+        "policy_key": { "type": "string", "pattern": "^[a-z][a-z0-9_-]{0,63}$" },
+        "notification_intent_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+        "notification_policy_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+        "schedule": { "$ref": "notification-types.schema.json#/$defs/schedule" },
+        "late_handling": { "$ref": "notification-types.schema.json#/$defs/lateHandling" }
+      },
+      "allOf": [
+        {
+          "if": { "required": ["notification_intent_id"] },
+          "then": { "required": ["notification_policy_id"] },
+          "else": { "not": { "required": ["notification_policy_id"] } }
+        }
+      ],
+      "additionalProperties": false
+    },
+    "policyResult": {
+      "type": "object",
+      "required": [
+        "policy_key", "notification_intent_id", "notification_policy_id", "notification_schedule_id",
+        "normalized_notification_schedule_hash", "status", "effect"
+      ],
+      "properties": {
+        "policy_key": { "type": "string", "pattern": "^[a-z][a-z0-9_-]{0,63}$" },
+        "notification_intent_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+        "notification_policy_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+        "notification_schedule_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+        "normalized_notification_schedule_hash": { "$ref": "notification-types.schema.json#/$defs/sha256" },
+        "status": { "const": "active" },
+        "effect": { "enum": ["retained", "updated", "created"] }
+      },
+      "additionalProperties": false
+    },
+    "workReconciliation": {
+      "type": "object",
+      "required": [
+        "state", "cancelled_work_instance_ids", "retained_work_instance_ids",
+        "protected_stale_work_instance_ids", "created_work_instance_ids"
+      ],
+      "properties": {
+        "state": { "enum": ["none", "reconciled", "materialized", "reconciled_and_materialized"] },
+        "cancelled_work_instance_ids": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "notification-types.schema.json#/$defs/id" }
+        },
+        "retained_work_instance_ids": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "notification-types.schema.json#/$defs/id" }
+        },
+        "protected_stale_work_instance_ids": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "notification-types.schema.json#/$defs/id" }
+        },
+        "created_work_instance_ids": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "notification-types.schema.json#/$defs/id" }
+        }
+      },
+      "additionalProperties": false
+    },
+    "receiptSummary": {
+      "type": "object",
+      "required": ["receipt_contract", "command_receipt_id", "effect", "semantic_facts_hash", "created_at_utc"],
+      "properties": {
+        "receipt_contract": {
+          "enum": ["spine.schedule-update-receipt.v1", "spine.schedule-cancel-receipt.v1"]
+        },
+        "command_receipt_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+        "effect": {
+          "enum": [
+            "schedule_updated_and_reconciled", "schedule_updated", "schedule_reconciled",
+            "schedule_update_noop", "schedule_cancelled"
+          ]
+        },
+        "semantic_facts_hash": { "$ref": "notification-types.schema.json#/$defs/sha256" },
+        "created_at_utc": { "$ref": "notification-types.schema.json#/$defs/utcTimestamp" }
+      },
+      "additionalProperties": false
+    }
+  }
+}

@@ -26,6 +26,8 @@ Authoritative starting points:
 - `specs/schedule-show.md` and `contracts/schemas/schedule-show-*.schema.json` define the implemented read-only aggregate verification surface; behavioral coverage lives in `tests/test_schedule_show_command.py`.
 - `specs/schedule-operator-tools.md` defines the implemented `schedule.build` relative-countdown compiler and CLI `--compact` projections; behavioral coverage lives in `tests/test_schedule_operator_tools.py`.
 - `contracts/schedule-operator-fixture-manifest.json` indexes the checked-in relative-countdown builder request.
+- `specs/schedule-operations.md` defines the proposed, not-yet-implemented operational lifecycle family: `agenda.show`, atomic `schedule.update`, and atomic `schedule.cancel` with mandatory work reconciliation.
+- `contracts/schedule-operations-fixture-manifest.json` and `contracts/schemas/schedule-{agenda,update,cancel}-*.schema.json` define its proposed structural contract package; these versions are intentionally absent from `system.info.implemented_contract_versions` until runtime acceptance.
 - `specs/agent-command-contract.md` defines the MVP agent command core and CLI contract.
 - `docs/AGENT_QUICKSTART.md` gives a zero-context agent one executable, fake-only path through recurrence and recurring notifications.
 - `specs/decisions/0001-kinflow-is-donor-not-foundation.md` records the Kinflow relationship.
@@ -66,7 +68,7 @@ This repository follows the Cortext1 component scaffold standard incrementally:
 - `docs/AGENT_QUICKSTART.md`: executable cold-start path for a new agent
 - `docs/AGENT_OPERATOR_GUIDE.md`: agent-facing contract for operating current Spine runtime surfaces safely
 - `docs/OPENCLAW_DEPLOYMENT_RUNBOOK.md`: operational rollout notes for the first OpenClaw replacement path
-- `contracts/`: machine-readable command, recurrence, notification, atomic schedule-create, canonical schedule-readback, builder, and compact-projection agreements plus fixture manifests
+- `contracts/`: machine-readable command, recurrence, notification, atomic schedule-create, canonical schedule-readback, builder, compact-projection, and proposed operational-lifecycle agreements plus fixture manifests
 - `deploy/`: deployment templates for systemd and environment files
 - `src/spine/`: initial Python package scaffold
 - `src/spine/ledger/`: canonical local persistence boundary

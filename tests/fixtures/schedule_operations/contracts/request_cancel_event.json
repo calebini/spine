@@ -1,0 +1,9 @@
+{
+  "contract_version": "spine.schedule-cancel.v1",
+  "command_id": "schedule-cancel-event-001",
+  "actor_subject_id": "subject_agent",
+  "item_id": "item_recurring_event",
+  "target_version": "4",
+  "cancelled_at_utc": "2035-02-11T12:00:00Z",
+  "reason_code": "operator_cancelled"
+}

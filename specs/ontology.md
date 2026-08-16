@@ -790,6 +790,13 @@ Deterministic eligibility rule (MVP):
 - `eligible_at_utc` MUST be written once when generating the work instance. It MUST NOT be recomputed on read/replay.
 - If eligibility changes, reconciliation cancels only unstarted work and materializes the replacement opportunity; it never silently recalculates an existing row.
 
+Proposed composite schedule reconciliation:
+
+- `specs/schedule-operations.md` defines a stricter unstarted predicate for its proposed composite update and cancellation commands: an operational reconciliation may cancel a row only when `status=eligible`, `attempt_count=0`, and no `side_effect_attempts` row references it.
+- Eligible retry work with `attempt_count>0`, in-progress work, and terminal work remain immutable historical evidence under those commands even when later schedule truth diverges. This stricter composite rule does not remove the lower-level legal `in_progress -> cancelled` storage transition for a separately authorized work-control workflow.
+- `agenda.show` is a read model over current items, anchors, recurrence, policies, and work. It creates no canonical agenda row and adds no ontology entity.
+- The proposed contract versions are not runtime capabilities until implementation, migration analysis, version declarations, and behavioral acceptance are complete.
+
 Deferred lifecycle posture (MVP):
 
 - `work_instances.status` provides minimum storage vocabulary for generated work state.
