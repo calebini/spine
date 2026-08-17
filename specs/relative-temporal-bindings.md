@@ -1,7 +1,7 @@
 # Spine Relative Temporal Bindings and Atomic Related-Task Creation
 
-Status: Draft v0.1; not implemented and not advertised by the runtime
-Scope: Explicit cross-item temporal derivation plus one atomic operator command for creating a task that is part of an existing event
+Status: Draft v0.2; not implemented and not advertised by the runtime
+Scope: Explicit cross-item temporal derivation, bounded discovery/reconciliation, and atomic creation of a task that is part of an existing event
 Created: 2026-08-17
 
 ## 1. Purpose
@@ -49,9 +49,17 @@ The proposed Version 1 constants are:
 
 - `binding_contract=spine.relative-temporal-binding.v1`;
 - `binding_normalization_version=spine.relative-temporal-binding-normalization.v1`;
+- `binding_revision_hash_derivation_version=spine.normalized-temporal-binding-revision-hash.v1`;
+- `binding_catalog_version=spine.temporal-binding-catalog.v1`;
 - `contract_version=spine.schedule-related-task-create.v1`;
 - `response_contract=spine.schedule-related-task-create-response.v1`;
-- `receipt_contract=spine.schedule-related-task-create-receipt.v1`; and
+- `receipt_contract=spine.schedule-related-task-create-receipt.v1`;
+- `reconcile_contract_version=spine.schedule-binding-reconcile.v1`;
+- `reconcile_response_contract=spine.schedule-binding-reconcile-response.v1`;
+- `reconcile_receipt_contract=spine.schedule-binding-reconcile-receipt.v1`;
+- `list_contract_version=spine.schedule-binding-list.v1`;
+- `list_response_contract=spine.schedule-binding-list-response.v1`;
+- `list_cursor_version=spine.schedule-binding-list-cursor.v1`;
 - `canonical_json_version=spine.canonical-json.v1`.
 
 These names are design inputs, not runtime claims. No implementation may advertise them until matching migrations, schemas, fixtures, behavioral tests, and command handling exist.
@@ -67,6 +75,7 @@ Version 1 supports:
 - one binding from source `event_start` to target `task_due`;
 - an exact signed elapsed-seconds offset;
 - explicit `snapshot` or `follow_source` behavior;
+- bounded binding discovery and one-binding-at-a-time follow-source reconciliation;
 - zero through 32 task reminder policies targeting the resolved task due time;
 - optional bounded reminder opportunity expansion and work materialization; and
 - deterministic dry run, commit, replay, readback, and failure evidence.
@@ -107,6 +116,7 @@ One logical binding has these minimum header facts:
 - `target_anchor_role=task_due`;
 - `source_item_id`;
 - `source_anchor_role=event_start`;
+- `relationship_id`, referencing the required stored `part_of` relation;
 - `binding_mode=snapshot|follow_source`;
 - `source_terminal_behavior=cancel_target|detach_at_last_value|require_decision`, required exactly for `follow_source`;
 - `created_by_command_id`;
@@ -134,8 +144,8 @@ Every successful initial resolution or later reconciliation creates one immutabl
 - resolved target UTC instant;
 - target local date, local time, timezone, and concrete timezone-database version;
 - `target_item_version` and `target_anchor_id`;
-- `resolution_kind=initial|source_changed|detached|source_terminal`;
-- normalized binding hash and every version constant used by its preimage;
+- `resolution_kind=initial|target_rescheduled|source_refreshed|detached|source_terminal|target_terminal|relationship_inactive`;
+- `normalized_temporal_binding_revision_hash` and every version constant used by its preimage;
 - `created_by_command_id`; and
 - `created_at_utc`.
 
@@ -150,7 +160,7 @@ The current revision is the greatest persisted revision index for an active logi
 - the current `target_occurrence_key`, which proves exactly which current occurrence the caller selected; and
 - the revision-independent `target_occurrence_selector`, which allows the same semantic source to be resolved after a recurrence revision.
 
-Initial authoring requires the key and selector to resolve to exactly one current actionable occurrence with active provenance for `consumer=temporal_binding`. That consumer value is an additive recurrence-provenance contract and schema change; it is not implemented today. Zero matches, multiple matches, stale recurrence facts, omitted occurrences, exclusions, or non-actionable provenance fail closed.
+Initial authoring requires the key and selector to resolve to exactly one current actionable occurrence. The composite itself atomically invokes the recurrence contract's Section 8 regeneration authority to produce or refresh active provenance for `consumer=temporal_binding`; callers MUST NOT pre-run the public `occurrence_provenance.regenerate` command. The existing recurrence consumer field is an open non-empty string, so `temporal_binding` requires registration in capability declarations and conformance fixtures but no new provenance identity model. Zero matches, multiple matches, stale recurrence facts, omitted occurrences, exclusions, or non-actionable provenance fail closed.
 
 Version 1 does not interpret `source_scope=item` on a recurring event as “the next occurrence,” “every occurrence,” or the recurrence seed.
 
@@ -179,44 +189,37 @@ The binding remains durable derivation evidence. Readback reports whether the ta
 - the source shell and event detail remain active and scheduled;
 - the named source anchor or selected occurrence resolves exactly once;
 - the current source item version and, when applicable, recurrence revision and selector result equal the revision's source facts;
-- the target item remains open and its current version and due anchor equal the revision's target facts;
+- the target item remains open and its current due anchor is semantically equal to the revision's target anchor;
 - the logical binding remains active; and
 - the required `part_of` relation remains active.
 
-Otherwise the binding is computed as `stale`, `source_terminal`, `source_unresolved`, `target_diverged`, or `relationship_inactive`. These states are read-model facts derived from current canonical rows; a source mutation does not rewrite an old binding revision merely to label it stale.
+Otherwise the binding is computed as `stale`, `source_terminal`, `source_unresolved`, `target_diverged`, `target_terminal`, or `relationship_inactive`. These states are read-model facts derived from current canonical rows; a source mutation does not rewrite an old binding revision merely to label it stale.
 
 Any notification opportunity or work row targeting the bound task due time is non-actionable while the binding is not `current`. Attempt-start freshness MUST check this invariant even when the work row was valid when materialized.
 
 ### 5.8 Reconciliation posture
 
-Following is implemented by a bounded reconciliation transaction, not a read-time illusion and not an unbounded cascade inside the source mutation.
+Following is implemented by the bounded `schedule.binding.list` and `schedule.binding.reconcile` contracts in Section 7, not by a read-time illusion and not by unbounded fan-out inside a source mutation. Discovery is read-only. Each reconcile command targets exactly one active logical binding and either refreshes its source evidence, creates one ordinary next task version, resolves a terminal/conflict branch, repairs bounded notification work, or returns a receipt-bearing no-op.
 
-A future `schedule.binding.reconcile` command will accept the logical binding ID, exact current binding revision, exact source and target versions, action time, and optional bounded reminder materialization. When the source still resolves and the derived target differs, one success MUST atomically:
+The first runtime implementation MUST ship creation, discovery, reconciliation, readback, and attempt-start binding freshness together. Advertising create-time `follow_source` without the rest of that family is non-conforming.
 
-1. create one next task version with a new concrete due anchor;
-2. create one next binding revision pointing to that target version and anchor;
-3. copy forward or reconcile unchanged task supporting truth;
-4. classify stale notification work and optionally materialize bounded replacements;
-5. write one audit and one command receipt; and
-6. return the prior and successor source, target, binding, policy, and work evidence.
+### 5.9 Relational persistence
 
-If the derived target is unchanged, reconciliation is a receipt-bearing no-op and creates no task version or binding revision.
+The implementation introduces three ordinary relational authorities:
 
-If the source is terminal, the binding's explicit `source_terminal_behavior` controls reconciliation:
+- `relative_temporal_bindings`, one logical header per binding;
+- `relative_temporal_binding_revisions`, immutable revision rows with a unique `(temporal_binding_id, revision_index)` and foreign keys to the exact source/target item versions, target anchor, relationship, recurrence revision, and occurrence provenance when present; and
+- `temporal_binding_catalog_state`, exactly one singleton row containing the nonnegative integer `binding_catalog_generation` used only for cursor invalidation.
 
-- `cancel_target` atomically cancels the open task and reconciles its unstarted notification work;
-- `detach_at_last_value` retires the binding and leaves the task at its last concrete due anchor; or
-- `require_decision` returns a structured unresolved result, keeps the task and binding unchanged, and leaves schedule-dependent work non-actionable.
+Semantic binding and selector facts MUST NOT be stored as opaque JSON identity blobs. Normalized selector children use the same relational representation and reconstruction rules as notification selected-occurrence selectors. The active-binding uniqueness constraint is `(target_item_id, target_anchor_role)` where `binding_status=active`. Revision indexes begin at `1`, are contiguous within one logical binding, and are assigned before the revision identity and hash are persisted.
 
-The implementation plan must define how tickerd or an operator discovers stale bindings and invokes this bounded command. Discovery cadence is not canonical truth, but reconciliation results are.
-
-Direct `schedule.update` replacement of a due anchor governed by an active `follow_source` binding MUST fail until a later accepted contract supplies an atomic detach-or-replace action. The implementation MUST NOT silently break or overwrite the binding.
+The catalog generation begins at `0` when the migration creates the singleton. Every successful transaction that changes any fact capable of changing binding membership or Section 7.1 state increments it exactly once in that same transaction. Read-only operations, dry runs, compatible replays, receipt-only no-ops, and work-only reconciliation do not increment it. The generation is an invalidation watermark, not schedule truth, and no state predicate may consult its numeric value.
 
 ## 6. `schedule.related_task.create`
 
 ### 6.1 Request
 
-The proposed request is a closed JSON object with:
+The proposed request is a closed JSON object with exactly these required top-level fields:
 
 - `contract_version=spine.schedule-related-task-create.v1`;
 - `command_id`;
@@ -226,9 +229,10 @@ The proposed request is a closed JSON object with:
 - `task`;
 - `relationship`;
 - `temporal_binding`;
-- optional `delivery`;
-- `reminders`; and
+- `reminders`;
 - `materialization`.
+
+`delivery` is the only conditionally present top-level field: it is required exactly when `reminders` is non-empty and forbidden when `reminders=[]`. There are no omitted-field defaults for reminders or materialization. A zero-reminder request MUST carry `reminders=[]` and `materialization={"mode":"none"}`. These explicit values are request semantic facts and participate in replay comparison.
 
 `source` contains:
 
@@ -261,6 +265,10 @@ Fresh authoring requires:
 
 The command does not accept a title fragment, ordinal such as “the golf trip,” or a relation query in place of `source.item_id`. Entity resolution is a caller responsibility and must happen before the normalized request is submitted.
 
+For `source.scope=selected_occurrence`, the handler derives the exact selector-local proof window from `specs/recurrence.md`: `range_basis=original_schedule`, `range_start` equal to the selector's canonical original scheduled fact, and `range_end` equal to that local-instant scheduled fact plus one wall-clock second. Through the recurrence regeneration service, it expands that complete window, intersects it with the single supplied current occurrence key, and derives the ordinary recurrence provenance slot, content hash, and provenance identity with `consumer=temporal_binding` and `producer=schedule.related_task.create`.
+
+Equal active slot plus equal content retains the existing provenance row. Equal slot plus different current content atomically supersedes and replaces it. A missing predecessor creates one active row. No other occurrence slot is selected or superseded. Failure to form the proof window, select exactly the supplied key and selector, or produce current actionable provenance fails before any composite row commits.
+
 ### 6.3 Atomic persistence
 
 One fresh non-dry-run success is one database transaction whose logical phases are:
@@ -268,16 +276,17 @@ One fresh non-dry-run success is one database transaction whose logical phases a
 1. validate the closed request and derive replay semantic facts;
 2. resolve command-ID replay or collision;
 3. verify schema, declared contracts, actor, and source version/lifecycle;
-4. resolve the concrete source event start or selected occurrence;
+4. resolve the concrete source event start or selected occurrence and derive the selector-local proof window;
 5. normalize the binding, derive the target instant, and validate task, relation, route, reminders, and materialization;
-6. create the task shell, common version `1`, task detail, and concrete due anchor;
-7. create the active stored `part_of` relation from task to source event;
-8. create the temporal-binding header and revision;
-9. create the complete initial notification policy set;
-10. expand and materialize the complete bounded selection when requested;
-11. persist one composite audit and one composite command receipt;
-12. run commit invariants and commit; and
-13. read back receipt-bound evidence and fail closed on contradiction.
+6. begin the atomic write and, for a selected occurrence, retain or produce current `consumer=temporal_binding` occurrence provenance;
+7. create the task shell, common version `1`, task detail, and concrete due anchor;
+8. create the active stored `part_of` relation from task to source event;
+9. create the temporal-binding header and revision referencing the selected source provenance when applicable;
+10. create the complete initial notification policy set;
+11. expand and materialize the complete bounded selection when requested;
+12. persist one composite audit and one composite command receipt;
+13. run commit invariants and commit; and
+14. read back receipt-bound evidence and fail closed on contradiction.
 
 Any failure before commit rolls back every selected row. There is no branch that leaves a task without its requested relation or binding, a relation without its task, a partial reminder set, a partial materialization range, or a receipt for rolled-back work.
 
@@ -296,7 +305,7 @@ Ordinary command-derived identities use `command=schedule.related_task.create`, 
 - composite audit: `/audit`; and
 - command receipt: `/`.
 
-Notification, opportunity, provenance, and work identities retain their owning specifications. The normalized binding hash is SHA-256 over Spine canonical JSON containing the version constants; source and target item/anchor roles; binding mode; conditionally present terminal behavior; source scope and selected-occurrence selector facts; source version, recurrence revision, scheduled fact, and resolved UTC instant; offset basis and seconds; target version, local schedule facts, resolved UTC instant, timezone, and concrete timezone-database version. Generated IDs, occurrence keys, provenance IDs, command IDs, actors, and creation/audit timestamps are not in this semantic hash.
+Notification, opportunity, provenance, and work identities retain their owning specifications. `normalized_temporal_binding_revision_hash` is the lowercase SHA-256 digest of Spine canonical JSON containing exactly `binding_revision_hash_derivation_version`, `binding_contract`, `binding_normalization_version`, `canonical_json_version`, `source_item_id`, `source_anchor_role`, `target_item_id`, `target_anchor_role`, `relationship_id`, `relationship_type=part_of`, `binding_mode`, conditionally present `source_terminal_behavior`, `source_scope`, conditionally present `source_anchor_id` for item scope, conditionally present normalized `target_occurrence_selector` for selected-occurrence scope, `source_target_version`, conditionally present `source_recurrence_revision_id`, canonical original `source_scheduled_fact`, `resolved_source_utc`, `offset_basis`, `offset_seconds`, `target_item_version`, target `local_date`, `local_time`, `timezone`, concrete `timezone_database_version`, `resolved_target_utc`, and `resolution_kind`. Other generated IDs, occurrence keys, provenance IDs, command IDs, actors, and creation/audit timestamps are excluded. Absent conditional facts are omitted rather than encoded as `null`.
 
 The exact hash preimage and canonical ordering must be closed in the machine-contract phase before implementation begins.
 
@@ -307,9 +316,9 @@ Fresh success stores `effect=related_task_schedule_created`. Compatible replay r
 The response and receipt expose at least:
 
 - task item ID, version, detail status, title, and subject roles;
-- source event ID/version, source scope, source anchor or occurrence identities, resolved source local/UTC time, timezone, and timezone-database version;
+- source event ID/version, source scope, source anchor or occurrence identities, temporal-binding occurrence-provenance identity and proof-window facts when selected, resolved source local/UTC time, timezone, and timezone-database version;
 - relation ID, direction, type, and status;
-- temporal binding ID/revision, mode, terminal behavior, offset, resolution state, and normalized hash;
+- temporal binding ID/revision, mode, terminal behavior, offset, resolution state, and normalized revision hash;
 - target due-anchor ID and resolved local/UTC time;
 - delivery snapshot when reminders exist;
 - policy key, intent, schedule, and policy IDs;
@@ -328,110 +337,279 @@ Replay follows the shared global command-ID ordering. A compatible same-command 
 
 If receipt-bound historical evidence is missing or contradictory, replay fails with `runtime_failure`; it does not reconstruct different facts from current state.
 
-## 7. Read and Mutation Surfaces
+## 7. Binding Discovery and Reconciliation
 
-Implementation of this contract family requires additive readback:
+### 7.1 Closed binding state
 
-- `schedule.show` can include `relations` and `temporal_bindings`, returning the current concrete schedule plus binding mode, current revision, freshness state, source summary, offset, and relation identity;
-- `agenda.show` returns a compact binding summary and MUST distinguish a task that is open but whose follow-source schedule is stale;
-- `relation.list` continues to return the ordinary stored `part_of` row and derived `contains` alias without temporal inference; and
-- a bounded binding discovery/read command must support reconciliation without raw SQL.
+Every binding read computes exactly one `binding_state` using this precedence:
 
-A stale binding does not erase the task from canonical reads. It does make the derived due schedule and schedule-dependent notification work non-actionable until reconciliation or explicit resolution.
+1. `retired` when the logical binding is retired;
+2. for `snapshot`, `snapshot_resolved` when the current target due anchor still equals the latest binding revision, otherwise `snapshot_diverged`;
+3. for active `follow_source`, `target_terminal` when the target shell, task detail, or completion state is terminal;
+4. `source_terminal` when the source shell or event detail is terminal;
+5. `relationship_inactive` when the referenced stored `part_of` relation is absent or inactive;
+6. `source_unresolved` when the named source anchor or selected-occurrence selector resolves zero or multiple current actionable occurrences;
+7. `target_diverged` when the current target due anchor is not semantically equal to the latest binding revision and the target is not terminal;
+8. `stale` when the source still resolves exactly once but current source item-version, recurrence-revision, occurrence-key, provenance, scheduled, timezone, or normalized-recurrence facts differ from the latest binding revision; and
+9. `current` otherwise.
 
-Later mutation design must close:
+The enum is closed: `retired`, `snapshot_resolved`, `snapshot_diverged`, `current`, `stale`, `source_terminal`, `source_unresolved`, `target_diverged`, `target_terminal`, and `relationship_inactive`. Implementations MUST NOT collapse the specific non-current states into one undifferentiated stale value.
 
-- `schedule.binding.reconcile` request, effects, and failure ordering;
-- atomic detach or mode change;
-- relation inactivation interaction;
-- source terminal resolution;
-- target completion or cancellation interaction; and
-- whether source `schedule.update` receipts enumerate affected binding IDs or only expose them through bounded discovery.
+Target-anchor semantic equality compares exactly anchor kind, local date, local time, timezone, concrete timezone-database version, and resolved UTC instant after canonicalization; anchor-row identity alone is neither sufficient nor required. Source scheduled and timezone facts use the same byte-level canonical comparison plus source item and recurrence freshness facts named in Section 5.3.
 
-The first runtime implementation MUST NOT claim full `follow_source` support until reconciliation, discovery/readback, and attempt-start freshness ship together.
+### 7.2 `schedule.binding.list`
 
-## 8. Failure Posture
+`schedule.binding.list` is the bounded read and discovery surface. Its closed request contains:
 
-At minimum, machine contracts must distinguish:
+- `contract_version=spine.schedule-binding-list.v1`;
+- optional `source_item_id`;
+- optional `target_item_id`;
+- optional `binding_mode=snapshot|follow_source`;
+- optional `binding_status=active|retired`, defaulting to `active`;
+- optional non-empty unique `binding_states` array using the Section 7.1 enum, defaulting to all states legal for the selected status and mode;
+- optional decimal-string `limit` in `1..1000`, defaulting to `100`;
+- optional opaque `cursor`; and
+- optional `bounded` boolean.
 
-| Condition | Code | Field |
+At least one endpoint filter is required unless `bounded=true`. `binding_states` is normalized into the fixed Section 7.1 precedence before request comparison; duplicate values fail with `invalid_request`, `field=binding_states`. A cursor is mutually exclusive with changing any repeated filter or limit fact. The command performs no write, audit, receipt, provenance generation, reconciliation, or adapter action.
+
+Cursor invalidation uses a persisted decimal-string `binding_catalog_generation`, not an unbounded hash over every matching binding. This monotonic invalidation watermark increments transactionally whenever a commit can change binding membership or computed state: binding header/revision/status, source or target current item version/lifecycle, source recurrence revision, or referenced relation status. It is not schedule truth and never decides a binding state; it only proves that a paginated read still observes the same catalog generation. Conservative increments caused by unrelated item mutations are legal and only invalidate cursors.
+
+Results order by the fixed Section 7.1 state precedence, then `source_item_id`, `target_item_id`, and `temporal_binding_id`. Each row returns the binding header, relationship identity/status, latest revision and hash, source and target version/anchor/recurrence/provenance summaries, offset, computed state, `reconcile_required`, `automatic_reconcile_eligible`, `operator_decision_required`, and the exact version/revision values required by `schedule.binding.reconcile`.
+
+`reconcile_required=true` exactly for an active `follow_source` binding whose state is not `current`. `automatic_reconcile_eligible=true` exactly for `stale`, `target_terminal`, `relationship_inactive`, or `source_terminal` whose stored behavior is `cancel_target` or `detach_at_last_value`. `operator_decision_required=true` exactly for `source_unresolved`, `target_diverged`, or `source_terminal` whose stored behavior is `require_decision`. The two disposition booleans are never both true. Snapshot, retired, and current rows set all three booleans false.
+
+The first page reads one `binding_catalog_generation` inside the same database read snapshot as the selected rows. The cursor payload contains `cursor_version=spine.schedule-binding-list-cursor.v1`, every accepted normalized query fact, that generation, and the last returned ordering tuple. The opaque cursor is unpadded base64url of Spine canonical cursor JSON, followed by `.`, followed by the lowercase SHA-256 digest of those exact bytes. A malformed cursor or changed query fact fails with `invalid_request`, `field=cursor`; a changed catalog generation fails with `stale_cursor`, `field=cursor`. Every page returns the accepted generation. Terminal output uses `has_more=false` and `next_cursor=null`.
+
+Tickerd or an operator may repeatedly list non-current active follow bindings. Tickerd invokes one reconcile command only for rows with `automatic_reconcile_eligible=true`; it surfaces but does not repeatedly receipt-churn rows requiring an operator decision. Discovery cadence is deployment configuration, not canonical ledger truth. A deployment that claims automatic follow-source operation MUST configure this bounded loop and expose its health operationally. Safety does not depend on sweep timing because Section 5.7 attempt-start freshness independently blocks stale work.
+
+### 7.3 `schedule.binding.reconcile` request
+
+The reconcile request is a closed object with these required fields:
+
+- `contract_version=spine.schedule-binding-reconcile.v1`;
+- `command_id`;
+- `actor_subject_id`;
+- `reconciled_at_utc`;
+- `temporal_binding_id`;
+- exact `target_temporal_binding_revision_id`;
+- exact `source_target_version`;
+- exact `target_target_version`;
+- `expected_binding_state`; and
+- explicit `materialization`, using the exact `schedule.create` `none|bounded` union.
+
+`source_recurrence_revision_id` is required exactly when the latest binding revision uses `source_scope=selected_occurrence` and the source still owns a recurrence set. It is forbidden for `source_scope=item`.
+
+Optional `operator_resolution` has the closed values `cancel_target` and `detach_at_current_target`. `cancel_target` is accepted only for `source_terminal` with stored behavior `require_decision` or for `source_unresolved`. `detach_at_current_target` is accepted for `current`, `stale`, `source_terminal` with stored behavior `require_decision`, `source_unresolved`, or `target_diverged`. It is forbidden in every other state. `cancel_target` performs the ordinary terminal task transition. `detach_at_current_target` retires the binding and preserves the target's current concrete due anchor. This supplies a safe explicit path for proactively abandoning follow behavior or resolving divergence without silently rewriting history.
+
+Bounded materialization is legal only when the resolution leaves an open target task with a current concrete binding and at least one current active notification policy. Its `item_relative` offsets use the resulting target due UTC instant; its local range uses the resulting target timezone and pinned database version. Evaluation timestamp, complete-range selection, limit, no-prefix behavior, and route validation are exactly those of `schedule.create`. Terminal, detached, relationship-inactive, target-terminal, or unresolved decision branches require `materialization={"mode":"none"}`. Mandatory stale-work reconciliation still runs in every branch.
+
+### 7.4 Resolution branches
+
+After exact freshness checks, the command resolves one branch:
+
+- any state that legally accepts `operator_resolution=detach_at_current_target`: create one detached binding revision, retain the current task version and anchor, and retire the binding;
+- `current`: no binding or item truth changes; bounded materialization may repair missing current work.
+- `stale` with changed derived target schedule: create one next task version with a new concrete due anchor and one next binding revision with `resolution_kind=target_rescheduled`.
+- `stale` with byte-equal derived target schedule but changed source freshness: retain the current task version and anchor and create one next binding revision with `resolution_kind=source_refreshed`.
+- `source_terminal` with stored `cancel_target`, or with `require_decision` plus `operator_resolution=cancel_target`: create one next cancelled task version, one terminal binding revision, and retire the binding.
+- `source_terminal` with stored `detach_at_last_value`: create one detached binding revision, retain the current task version and anchor, and retire the binding.
+- `source_terminal` with stored `require_decision` and no operator resolution: retain binding and task truth and return `resolution_outcome=decision_required`.
+- `source_unresolved` with `operator_resolution=cancel_target`: cancel exactly as requested. Without an operator resolution, retain binding and task truth and return `decision_required`.
+- `target_diverged` without detach resolution: fail with `semantic_conflict`, `field=operator_resolution`; the command MUST NOT overwrite the divergent target.
+- `target_terminal`: create one `target_terminal` binding revision against the existing terminal target version and retire the binding.
+- `relationship_inactive`: create one `relationship_inactive` binding revision at the current target anchor and retire the binding.
+
+Snapshot and already-retired bindings are not reconcile targets and fail without mutation. A source mutable fact that changes after request construction changes the actual binding state or exact source version/revision and therefore fails freshness rather than executing a different branch.
+
+### 7.5 Selected-occurrence provenance during reconciliation
+
+For a selected-occurrence binding in `current` or `stale`, reconciliation derives the same one-second `original_schedule` proof window as Section 6.2 and resolves the stored revision-independent selector against current recurrence truth. Through the recurrence regeneration service, exactly one actionable result atomically retains or replaces `consumer=temporal_binding` provenance using `producer=schedule.binding.reconcile` before a successor binding revision or work is written.
+
+The new binding revision records the current occurrence key and active provenance identity, while its normalized semantic hash uses the revision-independent selector rather than the revision-bound key. A zero/multiple/non-actionable result becomes `source_unresolved`; it does not widen the range, guess a successor, or persist new provenance. Old provenance remains historical but cannot authorize action.
+
+### 7.6 Notification-work reconciliation
+
+Every reconcile invocation classifies the complete affected set of target notification work after the resolution branch is known. The unstarted and protected predicates are exactly those in `specs/schedule-operations.md`.
+
+An eligible zero-attempt row with no side-effect attempt is cancelled when its target schedule, item/policy version, occurrence provenance, routing, parent lifecycle, or temporal-binding freshness is no longer current. `specs/notifications.md` owns the conditional `notification_temporal_binding_stale` cancellation reason and extended precedence imported by this family: it is ordered after `notification_occurrence_stale` and before `notification_routing_changed`. The ontology imports the same attempt-start predicate. Persistence constraints, machine contracts, and behavioral tests for the added value MUST ship atomically with `spine.relative-temporal-binding.v1`; runtimes that do not advertise that family MUST NOT return it. When both target time and binding freshness changed, existing `notification_target_changed` takes precedence.
+
+In-progress, retry, and terminal work remains protected historical evidence. Returned `cancelled_work_instance_ids`, `retained_work_instance_ids`, `protected_stale_work_instance_ids`, and `created_work_instance_ids` are pairwise disjoint and classify every selected row exactly once. No branch invokes an adapter or creates a side-effect attempt.
+
+When reconciliation creates a next task version, unchanged active notification intents and policies copy forward under their ordinary lineage rules before bounded replacement work is expanded. `materialization.mode=none` performs all mandatory cancellation but creates no replacement work. `mode=bounded` uses the complete range, provenance, limit, no-prefix, and route rules from `schedule.create` against successor truth.
+
+### 7.7 Effects, audit, and transaction
+
+`resolution_outcome` is closed over `target_rescheduled`, `source_refreshed`, `source_unchanged`, `target_cancelled`, `binding_detached`, `target_terminal_retired`, `relationship_inactive_retired`, and `decision_required`. The stored command-receipt effect is selected from this table:
+
+| Resolution outcome | `work_changed=false` | `work_changed=true` |
 |---|---|---|
-| source item is not an event | `wrong_item_type` | `source.item_id` |
-| source event or shell is terminal | `invalid_state_transition` | `source.item_id` |
-| source target version is stale | `stale_version` | `source.target_version` |
-| scope disagrees with recurrence state | `invalid_request` | `source.scope` |
-| selected occurrence key/revision is stale | `stale_version` | narrowest source occurrence field |
-| selected occurrence resolves zero or multiple times | `semantic_conflict` | `source.target_occurrence_selector` |
-| source occurrence is not actionable | `semantic_conflict` | `source.target_occurrence_key` |
-| pinned timezone data is unavailable | `environment_failure` | source timezone-database field |
-| offset is outside the Version 1 bound | `invalid_request` | `temporal_binding.offset_seconds` |
-| snapshot supplies terminal behavior | `invalid_request` | `temporal_binding.source_terminal_behavior` |
-| reminders exist without delivery | `missing_required_field` | `delivery` |
-| delivery exists without reminders | `invalid_request` | `delivery` |
-| bounded materialization has no reminders | `invalid_request` | `materialization.mode` |
-| relation or binding uniqueness conflicts | `semantic_conflict` | `relationship` or `temporal_binding` |
-| commit/readback evidence disagrees | `runtime_failure` | omitted unless singular |
+| `target_rescheduled` | `binding_target_rescheduled` | `binding_target_rescheduled_and_work_reconciled` |
+| `source_refreshed` | `binding_source_refreshed` | `binding_source_refreshed_and_work_reconciled` |
+| `source_unchanged` | `binding_reconcile_noop` | `binding_work_reconciled` |
+| `target_cancelled` | `binding_target_cancelled` | `binding_target_cancelled_and_work_reconciled` |
+| `binding_detached` | `binding_detached` | `binding_detached_and_work_reconciled` |
+| `target_terminal_retired` | `binding_target_terminal_retired` | `binding_target_terminal_retired_and_work_reconciled` |
+| `relationship_inactive_retired` | `binding_relationship_inactive_retired` | `binding_relationship_inactive_retired_and_work_reconciled` |
+| `decision_required` | `binding_decision_required` | `binding_decision_required_and_work_reconciled` |
 
-The detailed validation order, CLI exits, JSON Schema failures, and replay precedence must be closed before implementation. Compatible replay must precede current source lifecycle, version, occurrence, timezone, and route checks.
+One fresh success is one transaction. It validates and derives the complete branch and work classification before mutation, then writes selected provenance, task version/anchor, copied policy truth, binding revision/status, work reconciliation/materialization, one composite audit when truth or work changed, and one command receipt. A no-op or decision-required result with unchanged work writes only the receipt. Any pre-commit failure rolls back every selected row.
 
-## 9. Initial Contract and Fixture Plan
+Reconcile command-derived identities use `command=schedule.binding.reconcile` and the shared command-id derivation with `/target/scheduled_time` for a replacement due anchor, `/temporal_binding/revision` for a successor binding revision, `/audit` for the composite audit, and `/` for the receipt. Copied policies and newly materialized work retain their owning content-addressed and copy-forward specifications. `truth_changed=true` for every resolution outcome except `source_unchanged` and `decision_required`; `work_changed` reflects any cancellation or creation. A truth-changing transaction increments `binding_catalog_generation` exactly once; work-only and receipt-only outcomes do not.
+
+### 7.8 Response, dry run, and replay
+
+The response returns `response_contract=spine.schedule-binding-reconcile-response.v1`, top-level and stored effects, resolution outcome, truth/work booleans, prior/current binding revisions, binding state before and after, source/target/relationship facts, selected-occurrence provenance when applicable, prior/result task versions and anchors, policy lineage, complete work-classification arrays, materialization summary, audit ID when written, and `receipt_contract=spine.schedule-binding-reconcile-receipt.v1`.
+
+Dry run evaluates the same branch and would-be identities against one read snapshot and writes nothing. Compatible replay is resolved before current binding, source, target, recurrence, relationship, timezone, or materialization checks; it returns top-level `effect=schedule_binding_reconcile_replay` plus the original stored receipt and performs no new reconciliation.
+
+## 8. Integration with Existing Reads and Mutations
+
+Implementation of this family requires additive readback:
+
+- `schedule.show` accepts `relations` and `temporal_bindings` include values and returns the current concrete schedule plus binding mode, latest revision, computed state, source/target evidence, offset, relationship identity, and reconcile inputs;
+- `agenda.show` returns a compact binding summary and distinguishes an open task from the actionability of its derived schedule;
+- `relation.list` continues to return the ordinary stored `part_of` row and derived `contains` alias without temporal inference; and
+- `schedule.binding.list` is the canonical bounded discovery surface; agents and workers MUST NOT use raw SQL for binding discovery.
+
+A stale binding does not erase the task from canonical reads. It makes the derived due schedule and schedule-dependent notification work non-actionable until reconciliation or explicit resolution.
+
+Direct `schedule.update` replacement of a due anchor governed by an active `follow_source` binding fails with `semantic_conflict`, `field=temporal_binding_id`. The operator may first use `schedule.binding.reconcile` with `operator_resolution=detach_at_current_target` when the binding is divergent or otherwise requires a decision, then update the now-unbound task. Snapshot-bound tasks may be rescheduled normally; readback changes from `snapshot_resolved` to `snapshot_diverged` without changing historical binding evidence.
+
+Ordinary target completion or cancellation remains authoritative. It does not synchronously fan out into the binding table; the binding becomes `target_terminal`, all future schedule-dependent work fails freshness immediately, and the next bounded reconciliation retires the binding. Relation inactivation behaves analogously through `relationship_inactive`.
+
+Source schedule or recurrence mutations do not synchronously enumerate or mutate dependent tasks and do not need a fan-out marker for safety. They make affected bindings deterministically non-current by version/revision comparison. Tickerd's configured bounded discovery loop supplies eventual reconciliation; the attempt-start freshness gate supplies immediate delivery safety. Source mutation receipts therefore do not claim dependent reconciliation.
+
+## 9. Validation and Failure Posture
+
+### 9.1 Write validation order
+
+Both create and reconcile use this ordered posture:
+
+1. parse a closed JSON object and validate field shapes;
+2. validate command identifier, contract version, command identity, actor, and action timestamp;
+3. resolve global command-ID collision or compatible same-command replay;
+4. verify ledger schema and the complete advertised contract family;
+5. resolve the binding/source/target identities required by the command;
+6. validate shell, item type, detail lifecycle shape, binding mode/status, and referenced relationship facts;
+7. validate exact item, binding-revision, and recurrence-revision freshness;
+8. validate conditional request-field shapes and enum membership without yet choosing a state-dependent branch;
+9. resolve pinned timezone data and delivery targets;
+10. resolve the source anchor or selected occurrence, compute actual binding state, and derive temporal-binding provenance when the selected branch requires source resolution;
+11. compare `expected_binding_state` when present and validate state-dependent operator resolution;
+12. normalize derived target, reminder/policy, materialization, work classification, identities, audit, and receipt;
+13. begin one write transaction, persist every selected effect, run invariants, and commit; and
+14. read back receipt-bound evidence and fail closed on contradiction.
+
+Compatible replay precedes current lifecycle, freshness, timezone, route, occurrence, and materialization checks. Within Phase 7, binding revision, source item version, source recurrence revision, then target item version are checked in that order. Expected binding state is compared only in Phase 11, after the state has been deterministically computed.
+
+### 9.2 Failure matrix
+
+| Command | Condition | Code | Field |
+|---|---|---|---|
+| create | source item is not an event | `wrong_item_type` | `source.item_id` |
+| create | source event or shell is terminal | `invalid_state_transition` | `source.item_id` |
+| create | source target version is stale | `stale_version` | `source.target_version` |
+| create | scope disagrees with recurrence state | `invalid_request` | `source.scope` |
+| create | selected occurrence key/revision is stale | `stale_version` | narrowest source occurrence field |
+| create | selector proof window cannot be formed | `semantic_conflict` | `source.target_occurrence_selector` |
+| create | selected occurrence resolves zero or multiple times | `semantic_conflict` | `source.target_occurrence_selector` |
+| create | source occurrence is not actionable | `semantic_conflict` | `source.target_occurrence_key` |
+| create, list, or reconcile | pinned timezone data required to resolve a source is unavailable | `environment_failure` | `source_schedule.timezone_database_version` |
+| create | offset is outside the Version 1 bound | `invalid_request` | `temporal_binding.offset_seconds` |
+| create | snapshot supplies terminal behavior | `invalid_request` | `temporal_binding.source_terminal_behavior` |
+| create | reminders field is omitted | `missing_required_field` | `reminders` |
+| create | materialization field is omitted | `missing_required_field` | `materialization` |
+| create | reminders exist without delivery | `missing_required_field` | `delivery` |
+| create | delivery exists with `reminders=[]` | `invalid_request` | `delivery` |
+| create | bounded materialization has no reminders | `invalid_request` | `materialization.mode` |
+| create | relation or binding uniqueness conflicts | `semantic_conflict` | `relationship` or `temporal_binding` |
+| list | no endpoint and `bounded` is not true | `missing_required_field` | `source_item_id` |
+| list | cursor query facts differ | `invalid_request` | `cursor` |
+| list | cursor snapshot changed | `stale_cursor` | `cursor` |
+| reconcile | binding is snapshot or already retired | `invalid_state_transition` | `temporal_binding_id` |
+| reconcile | binding revision differs | `stale_version` | `target_temporal_binding_revision_id` |
+| reconcile | source item version differs | `stale_version` | `source_target_version` |
+| reconcile | source recurrence revision differs | `stale_version` | `source_recurrence_revision_id` |
+| reconcile | target item version differs | `stale_version` | `target_target_version` |
+| reconcile | actual state differs from expected state | `stale_version` | `expected_binding_state` |
+| reconcile | operator resolution is illegal for actual state | `invalid_request` | `operator_resolution` |
+| reconcile | target diverged without detach resolution | `semantic_conflict` | `operator_resolution` |
+| reconcile | bounded materialization is requested for a non-current result | `invalid_request` | `materialization.mode` |
+| either write | required provenance cannot be retained or written atomically | `runtime_failure` | `occurrence_provenance` |
+| either write | commit/readback evidence disagrees | `runtime_failure` | omitted unless singular |
+
+Request-shape errors and CLI exits inherit `specs/agent-command-contract.md`. A `source_unresolved` or `source_terminal` branch requiring a decision is a successful, receipt-bearing semantic result rather than a failure when its exact expected state and request fields are valid.
+
+## 10. Initial Contract and Fixture Plan
 
 Before runtime work, add:
 
-- a shared relative-temporal-binding type schema;
-- request, response, and failure schemas for `schedule.related_task.create`;
-- request, response, and failure schemas for `schedule.binding.reconcile` if `follow_source` is in the first implementation slice;
+- shared relative-temporal-binding and binding-state schemas;
+- create request, response, receipt, and failure schemas;
+- list request, response, and cursor schemas;
+- reconcile request, response, receipt, and failure schemas;
+- the `temporal_binding` provenance consumer to supported-consumer declarations and conformance fixtures, and the conditionally owned `notification_temporal_binding_stale` value to relational constraints and machine contracts;
 - a fixture manifest and structural validator tests;
-- computed identity vectors for task, relation, binding, revision, anchor, audit, receipt, and normalized binding hash; and
-- behavioral transaction, replay, stale-source, recurrence, route, materialization, readback, and attempt-start freshness tests.
+- computed identity vectors for task, relation, binding, revision, anchor, provenance, cursor, audit, receipt, and normalized binding-revision hash; and
+- behavioral transaction, replay, stale-source, recurrence, route, materialization, discovery, readback, reconciliation, and attempt-start freshness tests.
 
 Minimum positive fixtures:
 
-1. snapshot task at event start with no reminders;
+1. snapshot task at event start with `reminders=[]` and explicit materialization none;
 2. snapshot task before event with one reminder and bounded work;
 3. follow-source task at a non-recurring event;
-4. task bound to one selected recurring occurrence;
-5. compatible replay after the source later moves; and
-6. dry run with deterministic would-be identities and no rows.
+4. task bound to one selected recurring occurrence with composite-produced provenance;
+5. binding list pagination and stale cursor;
+6. source reschedule producing a new task version and work reconciliation;
+7. source-only version change producing a new binding revision without a task version;
+8. source terminal behavior for each stored value;
+9. source-unresolved and target-diverged operator resolution;
+10. target-terminal and relationship-inactive retirement;
+11. compatible create and reconcile replay after later source movement; and
+12. dry runs with deterministic would-be identities and no rows.
 
-Minimum failure and reconciliation fixtures:
+Minimum failure fixtures:
 
-1. wrong source type;
-2. stale source version;
-3. recurring source with `scope=item`;
-4. stale or excluded selected occurrence;
-5. invalid offset;
+1. wrong source type and stale source version;
+2. recurring source with `scope=item`;
+3. stale, excluded, missing, or multiply resolved selected occurrence;
+4. invalid offset;
+5. omitted reminders, omitted materialization, invalid delivery/reminder pairing, and bounded materialization without reminders;
 6. missing or mismatched delivery target;
-7. injected failures after task, relation, binding, policy, and work phases proving total rollback;
-8. source move causing follow binding staleness and delivery ineligibility;
-9. successful follow reconciliation producing one next task version;
-10. follow-source terminal behavior for all three closed values; and
-11. direct target schedule update rejected while follow binding governs it.
+7. injected failures after provenance, task, relation, binding, policy, work, and receipt phases proving total rollback;
+8. reconcile against snapshot, retired, stale binding revision, stale source/target/revision, or changed expected state;
+9. illegal operator resolution and bounded materialization on a non-current result;
+10. direct target schedule update rejected while follow binding governs it; and
+11. stale follow binding rejected at delivery attempt start even before the discovery worker runs.
 
-## 10. Acceptance Criteria
+## 11. Acceptance Criteria
 
 This contract family is ready to implement only when:
 
-1. two independent implementations can derive byte-identical normalized binding hashes and command-derived IDs from the fixture corpus;
+1. two independent implementations derive byte-identical normalized binding-revision hashes, command IDs, provenance IDs, cursors, and receipts from the fixture corpus;
 2. `part_of` without a binding demonstrably produces no temporal effect;
-3. the composite either commits the complete task/relation/binding/reminder/work bundle or no selected row;
+3. the composite either commits the complete provenance/task/relation/binding/reminder/work bundle or no selected row;
 4. all granular child identities remain independently queryable;
 5. snapshot and follow-source behavior differ exactly as specified after source movement;
-6. a follow reconciliation creates an ordinary next task version and never mutates an old anchor or item version;
-7. stale, unresolved, terminal, divergent, or relation-inactive follow bindings cannot authorize reminder delivery;
-8. compatible replay returns original receipt facts without reevaluating current source or route state;
-9. readback distinguishes open task lifecycle from binding freshness and notification delivery lifecycle;
-10. no command performs delivery or creates a `side_effect_attempts` row; and
-11. the operator guide can express success using stable lifecycle language without hiding the relation, binding mode, or stale state.
+6. selected recurring-occurrence creation and reconciliation produce their own bounded current provenance without caller choreography;
+7. a changed derived target creates one ordinary next task version, while a source-only refresh creates only a binding revision;
+8. discovery is bounded, ordered, cursor-bound, and usable without raw SQL;
+9. every closed reconciliation outcome and work-changed branch has a fixture and deterministic receipt effect;
+10. stale, unresolved, terminal, divergent, or relation-inactive follow bindings cannot authorize reminder delivery even before reconciliation;
+11. compatible replay returns original receipt facts without reevaluating current source, relationship, route, or materialization state;
+12. readback distinguishes task lifecycle, binding state, reminder work, and delivery lifecycle;
+13. no command performs delivery or creates a `side_effect_attempts` row; and
+14. the operator guide can express success or decision pressure without hiding the relation, binding mode, provenance, or stale state.
 
-## 11. Audit Questions for the First Whetstone Pass
+## 12. Questions for the Focused Recheck
 
-The first bounded audit should focus on these decisions rather than broad prose mutation:
+The next bounded audit should verify:
 
-1. Is the `snapshot` versus `follow_source` distinction complete and observable?
-2. Does selected-occurrence rebinding use sufficient revision-independent identity without inheriting occurrence-key churn?
-3. Can binding freshness and notification attempt-start freshness be evaluated deterministically from persisted facts?
-4. Is asynchronous bounded reconciliation safe, or does any source mutation require additional transactionally persisted discovery pressure?
-5. Are source terminal behavior and manual target override semantics complete?
-6. Does the proposed model preserve granular Spine authority while actually eliminating operator choreography?
-7. Are identity preimages, failure precedence, and readback obligations sufficiently closed to begin schemas and fixtures?
+1. whether the closed list/reconcile family makes accepted `follow_source` creation buildable without invention;
+2. whether selector-local provenance generation composes exactly with the recurrence authority;
+3. whether state precedence, expected-state freshness, resolution branches, and effects are mutually exhaustive;
+4. whether periodic bounded discovery plus attempt-start freshness is sufficient without source-mutation fan-out markers;
+5. whether source-terminal, source-unresolved, target-diverged, target-terminal, and relationship-inactive paths leave safe operator outcomes;
+6. whether work cancellation reason precedence is compatible with the notification authority; and
+7. whether any remaining gap blocks schemas and structural fixtures.
