@@ -1,0 +1,29 @@
+{
+  "scenario_id": "cancel.wrong_item_type",
+  "command": "schedule.cancel",
+  "request": {
+    "contract_version": "spine.schedule-cancel.v1",
+    "command_id": "schedule-cancel-collection-001",
+    "actor_subject_id": "subject_agent",
+    "item_id": "item_collection",
+    "target_version": "1",
+    "cancelled_at_utc": "2035-02-11T12:00:00Z"
+  },
+  "ledger_context": {
+    "shell_status": "active",
+    "item_type": "collection",
+    "current_version": "1"
+  },
+  "expected_validation_phase": "6",
+  "expected_response": {
+    "ok": false,
+    "command": "schedule.cancel",
+    "error": {
+      "code": "wrong_item_type",
+      "message": "schedule.cancel requires an event or task item but found collection",
+      "field": "item_id"
+    }
+  },
+  "mutation": "none",
+  "command_receipt_written": false
+}

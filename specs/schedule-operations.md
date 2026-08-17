@@ -310,6 +310,7 @@ The table below closes the Version 1 failures that depend on schedule-operation 
 | `agenda.show` | a cursor-bound source snapshot has changed | A6 | `stale_cursor` | `cursor` |
 | `agenda.show` | a selected stored source requires unavailable pinned timezone data | A7 | `environment_failure` | `primary_schedule.timezone_database_version` |
 | `schedule.update` | target shell is archived | 6 | `invalid_state_transition` | `status` |
+| `schedule.update` | resolved target item type is not `event` or `task` | 6 | `wrong_item_type` | `item_id` |
 | `schedule.update` | target event/task detail is terminal | 6 | `invalid_state_transition` | `detail_status` |
 | `schedule.update` | target version is not current | 6 | `stale_version` | `target_version` |
 | `schedule.update` | primary event-start/task-due anchor is not `local_instant` | 7 | `invalid_request` | `primary_schedule.anchor_kind` |
@@ -323,6 +324,7 @@ The table below closes the Version 1 failures that depend on schedule-operation 
 | `schedule.update` | successor recurrence, reminder, or materialization normalization fails | 9 | inherited exact code | inherited narrowest responsible `patch` or `materialization` field |
 | `schedule.update` | required recurrence provenance cannot be resolved or regenerated | 10 | inherited exact provenance failure code | inherited recurrence-provenance field |
 | `schedule.cancel` | target shell is archived | 6 | `invalid_state_transition` | `status` |
+| `schedule.cancel` | resolved target item type is not `event` or `task` | 6 | `wrong_item_type` | `item_id` |
 | `schedule.cancel` | event is not `scheduled` or task is not `open` | 6 | `invalid_state_transition` | `detail_status` |
 | `schedule.cancel` | target version is not current | 6 | `stale_version` | `target_version` |
 | either write command | schema/runtime does not support the declared contract family | 4 | `environment_failure` | the responsible schema or contract field |

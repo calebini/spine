@@ -1,0 +1,31 @@
+{
+  "scenario_id": "update.wrong_item_type",
+  "command": "schedule.update",
+  "request": {
+    "contract_version": "spine.schedule-update.v1",
+    "command_id": "schedule-update-project-001",
+    "actor_subject_id": "subject_agent",
+    "item_id": "item_project",
+    "target_version": "2",
+    "updated_at_utc": "2035-02-10T12:00:00Z",
+    "patch": { "item": { "title": "Not a schedule target" } },
+    "materialization": { "mode": "none" }
+  },
+  "ledger_context": {
+    "shell_status": "active",
+    "item_type": "project",
+    "current_version": "2"
+  },
+  "expected_validation_phase": "6",
+  "expected_response": {
+    "ok": false,
+    "command": "schedule.update",
+    "error": {
+      "code": "wrong_item_type",
+      "message": "schedule.update requires an event or task item but found project",
+      "field": "item_id"
+    }
+  },
+  "mutation": "none",
+  "command_receipt_written": false
+}

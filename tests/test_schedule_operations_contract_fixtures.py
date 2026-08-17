@@ -148,7 +148,7 @@ class ScheduleOperationsContractFixtureTests(unittest.TestCase):
             if entry["kind"] == "semantic_failure_scenario"
         ]
 
-        self.assertEqual(len(scenario_entries), 10)
+        self.assertEqual(len(scenario_entries), 12)
         for entry in scenario_entries:
             with self.subTest(fixture_id=entry["fixture_id"]):
                 scenario = _load(ROOT / entry["fixture"])
@@ -179,6 +179,20 @@ class ScheduleOperationsContractFixtureTests(unittest.TestCase):
         scenario["request"]["patch"] = {"item": {"title": "Allowed title update"}}
 
         self.assertIsNone(_schedule_operation_semantic_error(scenario))
+
+    def test_wrong_item_type_precedes_stale_version_for_schedule_writes(self) -> None:
+        for fixture_name in (
+            "failure_update_wrong_item_type.json",
+            "failure_cancel_wrong_item_type.json",
+        ):
+            with self.subTest(fixture=fixture_name):
+                scenario = _load(FIXTURE_DIR / fixture_name)
+                scenario["request"]["target_version"] = "99"
+
+                self.assertEqual(
+                    _schedule_operation_semantic_error(scenario),
+                    _semantic_error("6", "wrong_item_type", "item_id"),
+                )
 
     def test_proposed_contracts_are_not_declared_as_implemented(self) -> None:
         proposed = {
@@ -263,6 +277,9 @@ def _schedule_operation_semantic_error(
         return _semantic_error("6", "invalid_state_transition", "status")
 
     item_type = context.get("item_type")
+    if item_type not in {"event", "task"}:
+        return _semantic_error("6", "wrong_item_type", "item_id")
+
     detail_status = context.get("detail_status")
     if (item_type == "event" and detail_status != "scheduled") or (
         item_type == "task" and detail_status != "open"

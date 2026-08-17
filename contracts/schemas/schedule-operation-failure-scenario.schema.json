@@ -47,8 +47,7 @@
           "request": { "$ref": "schedule-update-request.schema.json" },
           "ledger_context": {
             "required": [
-              "shell_status", "item_type", "detail_status", "current_version",
-              "primary_anchor_kind", "event_has_end_anchor", "has_recurrence"
+              "shell_status", "item_type", "current_version"
             ]
           },
           "expected_response": {
@@ -63,11 +62,49 @@
         "properties": {
           "request": { "$ref": "schedule-cancel-request.schema.json" },
           "ledger_context": {
-            "required": ["shell_status", "item_type", "detail_status", "current_version"]
+            "required": ["shell_status", "item_type", "current_version"]
           },
           "expected_response": {
             "properties": { "command": { "const": "schedule.cancel" } }
           }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "command": { "const": "schedule.update" },
+          "ledger_context": {
+            "properties": { "item_type": { "enum": ["event", "task"] } },
+            "required": ["item_type"]
+          }
+        },
+        "required": ["command", "ledger_context"]
+      },
+      "then": {
+        "properties": {
+          "ledger_context": {
+            "required": [
+              "detail_status", "primary_anchor_kind", "event_has_end_anchor", "has_recurrence"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "command": { "const": "schedule.cancel" },
+          "ledger_context": {
+            "properties": { "item_type": { "enum": ["event", "task"] } },
+            "required": ["item_type"]
+          }
+        },
+        "required": ["command", "ledger_context"]
+      },
+      "then": {
+        "properties": {
+          "ledger_context": { "required": ["detail_status"] }
         }
       }
     },
@@ -93,7 +130,7 @@
       "type": "object",
       "properties": {
         "shell_status": { "enum": ["active", "archived"] },
-        "item_type": { "enum": ["event", "task"] },
+        "item_type": { "enum": ["event", "task", "project", "collection"] },
         "detail_status": { "enum": ["scheduled", "cancelled", "open", "done"] },
         "current_version": { "$ref": "notification-types.schema.json#/$defs/decimalPositive" },
         "primary_anchor_kind": {

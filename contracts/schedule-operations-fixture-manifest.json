@@ -104,6 +104,18 @@
       "kind": "semantic_failure_scenario",
       "fixture": "tests/fixtures/schedule_operations/contracts/failure_cancel_terminal_target.json",
       "schema": "contracts/schemas/schedule-operation-failure-scenario.schema.json"
+    },
+    {
+      "fixture_id": "failure.update_wrong_item_type",
+      "kind": "semantic_failure_scenario",
+      "fixture": "tests/fixtures/schedule_operations/contracts/failure_update_wrong_item_type.json",
+      "schema": "contracts/schemas/schedule-operation-failure-scenario.schema.json"
+    },
+    {
+      "fixture_id": "failure.cancel_wrong_item_type",
+      "kind": "semantic_failure_scenario",
+      "fixture": "tests/fixtures/schedule_operations/contracts/failure_cancel_wrong_item_type.json",
+      "schema": "contracts/schemas/schedule-operation-failure-scenario.schema.json"
     }
   ]
 }
