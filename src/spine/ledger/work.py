@@ -248,12 +248,13 @@ def cancel_work_instance(
     work_instance_id: str,
     cancelled_at_utc: str,
     reason_code: str,
+    require_fresh: bool = True,
 ) -> UpdatedWorkInstance:
     """Cancel eligible or in-progress work with a durable reason."""
 
     require_utc_z("cancelled_at_utc", cancelled_at_utc)
     _require_reason(reason_code)
-    row = _get_work_for_outcome(connection, work_instance_id)
+    row = _get_work_for_outcome(connection, work_instance_id) if require_fresh else get_work_instance(connection, work_instance_id)
     if row["status"] not in {WorkStatus.ELIGIBLE.value, WorkStatus.IN_PROGRESS.value}:
         raise SpineValidationError("work_outcome_rejected", f"work cannot be cancelled from status {row['status']}")
     return _set_work_outcome(
@@ -382,6 +383,11 @@ def assert_work_instance_not_stale(connection: sqlite3.Connection, work_instance
                 )) != row["target_at_utc"]
             ):
                 _raise_stale_work(work_instance_id, "recurrence occurrence changed or is not actionable")
+        if row["item_type"] == ItemType.TASK.value:
+            from spine.ledger.temporal_bindings import active_follow_binding_current
+
+            if not active_follow_binding_current(connection, item_id=str(row["item_id"])):
+                _raise_stale_work(work_instance_id, "active follow-source temporal binding is not current")
         return
 
     if row["item_version"] != row["current_version"]:

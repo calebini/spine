@@ -15,7 +15,7 @@ This command remains the canonical deep readback for one known item. The impleme
 
 The request requires `item_id`. Optional fields are:
 
-- `include`: a unique array containing any of `policies`, `work`, and `attempts`; omission includes all three;
+- `include`: a unique array containing any of `policies`, `work`, `attempts`, `relations`, and `temporal_bindings`; omission includes policies, work, and attempts;
 - `notification_policies_limit`: integer or decimal string in `0..100`, default `100`;
 - `work_instances_limit`: integer or decimal string in `0..1000`, default `1000`; and
 - `side_effect_attempts_limit`: integer or decimal string in `0..1000`, default `1000`.
@@ -62,7 +62,9 @@ Every included collection returns its accepted limit, total count, and truncatio
 
 `delivery_targets` contains one entry per distinct target referenced by current policies or item work, ordered by `delivery_target_id`. `current_snapshot` is the current canonical delivery-target row. When the item was authored by `schedule.create`, `authored_snapshot` is the immutable routing snapshot stored in that receipt, and `routing_facts_match_authored` compares delivery target id, channel, adapter, and target reference. The command never substitutes the current route for historical authoring evidence.
 
-The optional `authoring_receipt` summary identifies the persisted `schedule.create`, `event.create`, or `task.create` receipt that created the item. It is receipt evidence, not delivery evidence.
+When requested, `relations` returns ordinary stored rows touching the item and `temporal_bindings` returns binding headers, latest immutable revisions, computed state, source evidence, and exact reconciliation inputs. These are granular readback facts; the concrete scheduled anchor remains present independently.
+
+The optional `authoring_receipt` summary identifies the persisted `schedule.create`, `schedule.related_task.create`, `event.create`, or `task.create` receipt that created the item. It is receipt evidence, not delivery evidence.
 
 ## 5. Explicit Lifecycle Model
 

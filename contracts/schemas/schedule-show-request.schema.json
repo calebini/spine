@@ -9,7 +9,7 @@
     "include": {
       "type": "array",
       "uniqueItems": true,
-      "items": { "enum": ["policies", "work", "attempts"] }
+      "items": { "enum": ["policies", "work", "attempts", "relations", "temporal_bindings"] }
     },
     "notification_policies_limit": { "$ref": "#/$defs/policyLimit" },
     "work_instances_limit": { "$ref": "#/$defs/evidenceLimit" },

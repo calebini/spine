@@ -1,0 +1,41 @@
+{
+  "ok": true,
+  "command": "schedule.binding.reconcile",
+  "response_contract": "spine.schedule-binding-reconcile-response.v1",
+  "effect": "binding_reconcile_noop",
+  "command_id": "reconcile-current-pack-golf",
+  "command_receipt_id": "receipt-reconcile-current-pack-golf",
+  "temporal_binding_id": "binding-pack-golf",
+  "resolution_outcome": "source_unchanged",
+  "truth_changed": false,
+  "work_changed": false,
+  "binding_state_before": "current",
+  "binding_state_after": "current",
+  "prior_temporal_binding_revision_id": "binding-revision-pack-golf-1",
+  "current_temporal_binding_revision_id": "binding-revision-pack-golf-1",
+  "source_item_id": "event-golf-trip",
+  "target_item_id": "task-pack-golf-bag",
+  "target_item_version": "1",
+  "work_reconciliation": {
+    "cancelled_work_instance_ids": [],
+    "retained_work_instance_ids": [],
+    "protected_stale_work_instance_ids": [],
+    "created_work_instance_ids": []
+  },
+  "materialization": {
+    "mode": "none",
+    "state": "not_requested",
+    "opportunity_count": "0",
+    "work_instance_count": "0",
+    "opportunity_work": [],
+    "work_instance_ids": []
+  },
+  "delivery_state": "not_attempted_by_command",
+  "receipt": {
+    "receipt_contract": "spine.schedule-binding-reconcile-receipt.v1",
+    "command_receipt_id": "receipt-reconcile-current-pack-golf",
+    "effect": "binding_reconcile_noop",
+    "semantic_facts_hash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+    "created_at_utc": "2026-08-17T12:00:00Z"
+  }
+}

@@ -38,7 +38,7 @@ class LedgerMigrationTests(unittest.TestCase):
         self.assertTrue(result.initialized)
         self.assertTrue(result.verified)
         verification = verify_schema(self.connection)
-        self.assertEqual(verification.schema_version, 7)
+        self.assertEqual(verification.schema_version, 8)
         self.assertEqual(verification.integrity_check, "ok")
 
     def test_empty_database_requires_explicit_initialization(self) -> None:
@@ -51,8 +51,8 @@ class LedgerMigrationTests(unittest.TestCase):
         result = migrate_schema(self.connection)
 
         self.assertEqual(result.before_version, 6)
-        self.assertEqual(result.applied_versions, (7,))
-        self.assertEqual(result.after_version, 7)
+        self.assertEqual(result.applied_versions, (7, 8))
+        self.assertEqual(result.after_version, 8)
         self.assertTrue(result.verified)
         columns = {row["name"] for row in self.connection.execute("PRAGMA table_info(temporal_anchors)")}
         self.assertNotIn("recurrence_rule", columns)
@@ -189,7 +189,7 @@ class LedgerMigrationTests(unittest.TestCase):
             payload = json.loads(output.getvalue())
             self.assertEqual(exit_code, 0)
             self.assertEqual(payload["before_version"], 0)
-            self.assertEqual(payload["after_version"], 7)
+            self.assertEqual(payload["after_version"], 8)
             self.assertTrue(payload["initialized"])
 
     def _initialize_v6(self) -> None:

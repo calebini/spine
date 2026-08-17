@@ -1,0 +1,49 @@
+{
+  "schema_version": "spine.relative-temporal-binding-contract-fixtures.v1",
+  "fixture_scope": "structural_examples",
+  "fixture_scope_note": "Initial schema-8 request and success fixtures. Runtime-derived identities and hashes in structural responses are illustrative; command tests verify deterministic derivation, replay, atomic persistence, selected-occurrence provenance, reconciliation, readback, and delivery freshness.",
+  "fixtures": [
+    {
+      "fixture_id": "request.create_snapshot_task",
+      "kind": "request",
+      "fixture": "tests/fixtures/relative_temporal_bindings/contracts/request_create_snapshot_task.json",
+      "schema": "contracts/schemas/schedule-related-task-create-request.schema.json"
+    },
+    {
+      "fixture_id": "request.create_follow_selected_occurrence",
+      "kind": "request",
+      "fixture": "tests/fixtures/relative_temporal_bindings/contracts/request_create_follow_selected_occurrence.json",
+      "schema": "contracts/schemas/schedule-related-task-create-request.schema.json"
+    },
+    {
+      "fixture_id": "response.create_snapshot_task",
+      "kind": "success_response",
+      "fixture": "tests/fixtures/relative_temporal_bindings/contracts/response_create_snapshot_task.json",
+      "schema": "contracts/schemas/schedule-related-task-create-response.schema.json"
+    },
+    {
+      "fixture_id": "request.binding_list",
+      "kind": "request",
+      "fixture": "tests/fixtures/relative_temporal_bindings/contracts/request_binding_list.json",
+      "schema": "contracts/schemas/schedule-binding-list-request.schema.json"
+    },
+    {
+      "fixture_id": "response.binding_list_empty",
+      "kind": "success_response",
+      "fixture": "tests/fixtures/relative_temporal_bindings/contracts/response_binding_list_empty.json",
+      "schema": "contracts/schemas/schedule-binding-list-response.schema.json"
+    },
+    {
+      "fixture_id": "request.binding_reconcile_current",
+      "kind": "request",
+      "fixture": "tests/fixtures/relative_temporal_bindings/contracts/request_binding_reconcile_current.json",
+      "schema": "contracts/schemas/schedule-binding-reconcile-request.schema.json"
+    },
+    {
+      "fixture_id": "response.binding_reconcile_current",
+      "kind": "success_response",
+      "fixture": "tests/fixtures/relative_temporal_bindings/contracts/response_binding_reconcile_current.json",
+      "schema": "contracts/schemas/schedule-binding-reconcile-response.schema.json"
+    }
+  ]
+}

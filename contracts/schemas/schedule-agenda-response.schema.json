@@ -94,6 +94,8 @@
         "end_at_utc": { "$ref": "notification-types.schema.json#/$defs/utcTimestamp" },
         "recurrence_revision_id": { "$ref": "notification-types.schema.json#/$defs/id" },
         "occurrence_key": { "$ref": "notification-types.schema.json#/$defs/id" },
+        "schedule_actionable": { "type": "boolean" },
+        "temporal_binding": { "$ref": "#/$defs/temporalBindingSummary" },
         "defer_state": { "enum": ["not_deferred", "deferred", "defer_elapsed"] },
         "defer_until_utc": { "$ref": "notification-types.schema.json#/$defs/utcTimestamp" },
         "notification_summary": { "$ref": "#/$defs/notificationSummary" },
@@ -108,8 +110,39 @@
         {
           "if": { "properties": { "all_day": { "const": false } }, "required": ["all_day"] },
           "then": { "required": ["view_local_time"] }
+        },
+        {
+          "if": { "required": ["temporal_binding"] },
+          "then": { "required": ["schedule_actionable"] },
+          "else": { "not": { "required": ["schedule_actionable"] } }
         }
       ],
+      "additionalProperties": false
+    },
+    "temporalBindingSummary": {
+      "type": "object",
+      "required": [
+        "temporal_binding_id", "binding_mode", "binding_state", "source_item_id",
+        "source_anchor_role", "offset_seconds", "reconcile_required",
+        "automatic_reconcile_eligible", "operator_decision_required"
+      ],
+      "properties": {
+        "temporal_binding_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+        "binding_mode": { "enum": ["snapshot", "follow_source"] },
+        "binding_state": {
+          "enum": [
+            "retired", "snapshot_resolved", "snapshot_diverged", "target_terminal",
+            "source_terminal", "relationship_inactive", "source_unresolved",
+            "target_diverged", "stale", "current"
+          ]
+        },
+        "source_item_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+        "source_anchor_role": { "const": "event_start" },
+        "offset_seconds": { "$ref": "notification-types.schema.json#/$defs/signedDecimal" },
+        "reconcile_required": { "type": "boolean" },
+        "automatic_reconcile_eligible": { "type": "boolean" },
+        "operator_decision_required": { "type": "boolean" }
+      },
       "additionalProperties": false
     },
     "notificationSummary": {

@@ -240,7 +240,7 @@ Current Spine behavior already provides useful substrate:
 
 Important current limitations include:
 
-- schema-7 `work_kind` currently permits only `notification_reminder`;
+- the canonical `work_kind` currently permits only `notification_reminder`;
 - candidate-action kinds do not yet include an explicit agent invocation or agent proposal vocabulary;
 - notification policies describe delivery scheduling, not general agent mandates;
 - no durable agent-run/result artifact is defined;

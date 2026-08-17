@@ -1,0 +1,9 @@
+{
+  "ok": true,
+  "command": "schedule.binding.list",
+  "response_contract": "spine.schedule-binding-list-response.v1",
+  "binding_catalog_generation": "0",
+  "bindings": [],
+  "has_more": false,
+  "next_cursor": null
+}

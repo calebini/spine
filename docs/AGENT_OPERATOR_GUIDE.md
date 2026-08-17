@@ -82,7 +82,7 @@ Do not require current-schema verification before an intended migration; an olde
 "$SPINE_COMMAND" --db "$SPINE_DB" --pretty system info
 ```
 
-Require equal `implemented_ledger_schema_version` and `ledger_schema_version`. Before using the atomic and operator surfaces, also require `implemented_contract_versions` to include `spine.schedule-create.v1`, `spine.schedule-create-normalization.v1`, `spine.schedule-create-response.v1`, `spine.schedule-create-receipt.v1`, `spine.schedule-show.v1`, `spine.schedule-operations-normalization.v1`, the `spine.schedule-agenda.v1`, `spine.schedule-update.v1`, and `spine.schedule-cancel.v1` request/response families, both update/cancel receipt versions, `spine.schedule-compact.v1`, `spine.schedule-countdown-builder.v1`, and `spine.schedule-countdown-builder-response.v1`.
+Require equal `implemented_ledger_schema_version` and `ledger_schema_version`. Before using the atomic and operator surfaces, also require `implemented_contract_versions` to include `spine.schedule-create.v1`, `spine.schedule-show.v1`, the complete agenda/update/cancel family, `spine.schedule-compact.v1`, and the countdown-builder family. Before using related tasks, additionally require `spine.relative-temporal-binding.v1`, `spine.schedule-related-task-create.v1`, and both `spine.schedule-binding-list.v1` and `spine.schedule-binding-reconcile.v1` with their response/receipt/cursor versions.
 
 For `schedule.create`, prefer the request directive `"timezone_database_version":{"kind":"system_current"}`. Spine resolves it once during fresh execution, stores the concrete installed version, and returns that concrete value in receipts and readback. A compatible replay returns the original resolved version even if the host later installs newer timezone data. Operators may instead use `{"kind":"explicit","version":"<exact-version>"}`. Omission is invalid; Spine never chooses timezone data through a hidden default. For lower-level local-time commands that require the concrete string directly, use the value returned by `system.info`. Never copy a version from an example or another machine.
 
@@ -118,7 +118,7 @@ Current commands:
 - `"$SPINE_WORKER"`: run the production-shaped worker in `observe_only`, `active`, or `suspended`.
 - `"$SPINE_CHECKOUT/.venv/bin/spine-openclaw-smoke"`: run a bounded fake OpenClaw smoke.
 
-The scheduling command surface is `schedule.build`, `schedule.create`, `schedule.show`, `agenda.show`, `schedule.update`, `schedule.cancel`, `event.create`, `event.reschedule`, `task.create`, `item.occurrences`, `recurrence.instance.add`, `recurrence.instance.remove`, `recurrence.instance.override`, `recurrence.series.edit`, `occurrence_provenance.regenerate`, `reminder.create`, `reminder.edit`, `reminder.disable`, `notification.opportunities`, and `notification_work.materialize`. Prefer `schedule.build` for the relative-event countdown profile, `schedule.create` for a new scheduled item plus its initial reminders, `agenda.show` for a bounded cross-item range, `schedule.update` for whole-schedule desired-state replacement and reconciliation, `schedule.cancel` for terminal cancellation, and `schedule.show` for canonical single-item verification. Use the lower-level family for occurrence-specific or otherwise independent mutations. See `docs/AGENT_QUICKSTART.md` for the complete executable path; see `specs/agent-command-contract.md` for normative request, response, replay, and failure behavior.
+The scheduling command surface is `schedule.build`, `schedule.create`, `schedule.related_task.create`, `schedule.show`, `agenda.show`, `schedule.update`, `schedule.cancel`, `schedule.binding.list`, `schedule.binding.reconcile`, `event.create`, `event.reschedule`, `task.create`, `item.occurrences`, `recurrence.instance.add`, `recurrence.instance.remove`, `recurrence.instance.override`, `recurrence.series.edit`, `occurrence_provenance.regenerate`, `reminder.create`, `reminder.edit`, `reminder.disable`, `notification.opportunities`, and `notification_work.materialize`. Prefer `schedule.related_task.create` when one intent includes a new task, `part_of` relation, event-relative due time, and optional reminders. Use `schedule.binding.list` and `.reconcile` for explicit follow-source lifecycle. Use the lower-level family for occurrence-specific or otherwise independent mutations. See `docs/AGENT_QUICKSTART.md` for the complete executable path; see `specs/agent-command-contract.md` for normative request, response, replay, and failure behavior.
 
 ## Stable Scheduling Lifecycle Language
 
@@ -172,6 +172,49 @@ export ITEM_ID=item-id-from-schedule-create
 Require `lifecycle.authored.state=committed`. Treat `lifecycle.opportunities`, `lifecycle.work`, `lifecycle.delivery.attempt_state`, and `lifecycle.delivery.outcome_state` as separate evidence. Authoring never implies delivery.
 
 Structural request examples live in `tests/fixtures/schedule_create/contracts/`. The repeat-window event fixture is the quickest complete bounded example, and the recurring-task fixture shows inherited recurrence plus named route resolution without immediate work.
+
+## Atomic Related Tasks and Temporal Bindings
+
+Use `schedule.related_task.create` when the operator's one intent is “create this task as part of that event, due at an offset from it, with these reminders.” Do not emulate it with separate task, relation, and reminder commands. The source must be an exact active event ID and version. A non-recurring event uses `source.scope=item`; a recurring event requires one current occurrence key, its recurrence revision, and its revision-independent selector from the occurrence identity.
+
+Choose binding behavior explicitly:
+
+- `snapshot` copies the resolved event time once. Later event changes do not move or cancel the task.
+- `follow_source` governs the task due time and requires `source_terminal_behavior=cancel_target|detach_at_last_value|require_decision`. Source changes are reconciled into ordinary task versions; they are never hidden read-time changes.
+
+The zero-reminder snapshot example is directly copyable from `tests/fixtures/relative_temporal_bindings/contracts/request_create_snapshot_task.json`. Preview and commit the unchanged request with the same `command_id`:
+
+```bash
+"$SPINE_COMMAND" --db "$SPINE_DB" \
+  --input "$SPINE_CHECKOUT/tests/fixtures/relative_temporal_bindings/contracts/request_create_snapshot_task.json" \
+  --dry-run --pretty schedule related_task create
+"$SPINE_COMMAND" --db "$SPINE_DB" \
+  --input /absolute/path/related-task-request.json \
+  --pretty schedule related_task create
+```
+
+Fresh success must enumerate the task, relation, binding/revision, concrete task-due anchor, policies, work, audit, and receipt separately. It always reports `delivery_state=not_attempted_by_command`. Read the granular evidence without SQL:
+
+```bash
+export RELATED_TASK_ID=item-id-from-related-task-receipt
+"$SPINE_COMMAND" --db "$SPINE_DB" \
+  --item-id "$RELATED_TASK_ID" \
+  --include policies,work,attempts,relations,temporal_bindings \
+  --pretty schedule show
+```
+
+For follow-source operation, discover bounded state and use the exact returned `reconcile_inputs`; do not reconstruct versions or query binding tables:
+
+```bash
+"$SPINE_COMMAND" --db "$SPINE_DB" --input /absolute/path/binding-list-request.json \
+  --pretty schedule binding list
+"$SPINE_COMMAND" --db "$SPINE_DB" --input /absolute/path/binding-reconcile-request.json \
+  --dry-run --pretty schedule binding reconcile
+"$SPINE_COMMAND" --db "$SPINE_DB" --input /absolute/path/binding-reconcile-request.json \
+  --pretty schedule binding reconcile
+```
+
+`automatic_reconcile_eligible=true` is safe for the configured bounded scheduler loop. `operator_decision_required=true` requires an explicit supported resolution; do not repeatedly submit no-op decision receipts. A stale follow binding leaves the task visible but makes `agenda.show.schedule_actionable=false` and blocks schedule-dependent notification work before any attempt starts. Direct `schedule.update` replacement of its due time fails until the binding is explicitly detached. Snapshot and retired bindings do not add that freshness gate.
 
 ## Operational Schedule Lifecycle
 
@@ -592,7 +635,7 @@ Use one read-only command after schedule creation, reminder mutation, work mater
   --pretty schedule show
 ```
 
-The response provides current item state; stored local time, concrete timezone-data version, and UTC resolution; current recurrence; policy and intent identities; work status; delivery route snapshots; and side-effect attempts. Collection counts and lifecycle summaries cover all matching evidence even when a detail limit truncates an array. The public field `notification_policy_id` intentionally aliases schema-7 `notification_policies.policy_id`; `work_instances.notification_policy_id` is also the canonical foreign-key column.
+The response provides current item state; stored local time, concrete timezone-data version, and UTC resolution; current recurrence; policy and intent identities; work status; delivery route snapshots; and side-effect attempts. Add `relations,temporal_bindings` to `--include` when inspecting a related task. Collection counts and lifecycle summaries cover all matching evidence even when a detail limit truncates an array. The public field `notification_policy_id` intentionally aliases `notification_policies.policy_id`; `work_instances.notification_policy_id` is also the canonical foreign-key column.
 
 Do not infer delivery from authoring or materialization. Require `lifecycle.delivery.attempt_state=attempted` before claiming that a worker tried delivery, and inspect `lifecycle.delivery.outcome_state` plus `side_effect_attempts` before claiming success or failure. For virtual occurrence inspection, continue to use bounded `item.occurrences`; for provenance repair, use `occurrence_provenance.regenerate` and inspect its structured receipt.
 

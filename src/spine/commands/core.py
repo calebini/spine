@@ -117,6 +117,9 @@ MVP_COMMANDS = frozenset(
         "agenda.show",
         "schedule.update",
         "schedule.cancel",
+        "schedule.related_task.create",
+        "schedule.binding.list",
+        "schedule.binding.reconcile",
         "task.update",
         "task.complete",
         "task.cancel",
@@ -139,6 +142,7 @@ WRITE_COMMANDS = MVP_COMMANDS - {
     "item.show",
     "schedule.show",
     "agenda.show",
+    "schedule.binding.list",
     "schedule.build",
     "item.list",
     "item.occurrences",
@@ -191,6 +195,18 @@ def handle(command: str, request: Mapping[str, Any], context: CommandContext) ->
 
 
 def _dispatch(command: str, request: Mapping[str, Any], context: CommandContext) -> dict[str, Any]:
+    if command == "schedule.related_task.create":
+        from spine.commands.temporal_bindings import handle_related_task_create
+
+        return handle_related_task_create(request, context)
+    if command == "schedule.binding.list":
+        from spine.commands.temporal_bindings import handle_binding_list
+
+        return handle_binding_list(request, context)
+    if command == "schedule.binding.reconcile":
+        from spine.commands.temporal_bindings import handle_binding_reconcile
+
+        return handle_binding_reconcile(request, context)
     if command == "subject.upsert":
         return _handle_subject_upsert(request, context)
     if command == "subject_group.upsert":
@@ -624,10 +640,10 @@ def _handle_schedule_show(request: Mapping[str, Any], context: CommandContext) -
         raise SpineValidationError("invalid_request:include", "include must be an array")
     include_values: list[str] = []
     for value in raw_include:
-        if not isinstance(value, str) or value not in {"policies", "work", "attempts"}:
+        if not isinstance(value, str) or value not in {"policies", "work", "attempts", "relations", "temporal_bindings"}:
             raise SpineValidationError(
                 "invalid_request:include",
-                "include values must be policies, work, or attempts",
+                "include values must be policies, work, attempts, relations, or temporal_bindings",
             )
         include_values.append(value)
     if len(include_values) != len(set(include_values)):
@@ -1972,6 +1988,15 @@ def _handle_schedule_update(request: Mapping[str, Any], context: CommandContext)
         raise SpineValidationError("invalid_state_transition:detail_status", "target schedule is terminal")
     if int(item["current_version"]) != target_version:
         raise SpineValidationError("stale_version:target_version", "target version is not current")
+    if item["item_type"] == "task" and "scheduled_time" in patch:
+        from spine.ledger.temporal_bindings import active_binding_for_target
+
+        governing_binding = active_binding_for_target(context.ledger, item_id=item_id)
+        if governing_binding is not None and governing_binding["binding_mode"] == "follow_source":
+            raise SpineValidationError(
+                "semantic_conflict:temporal_binding_id",
+                f"task due time is governed by active follow binding {governing_binding['temporal_binding_id']}",
+            )
     anchor_key = "start_anchor" if item["item_type"] == "event" else "due_anchor"
     current_anchor = item["detail"].get(anchor_key)
     if not isinstance(current_anchor, Mapping) or current_anchor.get("anchor_kind") != "local_instant":
@@ -5982,6 +6007,8 @@ def _schedule_reconcile_work_plan(
     active_policies: Sequence[Mapping[str, object]],
     target_changed: bool,
     recurrence_changed: bool,
+    temporal_binding_stale: bool = False,
+    parent_terminal: bool = False,
 ) -> tuple[list[str], list[str], list[str], dict[str, str]]:
     by_intent = {str(value["notification_intent_id"]): value for value in active_policies}
     rows = connection.execute(
@@ -6010,10 +6037,14 @@ def _schedule_reconcile_work_plan(
             reason = "notification_target_changed"
         elif recurrence_changed:
             reason = "notification_occurrence_stale"
+        elif temporal_binding_stale:
+            reason = "notification_temporal_binding_stale"
         elif policy is not None and row["delivery_target_id"] != policy["delivery_target_id"]:
             reason = "notification_routing_changed"
         elif policy is None:
             reason = "notification_policy_disabled"
+        elif parent_terminal:
+            reason = "parent_lifecycle_terminal"
         work_id = str(row["work_instance_id"])
         if reason is None:
             retained.append(work_id)
@@ -6420,6 +6451,13 @@ def _agenda_source_snapshot_hash(
             "item": _canonical_value(item),
             "recurrence": _canonical_value(load_current_recurrence_set(connection, item_id=item_id)),
         }
+        from spine.ledger.temporal_bindings import active_binding_for_target, binding_view
+
+        active_binding = active_binding_for_target(connection, item_id=item_id)
+        if active_binding is not None:
+            value["temporal_binding"] = _canonical_value(
+                binding_view(connection, str(active_binding["temporal_binding_id"]))
+            )
         if include_policies:
             policies = connection.execute(
                 """
@@ -6778,6 +6816,25 @@ def _agenda_entry_base(
         )
     if "work_summary" in included:
         entry["work_summary"] = _agenda_work_summary(connection, item_id=str(item["item_id"]))
+    if item["item_type"] == "task":
+        from spine.ledger.temporal_bindings import active_binding_for_target, binding_view
+
+        binding = active_binding_for_target(connection, item_id=str(item["item_id"]))
+        if binding is not None:
+            view = binding_view(connection, str(binding["temporal_binding_id"]))
+            governed = view["binding_mode"] == "follow_source"
+            entry["schedule_actionable"] = bool(actionable and (not governed or view["binding_state"] == "current"))
+            entry["temporal_binding"] = {
+                "temporal_binding_id": view["temporal_binding_id"],
+                "binding_mode": view["binding_mode"],
+                "binding_state": view["binding_state"],
+                "source_item_id": view["source_item_id"],
+                "source_anchor_role": view["source_anchor_role"],
+                "offset_seconds": view["latest_revision"]["offset_seconds"],
+                "reconcile_required": view["reconcile_required"],
+                "automatic_reconcile_eligible": view["automatic_reconcile_eligible"],
+                "operator_decision_required": view["operator_decision_required"],
+            }
     return entry
 
 
@@ -7103,6 +7160,8 @@ def _derived_id(command: str, command_id: str, row_role: str, request_path: str)
         "item_subject_role": "item_subject_role",
         "notification_policy": "notification_policy",
         "work_instance": "work_instance",
+        "temporal_binding": "temporal_binding",
+        "temporal_binding_revision": "temporal_binding_revision",
     }
     return command_derived_id(
         prefix=prefixes[row_role], command=command, command_id=command_id, row_role=row_role, request_path=request_path
@@ -7899,6 +7958,11 @@ def _notification_work_stale_reason(
         ).fetchone()
         if active is None:
             return "notification_occurrence_stale"
+    if item["item_type"] == "task":
+        from spine.ledger.temporal_bindings import active_follow_binding_current
+
+        if not active_follow_binding_current(connection, item_id=str(item["item_id"])):
+            return "notification_temporal_binding_stale"
     if policy is not None and work["delivery_target_id"] != policy["delivery_target_id"]:
         return "notification_routing_changed"
     if policy is None or policy["status"] != "active":

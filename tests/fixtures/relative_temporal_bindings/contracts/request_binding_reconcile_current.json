@@ -1,0 +1,12 @@
+{
+  "contract_version": "spine.schedule-binding-reconcile.v1",
+  "command_id": "reconcile-current-pack-golf",
+  "actor_subject_id": "subject-owner",
+  "reconciled_at_utc": "2026-08-17T12:00:00Z",
+  "temporal_binding_id": "binding-pack-golf",
+  "target_temporal_binding_revision_id": "binding-revision-pack-golf-1",
+  "source_target_version": "1",
+  "target_target_version": "1",
+  "expected_binding_state": "current",
+  "materialization": { "mode": "none" }
+}

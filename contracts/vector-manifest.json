@@ -9,6 +9,10 @@
     {
       "vector_id": "notification.every_hour_six_hours_before.v1",
       "fixture": "tests/fixtures/notifications/vectors/every_hour_six_hours_before.json"
+    },
+    {
+      "vector_id": "relative_temporal_binding.selected_occurrence_follow_source.v1",
+      "fixture": "tests/fixtures/relative_temporal_bindings/vectors/selected_occurrence_follow_source.json"
     }
   ]
 }

@@ -1,0 +1,27 @@
+{
+  "contract_version": "spine.schedule-related-task-create.v1",
+  "command_id": "related-task-pack-golf-bag",
+  "actor_subject_id": "subject-owner",
+  "created_at_utc": "2026-08-17T11:30:00Z",
+  "source": {
+    "item_id": "event-golf-trip",
+    "target_version": "1",
+    "anchor_role": "event_start",
+    "scope": "item"
+  },
+  "task": {
+    "title": "Pack golf bag",
+    "priority": "high",
+    "subject_roles": [
+      { "subject_id": "subject-owner", "role": "assignee" }
+    ]
+  },
+  "relationship": { "relation_type": "part_of" },
+  "temporal_binding": {
+    "binding_mode": "snapshot",
+    "offset_basis": "elapsed",
+    "offset_seconds": "-86400"
+  },
+  "reminders": [],
+  "materialization": { "mode": "none" }
+}

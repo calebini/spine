@@ -5,10 +5,14 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
+from spine.commands import core as command_core
+from spine.commands.temporal_bindings import _encode_cursor
 from spine.core.canonical_json import canonical_json_text
+from spine.core.hashing import hash_canonical_json
 from spine.core.notifications import expand_notification_policy, normalize_notification_policy
 from spine.core.occurrences import expand_recurrence_set
 from spine.core.recurrence_set import normalize_initial_recurrence_set
+from spine.core.temporal_bindings import binding_revision_preimage
 
 ROOT = Path(__file__).parents[1]
 MANIFEST = ROOT / "contracts" / "vector-manifest.json"
@@ -24,6 +28,7 @@ class ComputedContractVectorTests(unittest.TestCase):
             {
                 "recurrence.every_three_days_0800.v1",
                 "notification.every_hour_six_hours_before.v1",
+                "relative_temporal_binding.selected_occurrence_follow_source.v1",
             },
         )
         for entry in manifest["vectors"]:
@@ -147,6 +152,49 @@ class ComputedContractVectorTests(unittest.TestCase):
             expected["opportunities"],
         )
         self.assertEqual(list(result.diagnostics), expected["diagnostics"])
+
+    def test_temporal_binding_vector_pins_revision_hash_ids_and_cursor(self) -> None:
+        vector = _load(
+            ROOT
+            / "tests/fixtures/relative_temporal_bindings/vectors/selected_occurrence_follow_source.json"
+        )
+        context = vector["normalization_context"]
+        preimage = binding_revision_preimage(
+            binding=vector["binding"],
+            source=vector["source"],
+            source_scope=context["source_scope"],
+            offset_seconds=int(context["offset_seconds"]),
+            target=vector["target"],
+            target_item_version=int(context["target_item_version"]),
+            resolution_kind=context["resolution_kind"],
+        )
+        expected = vector["expected"]
+        self.assertEqual(canonical_json_text(preimage), vector["canonical_preimage_bytes"])
+        self.assertEqual(
+            hash_canonical_json(preimage),
+            expected["normalized_temporal_binding_revision_hash"],
+        )
+
+        command = vector["command_context"]["command"]
+        command_id = vector["command_context"]["command_id"]
+        paths = {
+            "item_id": ("item", "/task"),
+            "due_anchor_id": ("due_anchor", "/temporal_binding/resolved_target"),
+            "relation_id": ("relation", "/relationship"),
+            "temporal_binding_id": ("temporal_binding", "/temporal_binding"),
+            "temporal_binding_revision_id": (
+                "temporal_binding_revision",
+                "/temporal_binding/revisions/0",
+            ),
+            "audit_id": ("audit", "/audit"),
+        }
+        for field, (role, path) in paths.items():
+            self.assertEqual(
+                command_core._derived_id(command, command_id, role, path),
+                expected[field],
+            )
+        self.assertEqual(command_core._receipt_id(command, command_id), expected["command_receipt_id"])
+        self.assertEqual(_encode_cursor(vector["cursor_payload"]), expected["cursor"])
 
 
 def _load(path: Path) -> dict[str, object]:

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import sqlite3
+from contextlib import nullcontext
 
 from spine.core import SpineValidationError
 from spine.ledger.common import enum_value, new_id, require_non_empty, require_utc_z
@@ -20,6 +21,7 @@ def create_item_relation(
     created_by_subject_id: str,
     relation_status: RelationStatus | str = RelationStatus.ACTIVE,
     metadata_json: str | None = None,
+    manage_transaction: bool = True,
 ) -> str:
     """Create a stored MVP item relation."""
 
@@ -33,7 +35,7 @@ def create_item_relation(
     if relation_type_value in {"blocks", "contains"}:
         raise SpineValidationError("reserved_relation_type", f"relation_type is query-only: {relation_type_value}")
     try:
-        with connection:
+        with connection if manage_transaction else nullcontext():
             connection.execute(
                 """
                 INSERT INTO coordination_item_relations (

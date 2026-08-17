@@ -10,7 +10,7 @@ Spine owns coordination truth. Adapters make it visible, actionable, or enriched
 
 ## Current Status
 
-Seed-spec phase with an acceptance-verified canonical scheduling and notification runtime. The runtime implements structured recurrence across local-date, local-instant, and fixed-UTC bases; daily, weekly, monthly, and yearly frequencies; selectors, exceptions, overrides, series edits, bounded occurrence reads, lineage, and occurrence provenance. It also implements one-time, offset, fixed-elapsed, and local-calendar notification schedules; bounded opportunities; durable work materialization and reconciliation; atomic `schedule.create`, `schedule.update`, and `schedule.cancel` lifecycle commands; cross-item `agenda.show`; canonical `schedule.show` verification; deterministic relative-event countdown request building; compact operator receipts; Tickerd horizon repair; and fake OpenClaw delivery through `side_effect_attempts`. Schema version 7 is the single relational scheduling authority. Computed vectors, Draft 2020-12 fixture validation, migration/rollback tests, lifecycle behavioral tests, no-skip Tickerd integration tests, and a bounded fake-delivery canary are complete; production deployment and any real send remain separate operator actions.
+Seed-spec phase with an acceptance-verified canonical scheduling and notification runtime. The runtime implements structured recurrence across local-date, local-instant, and fixed-UTC bases; daily, weekly, monthly, and yearly frequencies; selectors, exceptions, overrides, series edits, bounded occurrence reads, lineage, and occurrence provenance. It also implements one-time, offset, fixed-elapsed, and local-calendar notification schedules; bounded opportunities; durable work materialization and reconciliation; atomic `schedule.create`, `schedule.update`, and `schedule.cancel` lifecycle commands; cross-item `agenda.show`; canonical `schedule.show` verification; explicit snapshot/follow-source temporal bindings; atomic related-task creation; deterministic relative-event countdown request building; compact operator receipts; Tickerd horizon and binding repair; and fake OpenClaw delivery through `side_effect_attempts`. Schema version 8 is the single relational scheduling authority. Computed vectors, Draft 2020-12 fixture validation, migration/rollback tests, lifecycle behavioral tests, no-skip Tickerd integration tests, and a bounded fake-delivery canary are complete; production deployment and any real send remain separate operator actions.
 
 Authoritative starting points:
 
@@ -28,7 +28,8 @@ Authoritative starting points:
 - `contracts/schedule-operator-fixture-manifest.json` indexes the checked-in relative-countdown builder request.
 - `specs/schedule-operations.md` defines the implemented operational lifecycle family: `agenda.show`, atomic `schedule.update`, and atomic `schedule.cancel` with mandatory work reconciliation; behavioral coverage lives in `tests/test_schedule_operations_command.py`.
 - `contracts/schedule-operations-fixture-manifest.json`, `contracts/schemas/schedule-{agenda,update,cancel}-*.schema.json`, and `contracts/schemas/schedule-operation-failure-*.schema.json` define its implemented structural and semantic-failure contract package; the complete version family is advertised by `system.info.implemented_contract_versions`.
-- `specs/relative-temporal-bindings.md` is the unimplemented draft for explicit snapshot/follow-source temporal derivation, bounded binding discovery/reconciliation, and atomic creation of a task that is `part_of` an existing event. It is design input only and is not advertised by `system.info`.
+- `specs/relative-temporal-bindings.md` defines implemented explicit snapshot/follow-source temporal derivation, bounded binding discovery/reconciliation, and atomic creation of a task that is `part_of` an existing event; its schemas, fixtures, migration, and behavioral coverage ship as one schema-8 family.
+- `contracts/relative-temporal-binding-fixture-manifest.json` indexes its request/response examples; behavioral coverage lives in `tests/test_relative_temporal_bindings_command.py`.
 - `specs/agent-command-contract.md` defines the MVP agent command core and CLI contract.
 - `docs/AGENT_QUICKSTART.md` gives a zero-context agent one executable, fake-only path through recurrence and recurring notifications.
 - `specs/decisions/0001-kinflow-is-donor-not-foundation.md` records the Kinflow relationship.
@@ -69,7 +70,7 @@ This repository follows the Cortext1 component scaffold standard incrementally:
 - `docs/AGENT_QUICKSTART.md`: executable cold-start path for a new agent
 - `docs/AGENT_OPERATOR_GUIDE.md`: agent-facing contract for operating current Spine runtime surfaces safely
 - `docs/OPENCLAW_DEPLOYMENT_RUNBOOK.md`: operational rollout notes for the first OpenClaw replacement path
-- `contracts/`: machine-readable command, recurrence, notification, atomic schedule-create, canonical schedule-readback, builder, compact-projection, and operational-lifecycle agreements plus fixture manifests
+- `contracts/`: machine-readable command, recurrence, notification, atomic schedule-create, canonical schedule-readback, builder, compact-projection, operational-lifecycle, and relative-temporal-binding agreements plus fixture manifests
 - `deploy/`: deployment templates for systemd and environment files
 - `src/spine/`: initial Python package scaffold
 - `src/spine/ledger/`: canonical local persistence boundary

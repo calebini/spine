@@ -48,6 +48,12 @@ def materialize_notification_horizon(
             items_repaired=0,
             failures=({"reason_code": "scheduler_actor_unavailable"},),
         )
+    binding_failures, bindings_repaired, bindings_scanned = _reconcile_temporal_bindings(
+        connection,
+        evaluated_at_utc=evaluated_at_utc,
+        actor_subject_id=actor,
+        max_bindings=max_items,
+    )
     rows = connection.execute(
         """
         SELECT DISTINCT i.item_id, i.current_version
@@ -60,8 +66,8 @@ def materialize_notification_horizon(
         """,
         (max_items,),
     ).fetchall()
-    repaired = 0
-    failures: list[dict[str, object]] = []
+    repaired = bindings_repaired
+    failures: list[dict[str, object]] = list(binding_failures)
     context = CommandContext(ledger=connection)
     for row in rows:
         item_id = str(row["item_id"])
@@ -136,10 +142,78 @@ def materialize_notification_horizon(
         if materialize["changed"]:
             repaired += 1
     return SchedulingCycleResult(
-        items_scanned=len(rows),
+        items_scanned=len(rows) + bindings_scanned,
         items_repaired=repaired,
         failures=tuple(failures),
     )
+
+
+def _reconcile_temporal_bindings(
+    connection: sqlite3.Connection,
+    *,
+    evaluated_at_utc: str,
+    actor_subject_id: str,
+    max_bindings: int,
+) -> tuple[tuple[dict[str, object], ...], int, int]:
+    context = CommandContext(ledger=connection)
+    listed = handle(
+        "schedule.binding.list",
+        {
+            "contract_version": "spine.schedule-binding-list.v1",
+            "binding_mode": "follow_source",
+            "binding_status": "active",
+            "binding_states": [
+                "stale",
+                "source_terminal",
+                "source_unresolved",
+                "target_diverged",
+                "target_terminal",
+                "relationship_inactive",
+            ],
+            "limit": str(min(max_bindings, 1000)),
+            "bounded": True,
+        },
+        context,
+    )
+    if not listed.get("ok"):
+        return ({"operation": "binding_list", "error": listed.get("error", {})},), 0, 0
+    failures: list[dict[str, object]] = []
+    repaired = 0
+    bindings = listed.get("bindings", [])
+    if not isinstance(bindings, list):
+        return ({"operation": "binding_list", "reason_code": "binding_list_rows_invalid"},), 0, 0
+    for raw in bindings:
+        if not isinstance(raw, Mapping) or not raw.get("automatic_reconcile_eligible"):
+            continue
+        inputs = raw.get("reconcile_inputs")
+        if not isinstance(inputs, Mapping):
+            failures.append({"operation": "binding_reconcile", "reason_code": "binding_reconcile_inputs_missing"})
+            continue
+        request = {
+            "contract_version": "spine.schedule-binding-reconcile.v1",
+            "command_id": "scheduler_binding_"
+            + hash_canonical_json(
+                {
+                    "derivation_version": "spine.scheduler-binding-reconcile-command-id.v1",
+                    "temporal_binding_id": inputs["temporal_binding_id"],
+                    "target_temporal_binding_revision_id": inputs["target_temporal_binding_revision_id"],
+                    "expected_binding_state": inputs["expected_binding_state"],
+                    "evaluated_at_utc": evaluated_at_utc,
+                }
+            ),
+            "actor_subject_id": actor_subject_id,
+            "reconciled_at_utc": evaluated_at_utc,
+            "materialization": {"mode": "none"},
+            **dict(inputs),
+        }
+        result = handle("schedule.binding.reconcile", request, context)
+        if not result.get("ok"):
+            failures.append(
+                {"temporal_binding_id": inputs["temporal_binding_id"], "operation": "binding_reconcile", "error": result.get("error", {})}
+            )
+        elif result.get("truth_changed") or result.get("work_changed"):
+            repaired += 1
+    return tuple(failures), repaired, len(bindings)
 
 
 def _recurrence_source_range(

@@ -1,6 +1,6 @@
 # Spine Operational Schedule Lifecycle
 
-Status: Implemented schema-7 contract
+Status: Implemented contract on current schema 8
 Scope: Cross-item agenda readback, atomic whole-schedule mutation, terminal cancellation, and notification-work reconciliation
 Created: 2026-08-16
 

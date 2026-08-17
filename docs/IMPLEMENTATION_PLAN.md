@@ -1,7 +1,7 @@
 # Spine Implementation Plan
 
-Status: Atomic scheduling, canonical readback, and operator-tooling acceptance verified
-Last reconciled with repository state: 2026-08-15
+Status: Relative temporal binding fat slice implemented and acceptance verified
+Last reconciled with repository state: 2026-08-17
 
 This is a non-normative delivery plan. The specifications and machine-readable contracts remain authoritative.
 
@@ -22,11 +22,11 @@ The delivery includes:
 
 Behavioral proof covers non-recurring events, recurring tasks, policy-only and bounded branches, named and explicit routes, recurrence provenance, response-schema conformance, replay without current-environment re-resolution, dry-run identity equivalence, DST ambiguity rejection, task-role semantic uniqueness, injected failure after each write phase, and the no-send boundary.
 
-No schema migration is planned: schema 7 already owns every canonical row required by this orchestration. A migration is introduced only if implementation proves that a required invariant cannot be represented safely by the existing relational contract.
+This original slice required no schema migration because schema 7 already owned every canonical row required by schedule creation. Schema 8 was later added for explicit relative temporal bindings.
 
 ## Delivered P0: Canonical Schedule Verification
 
-The `spine.schedule-show.v1` read model is implemented as the operator verification boundary over schema 7. It returns current item and schedule facts, concrete timezone-version and UTC-resolution evidence, recurrence, current notification policies and intent IDs, bounded work and attempt detail, route snapshots, complete status counts, and separate authored/opportunity/work/delivery lifecycle dimensions. The direct CLI `--item-id` and `--include` form maps to the same transport-neutral command request.
+The `spine.schedule-show.v1` read model is implemented as the operator verification boundary over the current schema. It returns current item and schedule facts, concrete timezone-version and UTC-resolution evidence, recurrence, current notification policies and intent IDs, bounded work and attempt detail, route snapshots, relations and temporal bindings when requested, complete status counts, and separate authored/opportunity/work/delivery lifecycle dimensions. The direct CLI `--item-id` and `--include` form maps to the same transport-neutral command request.
 
 The related documentation audit treats `notification_policies.policy_id` and the public `notification_policy_id` alias as distinct intentional surfaces, replaces item-specific operator SQL with `schedule.show`, and documents `timezone_database_version.kind=system_current` as a one-time pin to a concrete version. Omission remains invalid and compatible replay retains the original resolved version.
 
@@ -44,7 +44,15 @@ The read-only `schedule.build` command implements `spine.schedule-countdown-buil
 - `schedule.update` atomically changes whole-item schedule truth, whole-series recurrence, reminder policies, and delivery routing while reconciling obsolete never-started work and optionally materializing a replacement horizon; and
 - `schedule.cancel` performs a type-neutral terminal transition and cancels all never-started notification work without rewriting started or terminal evidence.
 
-The implementation is one environment-sized service-layer slice over the existing schema-7 engines rather than public subcommand chaining. It declares the complete version family, exposes all three commands through transport-neutral dispatch and the generic CLI, writes deterministic receipts and audits, preserves immutable canonical detail, supports dry run and replay, and has behavioral coverage for agenda selection/cursors, recurrence replacement, reminder replacement, reconciliation, bounded materialization, cancellation, and no-send behavior. Schema 7 already represented every required fact, so no migration was added.
+The implementation is one environment-sized service-layer slice over the canonical scheduling engines rather than public subcommand chaining. It declares the complete version family, exposes all three commands through transport-neutral dispatch and the generic CLI, writes deterministic receipts and audits, preserves immutable canonical detail, supports dry run and replay, and has behavioral coverage for agenda selection/cursors, recurrence replacement, reminder replacement, reconciliation, bounded materialization, cancellation, and no-send behavior. This slice itself required no migration.
+
+## Delivered Fat Slice: Relative Temporal Bindings and Atomic Related Tasks
+
+`specs/relative-temporal-bindings.md` is implemented as one schema-8 family. `schedule.related_task.create` atomically creates a normal task, concrete due anchor, stored `part_of` relation, explicit `snapshot|follow_source` binding and immutable first revision, optional reminders, optional bounded work, one audit, and one receipt. A selected recurring source also creates or refreshes bounded `consumer=temporal_binding` occurrence provenance in that transaction.
+
+`schedule.binding.list` provides bounded state-ordered discovery with generation-bound cursors. `schedule.binding.reconcile` resolves one follow-source binding at a time, creating an ordinary next task version when derived due time changes, refreshing only binding evidence for source-only changes, applying terminal/detach/decision outcomes, and reconciling notification work without sending. Tickerd's horizon cycle invokes only automatically eligible branches.
+
+Safety is independent of sweep cadence: direct due replacement is rejected while a follow binding governs the task, agenda/readback expose stale or decision state without erasing the task, and work processing checks binding freshness before a side-effect attempt can start. Structural schemas and initial fixtures live in `contracts/relative-temporal-binding-fixture-manifest.json`; runtime coverage includes atomic rollback, replay, dry run, selected occurrences, source movement, source-only refresh, snapshot divergence, cursor invalidation, scheduler terminal handling, agenda actionability, and stale-delivery rejection.
 
 ## Delivery Goal
 
@@ -61,6 +69,7 @@ The delivery is intentionally broad because recurrence identity, occurrence prov
 - `specs/schedule-show.md`: canonical aggregate schedule and delivery-lifecycle readback.
 - `specs/schedule-operator-tools.md`: relative countdown compilation and compact operator projection.
 - `specs/schedule-operations.md`: implemented cross-item agenda and atomic schedule update/cancel reconciliation lifecycle.
+- `specs/relative-temporal-bindings.md`: implemented atomic related-task creation, binding persistence/state, bounded discovery, reconciliation, and attempt freshness.
 - `contracts/schemas/recurrence-*.schema.json` and `contracts/schemas/notification-*.schema.json`: public machine shapes.
 - `contracts/vector-manifest.json`: computed identity and behavior evidence.
 
@@ -77,7 +86,7 @@ The delivery is intentionally broad because recurrence identity, occurrence prov
 
 ### Canonical persistence and migration
 
-- Schema version 7 recurrence sets, immutable revisions, segments, rules, selectors, rdates, exdates, overrides, and lineage.
+- Schema version 8, retaining schema-7 recurrence and notification authority while adding explicit temporal-binding headers, immutable revisions, and a cursor-invalidation catalog generation.
 - Occurrence provenance snapshots, slot uniqueness, supersession, and unresolved-range reports.
 - Stable notification-intent identities, immutable policy versions, structured schedule rows, boundaries, selectors, and occurrence target selectors.
 - Opportunity-bound work snapshots and fail-closed work/attempt constraints.
@@ -94,6 +103,7 @@ The delivery is intentionally broad because recurrence identity, occurrence prov
 - `reminder.create`, `.edit`, and `.disable` for structured notification policies.
 - `notification.opportunities` and `notification_work.materialize`.
 - `schedule.show` with bounded policy, work, route, receipt, and attempt evidence.
+- `schedule.related_task.create`, `schedule.binding.list`, and `schedule.binding.reconcile`, plus relation/binding schedule readback and agenda actionability.
 - Deterministic replay, stale-version checks, dry runs, receipts, and atomic item/supporting-set writes.
 
 ### Notification and delivery path
@@ -160,7 +170,7 @@ The fat slice is ready for one environment patch only when all of the following 
 | Gate | Proof | State |
 |---|---|---|
 | Engine | Pure recurrence and notification normalization/expansion tests and computed vectors | Passed |
-| Ledger | Schema-7 constraints, migration, preflight, and rollback tests | Passed |
+| Ledger | Schema-8 constraints, v6-to-v8 migration, preflight, and rollback tests | Passed |
 | Commands | Authoring, reads, mutation, replay, cursor, and provenance tests | Passed |
 | Notifications | Opportunity, materialization, reconciliation, and recurrence-binding tests | Passed |
 | Delivery | Tickerd observe-only and active fake OpenClaw with durable attempts | Passed |

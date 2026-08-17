@@ -1,6 +1,6 @@
 # Spine Relative Temporal Bindings and Atomic Related-Task Creation
 
-Status: Draft v0.2; not implemented and not advertised by the runtime
+Status: Implemented v1 on ledger schema 8
 Scope: Explicit cross-item temporal derivation, bounded discovery/reconciliation, and atomic creation of a task that is part of an existing event
 Created: 2026-08-17
 
@@ -34,7 +34,7 @@ The following invariants are normative for this draft and should survive contrac
 9. **Natural-language interpretation stays outside this contract.** An agent may translate “task attached to that event” into this normalized request, but Spine accepts only explicit identifiers and structured facts.
 10. **Channel rendering stays outside this contract.** A WhatsApp-sized acknowledgement is a deterministic projection of the receipt, not a new canonical receipt or lifecycle model.
 
-## 3. Authority and Proposed Version Family
+## 3. Authority and Version Family
 
 This draft depends on:
 
@@ -45,7 +45,7 @@ This draft depends on:
 - `specs/schedule-operations.md` for whole-schedule mutation and stale-work classification; and
 - `specs/agent-command-contract.md` for command identity, replay, dry-run, validation, error, and transport rules.
 
-The proposed Version 1 constants are:
+The implemented Version 1 constants are:
 
 - `binding_contract=spine.relative-temporal-binding.v1`;
 - `binding_normalization_version=spine.relative-temporal-binding-normalization.v1`;
@@ -62,7 +62,7 @@ The proposed Version 1 constants are:
 - `list_cursor_version=spine.schedule-binding-list-cursor.v1`;
 - `canonical_json_version=spine.canonical-json.v1`.
 
-These names are design inputs, not runtime claims. No implementation may advertise them until matching migrations, schemas, fixtures, behavioral tests, and command handling exist.
+The schema-8 runtime advertises this complete family only with matching migration, schemas, fixtures, behavioral tests, command handling, bounded scheduler reconciliation, readback, and attempt-start freshness enforcement.
 
 ## 4. Version 1 Boundary
 

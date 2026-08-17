@@ -1,0 +1,8 @@
+{
+  "contract_version": "spine.schedule-binding-list.v1",
+  "source_item_id": "event-golf-trip",
+  "binding_mode": "follow_source",
+  "binding_status": "active",
+  "binding_states": ["stale", "current"],
+  "limit": "100"
+}

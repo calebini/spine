@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cortext.local/spine/contracts/schemas/schedule-binding-reconcile-response.schema.json",
+  "title": "Spine Temporal Binding Reconcile Response v1",
+  "type": "object",
+  "required": [
+    "ok", "command", "response_contract", "effect", "command_id", "command_receipt_id",
+    "temporal_binding_id", "resolution_outcome", "truth_changed", "work_changed",
+    "binding_state_before", "binding_state_after", "prior_temporal_binding_revision_id",
+    "current_temporal_binding_revision_id", "source_item_id", "target_item_id",
+    "target_item_version", "work_reconciliation", "materialization", "delivery_state", "receipt"
+  ],
+  "properties": {
+    "ok": { "const": true },
+    "command": { "const": "schedule.binding.reconcile" },
+    "response_contract": { "const": "spine.schedule-binding-reconcile-response.v1" },
+    "effect": { "type": "string", "minLength": 1 },
+    "dry_run": { "const": true },
+    "command_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+    "command_receipt_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+    "temporal_binding_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+    "resolution_outcome": {
+      "enum": [
+        "target_rescheduled", "source_refreshed", "source_unchanged", "target_cancelled",
+        "binding_detached", "target_terminal_retired", "relationship_inactive_retired", "decision_required"
+      ]
+    },
+    "truth_changed": { "type": "boolean" },
+    "work_changed": { "type": "boolean" },
+    "binding_state_before": { "$ref": "relative-temporal-binding-types.schema.json#/$defs/bindingState" },
+    "binding_state_after": { "$ref": "relative-temporal-binding-types.schema.json#/$defs/bindingState" },
+    "prior_temporal_binding_revision_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+    "current_temporal_binding_revision_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+    "source_item_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+    "target_item_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+    "target_item_version": { "$ref": "notification-types.schema.json#/$defs/decimalPositive" },
+    "work_reconciliation": {
+      "type": "object",
+      "required": [
+        "cancelled_work_instance_ids", "retained_work_instance_ids",
+        "protected_stale_work_instance_ids", "created_work_instance_ids"
+      ],
+      "properties": {
+        "cancelled_work_instance_ids": { "$ref": "#/$defs/idArray" },
+        "retained_work_instance_ids": { "$ref": "#/$defs/idArray" },
+        "protected_stale_work_instance_ids": { "$ref": "#/$defs/idArray" },
+        "created_work_instance_ids": { "$ref": "#/$defs/idArray" }
+      },
+      "additionalProperties": false
+    },
+    "materialization": { "type": "object", "additionalProperties": true },
+    "delivery_state": { "const": "not_attempted_by_command" },
+    "receipt": {
+      "type": "object",
+      "required": ["receipt_contract", "command_receipt_id", "effect", "semantic_facts_hash", "created_at_utc"],
+      "properties": {
+        "receipt_contract": { "const": "spine.schedule-binding-reconcile-receipt.v1" },
+        "command_receipt_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+        "effect": { "type": "string", "minLength": 1 },
+        "semantic_facts_hash": { "$ref": "notification-types.schema.json#/$defs/sha256" },
+        "created_at_utc": { "$ref": "notification-types.schema.json#/$defs/utcTimestamp" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "idArray": {
+      "type": "array", "maxItems": 1000, "uniqueItems": true,
+      "items": { "$ref": "notification-types.schema.json#/$defs/id" }
+    }
+  }
+}

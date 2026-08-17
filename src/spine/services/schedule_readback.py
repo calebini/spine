@@ -10,6 +10,7 @@ from spine.commands.receipts import receipt_from_row
 from spine.core.errors import SpineValidationError
 from spine.core.schedule import resolve_local_instant
 from spine.ledger.recurrence import load_current_recurrence_set
+from spine.ledger.temporal_bindings import binding_view
 
 WORK_STATUSES = ("eligible", "in_progress", "succeeded", "failed", "cancelled")
 ATTEMPT_STATUSES = ("started", "succeeded", "failed", "rejected")
@@ -116,6 +117,28 @@ def build_schedule_readback(
                 "side_effect_attempts_truncated": attempts_truncated,
             }
         )
+    if "relations" in include:
+        result["relations"] = [
+            dict(row)
+            for row in connection.execute(
+                """
+                SELECT * FROM coordination_item_relations
+                WHERE source_item_id = ? OR target_item_id = ?
+                ORDER BY relation_type, relation_id
+                """,
+                (item_id, item_id),
+            )
+        ]
+    if "temporal_bindings" in include:
+        binding_rows = connection.execute(
+            """
+            SELECT temporal_binding_id FROM relative_temporal_bindings
+            WHERE source_item_id = ? OR target_item_id = ?
+            ORDER BY temporal_binding_id
+            """,
+            (item_id, item_id),
+        ).fetchall()
+        result["temporal_bindings"] = [binding_view(connection, str(row["temporal_binding_id"])) for row in binding_rows]
     return result
 
 
@@ -125,7 +148,7 @@ def _authoring_receipt(connection: sqlite3.Connection, item_id: str) -> dict[str
         SELECT *
         FROM command_receipts
         WHERE item_id = ?
-          AND command IN ('schedule.create', 'event.create', 'task.create')
+          AND command IN ('schedule.create', 'schedule.related_task.create', 'event.create', 'task.create')
         ORDER BY
           CASE command WHEN 'schedule.create' THEN 0 ELSE 1 END,
           created_at_utc,
@@ -138,7 +161,7 @@ def _authoring_receipt(connection: sqlite3.Connection, item_id: str) -> dict[str
 
 
 def _schedule_create_facts(receipt: Mapping[str, Any] | None) -> Mapping[str, Any] | None:
-    if receipt is None or receipt.get("command") != "schedule.create":
+    if receipt is None or receipt.get("command") not in {"schedule.create", "schedule.related_task.create"}:
         return None
     facts = receipt.get("result_identity_facts")
     return facts if isinstance(facts, Mapping) else None

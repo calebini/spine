@@ -1,0 +1,71 @@
+{
+  "vector_version": "spine.relative-temporal-binding-computed-vector.v1",
+  "command_context": {
+    "command": "schedule.related_task.create",
+    "command_id": "cmd_vector_related_task"
+  },
+  "binding": {
+    "source_item_id": "item_vector_event",
+    "target_item_id": "item_94880aa0423350daff6d33a029fddb0b41775cbb042d48fac296472ae1170ebf",
+    "relationship_id": "relation_bbdb7ef3dbcb7e16c2829405010ec19c68277c89a73ac349187f45a590bc4040",
+    "binding_mode": "follow_source",
+    "source_terminal_behavior": "detach_at_last_value"
+  },
+  "source": {
+    "source_target_version": "4",
+    "source_recurrence_revision_id": "recurrence_revision_vector_event_4",
+    "target_occurrence_selector": {
+      "recurrence_set_id": "recurrence_set_vector_event",
+      "segment_ref": "0",
+      "scheduled_fact": "2026-08-22T10:00:00",
+      "source_kind": "rule",
+      "source_precedence": "rule"
+    },
+    "source_scheduled_fact": "2026-08-22T10:00:00",
+    "resolved_source_utc": "2026-08-22T14:00:00Z"
+  },
+  "target": {
+    "local_date": "2026-08-22",
+    "local_time": "08:00:00",
+    "timezone": "America/Toronto",
+    "timezone_database_version": "2026c",
+    "utc_instant": "2026-08-22T12:00:00Z"
+  },
+  "normalization_context": {
+    "source_scope": "selected_occurrence",
+    "offset_seconds": "-7200",
+    "target_item_version": "1",
+    "resolution_kind": "initial"
+  },
+  "canonical_preimage_bytes": "{\"binding_contract\":\"spine.relative-temporal-binding.v1\",\"binding_mode\":\"follow_source\",\"binding_normalization_version\":\"spine.relative-temporal-binding-normalization.v1\",\"binding_revision_hash_derivation_version\":\"spine.normalized-temporal-binding-revision-hash.v1\",\"canonical_json_version\":\"spine.canonical-json.v1\",\"offset_basis\":\"elapsed\",\"offset_seconds\":\"-7200\",\"relationship_id\":\"relation_bbdb7ef3dbcb7e16c2829405010ec19c68277c89a73ac349187f45a590bc4040\",\"relationship_type\":\"part_of\",\"resolution_kind\":\"initial\",\"resolved_source_utc\":\"2026-08-22T14:00:00Z\",\"resolved_target_utc\":\"2026-08-22T12:00:00Z\",\"source_anchor_role\":\"event_start\",\"source_item_id\":\"item_vector_event\",\"source_recurrence_revision_id\":\"recurrence_revision_vector_event_4\",\"source_scheduled_fact\":\"2026-08-22T10:00:00\",\"source_scope\":\"selected_occurrence\",\"source_target_version\":\"4\",\"source_terminal_behavior\":\"detach_at_last_value\",\"target_anchor_role\":\"task_due\",\"target_item_id\":\"item_94880aa0423350daff6d33a029fddb0b41775cbb042d48fac296472ae1170ebf\",\"target_item_version\":\"1\",\"target_local_date\":\"2026-08-22\",\"target_local_time\":\"08:00:00\",\"target_occurrence_selector\":{\"recurrence_set_id\":\"recurrence_set_vector_event\",\"scheduled_fact\":\"2026-08-22T10:00:00\",\"segment_ref\":\"0\",\"source_kind\":\"rule\",\"source_precedence\":\"rule\"},\"timezone\":\"America/Toronto\",\"timezone_database_version\":\"2026c\"}",
+  "cursor_payload": {
+    "cursor_version": "spine.schedule-binding-list-cursor.v1",
+    "query": {
+      "source_item_id": "item_vector_event",
+      "target_item_id": null,
+      "binding_mode": "follow_source",
+      "binding_status": "active",
+      "binding_states": ["stale", "current"],
+      "limit": "100",
+      "bounded": false
+    },
+    "binding_catalog_generation": "9",
+    "last": [
+      "09",
+      "item_vector_event",
+      "item_94880aa0423350daff6d33a029fddb0b41775cbb042d48fac296472ae1170ebf",
+      "temporal_binding_9f531becd731c29ac6a40b0ce23dc90f3da8b6f3531cc37d9020b82e25df05d1"
+    ]
+  },
+  "expected": {
+    "normalized_temporal_binding_revision_hash": "211cead8a72ad961a02f087abf4b33c3f6d15d9f23102da33014308f2ee6553d",
+    "item_id": "item_94880aa0423350daff6d33a029fddb0b41775cbb042d48fac296472ae1170ebf",
+    "due_anchor_id": "anchor_1c9675070b3faa95ae1a6c2de6ddc7eee2051e833c20a02cf918975c0168484e",
+    "relation_id": "relation_bbdb7ef3dbcb7e16c2829405010ec19c68277c89a73ac349187f45a590bc4040",
+    "temporal_binding_id": "temporal_binding_9f531becd731c29ac6a40b0ce23dc90f3da8b6f3531cc37d9020b82e25df05d1",
+    "temporal_binding_revision_id": "temporal_binding_revision_e4d2e0d1ccdd9949a280d248ebbe8f4c603f85af300c46d86d22fcb9d94225b2",
+    "audit_id": "audit_22e23dbeef6104efb4e7426390c075daf4ddae1efc6b8fea95d08a0915c5a29d",
+    "command_receipt_id": "command_receipt_a3eafc11e20f7224456d67701befc71212053b37c4ea74a9924f3c7da2ba7efe",
+    "cursor": "eyJiaW5kaW5nX2NhdGFsb2dfZ2VuZXJhdGlvbiI6IjkiLCJjdXJzb3JfdmVyc2lvbiI6InNwaW5lLnNjaGVkdWxlLWJpbmRpbmctbGlzdC1jdXJzb3IudjEiLCJsYXN0IjpbIjA5IiwiaXRlbV92ZWN0b3JfZXZlbnQiLCJpdGVtXzk0ODgwYWEwNDIzMzUwZGFmZjZkMzNhMDI5ZmRkYjBiNDE3NzVjYmIwNDJkNDhmYWMyOTY0NzJhZTExNzBlYmYiLCJ0ZW1wb3JhbF9iaW5kaW5nXzlmNTMxYmVjZDczMWMyOWFjNmE0MGIwY2UyM2RjOTBmM2RhOGI2ZjM1MzFjYzM3ZDkwMjBiODJlMjVkZjA1ZDEiXSwicXVlcnkiOnsiYmluZGluZ19tb2RlIjoiZm9sbG93X3NvdXJjZSIsImJpbmRpbmdfc3RhdGVzIjpbInN0YWxlIiwiY3VycmVudCJdLCJiaW5kaW5nX3N0YXR1cyI6ImFjdGl2ZSIsImJvdW5kZWQiOmZhbHNlLCJsaW1pdCI6IjEwMCIsInNvdXJjZV9pdGVtX2lkIjoiaXRlbV92ZWN0b3JfZXZlbnQiLCJ0YXJnZXRfaXRlbV9pZCI6bnVsbH19.3d080af65f483cca0c6c90d4598a02f7a7af3f2195fb3934b767b4f8f1e86ee7"
+  }
+}

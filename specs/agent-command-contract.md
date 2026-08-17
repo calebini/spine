@@ -162,13 +162,23 @@ Fresh insert success returns `ok=true`, `command=subject.upsert`, `created=true`
 
 ### 9.1 Operational Schedule Family
 
-`specs/schedule-operations.md` defines three implemented command identifiers whose version facts are declared by the schema-7 runtime:
+`specs/schedule-operations.md` defines three implemented command identifiers whose version facts are declared by the schema-8 runtime:
 
 - `agenda.show`: a read-only, pinned-local-time, cross-item range view with recurrence expansion, stable snapshot pagination, and optional notification/work summaries;
 - `schedule.update`: one target-version-guarded transaction over whole-item facts, primary local schedule, whole-series recurrence replacement, complete desired reminder set, delivery retargeting, mandatory stale-work reconciliation, optional bounded replacement work, one audit when effects occur, and one receipt; and
 - `schedule.cancel`: one type-neutral event/task terminal transition plus cancellation of every never-started notification work row, preserving started and terminal evidence.
 
 The implemented request/success-response schemas are `contracts/schemas/schedule-agenda-*.schema.json`, `contracts/schemas/schedule-update-*.schema.json`, and `contracts/schemas/schedule-cancel-*.schema.json`. The shared closed failure response and state-aware semantic-failure scenario shapes are `contracts/schemas/schedule-operation-failure-response.schema.json` and `contracts/schemas/schedule-operation-failure-scenario.schema.json`. Structural examples and no-mutation failure scenarios are indexed by `contracts/schedule-operations-fixture-manifest.json`; runtime behavior is covered by `tests/test_schedule_operations_command.py`.
+
+### 9.2 Relative Temporal Binding Family
+
+`specs/relative-temporal-bindings.md` defines the schema-8 command family:
+
+- `schedule.related_task.create` atomically creates one ordinary open task, concrete due anchor, active stored `part_of` relation, explicit snapshot/follow-source binding and first revision, optional reminder policies and bounded work, one audit, and one replay-safe receipt;
+- `schedule.binding.list` is the bounded, ordered, generation-bound discovery surface and writes nothing; and
+- `schedule.binding.reconcile` resolves exactly one active follow-source binding, including source refresh, target reschedule/cancellation, detach, terminal retirement, decision pressure, mandatory work reconciliation, and optional bounded replacement work.
+
+The composite preserves granular child identities and lower-level reads. `schedule.show` accepts `relations` and `temporal_bindings`; `agenda.show` returns `schedule_actionable` and a compact binding summary for bound tasks. Direct due replacement through `schedule.update` is rejected while an active follow-source binding governs the task. Attempt start independently requires the binding state to be `current`, so delayed discovery cannot authorize stale delivery. Exact machine contracts and initial fixtures live under `contracts/schemas/{relative-temporal-binding-types,schedule-related-task-create-*,schedule-binding-list-*,schedule-binding-reconcile-*}.schema.json` and `contracts/relative-temporal-binding-fixture-manifest.json`.
 
 `item.list` accepts optional request fields `item_type`, `status`, `limit`, and `include_archived`. Valid `item_type` filter values are `event`, `task`, `project`, and `collection`. Valid `status` filter values are shell statuses `active` and `archived`. Invalid filters fail before read execution with `unsupported_field`, `field=item_type` or `field=status`, and CLI exit `2`. `include_archived` defaults to `false`; when `status` is absent, `include_archived=false` returns only active items and `include_archived=true` returns both active and archived items. `status` and `include_archived` are mutually exclusive request fields: if `status` is supplied and `include_archived` is also supplied, the command fails before read execution with `invalid_request`, `field=include_archived`, and CLI exit `2`. `limit` defaults to `50`, may be any integer from `0` through `100`, and fails with `invalid_request`, `field=limit`, and CLI exit `2` when invalid. Items order by `coordination_items.updated_at_utc` descending, then `item_id` ascending. The success response is the exact `item.list` response shape from the Section 4 Response Shape Catalog. It does not mutate.
 
@@ -254,7 +264,7 @@ The command creates policies directly on item version `1` and returns one compos
 
 Delivery resolution accepts an existing explicit target or a named normalized context default. It never creates or approves a route. Materialization accepts a bounded local or item-relative horizon and performs UTC normalization internally. No branch starts work, writes a side-effect attempt, invokes an adapter, or reports delivery.
 
-The schema-7 runtime implements this subsection. It resolves named CLI defaults from repeatable `--delivery-target-default KEY=DELIVERY_TARGET_ID` options and exposes all schedule-create version facts through `system.info`.
+The schema-8 runtime implements this subsection. It resolves named CLI defaults from repeatable `--delivery-target-default KEY=DELIVERY_TARGET_ID` options and exposes all schedule-create version facts through `system.info`.
 
 The CLI accepts `--compact` only with `schedule.create` and `schedule.show`. On success it applies the `spine.schedule-compact.v1` projection defined in `specs/schedule-operator-tools.md`; omission returns the existing full JSON unchanged. Compact mode is transport presentation and does not alter core command semantics, receipt persistence, or readback authority.
 
@@ -287,6 +297,8 @@ The notification-scheduling contract package lives under `contracts/schemas/noti
 The atomic schedule-creation contract package lives under `contracts/schemas/schedule-create-*.schema.json`, `contracts/schedule-create-fixture-manifest.json`, and `tests/fixtures/schedule_create/contracts/`. `specs/schedule-create.md` remains the semantic authority. Behavioral conformance, including atomic rollback, replay, dry run, recurrence provenance, bounded work, and no-send behavior, lives in `tests/test_schedule_create_command.py`.
 
 The operator-helper contracts live at `contracts/schemas/schedule-countdown-builder-*.schema.json` and `contracts/schemas/schedule-compact-response.schema.json`. `specs/schedule-operator-tools.md` remains their semantic authority, and end-to-end builder plus compact-CLI behavior lives in `tests/test_schedule_operator_tools.py`.
+
+The relative-temporal-binding package lives at `contracts/schemas/relative-temporal-binding-types.schema.json`, `contracts/schemas/schedule-related-task-create-*.schema.json`, `contracts/schemas/schedule-binding-{list,reconcile}-*.schema.json`, `contracts/relative-temporal-binding-fixture-manifest.json`, and `tests/fixtures/relative_temporal_bindings/contracts/`. Behavioral conformance lives in `tests/test_relative_temporal_bindings_command.py`.
 
 ## 17. MVP Acceptance Criteria
 

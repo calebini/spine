@@ -16,7 +16,7 @@ from spine.core import SpineValidationError
 from spine.ledger.common import utc_z_from_datetime
 from spine.ledger.sqlite import assert_ledger_invariants, connect, initialize_schema
 
-CURRENT_SCHEMA_VERSION = 7
+CURRENT_SCHEMA_VERSION = 8
 
 EXPECTED_SCHEMA_TABLES = frozenset(
     {
@@ -58,12 +58,15 @@ EXPECTED_SCHEMA_TABLES = frozenset(
         "recurrence_target_rdate_sources",
         "recurrence_target_rule_source_selectors",
         "recurrence_target_rule_sources",
+        "relative_temporal_binding_revisions",
+        "relative_temporal_bindings",
         "side_effect_attempts",
         "subject_groups",
         "subject_memberships",
         "subjects",
         "task_details",
         "temporal_anchors",
+        "temporal_binding_catalog_state",
         "work_instances",
     }
 )
@@ -92,6 +95,10 @@ EXPECTED_SCHEMA_INDEXES = frozenset(
         "notification_policies_group_unique",
         "notification_policies_recipient_status_idx",
         "notification_policies_subject_unique",
+        "relative_temporal_binding_revisions_binding_idx",
+        "relative_temporal_bindings_active_target_unique",
+        "relative_temporal_bindings_source_status_idx",
+        "relative_temporal_bindings_target_status_idx",
         "side_effect_attempts_candidate_action_idx",
         "side_effect_attempts_item_adapter_status_idx",
         "side_effect_attempts_projection_idx",
@@ -114,6 +121,7 @@ EXPECTED_SCHEMA_TRIGGERS = frozenset(
         "task_details_item_type_insert",
         "task_details_time_shape_insert",
         "task_details_recurrence_contract_insert",
+        "temporal_binding_catalog_related_item_audit",
         "locations_referenced_canonical_fields_update",
         "notification_policies_delivery_target_owner_insert",
         "notification_policies_structured_contract_insert",

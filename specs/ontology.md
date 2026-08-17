@@ -1,6 +1,6 @@
 # Spine Ontology
 
-Status: Draft v4.1.0; schema version 7 implementation aligned
+Status: Draft v4.2.0; schema version 8 implementation aligned
 Scope: First durable ontology and minimum data contract sketch for Spine
 
 ## 1. Ontology Goal
@@ -318,6 +318,16 @@ Transitions (minimum):
 - `active -> inactive` allowed.
 - `inactive` is terminal in MVP; mutating an inactive row back to `active` MUST be rejected.
 - Representing a renewed relation requires creating a new relation row under a future accepted versioning policy.
+
+### 4.6 relative_temporal_bindings and revisions
+
+Schema 8 adds an explicit temporal authority beside, not inside, the structural relation graph:
+
+- `relative_temporal_bindings` owns one immutable logical header connecting an event `event_start`, a task `task_due`, and the required active stored `part_of` relation. It records `snapshot|follow_source`, the required follow-source terminal behavior, creator facts, and one-way `active -> retired` lifecycle.
+- `relative_temporal_binding_revisions` owns immutable, contiguous resolution evidence: exact source item/recurrence/occurrence provenance, elapsed-seconds offset, resolved source/target UTC instants, pinned target local-time facts, exact target item version/anchor, resolution kind, normalized hash, and causation.
+- `temporal_binding_catalog_state` owns one monotonic generation used only to invalidate binding-list cursors. It is not schedule truth.
+
+At most one active binding governs `(target_item_id, target_anchor_role)`. A `part_of` relation alone has no temporal effect. Every bound task version retains an ordinary concrete temporal anchor; a follow-source change creates an ordinary next task version and binding revision atomically rather than changing time through a read join. Selected recurring sources require active bounded `occurrence_provenance` with `consumer=temporal_binding`. The complete field, state, hash, and reconciliation contract is normative in `specs/relative-temporal-bindings.md`.
 
 ## 5. Subjects and Groups
 
@@ -783,7 +793,7 @@ Minimum stale-work safety (MVP):
 
 - For `notification_reminder` work, attempt-start safety is based on the current intent row's schedule, target, route, occurrence provenance, active follow-source temporal binding when applicable, and parent lifecycle, not item-version equality alone.
 - Starting an external side effect MUST be rejected when the current intent is disabled or changed, its route is inactive or changed, its target snapshot changed, recurrence provenance is stale or non-actionable, an applicable active `follow_source` binding is not exactly `current`, its shell is archived, its current event is cancelled, or its current task is done or cancelled.
-- Binding freshness failure occurs before persistence of a `side_effect_attempts` row with `attempt_status=started`. It cancels only work satisfying the active workflow's unstarted predicate; retry, in-progress, and terminal work remains protected historical evidence. These temporal-binding rules are conditional on advertising `spine.relative-temporal-binding.v1` and do not change the current executable contract until that complete family ships.
+- Binding freshness failure occurs before persistence of a `side_effect_attempts` row with `attempt_status=started`. It cancels only work satisfying the active workflow's unstarted predicate; retry, in-progress, and terminal work remains protected historical evidence. Schema 8 advertises and enforces the complete `spine.relative-temporal-binding.v1` family.
 - For every other work instance, if `coordination_items.current_version != work_instances.item_version` at attempt start time, starting an external side effect MUST be rejected.
 - Stale recurrence-bound attempt starts MUST persist the canonical provenance-block report and recovery handoff before returning the failure.
 
@@ -797,7 +807,7 @@ Composite schedule reconciliation:
 - `specs/schedule-operations.md` defines a stricter unstarted predicate for its implemented composite update and cancellation commands: an operational reconciliation may cancel a row only when `status=eligible`, `attempt_count=0`, and no `side_effect_attempts` row references it.
 - Eligible retry work with `attempt_count>0`, in-progress work, and terminal work remain immutable historical evidence under those commands even when later schedule truth diverges. This stricter composite rule does not remove the lower-level legal `in_progress -> cancelled` storage transition for a separately authorized work-control workflow.
 - `agenda.show` is a read model over current items, anchors, recurrence, policies, and work. It creates no canonical agenda row and adds no ontology entity.
-- The operational contract versions are runtime capabilities in schema 7 and are declared through `system.info.implemented_contract_versions`.
+- The operational and relative-temporal-binding contract versions are runtime capabilities in schema 8 and are declared through `system.info.implemented_contract_versions`.
 
 Deferred lifecycle posture (MVP):
 

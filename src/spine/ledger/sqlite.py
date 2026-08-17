@@ -41,7 +41,7 @@ def initialize_schema(connection: sqlite3.Connection) -> None:
         version = connection.execute(
             "SELECT MAX(schema_version) FROM ledger_schema"
         ).fetchone()[0]
-        if version == 7:
+        if version == 8:
             return
         raise SpineValidationError(
             "ledger_schema_requires_migration",
@@ -51,23 +51,24 @@ def initialize_schema(connection: sqlite3.Connection) -> None:
     # The seed schema remains the compact pre-fat-slice baseline; a fresh
     # ledger immediately crosses the same one-shot boundary as an existing
     # empty scheduling surface so both paths receive byte-identical DDL.
-    migration = (
-        resources.files("spine.ledger.migrations")
-        .joinpath("0007_canonical_scheduling_notifications.sql")
-        .read_text(encoding="utf-8")
-    )
     connection.execute("PRAGMA foreign_keys = OFF")
     try:
-        try:
-            connection.executescript(migration)
-        except Exception:
-            if connection.in_transaction:
-                connection.rollback()
-            raise
-        connection.execute(
-            "INSERT INTO ledger_schema (schema_version, applied_at_utc) VALUES (7, '1970-01-01T00:00:00Z')"
-        )
-        connection.commit()
+        for version, name in (
+            (7, "0007_canonical_scheduling_notifications.sql"),
+            (8, "0008_relative_temporal_bindings.sql"),
+        ):
+            migration = resources.files("spine.ledger.migrations").joinpath(name).read_text(encoding="utf-8")
+            try:
+                connection.executescript(migration)
+            except Exception:
+                if connection.in_transaction:
+                    connection.rollback()
+                raise
+            connection.execute(
+                "INSERT INTO ledger_schema (schema_version, applied_at_utc) VALUES (?, '1970-01-01T00:00:00Z')",
+                (version,),
+            )
+            connection.commit()
     finally:
         connection.execute("PRAGMA foreign_keys = ON")
 

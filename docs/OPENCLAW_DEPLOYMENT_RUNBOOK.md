@@ -138,7 +138,7 @@ For verification only:
   --verify-only
 ```
 
-The current runtime requires ledger schema version 7. Run the normal migration command before deploying the updated worker, then require `--verify-only` and `system.info` to report schema 7 before any worker restart. Do not run a current worker against an older ledger or an older worker against a migrated ledger.
+The current runtime requires ledger schema version 8. Run the normal migration command before deploying the updated worker, then require `--verify-only` and `system.info` to report schema 8 before any worker restart. Do not run a current worker against an older ledger or an older worker against a migrated ledger.
 
 ```bash
 "$SPINE_MIGRATE" --db "$SPINE_DB" --verify-only
