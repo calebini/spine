@@ -28,6 +28,7 @@ Authoritative starting points:
 - `contracts/schedule-operator-fixture-manifest.json` indexes the checked-in relative-countdown builder request.
 - `specs/schedule-operations.md` defines the implemented operational lifecycle family: `agenda.show`, atomic `schedule.update`, and atomic `schedule.cancel` with mandatory work reconciliation; behavioral coverage lives in `tests/test_schedule_operations_command.py`.
 - `contracts/schedule-operations-fixture-manifest.json`, `contracts/schemas/schedule-{agenda,update,cancel}-*.schema.json`, and `contracts/schemas/schedule-operation-failure-*.schema.json` define its implemented structural and semantic-failure contract package; the complete version family is advertised by `system.info.implemented_contract_versions`.
+- `specs/relative-temporal-bindings.md` is the first unimplemented draft for explicit snapshot/follow-source temporal derivation and atomic creation of a task that is `part_of` an existing event. It is design input only and is not advertised by `system.info`.
 - `specs/agent-command-contract.md` defines the MVP agent command core and CLI contract.
 - `docs/AGENT_QUICKSTART.md` gives a zero-context agent one executable, fake-only path through recurrence and recurring notifications.
 - `specs/decisions/0001-kinflow-is-donor-not-foundation.md` records the Kinflow relationship.

@@ -211,6 +211,16 @@ For chat-sized audit output, add `--compact` to either command. Full JSON remain
 "$SPINE_COMMAND" --db "$SPINE_DB" --item-id "$ITEM_ID" --compact schedule show
 ```
 
+Use the stable lifecycle language in every operator response:
+
+- **saved/authored**: canonical item and policy truth exists;
+- **calculated/expanded**: bounded reminder opportunities were evaluated;
+- **queued/materialized**: durable work exists;
+- **attempted**: a durable adapter-attempt row exists; and
+- **delivered**: that attempt has a successful terminal outcome.
+
+Saved is not queued; queued is not attempted; attempted is not delivered. Use compact output for routine chat acknowledgement. Use full create output for consequential dry-run inspection, and full `schedule.show --include policies,work,attempts` before claiming delivery, investigating failure or cancellation, or following a compact truncation flag. `schedule.update` and `schedule.cancel` return full receipts; verify current evidence with `schedule.show` afterward.
+
 For the common relative intent “event in two hours; every 30 minutes until it starts,” use the read-only `schedule.build` request defined in `specs/schedule-operator-tools.md`. Supply an explicit `reference_time_utc`, `event_delay_seconds=7200`, and `reminder_interval_seconds=1800`; inspect `effect=schedule_create_request_built`, then submit the returned `schedule_create_request` unchanged. The builder pins the executing timezone-data version and resolves any context-default delivery route to an explicit target before authoring.
 
 For a request that uses `delivery.target.resolution=context_default`, bind the name explicitly in the CLI context:

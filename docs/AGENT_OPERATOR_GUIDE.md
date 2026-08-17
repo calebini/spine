@@ -120,6 +120,22 @@ Current commands:
 
 The scheduling command surface is `schedule.build`, `schedule.create`, `schedule.show`, `agenda.show`, `schedule.update`, `schedule.cancel`, `event.create`, `event.reschedule`, `task.create`, `item.occurrences`, `recurrence.instance.add`, `recurrence.instance.remove`, `recurrence.instance.override`, `recurrence.series.edit`, `occurrence_provenance.regenerate`, `reminder.create`, `reminder.edit`, `reminder.disable`, `notification.opportunities`, and `notification_work.materialize`. Prefer `schedule.build` for the relative-event countdown profile, `schedule.create` for a new scheduled item plus its initial reminders, `agenda.show` for a bounded cross-item range, `schedule.update` for whole-schedule desired-state replacement and reconciliation, `schedule.cancel` for terminal cancellation, and `schedule.show` for canonical single-item verification. Use the lower-level family for occurrence-specific or otherwise independent mutations. See `docs/AGENT_QUICKSTART.md` for the complete executable path; see `specs/agent-command-contract.md` for normative request, response, replay, and failure behavior.
 
+## Stable Scheduling Lifecycle Language
+
+Use the following words consistently in operator messages, agent logs, and handoffs:
+
+- **Authored** or **saved** means canonical item and policy truth committed. It does not mean reminder times were calculated, work was queued, or delivery occurred.
+- **Expanded** or **calculated** means Spine evaluated the bounded policy into notification opportunities. An opportunity is a virtual eligible moment, not executable work and not a delivery attempt.
+- **Materialized** or **queued** means durable `work_instances` rows exist. Queued work has not necessarily started and has not necessarily crossed an adapter boundary.
+- **Attempted** means a worker persisted a `side_effect_attempts` row before invoking an external boundary. An attempt may still be pending, failed, or rejected.
+- **Delivered** means terminal attempt evidence records a successful outcome. Do not use **sent** or **delivered** for authored policy, expanded opportunity, or materialized work alone.
+
+The compact operator shorthand is:
+
+> Saved is not queued; queued is not attempted; attempted is not delivered.
+
+When a routine chat acknowledgement needs one line, derive it from the returned lifecycle facts. For example: `Saved; 4 reminders queued; delivery not attempted.` Do not infer a later stage from an earlier one and do not replace the underlying structured receipt with this prose.
+
 ## Atomic Event or Task Scheduling
 
 `schedule.create` is the safest operator-facing creation path when item and reminder authoring belong to one intent. One accepted request can create:
@@ -228,6 +244,17 @@ Add `--compact` to successful create or readback commands when the consumer need
 ```
 
 The compact projection retains scheduled times, concrete timezone version, policy/intent IDs, work count/IDs, route adapter and target references, command identity, and separate lifecycle states. It does not mean delivery occurred. A preview explicitly returns `dry_run=true` and `lifecycle.authored=preview`; committed output returns `dry_run=false`. Omit `--compact` whenever the complete canonical receipt or readback is required.
+
+Use compact and full output deliberately:
+
+- Use `schedule.create --compact` for routine post-validation chat acknowledgement when the compact truncation flags are false and the operator does not need per-opportunity evidence.
+- Use `schedule.show --compact` for a quick current-state check or chat response when policy/work identities and aggregate lifecycle are sufficient.
+- Use full `schedule.create` output to inspect exact normalized policies, opportunity/work evidence, recurrence provenance, route resolution, or a consequential dry run before commit.
+- Use full `schedule.show --include policies,work,attempts` before claiming delivery, diagnosing a failure, inspecting cancellation or staleness, reconciling IDs, or following any compact truncation flag.
+- `schedule.update` and `schedule.cancel` currently return their full composite receipts; use `schedule.show` afterward when current row-level evidence matters.
+- Use `agenda.show` for “what is coming up?”; it is a bounded projection and is not a substitute for full single-item delivery evidence.
+
+Compact output is not less authoritative for the fields it contains, but it is intentionally incomplete. Full output is the escalation surface whenever the question depends on omitted detail.
 
 ## Task Assignment Commands
 

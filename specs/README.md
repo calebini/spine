@@ -12,6 +12,7 @@ Current spec surface:
 - `schedule-show.md`: implemented canonical readback of current schedule, notification, work, route, and delivery-attempt evidence
 - `schedule-operator-tools.md`: implemented relative-event countdown request building and compact schedule operator projections
 - `schedule-operations.md`: implemented cross-item agenda, atomic whole-schedule update, terminal cancellation, and mandatory notification-work reconciliation
+- `relative-temporal-bindings.md`: draft explicit cross-item temporal bindings and atomic related-task creation; not implemented or runtime-advertised
 - `agent-command-contract.md`: draft agent-facing command/request contract for authoring and inspecting Spine coordination truth
 - `SPINE_SPEC_VERSIONING_AND_FREEZE_POLICY.md`: lightweight policy for spec versions, runtime declarations, and one-way freeze-manifest pinning
 - `decisions/0001-kinflow-is-donor-not-foundation.md`: accepted decision on the Kinflow relationship

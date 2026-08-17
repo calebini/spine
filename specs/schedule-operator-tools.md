@@ -63,13 +63,17 @@ Compact `schedule.show` requires policy and work detail to populate its audit fi
 
 The compact lifecycle is a projection of existing evidence, not a collapsed “done” boolean:
 
-- `authored=committed` means canonical item/policy authoring exists;
-- `opportunities` reports expansion evidence;
-- `work` reports durable materialization evidence;
-- `delivery_attempt` reports whether a worker wrote an attempt; and
-- `delivery_outcome` reports no outcome, pending, succeeded, failed, rejected, or mixed evidence.
+- `authored=committed` means canonical item/policy authoring exists and may be rendered as **saved**;
+- `opportunities` reports expansion evidence and may be rendered as **calculated** or **expanded**;
+- `work` reports durable materialization evidence and may be rendered as **queued** or **materialized**;
+- `delivery_attempt` reports whether a worker wrote an attempt and may be rendered as **attempted** only when that evidence exists; and
+- `delivery_outcome` reports no outcome, pending, succeeded, failed, rejected, or mixed evidence, and may be rendered as **delivered** only for a successful terminal outcome.
+
+Operator projections MUST preserve the ordering of these meanings: saved is not queued, queued is not attempted, and attempted is not delivered. A renderer may produce concise prose such as `Saved; 4 reminders queued; delivery not attempted`, but it MUST derive every clause from the corresponding structured field and MUST NOT replace the canonical response or promote an earlier phase into a later one.
 
 Fresh `schedule.create --compact` always reports `delivery_attempt=not_attempted` and `delivery_outcome=none`. Only later readback can expose worker delivery evidence.
+
+Compact output is intended for routine acknowledgement and quick current-state inspection. Full `schedule.create` remains the inspection surface for normalized policy, opportunity, provenance, and work evidence. Full `schedule.show` with requested policies, work, and attempts remains the inspection surface for delivery claims, failures, cancellation, staleness, and any truncated compact identity list. Channel-specific prose, including WhatsApp formatting, is a renderer or adapter concern and does not create another Spine receipt contract.
 
 ## 5. Acceptance
 
