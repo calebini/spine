@@ -24,6 +24,15 @@ IMPLEMENTED_CONTRACT_VERSIONS = frozenset(
         "spine.schedule-countdown-builder.v1",
         "spine.schedule-countdown-builder-response.v1",
         "spine.schedule-show.v1",
+        "spine.schedule-operations-normalization.v1",
+        "spine.schedule-agenda.v1",
+        "spine.schedule-agenda-response.v1",
+        "spine.schedule-update.v1",
+        "spine.schedule-update-response.v1",
+        "spine.schedule-update-receipt.v1",
+        "spine.schedule-cancel.v1",
+        "spine.schedule-cancel-response.v1",
+        "spine.schedule-cancel-receipt.v1",
         "spine.system-info.v1",
     }
 )

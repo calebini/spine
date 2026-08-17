@@ -82,7 +82,7 @@ Do not require current-schema verification before an intended migration; an olde
 "$SPINE_COMMAND" --db "$SPINE_DB" --pretty system info
 ```
 
-Require equal `implemented_ledger_schema_version` and `ledger_schema_version`. Before using the atomic and operator surfaces, also require `implemented_contract_versions` to include `spine.schedule-create.v1`, `spine.schedule-create-normalization.v1`, `spine.schedule-create-response.v1`, `spine.schedule-create-receipt.v1`, `spine.schedule-show.v1`, `spine.schedule-compact.v1`, `spine.schedule-countdown-builder.v1`, and `spine.schedule-countdown-builder-response.v1`.
+Require equal `implemented_ledger_schema_version` and `ledger_schema_version`. Before using the atomic and operator surfaces, also require `implemented_contract_versions` to include `spine.schedule-create.v1`, `spine.schedule-create-normalization.v1`, `spine.schedule-create-response.v1`, `spine.schedule-create-receipt.v1`, `spine.schedule-show.v1`, `spine.schedule-operations-normalization.v1`, the `spine.schedule-agenda.v1`, `spine.schedule-update.v1`, and `spine.schedule-cancel.v1` request/response families, both update/cancel receipt versions, `spine.schedule-compact.v1`, `spine.schedule-countdown-builder.v1`, and `spine.schedule-countdown-builder-response.v1`.
 
 For `schedule.create`, prefer the request directive `"timezone_database_version":{"kind":"system_current"}`. Spine resolves it once during fresh execution, stores the concrete installed version, and returns that concrete value in receipts and readback. A compatible replay returns the original resolved version even if the host later installs newer timezone data. Operators may instead use `{"kind":"explicit","version":"<exact-version>"}`. Omission is invalid; Spine never chooses timezone data through a hidden default. For lower-level local-time commands that require the concrete string directly, use the value returned by `system.info`. Never copy a version from an example or another machine.
 
@@ -118,7 +118,7 @@ Current commands:
 - `"$SPINE_WORKER"`: run the production-shaped worker in `observe_only`, `active`, or `suspended`.
 - `"$SPINE_CHECKOUT/.venv/bin/spine-openclaw-smoke"`: run a bounded fake OpenClaw smoke.
 
-The scheduling command surface is `schedule.build`, `schedule.create`, `schedule.show`, `event.create`, `event.reschedule`, `task.create`, `item.occurrences`, `recurrence.instance.add`, `recurrence.instance.remove`, `recurrence.instance.override`, `recurrence.series.edit`, `occurrence_provenance.regenerate`, `reminder.create`, `reminder.edit`, `reminder.disable`, `notification.opportunities`, and `notification_work.materialize`. Prefer `schedule.build` for the relative-event countdown profile, `schedule.create` for a new scheduled item plus its initial reminders, and `schedule.show` for canonical verification. Use the lower-level family for independent authoring, reads, and later mutations. See `docs/AGENT_QUICKSTART.md` for the complete executable path; see `specs/agent-command-contract.md` for normative request, response, replay, and failure behavior.
+The scheduling command surface is `schedule.build`, `schedule.create`, `schedule.show`, `agenda.show`, `schedule.update`, `schedule.cancel`, `event.create`, `event.reschedule`, `task.create`, `item.occurrences`, `recurrence.instance.add`, `recurrence.instance.remove`, `recurrence.instance.override`, `recurrence.series.edit`, `occurrence_provenance.regenerate`, `reminder.create`, `reminder.edit`, `reminder.disable`, `notification.opportunities`, and `notification_work.materialize`. Prefer `schedule.build` for the relative-event countdown profile, `schedule.create` for a new scheduled item plus its initial reminders, `agenda.show` for a bounded cross-item range, `schedule.update` for whole-schedule desired-state replacement and reconciliation, `schedule.cancel` for terminal cancellation, and `schedule.show` for canonical single-item verification. Use the lower-level family for occurrence-specific or otherwise independent mutations. See `docs/AGENT_QUICKSTART.md` for the complete executable path; see `specs/agent-command-contract.md` for normative request, response, replay, and failure behavior.
 
 ## Atomic Event or Task Scheduling
 
@@ -156,6 +156,25 @@ export ITEM_ID=item-id-from-schedule-create
 Require `lifecycle.authored.state=committed`. Treat `lifecycle.opportunities`, `lifecycle.work`, `lifecycle.delivery.attempt_state`, and `lifecycle.delivery.outcome_state` as separate evidence. Authoring never implies delivery.
 
 Structural request examples live in `tests/fixtures/schedule_create/contracts/`. The repeat-window event fixture is the quickest complete bounded example, and the recurring-task fixture shows inherited recurrence plus named route resolution without immediate work.
+
+## Operational Schedule Lifecycle
+
+Use the generic JSON-input CLI form for all three lifecycle commands:
+
+```bash
+"$SPINE_COMMAND" --db "$SPINE_DB" --input /absolute/path/agenda-request.json --pretty agenda show
+"$SPINE_COMMAND" --db "$SPINE_DB" --input /absolute/path/schedule-update-request.json --dry-run --pretty schedule update
+"$SPINE_COMMAND" --db "$SPINE_DB" --input /absolute/path/schedule-update-request.json --pretty schedule update
+"$SPINE_COMMAND" --db "$SPINE_DB" --input /absolute/path/schedule-cancel-request.json --pretty schedule cancel
+```
+
+`agenda.show` is read-only. Its local range is half-open, bounded to 366 elapsed days, and pinned to one concrete timezone-data version. Repeat every non-cursor request fact unchanged on the next page. Treat `stale_cursor` as a requirement to restart from page one; Spine never continues against changed item, recurrence, policy, route, or requested work-summary facts.
+
+`schedule.update` requires the exact current item version and an explicit `materialization` mode. Its patch is desired successor truth: `recurrence` is a whole-series replacement and `reminders`, when present, is the complete desired active set keyed by stable `policy_key`. It classifies existing work as cancelled, retained, or protected stale before optional bounded replacement materialization. Require `phases.delivery=not_attempted`; the command never starts work or sends. Preview the exact request with `--dry-run`, then commit it unchanged with the same `command_id`.
+
+`schedule.cancel` creates the next cancelled item version and cancels every eligible, zero-attempt work row using `parent_lifecycle_terminal`. In-progress, retried, attempted, and terminal work remains immutable evidence under `protected_stale_work_instance_ids`. A fresh call against terminal truth fails; only a compatible replay of the original `command_id` returns success.
+
+After either write, use `schedule.show` for complete item/policy/work/attempt evidence. Use lower-level recurrence commands for one-occurrence changes and series splits; the composite update intentionally preserves those precision surfaces. Structural examples live in `tests/fixtures/schedule_operations/contracts/`, and the exact contracts live in `specs/schedule-operations.md`.
 
 ### Relative event plus countdown builder
 

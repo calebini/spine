@@ -194,8 +194,8 @@ class ScheduleOperationsContractFixtureTests(unittest.TestCase):
                     _semantic_error("6", "wrong_item_type", "item_id"),
                 )
 
-    def test_proposed_contracts_are_not_declared_as_implemented(self) -> None:
-        proposed = {
+    def test_operational_contract_family_is_declared_as_implemented(self) -> None:
+        implemented = {
             "spine.schedule-operations-normalization.v1",
             "spine.schedule-agenda.v1",
             "spine.schedule-agenda-response.v1",
@@ -206,7 +206,7 @@ class ScheduleOperationsContractFixtureTests(unittest.TestCase):
             "spine.schedule-cancel-response.v1",
             "spine.schedule-cancel-receipt.v1",
         }
-        self.assertTrue(proposed.isdisjoint(IMPLEMENTED_CONTRACT_VERSIONS))
+        self.assertTrue(implemented.issubset(IMPLEMENTED_CONTRACT_VERSIONS))
 
 
 def _valid(schema: dict[str, object], value: dict[str, object], registry: Registry) -> bool:

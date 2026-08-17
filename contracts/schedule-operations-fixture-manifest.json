@@ -1,7 +1,7 @@
 {
   "schema_version": "spine.schedule-operations-contract-fixtures.v1",
   "fixture_scope": "structural_examples",
-  "fixture_scope_note": "Request and success-response fixtures validate proposed structural shapes. Entries with kind semantic_failure_scenario combine a schema-valid command request, minimal ledger/environment preconditions, and the exact required no-mutation failure response; the executable oracle evaluates those preconditions in normative validation order. Generated identities, hashes, timezone resolutions, occurrence facts, reconciliation selections, and effects remain illustrative until behavioral implementation and computed vectors land. Cross-array work-reconciliation ID disjointness is a post-schema semantic invariant exercised by the contract test because standard JSON Schema cannot compare values across sibling arrays.",
+  "fixture_scope_note": "Request and success-response fixtures validate implemented structural shapes. Entries with kind semantic_failure_scenario combine a schema-valid command request, minimal ledger/environment preconditions, and the exact required no-mutation failure response; the executable oracle evaluates those preconditions in normative validation order. Fixture identities and hashes remain illustrative, while executable lifecycle behavior is covered by tests/test_schedule_operations_command.py. Cross-array work-reconciliation ID disjointness is a post-schema semantic invariant exercised by the contract test because standard JSON Schema cannot compare values across sibling arrays.",
   "fixtures": [
     {
       "fixture_id": "request.agenda_local_day",

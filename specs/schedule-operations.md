@@ -1,6 +1,6 @@
 # Spine Operational Schedule Lifecycle
 
-Status: Draft pre-implementation contract
+Status: Implemented schema-7 contract
 Scope: Cross-item agenda readback, atomic whole-schedule mutation, terminal cancellation, and notification-work reconciliation
 Created: 2026-08-16
 
@@ -28,7 +28,7 @@ This specification depends on:
 - `specs/agent-command-contract.md` for shared command, replay, stale-version, error, dry-run, and CLI rules; and
 - `specs/architecture.md` for provider-independent orchestration and external-side-effect boundaries.
 
-The proposed version facts are:
+The implemented version facts are:
 
 - `spine.schedule-operations-normalization.v1`;
 - `spine.schedule-agenda.v1` and `spine.schedule-agenda-response.v1`;
@@ -37,7 +37,7 @@ The proposed version facts are:
 
 The exact machine shapes live in `contracts/schemas/schedule-agenda-*.schema.json`, `contracts/schemas/schedule-update-*.schema.json`, and `contracts/schemas/schedule-cancel-*.schema.json`.
 
-These facts are proposed, not implemented. Until executable behavior and behavioral tests land, `system.info.implemented_contract_versions` MUST NOT advertise them and the runtime MUST return `unsupported_command` for these command identifiers.
+The runtime advertises these facts through `system.info.implemented_contract_versions`. Behavioral conformance, including agenda snapshot pagination, atomic update/reconciliation/materialization, cancellation, replay, dry run, and no-send behavior, lives in `tests/test_schedule_operations_command.py`.
 
 ## 3. Shared Boundary
 

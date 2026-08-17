@@ -9,7 +9,7 @@ Contract version: `spine.schedule-show.v1`
 
 The command is read-only. It creates no item version, policy, work row, audit row, receipt, projection, or side-effect attempt and invokes no adapter.
 
-This command remains the canonical deep readback for one known item. The proposed cross-item `agenda.show` range view is specified separately in `specs/schedule-operations.md` and does not replace this evidence surface.
+This command remains the canonical deep readback for one known item. The implemented cross-item `agenda.show` range view is specified separately in `specs/schedule-operations.md` and does not replace this evidence surface.
 
 ## 2. Request
 

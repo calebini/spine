@@ -63,7 +63,7 @@ Version 1 intentionally does not support:
 
 These exclusions keep the first composite boundary small while preserving the complete lower-level contract family for advanced authoring.
 
-The proposed `schedule.update` and `schedule.cancel` lifecycle surfaces are specified separately in `specs/schedule-operations.md`; their existence does not broaden this implemented creation contract.
+The implemented `schedule.update` and `schedule.cancel` lifecycle surfaces are specified separately in `specs/schedule-operations.md`; their existence does not broaden this creation contract.
 
 ## 4. Request Contract
 

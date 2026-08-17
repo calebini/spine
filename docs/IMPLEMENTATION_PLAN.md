@@ -36,15 +36,15 @@ The `spine.schedule-compact.v1` CLI projection provides audit-complete, chat-siz
 
 The read-only `schedule.build` command implements `spine.schedule-countdown-builder.v1`. It compiles an explicit reference instant plus relative event delay and reminder cadence into a normal, fully pinned `schedule.create` request. Its first tested profile—event in two hours, remind every 30 minutes until start—resolves the route and timezone version, bounds four work opportunities, performs no write, and feeds the existing atomic authoring path unchanged.
 
-## Proposed Next Fat Slice: Operational Schedule Lifecycle
+## Delivered Fat Slice: Operational Schedule Lifecycle
 
-`specs/schedule-operations.md` now defines the pre-implementation contract family for daily schedule operation after creation:
+`specs/schedule-operations.md` defines the implemented contract family for daily schedule operation after creation:
 
 - `agenda.show` provides one bounded cross-item local-time agenda with recurrence expansion and snapshot-bound pagination;
 - `schedule.update` atomically changes whole-item schedule truth, whole-series recurrence, reminder policies, and delivery routing while reconciling obsolete never-started work and optionally materializing a replacement horizon; and
 - `schedule.cancel` performs a type-neutral terminal transition and cancels all never-started notification work without rewriting started or terminal evidence.
 
-The structural schemas and fixtures are present, but no runtime command, version declaration, migration, or operator guide claims implementation. Before code, run a bounded contract audit focused on agenda selection/order/cursor identity, reminder key continuity, recurrence replacement, exact unstarted-work classification, effect precedence, receipt reconstruction, and failure atomicity. Implementation should then land as one environment-sized service-layer slice over existing engines rather than as public subcommand chaining.
+The implementation is one environment-sized service-layer slice over the existing schema-7 engines rather than public subcommand chaining. It declares the complete version family, exposes all three commands through transport-neutral dispatch and the generic CLI, writes deterministic receipts and audits, preserves immutable canonical detail, supports dry run and replay, and has behavioral coverage for agenda selection/cursors, recurrence replacement, reminder replacement, reconciliation, bounded materialization, cancellation, and no-send behavior. Schema 7 already represented every required fact, so no migration was added.
 
 ## Delivery Goal
 
@@ -60,7 +60,7 @@ The delivery is intentionally broad because recurrence identity, occurrence prov
 - `specs/agent-command-contract.md`: public command and receipt behavior.
 - `specs/schedule-show.md`: canonical aggregate schedule and delivery-lifecycle readback.
 - `specs/schedule-operator-tools.md`: relative countdown compilation and compact operator projection.
-- `specs/schedule-operations.md`: proposed cross-item agenda and atomic schedule update/cancel reconciliation lifecycle.
+- `specs/schedule-operations.md`: implemented cross-item agenda and atomic schedule update/cancel reconciliation lifecycle.
 - `contracts/schemas/recurrence-*.schema.json` and `contracts/schemas/notification-*.schema.json`: public machine shapes.
 - `contracts/vector-manifest.json`: computed identity and behavior evidence.
 

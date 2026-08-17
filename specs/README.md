@@ -11,7 +11,7 @@ Current spec surface:
 - `schedule-create.md`: implemented atomic operator-facing creation of one scheduled event/task, initial reminder policies, and optional bounded work
 - `schedule-show.md`: implemented canonical readback of current schedule, notification, work, route, and delivery-attempt evidence
 - `schedule-operator-tools.md`: implemented relative-event countdown request building and compact schedule operator projections
-- `schedule-operations.md`: proposed cross-item agenda, atomic whole-schedule update, terminal cancellation, and mandatory notification-work reconciliation
+- `schedule-operations.md`: implemented cross-item agenda, atomic whole-schedule update, terminal cancellation, and mandatory notification-work reconciliation
 - `agent-command-contract.md`: draft agent-facing command/request contract for authoring and inspecting Spine coordination truth
 - `SPINE_SPEC_VERSIONING_AND_FREEZE_POLICY.md`: lightweight policy for spec versions, runtime declarations, and one-way freeze-manifest pinning
 - `decisions/0001-kinflow-is-donor-not-foundation.md`: accepted decision on the Kinflow relationship
@@ -33,11 +33,11 @@ Executable contract artifacts:
 - `../contracts/schemas/schedule-compact-response.schema.json`: compact schedule create/readback operator projection
 - `../contracts/schedule-operator-fixture-manifest.json`: relative-countdown builder fixture index
 - `../tests/fixtures/schedule_operator/`: checked-in operator-builder request examples
-- `../contracts/schedule-operations-fixture-manifest.json`: proposed operational-lifecycle structural fixture index
-- `../contracts/schemas/schedule-operations-types.schema.json`: shared proposed operational-lifecycle machine types
-- `../contracts/schemas/schedule-{agenda,update,cancel}-*.schema.json`: proposed agenda/update/cancel request and response contracts
+- `../contracts/schedule-operations-fixture-manifest.json`: implemented operational-lifecycle structural fixture index
+- `../contracts/schemas/schedule-operations-types.schema.json`: shared operational-lifecycle machine types
+- `../contracts/schemas/schedule-{agenda,update,cancel}-*.schema.json`: implemented agenda/update/cancel request and response contracts
 - `../contracts/schemas/schedule-operation-failure-*.schema.json`: shared failure-response and state-aware semantic-failure scenario contracts
-- `../tests/fixtures/schedule_operations/contracts/`: proposed operational-lifecycle structural examples and no-mutation failure scenarios
+- `../tests/fixtures/schedule_operations/contracts/`: operational-lifecycle structural examples and no-mutation failure scenarios
 
 Spec status labels:
 

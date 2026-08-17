@@ -285,9 +285,12 @@ The executable example captures these with `jq` and stops when any expected coun
 |---|---|---:|---:|
 | Inspect local authority | `system.info` | No | No |
 | Verify one complete schedule lifecycle | `schedule.show` | No | No |
+| Read a bounded cross-item agenda | `agenda.show` | No | No |
 | Bootstrap/update actor | `subject.upsert` | Yes | No |
 | Create/update delivery endpoint | `delivery_target.upsert` | Yes | No |
 | Atomically create scheduled item + reminders | `schedule.create` | Yes | No |
+| Atomically update schedule truth and reconcile work | `schedule.update` | Yes | No |
+| Cancel a schedule and never-started work | `schedule.cancel` | Yes | No |
 | Author recurring event | `event.create` | Yes | No |
 | Attach recurrence to non-recurring event | `event.reschedule` | Yes | No |
 | Author recurring task | `task.create` | Yes | No |
@@ -311,9 +314,9 @@ Use these in order when more detail is needed:
 
 1. `docs/AGENT_OPERATOR_GUIDE.md` — operations, migration, worker modes, inspection, and troubleshooting.
 2. `specs/agent-command-contract.md` — exact public command behavior and errors.
-3. `specs/schedule-create.md`, `specs/schedule-show.md`, `specs/recurrence.md`, and `specs/notifications.md` — atomic orchestration, readback, scheduling semantics, and identity.
+3. `specs/schedule-create.md`, `specs/schedule-show.md`, `specs/schedule-operations.md`, `specs/recurrence.md`, and `specs/notifications.md` — atomic orchestration, readback, operational lifecycle, scheduling semantics, and identity.
 4. `contracts/schemas/schedule-*.schema.json`, `contracts/schemas/recurrence-*.schema.json`, and `contracts/schemas/notification-*.schema.json` — machine-readable shapes.
-5. `tests/fixtures/schedule_create/contracts/`, `tests/fixtures/recurrence/contracts/`, and `tests/fixtures/notifications/contracts/` — copyable structural examples.
+5. `tests/fixtures/schedule_create/contracts/`, `tests/fixtures/schedule_operations/contracts/`, `tests/fixtures/recurrence/contracts/`, and `tests/fixtures/notifications/contracts/` — copyable structural examples.
 6. `tests/fixtures/recurrence/vectors/` and `tests/fixtures/notifications/vectors/` — computed identity and expansion evidence.
 
 Never infer a write from the relational schema. Use public commands and verify the structured response plus ledger readback.
