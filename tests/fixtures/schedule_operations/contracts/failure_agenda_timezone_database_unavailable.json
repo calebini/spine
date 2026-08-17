@@ -1,0 +1,30 @@
+{
+  "scenario_id": "agenda.timezone_database_unavailable",
+  "command": "agenda.show",
+  "request": {
+    "contract_version": "spine.schedule-agenda.v1",
+    "evaluated_at_utc": "2035-02-14T12:00:00Z",
+    "range_start_local": "2035-02-14T00:00:00",
+    "range_end_local": "2035-02-15T00:00:00",
+    "timezone": "America/Toronto",
+    "timezone_database_version": { "kind": "explicit", "version": "2035a" },
+    "limit": "100"
+  },
+  "ledger_context": {
+    "timezone_database_available": false,
+    "range_start_resolution": "unambiguous",
+    "range_end_resolution": "unambiguous"
+  },
+  "expected_validation_phase": "A4",
+  "expected_response": {
+    "ok": false,
+    "command": "agenda.show",
+    "error": {
+      "code": "environment_failure",
+      "message": "requested timezone database version is unavailable",
+      "field": "timezone_database_version"
+    }
+  },
+  "mutation": "none",
+  "command_receipt_written": false
+}

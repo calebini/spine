@@ -1,7 +1,7 @@
 {
   "schema_version": "spine.schedule-operations-contract-fixtures.v1",
   "fixture_scope": "structural_examples",
-  "fixture_scope_note": "These fixtures validate proposed request and response shapes only. Generated identities, hashes, timezone resolutions, occurrence facts, reconciliation selections, and effects are illustrative until behavioral implementation and computed vectors land. Cross-array work-reconciliation ID disjointness is a post-schema semantic invariant exercised by the contract test because standard JSON Schema cannot compare values across sibling arrays.",
+  "fixture_scope_note": "Request and success-response fixtures validate proposed structural shapes. Entries with kind semantic_failure_scenario combine a schema-valid command request, minimal ledger/environment preconditions, and the exact required no-mutation failure response; the executable oracle evaluates those preconditions in normative validation order. Generated identities, hashes, timezone resolutions, occurrence facts, reconciliation selections, and effects remain illustrative until behavioral implementation and computed vectors land. Cross-array work-reconciliation ID disjointness is a post-schema semantic invariant exercised by the contract test because standard JSON Schema cannot compare values across sibling arrays.",
   "fixtures": [
     {
       "fixture_id": "request.agenda_local_day",
@@ -44,6 +44,66 @@
       "kind": "success_response",
       "fixture": "tests/fixtures/schedule_operations/contracts/response_cancel_event.json",
       "schema": "contracts/schemas/schedule-cancel-response.schema.json"
+    },
+    {
+      "fixture_id": "failure.agenda_ambiguous_range_start",
+      "kind": "semantic_failure_scenario",
+      "fixture": "tests/fixtures/schedule_operations/contracts/failure_agenda_ambiguous_range_start.json",
+      "schema": "contracts/schemas/schedule-operation-failure-scenario.schema.json"
+    },
+    {
+      "fixture_id": "failure.agenda_timezone_database_unavailable",
+      "kind": "semantic_failure_scenario",
+      "fixture": "tests/fixtures/schedule_operations/contracts/failure_agenda_timezone_database_unavailable.json",
+      "schema": "contracts/schemas/schedule-operation-failure-scenario.schema.json"
+    },
+    {
+      "fixture_id": "failure.agenda_stale_cursor",
+      "kind": "semantic_failure_scenario",
+      "fixture": "tests/fixtures/schedule_operations/contracts/failure_agenda_stale_cursor.json",
+      "schema": "contracts/schemas/schedule-operation-failure-scenario.schema.json"
+    },
+    {
+      "fixture_id": "failure.update_unsupported_primary_anchor",
+      "kind": "semantic_failure_scenario",
+      "fixture": "tests/fixtures/schedule_operations/contracts/failure_update_unsupported_primary_anchor.json",
+      "schema": "contracts/schemas/schedule-operation-failure-scenario.schema.json"
+    },
+    {
+      "fixture_id": "failure.update_end_anchored_scheduled_time",
+      "kind": "semantic_failure_scenario",
+      "fixture": "tests/fixtures/schedule_operations/contracts/failure_update_end_anchored_scheduled_time.json",
+      "schema": "contracts/schemas/schedule-operation-failure-scenario.schema.json"
+    },
+    {
+      "fixture_id": "failure.update_recurring_time_without_recurrence",
+      "kind": "semantic_failure_scenario",
+      "fixture": "tests/fixtures/schedule_operations/contracts/failure_update_recurring_time_without_recurrence.json",
+      "schema": "contracts/schemas/schedule-operation-failure-scenario.schema.json"
+    },
+    {
+      "fixture_id": "failure.update_terminal_target",
+      "kind": "semantic_failure_scenario",
+      "fixture": "tests/fixtures/schedule_operations/contracts/failure_update_terminal_target.json",
+      "schema": "contracts/schemas/schedule-operation-failure-scenario.schema.json"
+    },
+    {
+      "fixture_id": "failure.update_policy_key_mismatch",
+      "kind": "semantic_failure_scenario",
+      "fixture": "tests/fixtures/schedule_operations/contracts/failure_update_policy_key_mismatch.json",
+      "schema": "contracts/schemas/schedule-operation-failure-scenario.schema.json"
+    },
+    {
+      "fixture_id": "failure.update_duplicate_normalized_policy",
+      "kind": "semantic_failure_scenario",
+      "fixture": "tests/fixtures/schedule_operations/contracts/failure_update_duplicate_normalized_policy.json",
+      "schema": "contracts/schemas/schedule-operation-failure-scenario.schema.json"
+    },
+    {
+      "fixture_id": "failure.cancel_terminal_target",
+      "kind": "semantic_failure_scenario",
+      "fixture": "tests/fixtures/schedule_operations/contracts/failure_cancel_terminal_target.json",
+      "schema": "contracts/schemas/schedule-operation-failure-scenario.schema.json"
     }
   ]
 }

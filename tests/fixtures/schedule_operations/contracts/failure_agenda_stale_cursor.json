@@ -1,0 +1,33 @@
+{
+  "scenario_id": "agenda.stale_cursor",
+  "command": "agenda.show",
+  "request": {
+    "contract_version": "spine.schedule-agenda.v1",
+    "evaluated_at_utc": "2035-02-14T12:00:00Z",
+    "range_start_local": "2035-02-14T00:00:00",
+    "range_end_local": "2035-02-15T00:00:00",
+    "timezone": "America/Toronto",
+    "timezone_database_version": { "kind": "explicit", "version": "2035a" },
+    "limit": "100",
+    "cursor": "opaque.cursor.bound.to.prior.snapshot"
+  },
+  "ledger_context": {
+    "timezone_database_available": true,
+    "range_start_resolution": "unambiguous",
+    "range_end_resolution": "unambiguous",
+    "cursor_query_matches": true,
+    "cursor_snapshot_matches": false
+  },
+  "expected_validation_phase": "A6",
+  "expected_response": {
+    "ok": false,
+    "command": "agenda.show",
+    "error": {
+      "code": "stale_cursor",
+      "message": "agenda source snapshot changed after the cursor was issued",
+      "field": "cursor"
+    }
+  },
+  "mutation": "none",
+  "command_receipt_written": false
+}

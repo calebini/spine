@@ -162,7 +162,9 @@ The closed request requires:
 - non-empty `patch`; and
 - `materialization`, explicitly `none` or `bounded`.
 
-The target MUST be an active-shell scheduled event or open task. A terminal detail state fails with `invalid_state_transition`. Version 1 supports only a primary `local_instant` event-start or task-due anchor. An event with an end anchor cannot change its start through this command because an implicit duration policy is undefined; callers use `event.reschedule` until a later composite duration contract exists.
+The target MUST be an active-shell scheduled event or open task whose primary event-start or task-due anchor has `anchor_kind=local_instant`. This target-shape requirement applies to every Version 1 patch dimension, including item-only, reminder-only, delivery-only, and reconciliation-only updates; another primary anchor kind fails with `invalid_request`, `field=primary_schedule.anchor_kind`. A terminal detail state fails with `invalid_state_transition`, `field=detail_status`.
+
+An otherwise eligible event may retain an end anchor while receiving an item, recurrence, delivery, reminder, or reconciliation-only update. When such an event has an end anchor, a request containing `patch.scheduled_time` fails with `invalid_request`, `field=patch.scheduled_time`, because Version 1 defines neither implicit duration preservation nor end-anchor replacement. Callers use `event.reschedule` for that temporal mutation until a later composite duration contract exists. The end anchor alone does not make non-time patch dimensions ineligible.
 
 The patch may contain `item`, `scheduled_time`, `recurrence`, `delivery`, and `reminders`. Omitted dimensions copy current truth exactly. At least one dimension is required, although normalized equality may produce a no-op.
 
@@ -259,6 +261,19 @@ Compatible replay returns `effect=schedule_cancel_replay` while the nested recei
 
 ## 7. Atomicity, Validation, and Failure Ordering
 
+`agenda.show` is read-only and uses this ordered validation/evaluation sequence:
+
+A1. parse the closed request object and validate field shapes;
+A2. verify ledger schema and the declared agenda contract family;
+A3. decode an optional cursor and compare its bound request facts;
+A4. resolve the view timezone and timezone-database directive;
+A5. resolve both local boundaries and validate the normalized range;
+A6. derive the current source snapshot and compare an optional cursor-bound snapshot;
+A7. resolve stored source time facts, expand/select entries, and derive requested summaries and diagnostics; and
+A8. construct the ordered response and verify response invariants.
+
+It performs no write, creates no replay receipt, and fails before returning a partial page.
+
 Each fresh write is one SQLite transaction and uses internal domain/persistence services rather than independently committing public handlers.
 
 Shared validation order is:
@@ -278,7 +293,43 @@ Shared validation order is:
 
 Same-command replay and cross-command command-ID collision precede stale target-version checks. No other semantic validation may allow an incompatible stale request to mutate.
 
-Any failure rolls back the complete command. There is no branch that keeps a truth mutation while losing required reconciliation, keeps cancelled work while losing replacement work, materializes a prefix, or writes a receipt for a rolled-back transaction.
+Any failure detected before a successful SQLite commit rolls back the complete command. There is no branch that keeps a truth mutation while losing required reconciliation, keeps cancelled work while losing replacement work, materializes a prefix, or writes a receipt for a rolled-back transaction. If Phase 12 detects contradictory evidence only after a successful commit, the command returns `runtime_failure` and preserves the committed command receipt as the authoritative replay index; it MUST NOT roll back selected rows independently or retry automatically under a new command ID.
+
+### 7.1 Command-Specific Failure Matrix
+
+The table below closes the Version 1 failures that depend on schedule-operation semantics rather than JSON Schema alone. `A` phase labels refer to the agenda sequence; numeric phases refer to the write-command sequence. When a row names two alternative fields, the implementation reports the first responsible field evaluated in the written order. Except for the explicitly post-commit Phase 12 branch above, every listed failure returns `ok=false`, persists no item, recurrence, policy, provenance, opportunity, work, audit, attempt, or command-receipt row, and leaves no partial mutation. The `error.message` is stable within an implementation release but is not a replay or compatibility fact.
+
+| Command | Condition | Phase | `error.code` | `error.field` |
+|---|---|---:|---|---|
+| `agenda.show` | unknown view timezone | A4 | `invalid_request` | `timezone` |
+| `agenda.show` | requested explicit or resolved `system_current` timezone-database version is unavailable | A4 | `environment_failure` | `timezone_database_version` |
+| `agenda.show` | range start is nonexistent or ambiguous in the accepted view timezone | A5 | `invalid_request` | `range_start_local` |
+| `agenda.show` | range end is nonexistent or ambiguous in the accepted view timezone | A5 | `invalid_request` | `range_end_local` |
+| `agenda.show` | normalized range is empty, reversed, or longer than 366 elapsed days | A5 | `invalid_request` | `range_end_local` |
+| `agenda.show` | cursor request facts differ from the cursor-bound query | A3 | `invalid_request` | `cursor` |
+| `agenda.show` | a cursor-bound source snapshot has changed | A6 | `stale_cursor` | `cursor` |
+| `agenda.show` | a selected stored source requires unavailable pinned timezone data | A7 | `environment_failure` | `primary_schedule.timezone_database_version` |
+| `schedule.update` | target shell is archived | 6 | `invalid_state_transition` | `status` |
+| `schedule.update` | target event/task detail is terminal | 6 | `invalid_state_transition` | `detail_status` |
+| `schedule.update` | target version is not current | 6 | `stale_version` | `target_version` |
+| `schedule.update` | primary event-start/task-due anchor is not `local_instant` | 7 | `invalid_request` | `primary_schedule.anchor_kind` |
+| `schedule.update` | `patch.scheduled_time` targets an event with an end anchor | 7 | `invalid_request` | `patch.scheduled_time` |
+| `schedule.update` | a recurring target changes `scheduled_time` without complete recurrence replacement | 7 | `missing_required_field` | `patch.recurrence` |
+| `schedule.update` | exactly one reminder intent/policy identity is supplied | 7 | `invalid_request` | the missing identity field under `patch.reminders[n]` |
+| `schedule.update` | a policy key is rebound to a different current intent | 7 | `semantic_conflict` | `patch.reminders[n].policy_key` |
+| `schedule.update` | two desired entries normalize to the same notification policy | 9 | `semantic_conflict` | `patch.reminders` |
+| `schedule.update` | a new reminder has no inherited or supplied delivery route | 7 | `missing_required_field` | `patch.delivery` |
+| `schedule.update` | delivery-target resolution fails | 8 | inherited exact code and field from `schedule.create` | inherited responsible `patch.delivery` field |
+| `schedule.update` | successor recurrence, reminder, or materialization normalization fails | 9 | inherited exact code | inherited narrowest responsible `patch` or `materialization` field |
+| `schedule.update` | required recurrence provenance cannot be resolved or regenerated | 10 | inherited exact provenance failure code | inherited recurrence-provenance field |
+| `schedule.cancel` | target shell is archived | 6 | `invalid_state_transition` | `status` |
+| `schedule.cancel` | event is not `scheduled` or task is not `open` | 6 | `invalid_state_transition` | `detail_status` |
+| `schedule.cancel` | target version is not current | 6 | `stale_version` | `target_version` |
+| either write command | schema/runtime does not support the declared contract family | 4 | `environment_failure` | the responsible schema or contract field |
+| either write command | commit invariant fails before commit | 11 | `runtime_failure` | omitted unless one field is solely responsible |
+| either write command | committed receipt-bound readback disagrees | 12 | `runtime_failure` | omitted unless one field is solely responsible |
+
+Request-shape failures retain the common codes, fields, and CLI exits from `specs/agent-command-contract.md`. Within one phase, rows are evaluated in their table order for the applicable command except that exact narrow-field schema validation precedes stored-state semantic validation. Global command-ID collision and compatible same-command replay remain write Phase 3: compatible replay returns its stored success before target lifecycle, version, timezone, or patch semantic checks; incompatible same-command or cross-command reuse fails with `semantic_conflict`, `field=command_id`; neither branch creates a new domain row. Read-only `agenda.show` has no command receipt or replay branch.
 
 ## 8. Receipt and Replay Facts
 

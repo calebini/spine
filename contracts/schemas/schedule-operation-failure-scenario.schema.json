@@ -1,0 +1,118 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cortext.local/spine/contracts/schemas/schedule-operation-failure-scenario.schema.json",
+  "title": "Spine Operational Schedule Semantic Failure Scenario v1",
+  "type": "object",
+  "required": [
+    "scenario_id", "command", "request", "ledger_context",
+    "expected_validation_phase", "expected_response", "mutation", "command_receipt_written"
+  ],
+  "properties": {
+    "scenario_id": { "type": "string", "pattern": "^[a-z][a-z0-9_.-]+$" },
+    "command": { "enum": ["agenda.show", "schedule.update", "schedule.cancel"] },
+    "request": {
+      "oneOf": [
+        { "$ref": "schedule-agenda-request.schema.json" },
+        { "$ref": "schedule-update-request.schema.json" },
+        { "$ref": "schedule-cancel-request.schema.json" }
+      ]
+    },
+    "ledger_context": { "$ref": "#/$defs/ledgerContext" },
+    "expected_validation_phase": { "type": "string", "pattern": "^(A[1-8]|3|4|5|6|7|8|9|10|11|12)$" },
+    "expected_response": { "$ref": "schedule-operation-failure-response.schema.json" },
+    "mutation": { "const": "none" },
+    "command_receipt_written": { "const": false }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "command": { "const": "agenda.show" } }, "required": ["command"] },
+      "then": {
+        "properties": {
+          "request": { "$ref": "schedule-agenda-request.schema.json" },
+          "ledger_context": {
+            "required": [
+              "timezone_database_available", "range_start_resolution", "range_end_resolution"
+            ]
+          },
+          "expected_response": {
+            "properties": { "command": { "const": "agenda.show" } }
+          }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "command": { "const": "schedule.update" } }, "required": ["command"] },
+      "then": {
+        "properties": {
+          "request": { "$ref": "schedule-update-request.schema.json" },
+          "ledger_context": {
+            "required": [
+              "shell_status", "item_type", "detail_status", "current_version",
+              "primary_anchor_kind", "event_has_end_anchor", "has_recurrence"
+            ]
+          },
+          "expected_response": {
+            "properties": { "command": { "const": "schedule.update" } }
+          }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "command": { "const": "schedule.cancel" } }, "required": ["command"] },
+      "then": {
+        "properties": {
+          "request": { "$ref": "schedule-cancel-request.schema.json" },
+          "ledger_context": {
+            "required": ["shell_status", "item_type", "detail_status", "current_version"]
+          },
+          "expected_response": {
+            "properties": { "command": { "const": "schedule.cancel" } }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "request": { "required": ["cursor"] }
+        },
+        "required": ["request"]
+      },
+      "then": {
+        "properties": {
+          "ledger_context": {
+            "required": ["cursor_query_matches", "cursor_snapshot_matches"]
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "ledgerContext": {
+      "type": "object",
+      "properties": {
+        "shell_status": { "enum": ["active", "archived"] },
+        "item_type": { "enum": ["event", "task"] },
+        "detail_status": { "enum": ["scheduled", "cancelled", "open", "done"] },
+        "current_version": { "$ref": "notification-types.schema.json#/$defs/decimalPositive" },
+        "primary_anchor_kind": {
+          "enum": ["local_date", "local_instant", "instant_utc", "utc_window", "local_window"]
+        },
+        "event_has_end_anchor": { "type": "boolean" },
+        "has_recurrence": { "type": "boolean" },
+        "timezone_database_available": { "type": "boolean" },
+        "range_start_resolution": { "enum": ["unambiguous", "ambiguous", "nonexistent"] },
+        "range_end_resolution": { "enum": ["unambiguous", "ambiguous", "nonexistent"] },
+        "cursor_query_matches": { "type": "boolean" },
+        "cursor_snapshot_matches": { "type": "boolean" },
+        "policy_key_mapping_matches": { "type": "boolean" },
+        "normalized_policy_hashes": {
+          "type": "array",
+          "items": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

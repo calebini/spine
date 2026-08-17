@@ -36,7 +36,8 @@ Executable contract artifacts:
 - `../contracts/schedule-operations-fixture-manifest.json`: proposed operational-lifecycle structural fixture index
 - `../contracts/schemas/schedule-operations-types.schema.json`: shared proposed operational-lifecycle machine types
 - `../contracts/schemas/schedule-{agenda,update,cancel}-*.schema.json`: proposed agenda/update/cancel request and response contracts
-- `../tests/fixtures/schedule_operations/contracts/`: proposed operational-lifecycle structural examples
+- `../contracts/schemas/schedule-operation-failure-*.schema.json`: shared failure-response and state-aware semantic-failure scenario contracts
+- `../tests/fixtures/schedule_operations/contracts/`: proposed operational-lifecycle structural examples and no-mutation failure scenarios
 
 Spec status labels:
 

@@ -1,0 +1,30 @@
+{
+  "scenario_id": "agenda.ambiguous_range_start",
+  "command": "agenda.show",
+  "request": {
+    "contract_version": "spine.schedule-agenda.v1",
+    "evaluated_at_utc": "2035-11-04T04:00:00Z",
+    "range_start_local": "2035-11-04T01:30:00",
+    "range_end_local": "2035-11-04T03:00:00",
+    "timezone": "America/Toronto",
+    "timezone_database_version": { "kind": "explicit", "version": "2035a" },
+    "limit": "100"
+  },
+  "ledger_context": {
+    "timezone_database_available": true,
+    "range_start_resolution": "ambiguous",
+    "range_end_resolution": "unambiguous"
+  },
+  "expected_validation_phase": "A5",
+  "expected_response": {
+    "ok": false,
+    "command": "agenda.show",
+    "error": {
+      "code": "invalid_request",
+      "message": "agenda range start is ambiguous in the accepted view timezone",
+      "field": "range_start_local"
+    }
+  },
+  "mutation": "none",
+  "command_receipt_written": false
+}

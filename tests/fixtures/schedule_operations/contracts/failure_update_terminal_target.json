@@ -1,0 +1,35 @@
+{
+  "scenario_id": "update.terminal_target",
+  "command": "schedule.update",
+  "request": {
+    "contract_version": "spine.schedule-update.v1",
+    "command_id": "schedule-update-terminal-event-001",
+    "actor_subject_id": "subject_agent",
+    "item_id": "item_cancelled_event",
+    "target_version": "4",
+    "updated_at_utc": "2035-02-10T12:00:00Z",
+    "patch": { "item": { "title": "Cannot update" } },
+    "materialization": { "mode": "none" }
+  },
+  "ledger_context": {
+    "shell_status": "active",
+    "item_type": "event",
+    "detail_status": "cancelled",
+    "current_version": "4",
+    "primary_anchor_kind": "local_instant",
+    "event_has_end_anchor": false,
+    "has_recurrence": false
+  },
+  "expected_validation_phase": "6",
+  "expected_response": {
+    "ok": false,
+    "command": "schedule.update",
+    "error": {
+      "code": "invalid_state_transition",
+      "message": "schedule.update requires a scheduled event or open task",
+      "field": "detail_status"
+    }
+  },
+  "mutation": "none",
+  "command_receipt_written": false
+}

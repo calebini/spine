@@ -1,0 +1,43 @@
+{
+  "scenario_id": "update.end_anchored_scheduled_time",
+  "command": "schedule.update",
+  "request": {
+    "contract_version": "spine.schedule-update.v1",
+    "command_id": "schedule-update-end-anchored-time-001",
+    "actor_subject_id": "subject_agent",
+    "item_id": "item_timed_event_with_end",
+    "target_version": "3",
+    "updated_at_utc": "2035-02-10T12:00:00Z",
+    "patch": {
+      "scheduled_time": {
+        "time_basis": "local_instant",
+        "local_date": "2035-02-14",
+        "local_time": "11:00:00",
+        "timezone": "America/Toronto",
+        "timezone_database_version": { "kind": "explicit", "version": "2035a" }
+      }
+    },
+    "materialization": { "mode": "none" }
+  },
+  "ledger_context": {
+    "shell_status": "active",
+    "item_type": "event",
+    "detail_status": "scheduled",
+    "current_version": "3",
+    "primary_anchor_kind": "local_instant",
+    "event_has_end_anchor": true,
+    "has_recurrence": false
+  },
+  "expected_validation_phase": "7",
+  "expected_response": {
+    "ok": false,
+    "command": "schedule.update",
+    "error": {
+      "code": "invalid_request",
+      "message": "schedule.update v1 cannot replace the start of an event with an end anchor",
+      "field": "patch.scheduled_time"
+    }
+  },
+  "mutation": "none",
+  "command_receipt_written": false
+}

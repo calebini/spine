@@ -1,0 +1,55 @@
+{
+  "scenario_id": "update.policy_key_mismatch",
+  "command": "schedule.update",
+  "request": {
+    "contract_version": "spine.schedule-update.v1",
+    "command_id": "schedule-update-policy-key-mismatch-001",
+    "actor_subject_id": "subject_agent",
+    "item_id": "item_recurring_event",
+    "target_version": "3",
+    "updated_at_utc": "2035-02-10T12:00:00Z",
+    "patch": {
+      "reminders": [
+        {
+          "policy_key": "countdown",
+          "notification_intent_id": "notification_intent_wrong",
+          "notification_policy_id": "notification_policy_wrong",
+          "schedule": {
+            "kind": "offsets",
+            "at": [
+              {
+                "kind": "target_offset",
+                "offset_basis": "elapsed",
+                "offset_seconds": "-1800"
+              }
+            ]
+          },
+          "late_handling": { "kind": "skip" }
+        }
+      ]
+    },
+    "materialization": { "mode": "none" }
+  },
+  "ledger_context": {
+    "shell_status": "active",
+    "item_type": "event",
+    "detail_status": "scheduled",
+    "current_version": "3",
+    "primary_anchor_kind": "local_instant",
+    "event_has_end_anchor": false,
+    "has_recurrence": true,
+    "policy_key_mapping_matches": false
+  },
+  "expected_validation_phase": "7",
+  "expected_response": {
+    "ok": false,
+    "command": "schedule.update",
+    "error": {
+      "code": "semantic_conflict",
+      "message": "policy key does not match its current notification intent",
+      "field": "patch.reminders[0].policy_key"
+    }
+  },
+  "mutation": "none",
+  "command_receipt_written": false
+}
