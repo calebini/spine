@@ -1,0 +1,75 @@
+{
+  "ok": true,
+  "command": "schedule.update",
+  "response_contract": "spine.schedule-update-response.v1",
+  "effect": "schedule_updated_and_reconciled",
+  "command_id": "schedule-update-title-reconcile-001",
+  "command_receipt_id": "command_receipt_schedule_update_title_reconcile_001",
+  "audit_id": "audit_schedule_update_title_reconcile_001",
+  "item_id": "item_recurring_event",
+  "item_type": "event",
+  "target_version": "4",
+  "current_version": "5",
+  "truth_changed": true,
+  "work_changed": true,
+  "changed_dimensions": ["item"],
+  "scheduled_time": {
+    "anchor_id": "anchor_recurring_event_current",
+    "time_basis": "local_instant",
+    "local_date": "2035-02-14",
+    "local_time": "11:00:00",
+    "timezone": "America/Toronto",
+    "timezone_database_version": "2035a",
+    "resolution_kind": "unambiguous",
+    "utc_instant": "2035-02-14T16:00:00Z",
+    "offset_seconds": "-18000"
+  },
+  "recurrence": {
+    "recurrence_set_id": "recurrence_set_recurring_event",
+    "recurrence_revision_id": "recurrence_revision_recurring_event_004",
+    "revision_number": "2",
+    "normalized_recurrence_set_hash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+    "diagnostics": []
+  },
+  "policies": [
+    {
+      "policy_key": "countdown",
+      "notification_intent_id": "notification_intent_countdown",
+      "notification_policy_id": "notification_policy_countdown_v5",
+      "notification_schedule_id": "notification_schedule_countdown_v5",
+      "normalized_notification_schedule_hash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+      "status": "active",
+      "effect": "retained"
+    }
+  ],
+  "disabled_notification_intent_ids": [],
+  "work_reconciliation": {
+    "state": "reconciled",
+    "cancelled_work_instance_ids": ["work_obsolete_unstarted_001"],
+    "retained_work_instance_ids": ["work_current_eligible_001"],
+    "protected_stale_work_instance_ids": ["work_obsolete_started_001"],
+    "created_work_instance_ids": []
+  },
+  "materialization": {
+    "mode": "none",
+    "state": "not_requested",
+    "opportunity_count": "0",
+    "work_instance_count": "0",
+    "opportunity_work": [],
+    "work_instance_ids": []
+  },
+  "phases": {
+    "truth": "updated",
+    "provenance": "retained",
+    "opportunities": "not_requested",
+    "work": "reconciled",
+    "delivery": "not_attempted"
+  },
+  "receipt": {
+    "receipt_contract": "spine.schedule-update-receipt.v1",
+    "command_receipt_id": "command_receipt_schedule_update_title_reconcile_001",
+    "effect": "schedule_updated_and_reconciled",
+    "semantic_facts_hash": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+    "created_at_utc": "2035-02-11T12:00:00Z"
+  }
+}

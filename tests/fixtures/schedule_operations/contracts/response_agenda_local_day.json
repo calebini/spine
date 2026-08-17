@@ -92,5 +92,6 @@
   "included": ["notification_summary", "work_summary"],
   "limit": "100",
   "has_more": false,
+  "next_cursor": null,
   "diagnostics": []
 }

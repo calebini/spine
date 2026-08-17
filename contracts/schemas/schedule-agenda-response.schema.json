@@ -5,7 +5,7 @@
   "type": "object",
   "required": [
     "ok", "command", "response_contract", "evaluated_at_utc", "normalized_range",
-    "query_hash", "source_snapshot_hash", "entries", "included", "limit", "has_more"
+    "query_hash", "source_snapshot_hash", "entries", "included", "limit", "has_more", "next_cursor"
   ],
   "properties": {
     "ok": { "const": true },
@@ -30,7 +30,7 @@
       "pattern": "^([1-9]|[1-9][0-9]|[1-9][0-9]{2}|1000)$"
     },
     "has_more": { "type": "boolean" },
-    "next_cursor": { "type": "string", "minLength": 1 },
+    "next_cursor": { "type": ["string", "null"] },
     "diagnostics": {
       "type": "array",
       "items": { "$ref": "#/$defs/diagnostic" }
@@ -39,8 +39,8 @@
   "allOf": [
     {
       "if": { "properties": { "has_more": { "const": true } }, "required": ["has_more"] },
-      "then": { "required": ["next_cursor"] },
-      "else": { "not": { "required": ["next_cursor"] } }
+      "then": { "properties": { "next_cursor": { "type": "string", "minLength": 1 } } },
+      "else": { "properties": { "next_cursor": { "type": "null" } } }
     }
   ],
   "additionalProperties": false,
@@ -144,15 +144,29 @@
     },
     "diagnostic": {
       "type": "object",
-      "required": ["diagnostic_code", "item_id"],
+      "required": ["diagnostic_code", "item_id", "field"],
       "properties": {
         "diagnostic_code": {
           "enum": ["agenda_item_unscheduled", "agenda_recurrence_candidate_omitted", "agenda_terminal_excluded"]
         },
         "item_id": { "$ref": "notification-types.schema.json#/$defs/id" },
         "occurrence_key": { "$ref": "notification-types.schema.json#/$defs/id" },
-        "field": { "type": "string", "minLength": 1 }
+        "field": { "enum": ["primary_schedule", "recurrence", "detail_status"] }
       },
+      "allOf": [
+        {
+          "if": { "properties": { "diagnostic_code": { "const": "agenda_item_unscheduled" } }, "required": ["diagnostic_code"] },
+          "then": { "properties": { "field": { "const": "primary_schedule" } } }
+        },
+        {
+          "if": { "properties": { "diagnostic_code": { "const": "agenda_recurrence_candidate_omitted" } }, "required": ["diagnostic_code"] },
+          "then": { "properties": { "field": { "const": "recurrence" } } }
+        },
+        {
+          "if": { "properties": { "diagnostic_code": { "const": "agenda_terminal_excluded" } }, "required": ["diagnostic_code"] },
+          "then": { "properties": { "field": { "const": "detail_status" } } }
+        }
+      ],
       "additionalProperties": false
     }
   }

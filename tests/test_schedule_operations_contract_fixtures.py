@@ -37,6 +37,8 @@ class ScheduleOperationsContractFixtureTests(unittest.TestCase):
             schema = _load(ROOT / entry["schema"])
             fixture = _load(ROOT / entry["fixture"])
             Draft202012Validator(schema, registry=self.registry).validate(fixture)
+            if "work_reconciliation" in fixture:
+                self.assertTrue(_work_reconciliation_arrays_are_disjoint(fixture))
 
         self.assertEqual(len(fixture_ids), len(set(fixture_ids)))
         self.assertEqual(len(fixture_paths), len(set(fixture_paths)))
@@ -73,6 +75,70 @@ class ScheduleOperationsContractFixtureTests(unittest.TestCase):
         cancel["deliver"] = True
         self.assertFalse(_valid(cancel_schema, cancel, self.registry))
 
+    def test_agenda_response_cursor_and_diagnostic_shapes_are_deterministic(self) -> None:
+        schema = self.schemas["schedule-agenda-response.schema.json"]
+        response = _load(FIXTURE_DIR / "response_agenda_local_day.json")
+        self.assertTrue(_valid(schema, response, self.registry))
+
+        missing_terminal_cursor = copy.deepcopy(response)
+        del missing_terminal_cursor["next_cursor"]
+        self.assertFalse(_valid(schema, missing_terminal_cursor, self.registry))
+
+        continued_page = copy.deepcopy(response)
+        continued_page["has_more"] = True
+        self.assertFalse(_valid(schema, continued_page, self.registry))
+        continued_page["next_cursor"] = "opaque.cursor"
+        self.assertTrue(_valid(schema, continued_page, self.registry))
+
+        missing_field = copy.deepcopy(response)
+        missing_field["diagnostics"] = [
+            {"diagnostic_code": "agenda_item_unscheduled", "item_id": "item_unscheduled"}
+        ]
+        self.assertFalse(_valid(schema, missing_field, self.registry))
+
+        wrong_field = copy.deepcopy(response)
+        wrong_field["diagnostics"] = [
+            {
+                "diagnostic_code": "agenda_item_unscheduled",
+                "item_id": "item_unscheduled",
+                "field": "recurrence",
+            }
+        ]
+        self.assertFalse(_valid(schema, wrong_field, self.registry))
+
+        valid_diagnostic = copy.deepcopy(response)
+        valid_diagnostic["diagnostics"] = [
+            {
+                "diagnostic_code": "agenda_item_unscheduled",
+                "item_id": "item_unscheduled",
+                "field": "primary_schedule",
+            }
+        ]
+        self.assertTrue(_valid(schema, valid_diagnostic, self.registry))
+
+    def test_work_reconciliation_arrays_are_semantically_disjoint(self) -> None:
+        schema = self.schemas["schedule-update-response.schema.json"]
+        response = _load(
+            FIXTURE_DIR / "response_update_title_with_work_classifications.json"
+        )
+        reconciliation = response["work_reconciliation"]
+
+        self.assertTrue(_valid(schema, response, self.registry))
+        self.assertTrue(_work_reconciliation_arrays_are_disjoint(response))
+        self.assertTrue(reconciliation["retained_work_instance_ids"])
+        self.assertTrue(reconciliation["protected_stale_work_instance_ids"])
+
+        overlapping = copy.deepcopy(response)
+        duplicate_id = overlapping["work_reconciliation"]["retained_work_instance_ids"][0]
+        overlapping["work_reconciliation"]["protected_stale_work_instance_ids"].append(
+            duplicate_id
+        )
+
+        # Draft 2020-12 cannot compare values across sibling arrays, so the
+        # structural schema accepts this and the explicit semantic oracle rejects it.
+        self.assertTrue(_valid(schema, overlapping, self.registry))
+        self.assertFalse(_work_reconciliation_arrays_are_disjoint(overlapping))
+
     def test_proposed_contracts_are_not_declared_as_implemented(self) -> None:
         proposed = {
             "spine.schedule-operations-normalization.v1",
@@ -90,6 +156,31 @@ class ScheduleOperationsContractFixtureTests(unittest.TestCase):
 
 def _valid(schema: dict[str, object], value: dict[str, object], registry: Registry) -> bool:
     return not list(Draft202012Validator(schema, registry=registry).iter_errors(value))
+
+
+def _work_reconciliation_arrays_are_disjoint(value: dict[str, object]) -> bool:
+    reconciliation = value.get("work_reconciliation")
+    if not isinstance(reconciliation, dict):
+        return True
+
+    fields = (
+        "cancelled_work_instance_ids",
+        "retained_work_instance_ids",
+        "protected_stale_work_instance_ids",
+        "created_work_instance_ids",
+    )
+    seen: set[str] = set()
+    for field in fields:
+        identities = reconciliation.get(field)
+        if not isinstance(identities, list) or not all(
+            isinstance(identity, str) for identity in identities
+        ):
+            return False
+        for identity in identities:
+            if identity in seen:
+                return False
+            seen.add(identity)
+    return True
 
 
 def _load(path: Path) -> dict[str, object]:

@@ -106,7 +106,7 @@ Recurring primary anchors expand through `specs/recurrence.md` using expressed-t
 
 A stored local instant MUST resolve using its own pinned timezone and timezone-database version before conversion to the agenda view. An unavailable required pinned version fails closed; the command MUST NOT resolve using different timezone data or silently omit the entry. Recurrence nonexistent-time omission and deterministic ambiguous-time selection remain governed by `specs/recurrence.md` and may emit diagnostics.
 
-Items without a primary scheduled anchor are omitted. When diagnostics are requested, each omission emits `agenda_item_unscheduled` with `item_id`. Other closed agenda diagnostic codes are `agenda_recurrence_candidate_omitted` and `agenda_terminal_excluded`. Diagnostics are ordered by code, item ID, optional occurrence key, then field.
+Items without a primary scheduled anchor are omitted. When diagnostics are requested, each omission emits `agenda_item_unscheduled` with `item_id` and `field=primary_schedule`. Other closed agenda diagnostics are `agenda_recurrence_candidate_omitted` with `field=recurrence` and `agenda_terminal_excluded` with `field=detail_status`. Every diagnostic requires `field`. Diagnostics are ordered by code, item ID, optional occurrence key, then field, with an absent occurrence key sorting before a present value.
 
 ### 4.3 Entry View and Ordering
 
@@ -147,7 +147,7 @@ The first page derives `query_hash` from canonical JSON containing the normalize
 
 The cursor is an opaque integrity-checked encoding of normalization version, query hash, source snapshot hash, and last emitted ordering tuple. A next-page request MUST repeat every non-cursor request fact byte-for-byte. Any query mismatch fails with `invalid_request`, `field=cursor`; any changed source snapshot fails with `stale_cursor`, `field=cursor`. The command never continues against a silently changed agenda snapshot.
 
-The response returns `limit`, `has_more`, optional `next_cursor`, both hashes, the concrete normalized range, ordered entries, requested `included` values, and optional diagnostics. It returns no redundant `truncated` flag.
+The response returns `limit`, `has_more`, required nullable `next_cursor`, both hashes, the concrete normalized range, ordered entries, requested `included` values, and optional diagnostics. `next_cursor` is a non-empty opaque string exactly when `has_more=true` and is JSON `null` when `has_more=false`. It returns no redundant `truncated` flag.
 
 ## 5. `schedule.update`
 
@@ -205,7 +205,11 @@ Every update computes notification-work freshness after normalized successor tru
 
 Cancellation uses the closed reason-code precedence from `specs/notifications.md`: `notification_schedule_superseded`, `notification_target_changed`, `notification_occurrence_stale`, `notification_routing_changed`, `notification_policy_disabled`, then `parent_lifecycle_terminal`.
 
-In-progress work, eligible retry work with `attempt_count>0`, and terminal work are immutable historical evidence. Divergent rows are returned as `protected_stale_work_instance_ids`; they are not retained as authorization. Attempt-start freshness MUST still reject them against changed truth.
+An existing row selected by the reconciliation or materialization evaluation is returned in `retained_work_instance_ids` exactly when its notification intent, schedule hash, target, route, occurrence provenance, and parent lifecycle remain semantically current under successor truth, so no cancellation reason applies. Retention leaves the row and its lifecycle unchanged; it may cross unchanged policy copy-forward as permitted by `specs/notifications.md`. A retained eligible row remains subject to the normal attempt-start freshness gate, while retained in-progress or terminal rows are evidence rather than new authorization.
+
+In-progress work, eligible retry work with `attempt_count>0`, and terminal work are immutable historical evidence. When their semantic bindings diverge, they are returned as `protected_stale_work_instance_ids`; they are not retained as authorization. Attempt-start freshness MUST still reject any nonterminal protected row against changed truth.
+
+For one response, `cancelled_work_instance_ids`, `retained_work_instance_ids`, `protected_stale_work_instance_ids`, and `created_work_instance_ids` are pairwise disjoint. Every existing row selected by reconciliation is classified as exactly cancelled, retained, or protected stale; a row created by the same command appears only in the created array.
 
 `materialization.mode=none` performs mandatory cancellation but creates no replacement opportunity or work. `mode=bounded` uses the exact range, local-to-UTC normalization, completeness, limit, provenance, opportunity, and work rules from `schedule.create`, evaluated against successor truth. It reconciles the complete affected eligible set before creating the complete selected replacement set. A limit that would produce a prefix fails the whole command.
 

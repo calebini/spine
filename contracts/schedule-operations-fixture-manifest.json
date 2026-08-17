@@ -1,7 +1,7 @@
 {
   "schema_version": "spine.schedule-operations-contract-fixtures.v1",
   "fixture_scope": "structural_examples",
-  "fixture_scope_note": "These fixtures validate proposed request and response shapes only. Generated identities, hashes, timezone resolutions, occurrence facts, reconciliation selections, and effects are illustrative until behavioral implementation and computed vectors land.",
+  "fixture_scope_note": "These fixtures validate proposed request and response shapes only. Generated identities, hashes, timezone resolutions, occurrence facts, reconciliation selections, and effects are illustrative until behavioral implementation and computed vectors land. Cross-array work-reconciliation ID disjointness is a post-schema semantic invariant exercised by the contract test because standard JSON Schema cannot compare values across sibling arrays.",
   "fixtures": [
     {
       "fixture_id": "request.agenda_local_day",
@@ -25,6 +25,12 @@
       "fixture_id": "response.update_recurring_event",
       "kind": "success_response",
       "fixture": "tests/fixtures/schedule_operations/contracts/response_update_recurring_event.json",
+      "schema": "contracts/schemas/schedule-update-response.schema.json"
+    },
+    {
+      "fixture_id": "response.update_title_with_work_classifications",
+      "kind": "success_response",
+      "fixture": "tests/fixtures/schedule_operations/contracts/response_update_title_with_work_classifications.json",
       "schema": "contracts/schemas/schedule-update-response.schema.json"
     },
     {
