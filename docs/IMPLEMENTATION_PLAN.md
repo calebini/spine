@@ -178,7 +178,7 @@ The fat slice is ready for one environment patch only when all of the following 
 
 ## Deferred Beyond This Delivery
 
-- Foreman/Threshold approval integration.
+- governance-authority approval integration.
 - Calendar and vendor adapters beyond the OpenClaw path.
 - General daemon ownership in Spine; Tickerd remains the runtime owner.
 - Conversational parsing as canonical truth; ingest must persist explicit structured facts.

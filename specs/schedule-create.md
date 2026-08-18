@@ -135,7 +135,7 @@ The accepted `scheduled_time` is the recurrence set's seed anchor and supplies `
 
 An explicit target MUST already exist, be active, have the same recipient owner, and have the same channel. A context default is not ambient inference: the transport MUST provide a normalized `CommandContext.delivery_target_defaults` mapping from `default_key` to exactly one delivery-target ID before handler invocation. The resolved row must satisfy the same owner, status, and channel checks.
 
-Zero matches, multiple matches, an absent key, an inactive target, or an owner/channel mismatch fails before mutation. The command MUST NOT create, update, approve, or reactivate a delivery target. Foreman/Threshold or an operator-facing route command remains responsible for approval and route creation.
+Zero matches, multiple matches, an absent key, an inactive target, or an owner/channel mismatch fails before mutation. The command MUST NOT create, update, approve, or reactivate a delivery target. The governance authority or an operator-facing route command remains responsible for approval and route creation.
 
 The fresh receipt snapshots the resolved `delivery_target_id`, `resolution_source`, `default_key` when used, `channel`, `adapter_name`, and `target_ref`. Replay returns that snapshot and MUST NOT resolve the default again or substitute a target that later becomes the context default.
 

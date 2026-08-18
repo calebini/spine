@@ -30,10 +30,12 @@ Authoritative starting points:
 - `contracts/schedule-operations-fixture-manifest.json`, `contracts/schemas/schedule-{agenda,update,cancel}-*.schema.json`, and `contracts/schemas/schedule-operation-failure-*.schema.json` define its implemented structural and semantic-failure contract package; the complete version family is advertised by `system.info.implemented_contract_versions`.
 - `specs/relative-temporal-bindings.md` defines implemented explicit snapshot/follow-source temporal derivation, bounded binding discovery/reconciliation, and atomic creation of a task that is `part_of` an existing event; its schemas, fixtures, migration, and behavioral coverage ship as one schema-8 family.
 - `contracts/relative-temporal-binding-fixture-manifest.json` indexes its request/response examples; behavioral coverage lives in `tests/test_relative_temporal_bindings_command.py`.
+- `specs/contextual-advisories.md` begins the draft role-based cross-system contract for one scheduled, governed, read-only agent advisory and at most one ordinary derivative notification. It is not implemented and declares no compatibility surface yet.
 - `specs/agent-command-contract.md` defines the MVP agent command core and CLI contract.
 - `docs/AGENT_QUICKSTART.md` gives a zero-context agent one executable, fake-only path through recurrence and recurring notifications.
 - `specs/decisions/0001-kinflow-is-donor-not-foundation.md` records the Kinflow relationship.
 - `specs/decisions/0002-first-class-delivery-targets.md` records the subject/group delivery target boundary.
+- `specs/decisions/0003-role-based-governance-boundary.md` proposes keeping repository and product names out of public authority contracts.
 
 ## First Product Profiles
 
@@ -55,7 +57,7 @@ Kinflow 1.0 is a donor. Its deterministic lifecycle posture, audit/replay habits
 
 tickerd owns daemon heartbeat and bounded runtime execution. Spine adapts eligible work into tickerd work items.
 
-Foreman/Threshold owns approval and boundary crossing policy. Spine may generate candidate actions; Foreman/Threshold decides whether those actions are allowed, require approval, or are blocked.
+The role named `governance_authority` owns approval and boundary-crossing policy. Spine may generate candidate actions; the configured governance authority decides whether those actions are allowed, require approval, or are blocked. Concrete repository and product names are operational bindings, not public Spine contract vocabulary.
 
 Adapters touch external systems and persist outcomes back into Spine. Projection failures damage projections, not canonical truth.
 

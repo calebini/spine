@@ -14,7 +14,7 @@ The motivating example is a reminder for a golf trip this weekend. Two days befo
 
 The desired behavior is more autonomous than a hard-coded weather workflow. The user may want the agent to inspect the event context and decide that weather, traffic, course rules, an early departure, missing equipment, or nothing at all is the most useful response.
 
-This note preserves the current discussion while the design remains fluid. It does not define accepted schema, command, migration, runtime, approval, or compatibility behavior. Normative decisions belong in `specs/`, accepted architecture decisions, machine-readable contracts, and executable fixtures only after the open questions here converge.
+This note preserves the broader design discussion while it remains fluid. `specs/contextual-advisories.md` now owns the narrower normative draft for the first cross-system experiment. This note does not define accepted schema, command, migration, runtime, approval, or compatibility behavior beyond that draft.
 
 ## Central Distinction: Discretion Versus Authority
 
@@ -31,7 +31,7 @@ A durable policy need not prescribe the agent's exact plan, tool sequence, queri
 - read-only, proposal, or external-write authority;
 - time, tool-call, token, and cost budgets;
 - whether contacting another person is allowed;
-- which outcomes require Foreman/Threshold approval;
+- which outcomes require governance-authority approval;
 - when the agent should notify, ask for clarification, or remain silent;
 - the required result/evidence shape; and
 - fallback behavior when research, inference, or delivery fails.
@@ -206,9 +206,9 @@ Spine should not make stochastic model output part of schedule, occurrence, or p
 
 tickerd continues to own daemon cadence, singleton/runtime mechanics, bounded processing, health, readiness, and reconciliation-loop execution. It should not own mandate semantics, agent reasoning, canonical results, or approval policy.
 
-### Foreman/Threshold
+### Governance authority
 
-Foreman/Threshold governs capability and boundary crossing. It may decide that a run is allowed, needs evidence, requires approval, or is blocked. Proposal and execution authority should not be inferred from the fact that a trigger became eligible.
+The governance authority governs capability and boundary crossing. It may decide that a run is allowed, needs evidence, requires approval, or is blocked. Proposal and execution authority should not be inferred from the fact that a trigger became eligible. Public contracts name this role rather than its implementing repository or product.
 
 ### Agent runtime
 
@@ -236,7 +236,7 @@ Current Spine behavior already provides useful substrate:
 - freshness checks before work or candidate-action execution;
 - `side_effect_attempts` as the single generic external-attempt ledger;
 - delivery targets and a guarded notification processor; and
-- an architectural Foreman/Threshold boundary.
+- an architectural governance-authority boundary.
 
 Important current limitations include:
 
@@ -245,7 +245,7 @@ Important current limitations include:
 - notification policies describe delivery scheduling, not general agent mandates;
 - no durable agent-run/result artifact is defined;
 - no general agent processor binding exists in the Spine worker;
-- Foreman/Threshold integration remains deferred;
+- governance-authority integration remains deferred;
 - first-class locations exist in the ontology and ledger but are not fully available through the public scheduling command surface; and
 - operator readback does not expose agent planning, tool, result, approval, and derivative-delivery phases.
 
@@ -340,7 +340,7 @@ The following discussion should happen before a normative specification or imple
 ### Capabilities and approval
 
 - What is the smallest useful capability-profile vocabulary?
-- Are read-only public-data calls preauthorized, or does every external call pass Foreman/Threshold?
+- Are read-only public-data calls preauthorized, or does every external call pass the governance authority?
 - Does model inference itself require a budget or approval decision distinct from tool calls?
 - How does an agent promote an advisory into a proposed canonical or external action?
 - Which decision evidence must Spine persist versus reference?

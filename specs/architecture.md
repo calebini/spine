@@ -9,7 +9,7 @@ Spine stores coordination truth.
 
 Tickerd keeps time.
 
-Foreman/Threshold governs boundary crossing.
+The governance authority governs boundary crossing.
 
 Adapters touch the outside world.
 
@@ -88,11 +88,11 @@ The Spine tickerd adapter SHOULD map eligible Spine work instances to tickerd wo
 
 In `observe_only` mode, the adapter MUST inspect or report eligible work without external side effects.
 
-In `active` mode, the adapter MAY process eligible work through an explicit processor. The adapter MUST start the work before invoking the processor and MUST persist the processor outcome as Spine work lifecycle state. Any external write MUST pass through Spine side-effect attempt accounting and any required Foreman/Threshold approval.
+In `active` mode, the adapter MAY process eligible work through an explicit processor. The adapter MUST start the work before invoking the processor and MUST persist the processor outcome as Spine work lifecycle state. Any external write MUST pass through Spine side-effect attempt accounting and any required governance-authority approval.
 
-## 5. Relationship to Foreman/Threshold
+## 5. Relationship to the Governance Authority
 
-Foreman may later be branded conceptually as Threshold. Spine MUST NOT assume a repository or package rename.
+`specs/decisions/0003-role-based-governance-boundary.md` proposes that Spine name this relationship by protocol role rather than by repository, package, deployment, or product brand. Concrete component bindings belong to operational configuration.
 
 Spine creates coordination pressure:
 
@@ -103,7 +103,7 @@ Spine creates coordination pressure:
 - a user decision is needed
 - an automation candidate exists
 
-Foreman/Threshold constrains boundary crossing:
+The governance authority constrains boundary crossing:
 
 - allowed
 - requires approval
@@ -152,9 +152,15 @@ Tickerd may initiate bounded materialization and process eligible work. It does 
 
 One fresh success is one database transaction containing the complete new item bundle, initial policies, requested recurrence provenance and bounded work, one audit, and one command receipt. The orchestration service reuses internal deterministic domain and persistence functions; it MUST NOT chain public command handlers whose independent commits would expose partial state or synthetic subcommand receipts.
 
-An explicit or named context-default delivery target resolves only to an existing canonical route. Transport context cannot approve, create, update, or send through that route. Foreman/Threshold retains approval authority, and adapters remain inaccessible until later durable work processing passes the ordinary side-effect-attempt gate.
+An explicit or named context-default delivery target resolves only to an existing canonical route. Transport context cannot approve, create, update, or send through that route. The governance authority retains approval authority, and adapters remain inaccessible until later durable work processing passes the ordinary side-effect-attempt gate.
 
-## 9. Suggested Future Package Boundaries
+## 9. Scheduled Contextual-Advisory Boundary
+
+`specs/contextual-advisories.md` defines the draft cross-system boundary for one scheduled Spine trigger to request one governed, bounded, read-only agent run and create at most one ordinary derivative notification. Spine remains the coordination and schedule authority; the governance authority owns authorization and evidence acceptance; the agent runtime owns bounded reasoning and allowed tool use; the existing delivery path owns contact with a destination.
+
+Cross-system contracts name these roles rather than their implementing components. Agent plans, tool choices, and generated prose are execution evidence, not canonical coordination truth. No model or tool is invoked during deterministic schedule expansion, and no agent outcome may bypass source-freshness checks or Spine's attempt-gated notification pipeline.
+
+## 10. Suggested Future Package Boundaries
 
 Implementation directories should be added when behavior exists:
 

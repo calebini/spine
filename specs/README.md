@@ -5,7 +5,7 @@ This directory contains Spine's normative design and compatibility promises.
 Current spec surface:
 
 - `overview.md`: purpose, doctrine, ontology, and non-goals
-- `architecture.md`: component boundaries and relationships to tickerd, Foreman/Threshold, adapters, and projections
+- `architecture.md`: component boundaries and relationships to tickerd, the governance authority, adapters, and projections
 - `ontology.md`: first durable ontology and data model sketch
 - `recurrence.md`: canonical flexible recurrence-set model, deterministic expansion and identity, mutation, and occurrence provenance
 - `schedule-create.md`: implemented atomic operator-facing creation of one scheduled event/task, initial reminder policies, and optional bounded work
@@ -13,10 +13,12 @@ Current spec surface:
 - `schedule-operator-tools.md`: implemented relative-event countdown request building and compact schedule operator projections
 - `schedule-operations.md`: implemented cross-item agenda, atomic whole-schedule update, terminal cancellation, and mandatory notification-work reconciliation
 - `relative-temporal-bindings.md`: implemented schema-8 cross-item temporal bindings, bounded discovery/reconciliation, and atomic related-task creation
+- `contextual-advisories.md`: draft role-based cross-system contract for one scheduled, governed, read-only agent advisory and at most one derivative notification
 - `agent-command-contract.md`: draft agent-facing command/request contract for authoring and inspecting Spine coordination truth
 - `SPINE_SPEC_VERSIONING_AND_FREEZE_POLICY.md`: lightweight policy for spec versions, runtime declarations, and one-way freeze-manifest pinning
 - `decisions/0001-kinflow-is-donor-not-foundation.md`: accepted decision on the Kinflow relationship
 - `decisions/0002-first-class-delivery-targets.md`: accepted decision separating subject/group identity from delivery endpoints
+- `decisions/0003-role-based-governance-boundary.md`: proposed decision keeping component and product names out of cross-system authority contracts
 
 Executable contract artifacts:
 
