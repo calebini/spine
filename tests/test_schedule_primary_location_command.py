@@ -10,6 +10,7 @@ from referencing import Registry, Resource
 
 from spine import IMPLEMENTED_CONTRACT_VERSIONS
 from spine.commands import CommandContext, handle
+from spine.commands.cli import _schedule_show_include
 from spine.commands.compact import compact_schedule_response
 from spine.ledger import LocationInput, connect, initialize_schema
 from spine.ledger.supporting import insert_location
@@ -393,6 +394,12 @@ class SchedulePrimaryLocationCommandTests(unittest.TestCase):
         self.assertTrue(expected.issubset(IMPLEMENTED_CONTRACT_VERSIONS))
         info = handle("system.info", {}, self.context)
         self.assertTrue(expected.issubset(set(info["implemented_contract_versions"])))
+
+    def test_cli_include_parser_accepts_primary_location(self) -> None:
+        self.assertEqual(
+            _schedule_show_include("policies,primary_location,work"),
+            ["policies", "primary_location", "work"],
+        )
 
     def inline_location(self) -> dict[str, object]:
         return {
