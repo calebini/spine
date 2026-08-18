@@ -545,11 +545,13 @@ The following decisions remain intentionally open for the first audit:
    to the selected governance authority's native intent, dispatch, receipt, and evidence
    contracts;
 5. the exact context-snapshot minimization and sensitive-data rules;
-6. how location facts are exposed through the public schedule authoring surface;
-7. the initial budgets and usefulness-deadline defaults;
-8. whether `request_clarification` is rendered through the same delivery policy as an
+6. the initial budgets and usefulness-deadline defaults;
+7. whether `request_clarification` is rendered through the same delivery policy as an
    advisory; and
-9. the exact commands and readback projection used by operators.
+8. the exact commands and readback projection used by operators.
+
+The primary-location prerequisite is satisfied by the implemented and audited
+`spine.schedule-primary-location.v1` family; it is no longer an open advisory decision.
 
 Until these decisions converge, there is no schema version, compatibility declaration,
 or implementation commitment for contextual advisories.

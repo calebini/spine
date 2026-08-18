@@ -1,0 +1,17 @@
+{
+  "effect": "retained",
+  "requested_mode": "reference",
+  "previous_location_id": "location_lakeside_golf_club",
+  "current": {
+    "location_contract": "spine.schedule-primary-location.v1",
+    "view_contract": "spine.schedule-primary-location-view.v1",
+    "location_id": "location_lakeside_golf_club",
+    "item_location_id": "item_location_golf_trip_primary_v1",
+    "role": "primary",
+    "label": "Lakeside Golf Club",
+    "kind": "place",
+    "item_location_created_at_utc": "2035-02-01T12:00:00Z",
+    "location_created_at_utc": "2035-02-01T12:00:00Z",
+    "location_updated_at_utc": "2035-02-01T12:00:00Z"
+  }
+}

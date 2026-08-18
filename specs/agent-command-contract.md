@@ -14,7 +14,7 @@ The CLI is the first expected transport adapter. Future MCP and localhost HTTP a
 
 ## 2. Authority
 
-This contract depends on `specs/overview.md`, `specs/architecture.md`, `specs/ontology.md`, `specs/recurrence.md`, `specs/notifications.md`, `specs/schedule-create.md`, `specs/schedule-show.md`, `specs/schedule-operator-tools.md`, `specs/schedule-operations.md`, and `specs/SPINE_SPEC_VERSIONING_AND_FREEZE_POLICY.md`. If this document conflicts with `specs/ontology.md`, the ontology wins for ledger truth and this document must be corrected.
+This contract depends on `specs/overview.md`, `specs/architecture.md`, `specs/ontology.md`, `specs/recurrence.md`, `specs/notifications.md`, `specs/schedule-create.md`, `specs/schedule-show.md`, `specs/schedule-operator-tools.md`, `specs/schedule-operations.md`, the additive `specs/schedule-primary-location.md` capability, and `specs/SPINE_SPEC_VERSIONING_AND_FREEZE_POLICY.md`. If this document conflicts with `specs/ontology.md`, the ontology wins for ledger truth and this document must be corrected.
 
 Spine is the canonical coordination ledger and planning fabric. External tools are projections or side-effect targets. The authoring commands in this contract do not send externally.
 
@@ -128,13 +128,13 @@ Copied event and task detail rows preserve only ontology-backed detail facts. Ev
 
 ## 7. Supporting-Set Command Inputs
 
-The ledger and read response shapes preserve locations, subject roles, and notification policies as canonical item-version supporting sets, and `item.show` returns existing persisted supporting rows using the Section 4 catalog shapes. The Agent Command Contract MVP does not accept initial `locations` or `notification_policies` arrays on `event.create` or `task.create`, and does not accept `subject_roles` on `event.create`. Supplying one of those deferred top-level fields fails request-shape validation with `unsupported_field`, the supplied field name, and CLI exit `2`.
+The ledger and read response shapes preserve locations, subject roles, and notification policies as canonical item-version supporting sets, and `item.show` returns existing persisted supporting rows using the Section 4 catalog shapes. The lower-level Agent Command Contract MVP does not accept initial `locations` or `notification_policies` arrays on `event.create` or `task.create`, and does not accept `subject_roles` on `event.create`. Supplying one of those deferred top-level fields fails request-shape validation with `unsupported_field`, the supplied field name, and CLI exit `2`. This does not prohibit the separately versioned, singular `item.primary_location` capability on the high-level schedule family defined by `specs/schedule-primary-location.md`; that capability never accepts a general `locations` array.
 
 `task.create` promotes the narrow task assignment slice through optional top-level `subject_roles`. `task.update` promotes the same slice through optional `patch.subject_roles`. Each value is an array of objects with required non-empty `subject_id` and `role`, plus optional `status` defaulting to `active`. The only accepted roles in this slice are `assignee` and `owner`; the accepted statuses are `active` and `inactive`. Every referenced subject must exist. A duplicate `(subject_id, role)` pair in one accepted array fails before mutation with `invalid_request`, `field=subject_roles` for create or `field=patch.subject_roles` for update, and CLI exit `2`.
 
 The accepted array is the complete task assignee/owner role set for the resulting item version. On create, omission and an empty array both produce no task assignee/owner rows. On update, omission preserves the complete current role set by copy-forward, an empty array clears it, and a non-empty array replaces it. Replacement does not alter non-assignee/non-owner roles already present through lower-level ledger APIs; those rows copy forward unchanged. Role comparison is set-semantic and independent of request array order. A role-only patch whose normalized `(subject_id, role, status)` set already equals the current task assignee/owner set is a no-op.
 
-Command-created task role rows use row role `item_subject_role`. Create IDs derive from `/subject_roles/<zero-based-index>` and update replacement IDs derive from `/patch/subject_roles/<zero-based-index>`. Task create and update success responses return `subject_roles` as the complete current task role set using the Section 4 `subject_role_element` shape. Other supporting-set authoring remains deferred; its future command paths remain reserved under `/locations`, `/subject_roles`, and `/notification_policies`.
+Command-created task role rows use row role `item_subject_role`. Create IDs derive from `/subject_roles/<zero-based-index>` and update replacement IDs derive from `/patch/subject_roles/<zero-based-index>`. Task create and update success responses return `subject_roles` as the complete current task role set using the Section 4 `subject_role_element` shape. Other general supporting-set authoring remains deferred; its future command paths remain reserved under `/locations`, `/subject_roles`, and `/notification_policies`. The singular high-level primary-location paths are `/item/primary_location/location`, `/item/primary_location`, `/patch/primary_location/location`, and `/patch/primary_location` and are owned exclusively by the additive schedule-primary-location family.
 
 ## 8. Subject Commands
 
@@ -156,7 +156,7 @@ Fresh insert success returns `ok=true`, `command=subject.upsert`, `created=true`
 
 `item.show` returns `locations`, `subject_roles`, and `notification_policies` using the catalog element shapes. When `include_relations=true`, it returns `relations` elements in the `relation.list` response shape. It always returns the accepted requested limits as stringified decimal response fields and the truncation booleans named in the catalog.
 
-`schedule.show` is the read-only aggregate verification command defined by `specs/schedule-show.md`. It requires `item_id`; optional `include` values select policy, work, and attempt detail collections, and optional per-collection limits bound those arrays. It always returns current item facts, stored and resolved schedule facts, recurrence when present, explicit authored/opportunity/work/delivery lifecycle dimensions, delivery-target snapshots, and complete summary counts. The exact request and response shapes are `contracts/schemas/schedule-show-request.schema.json` and `contracts/schemas/schedule-show-response.schema.json`. It creates no ledger row, invokes no adapter, and is the preferred operator readback after `schedule.create` or later worker processing.
+`schedule.show` is the read-only aggregate verification command defined by `specs/schedule-show.md`. It requires `item_id`; optional `include` values select policy, work, attempt, relation, temporal-binding, and advertised primary-location projections, and optional per-collection limits bound the applicable arrays. It always returns current item facts, stored and resolved schedule facts, recurrence when present, explicit authored/opportunity/work/delivery lifecycle dimensions, delivery-target snapshots, and complete summary counts. The exact request and response shapes are `contracts/schemas/schedule-show-request.schema.json` and `contracts/schemas/schedule-show-response.schema.json`. It creates no ledger row, invokes no adapter, and is the preferred operator readback after `schedule.create` or later worker processing.
 
 `schedule.build` is the read-only relative-event countdown compiler defined by `specs/schedule-operator-tools.md`. It requires an explicit reference instant, relative event delay, fixed-elapsed reminder cadence, timezone-data directive, actor, eventual `schedule.create` command ID, and delivery request. It resolves environment-dependent timezone and route facts into a concrete `spine.schedule-create.v1` request, consumes no command ID, creates no receipt, and writes nothing. Its exact request and response shapes are `contracts/schemas/schedule-countdown-builder-request.schema.json` and `contracts/schemas/schedule-countdown-builder-response.schema.json`.
 
@@ -259,6 +259,14 @@ For all notification writes, same-command compatible replay and global command-i
 ## 14.1 Composite Schedule Command
 
 `schedule.create` is the one-call operator surface for creating a new scheduled event or task, its complete initial notification-policy set, optional recurrence provenance, and optional bounded notification work. `specs/schedule-create.md` is its semantic authority; `contracts/schemas/schedule-create-request.schema.json` and `contracts/schemas/schedule-create-response.schema.json` are its structural request and response contracts.
+
+`specs/schedule-primary-location.md` defines an additive schedule capability over the
+existing schema-8 `locations` and `item_locations` authority. When advertised, it adds
+singular primary-location create/reference authoring to `schedule.create`,
+retain/replace/clear semantics to `schedule.update`, explicit clean projections to
+schedule and agenda reads, and builder/compact pass-through. It neither activates
+general supporting-set arrays nor changes time, recurrence, route, notification, or
+delivery authority.
 
 The command creates policies directly on item version `1` and returns one composite audit and one composite command receipt. It does not obtain atomicity by invoking public subcommands or creating lower-level command receipts. A bounded recurring branch regenerates `notification_schedule` occurrence provenance before opportunity expansion. Any requested policy, provenance, expansion, materialization, or commit failure rolls back the item and every child row.
 

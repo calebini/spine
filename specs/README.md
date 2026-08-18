@@ -14,6 +14,7 @@ Current spec surface:
 - `schedule-operations.md`: implemented cross-item agenda, atomic whole-schedule update, terminal cancellation, and mandatory notification-work reconciliation
 - `relative-temporal-bindings.md`: implemented schema-8 cross-item temporal bindings, bounded discovery/reconciliation, and atomic related-task creation
 - `contextual-advisories.md`: draft role-based cross-system contract for one scheduled, governed, read-only agent advisory and at most one derivative notification
+- `schedule-primary-location.md`: implemented schema-8 contract for primary-location authoring, mutation, readback, builder pass-through, and operator projections on scheduled events and tasks
 - `agent-command-contract.md`: draft agent-facing command/request contract for authoring and inspecting Spine coordination truth
 - `SPINE_SPEC_VERSIONING_AND_FREEZE_POLICY.md`: lightweight policy for spec versions, runtime declarations, and one-way freeze-manifest pinning
 - `decisions/0001-kinflow-is-donor-not-foundation.md`: accepted decision on the Kinflow relationship
@@ -41,6 +42,9 @@ Executable contract artifacts:
 - `../contracts/schemas/schedule-{agenda,update,cancel}-*.schema.json`: implemented agenda/update/cancel request and response contracts
 - `../contracts/schemas/schedule-operation-failure-*.schema.json`: shared failure-response and state-aware semantic-failure scenario contracts
 - `../tests/fixtures/schedule_operations/contracts/`: operational-lifecycle structural examples and no-mutation failure scenarios
+- `../contracts/schedule-primary-location-fixture-manifest.json`: primary-location schedule contract fixture index
+- `../contracts/schemas/schedule-primary-location-types.schema.json`: shared closed authoring, read view, and update-change types
+- `../tests/fixtures/schedule_primary_location/contracts/`: primary-location structural examples and missing-reference scenario
 - `../contracts/relative-temporal-binding-fixture-manifest.json`: relative-temporal-binding structural fixture index
 - `../contracts/schemas/relative-temporal-binding-types.schema.json`: shared binding, revision, state, and readback types
 - `../contracts/schemas/schedule-{related-task-create,binding-list,binding-reconcile}-*.schema.json`: implemented binding-family request and response contracts

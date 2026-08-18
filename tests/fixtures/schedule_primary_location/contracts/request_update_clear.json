@@ -1,0 +1,10 @@
+{
+  "contract_version": "spine.schedule-update.v1",
+  "command_id": "schedule-clear-golf-location-001",
+  "actor_subject_id": "subject_agent",
+  "item_id": "item_golf_trip",
+  "target_version": "2",
+  "updated_at_utc": "2035-02-03T12:00:00Z",
+  "patch": { "primary_location": null },
+  "materialization": { "mode": "none" }
+}

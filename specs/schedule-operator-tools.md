@@ -30,7 +30,7 @@ The exact request is `contracts/schemas/schedule-countdown-builder-request.schem
 
 `tests/fixtures/schedule_operator/countdown_builder_request.json` is the checked-in starting request for the two-hour/30-minute profile; `contracts/schedule-operator-fixture-manifest.json` binds it to the request schema.
 
-Optional fields are `summary`, `source_ref`, event detail, `policy_key`, `reminder_start_before_seconds`, and `materialization_limit`. Event detail defaults to `all_day=false`; policy key defaults to `countdown`; reminder start defaults to the complete event delay; and materialization limit defaults to `1000`.
+Optional fields are `summary`, `source_ref`, event detail, `policy_key`, `reminder_start_before_seconds`, and `materialization_limit`. A runtime advertising `spine.schedule-primary-location.v1` additionally accepts the closed optional `primary_location` authoring value from `specs/schedule-primary-location.md` and copies it unchanged into the generated schedule-create request. Event detail defaults to `all_day=false`; policy key defaults to `countdown`; reminder start defaults to the complete event delay; and materialization limit defaults to `1000`.
 
 The reminder start MUST NOT exceed the event delay and MUST fit Spine's 366-day materialization-range bound. This ensures that the generated countdown does not begin before `reference_time_utc` and that its output is accepted by `schedule.create`. The complete stop-exclusive countdown opportunity count MUST fit the requested limit and the platform maximum of 1000. Invalid timezone, unavailable pinned timezone data, ambiguous or unrepresentable resulting time, invalid cadence, invalid route, or insufficient limit fails closed before any write.
 
@@ -52,6 +52,10 @@ The exact success shape is `contracts/schemas/schedule-compact-response.schema.j
 - complete work count, returned work IDs, and an explicit truncation flag;
 - separate authored, opportunity, work, delivery-attempt, and delivery-outcome states; and
 - delivery target ID, channel, destination source reference, and destination target reference.
+
+When the full create response contains a primary location, or the underlying
+schedule-show read explicitly requested it, compact output carries the complete clean
+primary-location view or JSON `null`. It omits the property otherwise.
 
 `dry_run` is always explicit. A compact schedule-create preview reports `dry_run=true` and `lifecycle.authored=preview`; its returned IDs and work states are deterministic preview facts, not persisted evidence. Committed create/replay and all readback responses report `dry_run=false`.
 
@@ -84,4 +88,6 @@ This contract is accepted when executable tests prove that:
 3. ambiguous resulting local time, pre-reference countdown start, and insufficient materialization limit fail closed;
 4. compact create and show responses validate under Draft 2020-12 and retain every required audit field;
 5. compact readback preserves separate delivery attempt and outcome evidence; and
-6. full JSON behavior remains unchanged when `--compact` is absent.
+6. full JSON behavior remains unchanged when `--compact` is absent; and
+7. the advertised primary-location capability passes authoring through the builder and
+   projects the clean view conditionally without reducing it to an unbound label.

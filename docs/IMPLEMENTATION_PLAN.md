@@ -1,7 +1,7 @@
 # Spine Implementation Plan
 
-Status: Relative temporal binding fat slice implemented and acceptance verified
-Last reconciled with repository state: 2026-08-17
+Status: Primary-location schedule support implemented and acceptance verified
+Last reconciled with repository state: 2026-08-18
 
 This is a non-normative delivery plan. The specifications and machine-readable contracts remain authoritative.
 
@@ -54,6 +54,26 @@ The implementation is one environment-sized service-layer slice over the canonic
 
 Safety is independent of sweep cadence: direct due replacement is rejected while a follow binding governs the task, agenda/readback expose stale or decision state without erasing the task, and work processing checks binding freshness before a side-effect attempt can start. Structural schemas and initial fixtures live in `contracts/relative-temporal-binding-fixture-manifest.json`; runtime coverage includes atomic rollback, replay, dry run, selected occurrences, source movement, source-only refresh, snapshot divergence, cursor invalidation, scheduler terminal handling, agenda actionability, and stale-delivery rejection.
 
+## Delivered Additive Slice: Primary Schedule Location
+
+`specs/schedule-primary-location.md` activates the existing canonical `locations` and
+version-scoped `item_locations` model across the high-level scheduling surfaces without
+adding another location authority or a schema migration. `schedule.create` and
+`schedule.update` accept closed inline-create/reference forms; `schedule.show` and
+`agenda.show` expose an explicitly requested clean view; `schedule.build` passes the
+public authoring value through; and compact create/show receipts preserve the complete
+bound view when present.
+
+The implementation derives deterministic location and item-location identities,
+copies retained primary roles across item versions, preserves immutable historical
+rows on replace/clear, validates references inside the transaction, and snapshots
+replay evidence. Location timezone remains descriptive and cannot alter schedule time,
+location-only mutation does not stale recurrence provenance or reminder work, and
+authoring still performs no send. Structural fixtures plus behavioral tests cover
+inline/reference creation, dry run, replay after metadata refresh, read projections,
+no-op/copy-forward behavior, replace/clear, missing references, rollback, work
+retention, and runtime capability declarations.
+
 ## Delivery Goal
 
 Ship one environment-sized implementation that supports the complete path from a structured recurrence or notification command to deterministic virtual results, canonical relational state, durable notification work, Tickerd processing, and a recorded adapter attempt.
@@ -69,6 +89,7 @@ The delivery is intentionally broad because recurrence identity, occurrence prov
 - `specs/schedule-show.md`: canonical aggregate schedule and delivery-lifecycle readback.
 - `specs/schedule-operator-tools.md`: relative countdown compilation and compact operator projection.
 - `specs/schedule-operations.md`: implemented cross-item agenda and atomic schedule update/cancel reconciliation lifecycle.
+- `specs/schedule-primary-location.md`: implemented primary-location authoring, mutation, builder, readback, and compact-projection extension.
 - `specs/relative-temporal-bindings.md`: implemented atomic related-task creation, binding persistence/state, bounded discovery, reconciliation, and attempt freshness.
 - `contracts/schemas/recurrence-*.schema.json` and `contracts/schemas/notification-*.schema.json`: public machine shapes.
 - `contracts/vector-manifest.json`: computed identity and behavior evidence.

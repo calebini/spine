@@ -19,6 +19,12 @@
       "minProperties": 1,
       "properties": {
         "item": { "$ref": "schedule-operations-types.schema.json#/$defs/itemPatch" },
+        "primary_location": {
+          "oneOf": [
+            { "$ref": "schedule-primary-location-types.schema.json#/$defs/authoring" },
+            { "type": "null" }
+          ]
+        },
         "scheduled_time": { "$ref": "schedule-operations-types.schema.json#/$defs/scheduledTimeReplacement" },
         "recurrence": { "$ref": "schedule-operations-types.schema.json#/$defs/recurrenceReplacement" },
         "delivery": { "$ref": "schedule-create-request.schema.json#/$defs/delivery" },

@@ -203,6 +203,25 @@ export ITEM_ID=item-id-from-schedule-create
 
 The four lifecycle sections are independent: authored, opportunities, work, and delivery. Immediately after authoring, delivery remains `attempt_state=not_attempted`; after a worker runs, the same readback exposes attempts and terminal outcome evidence.
 
+To bind a place during atomic creation, add one closed `item.primary_location` value:
+
+```json
+{
+  "mode": "create",
+  "label": "Lakeside Golf Club",
+  "kind": "place",
+  "address_text": "123 Fairway Road"
+}
+```
+
+Use `{"mode":"reference","location_id":"location_..."}` only when the exact
+canonical row is already known. Spine performs no venue search or geocoding. The
+location timezone is descriptive and never changes the schedule timezone. Verify it
+with `schedule show --include primary_location`; use
+`schedule.update.patch.primary_location` to create/reference a replacement, `null` to
+clear, and omission to retain. See `specs/schedule-primary-location.md` for the exact
+contract and `docs/AGENT_OPERATOR_GUIDE.md` for the operational rules.
+
 For chat-sized audit output, add `--compact` to either command. Full JSON remains the default:
 
 ```bash

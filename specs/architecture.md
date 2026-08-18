@@ -160,6 +160,8 @@ An explicit or named context-default delivery target resolves only to an existin
 
 Cross-system contracts name these roles rather than their implementing components. Agent plans, tool choices, and generated prose are execution evidence, not canonical coordination truth. No model or tool is invoked during deterministic schedule expansion, and no agent outcome may bypass source-freshness checks or Spine's attempt-gated notification pipeline.
 
+`specs/schedule-primary-location.md` defines the prerequisite public activation of the existing first-class location model on schedule create, update, readback, builder, agenda, and compact surfaces. It creates no location authority outside `locations` and `item_locations`, never lets location timezone alter schedule time, and does not make current notification work location-sensitive.
+
 ## 10. Suggested Future Package Boundaries
 
 Implementation directories should be added when behavior exists:

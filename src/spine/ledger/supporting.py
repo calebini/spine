@@ -201,7 +201,9 @@ def current_locations(connection: sqlite3.Connection, *, item_id: str, version: 
           il.item_location_id, il.item_id, il.version, il.location_id, il.role,
           il.created_at_utc,
           l.label, l.kind, l.address_text, l.latitude, l.longitude, l.timezone,
-          l.provider_ref, l.metadata_json
+          l.provider_ref, l.metadata_json,
+          l.created_at_utc AS location_created_at_utc,
+          l.updated_at_utc AS location_updated_at_utc
         FROM item_locations AS il
         JOIN locations AS l ON l.location_id = il.location_id
         WHERE il.item_id = ? AND il.version = ?

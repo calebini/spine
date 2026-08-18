@@ -1,0 +1,84 @@
+{
+  "schema_version": "spine.schedule-primary-location-contract-fixtures.v1",
+  "fixture_scope": "structural_examples",
+  "fixture_scope_note": "Closed authoring values, schedule create/update/read/builder requests, and the clean view are structural contract examples. Conditional response projections and semantic coordinate invariants are exercised by tests/test_schedule_primary_location_contract_fixtures.py; atomic runtime, replay, rollback, readback, and work-retention behavior is exercised by tests/test_schedule_primary_location_command.py.",
+  "fixtures": [
+    {
+      "fixture_id": "authoring.inline_place",
+      "kind": "authoring_value",
+      "fixture": "tests/fixtures/schedule_primary_location/contracts/authoring_inline_place.json",
+      "schema": "contracts/schemas/schedule-primary-location-types.schema.json",
+      "schema_ref": "#/$defs/authoring"
+    },
+    {
+      "fixture_id": "authoring.reference",
+      "kind": "authoring_value",
+      "fixture": "tests/fixtures/schedule_primary_location/contracts/authoring_reference.json",
+      "schema": "contracts/schemas/schedule-primary-location-types.schema.json",
+      "schema_ref": "#/$defs/authoring"
+    },
+    {
+      "fixture_id": "view.primary_location",
+      "kind": "view",
+      "fixture": "tests/fixtures/schedule_primary_location/contracts/view_primary_location.json",
+      "schema": "contracts/schemas/schedule-primary-location-types.schema.json",
+      "schema_ref": "#/$defs/view"
+    },
+    {
+      "fixture_id": "response_change.retained",
+      "kind": "location_change",
+      "fixture": "tests/fixtures/schedule_primary_location/contracts/response_change_retained.json",
+      "schema": "contracts/schemas/schedule-primary-location-types.schema.json",
+      "schema_ref": "#/$defs/updateChange"
+    },
+    {
+      "fixture_id": "response_change.cleared",
+      "kind": "location_change",
+      "fixture": "tests/fixtures/schedule_primary_location/contracts/response_change_cleared.json",
+      "schema": "contracts/schemas/schedule-primary-location-types.schema.json",
+      "schema_ref": "#/$defs/updateChange"
+    },
+    {
+      "fixture_id": "request.create_inline_event",
+      "kind": "request",
+      "fixture": "tests/fixtures/schedule_primary_location/contracts/request_create_inline_event.json",
+      "schema": "contracts/schemas/schedule-create-request.schema.json"
+    },
+    {
+      "fixture_id": "request.update_reference",
+      "kind": "request",
+      "fixture": "tests/fixtures/schedule_primary_location/contracts/request_update_reference.json",
+      "schema": "contracts/schemas/schedule-update-request.schema.json"
+    },
+    {
+      "fixture_id": "request.update_clear",
+      "kind": "request",
+      "fixture": "tests/fixtures/schedule_primary_location/contracts/request_update_clear.json",
+      "schema": "contracts/schemas/schedule-update-request.schema.json"
+    },
+    {
+      "fixture_id": "request.schedule_show",
+      "kind": "request",
+      "fixture": "tests/fixtures/schedule_primary_location/contracts/request_schedule_show.json",
+      "schema": "contracts/schemas/schedule-show-request.schema.json"
+    },
+    {
+      "fixture_id": "request.agenda_show",
+      "kind": "request",
+      "fixture": "tests/fixtures/schedule_primary_location/contracts/request_agenda_show.json",
+      "schema": "contracts/schemas/schedule-agenda-request.schema.json"
+    },
+    {
+      "fixture_id": "request.countdown_builder",
+      "kind": "request",
+      "fixture": "tests/fixtures/schedule_primary_location/contracts/request_countdown_builder.json",
+      "schema": "contracts/schemas/schedule-countdown-builder-request.schema.json"
+    },
+    {
+      "fixture_id": "failure.update_missing_reference",
+      "kind": "semantic_failure_scenario",
+      "fixture": "tests/fixtures/schedule_primary_location/contracts/failure_update_missing_reference.json",
+      "schema": "contracts/schemas/schedule-operation-failure-scenario.schema.json"
+    }
+  ]
+}

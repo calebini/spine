@@ -139,6 +139,11 @@ def build_schedule_readback(
             (item_id, item_id),
         ).fetchall()
         result["temporal_bindings"] = [binding_view(connection, str(row["temporal_binding_id"])) for row in binding_rows]
+    if "primary_location" in include:
+        from spine.services.primary_locations import current_primary_location, primary_location_view
+
+        primary = current_primary_location(item)
+        result["primary_location"] = primary_location_view(primary) if primary is not None else None
     return result
 
 

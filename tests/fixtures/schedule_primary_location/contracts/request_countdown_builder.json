@@ -1,0 +1,22 @@
+{
+  "contract_version": "spine.schedule-countdown-builder.v1",
+  "command_id": "relative-golf-countdown-001",
+  "actor_subject_id": "subject_owner",
+  "reference_time_utc": "2035-02-01T12:00:00Z",
+  "title": "Leave for golf",
+  "event_detail": { "all_day": false, "visibility": "private" },
+  "primary_location": {
+    "mode": "reference",
+    "location_id": "location_lakeside_golf_club"
+  },
+  "timezone": "America/Toronto",
+  "timezone_database_version": { "kind": "system_current" },
+  "event_delay_seconds": "7200",
+  "reminder_interval_seconds": "1800",
+  "delivery": {
+    "recipient_kind": "subject",
+    "recipient_subject_id": "subject_owner",
+    "channel": "whatsapp",
+    "target": { "resolution": "context_default", "default_key": "owner_whatsapp" }
+  }
+}

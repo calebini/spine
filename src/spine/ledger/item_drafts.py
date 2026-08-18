@@ -72,3 +72,4 @@ class ItemVersionDraft:
     subject_role_replacement_roles: tuple[str, ...] = ()
     audit_action: str = "version_created"
     reason_code: str = "item_version_created"
+    audit_payload: dict[str, object] | None = None

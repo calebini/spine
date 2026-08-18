@@ -1,0 +1,13 @@
+{
+  "contract_version": "spine.schedule-agenda.v1",
+  "evaluated_at_utc": "2035-02-14T12:00:00Z",
+  "range_start_local": "2035-02-14T00:00:00",
+  "range_end_local": "2035-02-15T00:00:00",
+  "timezone": "America/Toronto",
+  "timezone_database_version": { "kind": "explicit", "version": "2035a" },
+  "item_types": ["event", "task"],
+  "include_terminal": false,
+  "include": ["primary_location"],
+  "include_diagnostics": true,
+  "limit": "100"
+}

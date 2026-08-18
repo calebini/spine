@@ -1,0 +1,10 @@
+{
+  "mode": "create",
+  "label": "Lakeside Golf Club",
+  "kind": "place",
+  "address_text": "123 Fairway Road, Toronto, ON",
+  "latitude": "43.7001",
+  "longitude": "-79.4163",
+  "timezone": "America/Toronto",
+  "provider_ref": "maps:place:lakeside"
+}

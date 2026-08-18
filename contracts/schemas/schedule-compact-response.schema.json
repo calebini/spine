@@ -19,6 +19,12 @@
     "item_id": { "$ref": "notification-types.schema.json#/$defs/id" },
     "item_type": { "enum": ["event", "task", "project", "collection"] },
     "status": { "enum": ["active", "archived"] },
+    "primary_location": {
+      "oneOf": [
+        { "$ref": "schedule-primary-location-types.schema.json#/$defs/view" },
+        { "type": "null" }
+      ]
+    },
     "command_id": { "type": ["string", "null"] },
     "command_receipt_id": { "type": ["string", "null"] },
     "scheduled_times": {

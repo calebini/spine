@@ -60,6 +60,7 @@ def create_event_from_draft(
     connection: sqlite3.Connection,
     draft: EventDraft,
     *,
+    validate_prerequisites: Callable[[sqlite3.Connection], None] | None = None,
     insert_canonical_extension: Callable[[sqlite3.Connection], None] | None = None,
     audit_action: str = "created",
     audit_reason_code: str = "created",
@@ -126,6 +127,7 @@ def create_event_from_draft(
         source_ref=draft.source_ref,
         item_locations=draft.item_locations,
         subject_roles=draft.subject_roles,
+        validate_prerequisites=validate_prerequisites,
         insert_anchors=insert_anchors,
         insert_detail=insert_detail,
         insert_canonical_extension=insert_canonical_extension,
@@ -153,6 +155,7 @@ def create_event_v1(
     attendance_policy_ref: str | None = None,
     item_locations: tuple[ItemLocationInput, ...] = (),
     subject_roles: tuple[ItemSubjectRoleInput, ...] = (),
+    validate_prerequisites: Callable[[sqlite3.Connection], None] | None = None,
     insert_canonical_extension: Callable[[sqlite3.Connection], None] | None = None,
     audit_action: str = "created",
     audit_reason_code: str = "created",
@@ -179,6 +182,7 @@ def create_event_v1(
             item_locations=item_locations,
             subject_roles=subject_roles,
         ),
+        validate_prerequisites=validate_prerequisites,
         insert_canonical_extension=insert_canonical_extension,
         audit_action=audit_action,
         audit_reason_code=audit_reason_code,
@@ -190,6 +194,7 @@ def create_task_from_draft(
     connection: sqlite3.Connection,
     draft: TaskDraft,
     *,
+    validate_prerequisites: Callable[[sqlite3.Connection], None] | None = None,
     insert_canonical_extension: Callable[[sqlite3.Connection], None] | None = None,
     audit_action: str = "created",
     audit_reason_code: str = "created",
@@ -262,6 +267,7 @@ def create_task_from_draft(
         source_ref=draft.source_ref,
         item_locations=draft.item_locations,
         subject_roles=draft.subject_roles,
+        validate_prerequisites=validate_prerequisites,
         insert_anchors=insert_anchors,
         insert_detail=insert_detail,
         insert_canonical_extension=insert_canonical_extension,
@@ -290,6 +296,7 @@ def create_task_v1(
     completed_by_subject_id: str | None = None,
     item_locations: tuple[ItemLocationInput, ...] = (),
     subject_roles: tuple[ItemSubjectRoleInput, ...] = (),
+    validate_prerequisites: Callable[[sqlite3.Connection], None] | None = None,
     insert_canonical_extension: Callable[[sqlite3.Connection], None] | None = None,
     audit_action: str = "created",
     audit_reason_code: str = "created",
@@ -317,6 +324,7 @@ def create_task_v1(
             item_locations=item_locations,
             subject_roles=subject_roles,
         ),
+        validate_prerequisites=validate_prerequisites,
         insert_canonical_extension=insert_canonical_extension,
         audit_action=audit_action,
         audit_reason_code=audit_reason_code,
@@ -426,6 +434,7 @@ def create_item_version_from_draft(
                 reason_code=draft.reason_code,
                 actor_ref=draft.created_by_subject_id,
                 created_at_utc=draft.created_at_utc,
+                payload=draft.audit_payload,
             )
             assert_ledger_invariants(connection, item_id=draft.item_id)
     except sqlite3.IntegrityError as exc:
@@ -456,6 +465,7 @@ def create_next_item_version(
     subject_role_replacement_roles: tuple[str, ...] = (),
     audit_action: str = "version_created",
     reason_code: str = "item_version_created",
+    audit_payload: dict[str, object] | None = None,
     insert_prerequisites: Callable[[sqlite3.Connection, int], None] | None = None,
     insert_canonical_extension: Callable[[sqlite3.Connection, int], None] | None = None,
     supporting_command_id: str | None = None,
@@ -479,6 +489,7 @@ def create_next_item_version(
             subject_role_replacement_roles=subject_role_replacement_roles,
             audit_action=audit_action,
             reason_code=reason_code,
+            audit_payload=audit_payload,
         ),
         insert_prerequisites=insert_prerequisites,
         insert_canonical_extension=insert_canonical_extension,
@@ -736,6 +747,7 @@ def _create_item_v1(
     source_ref: str | None,
     item_locations: tuple[ItemLocationInput, ...],
     subject_roles: tuple[ItemSubjectRoleInput, ...],
+    validate_prerequisites: Callable[[sqlite3.Connection], None] | None,
     insert_anchors: Callable[[sqlite3.Connection], None],
     insert_detail: Callable[[sqlite3.Connection], None],
     insert_canonical_extension: Callable[[sqlite3.Connection], None] | None = None,
@@ -745,6 +757,8 @@ def _create_item_v1(
 ) -> CreatedItem:
     try:
         with connection:
+            if validate_prerequisites is not None:
+                validate_prerequisites(connection)
             insert_anchors(connection)
             _insert_item_shell(
                 connection,
@@ -976,6 +990,7 @@ def _insert_mutation_audit(
     reason_code: str,
     actor_ref: str,
     created_at_utc: str,
+    payload: dict[str, object] | None = None,
 ) -> None:
     connection.execute(
         """
@@ -991,7 +1006,8 @@ def _insert_mutation_audit(
             reason_code,
             actor_ref,
             audit_log_payload_hash(
-                mutation_audit_payload(
+                payload
+                or mutation_audit_payload(
                     action=action,
                     item_id=item_id,
                     item_type=item_type,

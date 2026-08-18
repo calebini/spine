@@ -17,6 +17,7 @@ def build_relative_event_countdown(
     summary: str | None,
     source_ref: str | None,
     event_detail: Mapping[str, Any],
+    primary_location: Mapping[str, Any] | None,
     timezone: str,
     timezone_database_version: str,
     event_delay_seconds: int,
@@ -39,6 +40,8 @@ def build_relative_event_countdown(
         item["summary"] = summary
     if source_ref is not None:
         item["source_ref"] = source_ref
+    if primary_location is not None:
+        item["primary_location"] = dict(primary_location)
     request = {
         "contract_version": "spine.schedule-create.v1",
         "command_id": command_id,

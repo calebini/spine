@@ -31,7 +31,7 @@ def _compact_create(response: Mapping[str, Any]) -> dict[str, Any]:
     phases = _mapping(response.get("phases"), "phases")
     work_ids = _string_sequence(materialization.get("work_instance_ids"), "materialization.work_instance_ids")
     dry_run = bool(response.get("dry_run", False))
-    return {
+    result = {
         "ok": True,
         "command": "schedule.create",
         "projection_contract": COMPACT_CONTRACT_VERSION,
@@ -65,6 +65,10 @@ def _compact_create(response: Mapping[str, Any]) -> dict[str, Any]:
         },
         "delivery_targets": [_compact_create_delivery(delivery)],
     }
+    if "primary_location" in response:
+        value = response["primary_location"]
+        result["primary_location"] = dict(value) if isinstance(value, Mapping) else None
+    return result
 
 
 def _compact_show(response: Mapping[str, Any]) -> dict[str, Any]:
@@ -83,7 +87,7 @@ def _compact_show(response: Mapping[str, Any]) -> dict[str, Any]:
         (value for value in scheduled_times if value.get("anchor_role") in {"event_start", "task_due"}),
         scheduled_times[0] if scheduled_times else {},
     )
-    return {
+    result = {
         "ok": True,
         "command": "schedule.show",
         "projection_contract": COMPACT_CONTRACT_VERSION,
@@ -117,6 +121,10 @@ def _compact_show(response: Mapping[str, Any]) -> dict[str, Any]:
         },
         "delivery_targets": [_compact_show_delivery(value) for value in _mapping_sequence(response.get("delivery_targets"))],
     }
+    if "primary_location" in response:
+        value = response["primary_location"]
+        result["primary_location"] = dict(value) if isinstance(value, Mapping) else None
+    return result
 
 
 def _compact_create_delivery(delivery: Mapping[str, Any]) -> dict[str, Any]:

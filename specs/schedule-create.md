@@ -12,6 +12,11 @@ This command removes transport and agent choreography. It does not replace the l
 
 `specs/schedule-operator-tools.md` defines an additive read-only `schedule.build` compiler for relative-event countdown intent and a CLI compact success projection. The compiler produces this contract's ordinary request; the projection consumes this contract's ordinary response. Neither changes the authoring semantics or authority defined here.
 
+`specs/schedule-primary-location.md` defines an additive capability for an optional
+`item.primary_location`. Until a runtime advertises that complete contract family, the
+field remains unsupported. Once advertised, its authoring, identity, receipt, replay,
+and conditional response rules are normative extensions of this command.
+
 The command is an authoring boundary only. It MUST NOT start work, persist a `side_effect_attempts` row, invoke an adapter, or claim delivery.
 
 ## 2. Authority and Version Constants
@@ -40,7 +45,7 @@ The current schema-8 runtime implements this surface and declares all four sched
 
 `schedule.create` owns orchestration over one new item. It does not introduce a new canonical entity, alternative reminder model, second recurrence engine, route-approval system, or delivery path.
 
-Version 1 intentionally supports:
+The base Version 1 contract intentionally supports:
 
 - exactly one new `event` or `task`;
 - one required `local_instant` event-start or task-due schedule;
@@ -49,6 +54,10 @@ Version 1 intentionally supports:
 - one to 32 request-keyed notification policies;
 - either no work materialization or one bounded horizon containing at most 1000 actionable opportunities; and
 - initial notification policies on item version `1`.
+
+The additive `spine.schedule-primary-location.v1` capability permits zero or one
+primary location without changing any of these time, recurrence, route, policy, or
+materialization limits.
 
 Version 1 intentionally does not support:
 
@@ -83,7 +92,7 @@ Unknown fields fail under the public command contract. `command_id`, actor resol
 
 ### 4.1 Item
 
-`item` contains required `item_type` and `title`, optional `summary` and `source_ref`, and exactly one type detail object matching `item_type`.
+`item` contains required `item_type` and `title`, optional `summary` and `source_ref`, and exactly one type detail object matching `item_type`. When the runtime advertises `spine.schedule-primary-location.v1`, it also accepts optional `primary_location` using the closed create/reference shape in `specs/schedule-primary-location.md`; otherwise that field fails as unsupported.
 
 - `item_type=event` requires `event_detail` and forbids `task_detail`. `event_detail.all_day` is exactly `false`; optional fields are `visibility` and `attendance_policy_ref`. Version 1 creates a scheduled point event without an end anchor.
 - `item_type=task` requires `task_detail` and forbids `event_detail`. Optional `task_detail` fields are `priority` and `subject_roles`. `subject_roles` is the complete initial assignee/owner set and follows the lower-level `task.create` role rules: each entry accepts `role=assignee|owner`, accepts `status=active|inactive`, and derives `status=active` when omitted. After per-entry defaulting and before canonical ordering or identity derivation, every `(subject_id, role)` pair MUST be unique regardless of status. A repeated pair, including one whose entries differ only because one is `active` and the other is `inactive`, fails with `invalid_request`, `field=item.task_detail.subject_roles`, and CLI exit `2`.
@@ -218,6 +227,9 @@ Ordinary command-derived item, anchor, audit, and receipt IDs use `command=sched
 - command receipt: `/`;
 - task subject roles: `/item/task_detail/subject_roles/<canonical-index>`.
 
+When the primary-location capability is used, its location and item-location paths are
+the exact paths registered by `specs/schedule-primary-location.md`.
+
 Recurrence, notification, occurrence, provenance, opportunity, and work identities use their owning content-addressed specifications. For initial notification intent derivation, `intent_created_item_version="1"` and `intent_created_by_command_id` is the composite `command_id`. Policy normalization order is canonical `policy_key` order; `policy_key` is included in the composite receipt mapping but is not added to the existing notification-policy identity preimage.
 
 On fresh non-dry-run success, exactly one `command_receipts` row is written. Compatible replay and dry run write no receipt row. The persisted receipt has:
@@ -250,6 +262,8 @@ A success follows `spine.schedule-create-response.v1` and returns:
 - `ok=true`, `command=schedule.create`, `response_contract`, and `effect`;
 - `command_id`, `command_receipt_id`, `audit_id`, and `created_at_utc`;
 - item identity, type, version `1`, title, and accepted local/UTC schedule facts;
+- optional `primary_location` exactly when the request supplied it and the runtime
+  advertises the primary-location capability;
 - optional recurrence set, revision, normalized hash, and timezone-resolution diagnostics;
 - the snapshotted delivery resolution and explicit `delivery_state=not_attempted_by_command`;
 - policies ordered by `policy_key`, including intent, policy, schedule, and normalized schedule-hash identities;
@@ -304,6 +318,8 @@ Errors use the common public codes and CLI exits. Required fail-closed cases inc
 - duplicate policy key: `semantic_conflict`, `field=reminders[n].policy_key`;
 - absent or ambiguous context default: `referenced_row_not_found` or `semantic_conflict`, `field=delivery.target.default_key`;
 - explicit target missing: `referenced_row_not_found`, `field=delivery.target.delivery_target_id`;
+- advertised primary-location reference missing: `referenced_row_not_found`,
+  `field=item.primary_location.location_id`;
 - inactive or owner/channel-mismatched target: `semantic_conflict` on the responsible delivery field;
 - invalid or oversized horizon: `invalid_request` on the responsible materialization field;
 - more opportunities than the accepted limit: `invalid_request`, `field=materialization.limit`;

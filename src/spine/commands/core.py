@@ -54,7 +54,7 @@ from spine.core.schedule import (
     resolve_local_instant,
     system_timezone_database_version,
 )
-from spine.ledger.common import TemporalAnchorInput, insert_temporal_anchor, require_utc_z
+from spine.ledger.common import TemporalAnchorInput, copy_id, insert_temporal_anchor, require_utc_z
 from spine.ledger.item_drafts import _UNSET
 from spine.ledger.items import (
     archive_item,
@@ -93,6 +93,7 @@ from spine.ledger.supporting import (
     current_locations,
     current_notification_policies,
     current_subject_roles,
+    insert_item_location,
 )
 from spine.ledger.work import assert_work_instance_not_stale, cancel_work_instance, create_work_instance
 
@@ -640,10 +641,12 @@ def _handle_schedule_show(request: Mapping[str, Any], context: CommandContext) -
         raise SpineValidationError("invalid_request:include", "include must be an array")
     include_values: list[str] = []
     for value in raw_include:
-        if not isinstance(value, str) or value not in {"policies", "work", "attempts", "relations", "temporal_bindings"}:
+        if not isinstance(value, str) or value not in {
+            "policies", "work", "attempts", "relations", "temporal_bindings", "primary_location"
+        }:
             raise SpineValidationError(
                 "invalid_request:include",
-                "include values must be policies, work, attempts, relations, or temporal_bindings",
+                "include values must be policies, work, attempts, relations, temporal_bindings, or primary_location",
             )
         include_values.append(value)
     if len(include_values) != len(set(include_values)):
@@ -722,7 +725,7 @@ def _handle_agenda_show(request: Mapping[str, Any], context: CommandContext) -> 
     included = _agenda_unique_values(
         request.get("include", []),
         "include",
-        {"notification_summary", "work_summary"},
+        {"notification_summary", "work_summary", "primary_location"},
         allow_empty=True,
     )
     include_terminal = request.get("include_terminal", False)
@@ -947,6 +950,7 @@ def _handle_schedule_build(request: Mapping[str, Any], context: CommandContext) 
         "summary",
         "source_ref",
         "event_detail",
+        "primary_location",
         "timezone",
         "timezone_database_version",
         "event_delay_seconds",
@@ -1026,6 +1030,17 @@ def _handle_schedule_build(request: Mapping[str, Any], context: CommandContext) 
     _schedule_exact_fields(event_detail, {"all_day", "visibility", "attendance_policy_ref"}, "event_detail")
     if event_detail.get("all_day") is not False:
         raise SpineValidationError("invalid_request:event_detail.all_day", "countdown builder events require all_day=false")
+    primary_location = None
+    if "primary_location" in request:
+        from spine.services.primary_locations import normalize_primary_location
+
+        normalize_primary_location(
+            request["primary_location"],
+            field="primary_location",
+        )
+        # The builder preserves the public authoring shape. Normalization/version
+        # facts are bound when the generated schedule.create request is handled.
+        primary_location = dict(_schedule_object(request["primary_location"], "primary_location"))
 
     resolved_delivery = _schedule_resolve_delivery(request.get("delivery"), context)
     delivery: dict[str, Any] = {
@@ -1047,6 +1062,7 @@ def _handle_schedule_build(request: Mapping[str, Any], context: CommandContext) 
             summary=_optional_str(request, "summary"),
             source_ref=_optional_str(request, "source_ref"),
             event_detail=event_detail,
+            primary_location=primary_location,
             timezone=timezone,
             timezone_database_version=timezone_version,
             event_delay_seconds=event_delay,
@@ -1405,8 +1421,21 @@ def _handle_schedule_create(request: Mapping[str, Any], context: CommandContext)
             raise SpineValidationError(f"missing_{required_field}", f"{required_field} is required")
     if request.get("contract_version") != "spine.schedule-create.v1":
         raise SpineValidationError("invalid_request:contract_version", "contract_version must be spine.schedule-create.v1")
+    raw_item = _schedule_object(request.get("item"), "item")
+    normalized_primary_location = None
+    if "primary_location" in raw_item:
+        from spine.services.primary_locations import normalize_primary_location
+
+        normalized_primary_location = normalize_primary_location(
+            raw_item["primary_location"],
+            field="item.primary_location",
+        )
     command_id, actor, created_at = _write_identity(command, request, "created_at_utc", context)
     semantic = _schedule_semantic_request(command_id, actor, created_at, request, allowed)
+    if normalized_primary_location is not None:
+        semantic_item = semantic.get("item")
+        if isinstance(semantic_item, dict):
+            semantic_item["primary_location"] = dict(normalized_primary_location)
     replay = _compatible_replay(command, command_id, semantic, context)
     if replay is not None:
         if not _schedule_create_evidence_matches(context.ledger, replay):
@@ -1424,13 +1453,22 @@ def _handle_schedule_create(request: Mapping[str, Any], context: CommandContext)
         "spine.schedule-create-response.v1",
         "spine.schedule-create-receipt.v1",
     }
+    if normalized_primary_location is not None:
+        required_contracts.update(
+            {
+                "spine.schedule-primary-location.v1",
+                "spine.schedule-primary-location-authoring.v1",
+                "spine.schedule-primary-location-view.v1",
+                "spine.schedule-primary-location-normalization.v1",
+            }
+        )
     if not required_contracts.issubset(IMPLEMENTED_CONTRACT_VERSIONS):
         raise SpineValidationError(
             "environment_failure:contract_version",
             "runtime does not declare the complete schedule.create contract family",
         )
 
-    item_request = _schedule_object(request.get("item"), "item")
+    item_request = raw_item
     item_type = _enum(item_request.get("item_type"), "item.item_type", {"event", "task"})
     title = _nested_required_str(item_request, "title", "item.title")
     _schedule_validate_item_fields(item_request, item_type=item_type)
@@ -1454,6 +1492,56 @@ def _handle_schedule_create(request: Mapping[str, Any], context: CommandContext)
     )
     item_id = _derived_id(command, command_id, "item", "/item")
     audit_id = _derived_id(command, command_id, "audit", "/audit")
+
+    item_locations = ()
+    primary_location_view: dict[str, Any] | None = None
+    referenced_location_holder: list[dict[str, Any]] = []
+    validate_location_prerequisites: Callable[[sqlite3.Connection], None] | None = None
+    primary_location_id: str | None = None
+    primary_item_location_id: str | None = None
+    if normalized_primary_location is not None:
+        from spine.services.primary_locations import (
+            inline_location_inputs,
+            load_referenced_location,
+            predicted_inline_view,
+            reference_location_input,
+        )
+
+        primary_item_location_id = _derived_id(command, command_id, "item_location", "/item/primary_location")
+        if normalized_primary_location["mode"] == "create":
+            primary_location_id = _derived_id(command, command_id, "location", "/item/primary_location/location")
+            item_locations = (
+                inline_location_inputs(
+                    normalized_primary_location,
+                    location_id=primary_location_id,
+                    item_location_id=primary_item_location_id,
+                    created_at_utc=created_at,
+                ),
+            )
+            primary_location_view = predicted_inline_view(
+                normalized_primary_location,
+                location_id=primary_location_id,
+                item_location_id=primary_item_location_id,
+                created_at_utc=created_at,
+            )
+        else:
+            primary_location_id = normalized_primary_location["location_id"]
+            item_locations = (
+                reference_location_input(
+                    location_id=primary_location_id,
+                    item_location_id=primary_item_location_id,
+                    created_at_utc=created_at,
+                ),
+            )
+
+            def validate_location_prerequisites(connection: sqlite3.Connection) -> None:
+                referenced_location_holder.append(
+                    load_referenced_location(
+                        connection,
+                        location_id=str(primary_location_id),
+                        field="item.primary_location.location_id",
+                    )
+                )
 
     recurrence_authoring = scheduled_request.get("recurrence")
     raw_anchor: dict[str, object] = {
@@ -1517,9 +1605,33 @@ def _handle_schedule_create(request: Mapping[str, Any], context: CommandContext)
         "version": "1",
         "command_id": command_id,
     }
+    if primary_location_id is not None and primary_item_location_id is not None:
+        audit_payload.update(
+            {
+                "location_id": primary_location_id,
+                "item_location_id": primary_item_location_id,
+            }
+        )
     receipt_holder: list[dict[str, Any]] = []
 
     def insert_schedule_bundle(connection: sqlite3.Connection) -> None:
+        nonlocal primary_location_view
+        if (
+            normalized_primary_location is not None
+            and normalized_primary_location["mode"] == "reference"
+        ):
+            from spine.services.primary_locations import referenced_view
+
+            if len(referenced_location_holder) != 1 or primary_item_location_id is None:
+                raise SpineValidationError(
+                    "runtime_failure:item.primary_location",
+                    "referenced primary location prerequisite was not resolved exactly once",
+                )
+            primary_location_view = referenced_view(
+                referenced_location_holder[0],
+                item_location_id=primary_item_location_id,
+                item_location_created_at_utc=created_at,
+            )
         if recurrence is not None:
             insert_initial_recurrence_set(connection, normalized=recurrence, command_id=command_id, created_at_utc=created_at)
         _schedule_fail_if_requested(context, "item")
@@ -1724,6 +1836,13 @@ def _handle_schedule_create(request: Mapping[str, Any], context: CommandContext)
             "materialization": materialization_facts,
             "phases": phases,
         }
+        if normalized_primary_location is not None:
+            if primary_location_view is None:
+                raise SpineValidationError(
+                    "runtime_failure:item.primary_location",
+                    "primary location result could not be constructed",
+                )
+            result_facts["primary_location"] = primary_location_view
         if recurrence is not None:
             result_facts["recurrence"] = {
                 "recurrence_set_id": recurrence.value["recurrence_set_id"],
@@ -1745,6 +1864,11 @@ def _handle_schedule_create(request: Mapping[str, Any], context: CommandContext)
                 "resolved_timezone_database_version": scheduled["timezone_database_version"],
                 "resolved_initial_utc_instant": scheduled["utc_instant"],
                 "resolved_delivery": delivery["snapshot"],
+                **(
+                    {"normalized_primary_location": dict(normalized_primary_location)}
+                    if normalized_primary_location is not None
+                    else {}
+                ),
                 "normalized_result": result_facts,
             },
             result_identity_facts=result_facts,
@@ -1779,6 +1903,8 @@ def _handle_schedule_create(request: Mapping[str, Any], context: CommandContext)
         create_event_v1(
             context.ledger,
             **common_create,
+            validate_prerequisites=validate_location_prerequisites,
+            item_locations=item_locations,
             all_day=False,
             start_anchor=anchor,
             visibility=_nested_optional_str(event_detail, "visibility", "item.event_detail.visibility"),
@@ -1793,6 +1919,8 @@ def _handle_schedule_create(request: Mapping[str, Any], context: CommandContext)
         create_task_v1(
             context.ledger,
             **common_create,
+            validate_prerequisites=validate_location_prerequisites,
+            item_locations=item_locations,
             priority=_nested_optional_str(task_detail, "priority", "item.task_detail.priority"),
             due_anchor=anchor,
             subject_roles=subject_roles,
@@ -1961,21 +2089,49 @@ def _handle_schedule_update(request: Mapping[str, Any], context: CommandContext)
     item_id = _required_str(request, "item_id")
     target_version = _version(request, "target_version")
     patch = _schedule_object(request.get("patch"), "patch")
-    _schedule_exact_fields(patch, {"item", "scheduled_time", "recurrence", "delivery", "reminders"}, "patch")
+    _schedule_exact_fields(
+        patch,
+        {"item", "primary_location", "scheduled_time", "recurrence", "delivery", "reminders"},
+        "patch",
+    )
     if not patch:
         raise SpineValidationError("invalid_request:patch", "patch must not be empty")
+    normalized_primary_patch: object = _UNSET
+    if "primary_location" in patch:
+        if patch["primary_location"] is None:
+            normalized_primary_patch = None
+        else:
+            from spine.services.primary_locations import normalize_primary_location
+
+            normalized_primary_patch = normalize_primary_location(
+                patch["primary_location"],
+                field="patch.primary_location",
+            )
     semantic = _schedule_update_semantic_request(command_id, actor, updated_at, request, allowed)
+    if normalized_primary_patch is not _UNSET:
+        semantic_patch = semantic.get("patch")
+        if isinstance(semantic_patch, dict):
+            semantic_patch["primary_location"] = (
+                None if normalized_primary_patch is None else dict(normalized_primary_patch)
+            )
     replay = _compatible_replay(command, command_id, semantic, context)
     if replay is not None:
         return _schedule_update_response(replay, response_effect="schedule_update_replay")
-    _schedule_operations_runtime_check(
-        context.ledger,
-        {
-            "spine.schedule-update.v1",
-            "spine.schedule-update-response.v1",
-            "spine.schedule-update-receipt.v1",
-        }
-    )
+    required_contracts = {
+        "spine.schedule-update.v1",
+        "spine.schedule-update-response.v1",
+        "spine.schedule-update-receipt.v1",
+    }
+    if normalized_primary_patch is not _UNSET:
+        required_contracts.update(
+            {
+                "spine.schedule-primary-location.v1",
+                "spine.schedule-primary-location-authoring.v1",
+                "spine.schedule-primary-location-view.v1",
+                "spine.schedule-primary-location-normalization.v1",
+            }
+        )
+    _schedule_operations_runtime_check(context.ledger, required_contracts)
     item = _hydrated_item(context.ledger, item_id)
     if item["item_type"] not in {"event", "task"}:
         return _error(command, "wrong_item_type", "schedule.update supports event or task items", "item_id")
@@ -2045,6 +2201,121 @@ def _handle_schedule_update(request: Mapping[str, Any], context: CommandContext)
         command_id=command_id,
         value=patch.get("item"),
     )
+    from spine.services.primary_locations import (
+        canonical_location_facts,
+        current_primary_location,
+        inline_location_inputs,
+        load_referenced_location,
+        predicted_inline_view,
+        primary_location_view,
+        reference_location_input,
+        referenced_view,
+    )
+
+    current_primary = current_primary_location(item)
+    previous_location_id = str(current_primary["location_id"]) if current_primary is not None else None
+    primary_location_changed = False
+    primary_location_change: dict[str, Any] | None = None
+    replacement_item_location = None
+    referenced_location_snapshot: dict[str, Any] | None = None
+    primary_reference_field = "patch.primary_location.location_id"
+    if normalized_primary_patch is not _UNSET:
+        if normalized_primary_patch is None:
+            primary_location_changed = current_primary is not None
+            primary_location_change = {
+                "effect": "cleared" if primary_location_changed else "retained",
+                "requested_mode": "clear",
+                "previous_location_id": previous_location_id,
+                "current": None,
+            }
+        elif normalized_primary_patch["mode"] == "reference":
+            referenced_location_snapshot = load_referenced_location(
+                context.ledger,
+                location_id=str(normalized_primary_patch["location_id"]),
+                field=primary_reference_field,
+            )
+            requested_location_id = str(normalized_primary_patch["location_id"])
+            primary_location_changed = requested_location_id != previous_location_id
+            if primary_location_changed:
+                replacement_item_location_id = _derived_id(
+                    command,
+                    command_id,
+                    "item_location",
+                    "/patch/primary_location",
+                )
+                replacement_item_location = reference_location_input(
+                    location_id=requested_location_id,
+                    item_location_id=replacement_item_location_id,
+                    created_at_utc=updated_at,
+                )
+                current_location_view = referenced_view(
+                    referenced_location_snapshot,
+                    item_location_id=replacement_item_location_id,
+                    item_location_created_at_utc=updated_at,
+                )
+            else:
+                current_location_view = primary_location_view(current_primary)
+            primary_location_change = {
+                "effect": (
+                    "retained"
+                    if not primary_location_changed
+                    else "created"
+                    if current_primary is None
+                    else "replaced"
+                ),
+                "requested_mode": "reference",
+                "previous_location_id": previous_location_id,
+                "current": current_location_view,
+            }
+        else:
+            requested_facts = {
+                key: normalized_primary_patch[key]
+                for key in ("label", "kind", "address_text", "latitude", "longitude", "timezone", "provider_ref")
+                if key in normalized_primary_patch
+            }
+            primary_location_changed = (
+                current_primary is None
+                or canonical_location_facts(current_primary) != requested_facts
+            )
+            if primary_location_changed:
+                replacement_location_id = _derived_id(
+                    command,
+                    command_id,
+                    "location",
+                    "/patch/primary_location/location",
+                )
+                replacement_item_location_id = _derived_id(
+                    command,
+                    command_id,
+                    "item_location",
+                    "/patch/primary_location",
+                )
+                replacement_item_location = inline_location_inputs(
+                    normalized_primary_patch,
+                    location_id=replacement_location_id,
+                    item_location_id=replacement_item_location_id,
+                    created_at_utc=updated_at,
+                )
+                current_location_view = predicted_inline_view(
+                    normalized_primary_patch,
+                    location_id=replacement_location_id,
+                    item_location_id=replacement_item_location_id,
+                    created_at_utc=updated_at,
+                )
+            else:
+                current_location_view = primary_location_view(current_primary)
+            primary_location_change = {
+                "effect": (
+                    "retained"
+                    if not primary_location_changed
+                    else "created"
+                    if current_primary is None
+                    else "replaced"
+                ),
+                "requested_mode": "create",
+                "previous_location_id": previous_location_id,
+                "current": current_location_view,
+            }
     current_policies = load_current_notification_policies(context.ledger, item_id=item_id)
     active_current = [value for value in current_policies if value["status"] == "active"]
     policy_keys = _schedule_existing_policy_keys(context.ledger, item_id=item_id, policies=active_current)
@@ -2071,6 +2342,8 @@ def _handle_schedule_update(request: Mapping[str, Any], context: CommandContext)
     changed_dimensions: list[str] = []
     if item_patch["changed"]:
         changed_dimensions.append("item")
+    if primary_location_changed:
+        changed_dimensions.append("primary_location")
     if (
         replacement_anchor is not None
         and _anchor_semantic_facts(current_anchor) != _anchor_semantic_facts(_anchor_output(replacement_anchor))
@@ -2083,7 +2356,9 @@ def _handle_schedule_update(request: Mapping[str, Any], context: CommandContext)
     if "reminders" in patch and _schedule_policy_set_changes(active_current, desired_policies):
         changed_dimensions.append("reminders")
     changed_dimensions = [
-        value for value in ("item", "scheduled_time", "recurrence", "delivery", "reminders") if value in changed_dimensions
+        value
+        for value in ("item", "primary_location", "scheduled_time", "recurrence", "delivery", "reminders")
+        if value in changed_dimensions
     ]
     truth_changed = bool(changed_dimensions)
     result_version = target_version + 1 if truth_changed else target_version
@@ -2113,6 +2388,17 @@ def _handle_schedule_update(request: Mapping[str, Any], context: CommandContext)
         truth_changed = bool(changed_dimensions)
         result_version = target_version + 1 if truth_changed else target_version
         successor_recurrence = current_recurrence
+
+    if (
+        primary_location_change is not None
+        and primary_location_change["effect"] == "retained"
+        and truth_changed
+        and current_primary is not None
+    ):
+        copied = dict(current_primary)
+        copied["item_location_id"] = copy_id(str(current_primary["item_location_id"]), result_version)
+        copied["created_at_utc"] = updated_at
+        primary_location_change["current"] = primary_location_view(copied)
 
     if not truth_changed:
         desired_policies = tuple(
@@ -2152,6 +2438,19 @@ def _handle_schedule_update(request: Mapping[str, Any], context: CommandContext)
     def persist_bundle(connection: sqlite3.Connection, next_version: int) -> None:
         nonlocal selected_opportunity_count, work_changed
         if truth_changed:
+            if primary_location_changed:
+                connection.execute(
+                    "DELETE FROM item_locations WHERE item_id = ? AND version = ? AND role = 'primary'",
+                    (item_id, next_version),
+                )
+                if replacement_item_location is not None:
+                    insert_item_location(
+                        connection,
+                        item_id=item_id,
+                        version=next_version,
+                        item_location=replacement_item_location,
+                        default_created_at_utc=updated_at,
+                    )
             if successor_recurrence is not None and successor_recurrence is not current_recurrence:
                 insert_initial_recurrence_set(
                     connection,
@@ -2271,6 +2570,8 @@ def _handle_schedule_update(request: Mapping[str, Any], context: CommandContext)
                 "delivery": "not_attempted",
             },
         }
+        if primary_location_change is not None:
+            result_facts["primary_location_change"] = primary_location_change
         recurrence_value = successor_recurrence.value if isinstance(successor_recurrence, NormalizedRecurrenceSet) else successor_recurrence
         if recurrence_value is not None:
             result_facts["recurrence"] = {
@@ -2290,7 +2591,21 @@ def _handle_schedule_update(request: Mapping[str, Any], context: CommandContext)
             effect=effect,
             item_id=item_id,
             target_version=str(target_version),
-            semantic_facts={**semantic, "normalized_result": result_facts},
+            semantic_facts={
+                **semantic,
+                **(
+                    {
+                        "normalized_primary_location": (
+                            None
+                            if normalized_primary_patch is None
+                            else dict(normalized_primary_patch)
+                        )
+                    }
+                    if normalized_primary_patch is not _UNSET
+                    else {}
+                ),
+                "normalized_result": result_facts,
+            },
             result_identity_facts=result_facts,
         )
         insert_command_receipt(connection, receipt)
@@ -2301,6 +2616,17 @@ def _handle_schedule_update(request: Mapping[str, Any], context: CommandContext)
         next_anchor = replacement_anchor
 
         def insert_prerequisites(connection: sqlite3.Connection, _version: int) -> None:
+            if referenced_location_snapshot is not None and primary_location_changed:
+                current_reference = load_referenced_location(
+                    connection,
+                    location_id=str(referenced_location_snapshot["location_id"]),
+                    field=primary_reference_field,
+                )
+                if current_reference != referenced_location_snapshot:
+                    raise SpineValidationError(
+                        f"semantic_conflict:{primary_reference_field}",
+                        "referenced primary location changed during schedule.update",
+                    )
             if next_anchor is not None:
                 insert_temporal_anchor(
                     connection,
@@ -2335,6 +2661,26 @@ def _handle_schedule_update(request: Mapping[str, Any], context: CommandContext)
             subject_role_replacement_roles=("assignee", "owner") if subject_roles is not None else (),
             audit_action="schedule_updated",
             reason_code="schedule_updated",
+            audit_payload={
+                "action": "schedule_updated",
+                "item_id": item_id,
+                "item_type": item["item_type"],
+                "previous_version": str(target_version),
+                "version": str(result_version),
+                **(
+                    {
+                        "primary_location_effect": primary_location_change["effect"],
+                        "previous_location_id": previous_location_id,
+                        "current_location_id": (
+                            primary_location_change["current"]["location_id"]
+                            if isinstance(primary_location_change.get("current"), Mapping)
+                            else None
+                        ),
+                    }
+                    if primary_location_change is not None
+                    else {}
+                ),
+            },
             insert_prerequisites=insert_prerequisites,
             insert_canonical_extension=persist_bundle,
             supporting_command_id=command_id,
@@ -5023,7 +5369,11 @@ def _nested_optional_str(value: Mapping[str, Any], key: str, field: str) -> str 
 
 
 def _schedule_validate_item_fields(item: Mapping[str, Any], *, item_type: str) -> None:
-    _schedule_exact_fields(item, {"item_type", "title", "summary", "source_ref", "event_detail", "task_detail"}, "item")
+    _schedule_exact_fields(
+        item,
+        {"item_type", "title", "summary", "source_ref", "primary_location", "event_detail", "task_detail"},
+        "item",
+    )
     if item_type == "event":
         if "task_detail" in item:
             raise SpineValidationError("invalid_request:item.task_detail", "event items cannot contain task_detail")
@@ -6816,6 +7166,11 @@ def _agenda_entry_base(
         )
     if "work_summary" in included:
         entry["work_summary"] = _agenda_work_summary(connection, item_id=str(item["item_id"]))
+    if "primary_location" in included:
+        from spine.services.primary_locations import current_primary_location, primary_location_view
+
+        primary = current_primary_location(item)
+        entry["primary_location"] = primary_location_view(primary) if primary is not None else None
     if item["item_type"] == "task":
         from spine.ledger.temporal_bindings import active_binding_for_target, binding_view
 
@@ -7080,6 +7435,41 @@ def _schedule_create_evidence_matches(connection: sqlite3.Connection, receipt: M
         or receipt_row["command_id"] != receipt.get("command_id")
     ):
         return False
+    primary_location = facts.get("primary_location")
+    if primary_location is not None:
+        if not isinstance(primary_location, Mapping):
+            return False
+        from spine.services.primary_locations import primary_location_view
+
+        row = connection.execute(
+            """
+            SELECT il.item_location_id, il.location_id, il.role, il.created_at_utc,
+                   l.label, l.kind, l.address_text, l.latitude, l.longitude, l.timezone,
+                   l.provider_ref, l.created_at_utc AS location_created_at_utc,
+                   l.updated_at_utc AS location_updated_at_utc
+            FROM item_locations AS il
+            JOIN locations AS l ON l.location_id = il.location_id
+            WHERE il.item_id = ? AND il.version = 1 AND il.role = 'primary'
+            """,
+            (item_id,),
+        ).fetchone()
+        if row is None:
+            return False
+        persisted_primary_location = primary_location_view(dict(row))
+        # Location metadata may be refreshed after authoring. Replay verifies the
+        # immutable canonical facts and relationship identity while returning the
+        # original stored receipt snapshot.
+        mutable_view_fields = {"location_updated_at_utc"}
+        if {
+            key: value
+            for key, value in persisted_primary_location.items()
+            if key not in mutable_view_fields
+        } != {
+            key: value
+            for key, value in dict(primary_location).items()
+            if key not in mutable_view_fields
+        }:
+            return False
     for policy in policies:
         if not isinstance(policy, Mapping):
             return False
@@ -7158,6 +7548,8 @@ def _derived_id(command: str, command_id: str, row_role: str, request_path: str)
         "due_anchor": "anchor",
         "defer_until_anchor": "anchor",
         "item_subject_role": "item_subject_role",
+        "location": "location",
+        "item_location": "item_location",
         "notification_policy": "notification_policy",
         "work_instance": "work_instance",
         "temporal_binding": "temporal_binding",

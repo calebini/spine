@@ -15,7 +15,7 @@ This command remains the canonical deep readback for one known item. The impleme
 
 The request requires `item_id`. Optional fields are:
 
-- `include`: a unique array containing any of `policies`, `work`, `attempts`, `relations`, and `temporal_bindings`; omission includes policies, work, and attempts;
+- `include`: a unique array containing any of `policies`, `work`, `attempts`, `relations`, `temporal_bindings`, and, when the runtime advertises `spine.schedule-primary-location.v1`, `primary_location`; omission includes policies, work, and attempts;
 - `notification_policies_limit`: integer or decimal string in `0..100`, default `100`;
 - `work_instances_limit`: integer or decimal string in `0..1000`, default `1000`; and
 - `side_effect_attempts_limit`: integer or decimal string in `0..1000`, default `1000`.
@@ -38,6 +38,11 @@ CLI `--compact` applies the additive `spine.schedule-compact.v1` projection defi
 ## 3. Current Item and Time View
 
 The response embeds the current `item.show` shell, common version, event/task detail, locations, and subject-role view under `item`, excluding the separately returned notification-policy collection. It does not return a historical item version as current.
+
+When `primary_location` was explicitly included, the response additionally returns the
+clean top-level view or JSON `null` defined by `specs/schedule-primary-location.md`.
+The property is omitted otherwise. This projection does not remove or rewrite the
+granular `item.locations` collection.
 
 `scheduled_times` is ordered by the closed anchor-role order:
 
@@ -104,4 +109,6 @@ The contract is accepted when executable tests prove that:
 4. authoring, opportunity expansion, work materialization, delivery attempt, and delivery outcome remain distinct;
 5. a started attempt reads as pending and a later succeeded attempt reads as succeeded;
 6. the direct CLI `--item-id` and `--include` form maps to the same request; and
-7. request and runtime response validate under Draft 2020-12 schemas.
+7. request and runtime response validate under Draft 2020-12 schemas; and
+8. a runtime advertising the primary-location family returns its clean view only when
+   explicitly included, while leaving `item.locations` intact.

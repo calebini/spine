@@ -31,9 +31,10 @@
     "changed_dimensions": {
       "type": "array",
       "uniqueItems": true,
-      "items": { "enum": ["item", "scheduled_time", "recurrence", "delivery", "reminders"] }
+      "items": { "enum": ["item", "primary_location", "scheduled_time", "recurrence", "delivery", "reminders"] }
     },
     "scheduled_time": { "$ref": "schedule-create-response.schema.json#/$defs/resolvedSchedule" },
+    "primary_location_change": { "$ref": "schedule-primary-location-types.schema.json#/$defs/updateChange" },
     "recurrence": { "$ref": "#/$defs/recurrenceSummary" },
     "policies": {
       "type": "array",

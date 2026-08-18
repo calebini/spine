@@ -110,6 +110,7 @@
         "title": { "type": "string", "minLength": 1 },
         "summary": { "type": "string" },
         "source_ref": { "type": "string" },
+        "primary_location": { "$ref": "schedule-primary-location-types.schema.json#/$defs/authoring" },
         "event_detail": { "$ref": "#/$defs/eventDetail" },
         "task_detail": { "$ref": "#/$defs/taskDetail" }
       },

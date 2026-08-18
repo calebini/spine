@@ -31,7 +31,7 @@
     "include": {
       "type": "array",
       "uniqueItems": true,
-      "items": { "enum": ["notification_summary", "work_summary"] }
+      "items": { "enum": ["notification_summary", "work_summary", "primary_location"] }
     },
     "include_diagnostics": { "type": "boolean" },
     "limit": {

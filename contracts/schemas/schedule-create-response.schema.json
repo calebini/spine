@@ -264,6 +264,7 @@
         "current_version": { "const": "1" },
         "title": { "type": "string", "minLength": 1 },
         "scheduled_time": { "$ref": "#/$defs/resolvedSchedule" },
+        "primary_location": { "$ref": "schedule-primary-location-types.schema.json#/$defs/view" },
         "recurrence": { "$ref": "#/$defs/recurrence" },
         "delivery": { "$ref": "#/$defs/delivery" },
         "policies": {

@@ -16,6 +16,7 @@
     "summary": { "type": "string" },
     "source_ref": { "type": "string" },
     "event_detail": { "$ref": "schedule-create-request.schema.json#/$defs/eventDetail" },
+    "primary_location": { "$ref": "schedule-primary-location-types.schema.json#/$defs/authoring" },
     "timezone": { "type": "string", "minLength": 1 },
     "timezone_database_version": { "$ref": "schedule-create-request.schema.json#/$defs/timezoneDatabaseVersionDirective" },
     "event_delay_seconds": { "$ref": "notification-types.schema.json#/$defs/decimalPositive" },

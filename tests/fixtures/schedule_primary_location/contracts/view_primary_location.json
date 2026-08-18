@@ -1,0 +1,17 @@
+{
+  "location_contract": "spine.schedule-primary-location.v1",
+  "view_contract": "spine.schedule-primary-location-view.v1",
+  "location_id": "location_lakeside_golf_club",
+  "item_location_id": "item_location_golf_trip_primary_v1",
+  "role": "primary",
+  "label": "Lakeside Golf Club",
+  "kind": "place",
+  "address_text": "123 Fairway Road, Toronto, ON",
+  "latitude": "43.7001",
+  "longitude": "-79.4163",
+  "timezone": "America/Toronto",
+  "provider_ref": "maps:place:lakeside",
+  "item_location_created_at_utc": "2035-02-01T12:00:00Z",
+  "location_created_at_utc": "2035-02-01T12:00:00Z",
+  "location_updated_at_utc": "2035-02-01T12:00:00Z"
+}

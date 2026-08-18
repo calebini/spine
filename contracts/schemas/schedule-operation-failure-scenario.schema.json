@@ -144,6 +144,7 @@
         "cursor_query_matches": { "type": "boolean" },
         "cursor_snapshot_matches": { "type": "boolean" },
         "policy_key_mapping_matches": { "type": "boolean" },
+        "referenced_location_exists": { "type": "boolean" },
         "normalized_policy_hashes": {
           "type": "array",
           "items": { "type": "string", "pattern": "^[0-9a-f]{64}$" }

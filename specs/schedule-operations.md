@@ -83,7 +83,9 @@ Optional fields are:
 - `item_types`, a unique subset of `event|task`, default both;
 - `item_ids`, a unique narrowing set of at most 100 IDs;
 - `include_terminal`, default `false`;
-- `include`, a unique subset of `notification_summary|work_summary`, default empty;
+- `include`, a unique subset of `notification_summary|work_summary` plus
+  `primary_location` when the runtime advertises
+  `spine.schedule-primary-location.v1`, default empty;
 - `include_diagnostics`, default `false`; and
 - `cursor` for the next page.
 
@@ -144,6 +146,8 @@ The first page derives `query_hash` from canonical JSON containing the normalize
 - current recurrence set and revision identities;
 - current policy IDs, intent IDs, status, normalized schedule hashes, target, and routing facts when either notification or work summary is included; and
 - matching work IDs, eligibility, status, and attempt count when work summary is included.
+- the clean current primary-location view or JSON `null` when `primary_location` is
+  included, as defined by `specs/schedule-primary-location.md`.
 
 The cursor is an opaque integrity-checked encoding of normalization version, query hash, source snapshot hash, and last emitted ordering tuple. A next-page request MUST repeat every non-cursor request fact byte-for-byte. Any query mismatch fails with `invalid_request`, `field=cursor`; any changed source snapshot fails with `stale_cursor`, `field=cursor`. The command never continues against a silently changed agenda snapshot.
 
@@ -166,7 +170,7 @@ The target MUST be an active-shell scheduled event or open task whose primary ev
 
 An otherwise eligible event may retain an end anchor while receiving an item, recurrence, delivery, reminder, or reconciliation-only update. When such an event has an end anchor, a request containing `patch.scheduled_time` fails with `invalid_request`, `field=patch.scheduled_time`, because Version 1 defines neither implicit duration preservation nor end-anchor replacement. Callers use `event.reschedule` for that temporal mutation until a later composite duration contract exists. The end anchor alone does not make non-time patch dimensions ineligible.
 
-The patch may contain `item`, `scheduled_time`, `recurrence`, `delivery`, and `reminders`. Omitted dimensions copy current truth exactly. At least one dimension is required, although normalized equality may produce a no-op.
+The patch may contain `item`, `scheduled_time`, `recurrence`, `delivery`, and `reminders`. A runtime advertising `spine.schedule-primary-location.v1` additionally accepts `primary_location` with omit-to-retain, null-to-clear, and closed create/reference replacement semantics from `specs/schedule-primary-location.md`. Omitted dimensions copy current truth exactly. At least one dimension is required, although normalized equality may produce a no-op.
 
 ### 5.2 Item and Scheduled-Time Patch
 
@@ -217,6 +221,10 @@ For one response, `cancelled_work_instance_ids`, `retained_work_instance_ids`, `
 
 Occurrence provenance is regenerated when recurrence truth, primary scheduled time, or recurrence-bound policy targeting changes, and whenever bounded materialization needs a source range not already proven current. Unresolved or non-actionable provenance fails the transaction.
 
+A primary-location-only truth change neither regenerates occurrence provenance nor
+cancels otherwise-current notification work. Location is not part of the Version 1
+recurrence, opportunity, work, route, or delivery freshness preimages.
+
 ### 5.6 Effects, Versioning, and Response
 
 The stored command-receipt effect is closed over two booleans, `truth_changed` and `work_changed`:
@@ -230,7 +238,7 @@ The stored command-receipt effect is closed over two booleans, `truth_changed` a
 
 Truth change creates exactly one next item version and one composite audit. Work-only reconciliation creates no item version but writes one composite audit. A complete no-op writes no item version or audit but still writes one replay receipt. Dry run returns deterministic would-be results and writes nothing.
 
-The response returns target and current versions, closed effect, `truth_changed`, `work_changed`, canonically ordered `changed_dimensions`, current scheduled-time resolution, optional recurrence summary, current active policy mapping, disabled intent IDs, work reconciliation arrays, materialization summary, phase states, audit ID when written, and receipt summary. `changed_dimensions` values are `item`, `scheduled_time`, `recurrence`, `delivery`, and `reminders`.
+The response returns target and current versions, closed effect, `truth_changed`, `work_changed`, canonically ordered `changed_dimensions`, current scheduled-time resolution, optional recurrence summary, current active policy mapping, disabled intent IDs, work reconciliation arrays, materialization summary, phase states, audit ID when written, and receipt summary. Base `changed_dimensions` values are `item`, `scheduled_time`, `recurrence`, `delivery`, and `reminders`. The advertised primary-location capability inserts `primary_location` after `item` and returns the conditional `primary_location_change` result defined by `specs/schedule-primary-location.md`.
 
 Compatible replay returns top-level `effect=schedule_update_replay` plus the stored receipt effect under `receipt.effect`; it creates no row and does not re-resolve timezone data, context defaults, provenance, opportunities, or work.
 
@@ -316,6 +324,7 @@ The table below closes the Version 1 failures that depend on schedule-operation 
 | `schedule.update` | primary event-start/task-due anchor is not `local_instant` | 7 | `invalid_request` | `primary_schedule.anchor_kind` |
 | `schedule.update` | `patch.scheduled_time` targets an event with an end anchor | 7 | `invalid_request` | `patch.scheduled_time` |
 | `schedule.update` | a recurring target changes `scheduled_time` without complete recurrence replacement | 7 | `missing_required_field` | `patch.recurrence` |
+| `schedule.update` | advertised primary-location reference does not resolve | 7 | `referenced_row_not_found` | `patch.primary_location.location_id` |
 | `schedule.update` | exactly one reminder intent/policy identity is supplied | 7 | `invalid_request` | the missing identity field under `patch.reminders[n]` |
 | `schedule.update` | a policy key is rebound to a different current intent | 7 | `semantic_conflict` | `patch.reminders[n].policy_key` |
 | `schedule.update` | two desired entries normalize to the same notification policy | 9 | `semantic_conflict` | `patch.reminders` |
@@ -342,7 +351,10 @@ Arrays are canonically ordered:
 - policy mappings by `policy_key`;
 - intent IDs and work IDs lexically unless an opportunity order is explicitly returned;
 - materialized opportunity/work pairs by eligibility time, opportunity ID, then work ID; and
-- changed dimensions in the fixed order `item`, `scheduled_time`, `recurrence`, `delivery`, `reminders`.
+- changed dimensions in the base fixed order `item`, `scheduled_time`, `recurrence`,
+  `delivery`, `reminders`; when `spine.schedule-primary-location.v1` is advertised,
+  the extended fixed order is `item`, `primary_location`, `scheduled_time`,
+  `recurrence`, `delivery`, `reminders`.
 
 Receipt evidence MUST be sufficient to reconstruct compatible replay without querying mutable route defaults, current timezone versions, current successor state, or a newly evaluated opportunity range. Missing or contradictory required historical evidence fails with `runtime_failure`; replay never repairs it.
 

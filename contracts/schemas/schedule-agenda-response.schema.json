@@ -23,7 +23,7 @@
     "included": {
       "type": "array",
       "uniqueItems": true,
-      "items": { "enum": ["notification_summary", "work_summary"] }
+      "items": { "enum": ["notification_summary", "work_summary", "primary_location"] }
     },
     "limit": {
       "type": "string",
@@ -41,6 +41,22 @@
       "if": { "properties": { "has_more": { "const": true } }, "required": ["has_more"] },
       "then": { "properties": { "next_cursor": { "type": "string", "minLength": 1 } } },
       "else": { "properties": { "next_cursor": { "type": "null" } } }
+    },
+    {
+      "if": {
+        "properties": { "included": { "contains": { "const": "primary_location" } } },
+        "required": ["included"]
+      },
+      "then": {
+        "properties": {
+          "entries": { "items": { "required": ["primary_location"] } }
+        }
+      },
+      "else": {
+        "properties": {
+          "entries": { "items": { "not": { "required": ["primary_location"] } } }
+        }
+      }
     }
   ],
   "additionalProperties": false,
@@ -98,6 +114,12 @@
         "temporal_binding": { "$ref": "#/$defs/temporalBindingSummary" },
         "defer_state": { "enum": ["not_deferred", "deferred", "defer_elapsed"] },
         "defer_until_utc": { "$ref": "notification-types.schema.json#/$defs/utcTimestamp" },
+        "primary_location": {
+          "oneOf": [
+            { "$ref": "schedule-primary-location-types.schema.json#/$defs/view" },
+            { "type": "null" }
+          ]
+        },
         "notification_summary": { "$ref": "#/$defs/notificationSummary" },
         "work_summary": { "$ref": "#/$defs/workSummary" }
       },

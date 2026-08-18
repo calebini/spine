@@ -82,7 +82,7 @@ Do not require current-schema verification before an intended migration; an olde
 "$SPINE_COMMAND" --db "$SPINE_DB" --pretty system info
 ```
 
-Require equal `implemented_ledger_schema_version` and `ledger_schema_version`. Before using the atomic and operator surfaces, also require `implemented_contract_versions` to include `spine.schedule-create.v1`, `spine.schedule-show.v1`, the complete agenda/update/cancel family, `spine.schedule-compact.v1`, and the countdown-builder family. Before using related tasks, additionally require `spine.relative-temporal-binding.v1`, `spine.schedule-related-task-create.v1`, and both `spine.schedule-binding-list.v1` and `spine.schedule-binding-reconcile.v1` with their response/receipt/cursor versions.
+Require equal `implemented_ledger_schema_version` and `ledger_schema_version`. Before using the atomic and operator surfaces, also require `implemented_contract_versions` to include `spine.schedule-create.v1`, `spine.schedule-show.v1`, the complete agenda/update/cancel family, `spine.schedule-compact.v1`, and the countdown-builder family. Before authoring or reading primary locations, require `spine.schedule-primary-location.v1`, `spine.schedule-primary-location-authoring.v1`, `spine.schedule-primary-location-view.v1`, and `spine.schedule-primary-location-normalization.v1`. Before using related tasks, additionally require `spine.relative-temporal-binding.v1`, `spine.schedule-related-task-create.v1`, and both `spine.schedule-binding-list.v1` and `spine.schedule-binding-reconcile.v1` with their response/receipt/cursor versions.
 
 For `schedule.create`, prefer the request directive `"timezone_database_version":{"kind":"system_current"}`. Spine resolves it once during fresh execution, stores the concrete installed version, and returns that concrete value in receipts and readback. A compatible replay returns the original resolved version even if the host later installs newer timezone data. Operators may instead use `{"kind":"explicit","version":"<exact-version>"}`. Omission is invalid; Spine never chooses timezone data through a hidden default. For lower-level local-time commands that require the concrete string directly, use the value returned by `system.info`. Never copy a version from an example or another machine.
 
@@ -540,6 +540,61 @@ Before any send, inspect the JSON output:
 
 If any field is wrong, do not send. Fix the source record or integration path first.
 
+## Primary Schedule Locations
+
+Use the singular `item.primary_location` field on `schedule.create`; do not write
+`locations` or `item_locations` directly and do not supply a general locations array.
+Create a new canonical place inline:
+
+```json
+{
+  "primary_location": {
+    "mode": "create",
+    "label": "Lakeside Golf Club",
+    "kind": "place",
+    "address_text": "123 Fairway Road",
+    "timezone": "America/Toronto"
+  }
+}
+```
+
+Or explicitly link a known canonical row:
+
+```json
+{
+  "primary_location": {
+    "mode": "reference",
+    "location_id": "location_..."
+  }
+}
+```
+
+Spine does not search, geocode, infer, or deduplicate a venue. Latitude and longitude,
+when used, are paired decimal strings. A location's optional timezone is descriptive:
+it never supplies or changes `scheduled_time.timezone` or its pinned timezone-data
+version.
+
+Use `schedule.update.patch.primary_location` with the same create/reference shapes to
+replace the current location, JSON `null` to clear it, or omit the field to retain it.
+An exact inline semantic match or reference to the current `location_id` is a no-op.
+Location-only updates create ordinary item history but retain otherwise-current
+recurrence provenance and notification work.
+
+Read the clean bound view explicitly:
+
+```bash
+"$SPINE_COMMAND" --db "$SPINE_DB" \
+  --item-id "$ITEM_ID" \
+  --include primary_location \
+  --pretty schedule show
+```
+
+Add `primary_location` to an `agenda.show.include` array when each agenda entry needs
+the view. Explicit reads return `primary_location=null` when absent; omission means the
+projection was not requested. Full `item.locations` remains the granular catalog
+surface. `schedule.build` accepts the same authoring value and passes it into its
+generated `schedule.create` request without resolving or writing it.
+
 ## What Success Looks Like
 
 Observe-only visibility success:
@@ -631,11 +686,11 @@ Use one read-only command after schedule creation, reminder mutation, work mater
 ```bash
 "$SPINE_COMMAND" --db "$SPINE_DB" \
   --item-id "$ITEM_ID" \
-  --include policies,work,attempts \
+  --include policies,work,attempts,primary_location \
   --pretty schedule show
 ```
 
-The response provides current item state; stored local time, concrete timezone-data version, and UTC resolution; current recurrence; policy and intent identities; work status; delivery route snapshots; and side-effect attempts. Add `relations,temporal_bindings` to `--include` when inspecting a related task. Collection counts and lifecycle summaries cover all matching evidence even when a detail limit truncates an array. The public field `notification_policy_id` intentionally aliases `notification_policies.policy_id`; `work_instances.notification_policy_id` is also the canonical foreign-key column.
+The response provides current item state; stored local time, concrete timezone-data version, and UTC resolution; current recurrence; policy and intent identities; work status; delivery route snapshots; and side-effect attempts. Include `primary_location` for the clean current location view, and add `relations,temporal_bindings` when inspecting a related task. Collection counts and lifecycle summaries cover all matching evidence even when a detail limit truncates an array. The public field `notification_policy_id` intentionally aliases `notification_policies.policy_id`; `work_instances.notification_policy_id` is also the canonical foreign-key column.
 
 Do not infer delivery from authoring or materialization. Require `lifecycle.delivery.attempt_state=attempted` before claiming that a worker tried delivery, and inspect `lifecycle.delivery.outcome_state` plus `side_effect_attempts` before claiming success or failure. For virtual occurrence inspection, continue to use bounded `item.occurrences`; for provenance repair, use `occurrence_provenance.regenerate` and inspect its structured receipt.
 
@@ -739,7 +794,7 @@ Use repository evidence in this order:
 
 1. `docs/AGENT_QUICKSTART.md` and `examples/agent-first-success.sh` for cold-start execution.
 2. This guide for operations and failure handling.
-3. `specs/agent-command-contract.md`, `specs/schedule-create.md`, `specs/schedule-show.md`, `specs/recurrence.md`, and `specs/notifications.md` for normative behavior.
+3. `specs/agent-command-contract.md`, `specs/schedule-create.md`, `specs/schedule-show.md`, `specs/schedule-primary-location.md`, `specs/recurrence.md`, and `specs/notifications.md` for normative behavior.
 4. `contracts/schemas/` for machine-readable request and response shapes.
 5. `tests/fixtures/schedule_create/contracts/`, `tests/fixtures/recurrence/contracts/`, and `tests/fixtures/notifications/contracts/` for structural examples.
 6. `tests/fixtures/recurrence/vectors/` and `tests/fixtures/notifications/vectors/` for computed identity evidence.
