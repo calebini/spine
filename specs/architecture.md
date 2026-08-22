@@ -138,6 +138,8 @@ Calendar notification cadence may reuse the frequency, selector, timezone-versio
 
 Tickerd may initiate bounded materialization and process eligible work. It does not own notification schedule interpretation. Repeated notification opportunities are separate work instances; adapter retries remain attempts or retry state for one work instance. No policy or opportunity may invoke an adapter directly.
 
+`specs/notification-rendering.md` defines the draft deterministic prose boundary for ordinary `notification_reminder` attempts. Rendering occurs only after existing freshness and late-handling gates grant attempt-start admission, uses the proposed attempt time plus current canonical item, target, occurrence/binding, and primary-location facts, and atomically persists immutable body evidence with the generic started attempt before external contact. It is a pure service/core concern with adapter-specific escaping at the edge; it does not make prose a scheduling fact or introduce a second attempt ledger. Contextual model-generated advisories remain a separate authority chain.
+
 ## 8. Composite Schedule Authoring Boundary
 
 `specs/schedule-create.md` defines `schedule.create`, a provider-independent orchestration service over existing item, recurrence, notification, provenance, work, audit, and receipt authorities. It introduces no new canonical entity and MUST live in the service/command layer rather than core schedule normalization or an adapter.

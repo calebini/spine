@@ -32,6 +32,7 @@ Authoritative starting points:
 - `specs/relative-temporal-bindings.md` defines implemented explicit snapshot/follow-source temporal derivation, bounded binding discovery/reconciliation, and atomic creation of a task that is `part_of` an existing event; its schemas, fixtures, migration, and behavioral coverage ship as one schema-8 family.
 - `contracts/relative-temporal-binding-fixture-manifest.json` indexes its request/response examples; behavioral coverage lives in `tests/test_relative_temporal_bindings_command.py`.
 - `specs/contextual-advisories.md` begins the draft role-based cross-system contract for one scheduled, governed, read-only agent advisory and at most one ordinary derivative notification. It is not implemented and declares no compatibility surface yet.
+- `specs/notification-rendering.md` defines the draft deterministic concise `en-CA` rendering profile for natural ordinary-reminder prose, immutable per-attempt rendering evidence, and exact adapter-envelope binding. It is not implemented and declares no compatibility surface yet.
 - `specs/agent-command-contract.md` defines the MVP agent command core and CLI contract.
 - `docs/AGENT_QUICKSTART.md` gives a zero-context agent one executable, fake-only path through recurrence and recurring notifications.
 - `specs/decisions/0001-kinflow-is-donor-not-foundation.md` records the Kinflow relationship.

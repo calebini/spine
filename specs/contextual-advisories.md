@@ -190,6 +190,10 @@ The delivery adapter consumes eligible derivative notification work through Spin
 ordinary attempt gate. It does not receive the agent's capability grant and cannot
 turn an advisory run into another class of action.
 
+The deterministic ordinary-reminder renderer in `specs/notification-rendering.md` is
+not an agent runtime and does not consume advisory outcomes. It remains the reliable
+non-model rendering path when an advisory is unavailable, rejected, stale, or absent.
+
 ## 6. Durable Spine Facts
 
 The first implementation is expected to require a later ledger schema version. Exact

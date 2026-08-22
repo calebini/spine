@@ -63,6 +63,18 @@ When current recurrence exists, `recurrence` is the complete normalized current 
 
 `work_instances` contains item-linked durable work across item versions, ordered by `eligible_at_utc` and `work_instance_id`. `side_effect_attempts` contains attempts bound to those work rows, ordered by `attempted_at_utc` and `attempt_id`; unrelated candidate-action or projection attempts for the same item are outside this schedule-delivery view. Counts and lifecycle summaries cover all matching rows even when a requested detail collection is omitted or truncated.
 
+`spine.notification-rendering.v1` is a capability-gated extension of each returned
+notification-attempt projection, not a new `include` value or top-level collection.
+When that capability is advertised and `attempts` is included explicitly or by
+default, each attempt created under the rendering contract MUST contain its linked
+immutable `notification_rendering` object using
+`specs/notification-rendering.md` Section 11. The nested object projects stored
+evidence keyed by `attempt_id`; `schedule.show` MUST NOT reconstruct, refresh, or
+rerender it. The rendering capability, its nested response schema, persistence, and
+readback implementation MUST be promoted atomically. Until that family is advertised,
+the currently implemented response shape remains unchanged and contains no implied
+rendering evidence.
+
 Every included collection returns its accepted limit, total count, and truncation boolean. A zero limit returns no elements while retaining the total count and lifecycle summary. Work and attempt detail queries fetch at most the requested limit plus one truncation sentinel; aggregate counts are computed in the ledger. Public work/attempt detail limits are at most 1000.
 
 `delivery_targets` contains one entry per distinct target referenced by current policies or item work, ordered by `delivery_target_id`. `current_snapshot` is the current canonical delivery-target row. When the item was authored by `schedule.create`, `authored_snapshot` is the immutable routing snapshot stored in that receipt, and `routing_facts_match_authored` compares delivery target id, channel, adapter, and target reference. The command never substitutes the current route for historical authoring evidence.
@@ -95,7 +107,13 @@ Work status and delivery outcome are reported separately. A succeeded work row d
 
 ## 6. Determinism and Failure
 
-The exact response shape is `contracts/schemas/schedule-show-response.schema.json`. Arrays use the deterministic order specified above. Integer counts and versions are returned as canonical decimal strings.
+The exact currently implemented base response shape is
+`contracts/schemas/schedule-show-response.schema.json`. A runtime advertising
+`spine.notification-rendering.v1` MUST also publish and declare the matching
+capability-gated schema extension described in Section 4; it MUST NOT emit that field
+while claiming conformance only to the present base schema. Arrays use the
+deterministic order specified above. Integer counts and versions are returned as
+canonical decimal strings.
 
 Unknown items fail through the shared structured item-not-found path. Missing referenced route or invalid stored lifecycle evidence fails closed as invalid readback state. Readback never repairs inconsistent evidence and never writes while handling failure.
 
