@@ -1,0 +1,499 @@
+{
+  "manifest_version": "spine.sqlite-schema-object-manifest.v1",
+  "schemas": {
+    "8": {
+      "objects": [
+        {
+          "definition_sha256": "d398d475608b90ad2f581456812626755656f58d3e67822c31232c3e3a2480e3",
+          "name": "audit_log_causation_idx",
+          "object_type": "index"
+        },
+        {
+          "definition_sha256": "0cc9fe580be71ea5d69605b59fa33b20cf1bc7e28dc191cd76eb5e0b1e994768",
+          "name": "audit_log_correlation_idx",
+          "object_type": "index"
+        },
+        {
+          "definition_sha256": "80cb552d5f61f4537d8ee95f882f93d9bd18b5c45772bf25715f526a18ea5c70",
+          "name": "audit_log_item_created_idx",
+          "object_type": "index"
+        },
+        {
+          "definition_sha256": "48690eb0d88726fe54d5ffbf406185f2f28e6e5971119a2265813a5eef1de395",
+          "name": "candidate_actions_item_status_idx",
+          "object_type": "index"
+        },
+        {
+          "definition_sha256": "55c5b57febd4926a15d8b3d4cce39448ac5b5489307feeeac71031448a435378",
+          "name": "candidate_actions_open_kind_idx",
+          "object_type": "index"
+        },
+        {
+          "definition_sha256": "aca3ce21d652821c3731a3fa4a9cda185825f22a936d3367ed70bb91b92add81",
+          "name": "command_receipts_item_created_idx",
+          "object_type": "index"
+        },
+        {
+          "definition_sha256": "82c2e18eb463be1e24c3881739787a57e688c0f32c3fc1bb70c21dce003d8692",
+          "name": "coordination_item_relations_active_source_idx",
+          "object_type": "index"
+        },
+        {
+          "definition_sha256": "a6ca8ced8774beefe6a5ecec56811011ef7d6697aae8b42c6da410dcdbc2cb29",
+          "name": "coordination_item_relations_active_target_idx",
+          "object_type": "index"
+        },
+        {
+          "definition_sha256": "a52d5a5f5bcddeb5940b4a1d64d8b046fc4070cd035fc418863aae68acccb82f",
+          "name": "coordination_item_relations_active_unique",
+          "object_type": "index"
+        },
+        {
+          "definition_sha256": "940fd4cb13e5d80b7ec1aa282146960f1c6f647b1a46336ece0daad427310181",
+          "name": "delivery_targets_active_account_unique",
+          "object_type": "index"
+        },
+        {
+          "definition_sha256": "7c98185706af9184732947ac080779a85c4fac742ecd1a794ac5ddfd11127f6c",
+          "name": "delivery_targets_active_no_account_unique",
+          "object_type": "index"
+        },
+        {
+          "definition_sha256": "50ffc20acdb37936fce7020dd34421cd1aa420cdc16625bdadb1569090082d56",
+          "name": "delivery_targets_owner_status_idx",
+          "object_type": "index"
+        },
+        {
+          "definition_sha256": "f7751c1122f730f4196684cfe0db5a64c8919f394640e5cd0ef23cd834b55a69",
+          "name": "external_projections_item_adapter_status_idx",
+          "object_type": "index"
+        },
+        {
+          "definition_sha256": "ba3be79b75e83ffb5ba0071d23da42218b8589954150ef2ce1a795a3b83bd757",
+          "name": "external_projections_status_updated_idx",
+          "object_type": "index"
+        },
+        {
+          "definition_sha256": "7577e5ac0d0a6e97b08d6d34fb226860a8b3eeb76bcfd421e1604026e60a4556",
+          "name": "item_locations_location_idx",
+          "object_type": "index"
+        },
+        {
+          "definition_sha256": "8478cc11f4df6ec0b9df8e361b493818fe7bd2650b78e685889f518f60a120ad",
+          "name": "item_subject_roles_subject_idx",
+          "object_type": "index"
+        },
+        {
+          "definition_sha256": "2fb24d3645f0c9f24d978a8bff0bbc541b5b8293c94f1830941ad548c7f7903e",
+          "name": "notification_policies_delivery_target_idx",
+          "object_type": "index"
+        },
+        {
+          "definition_sha256": "a76077fea67192d8473017f9f718d092af8a5e21eae012b9b95a8a109905aa8e",
+          "name": "notification_policies_group_status_idx",
+          "object_type": "index"
+        },
+        {
+          "definition_sha256": "d8a84c572f05c0ea1b91975f8ac19418b86f1a7c6a15e6ed99de6511366cafe7",
+          "name": "notification_policies_group_unique",
+          "object_type": "index"
+        },
+        {
+          "definition_sha256": "f1c980fb3bffab5a47a45badf9e628a00eff114e79b08d6b25f34d40f1a18286",
+          "name": "notification_policies_item_version_status_idx",
+          "object_type": "index"
+        },
+        {
+          "definition_sha256": "8c37a5853a4e787a70033133701b938f6a6c0fcdce5284002dff8d592460677f",
+          "name": "notification_policies_recipient_status_idx",
+          "object_type": "index"
+        },
+        {
+          "definition_sha256": "2d3929e3ec5476c4edd666441b5bec0d4e5b9de5d5b89e0cfd2d82639bb0f526",
+          "name": "notification_policies_subject_unique",
+          "object_type": "index"
+        },
+        {
+          "definition_sha256": "0bd69e8c85c724a02d1b3615a643ef0d1d6d324950bc97d6c34b06abca735aca",
+          "name": "relative_temporal_binding_revisions_binding_idx",
+          "object_type": "index"
+        },
+        {
+          "definition_sha256": "f5f5624d9ba5483646de5c37c7fdd73d880e466d02ea43d7652ba1c7d602ecdd",
+          "name": "relative_temporal_bindings_active_target_unique",
+          "object_type": "index"
+        },
+        {
+          "definition_sha256": "7cb70775ae811d7af17ffc899d545f77c144fb4b3e57f9b2534d87b3bd98f4b3",
+          "name": "relative_temporal_bindings_source_status_idx",
+          "object_type": "index"
+        },
+        {
+          "definition_sha256": "207c857751395061325b31959a544027f20dfbdad69502634ff43e6f453d47dc",
+          "name": "relative_temporal_bindings_target_status_idx",
+          "object_type": "index"
+        },
+        {
+          "definition_sha256": "378651b39e6ddecadff4cc379786df70bbcd98af9198426bd0074991611dfbbf",
+          "name": "side_effect_attempts_candidate_action_idx",
+          "object_type": "index"
+        },
+        {
+          "definition_sha256": "6dcd89f9f766a03076f77ca5a99bceff1d1a6ef5898cc0d495da7796e8797b04",
+          "name": "side_effect_attempts_item_adapter_status_idx",
+          "object_type": "index"
+        },
+        {
+          "definition_sha256": "75b0b7f8f8b24330dafddae155ad8dfcf0444337100cba395672c669a2eec180",
+          "name": "side_effect_attempts_projection_idx",
+          "object_type": "index"
+        },
+        {
+          "definition_sha256": "58e8fb8033ea6290f6376f16d4d85d70b539a847809fcbbb14e1586e7536a985",
+          "name": "side_effect_attempts_work_instance_idx",
+          "object_type": "index"
+        },
+        {
+          "definition_sha256": "3d63f7bdb1d73e47becf2e093e7f0105885bccd0e337b9ce4faf438ecf98e511",
+          "name": "subject_memberships_group_status_idx",
+          "object_type": "index"
+        },
+        {
+          "definition_sha256": "589b122ddba6a399698de6393119d0c87c58bc5dbae55a66937ab84e391c713e",
+          "name": "subject_memberships_subject_status_idx",
+          "object_type": "index"
+        },
+        {
+          "definition_sha256": "41ef17a72024d7748c726b7532df953c5a20a993fa3781af64b2f85aec3dc434",
+          "name": "work_instances_delivery_target_idx",
+          "object_type": "index"
+        },
+        {
+          "definition_sha256": "c2d50d02ac88b65899f0b5927f687fac9d233f6cd4372d4cdc98e0d10f48fb1e",
+          "name": "work_instances_eligible_due_idx",
+          "object_type": "index"
+        },
+        {
+          "definition_sha256": "9c0a1fcaa749801d2b7c7aa240bd678650e62b0b41d9cff642ba2a533f56a585",
+          "name": "work_instances_item_version_status_idx",
+          "object_type": "index"
+        },
+        {
+          "definition_sha256": "e0a2148ffd7088503e3d1fbaec47dcd19ab1ebc173075f43f3d29df1f2c9698c",
+          "name": "work_instances_source_work_idx",
+          "object_type": "index"
+        },
+        {
+          "definition_sha256": "655a7cb5a3f927558ded082136f1b942a2e728feb320320e16b3d6dd48009f17",
+          "name": "audit_log",
+          "object_type": "table"
+        },
+        {
+          "definition_sha256": "8c392ac99337c64e57c970bdba6f2c2d5aea64060aa97fc7511741cde3157b70",
+          "name": "candidate_actions",
+          "object_type": "table"
+        },
+        {
+          "definition_sha256": "5ea98bd9f4d977f5c8019ad32a1f2dbbb8fbd9c92662398e0f7db3086b874908",
+          "name": "command_receipts",
+          "object_type": "table"
+        },
+        {
+          "definition_sha256": "b3bb97135e80ef7b100bb89457f8b1db9f2e7170bed1541d53b4c8697c8686d0",
+          "name": "coordination_item_relations",
+          "object_type": "table"
+        },
+        {
+          "definition_sha256": "498f8100beb03a6e3a46d0d9a17ba67628e30054126f363d2e306dde3c6d8850",
+          "name": "coordination_item_versions",
+          "object_type": "table"
+        },
+        {
+          "definition_sha256": "2314e7c01cbacc980b9eeb396a36dc5629c55b1e2249d8dc65059154d8256056",
+          "name": "coordination_items",
+          "object_type": "table"
+        },
+        {
+          "definition_sha256": "07a9defa7c498443b95ca7cb2ef322e513b4b35f06ac63b1d55c3eeb31d2247e",
+          "name": "delivery_targets",
+          "object_type": "table"
+        },
+        {
+          "definition_sha256": "5d4bea856d54efb55d303b121f4a3d7a14fcf483ff2f8dd9da386b4eefb350c6",
+          "name": "event_details",
+          "object_type": "table"
+        },
+        {
+          "definition_sha256": "e168bf201de86c754c8057a256ff604def1f23caf0fb8ef85ebb26b806cae401",
+          "name": "external_projections",
+          "object_type": "table"
+        },
+        {
+          "definition_sha256": "550a5875976ce2c66ea352d0343600e51a190f951ba05ed1a57efff01ee039d8",
+          "name": "item_locations",
+          "object_type": "table"
+        },
+        {
+          "definition_sha256": "0db1b8220e4ce575c348edda0b71811537a5857619d2b03611fbe3424fefc3af",
+          "name": "item_subject_roles",
+          "object_type": "table"
+        },
+        {
+          "definition_sha256": "9418d5d712cc9ebed82b0d5affef760bb097c47f52232b63180c4d04fde16912",
+          "name": "ledger_schema",
+          "object_type": "table"
+        },
+        {
+          "definition_sha256": "3ea54b2e07d2c91e3779a6b2bf1ff8acdccbfd4a759cda10ca7b8c4b6e133881",
+          "name": "locations",
+          "object_type": "table"
+        },
+        {
+          "definition_sha256": "6013e2b553b4002901ea7ac36a69a942df38d926531e0a48ea171f40cc8892b2",
+          "name": "notification_policies",
+          "object_type": "table"
+        },
+        {
+          "definition_sha256": "d195b8b67785383e2da4f8552289115e72d9bc41db30de089e7693dc5b1b48e5",
+          "name": "notification_schedule_offsets",
+          "object_type": "table"
+        },
+        {
+          "definition_sha256": "93cffb66aa0c1b41bc4b0a87f2659a1e98e666a689233e9d3f85dae8e68d5922",
+          "name": "notification_schedule_selectors",
+          "object_type": "table"
+        },
+        {
+          "definition_sha256": "f972aa5f39b679420a5a8f90c8633f00440a73c323fd8841ea06ec2377b2aca2",
+          "name": "notification_schedules",
+          "object_type": "table"
+        },
+        {
+          "definition_sha256": "358cd14a00f3abbde3b193a287d10080f6f87df544d9ccce70e8428a79892466",
+          "name": "notification_target_occurrence_selectors",
+          "object_type": "table"
+        },
+        {
+          "definition_sha256": "3262c4d3e94373de5215bd237373eca0527ee014a1b9bd43fbfef7e0702cef4b",
+          "name": "notification_target_rdate_sources",
+          "object_type": "table"
+        },
+        {
+          "definition_sha256": "8a8773c695ec239689660767afd9ee10cc08cd698b230b91c3556044b3ca84d6",
+          "name": "notification_target_rule_source_selectors",
+          "object_type": "table"
+        },
+        {
+          "definition_sha256": "b751193e1e281c18d7dd5cc619c6236e132b158cd94397ff2fc9381994db9753",
+          "name": "notification_target_rule_sources",
+          "object_type": "table"
+        },
+        {
+          "definition_sha256": "2f5f9aec2d2559515a1b02db1d030c3a72bc8a6805b11e87b08032dfb00c9291",
+          "name": "occurrence_provenance",
+          "object_type": "table"
+        },
+        {
+          "definition_sha256": "3b092e9edaee08dfa96497c1c40a7d1afc2fa2f2ea2a8e0449ccd65851f58c3f",
+          "name": "occurrence_provenance_rdate_sources",
+          "object_type": "table"
+        },
+        {
+          "definition_sha256": "75d4037e1488c2efa9d99a00a3f64c86ce8a6043d912c82f76c02c1a8101a9a7",
+          "name": "occurrence_provenance_rule_sources",
+          "object_type": "table"
+        },
+        {
+          "definition_sha256": "f99d429f3158eddd0b1de15da99dc57755e2368a0b430bc69dae5b659a811685",
+          "name": "recurrence_exdates",
+          "object_type": "table"
+        },
+        {
+          "definition_sha256": "5bcec8ef7daf4fbf91f488f7f5c8d6ee9a2696c51108758c46401ee53349ef96",
+          "name": "recurrence_lineage",
+          "object_type": "table"
+        },
+        {
+          "definition_sha256": "3d8064609144c1ada284ea7304df000b48573d7392918592bfe7bd4b6d0ee032",
+          "name": "recurrence_overrides",
+          "object_type": "table"
+        },
+        {
+          "definition_sha256": "803fbf23fa5a093f488a93edc9b07ab4ba53e99d238e0a2651d62840678e6656",
+          "name": "recurrence_provenance_block_reports",
+          "object_type": "table"
+        },
+        {
+          "definition_sha256": "5a24ae1ff0dd9c0008d848e0406c9ac51a3e43fc5d9c6180244e2f09f50c9ea9",
+          "name": "recurrence_rdates",
+          "object_type": "table"
+        },
+        {
+          "definition_sha256": "dfe934c2fac2e20e492cfd705a629aba053cf8073362e66210ea13ac458317fe",
+          "name": "recurrence_revisions",
+          "object_type": "table"
+        },
+        {
+          "definition_sha256": "801d8312d2ad76da385dd720310093be7865cea5344f97df81045524d53c16b1",
+          "name": "recurrence_rule_selectors",
+          "object_type": "table"
+        },
+        {
+          "definition_sha256": "bf531a3acb766b0e3794a052131977cfcf57cf4a625c701a9f90fe684cb6dc4a",
+          "name": "recurrence_rules",
+          "object_type": "table"
+        },
+        {
+          "definition_sha256": "ea07a03a5fef9d0a73ecc7576900ed4cf56c784b27664e14fbe633ce3f8411da",
+          "name": "recurrence_segments",
+          "object_type": "table"
+        },
+        {
+          "definition_sha256": "e002a4cd6b4c9555d8fd29b1d534117acc3b41138de6c4f57487867c94bbb736",
+          "name": "recurrence_sets",
+          "object_type": "table"
+        },
+        {
+          "definition_sha256": "278cf949d385b59cc5518a860d53642542fb855f9ce5c1c5b08bd226d938d007",
+          "name": "recurrence_target_occurrence_selectors",
+          "object_type": "table"
+        },
+        {
+          "definition_sha256": "9f6eae64a0a4b076d53c257827f8cf43442b6846944dcd29dab16ba919378f85",
+          "name": "recurrence_target_rdate_sources",
+          "object_type": "table"
+        },
+        {
+          "definition_sha256": "d36de9a5de05ed9c423eb6d1cd6857e669e7972269a43a4230a07ec111f164b7",
+          "name": "recurrence_target_rule_source_selectors",
+          "object_type": "table"
+        },
+        {
+          "definition_sha256": "e77e3c20d70db92200610558ec6e27f71f29c0facb17f457ce05e5fcf1c6b6fe",
+          "name": "recurrence_target_rule_sources",
+          "object_type": "table"
+        },
+        {
+          "definition_sha256": "1e01c08b063ee1d37d87143461d86b62441396aad6e8da27502e396736451375",
+          "name": "relative_temporal_binding_revisions",
+          "object_type": "table"
+        },
+        {
+          "definition_sha256": "d446478e929b004754fd207b8a7b6bc2f5182f7cc6b211f75f49d93034317686",
+          "name": "relative_temporal_bindings",
+          "object_type": "table"
+        },
+        {
+          "definition_sha256": "8977708857091c9ac1ad8603efb7d1d75b838b04c3a26b838d2b1f21085ba68f",
+          "name": "side_effect_attempts",
+          "object_type": "table"
+        },
+        {
+          "definition_sha256": "81fe868ac81400d1761067335a10b957bf4dd27345b87958e0c06cece64e9c3b",
+          "name": "subject_groups",
+          "object_type": "table"
+        },
+        {
+          "definition_sha256": "253311233cea2010dc46b52bb661d8a052559a61096656d8319057cbb74f8c3e",
+          "name": "subject_memberships",
+          "object_type": "table"
+        },
+        {
+          "definition_sha256": "7e438f39e72e87f190f9da7c5c97c0bf178ff1c236b055c94d085bd38c61ddbc",
+          "name": "subjects",
+          "object_type": "table"
+        },
+        {
+          "definition_sha256": "2eed1acaa2f908bdcccc745c4d470d55baacada3141537b5c5ed04847c204c9e",
+          "name": "task_details",
+          "object_type": "table"
+        },
+        {
+          "definition_sha256": "dcd504c6f3fad3e6cdf691fe40f066406eb1c7e29b79f754be6832be0cf39df1",
+          "name": "temporal_anchors",
+          "object_type": "table"
+        },
+        {
+          "definition_sha256": "ac6429088cd1b1179b6c5c82a6288981623bcef136060760d0a1c78758765207",
+          "name": "temporal_binding_catalog_state",
+          "object_type": "table"
+        },
+        {
+          "definition_sha256": "4bd7cba10f78134bebe43ee5f10850be275bd02eb6db7ae05b0c86149c81d719",
+          "name": "work_instances",
+          "object_type": "table"
+        },
+        {
+          "definition_sha256": "026952aced49aad0430d6481acd1f5bbf35e8d09b8f80bba670a6919aa61eeb9",
+          "name": "coordination_item_versions_contiguous_insert",
+          "object_type": "trigger"
+        },
+        {
+          "definition_sha256": "3ec857d3572f5ac1f986de02a0e89b668304d3519c5c9f97dd80fbd970d60a66",
+          "name": "event_details_item_type_insert",
+          "object_type": "trigger"
+        },
+        {
+          "definition_sha256": "1c5170ad1ea4507543d71ce0f26df178e97b83435b45b52451eb1af7fb9e982c",
+          "name": "event_details_recurrence_contract_insert",
+          "object_type": "trigger"
+        },
+        {
+          "definition_sha256": "568d0514c8f46197672bceac27f738a219d2376a568df043c554b8d0630e22ae",
+          "name": "event_details_time_shape_insert",
+          "object_type": "trigger"
+        },
+        {
+          "definition_sha256": "384496ddfd83a4bf94f32ee18f6b7aab97e9f7c8e68d96c03240470cceb3b6d8",
+          "name": "locations_referenced_canonical_fields_update",
+          "object_type": "trigger"
+        },
+        {
+          "definition_sha256": "2d5e50b652f4b62f8c3e8f0999b4e112457ec484101d2c20a01f38ee88cbb168",
+          "name": "notification_policies_delivery_target_owner_insert",
+          "object_type": "trigger"
+        },
+        {
+          "definition_sha256": "c39915ba23646a42a56db680795898476add0647d4016715ae4a15e2dcf0c729",
+          "name": "notification_policies_structured_contract_insert",
+          "object_type": "trigger"
+        },
+        {
+          "definition_sha256": "6e21ad3d4072b13e614e3cefa79a61e6eaac0e8dbd72eef3ffb2eec354f70b90",
+          "name": "side_effect_attempts_origin_binding_insert",
+          "object_type": "trigger"
+        },
+        {
+          "definition_sha256": "116d4c1553d957a72c59830f07d5f017b3836bf18ed1e14acc954f617f8a7ecd",
+          "name": "side_effect_attempts_staleness_insert",
+          "object_type": "trigger"
+        },
+        {
+          "definition_sha256": "7d94c6a95b5662aac6a70c8acb60db07d2aed3fafbb6e608db9f25234c956d60",
+          "name": "task_details_item_type_insert",
+          "object_type": "trigger"
+        },
+        {
+          "definition_sha256": "3bd0b020825b8c5809e892312541d0e2cc2f22e496435be78e508d9413d593f8",
+          "name": "task_details_recurrence_contract_insert",
+          "object_type": "trigger"
+        },
+        {
+          "definition_sha256": "627c89ea50bde27bf61ff5b4d92c273a1fac11119dabccd7567febe53f885e9a",
+          "name": "task_details_time_shape_insert",
+          "object_type": "trigger"
+        },
+        {
+          "definition_sha256": "63ee6d3eb7f246bd3aeed92eaa76a09745f38166a51cf1d3a4f211239248eb30",
+          "name": "temporal_binding_catalog_related_item_audit",
+          "object_type": "trigger"
+        },
+        {
+          "definition_sha256": "4e0e76642213a60acf1b74c34548839bb9ffc389126da9413f21df04fef6b582",
+          "name": "work_instances_notification_policy_binding_insert",
+          "object_type": "trigger"
+        }
+      ]
+    }
+  }
+}

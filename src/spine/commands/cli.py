@@ -12,8 +12,9 @@ from typing import Any
 
 from spine.commands.compact import compact_schedule_response
 from spine.commands.context import CommandContext
-from spine.commands.core import MVP_COMMANDS, WRITE_COMMANDS, handle
-from spine.ledger.migrate import verify_schema
+from spine.commands.core import handle
+from spine.commands.registry import MVP_COMMANDS, WRITE_COMMANDS, missing_runtime_contract_versions
+from spine.ledger.preflight import verify_runtime_schema
 from spine.ledger.sqlite import connect
 
 EXIT_BY_ERROR = {
@@ -49,6 +50,21 @@ def main(argv: Sequence[str] | None = None) -> int:
             response["command"] = command
         _dump(response, pretty=args.pretty)
         return 2
+    missing_contracts = missing_runtime_contract_versions(command)
+    if missing_contracts:
+        _dump(
+            {
+                "ok": False,
+                "command": command,
+                "error": {
+                    "code": "environment_failure",
+                    "message": f"missing required runtime contracts: {', '.join(missing_contracts)}",
+                    "field": "runtime_contracts",
+                },
+            },
+            pretty=args.pretty,
+        )
+        return 7
     if args.if_absent and command != "reminder.create":
         _dump(
             {
@@ -262,7 +278,7 @@ def _open_ledger(db: str, *, writable: bool):
             raise CliPreflightError("invalid_request", "ledger database is not readable", "db")
     connection = connect(path)
     try:
-        verify_schema(connection)
+        verify_runtime_schema(connection)
     except Exception as exc:
         connection.close()
         raise CliPreflightError("invalid_request", str(exc), "db") from exc

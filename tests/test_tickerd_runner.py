@@ -21,8 +21,14 @@ class TickerdRunnerCliTests(unittest.TestCase):
             db_path = Path(directory) / "missing.sqlite"
             state_dir = Path(directory) / "state"
 
-            with self.assertRaisesRegex(SystemExit, "database does not exist"):
-                main(["--db", str(db_path), "--state-dir", str(state_dir), "--max-cycles", "1"])
+            exit_code = main(["--db", str(db_path), "--state-dir", str(state_dir), "--max-cycles", "1"])
+
+            self.assertEqual(exit_code, 3)
+            health = json.loads((state_dir / "health.json").read_text(encoding="utf-8"))
+            self.assertEqual(health["state"], "DOWN")
+            self.assertFalse(health["is_ready"])
+            events = [json.loads(line) for line in (state_dir / "events.jsonl").read_text(encoding="utf-8").splitlines()]
+            self.assertEqual(events, [{"event": "ledger_runtime_preflight_failed", "reason": "database_unavailable"}])
 
 
 @unittest.skipUnless(TICKERD_AVAILABLE, "tickerd is not importable")

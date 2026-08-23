@@ -19,6 +19,7 @@ from spine.commands.receipts import (
     get_command_receipt,
     insert_command_receipt,
 )
+from spine.commands.registry import MVP_COMMANDS, WRITE_COMMANDS
 from spine.commands.responses import (
     event_reschedule_response,
     event_update_response,
@@ -98,61 +99,6 @@ from spine.ledger.supporting import (
     insert_item_location,
 )
 from spine.ledger.work import assert_work_instance_not_stale, cancel_work_instance, create_work_instance
-
-MVP_COMMANDS = frozenset(
-    {
-        "subject.upsert",
-        "subject_group.upsert",
-        "delivery_target.upsert",
-        "system.info",
-        "item.show",
-        "item.list",
-        "item.occurrences",
-        "item.archive",
-        "event.create",
-        "event.update",
-        "event.reschedule",
-        "event.cancel",
-        "task.create",
-        "schedule.create",
-        "schedule.build",
-        "schedule.show",
-        "agenda.show",
-        "schedule.update",
-        "schedule.cancel",
-        "schedule.related_task.create",
-        "schedule.binding.list",
-        "schedule.binding.reconcile",
-        "task.update",
-        "task.complete",
-        "task.cancel",
-        "relation.create",
-        "relation.list",
-        "reminder.create",
-        "reminder.edit",
-        "reminder.disable",
-        "notification.opportunities",
-        "occurrence_provenance.regenerate",
-        "notification_work.materialize",
-        "recurrence.instance.add",
-        "recurrence.instance.remove",
-        "recurrence.instance.override",
-        "recurrence.series.edit",
-    }
-)
-
-WRITE_COMMANDS = MVP_COMMANDS - {
-    "item.show",
-    "schedule.show",
-    "agenda.show",
-    "schedule.binding.list",
-    "schedule.build",
-    "item.list",
-    "item.occurrences",
-    "relation.list",
-    "notification.opportunities",
-    "system.info",
-}
 
 
 def handle(command: str, request: Mapping[str, Any], context: CommandContext) -> dict[str, Any]:

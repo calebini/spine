@@ -38,7 +38,7 @@ spine-worker = "spine.runtime.worker:main"
 where = ["src"]
 
 [tool.setuptools.package-data]
-"spine.ledger" = ["schema.sql", "migrations/*.sql"]
+"spine.ledger" = ["schema.sql", "schema_object_manifest.v1.json", "migrations/*.sql"]
 "spine" = ["py.typed"]
 
 [tool.pytest.ini_options]

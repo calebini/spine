@@ -12,6 +12,7 @@ from typing import Any
 
 from spine.adapters import SpineTickerdWorkAdapter
 from spine.ledger import connect, initialize_schema
+from spine.runtime.preflight import admit_worker, emit_worker_preflight_failure
 from spine.runtime.tickerd_observe import RUNTIME_MODES
 
 
@@ -68,13 +69,22 @@ def run_foreground(
         reconcile_interval_ms=reconcile_interval_ms,
         max_work_items_per_tick=max_work_items_per_tick,
     )
+    health = JsonFileHealthSink(paths.health_path)
+    events = JsonlFileEventSink(paths.events_path)
+    preflight_failure = admit_worker(
+        connection,
+        config=config,
+        health_sink=health,
+        event_sink=events,
+    )
+    if preflight_failure is not None:
+        return preflight_failure
     adapter = SpineTickerdWorkAdapter(
         connection,
         runtime_mode=runtime_mode,
         scheduler_actor_subject_id=scheduler_actor_subject_id,
         materialization_horizon_seconds=materialization_horizon_seconds,
     )
-    events = JsonlFileEventSink(paths.events_path)
     kernel = RuntimeKernel(
         config,
         mode_reader=adapter,
@@ -88,11 +98,36 @@ def run_foreground(
         config,
         kernel=kernel,
         lock_backend=FileLockBackend(paths.lock_path, paths.owner_path),
-        health_sink=JsonFileHealthSink(paths.health_path),
+        health_sink=health,
         event_sink=events,
         install_signal_handlers=install_signal_handlers,
     )
     return runner.run(max_cycles=max_cycles)
+
+
+def report_database_unavailable(
+    *,
+    state_dir: Path | str,
+    tick_interval_ms: int,
+    reconcile_interval_ms: int,
+    max_work_items_per_tick: int,
+) -> Any:
+    """Emit the required failed-admission state when the ledger cannot be opened."""
+
+    TickerdConfig, _, _, JsonFileHealthSink, JsonlFileEventSink, _ = _tickerd_runner_types()
+    paths = SpineRunnerPaths.from_state_dir(state_dir)
+    paths.state_dir.mkdir(parents=True, exist_ok=True)
+    config = TickerdConfig(
+        tick_interval_ms=tick_interval_ms,
+        reconcile_interval_ms=reconcile_interval_ms,
+        max_work_items_per_tick=max_work_items_per_tick,
+    )
+    return emit_worker_preflight_failure(
+        config=config,
+        health_sink=JsonFileHealthSink(paths.health_path),
+        event_sink=JsonlFileEventSink(paths.events_path),
+        reason="database_unavailable",
+    )
 
 
 def main(argv: Sequence[str] | None = None) -> int:
@@ -106,9 +141,24 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     db_path = Path(args.db)
     if not db_path.exists() and not args.initialize_schema:
-        raise SystemExit(f"database does not exist: {db_path}; pass --initialize-schema to create it")
+        result = report_database_unavailable(
+            state_dir=args.state_dir,
+            tick_interval_ms=args.tick_interval_ms,
+            reconcile_interval_ms=args.reconcile_interval_ms,
+            max_work_items_per_tick=args.max_work_items,
+        )
+        return int(result.exit_code)
 
-    connection = connect(db_path)
+    try:
+        connection = connect(db_path)
+    except (OSError, sqlite3.Error):
+        result = report_database_unavailable(
+            state_dir=args.state_dir,
+            tick_interval_ms=args.tick_interval_ms,
+            reconcile_interval_ms=args.reconcile_interval_ms,
+            max_work_items_per_tick=args.max_work_items,
+        )
+        return int(result.exit_code)
     try:
         if args.initialize_schema:
             initialize_schema(connection)

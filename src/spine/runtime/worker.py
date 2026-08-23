@@ -22,8 +22,9 @@ from spine.adapters import (
     SpineTickerdWorkAdapter,
 )
 from spine.ledger import connect, initialize_schema
+from spine.runtime.preflight import admit_worker
 from spine.runtime.tickerd_observe import RUNTIME_MODES
-from spine.runtime.tickerd_runner import SpineRunnerPaths, _tickerd_runner_types
+from spine.runtime.tickerd_runner import SpineRunnerPaths, _tickerd_runner_types, report_database_unavailable
 
 FAKE_OPENCLAW_RESULTS = ("delivered", "transient", "permanent", "blocked", "binding_error", "send_exception")
 OPENCLAW_SENDERS = ("fake", "gateway")
@@ -114,6 +115,21 @@ def run_spine_worker(
     ) = _tickerd_runner_types()
     paths = SpineWorkerPaths.from_state_dir(state_dir)
     paths.runner.state_dir.mkdir(parents=True, exist_ok=True)
+    config = TickerdConfig(
+        tick_interval_ms=tick_interval_ms,
+        reconcile_interval_ms=reconcile_interval_ms,
+        max_work_items_per_tick=max_work_items_per_tick,
+    )
+    health = JsonFileHealthSink(paths.runner.health_path)
+    events = JsonlFileEventSink(paths.runner.events_path)
+    preflight_failure = admit_worker(
+        connection,
+        config=config,
+        health_sink=health,
+        event_sink=events,
+    )
+    if preflight_failure is not None:
+        return preflight_failure
     processor = _worker_processor(
         paths=paths,
         bindings=bindings,
@@ -122,12 +138,6 @@ def run_spine_worker(
         openclaw_fake_result=openclaw_fake_result,
     )
     adapter = SpineTickerdWorkAdapter(connection, runtime_mode=runtime_mode, processor=processor)
-    config = TickerdConfig(
-        tick_interval_ms=tick_interval_ms,
-        reconcile_interval_ms=reconcile_interval_ms,
-        max_work_items_per_tick=max_work_items_per_tick,
-    )
-    events = JsonlFileEventSink(paths.runner.events_path)
     kernel = RuntimeKernel(
         config,
         mode_reader=adapter,
@@ -141,11 +151,37 @@ def run_spine_worker(
         config,
         kernel=kernel,
         lock_backend=FileLockBackend(paths.runner.lock_path, paths.runner.owner_path),
-        health_sink=JsonFileHealthSink(paths.runner.health_path),
+        health_sink=health,
         event_sink=events,
         install_signal_handlers=install_signal_handlers,
     )
     return runner.run(max_cycles=max_cycles)
+
+
+def _report_database_unavailable(args: argparse.Namespace, db_path: Path) -> int:
+    result = report_database_unavailable(
+        state_dir=args.state_dir,
+        tick_interval_ms=args.tick_interval_ms,
+        reconcile_interval_ms=args.reconcile_interval_ms,
+        max_work_items_per_tick=args.max_work_items,
+    )
+    paths = SpineWorkerPaths.from_state_dir(args.state_dir)
+    payload = {
+        "database": str(db_path),
+        "state_dir": str(paths.runner.state_dir),
+        "bindings": args.bindings,
+        "openclaw_sends": str(paths.sends_path),
+        "openclaw_fake_result": args.openclaw_fake_result,
+        "openclaw_channel": args.openclaw_channel,
+        "openclaw_sender": args.openclaw_sender,
+        "runtime_mode": args.mode,
+        "exit_code": result.exit_code,
+        "reason": result.reason,
+        "cycles_completed": result.cycles_completed,
+    }
+    json.dump(payload, sys.stdout, sort_keys=True)
+    sys.stdout.write("\n")
+    return int(result.exit_code)
 
 
 def main(argv: Sequence[str] | None = None) -> int:
@@ -154,10 +190,13 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     db_path = Path(args.db)
     if not db_path.exists() and not args.initialize_schema:
-        raise SystemExit(f"database does not exist: {db_path}; pass --initialize-schema to create it")
+        return _report_database_unavailable(args, db_path)
 
     db_path.parent.mkdir(parents=True, exist_ok=True)
-    connection = connect(db_path)
+    try:
+        connection = connect(db_path)
+    except (OSError, sqlite3.Error):
+        return _report_database_unavailable(args, db_path)
     try:
         if args.initialize_schema:
             initialize_schema(connection)

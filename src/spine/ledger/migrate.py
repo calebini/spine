@@ -14,122 +14,8 @@ from pathlib import Path
 
 from spine.core import SpineValidationError
 from spine.ledger.common import utc_z_from_datetime
+from spine.ledger.preflight import CURRENT_SCHEMA_VERSION, current_schema_version, verify_runtime_schema
 from spine.ledger.sqlite import assert_ledger_invariants, connect, initialize_schema
-
-CURRENT_SCHEMA_VERSION = 8
-
-EXPECTED_SCHEMA_TABLES = frozenset(
-    {
-        "audit_log",
-        "candidate_actions",
-        "command_receipts",
-        "coordination_item_relations",
-        "coordination_item_versions",
-        "coordination_items",
-        "delivery_targets",
-        "event_details",
-        "external_projections",
-        "item_locations",
-        "item_subject_roles",
-        "ledger_schema",
-        "locations",
-        "notification_policies",
-        "notification_schedules",
-        "notification_schedule_offsets",
-        "notification_schedule_selectors",
-        "notification_target_occurrence_selectors",
-        "notification_target_rule_sources",
-        "notification_target_rule_source_selectors",
-        "notification_target_rdate_sources",
-        "occurrence_provenance",
-        "occurrence_provenance_rule_sources",
-        "occurrence_provenance_rdate_sources",
-        "recurrence_exdates",
-        "recurrence_lineage",
-        "recurrence_overrides",
-        "recurrence_provenance_block_reports",
-        "recurrence_rdates",
-        "recurrence_revisions",
-        "recurrence_rule_selectors",
-        "recurrence_rules",
-        "recurrence_segments",
-        "recurrence_sets",
-        "recurrence_target_occurrence_selectors",
-        "recurrence_target_rdate_sources",
-        "recurrence_target_rule_source_selectors",
-        "recurrence_target_rule_sources",
-        "relative_temporal_binding_revisions",
-        "relative_temporal_bindings",
-        "side_effect_attempts",
-        "subject_groups",
-        "subject_memberships",
-        "subjects",
-        "task_details",
-        "temporal_anchors",
-        "temporal_binding_catalog_state",
-        "work_instances",
-    }
-)
-
-EXPECTED_SCHEMA_INDEXES = frozenset(
-    {
-        "audit_log_causation_idx",
-        "audit_log_correlation_idx",
-        "audit_log_item_created_idx",
-        "candidate_actions_item_status_idx",
-        "candidate_actions_open_kind_idx",
-        "command_receipts_item_created_idx",
-        "coordination_item_relations_active_source_idx",
-        "coordination_item_relations_active_target_idx",
-        "coordination_item_relations_active_unique",
-        "external_projections_item_adapter_status_idx",
-        "external_projections_status_updated_idx",
-        "item_locations_location_idx",
-        "item_subject_roles_subject_idx",
-        "delivery_targets_active_account_unique",
-        "delivery_targets_active_no_account_unique",
-        "delivery_targets_owner_status_idx",
-        "notification_policies_item_version_status_idx",
-        "notification_policies_delivery_target_idx",
-        "notification_policies_group_status_idx",
-        "notification_policies_group_unique",
-        "notification_policies_recipient_status_idx",
-        "notification_policies_subject_unique",
-        "relative_temporal_binding_revisions_binding_idx",
-        "relative_temporal_bindings_active_target_unique",
-        "relative_temporal_bindings_source_status_idx",
-        "relative_temporal_bindings_target_status_idx",
-        "side_effect_attempts_candidate_action_idx",
-        "side_effect_attempts_item_adapter_status_idx",
-        "side_effect_attempts_projection_idx",
-        "side_effect_attempts_work_instance_idx",
-        "subject_memberships_group_status_idx",
-        "subject_memberships_subject_status_idx",
-        "work_instances_delivery_target_idx",
-        "work_instances_eligible_due_idx",
-        "work_instances_item_version_status_idx",
-        "work_instances_source_work_idx",
-    }
-)
-
-EXPECTED_SCHEMA_TRIGGERS = frozenset(
-    {
-        "coordination_item_versions_contiguous_insert",
-        "event_details_item_type_insert",
-        "event_details_time_shape_insert",
-        "event_details_recurrence_contract_insert",
-        "task_details_item_type_insert",
-        "task_details_time_shape_insert",
-        "task_details_recurrence_contract_insert",
-        "temporal_binding_catalog_related_item_audit",
-        "locations_referenced_canonical_fields_update",
-        "notification_policies_delivery_target_owner_insert",
-        "notification_policies_structured_contract_insert",
-        "work_instances_notification_policy_binding_insert",
-        "side_effect_attempts_origin_binding_insert",
-        "side_effect_attempts_staleness_insert",
-    }
-)
 
 
 @dataclass(frozen=True)
@@ -153,17 +39,6 @@ class SchemaVerificationResult:
     foreign_key_errors: int
     integrity_check: str
     ledger_invariants_ok: bool
-
-
-def current_schema_version(connection: sqlite3.Connection) -> int:
-    """Return the highest recorded ledger schema version, or 0 before initialization."""
-
-    if not _table_exists(connection, "ledger_schema"):
-        return 0
-    row = connection.execute("SELECT MAX(schema_version) AS schema_version FROM ledger_schema").fetchone()
-    if row is None or row["schema_version"] is None:
-        return 0
-    return int(row["schema_version"])
 
 
 def migrate_schema(
@@ -225,27 +100,7 @@ def migrate_schema(
 def verify_schema(connection: sqlite3.Connection) -> SchemaVerificationResult:
     """Run structural, SQLite, and ledger-domain verification checks."""
 
-    schema_version = current_schema_version(connection)
-    if schema_version != CURRENT_SCHEMA_VERSION:
-        raise SpineValidationError(
-            "ledger_schema_version_mismatch",
-            f"database schema version {schema_version} does not match expected version {CURRENT_SCHEMA_VERSION}",
-        )
-
-    table_names = _object_names(connection, object_type="table")
-    missing_tables = sorted(EXPECTED_SCHEMA_TABLES - table_names)
-    if missing_tables:
-        raise SpineValidationError("ledger_schema_missing_tables", ", ".join(missing_tables))
-
-    index_names = _object_names(connection, object_type="index")
-    missing_indexes = sorted(EXPECTED_SCHEMA_INDEXES - index_names)
-    if missing_indexes:
-        raise SpineValidationError("ledger_schema_missing_indexes", ", ".join(missing_indexes))
-
-    trigger_names = _object_names(connection, object_type="trigger")
-    missing_triggers = sorted(EXPECTED_SCHEMA_TRIGGERS - trigger_names)
-    if missing_triggers:
-        raise SpineValidationError("ledger_schema_missing_triggers", ", ".join(missing_triggers))
+    runtime_result = verify_runtime_schema(connection)
 
     foreign_key_errors = connection.execute("PRAGMA foreign_key_check").fetchall()
     if foreign_key_errors:
@@ -260,9 +115,9 @@ def verify_schema(connection: sqlite3.Connection) -> SchemaVerificationResult:
 
     assert_ledger_invariants(connection)
     return SchemaVerificationResult(
-        schema_version=schema_version,
-        table_count=len(table_names),
-        index_count=len(index_names),
+        schema_version=runtime_result.schema_version,
+        table_count=runtime_result.table_count,
+        index_count=runtime_result.index_count,
         foreign_key_errors=0,
         integrity_check=integrity_check,
         ledger_invariants_ok=True,
