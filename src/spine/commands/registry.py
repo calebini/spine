@@ -121,6 +121,9 @@ _requirements(
     "spine.schedule-primary-location.v1",
     "spine.schedule-primary-location-view.v1",
     "spine.relative-temporal-binding.v1",
+    "spine.notification-rendering.v1",
+    "spine.notification-rendering.concise-en-ca.v1",
+    "spine.notification-rendering-input.v1",
 )
 _requirements(
     {"agenda.show"},
@@ -218,6 +221,11 @@ WORKER_REQUIRED_CONTRACT_VERSIONS = tuple(
             version
             for command in WORKER_COMMANDS
             for version in COMMAND_RUNTIME_CONTRACT_REGISTRY[command].required_contract_versions
+        }
+        | {
+            "spine.notification-rendering.v1",
+            "spine.notification-rendering.concise-en-ca.v1",
+            "spine.notification-rendering-input.v1",
         }
     )
 )

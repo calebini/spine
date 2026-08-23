@@ -1,7 +1,7 @@
 {
   "manifest_version": "spine.sqlite-schema-object-manifest.v1",
   "schemas": {
-    "8": {
+    "9": {
       "objects": [
         {
           "definition_sha256": "d398d475608b90ad2f581456812626755656f58d3e67822c31232c3e3a2480e3",
@@ -111,6 +111,11 @@
         {
           "definition_sha256": "2d3929e3ec5476c4edd666441b5bec0d4e5b9de5d5b89e0cfd2d82639bb0f526",
           "name": "notification_policies_subject_unique",
+          "object_type": "index"
+        },
+        {
+          "definition_sha256": "130bc79e9e054cba60067f3ba698c20af258385ea32f8a4cb944c625563c742d",
+          "name": "notification_renderings_item_attempt_idx",
           "object_type": "index"
         },
         {
@@ -251,6 +256,11 @@
         {
           "definition_sha256": "6013e2b553b4002901ea7ac36a69a942df38d926531e0a48ea171f40cc8892b2",
           "name": "notification_policies",
+          "object_type": "table"
+        },
+        {
+          "definition_sha256": "ef640e2822a4321b22734332fd105e23658f37526422ae579c21759e46660894",
+          "name": "notification_renderings",
           "object_type": "table"
         },
         {
@@ -456,6 +466,11 @@
         {
           "definition_sha256": "c39915ba23646a42a56db680795898476add0647d4016715ae4a15e2dcf0c729",
           "name": "notification_policies_structured_contract_insert",
+          "object_type": "trigger"
+        },
+        {
+          "definition_sha256": "a5ed59334f2fd92a6a5d7b70ed6432904c993c6c446c9a9e11b4ac327c2351cb",
+          "name": "notification_renderings_attempt_binding_insert",
           "object_type": "trigger"
         },
         {

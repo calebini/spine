@@ -15,7 +15,8 @@ Current spec surface:
 - `relative-temporal-bindings.md`: implemented schema-8 cross-item temporal bindings, bounded discovery/reconciliation, and atomic related-task creation
 - `contextual-advisories.md`: draft role-based cross-system contract for one scheduled, governed, read-only agent advisory and at most one derivative notification
 - `notification-rendering.md`: draft deterministic concise `en-CA` rendering profile and immutable per-attempt evidence for ordinary reminder prose
-- `schedule-primary-location.md`: implemented schema-8 contract for primary-location authoring, mutation, readback, builder pass-through, and operator projections on scheduled events and tasks
+- `schedule-primary-location.md`: implemented primary-location authoring, mutation, readback, builder pass-through, and operator projections on scheduled events and tasks
+- `notification-rendering.md`: implemented schema-9 deterministic ordinary-reminder prose and immutable per-attempt rendering evidence
 - `agent-command-contract.md`: draft agent-facing command/request contract for authoring and inspecting Spine coordination truth
 - `SPINE_SPEC_VERSIONING_AND_FREEZE_POLICY.md`: lightweight policy for spec versions, runtime declarations, and one-way freeze-manifest pinning
 - `decisions/0001-kinflow-is-donor-not-foundation.md`: accepted decision on the Kinflow relationship

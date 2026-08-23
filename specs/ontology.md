@@ -949,6 +949,21 @@ Terminal attempt mechanics (MVP):
 
 A separate durable `adapter_results` store MUST NOT be introduced without an accepted decision.
 
+### 9.4 notification_renderings
+
+Owns immutable deterministic notification prose evidence for schema-9 ordinary
+reminder attempts. Each row is linked one-to-one to a `side_effect_attempts` row and
+records the rendering contract/profile, normalized current source facts, exact body,
+phrase facts, input/content hashes, and target, occurrence, binding, and primary-
+location snapshots used at attempt start. It is request evidence, not a second
+attempt, policy, work, or delivery-result ledger.
+
+The rendering row and its `attempt_status=started` row MUST commit atomically before
+external contact. `attempt_id`, `work_instance_id`, `item_id`, and
+`attempted_at_utc` MUST match the linked attempt. Compatible replay reuses the one
+stored row; a retry receives a new attempt and rendering. Complete fields, identities,
+failure semantics, and readback are governed by `specs/notification-rendering.md`.
+
 ## 10. Projections and Audit
 
 ### 10.1 external_projections

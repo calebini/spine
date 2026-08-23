@@ -4,15 +4,18 @@ import json
 import tempfile
 import unittest
 from contextlib import redirect_stdout
+from datetime import UTC, datetime
 from io import StringIO
 from pathlib import Path
+from types import SimpleNamespace
 
 from jsonschema import Draft202012Validator
 from referencing import Registry, Resource
 
+from spine.adapters import build_openclaw_side_effect_request
 from spine.commands import CommandContext, handle
 from spine.commands.cli import main as cli_main
-from spine.ledger import connect, initialize_schema
+from spine.ledger import connect, get_work_instance, initialize_schema
 from spine.services.attempts import prepare_work_attempt, record_attempt_success
 from spine.services.work import start_work, succeed_work
 
@@ -21,13 +24,8 @@ class ScheduleShowCommandTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         schema_dir = Path(__file__).parents[1] / "contracts" / "schemas"
-        schemas = {
-            path.name: json.loads(path.read_text(encoding="utf-8"))
-            for path in sorted(schema_dir.glob("*.schema.json"))
-        }
-        registry = Registry().with_resources(
-            (schema["$id"], Resource.from_contents(schema)) for schema in schemas.values()
-        )
+        schemas = {path.name: json.loads(path.read_text(encoding="utf-8")) for path in sorted(schema_dir.glob("*.schema.json"))}
+        registry = Registry().with_resources((schema["$id"], Resource.from_contents(schema)) for schema in schemas.values())
         cls.response_validator = Draft202012Validator(
             schemas["schedule-show-response.schema.json"],
             registry=registry,
@@ -133,6 +131,44 @@ class ScheduleShowCommandTests(unittest.TestCase):
         self.assertEqual(shown["lifecycle"]["work"]["count"], "6")
         self.assertNotIn("notification_policies", shown)
         self.assertNotIn("side_effect_attempts", shown)
+
+    def test_attempt_readback_nests_immutable_notification_rendering(self) -> None:
+        request = self._schedule_request(command_id="schedule-show-rendering")
+        request["item"]["primary_location"] = {
+            "mode": "create",
+            "label": "Downtown clinic",
+            "kind": "place",
+        }
+        created = handle("schedule.create", request, self.context)
+        work_id = created["materialization"]["work_instance_ids"][0]
+        start_work(self.connection, work_instance_id=work_id, started_at_utc="2026-08-14T11:59:00Z")
+        request = build_openclaw_side_effect_request(
+            self.connection,
+            work_row=get_work_instance(self.connection, work_id),
+            envelope=SimpleNamespace(
+                trace_id="trace-rendering",
+                causation_id="cause-rendering",
+                actual_start_ts=datetime(2026, 8, 14, 11, 59, 1, tzinfo=UTC),
+            ),
+        )
+        prepare_work_attempt(
+            self.connection,
+            attempt_id=request.attempt_id,
+            work_instance_id=request.work_instance_id,
+            adapter_name="openclaw",
+            idempotency_key=request.idempotency_key,
+            request_envelope=request.request_envelope,
+            attempted_at_utc=request.attempted_at_utc,
+            notification_rendering=request.notification_rendering,
+        )
+
+        shown = handle("schedule.show", {"item_id": created["item_id"], "include": ["attempts"]}, self.context)
+        self.response_validator.validate(shown)
+        evidence = shown["side_effect_attempts"][0]["notification_rendering"]
+        self.assertEqual(evidence["body_text"], request.message.body_text)
+        self.assertEqual(evidence["notification_rendering_id"], request.notification_rendering.notification_rendering_id)
+        self.assertEqual(evidence["primary_location"]["location_label"], "Downtown clinic")
+        self.assertIn("@ Downtown clinic", evidence["body_text"])
 
     def test_cli_item_id_and_include_flags_supply_a_complete_read_request(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

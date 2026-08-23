@@ -1,6 +1,6 @@
 # Spine Agent Quickstart
 
-Status: executable cold-start path for the current schema-8 runtime
+Status: executable cold-start path for the current schema-9 runtime
 Audience: an agent with repository access and no prior Spine context
 
 Use this document to reach a verified first success. Use `docs/AGENT_OPERATOR_GUIDE.md` afterward for migration, long-running operation, real-send controls, inspection, and troubleshooting.
@@ -59,7 +59,7 @@ Do not continue to worker commands until that import succeeds.
 
 ### New disposable ledger
 
-Create a unique directory and initialize a new schema-8 ledger:
+Create a unique directory and initialize a new schema-9 ledger:
 
 ```bash
 export SPINE_DEMO_ROOT="$(mktemp -d /tmp/spine-agent-quickstart.XXXXXX)"
@@ -85,7 +85,7 @@ Stop its worker first. Do not run current-schema `--verify-only` as a prerequisi
 
 ```bash
 export SPINE_DB=/absolute/path/to/ledger.sqlite
-cp "$SPINE_DB" "$SPINE_DB.pre-schema-8"
+cp "$SPINE_DB" "$SPINE_DB.pre-schema-9"
 "$SPINE_MIGRATE" --db "$SPINE_DB"
 "$SPINE_MIGRATE" --db "$SPINE_DB" --verify-only
 ```
@@ -356,7 +356,7 @@ Never infer a write from the relational schema. Use public commands and verify t
 
 An agent is ready to operate when it can truthfully report all of the following:
 
-- the ledger verifies at schema 8;
+- the ledger verifies at schema 9;
 - `system.info` reports matching implemented and actual schema versions;
 - it used the locally reported timezone-data version for local schedules;
 - it can explain recurrence cadence versus notification cadence versus retry;

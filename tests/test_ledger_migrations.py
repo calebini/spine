@@ -38,7 +38,7 @@ class LedgerMigrationTests(unittest.TestCase):
         self.assertTrue(result.initialized)
         self.assertTrue(result.verified)
         verification = verify_schema(self.connection)
-        self.assertEqual(verification.schema_version, 8)
+        self.assertEqual(verification.schema_version, 9)
         self.assertEqual(verification.integrity_check, "ok")
 
     def test_empty_database_requires_explicit_initialization(self) -> None:
@@ -51,14 +51,43 @@ class LedgerMigrationTests(unittest.TestCase):
         result = migrate_schema(self.connection)
 
         self.assertEqual(result.before_version, 6)
-        self.assertEqual(result.applied_versions, (7, 8))
-        self.assertEqual(result.after_version, 8)
+        self.assertEqual(result.applied_versions, (7, 8, 9))
+        self.assertEqual(result.after_version, 9)
         self.assertTrue(result.verified)
         columns = {row["name"] for row in self.connection.execute("PRAGMA table_info(temporal_anchors)")}
         self.assertNotIn("recurrence_rule", columns)
         self.assertIn("timezone_database_version", columns)
         self.assertIsNotNone(
             self.connection.execute("SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'notification_schedules'").fetchone()
+        )
+
+    def test_schema_8_migrates_to_immutable_notification_rendering_evidence(self) -> None:
+        self._initialize_v6()
+        from spine.ledger.migrate import _apply_migration
+
+        _apply_migration(
+            self.connection,
+            version=7,
+            migration_name="0007_canonical_scheduling_notifications.sql",
+        )
+        _apply_migration(
+            self.connection,
+            version=8,
+            migration_name="0008_relative_temporal_bindings.sql",
+        )
+        self.assertEqual(current_schema_version(self.connection), 8)
+
+        result = migrate_schema(self.connection)
+
+        self.assertEqual(result.applied_versions, (9,))
+        self.assertEqual(result.after_version, 9)
+        self.assertIsNotNone(
+            self.connection.execute("SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'notification_renderings'").fetchone()
+        )
+        self.assertIsNotNone(
+            self.connection.execute(
+                "SELECT 1 FROM sqlite_master WHERE type = 'trigger' AND name = 'notification_renderings_attempt_binding_insert'"
+            ).fetchone()
         )
 
     def test_preflight_rejects_each_populated_provisional_scheduling_surface(self) -> None:
@@ -189,7 +218,7 @@ class LedgerMigrationTests(unittest.TestCase):
             payload = json.loads(output.getvalue())
             self.assertEqual(exit_code, 0)
             self.assertEqual(payload["before_version"], 0)
-            self.assertEqual(payload["after_version"], 8)
+            self.assertEqual(payload["after_version"], 9)
             self.assertTrue(payload["initialized"])
 
     def _initialize_v6(self) -> None:

@@ -63,7 +63,7 @@ When current recurrence exists, `recurrence` is the complete normalized current 
 
 `work_instances` contains item-linked durable work across item versions, ordered by `eligible_at_utc` and `work_instance_id`. `side_effect_attempts` contains attempts bound to those work rows, ordered by `attempted_at_utc` and `attempt_id`; unrelated candidate-action or projection attempts for the same item are outside this schedule-delivery view. Counts and lifecycle summaries cover all matching rows even when a requested detail collection is omitted or truncated.
 
-`spine.notification-rendering.v1` is a capability-gated extension of each returned
+The implemented `spine.notification-rendering.v1` capability extends each returned
 notification-attempt projection, not a new `include` value or top-level collection.
 When that capability is advertised and `attempts` is included explicitly or by
 default, each attempt created under the rendering contract MUST contain its linked
@@ -71,9 +71,9 @@ immutable `notification_rendering` object using
 `specs/notification-rendering.md` Section 11. The nested object projects stored
 evidence keyed by `attempt_id`; `schedule.show` MUST NOT reconstruct, refresh, or
 rerender it. The rendering capability, its nested response schema, persistence, and
-readback implementation MUST be promoted atomically. Until that family is advertised,
-the currently implemented response shape remains unchanged and contains no implied
-rendering evidence.
+readback implementation are promoted atomically. Historical attempts that predate
+schema 9 simply omit the optional nested object; readback never invents missing
+evidence.
 
 Every included collection returns its accepted limit, total count, and truncation boolean. A zero limit returns no elements while retaining the total count and lifecycle summary. Work and attempt detail queries fetch at most the requested limit plus one truncation sentinel; aggregate counts are computed in the ledger. Public work/attempt detail limits are at most 1000.
 
@@ -107,11 +107,9 @@ Work status and delivery outcome are reported separately. A succeeded work row d
 
 ## 6. Determinism and Failure
 
-The exact currently implemented base response shape is
-`contracts/schemas/schedule-show-response.schema.json`. A runtime advertising
-`spine.notification-rendering.v1` MUST also publish and declare the matching
-capability-gated schema extension described in Section 4; it MUST NOT emit that field
-while claiming conformance only to the present base schema. Arrays use the
+The exact currently implemented response shape is
+`contracts/schemas/schedule-show-response.schema.json`, including the optional
+schema-9 rendering evidence described in Section 4. Arrays use the
 deterministic order specified above. Integer counts and versions are returned as
 canonical decimal strings.
 

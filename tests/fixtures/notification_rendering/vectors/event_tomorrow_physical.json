@@ -1,0 +1,47 @@
+{
+  "vector_version": "spine.notification-rendering-computed-vector.v1",
+  "source_input": {
+    "attempt_id": "attempt-vector-1",
+    "attempted_at_utc": "2026-08-23T18:00:00Z",
+    "work_instance_id": "work-vector-1",
+    "notification_opportunity_id": "opportunity-vector-1",
+    "notification_intent_id": "intent-vector-1",
+    "item_id": "item-vector-1",
+    "rendered_item_version": "3",
+    "item_type": "event",
+    "title": "Tee time",
+    "anchor_role": "event_start",
+    "target_scheduled_fact": "2026-08-24T14:00:00",
+    "target_at_utc": "2026-08-24T18:00:00Z",
+    "display_time_basis": "local_instant",
+    "display_timezone": "America/Toronto",
+    "timezone_database_version": "2026a",
+    "primary_location": {
+      "location_id": "location-vector-1",
+      "item_location_id": "item-location-vector-1",
+      "location_kind": "place",
+      "location_label": "Lakeridge"
+    }
+  },
+  "expected": {
+    "notification_rendering_id": "notification_rendering_172aec5c300dcf33c99e1d673c5efc35ba3801c66ac07f54e9078eb05ae67b21",
+    "rendering_input_hash": "00609f42426d164e99e3febe8a100c29190c60948e7e7f96fa9b38e7db56db60",
+    "rendered_content_hash": "667660ee849a3cc69adbd058b707a12af100a0e4aa27ac16dc799a42e3256ea5",
+    "body_text": "Reminder: Tee time @ Lakeridge at 2 PM tomorrow",
+    "phrase_kind": "future_calendar",
+    "phrase_facts": {
+      "normalized_title": "Tee time",
+      "location_clause": " @ Lakeridge",
+      "delta_seconds": "86400",
+      "reference_date": "2026-08-23",
+      "target_date": "2026-08-24",
+      "calendar_label": "tomorrow",
+      "clock": "2 PM"
+    },
+    "canonical_preimage_bytes": {
+      "rendering_input_hash": "{\"canonical_json_version\":\"spine.canonical-json.v1\",\"derivation_version\":\"spine.notification-rendering-input-hash.v1\",\"input_normalization_version\":\"spine.notification-rendering-input.v1\",\"rendering_contract\":\"spine.notification-rendering.v1\",\"rendering_profile\":\"spine.notification-rendering.concise-en-ca.v1\",\"source_input\":{\"anchor_role\":\"event_start\",\"attempt_id\":\"attempt-vector-1\",\"attempted_at_utc\":\"2026-08-23T18:00:00Z\",\"display_time_basis\":\"local_instant\",\"display_timezone\":\"America/Toronto\",\"item_id\":\"item-vector-1\",\"item_type\":\"event\",\"notification_intent_id\":\"intent-vector-1\",\"notification_opportunity_id\":\"opportunity-vector-1\",\"primary_location\":{\"item_location_id\":\"item-location-vector-1\",\"location_id\":\"location-vector-1\",\"location_kind\":\"place\",\"location_label\":\"Lakeridge\"},\"rendered_item_version\":\"3\",\"target_at_utc\":\"2026-08-24T18:00:00Z\",\"target_scheduled_fact\":\"2026-08-24T14:00:00\",\"timezone_database_version\":\"2026a\",\"title\":\"Tee time\",\"work_instance_id\":\"work-vector-1\"}}",
+      "rendered_content_hash": "{\"body_text\":\"Reminder: Tee time @ Lakeridge at 2 PM tomorrow\",\"canonical_json_version\":\"spine.canonical-json.v1\",\"derivation_version\":\"spine.notification-rendering-content-hash.v1\",\"input_normalization_version\":\"spine.notification-rendering-input.v1\",\"phrase_facts\":{\"calendar_label\":\"tomorrow\",\"clock\":\"2 PM\",\"delta_seconds\":\"86400\",\"location_clause\":\" @ Lakeridge\",\"normalized_title\":\"Tee time\",\"reference_date\":\"2026-08-23\",\"target_date\":\"2026-08-24\"},\"phrase_kind\":\"future_calendar\",\"rendering_contract\":\"spine.notification-rendering.v1\",\"rendering_input_hash\":\"00609f42426d164e99e3febe8a100c29190c60948e7e7f96fa9b38e7db56db60\",\"rendering_profile\":\"spine.notification-rendering.concise-en-ca.v1\"}",
+      "notification_rendering_id": "{\"attempt_id\":\"attempt-vector-1\",\"canonical_json_version\":\"spine.canonical-json.v1\",\"derivation_version\":\"spine.notification-rendering-id.v1\",\"input_normalization_version\":\"spine.notification-rendering-input.v1\",\"rendered_content_hash\":\"667660ee849a3cc69adbd058b707a12af100a0e4aa27ac16dc799a42e3256ea5\",\"rendering_contract\":\"spine.notification-rendering.v1\",\"rendering_input_hash\":\"00609f42426d164e99e3febe8a100c29190c60948e7e7f96fa9b38e7db56db60\",\"rendering_profile\":\"spine.notification-rendering.concise-en-ca.v1\"}"
+    }
+  }
+}

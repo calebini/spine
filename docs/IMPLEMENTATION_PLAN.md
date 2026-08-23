@@ -1,9 +1,25 @@
 # Spine Implementation Plan
 
-Status: Scheduler planning and durable no-op suppression implemented and verified
-Last reconciled with repository state: 2026-08-23
+Status: Deterministic notification rendering implemented and verified
+Last reconciled with repository state: 2026-08-24
 
 This is a non-normative delivery plan. The specifications and machine-readable contracts remain authoritative.
+
+## Delivered Slice: Deterministic Notification Rendering
+
+The schema-9 runtime now turns admitted ordinary reminder work into deterministic,
+concise `en-CA` prose at attempt start. Rendering uses the proposed attempt time plus
+current canonical title, target, item type, pinned target timezone, occurrence or
+follow-source binding evidence, and primary location. Relative phrases cover the
+six-hour window; longer horizons use calendar wording such as `at 2 PM tomorrow`.
+
+Each rendering is immutable evidence linked one-to-one with its side-effect attempt.
+The rendering and `attempt_status=started` row commit atomically, the OpenClaw request
+envelope binds rendering identity/content hash/exact body, compatible replay cannot
+authorize another transport call, retries receive new attempt-time evidence, and
+`schedule.show` nests stored evidence under the corresponding attempt. The public
+schema, schema-object manifest, computed vector, failure oracles, migration, runtime
+capability declarations, and operator documentation ship with the implementation.
 
 ## Delivered Sustaining Slice: Scheduler Planning and Durable No-Op Suppression
 
@@ -108,6 +124,7 @@ The delivery is intentionally broad because recurrence identity, occurrence prov
 
 - `specs/recurrence.md`: recurrence normalization, identity, expansion, mutation, lineage, and occurrence provenance.
 - `specs/notifications.md`: notification schedules, opportunities, late handling, materialization, and reconciliation.
+- `specs/notification-rendering.md`: deterministic attempt-time prose, immutable evidence, and adapter-envelope binding.
 - `specs/ontology.md`: relational authority and lifecycle invariants.
 - `specs/agent-command-contract.md`: public command and receipt behavior.
 - `specs/schedule-show.md`: canonical aggregate schedule and delivery-lifecycle readback.

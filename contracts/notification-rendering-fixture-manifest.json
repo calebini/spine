@@ -1,0 +1,16 @@
+{
+  "schema_version": "spine.notification-rendering-fixtures.v1",
+  "fixture_scope": "computed_conformance_vectors",
+  "fixtures": [
+    {
+      "fixture_id": "notification_rendering.event_tomorrow_physical.v1",
+      "kind": "computed_vector",
+      "fixture": "tests/fixtures/notification_rendering/vectors/event_tomorrow_physical.json"
+    },
+    {
+      "fixture_id": "notification_rendering.closed_failures.v1",
+      "kind": "failure_oracles",
+      "fixture": "tests/fixtures/notification_rendering/failures/closed_failure_oracles.json"
+    }
+  ]
+}

@@ -19,8 +19,10 @@ from spine.adapters.side_effects import (
     record_side_effect_result,
 )
 from spine.adapters.tickerd import WorkProcessingOutcome
-from spine.ledger import get_current_item
+from spine.core.errors import SpineValidationError
+from spine.core.notification_rendering import NotificationRendering
 from spine.ledger.common import require_utc_z, utc_z_from_datetime
+from spine.services.notification_rendering import resolve_notification_rendering
 
 OPENCLAW_ADAPTER_NAME = "openclaw"
 DEFAULT_OPENCLAW_CHANNEL = "whatsapp"
@@ -50,9 +52,10 @@ class OpenClawOutboundMessage:
     body_text: str
     dedupe_key: str
     created_at_utc: str
+    notification_rendering: NotificationRendering | None = None
 
     def request_envelope(self) -> dict[str, str]:
-        return {
+        result = {
             "payload_version": "spine.openclaw.outbound.v1",
             "delivery_id": self.delivery_id,
             "attempt_id": self.attempt_id,
@@ -64,6 +67,10 @@ class OpenClawOutboundMessage:
             "dedupe_key": self.dedupe_key,
             "created_at_utc": self.created_at_utc,
         }
+        if self.notification_rendering is not None:
+            result["notification_rendering_id"] = self.notification_rendering.notification_rendering_id
+            result["rendered_content_hash"] = self.notification_rendering.rendered_content_hash
+        return result
 
 
 @dataclass(frozen=True)
@@ -228,7 +235,12 @@ class OpenClawNotificationProcessor:
             send_exception_reason_code="openclaw_send_exception",
             missing_retry_reason_code="openclaw_missing_retry_at",
         )
-        return processor(connection, work_row, envelope)
+        try:
+            return processor(connection, work_row, envelope)
+        except SpineValidationError as exc:
+            if exc.code.startswith("notification_rendering_"):
+                return WorkProcessingOutcome.failed(exc.code)
+            raise
 
 
 def build_openclaw_side_effect_request(
@@ -248,6 +260,11 @@ def build_openclaw_side_effect_request(
         created_at_utc=_utc_z(envelope.actual_start_ts),
         channel_hint=channel_hint,
     )
+    if outbound.notification_rendering is None:  # pragma: no cover - constructor invariant
+        raise SpineValidationError(
+            "notification_rendering_persistence_conflict",
+            "OpenClaw notification request has no rendering evidence",
+        )
     return AttemptBackedSideEffectRequest(
         message=outbound,
         attempt_id=outbound.attempt_id,
@@ -255,6 +272,7 @@ def build_openclaw_side_effect_request(
         idempotency_key=outbound.dedupe_key,
         request_envelope=outbound.request_envelope(),
         attempted_at_utc=outbound.created_at_utc,
+        notification_rendering=outbound.notification_rendering,
     )
 
 
@@ -270,21 +288,27 @@ def build_openclaw_outbound_message(
     """Map Spine reminder work into an OpenClaw-style outbound message."""
 
     require_utc_z("created_at_utc", created_at_utc)
-    item = get_current_item(connection, str(work_row["item_id"]))
     work_instance_id = str(work_row["work_instance_id"])
     attempt_count = str(work_row["attempt_count"])
     target_ref = _openclaw_target_ref(connection, work_row=work_row, channel_hint=channel_hint)
-    title = str(item["version"]["title"])  # type: ignore[index]
+    attempt_id = f"openclaw-attempt-{work_instance_id}-{attempt_count}"
+    rendering = resolve_notification_rendering(
+        connection,
+        work_row=work_row,
+        attempt_id=attempt_id,
+        attempted_at_utc=created_at_utc,
+    )
     return OpenClawOutboundMessage(
         delivery_id=work_instance_id,
-        attempt_id=f"openclaw-attempt-{work_instance_id}-{attempt_count}",
+        attempt_id=attempt_id,
         trace_id=trace_id,
         causation_id=causation_id,
         channel_hint=channel_hint,
         target_ref=target_ref,
-        body_text=f"Reminder: {title}",
+        body_text=rendering.body_text,
         dedupe_key=f"openclaw:{work_instance_id}:{attempt_count}",
         created_at_utc=created_at_utc,
+        notification_rendering=rendering,
     )
 
 

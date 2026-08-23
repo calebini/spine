@@ -1,0 +1,41 @@
+{
+  "oracle_version": "spine.notification-rendering-failure-oracles.v1",
+  "failures": [
+    {
+      "scenario": "unsupported work kind or item target",
+      "error_code": "notification_rendering_unsupported_work",
+      "external_contact": false,
+      "attempt_persisted": false
+    },
+    {
+      "scenario": "missing or stale canonical source fact",
+      "error_code": "notification_rendering_source_unresolved",
+      "external_contact": false,
+      "attempt_persisted": false
+    },
+    {
+      "scenario": "pinned timezone database unavailable",
+      "error_code": "notification_rendering_timezone_database_unavailable",
+      "external_contact": false,
+      "attempt_persisted": false
+    },
+    {
+      "scenario": "title or location text is invalid",
+      "error_code": "notification_rendering_invalid_text",
+      "external_contact": false,
+      "attempt_persisted": false
+    },
+    {
+      "scenario": "rendered body exceeds the scalar limit",
+      "error_code": "notification_rendering_output_too_large",
+      "external_contact": false,
+      "attempt_persisted": false
+    },
+    {
+      "scenario": "attempt and rendering cannot commit atomically",
+      "error_code": "notification_rendering_persistence_conflict",
+      "external_contact": false,
+      "attempt_persisted": false
+    }
+  ]
+}

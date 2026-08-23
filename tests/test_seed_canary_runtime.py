@@ -44,7 +44,7 @@ class SeedCanaryRuntimeTests(unittest.TestCase):
         self.assertEqual([row["work_instance_id"] for row in eligible], [result["work_instance_id"]])
         self.assertEqual(preview["target_ref"], "canary-target")
         self.assertEqual(preview["channel_hint"], "whatsapp")
-        self.assertEqual(preview["body_text"], "Reminder: Spine canary")
+        self.assertEqual(preview["body_text"], "Reminder: Spine canary is due in 1 hour")
         self.assertEqual(preview["dedupe_key"], f"openclaw:{result['work_instance_id']}:1")
         self.assertEqual(preview["attempt_id"], f"openclaw-attempt-{result['work_instance_id']}-1")
 
@@ -112,7 +112,10 @@ class SeedCanaryRuntimeTests(unittest.TestCase):
             self.assertTrue(payload["work_instance_id"].startswith("work_instance_"))
             self.assertEqual(payload["target_ref"], "target-1")
             self.assertEqual(payload["predicted_openclaw_envelope"]["channel_hint"], "whatsapp")
-            self.assertEqual(payload["predicted_openclaw_envelope"]["body_text"], "Reminder: Check the canary")
+            self.assertEqual(
+                payload["predicted_openclaw_envelope"]["body_text"],
+                "Reminder: Check the canary is due in 1 hour",
+            )
 
     def test_cli_allows_channel_preview_override(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
@@ -191,7 +194,10 @@ class SeedCanaryRuntimeTests(unittest.TestCase):
             self.assertEqual(exit_code, 0)
             self.assertFalse(payload["seeded"])
             self.assertTrue(payload["work_instance_id"].startswith("work_instance_"))
-            self.assertEqual(payload["predicted_openclaw_envelope"]["body_text"], "Reminder: Original title")
+            self.assertEqual(
+                payload["predicted_openclaw_envelope"]["body_text"],
+                "Reminder: Original title is due in 59 minutes",
+            )
 
     def test_cli_refuses_existing_canary_without_if_absent(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

@@ -277,6 +277,8 @@
         "reason_code": { "type": "string" },
         "attempted_at_utc": { "$ref": "notification-types.schema.json#/$defs/utcTimestamp" },
         "completed_at_utc": { "$ref": "notification-types.schema.json#/$defs/utcTimestamp" }
+        ,
+        "notification_rendering": { "$ref": "notification-rendering.schema.json" }
       },
       "additionalProperties": false
     }

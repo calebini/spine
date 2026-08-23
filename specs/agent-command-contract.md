@@ -1,6 +1,6 @@
 # Spine Agent Command Contract
 
-Status: Draft v0.4.6; executable scheduling family, atomic creation, and canonical schedule readback implemented; bounded runtime-preflight amendment specified
+Status: Draft v0.4.7; executable scheduling, deterministic notification rendering, and bounded runtime preflight implemented on schema 9
 Scope: Agent-facing command/request contract for authoring and inspecting Spine coordination truth
 Created: 2026-06-19
 
@@ -127,7 +127,7 @@ Every registry entry requires `spine.canonical-json.v1`. The following table is 
 | `notification.opportunities`, `notification_work.materialize` | `spine.notification-schedule-authoring.v1`, `spine.notification-schedule.contract.v1`, `spine.notification-schedule.normalization.v1`, `spine.notification-opportunities.v1` |
 | `schedule.build` | `spine.schedule-create.v1`, `spine.schedule-create-normalization.v1`, `spine.schedule-countdown-builder.v1`, `spine.schedule-countdown-builder-response.v1`, `spine.notification-schedule.contract.v1` |
 | `schedule.create` | `spine.schedule-create.v1`, `spine.schedule-create-normalization.v1`, `spine.schedule-create-response.v1`, `spine.schedule-create-receipt.v1`, `spine.recurrence-authoring.v1`, `spine.recurrence.contract.v1`, `spine.recurrence.normalization.v1`, `spine.notification-schedule-authoring.v1`, `spine.notification-schedule.contract.v1`, `spine.notification-schedule.normalization.v1`, `spine.notification-opportunities.v1`, `spine.schedule-primary-location.v1`, `spine.schedule-primary-location-authoring.v1`, `spine.schedule-primary-location-view.v1`, `spine.schedule-primary-location-normalization.v1` |
-| `schedule.show` | `spine.schedule-show.v1`, `spine.schedule-compact.v1`, `spine.schedule-primary-location.v1`, `spine.schedule-primary-location-view.v1`, `spine.relative-temporal-binding.v1` |
+| `schedule.show` | `spine.schedule-show.v1`, `spine.schedule-compact.v1`, `spine.schedule-primary-location.v1`, `spine.schedule-primary-location-view.v1`, `spine.relative-temporal-binding.v1`, `spine.notification-rendering.v1`, `spine.notification-rendering.concise-en-ca.v1`, `spine.notification-rendering-input.v1` |
 | `agenda.show` | `spine.schedule-operations-normalization.v1`, `spine.schedule-agenda.v1`, `spine.schedule-agenda-response.v1`, `spine.schedule-primary-location.v1`, `spine.schedule-primary-location-view.v1`, `spine.relative-temporal-binding.v1` |
 | `schedule.update` | `spine.schedule-operations-normalization.v1`, `spine.schedule-update.v1`, `spine.schedule-update-response.v1`, `spine.schedule-update-receipt.v1`, `spine.recurrence-authoring.v1`, `spine.recurrence.contract.v1`, `spine.recurrence.normalization.v1`, `spine.notification-schedule-authoring.v1`, `spine.notification-schedule.contract.v1`, `spine.notification-schedule.normalization.v1`, `spine.notification-opportunities.v1`, `spine.schedule-primary-location.v1`, `spine.schedule-primary-location-authoring.v1`, `spine.schedule-primary-location-view.v1`, `spine.schedule-primary-location-normalization.v1`, `spine.relative-temporal-binding.v1` |
 | `schedule.cancel` | `spine.schedule-operations-normalization.v1`, `spine.schedule-cancel.v1`, `spine.schedule-cancel-response.v1`, `spine.schedule-cancel-receipt.v1`, `spine.notification-schedule.contract.v1`, `spine.relative-temporal-binding.v1` |
@@ -153,7 +153,7 @@ A missing required name, a required name stored under the wrong SQLite object ty
 
 Successful runtime preflight is admission evidence, not a declaration that every ledger page and historical foreign key is healthy. Write commands separately rely on enabled SQLite foreign-key enforcement, constraints, indexes, triggers, atomic transactions, command-specific validation, replay checks, and transaction-scoped domain invariants. Failure of any such write-time control rolls back the command and returns its ordinary structured failure; runtime preflight does not weaken those controls.
 
-The worker-required runtime-contract set is the union of the registry requirements for `occurrence_provenance.regenerate`, `notification_work.materialize`, and `schedule.binding.reconcile`; it is exact and unconditional for the current worker because those are the automatic provenance, notification-materialization, and binding-reconciliation services it advertises. A Spine worker MUST complete that check plus the same schema-version and schema-manifest checks before it reports ready, starts the Tickerd kernel, lists or reconciles work, begins a side-effect attempt, or calls any delivery processor.
+The worker-required runtime-contract set is the union of the registry requirements for `occurrence_provenance.regenerate`, `notification_work.materialize`, and `schedule.binding.reconcile`, plus `spine.notification-rendering.v1`, `spine.notification-rendering.concise-en-ca.v1`, and `spine.notification-rendering-input.v1`; it is exact and unconditional for the current worker because those are the automatic provenance, notification-materialization, binding-reconciliation, and ordinary-reminder rendering services it advertises. A Spine worker MUST complete that check plus the same schema-version and schema-manifest checks before it reports ready, starts the Tickerd kernel, lists or reconciles work, begins a side-effect attempt, or calls any delivery processor.
 
 Worker startup initializes its configured health and event sinks before admission, with `state=DOWN` and `readiness=false`. If preflight fails or a configured preflight timeout expires, it persists that not-ready health snapshot and emits exactly one diagnostic to the configured event sink, or as one JSON object on stderr when the sink is unavailable. The diagnostic has `event=ledger_runtime_preflight_failed`; `reason` equal to `timeout`, `database_unavailable`, `schema_version_mismatch`, `schema_object_mismatch`, or `runtime_contract_mismatch`; and, when applicable, `object_type` plus `object_name`. For `runtime_contract_mismatch`, it instead has `required_contract_versions`, the lexicographically sorted unique non-empty array containing every missing exact contract identifier; the singular field `required_contract_version` is forbidden. It MUST then exit nonzero without starting any runtime cycle. The process does not retry internally; a configured supervisor MAY start a new process and thereby perform a fresh bounded preflight. No failed-start process may materialize notification work, reconcile bindings or work, create an attempt row, or contact an adapter.
 
@@ -221,7 +221,7 @@ Fresh insert success returns `ok=true`, `command=subject.upsert`, `created=true`
 
 ### 9.1 Operational Schedule Family
 
-`specs/schedule-operations.md` defines three implemented command identifiers whose version facts are declared by the schema-8 runtime:
+`specs/schedule-operations.md` defines three implemented command identifiers whose version facts are declared by the current schema-9 runtime:
 
 - `agenda.show`: a read-only, pinned-local-time, cross-item range view with recurrence expansion, stable snapshot pagination, and optional notification/work summaries;
 - `schedule.update`: one target-version-guarded transaction over whole-item facts, primary local schedule, whole-series recurrence replacement, complete desired reminder set, delivery retargeting, mandatory stale-work reconciliation, optional bounded replacement work, one audit when effects occur, and one receipt; and
@@ -333,7 +333,7 @@ The command creates policies directly on item version `1` and returns one compos
 
 Delivery resolution accepts an existing explicit target or a named normalized context default. It never creates or approves a route. Materialization accepts a bounded local or item-relative horizon and performs UTC normalization internally. No branch starts work, writes a side-effect attempt, invokes an adapter, or reports delivery.
 
-The schema-8 runtime implements this subsection. It resolves named CLI defaults from repeatable `--delivery-target-default KEY=DELIVERY_TARGET_ID` options and exposes all schedule-create version facts through `system.info`.
+The current schema-9 runtime implements this subsection. It resolves named CLI defaults from repeatable `--delivery-target-default KEY=DELIVERY_TARGET_ID` options and exposes all schedule-create version facts through `system.info`.
 
 The CLI accepts `--compact` only with `schedule.create` and `schedule.show`. On success it applies the `spine.schedule-compact.v1` projection defined in `specs/schedule-operator-tools.md`; omission returns the existing full JSON unchanged. Compact mode is transport presentation and does not alter core command semantics, receipt persistence, or readback authority.
 

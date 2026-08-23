@@ -507,7 +507,7 @@ A deliverable reminder must eventually produce:
 - an eligible `work_instances` row with `work_kind=notification_reminder` and matching `delivery_target_id`
 - a channel value, currently `whatsapp` for the OpenClaw gateway path
 
-Multiple reminders may be attached to one event or task by issuing repeated `reminder.create` commands. Use the `current_version` returned by each successful command as the next call's `target_version`. Each intent remains independently addressable as later policy commands advance the item version. Run notification scheduling only after the schema-version-7 migration verifies successfully.
+Multiple reminders may be attached to one event or task by issuing repeated `reminder.create` commands. Use the `current_version` returned by each successful command as the next call's `target_version`. Each intent remains independently addressable as later policy commands advance the item version. Run notification scheduling only after the current schema-version-9 migration verifies successfully.
 
 For a multi-reminder canary, verify before active processing that every expected work row is still `status=eligible`, has its own `notification_policy_id`, and has the intended `eligible_at_utc`. After processing, require one terminal successful work row and one successful side-effect attempt per reminder. Cancelling or archiving the parent item must suppress all remaining reminders; disabling a bound policy or cancelling a work row must suppress that reminder only.
 
@@ -516,7 +516,12 @@ Destination routing is explicit:
 - `channel_hint` becomes OpenClaw gateway param `channel`.
 - `delivery_targets.target_ref` becomes OpenClaw gateway param `to`.
 - `work_subject_ref` is retained only as recipient-owner provenance for routed work.
-- `body_text` is currently derived as `Reminder: <current item title>`.
+- `body_text` is deterministically rendered from the current title, target time,
+  attempt time, target timezone, item type, and current primary location. For example,
+  it may be `Reminder: Tee time @ Lakeridge at 2 PM tomorrow` or
+  `Reminder: Tee time @ Lakeridge in 1 hour`. The exact body and its hashes are
+  persisted atomically with the started attempt and appear under that attempt in
+  `schedule.show`.
 - `dedupe_key` is currently `openclaw:<work_instance_id>:<attempt_count>`.
 
 The agent must persist or pass the destination intentionally. It must not infer a destination from conversational context at send time.

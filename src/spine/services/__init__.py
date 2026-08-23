@@ -15,6 +15,7 @@ from spine.services.attempts import (
     record_attempt_rejection,
     record_attempt_success,
 )
+from spine.services.notification_rendering import resolve_notification_rendering
 from spine.services.projections import plan_projection_sync
 from spine.services.scheduling import SchedulingCycleResult, materialize_notification_horizon
 from spine.services.work import (
@@ -40,6 +41,7 @@ __all__ = [
     "record_attempt_failure",
     "record_attempt_rejection",
     "record_attempt_success",
+    "resolve_notification_rendering",
     "require_processable_work",
     "retry_work",
     "start_work",

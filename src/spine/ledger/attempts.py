@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import sqlite3
+from contextlib import nullcontext
 from dataclasses import dataclass
 
 from spine.core import SpineValidationError
@@ -43,6 +44,7 @@ def create_started_attempt(
     item_id: str | None = None,
     source_item_version: int | None = None,
     reason_code: str | None = None,
+    manage_transaction: bool = True,
 ) -> StartedAttempt:
     """Persist the durable pre-write attempt row required before an external write."""
 
@@ -72,7 +74,7 @@ def create_started_attempt(
         projection_id=projection_id,
     )
     try:
-        with connection:
+        with connection if manage_transaction else nullcontext():
             connection.execute(
                 """
                 INSERT INTO side_effect_attempts (

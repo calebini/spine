@@ -9,6 +9,7 @@ from typing import Any
 from spine.commands.receipts import receipt_from_row
 from spine.core.errors import SpineValidationError
 from spine.core.schedule import resolve_local_instant
+from spine.ledger.notification_renderings import get_notification_rendering, notification_rendering_view
 from spine.ledger.recurrence import load_current_recurrence_set
 from spine.ledger.temporal_bindings import binding_view
 
@@ -111,7 +112,7 @@ def build_schedule_readback(
     if "attempts" in include:
         result.update(
             {
-                "side_effect_attempts": [_attempt_view(row) for row in attempt_page],
+                "side_effect_attempts": [_attempt_view(connection, row) for row in attempt_page],
                 "side_effect_attempts_count": str(sum(attempt_counts.values())),
                 "side_effect_attempts_limit": str(attempts_limit),
                 "side_effect_attempts_truncated": attempts_truncated,
@@ -426,8 +427,8 @@ def _work_view(row: Mapping[str, Any]) -> dict[str, Any]:
     return result
 
 
-def _attempt_view(row: Mapping[str, Any]) -> dict[str, Any]:
-    return _omit_none(
+def _attempt_view(connection: sqlite3.Connection, row: Mapping[str, Any]) -> dict[str, Any]:
+    result = _omit_none(
         {
             key: row.get(key)
             for key in (
@@ -447,6 +448,10 @@ def _attempt_view(row: Mapping[str, Any]) -> dict[str, Any]:
             )
         }
     )
+    rendering = get_notification_rendering(connection, attempt_id=str(row["attempt_id"]))
+    if rendering is not None:
+        result["notification_rendering"] = notification_rendering_view(rendering)
+    return result
 
 
 def _status_counts_query(

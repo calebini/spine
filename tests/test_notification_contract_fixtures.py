@@ -54,6 +54,7 @@ class NotificationContractFixtureTests(unittest.TestCase):
                 "notification-command.schema.json",
                 "notification-opportunity-response.schema.json",
                 "notification-policy.schema.json",
+                "notification-rendering.schema.json",
                 "notification-types.schema.json",
             },
         )

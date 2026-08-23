@@ -11,7 +11,9 @@ Machine-readable contract family:
 - `contracts/schemas/notification-policy.schema.json`
 - `contracts/schemas/notification-command.schema.json`
 - `contracts/schemas/notification-opportunity-response.schema.json`
+- `contracts/schemas/notification-rendering.schema.json`
 - `contracts/notification-fixture-manifest.json`
+- `contracts/notification-rendering-fixture-manifest.json`
 - `contracts/vector-manifest.json`
 
 ## 1. Purpose
@@ -26,7 +28,7 @@ This contract supports one-time notifications, explicit sets of target-relative 
 
 `specs/schedule-create.md` owns only the composite transaction and high-level request/receipt mapping for initial item-plus-policy authoring. It does not define alternate notification schedules, opportunities, work identities, reconciliation, or delivery semantics.
 
-`specs/notification-rendering.md` owns the draft downstream conversion of accepted ordinary reminder work into deterministic natural-language body text and immutable per-attempt rendering evidence. Rendering is not a notification-policy fact, does not enter schedule, opportunity, or work identity, and cannot authorize delivery.
+`specs/notification-rendering.md` owns the implemented downstream conversion of accepted ordinary reminder work into deterministic natural-language body text and immutable per-attempt rendering evidence. Rendering is not a notification-policy fact, does not enter schedule, opportunity, or work identity, and cannot authorize delivery.
 
 Tickerd may request bounded expansion or materialization and may select eligible work. It MUST NOT own notification cadence, infer unstored schedule defaults, or deliver directly from a policy. An adapter MUST NOT run until a corresponding work instance exists and a side-effect attempt has been persisted.
 

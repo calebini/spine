@@ -8,6 +8,7 @@ from dataclasses import dataclass
 from typing import Any, Generic, Literal, TypeVar
 
 from spine.adapters.tickerd import WorkProcessingOutcome
+from spine.core.notification_rendering import NotificationRendering
 from spine.services import (
     prepare_work_attempt,
     record_attempt_failure,
@@ -39,6 +40,7 @@ class AttemptBackedSideEffectRequest(Generic[TMessage]):  # noqa: UP046 -- publi
     idempotency_key: str
     request_envelope: Mapping[str, object]
     attempted_at_utc: str
+    notification_rendering: NotificationRendering | None = None
 
 
 @dataclass(frozen=True)
@@ -104,7 +106,10 @@ class AttemptBackedSideEffectProcessor(Generic[TMessage]):  # noqa: UP046 -- pub
             idempotency_key=request.idempotency_key,
             request_envelope=request.request_envelope,
             attempted_at_utc=request.attempted_at_utc,
+            notification_rendering=request.notification_rendering,
         )
+        if not gate.may_start_external_write:
+            return WorkProcessingOutcome.failed("side_effect_attempt_replay_suppressed")
         try:
             result = self.sender(request.message)
         except self.binding_error_type:

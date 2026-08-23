@@ -1,6 +1,6 @@
 # Spine Relative Temporal Bindings and Atomic Related-Task Creation
 
-Status: Implemented v1 on ledger schema 8
+Status: Implemented v1 (introduced on schema 8; active on current schema 9)
 Scope: Explicit cross-item temporal derivation, bounded discovery/reconciliation, and atomic creation of a task that is part of an existing event
 Created: 2026-08-17
 
@@ -62,7 +62,7 @@ The implemented Version 1 constants are:
 - `list_cursor_version=spine.schedule-binding-list-cursor.v1`;
 - `canonical_json_version=spine.canonical-json.v1`.
 
-The schema-8 runtime advertises this complete family only with matching migration, schemas, fixtures, behavioral tests, command handling, bounded scheduler reconciliation, readback, and attempt-start freshness enforcement.
+The current schema-9 runtime advertises this complete family only with matching migration, schemas, fixtures, behavioral tests, command handling, bounded scheduler reconciliation, readback, and attempt-start freshness enforcement.
 
 ## 4. Version 1 Boundary
 

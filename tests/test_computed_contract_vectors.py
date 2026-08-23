@@ -28,6 +28,7 @@ class ComputedContractVectorTests(unittest.TestCase):
             {
                 "recurrence.every_three_days_0800.v1",
                 "notification.every_hour_six_hours_before.v1",
+                "notification_rendering.event_tomorrow_physical.v1",
                 "relative_temporal_binding.selected_occurrence_follow_source.v1",
             },
         )

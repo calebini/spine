@@ -1,6 +1,6 @@
 # Spine Deterministic Notification Rendering
 
-Status: Draft v0.1.0; not implemented and declares no runtime compatibility surface
+Status: Implemented v1 on ledger schema 9
 Scope: Deterministic, concise, natural-language rendering of ordinary notification-reminder work at attempt start
 Authority: Normative design target for notification prose and its per-attempt evidence; scheduling, work, delivery, and item truth remain owned by their existing contracts
 
@@ -61,6 +61,10 @@ The v1 capability is atomic. A runtime MUST NOT advertise
 `spine.notification-rendering.v1` unless it implements the input resolver, pure
 renderer, immutable rendering evidence, attempt-envelope binding, readback, failure
 semantics, and conformance vectors together.
+
+The schema-9 runtime implements and advertises all four constants, persists rendering
+evidence in `notification_renderings`, binds OpenClaw request envelopes to that
+evidence, and exposes it through `schedule.show` attempt readback.
 
 The v1 authoring surfaces do not accept a rendering profile or template. Advertising
 the capability selects the single profile above for every supported ordinary reminder.
