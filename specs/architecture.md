@@ -1,6 +1,6 @@
 # Spine Architecture
 
-Status: Draft v0.2.0
+Status: Draft v0.2.2
 Scope: Component boundaries, module posture, and runtime relationships
 
 ## 1. Architectural Doctrine
@@ -89,6 +89,16 @@ The Spine tickerd adapter SHOULD map eligible Spine work instances to tickerd wo
 In `observe_only` mode, the adapter MUST inspect or report eligible work without external side effects.
 
 In `active` mode, the adapter MAY process eligible work through an explicit processor. The adapter MUST start the work before invoking the processor and MUST persist the processor outcome as Spine work lifecycle state. Any external write MUST pass through Spine side-effect attempt accounting and any required governance-authority approval.
+
+### 4.1 Ledger Verification Boundary
+
+Interactive commands and runtime workers require fast admission to a current ledger, not an implicit forensic examination of the whole database. Their startup preflight is therefore a bounded structural check over file access, SQLite open behavior, the exact ledger-schema version, the schema-versioned object manifest, and the compiled contract requirements of the resolved operation. Its work MUST be independent of domain-row count and database-file size. Worker readiness MUST NOT depend on a cold-cache scan of historical coordination, notification, work, attempt, receipt, or audit data.
+
+The executing Spine package owns both bounded-admission authorities. `spine.command-runtime-contract-registry.v1` maps each exact public command to read/write mode and exact required implemented contract versions; it is runtime capability metadata, not ledger truth. `spine.sqlite-schema-object-manifest.v1` maps the implemented ledger-schema version to required table, index, and trigger names, types, and canonical SQLite-definition fingerprints; it is generated or reviewed from the canonical schema/migration corpus, not learned from the target ledger. The command resolver, dispatcher, access classification, `system.info` capability projection, migration verifier, and startup preflight MUST share these authorities or prove exhaustive parity. Extra non-colliding SQLite objects remain outside Spine authority and do not block admission.
+
+Worker preflight occurs before Tickerd kernel startup and before any work discovery, reconciliation, processing, attempt creation, or adapter access. Failure or timeout leaves health `DOWN`, readiness false, emits the structured `ledger_runtime_preflight_failed` diagnostic, and terminates that process nonzero; supervisor restart is the only retry. This preserves Tickerd's ownership of cadence and health mechanics while Spine owns the ledger-admission decision. A successful preflight permits Tickerd to enter its ordinary ready lifecycle but does not itself claim an `UP` cycle result.
+
+Deep ledger verification is a separate operator and migration concern. It reuses the bounded schema checks, then owns full SQLite integrity checking, full foreign-key checking, and unscoped Spine domain-invariant validation, may take time proportional to ledger size, and is appropriate after storage incidents or before or after controlled migrations. The explicit deep path does not become a prerequisite for every command or daemon restart. Runtime writes remain fail-closed through foreign-key enforcement, relational constraints, triggers, transactions, command validation, replay rules, and mutation-scoped invariant checks. `specs/agent-command-contract.md` Section 5 is normative for registry entries, manifest identity and comparison, failures, and acceptance tests.
 
 ## 5. Relationship to the Governance Authority
 

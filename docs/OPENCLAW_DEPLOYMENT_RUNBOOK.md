@@ -138,7 +138,9 @@ For verification only:
   --verify-only
 ```
 
-The current runtime requires ledger schema version 8. Run the normal migration command before deploying the updated worker, then require `--verify-only` and `system.info` to report schema 8 before any worker restart. Do not run a current worker against an older ledger or an older worker against a migrated ledger.
+`--verify-only` is a deliberate deep-ledger operation. It performs full SQLite integrity and foreign-key checks plus unscoped Spine ledger-invariant validation, so its runtime may grow with ledger size and a cold filesystem cache. Run it during a controlled migration, deployment verification window, or storage-incident investigation, not on every interactive command, worker heartbeat, or routine scheduler restart. The bounded-runtime-preflight amendment requires ordinary `spine-command` and worker startup to use a separate structural check, but deployment automation MUST verify that the selected release implements that amendment before relying on bounded startup latency.
+
+The current runtime requires ledger schema version 8. Run the normal migration command and explicit deep verification during initialization, schema-changing deployment, or a scheduled verification window, then require `system.info` to report schema 8 before starting the updated worker. A routine restart of an unchanged, already admitted schema MUST NOT acquire a new implicit deep-verification dependency. Do not run a current worker against an older ledger or an older worker against a migrated ledger.
 
 ```bash
 "$SPINE_MIGRATE" --db "$SPINE_DB" --verify-only
@@ -380,7 +382,7 @@ Before production cutover:
 
 - CI is passing on `main`.
 - Deployment host has pulled the intended commit.
-- `"$SPINE_MIGRATE" --verify-only` passes on the target ledger.
+- The target ledger has a successful explicit deep verification appropriate to the deployment or incident window; routine restarts do not silently rerun it.
 - Fake OpenClaw smoke passes on host.
 - Observe-only runner pass is understood.
 - Gateway credentials are configured outside git.

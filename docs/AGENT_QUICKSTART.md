@@ -70,12 +70,14 @@ export SPINE_STATE_DIR="$SPINE_DEMO_ROOT/worker-state"
 
 ### Existing current ledger
 
-Do not initialize or migrate it. Verify it without mutation:
+Do not initialize or migrate it. When a deliberate deep-integrity pass is appropriate, verify it without mutation:
 
 ```bash
 export SPINE_DB=/absolute/path/to/ledger.sqlite
 "$SPINE_MIGRATE" --db "$SPINE_DB" --verify-only
 ```
+
+This explicit verification scans ledger data and may be expensive on a large database or cold disk cache. The specified bounded-runtime-preflight amendment separates ordinary command and worker admission from this deep pass, but operators MUST verify that the executing release implements that amendment before relying on bounded startup latency. Do not place `--verify-only` in an interactive scheduling loop or worker restart loop.
 
 ### Existing older ledger that requires migration
 

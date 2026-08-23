@@ -72,8 +72,10 @@ git -C "$SPINE_CHECKOUT" status --short
 Then choose exactly one ledger entry path:
 
 - New disposable ledger: `"$SPINE_MIGRATE" --db "$SPINE_DB" --initialize-if-empty`.
-- Existing current ledger: `"$SPINE_MIGRATE" --db "$SPINE_DB" --verify-only`.
+- Existing current ledger requiring explicit deep verification: `"$SPINE_MIGRATE" --db "$SPINE_DB" --verify-only`.
 - Existing older ledger: stop its worker, take a recoverable copy, run `"$SPINE_MIGRATE" --db "$SPINE_DB"`, and only then run `--verify-only`.
+
+`spine-ledger-migrate --verify-only` is the explicit deep-integrity path: it checks the full SQLite database, foreign keys, and unscoped Spine ledger invariants and may take time proportional to database size, especially with a cold filesystem cache. Use it for controlled deployment, migration, or incident verification; do not put it in an interactive command loop or a worker heartbeat. The bounded-runtime-preflight amendment in `specs/agent-command-contract.md` requires ordinary `spine-command` and worker startup to use a separate structural check whose cost is independent of ledger size. Until the executing release declares and tests that amendment as implemented, operators MUST assume routine command startup may still perform the older deep verification and MUST NOT claim bounded-preflight behavior from documentation alone.
 
 Do not require current-schema verification before an intended migration; an older valid schema is expected to fail that check. After initialization or migration, run:
 
