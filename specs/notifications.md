@@ -1,6 +1,6 @@
 # Spine Notification Scheduling
 
-Status: Draft v0.2.0; executable v1 contract family implemented
+Status: Draft v0.2.1; executable v1 contract family implemented; scheduler-planning amendment pending runtime conformance
 Scope: Canonical notification intent, bounded schedule expansion, durable work materialization, lifecycle reconciliation, and recurrence binding
 Authority: Normative notification-scheduling target; runtime conformance requires matching persistence, command, fixture, and implementation declarations
 
@@ -185,9 +185,36 @@ The response reports ordered `created_work_instance_ids`, `retained_work_instanc
 
 Materialization creates no side-effect attempt and invokes no adapter. Same-command compatible replay returns the stored receipt and identities without mutation. Incompatible command-id reuse fails before freshness checks.
 
+### 9.1 Automated Scheduler Planning and Durable No-Op Suppression
+
+An automatic horizon cycle MUST perform a bounded, read-only planning phase before it invokes any receipt-bearing provenance or materialization operation. Planning is a Spine service concern. Tickerd supplies daemon cycle cadence, evaluation time, horizon, and cycle bounds, but it does not interpret notification schedule cadence or persist scheduler eligibility.
+
+For each current item and active policy, the planner evaluates the policy-specific half-open opportunity window `[evaluated_at_utc - late_grace, evaluated_at_utc + horizon)`, where `late_grace` is zero for `late_handling.kind=skip` and is the accepted `grace_seconds` for `deliver_within`. Planning uses current item lifecycle, target anchors, policy and route facts, recurrence truth when applicable, existing opportunity-equivalent work, and current unstarted work that may require Section 10 reconciliation. Planning MUST use one consistent ledger snapshot or revalidate every planned precondition before persistence.
+
+An item has a dispatchable notification-work plan only when applying the plan can do at least one of the following:
+
+- create durable work for at least one actionable opportunity in the evaluated window that has no equivalent persisted work for the same opportunity and delivery target; or
+- cancel or replace at least one existing unstarted work row that is stale under Section 10.
+
+An actionable opportunity whose equivalent work already exists does not by itself justify materialization, including when that work is already in progress or terminal. A terminal or in-progress historical work row does not justify reconciliation because it cannot be cancelled. Active policy presence alone never makes an item dispatchable.
+
+The automatic scheduler MUST skip an item when all current active policies produce no missing actionable work for the evaluated window and no unstarted work row requires reconciliation. This includes a past one-shot policy after its `deliver_within` grace, an exhausted bounded repeat window, a terminal or non-actionable target, and a recurring policy with no qualifying occurrence in the bounded source range. Horizon-relative exhaustion is derived planning output only: it MUST NOT disable a policy, create a hidden scheduler row, or be persisted as canonical lifecycle truth.
+
+Recurrence-bound planning MUST derive the bounded source-occurrence range required by policy offsets and late grace before requesting provenance repair. The automatic cycle MUST NOT invoke `occurrence_provenance.regenerate` merely because a recurrence-bound active policy exists. Provenance repair is a dispatchable prerequisite only when missing or stale provenance could affect opportunity creation or stale-work reconciliation in the evaluated window. Failure to derive the required bounded range or establish required freshness fails closed as an operational planning failure; it MUST NOT be treated as proof of exhaustion.
+
+A plan containing no dispatchable action is not a command outcome. It writes no `command_receipts`, audit rows, recurrence provenance, work rows, or side-effect attempts. Implementations MAY emit ephemeral logs, metrics, or cycle counters for planned skips, but those observations are not Spine ledger facts. Repeated automatic cycles over unchanged exhausted state MUST therefore cause zero ledger growth.
+
+Cycle bounds apply to dispatchable item plans, not merely to the first raw rows having active policies. Discovery MUST itself remain bounded and make deterministic progress across its candidate set, using stable paging or an equivalent fair traversal. Exhausted items skipped during planning MUST NOT permanently consume the action limit or starve later dispatchable items.
+
+If pre-write revalidation finds no missing actionable work and no stale cancellable work requiring reconciliation, the scheduler service MUST discard and replan rather than invoke materialization. Equivalently, an automatic cycle MUST NOT persist an operation whose only possible public-command effect is `notification_work_zero_selected` or `notification_work_all_retained`. This may be implemented with a shared transaction snapshot or an equivalent pre-write compare. It does not suppress a reconciliation that actually cancels stale work, and it does not suppress compatible replay requested by an explicit caller.
+
+This invariant does not change the public `notification_work.materialize` command. A direct explicit invocation remains replay-safe and receipt-bearing for all four Section 9 effects, including `notification_work_zero_selected` and `notification_work_all_retained`. Durable no-op suppression applies only to scheduler-owned automatic discovery and dispatch; it MUST NOT weaken `command_receipts` globally or erase evidence for an operator-requested command.
+
 ## 10. Reconciliation and Lifecycle
 
 Schedule-generated work carries enough provenance to revalidate its notification intent, current policy semantics, item target, recurrence occurrence when present, and routing before processing.
+
+For this notification contract, `unstarted work` and `cancellable work` mean exactly a work row with `status=eligible`, `attempt_count=0`, and no `side_effect_attempts` row referencing it. An owning workflow MAY define a stricter cancellation predicate but MUST NOT weaken these three requirements. Eligible retry work with a positive attempt count or any attempt evidence, in-progress work, and terminal work are protected historical evidence and are never cancellable notification work.
 
 A schedule edit, target reschedule, target recurrence revision, selected-occurrence lifecycle change, delivery-target change, policy disablement, or terminal item transition can make eligible work stale or non-actionable. Reconciliation MUST prevent adapter invocation and MUST cancel only unstarted work. The base executable-v1 closed cancellation reason codes are `notification_schedule_superseded`, `notification_target_changed`, `notification_occurrence_stale`, `notification_routing_changed`, `notification_policy_disabled`, and `parent_lifecycle_terminal`; the first applicable reason in this order is persisted. In-progress and terminal work remain immutable historical facts and receive audit/report facts when later truth diverges.
 
@@ -257,3 +284,8 @@ The computed vector corpus is indexed by `contracts/vector-manifest.json`. Each 
 7. A delivery retry cannot be mistaken for a new scheduled reminder.
 8. Policy, target, recurrence, routing, and lifecycle changes fail closed before external invocation.
 9. Every external send remains represented by `side_effect_attempts` and no notification-specific attempt ledger exists.
+10. An automatic horizon cycle writes no ledger rows when bounded planning finds neither missing actionable work nor stale unstarted work requiring reconciliation.
+11. A past one-shot or bounded policy outside its late-handling window does not remain in the automatic dispatch set, while `deliver_within` remains eligible through its exact grace window.
+12. Recurrence-bound planning skips only after bounded recurrence evaluation proves no qualifying occurrence for the current horizon; missing or stale evidence fails closed and is not misclassified as exhaustion.
+13. Explicit `notification_work.materialize` zero-selected and all-retained calls retain their ordinary receipt and replay semantics.
+14. Exhausted items do not consume the dispatchable-item limit or permanently starve later actionable items.

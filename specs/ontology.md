@@ -662,6 +662,8 @@ Generated reminders MUST become `work_instances` rows before any delivery attemp
 
 `notification_policies` MUST NOT directly drive vendor delivery or hidden scheduler delivery state. A virtual opportunity does not authorize delivery; an active `work_instances` row and started `side_effect_attempts` row are required.
 
+Automatic scheduler eligibility is a bounded derived view over current policy, target, recurrence, route, lifecycle, and work facts. It is not a policy status, coordination item, work row, receipt, or hidden scheduler entity. In particular, horizon-relative exhaustion MUST NOT be persisted on `notification_policies`: a later horizon or changed canonical truth may make the same active policy relevant again. When the derived plan contains neither missing actionable work nor stale unstarted work requiring reconciliation, the cycle writes no Spine ledger row.
+
 ### 8.3 Structured notification schedules
 
 The canonical structured target adds these policy facts:
@@ -714,6 +716,8 @@ Structured-policy constraints:
 Owns generated domain work eligible for tickerd processing.
 
 Notification reminder rule (MVP): any deliverable reminder MUST be represented as a `work_instances` row. Implementations MUST NOT deliver reminders directly from `notification_policies` evaluation or hidden scheduler state.
+
+Existing equivalent reminder work satisfies automatic materialization planning for that opportunity and MUST NOT cause another receipt-bearing materialization call, including when that work is already in progress or terminal. Cancellable notification work has `status=eligible`, `attempt_count=0`, and no referencing `side_effect_attempts` row; an owning workflow may strengthen but never weaken that predicate. Only cancellable work that would actually be cancelled or replaced under notification reconciliation makes reconciliation dispatchable. Eligible retry work with attempt evidence, in-progress work, and terminal work remains historical evidence and does not keep an exhausted policy in the automatic dispatch set.
 
 Minimum contract:
 

@@ -69,7 +69,7 @@ tickerd owns:
 - `active`, `observe_only`, and `suspended` modes
 - health/readiness reporting
 - singleton ownership
-- cadence and overrun behavior
+- daemon cycle cadence and overrun behavior
 - reconciliation loop
 - bounded work item processing
 
@@ -136,7 +136,7 @@ Projection drift MUST be recoverable by replaying or reconciling from Spine trut
 
 Calendar notification cadence may reuse the frequency, selector, timezone-version, invalid-date, and DST-resolution semantics of `specs/recurrence.md`, but it does not create a recurrence set or store recurrence on a notification trigger anchor. Recurring-item notification policies bind to canonical item occurrences through current occurrence provenance before work is created.
 
-Tickerd may initiate bounded materialization and process eligible work. It does not own notification schedule interpretation. Repeated notification opportunities are separate work instances; adapter retries remain attempts or retry state for one work instance. No policy or opportunity may invoke an adapter directly.
+Tickerd may initiate bounded materialization and process eligible work. It does not own notification schedule interpretation. Before an automatic cycle invokes a receipt-bearing provenance or materialization operation, the Spine scheduling service performs bounded read-only planning against current policy, recurrence, route, lifecycle, and work facts. Only a plan that can create missing actionable work or reconcile stale unstarted work is dispatchable. A planned skip is ephemeral runtime observation and writes no receipt, audit, provenance, work, or attempt row; repeated unchanged exhausted state therefore causes no ledger growth. Direct operator invocation of the public materialization command retains its complete receipt and replay contract. Repeated notification opportunities are separate work instances; adapter retries remain attempts or retry state for one work instance. No policy or opportunity may invoke an adapter directly.
 
 `specs/notification-rendering.md` defines the draft deterministic prose boundary for ordinary `notification_reminder` attempts. Rendering occurs only after existing freshness and late-handling gates grant attempt-start admission, uses the proposed attempt time plus current canonical item, target, occurrence/binding, and primary-location facts, and atomically persists immutable body evidence with the generic started attempt before external contact. It is a pure service/core concern with adapter-specific escaping at the edge; it does not make prose a scheduling fact or introduce a second attempt ledger. Contextual model-generated advisories remain a separate authority chain.
 
