@@ -229,3 +229,35 @@ The fat slice is ready for one environment patch only when all of the following 
 - Conversational parsing as canonical truth; ingest must persist explicit structured facts.
 - Dashboards and broad external projections.
 - Release freeze-manifest promotion.
+
+### Future Horizon: Bounded Ledger Storage Lifecycle
+
+Spine's ledger is canonical, append-oriented coordination evidence, so its storage
+lifecycle must not be treated as ordinary log rotation. The recent scheduler no-op
+suppression removes accidental idle growth; the remaining legitimate growth should be
+measured in staging before retention or archival policy is designed. This horizon item
+does not authorize automatic deletion, compaction, or archival.
+
+The future work should proceed in this order:
+
+1. Establish a post-fix storage baseline and a supported storage readback that reports
+   database, WAL, table, index, and major evidence-family growth without requiring raw
+   SQL from operators.
+2. Classify every durable fact family as permanent canonical truth, replay/audit
+   evidence, reconstructable derived data, archive-eligible evidence after semantic
+   closure, or prohibited ephemeral telemetry.
+3. Resolve the idempotency boundary before pruning command receipts: either preserve
+   indefinite replay evidence or define a finite replay window backed by a compact,
+   durable replay fingerprint or tombstone contract.
+4. Specify explicit archival and compaction operations with immutable manifests,
+   content hashes, verification, restore/readback behavior, and fail-closed handling.
+   Delivery attempts and other safety evidence remain durable unless a normative
+   retention rule proves otherwise.
+5. Add disk budgets, growth alarms, and operator stop conditions. Spine must never
+   automatically delete canonical evidence merely because a storage threshold is
+   crossed.
+
+Backups protect recovery but do not reduce the active ledger. WAL checkpointing only
+controls the WAL sidecar, and `VACUUM` only reclaims pages after an independently
+authorized retention operation. Rotating whole database files is not an acceptable
+substitute because it would fragment Spine's canonical authority.
