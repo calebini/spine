@@ -70,6 +70,8 @@ from spine.ledger.migrate import current_schema_version
 from spine.ledger.notifications import (
     insert_notification_schedule_policy,
     load_current_notification_policies,
+    notification_policy_actionability,
+    notification_work_stale_reason,
     persist_notification_target_selector,
     remove_copied_notification_policy,
 )
@@ -3686,7 +3688,7 @@ def _handle_notification_opportunities(request: Mapping[str, Any], context: Comm
             range_start_utc=expansion_start,
             range_end_utc=range_end,
         )
-        actionable, reason = _notification_policy_actionability(context.ledger, item=item, policy=policy)
+        actionable, reason = notification_policy_actionability(context.ledger, item=item, policy=policy)
         expanded = expand_notification_policy(
             policy,
             targets=targets,
@@ -3960,7 +3962,8 @@ def _handle_occurrence_provenance_regenerate(request: Mapping[str, Any], context
             semantic_facts={**semantic, **facts},
             result_identity_facts=facts,
         )
-        insert_command_receipt(context.ledger, receipt)
+        if changed or not context.transport_metadata.get("automatic_scheduler"):
+            insert_command_receipt(context.ledger, receipt)
     return {
         "ok": True,
         "command": "occurrence_provenance.regenerate",
@@ -4068,13 +4071,18 @@ def _handle_notification_work_materialize(request: Mapping[str, Any], context: C
             """
             SELECT * FROM work_instances
             WHERE item_id = ? AND work_kind = 'notification_reminder'
-              AND status = 'eligible' AND eligible_at_utc >= ? AND eligible_at_utc < ?
+              AND status = 'eligible' AND attempt_count = 0
+              AND eligible_at_utc >= ? AND eligible_at_utc < ?
+              AND NOT EXISTS (
+                SELECT 1 FROM side_effect_attempts AS attempt
+                WHERE attempt.work_instance_id = work_instances.work_instance_id
+              )
             ORDER BY work_instance_id
             """,
             (item_id, range_start, range_end),
         ).fetchall()
         for work in existing_rows:
-            reason = _notification_work_stale_reason(
+            reason = notification_work_stale_reason(
                 context.ledger,
                 item=item,
                 work=work,
@@ -4086,7 +4094,11 @@ def _handle_notification_work_materialize(request: Mapping[str, Any], context: C
                     """
                     UPDATE work_instances
                     SET status = 'cancelled', reason_code = ?, updated_at_utc = ?
-                    WHERE work_instance_id = ? AND status = 'eligible'
+                    WHERE work_instance_id = ? AND status = 'eligible' AND attempt_count = 0
+                      AND NOT EXISTS (
+                        SELECT 1 FROM side_effect_attempts AS attempt
+                        WHERE attempt.work_instance_id = work_instances.work_instance_id
+                      )
                     """,
                     (reason, materialized_at, work["work_instance_id"]),
                 )
@@ -4180,7 +4192,8 @@ def _handle_notification_work_materialize(request: Mapping[str, Any], context: C
             semantic_facts={**semantic, **facts},
             result_identity_facts=facts,
         )
-        insert_command_receipt(context.ledger, receipt)
+        if created_ids or cancelled_ids or not context.transport_metadata.get("automatic_scheduler"):
+            insert_command_receipt(context.ledger, receipt)
     return {
         "ok": True,
         "command": "notification_work.materialize",
@@ -8191,35 +8204,6 @@ def _decode_notification_cursor(value: Any, *, expected: Mapping[str, Any]) -> l
     return last
 
 
-def _notification_policy_actionability(
-    connection: sqlite3.Connection,
-    *,
-    item: Mapping[str, Any],
-    policy: Mapping[str, object],
-) -> tuple[bool, str | None]:
-    if policy["status"] != "active":
-        return False, "notification_policy_disabled"
-    if item["status"] != "active":
-        return False, "item_inactive"
-    detail = item["detail"]
-    if item["item_type"] == "event" and detail["event_status"] != "scheduled":
-        return False, "event_not_scheduled"
-    if item["item_type"] == "task" and detail["task_status"] != "open":
-        return False, "task_not_open"
-    target = _delivery_target(connection, str(policy["delivery_target_id"]), required=False)
-    recipient_id = policy.get("recipient_subject_id") or policy.get("recipient_group_id")
-    owner_id = None if target is None else target.get("owner_subject_id") or target.get("owner_group_id")
-    if (
-        target is None
-        or target["status"] != "active"
-        or target["channel"] != policy["channel"]
-        or target["owner_kind"] != policy["recipient_kind"]
-        or owner_id != recipient_id
-    ):
-        return False, "delivery_target_unavailable"
-    return True, None
-
-
 def _notification_targets(
     connection: sqlite3.Connection,
     *,
@@ -8318,54 +8302,6 @@ def _current_notification_target_snapshots(
             )
         result[str(policy["notification_intent_id"])] = snapshots
     return result
-
-
-def _notification_work_stale_reason(
-    connection: sqlite3.Connection,
-    *,
-    item: Mapping[str, Any],
-    work: sqlite3.Row,
-    policy: Mapping[str, object] | None,
-    valid_targets: Mapping[str, set[tuple[object, ...]]],
-) -> str | None:
-    if policy is not None and work["normalized_notification_schedule_hash"] != policy["normalized_notification_schedule_hash"]:
-        return "notification_schedule_superseded"
-    target_snapshot = (
-        work["target_anchor_role"],
-        work["application_scope"],
-        work["target_scheduled_fact"],
-        work["target_at_utc"],
-        work["occurrence_key"],
-    )
-    if policy is not None and target_snapshot not in valid_targets.get(str(work["notification_intent_id"]), set()):
-        return "notification_target_changed"
-    if work["occurrence_provenance_id"] is not None:
-        active = connection.execute(
-            """
-            SELECT 1 FROM occurrence_provenance
-            WHERE occurrence_provenance_id = ? AND management_status = 'active'
-              AND actionable = 1
-            """,
-            (work["occurrence_provenance_id"],),
-        ).fetchone()
-        if active is None:
-            return "notification_occurrence_stale"
-    if item["item_type"] == "task":
-        from spine.ledger.temporal_bindings import active_follow_binding_current
-
-        if not active_follow_binding_current(connection, item_id=str(item["item_id"])):
-            return "notification_temporal_binding_stale"
-    if policy is not None and work["delivery_target_id"] != policy["delivery_target_id"]:
-        return "notification_routing_changed"
-    if policy is None or policy["status"] != "active":
-        return "notification_policy_disabled"
-    detail = item["detail"]
-    terminal = item["status"] != "active"
-    terminal = terminal or (item["item_type"] == "event" and detail["event_status"] != "scheduled")
-    terminal = terminal or (item["item_type"] == "task" and detail["task_status"] != "open")
-    if terminal:
-        return "parent_lifecycle_terminal"
-    return None
 
 
 def _notification_target_from_anchor(anchor: Mapping[str, Any]) -> dict[str, object]:

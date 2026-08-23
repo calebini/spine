@@ -3,16 +3,48 @@
 from __future__ import annotations
 
 import sqlite3
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
+from typing import Any
 from zoneinfo import ZoneInfo
 
 from spine.commands import CommandContext, handle
 from spine.core.errors import SpineValidationError
 from spine.core.hashing import hash_canonical_json
-from spine.ledger.notifications import load_current_notification_policies
+from spine.core.notifications import expand_notification_policy
+from spine.core.occurrences import expand_recurrence_set
+from spine.core.schedule import resolve_local_instant
+from spine.ledger.notifications import (
+    load_current_notification_policies,
+    notification_policy_actionability,
+    notification_work_stale_reason,
+)
 from spine.ledger.recurrence import load_current_recurrence_set
+
+_SCHEDULER_SCAN_MINIMUM = 100
+_SCHEDULER_SCAN_MULTIPLIER = 10
+_SCHEDULER_SCAN_MAXIMUM = 10_000
+_SCHEDULER_ROTATION_SECONDS = 60
+_CANDIDATE_ITEMS_CTE = """
+    WITH candidate_items AS (
+      SELECT p.item_id
+      FROM notification_policies AS p
+      JOIN coordination_items AS i
+        ON i.item_id = p.item_id AND i.current_version = p.version
+      WHERE p.status = 'active'
+      UNION
+      SELECT w.item_id
+      FROM work_instances AS w
+      WHERE w.work_kind = 'notification_reminder'
+        AND w.status = 'eligible'
+        AND w.attempt_count = 0
+        AND NOT EXISTS (
+          SELECT 1 FROM side_effect_attempts AS attempt
+          WHERE attempt.work_instance_id = w.work_instance_id
+        )
+    )
+"""
 
 
 @dataclass(frozen=True)
@@ -20,6 +52,21 @@ class SchedulingCycleResult:
     items_scanned: int
     items_repaired: int
     failures: tuple[dict[str, object], ...]
+
+
+@dataclass(frozen=True)
+class _NotificationWorkPlan:
+    item_id: str
+    version: str
+    range_start: str
+    range_end: str
+    recurrence_source_range: tuple[str, str] | None
+    needs_provenance: bool
+    needs_materialization: bool
+
+    @property
+    def dispatchable(self) -> bool:
+        return self.needs_provenance or self.needs_materialization
 
 
 def materialize_notification_horizon(
@@ -30,7 +77,7 @@ def materialize_notification_horizon(
     max_items: int,
     actor_subject_id: str | None = None,
 ) -> SchedulingCycleResult:
-    """Regenerate required recurrence provenance and materialize one UTC horizon."""
+    """Plan and apply required recurrence provenance and notification work."""
 
     if horizon_seconds < 1 or horizon_seconds > 31_622_400:
         raise SpineValidationError(
@@ -54,41 +101,48 @@ def materialize_notification_horizon(
         actor_subject_id=actor,
         max_bindings=max_items,
     )
-    rows = connection.execute(
-        """
-        SELECT DISTINCT i.item_id, i.current_version
-        FROM coordination_items AS i
-        JOIN notification_policies AS p
-          ON p.item_id = i.item_id AND p.version = i.current_version
-        WHERE p.status = 'active'
-        ORDER BY i.item_id
-        LIMIT ?
-        """,
-        (max_items,),
-    ).fetchall()
+    rows = _scheduler_candidate_rows(connection, evaluated=evaluated, max_items=max_items)
     repaired = bindings_repaired
     failures: list[dict[str, object]] = list(binding_failures)
-    context = CommandContext(ledger=connection)
+    context = CommandContext(ledger=connection, transport_metadata={"automatic_scheduler": True})
+    scanned = 0
+    dispatched = 0
     for row in rows:
+        if dispatched >= max_items:
+            break
+        scanned += 1
         item_id = str(row["item_id"])
         version = str(row["current_version"])
-        policies = load_current_notification_policies(connection, item_id=item_id)
-        recurrence = load_current_recurrence_set(connection, item_id=item_id)
-        grace_lookback = 0
-        for policy in policies:
-            late_handling = _mapping(policy.get("late_handling"), "notification policy late_handling")
-            if late_handling.get("kind") == "deliver_within":
-                grace_lookback = max(grace_lookback, int(str(late_handling.get("grace_seconds", "0"))))
-        eligibility_start = evaluated - timedelta(seconds=grace_lookback)
-        if recurrence is not None and any(
-            _mapping(value.get("target"), "notification policy target").get("application_scope") != "item" for value in policies
-        ):
-            source_start, source_end = _recurrence_source_range(
-                recurrence,
-                policies=policies,
-                eligibility_start=eligibility_start,
+        try:
+            plan = _plan_notification_work(
+                connection,
+                context=context,
+                item_id=item_id,
+                version=version,
+                evaluated_at_utc=evaluated_at_utc,
+                evaluated=evaluated,
                 eligibility_end=end,
             )
+        except SpineValidationError as exc:
+            failures.append(
+                {
+                    "item_id": item_id,
+                    "operation": "planning",
+                    "error": {"code": exc.code, "message": exc.message},
+                }
+            )
+            continue
+        if not plan.dispatchable:
+            continue
+        dispatched += 1
+        item_repaired = False
+        if plan.needs_provenance:
+            assert plan.recurrence_source_range is not None
+            source_start, source_end = plan.recurrence_source_range
+            recurrence = load_current_recurrence_set(connection, item_id=item_id)
+            if recurrence is None:
+                failures.append({"item_id": item_id, "operation": "provenance", "reason_code": "recurrence_not_configured"})
+                continue
             provenance_request = {
                 "command_id": _cycle_command_id(
                     "occurrence_provenance.regenerate",
@@ -113,8 +167,32 @@ def materialize_notification_horizon(
             if not provenance["ok"]:
                 failures.append({"item_id": item_id, "operation": "provenance", "error": provenance["error"]})
                 continue
-        range_start = _utc_text(eligibility_start)
-        range_end = _utc_text(end)
+            item_repaired = bool(provenance["changed"])
+            try:
+                plan = _plan_notification_work(
+                    connection,
+                    context=context,
+                    item_id=item_id,
+                    version=version,
+                    evaluated_at_utc=evaluated_at_utc,
+                    evaluated=evaluated,
+                    eligibility_end=end,
+                )
+            except SpineValidationError as exc:
+                failures.append(
+                    {
+                        "item_id": item_id,
+                        "operation": "planning_after_provenance",
+                        "error": {"code": exc.code, "message": exc.message},
+                    }
+                )
+                if item_repaired:
+                    repaired += 1
+                continue
+        if not plan.needs_materialization:
+            if item_repaired:
+                repaired += 1
+            continue
         materialize = handle(
             "notification_work.materialize",
             {
@@ -123,15 +201,15 @@ def materialize_notification_horizon(
                     item_id,
                     version,
                     evaluated_at_utc,
-                    range_start,
-                    range_end,
+                    plan.range_start,
+                    plan.range_end,
                 ),
                 "actor_subject_id": actor,
                 "item_id": item_id,
                 "target_version": version,
                 "materialized_at_utc": evaluated_at_utc,
-                "range_start_utc": range_start,
-                "range_end_utc": range_end,
+                "range_start_utc": plan.range_start,
+                "range_end_utc": plan.range_end,
                 "limit": "1000",
             },
             context,
@@ -139,13 +217,433 @@ def materialize_notification_horizon(
         if not materialize["ok"]:
             failures.append({"item_id": item_id, "operation": "materialize", "error": materialize["error"]})
             continue
-        if materialize["changed"]:
+        item_repaired = item_repaired or bool(materialize["changed"])
+        if item_repaired:
             repaired += 1
     return SchedulingCycleResult(
-        items_scanned=len(rows) + bindings_scanned,
+        items_scanned=scanned + bindings_scanned,
         items_repaired=repaired,
         failures=tuple(failures),
     )
+
+
+def _scheduler_candidate_rows(
+    connection: sqlite3.Connection,
+    *,
+    evaluated: datetime,
+    max_items: int,
+) -> list[sqlite3.Row]:
+    total = int(
+        connection.execute(
+            _CANDIDATE_ITEMS_CTE + "SELECT COUNT(*) FROM candidate_items",
+        ).fetchone()[0]
+    )
+    if total == 0:
+        return []
+    scan_budget = min(
+        total,
+        max(
+            _SCHEDULER_SCAN_MINIMUM,
+            min(max_items * _SCHEDULER_SCAN_MULTIPLIER, _SCHEDULER_SCAN_MAXIMUM),
+        ),
+    )
+    cycle_slot = int(evaluated.timestamp()) // _SCHEDULER_ROTATION_SECONDS
+    offset = (cycle_slot * scan_budget) % total
+    query = (
+        _CANDIDATE_ITEMS_CTE
+        + """
+        SELECT i.item_id, i.current_version
+        FROM candidate_items AS candidate
+        JOIN coordination_items AS i ON i.item_id = candidate.item_id
+        ORDER BY i.item_id
+        LIMIT ? OFFSET ?
+        """
+    )
+    rows = connection.execute(query, (scan_budget, offset)).fetchall()
+    remaining = scan_budget - len(rows)
+    if remaining:
+        rows.extend(connection.execute(query, (remaining, 0)).fetchall())
+    return rows
+
+
+def _plan_notification_work(
+    connection: sqlite3.Connection,
+    *,
+    context: CommandContext,
+    item_id: str,
+    version: str,
+    evaluated_at_utc: str,
+    evaluated: datetime,
+    eligibility_end: datetime,
+) -> _NotificationWorkPlan:
+    policies = load_current_notification_policies(connection, item_id=item_id)
+    active_policies = [value for value in policies if value.get("status") == "active"]
+    grace_lookback = max((_policy_grace_seconds(value) for value in active_policies), default=0)
+    eligibility_start = evaluated - timedelta(seconds=grace_lookback)
+    range_start = _utc_text(eligibility_start)
+    range_end = _utc_text(eligibility_end)
+    item = _scheduler_item(context, item_id=item_id)
+    recurrence = load_current_recurrence_set(connection, item_id=item_id)
+    cancellable = _cancellable_notification_work(
+        connection,
+        item_id=item_id,
+        range_start=range_start,
+        range_end=range_end,
+    )
+
+    recurrence_policies = [
+        value
+        for value in active_policies
+        if _mapping(value.get("target"), "notification policy target").get("application_scope") != "item"
+    ]
+    source_range: tuple[str, str] | None = None
+    if recurrence_policies:
+        if recurrence is None:
+            raise SpineValidationError("recurrence_not_configured", "recurrence-bound notification has no recurrence set")
+        source_range = _recurrence_source_range(
+            recurrence,
+            policies=recurrence_policies,
+            eligibility_start=eligibility_start,
+            eligibility_end=eligibility_end,
+        )
+        provisional, raw_keys = _provisional_recurrence_opportunities(
+            connection,
+            item=item,
+            recurrence=recurrence,
+            policies=recurrence_policies,
+            evaluated_at_utc=evaluated_at_utc,
+            range_start=range_start,
+            range_end=range_end,
+            source_range=source_range,
+        )
+        required_keys = {
+            str(value["occurrence_key"])
+            for value in provisional
+            if value.get("actionable") and _opportunity_has_no_work(connection, value)
+        }
+        if cancellable:
+            required_keys.update(raw_keys)
+        if required_keys - _active_notification_provenance_keys(connection, item_id=item_id, recurrence=recurrence):
+            return _NotificationWorkPlan(
+                item_id=item_id,
+                version=version,
+                range_start=range_start,
+                range_end=range_end,
+                recurrence_source_range=source_range,
+                needs_provenance=True,
+                needs_materialization=False,
+            )
+
+    opportunities = _read_notification_opportunities(
+        context,
+        item_id=item_id,
+        evaluated_at_utc=evaluated_at_utc,
+        range_start=range_start,
+        range_end=range_end,
+    )
+    missing_work = any(value.get("actionable") and _opportunity_has_no_work(connection, value) for value in opportunities)
+    policies_by_intent = {str(value["notification_intent_id"]): value for value in policies}
+    valid_targets = _scheduler_target_snapshots(connection, item=item, policies=policies, recurrence=recurrence)
+    stale_work = any(
+        notification_work_stale_reason(
+            connection,
+            item=item,
+            work=work,
+            policy=policies_by_intent.get(str(work["notification_intent_id"])),
+            valid_targets=valid_targets,
+        )
+        is not None
+        for work in cancellable
+    )
+    return _NotificationWorkPlan(
+        item_id=item_id,
+        version=version,
+        range_start=range_start,
+        range_end=range_end,
+        recurrence_source_range=source_range,
+        needs_provenance=False,
+        needs_materialization=missing_work or stale_work,
+    )
+
+
+def _scheduler_item(context: CommandContext, *, item_id: str) -> dict[str, Any]:
+    shown = handle("item.show", {"item_id": item_id}, context)
+    if not shown.get("ok"):
+        error = shown.get("error", {})
+        raise SpineValidationError(str(error.get("code", "item_not_found")), str(error.get("message", "item is unavailable")))
+    item_type = str(shown["item_type"])
+    detail_key = "event_detail" if item_type == "event" else "task_detail"
+    detail = shown.get(detail_key)
+    if not isinstance(detail, Mapping):
+        raise SpineValidationError("invalid_item_detail", "scheduled item detail is unavailable")
+    return {
+        "item_id": shown["item_id"],
+        "item_type": item_type,
+        "current_version": shown["current_version"],
+        "status": shown["status"],
+        "detail": dict(detail),
+    }
+
+
+def _policy_grace_seconds(policy: Mapping[str, object]) -> int:
+    late = _mapping(policy.get("late_handling"), "notification policy late_handling")
+    return int(str(late.get("grace_seconds", "0"))) if late.get("kind") == "deliver_within" else 0
+
+
+def _cancellable_notification_work(
+    connection: sqlite3.Connection,
+    *,
+    item_id: str,
+    range_start: str,
+    range_end: str,
+) -> list[sqlite3.Row]:
+    return connection.execute(
+        """
+        SELECT * FROM work_instances AS work
+        WHERE work.item_id = ?
+          AND work.work_kind = 'notification_reminder'
+          AND work.status = 'eligible'
+          AND work.attempt_count = 0
+          AND work.eligible_at_utc >= ? AND work.eligible_at_utc < ?
+          AND NOT EXISTS (
+            SELECT 1 FROM side_effect_attempts AS attempt
+            WHERE attempt.work_instance_id = work.work_instance_id
+          )
+        ORDER BY work.work_instance_id
+        """,
+        (item_id, range_start, range_end),
+    ).fetchall()
+
+
+def _read_notification_opportunities(
+    context: CommandContext,
+    *,
+    item_id: str,
+    evaluated_at_utc: str,
+    range_start: str,
+    range_end: str,
+) -> list[dict[str, object]]:
+    response = handle(
+        "notification.opportunities",
+        {
+            "item_id": item_id,
+            "evaluated_at_utc": evaluated_at_utc,
+            "range_start_utc": range_start,
+            "range_end_utc": range_end,
+            "limit": "1000",
+        },
+        context,
+    )
+    if not response.get("ok"):
+        error = response.get("error", {})
+        raise SpineValidationError(
+            str(error.get("code", "notification_opportunity_planning_failed")),
+            str(error.get("message", "notification opportunities could not be planned")),
+        )
+    values = response.get("opportunities")
+    if not isinstance(values, list):
+        raise SpineValidationError("invalid_notification_opportunities", "notification opportunities must be an array")
+    return [dict(value) for value in values if isinstance(value, Mapping)]
+
+
+def _opportunity_has_no_work(connection: sqlite3.Connection, opportunity: Mapping[str, object]) -> bool:
+    return (
+        connection.execute(
+            """
+            SELECT 1 FROM work_instances
+            WHERE notification_opportunity_id = ? AND delivery_target_id = ?
+            """,
+            (opportunity["notification_opportunity_id"], opportunity["delivery_target_id"]),
+        ).fetchone()
+        is None
+    )
+
+
+def _active_notification_provenance_keys(
+    connection: sqlite3.Connection,
+    *,
+    item_id: str,
+    recurrence: Mapping[str, object],
+) -> set[str]:
+    return {
+        str(row["occurrence_key"])
+        for row in connection.execute(
+            """
+            SELECT DISTINCT occurrence_key
+            FROM occurrence_provenance
+            WHERE item_id = ? AND recurrence_revision_id = ?
+              AND consumer = 'notification_schedule' AND management_status = 'active'
+            """,
+            (item_id, recurrence["recurrence_revision_id"]),
+        )
+    }
+
+
+def _provisional_recurrence_opportunities(
+    connection: sqlite3.Connection,
+    *,
+    item: Mapping[str, Any],
+    recurrence: Mapping[str, object],
+    policies: Sequence[Mapping[str, object]],
+    evaluated_at_utc: str,
+    range_start: str,
+    range_end: str,
+    source_range: tuple[str, str],
+) -> tuple[list[dict[str, object]], set[str]]:
+    expanded = expand_recurrence_set(
+        recurrence,
+        range_start=source_range[0],
+        range_end=source_range[1],
+        range_basis="expressed_time",
+    )
+    all_targets = [_provisional_occurrence_target(item=item, recurrence=recurrence, occurrence=value) for value in expanded.occurrences]
+    opportunities: list[dict[str, object]] = []
+    raw_keys: set[str] = set()
+    for policy in policies:
+        target = _mapping(policy.get("target"), "notification policy target")
+        selected = all_targets
+        if target.get("application_scope") == "selected_occurrence":
+            selected = [value for value in all_targets if value.get("occurrence_key") == target.get("target_occurrence_key")]
+        raw_keys.update(str(value["occurrence_key"]) for value in selected)
+        actionable, reason = notification_policy_actionability(connection, item=item, policy=policy)
+        generated = expand_notification_policy(
+            policy,
+            targets=selected,
+            evaluated_at_utc=evaluated_at_utc,
+            range_start_utc=range_start,
+            range_end_utc=range_end,
+            policy_actionable=actionable,
+            non_actionable_reason=reason,
+            candidate_limit=1001,
+        )
+        opportunities.extend(dict(value) for value in generated.opportunities)
+    return opportunities, raw_keys
+
+
+def _provisional_occurrence_target(
+    *,
+    item: Mapping[str, Any],
+    recurrence: Mapping[str, object],
+    occurrence: Mapping[str, object],
+) -> dict[str, object]:
+    expressed = str(occurrence["expressed_scheduled_fact"])
+    lifecycle = str(occurrence["lifecycle"])
+    detail = _mapping(item.get("detail"), "item detail")
+    actionable = item["status"] == "active" and lifecycle == "active"
+    actionable = actionable and (
+        (item["item_type"] == "event" and detail.get("event_status") == "scheduled")
+        or (item["item_type"] == "task" and detail.get("task_status") == "open")
+    )
+    value: dict[str, object] = {
+        "target_scheduled_fact": expressed,
+        "target_occurrence_selector": occurrence["target_occurrence_selector"],
+        "occurrence_id": occurrence["occurrence_id"],
+        "occurrence_key": occurrence["occurrence_key"],
+        "recurrence_set_id": recurrence["recurrence_set_id"],
+        "recurrence_revision_id": recurrence["recurrence_revision_id"],
+        "lifecycle": "scheduled" if lifecycle == "active" else lifecycle,
+        "actionable": actionable,
+    }
+    basis = str(recurrence["time_basis"])
+    if basis == "instant_utc":
+        value["target_utc_instant"] = expressed
+    elif basis == "local_instant":
+        resolution = resolve_local_instant(
+            expressed,
+            timezone=str(recurrence["timezone"]),
+            timezone_database_version=str(recurrence["timezone_database_version"]),
+        )
+        if resolution is not None:
+            value["target_utc_instant"] = resolution.utc_instant
+        else:
+            value["actionable"] = False
+    if recurrence.get("timezone") is not None:
+        value["timezone"] = recurrence["timezone"]
+        value["timezone_database_version"] = recurrence["timezone_database_version"]
+        value["target_local_date"] = expressed.split("T", 1)[0]
+    return value
+
+
+def _scheduler_target_snapshots(
+    connection: sqlite3.Connection,
+    *,
+    item: Mapping[str, Any],
+    policies: Sequence[Mapping[str, object]],
+    recurrence: Mapping[str, object] | None,
+) -> dict[str, set[tuple[object, ...]]]:
+    result: dict[str, set[tuple[object, ...]]] = {}
+    detail = _mapping(item.get("detail"), "item detail")
+    for policy in policies:
+        target = _mapping(policy.get("target"), "notification policy target")
+        scope = str(target["application_scope"])
+        snapshots: set[tuple[object, ...]] = set()
+        if scope == "item":
+            anchor = detail.get("start_anchor" if item["item_type"] == "event" else "due_anchor")
+            if isinstance(anchor, Mapping):
+                value = _scheduler_target_from_anchor(anchor)
+                snapshots.add(
+                    (
+                        target["anchor_role"],
+                        scope,
+                        value["target_scheduled_fact"],
+                        value.get("target_utc_instant"),
+                        None,
+                    )
+                )
+        elif recurrence is not None:
+            params: list[object] = [item["item_id"], recurrence["recurrence_revision_id"]]
+            selected = ""
+            if scope == "selected_occurrence":
+                selected = "AND occurrence_key = ?"
+                params.append(target["target_occurrence_key"])
+            for row in connection.execute(
+                f"""
+                SELECT expressed_scheduled_fact, timezone_utc_instant, occurrence_key
+                FROM occurrence_provenance
+                WHERE item_id = ? AND recurrence_revision_id = ?
+                  AND consumer = 'notification_schedule' AND management_status = 'active'
+                  {selected}
+                """,
+                tuple(params),
+            ):
+                target_at = row["timezone_utc_instant"]
+                if target_at is None and recurrence["time_basis"] == "instant_utc":
+                    target_at = row["expressed_scheduled_fact"]
+                snapshots.add(
+                    (
+                        target["anchor_role"],
+                        scope,
+                        row["expressed_scheduled_fact"],
+                        target_at,
+                        row["occurrence_key"],
+                    )
+                )
+        result[str(policy["notification_intent_id"])] = snapshots
+    return result
+
+
+def _scheduler_target_from_anchor(anchor: Mapping[str, object]) -> dict[str, object]:
+    kind = str(anchor["anchor_kind"])
+    if kind == "instant_utc":
+        value = str(anchor["utc_instant"])
+        return {"target_scheduled_fact": value, "target_utc_instant": value}
+    local_date = str(anchor["local_date"])
+    result: dict[str, object] = {"target_scheduled_fact": local_date}
+    if kind == "local_instant":
+        local_time = str(anchor["local_time"])
+        if len(local_time) == 5:
+            local_time += ":00"
+        scheduled = f"{local_date}T{local_time}"
+        resolution = resolve_local_instant(
+            scheduled,
+            timezone=str(anchor["timezone"]),
+            timezone_database_version=str(anchor["timezone_database_version"]),
+        )
+        if resolution is None:
+            raise SpineValidationError("semantic_conflict", "notification target is a nonexistent local instant")
+        result["target_scheduled_fact"] = scheduled
+        result["target_utc_instant"] = resolution.utc_instant
+    return result
 
 
 def _reconcile_temporal_bindings(

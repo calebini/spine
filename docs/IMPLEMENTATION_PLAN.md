@@ -1,9 +1,33 @@
 # Spine Implementation Plan
 
-Status: Primary-location schedule support implemented and acceptance verified
-Last reconciled with repository state: 2026-08-18
+Status: Scheduler planning and durable no-op suppression implemented and verified
+Last reconciled with repository state: 2026-08-23
 
 This is a non-normative delivery plan. The specifications and machine-readable contracts remain authoritative.
+
+## Delivered Sustaining Slice: Scheduler Planning and Durable No-Op Suppression
+
+The Tickerd-driven horizon cycle now performs bounded read-only Spine planning before
+dispatching receipt-bearing provenance or notification-work operations. Active policy
+presence alone no longer causes materialization. A plan dispatches only when it can
+create missing actionable work, repair recurrence provenance needed by the evaluated
+horizon, or reconcile stale cancellable work with `status=eligible`, zero attempts,
+and no side-effect-attempt evidence.
+
+Past exhausted one-shot and bounded policies, already-materialized opportunities, and
+recurrence horizons with no qualifying occurrence now produce zero ledger growth.
+`deliver_within` remains eligible through its exact grace interval; disabled-policy
+work remains discoverable for reconciliation; existing retry, in-progress, and
+terminal work remains protected history. The dispatch limit counts actionable plans
+rather than raw active-policy rows, preventing exhausted items from starving later
+work. Explicit `notification_work.materialize` retains its receipt-bearing
+zero-selected, all-retained, changed, collision, and replay semantics.
+
+Behavioral proof covers exhausted and future one-shots, exact late grace, local-time
+target-relative expansion, equivalent-work suppression, explicit no-op receipts,
+policy-edit and policy-disable reconciliation, exhausted and active recurrence,
+repeat-cycle provenance suppression, and dispatch-limit fairness. The complete suite
+passes without a schema migration or public command change.
 
 ## Delivered Fat Slice: Atomic Schedule Creation
 

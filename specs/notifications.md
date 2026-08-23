@@ -1,6 +1,6 @@
 # Spine Notification Scheduling
 
-Status: Draft v0.2.1; executable v1 contract family implemented; scheduler-planning amendment pending runtime conformance
+Status: Draft v0.2.1; executable v1 contract family and scheduler-planning amendment implemented
 Scope: Canonical notification intent, bounded schedule expansion, durable work materialization, lifecycle reconciliation, and recurrence binding
 Authority: Normative notification-scheduling target; runtime conformance requires matching persistence, command, fixture, and implementation declarations
 

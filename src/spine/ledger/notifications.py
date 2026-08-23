@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import sqlite3
+from collections.abc import Mapping
 from typing import Any
 
 from spine.core.errors import SpineValidationError
@@ -15,6 +16,90 @@ from spine.ledger.recurrence import (
     load_target_occurrence_selector,
     persist_target_occurrence_selector,
 )
+
+
+def notification_policy_actionability(
+    connection: sqlite3.Connection,
+    *,
+    item: Mapping[str, Any],
+    policy: Mapping[str, object],
+) -> tuple[bool, str | None]:
+    """Return canonical policy-level actionability and its first failure reason."""
+
+    if policy["status"] != "active":
+        return False, "notification_policy_disabled"
+    if item["status"] != "active":
+        return False, "item_inactive"
+    detail = item["detail"]
+    if item["item_type"] == "event" and detail["event_status"] != "scheduled":
+        return False, "event_not_scheduled"
+    if item["item_type"] == "task" and detail["task_status"] != "open":
+        return False, "task_not_open"
+    target = connection.execute(
+        "SELECT * FROM delivery_targets WHERE delivery_target_id = ?",
+        (policy["delivery_target_id"],),
+    ).fetchone()
+    recipient_id = policy.get("recipient_subject_id") or policy.get("recipient_group_id")
+    owner_id = None if target is None else target["owner_subject_id"] or target["owner_group_id"]
+    if (
+        target is None
+        or target["status"] != "active"
+        or target["channel"] != policy["channel"]
+        or target["owner_kind"] != policy["recipient_kind"]
+        or owner_id != recipient_id
+    ):
+        return False, "delivery_target_unavailable"
+    return True, None
+
+
+def notification_work_stale_reason(
+    connection: sqlite3.Connection,
+    *,
+    item: Mapping[str, Any],
+    work: sqlite3.Row,
+    policy: Mapping[str, object] | None,
+    valid_targets: Mapping[str, set[tuple[object, ...]]],
+) -> str | None:
+    """Return the canonical first stale reason for one notification work row."""
+
+    if policy is not None and work["normalized_notification_schedule_hash"] != policy["normalized_notification_schedule_hash"]:
+        return "notification_schedule_superseded"
+    target_snapshot = (
+        work["target_anchor_role"],
+        work["application_scope"],
+        work["target_scheduled_fact"],
+        work["target_at_utc"],
+        work["occurrence_key"],
+    )
+    if policy is not None and target_snapshot not in valid_targets.get(str(work["notification_intent_id"]), set()):
+        return "notification_target_changed"
+    if work["occurrence_provenance_id"] is not None:
+        active = connection.execute(
+            """
+            SELECT 1 FROM occurrence_provenance
+            WHERE occurrence_provenance_id = ? AND management_status = 'active'
+              AND actionable = 1
+            """,
+            (work["occurrence_provenance_id"],),
+        ).fetchone()
+        if active is None:
+            return "notification_occurrence_stale"
+    if item["item_type"] == "task":
+        from spine.ledger.temporal_bindings import active_follow_binding_current
+
+        if not active_follow_binding_current(connection, item_id=str(item["item_id"])):
+            return "notification_temporal_binding_stale"
+    if policy is not None and work["delivery_target_id"] != policy["delivery_target_id"]:
+        return "notification_routing_changed"
+    if policy is None or policy["status"] != "active":
+        return "notification_policy_disabled"
+    detail = item["detail"]
+    terminal = item["status"] != "active"
+    terminal = terminal or (item["item_type"] == "event" and detail["event_status"] != "scheduled")
+    terminal = terminal or (item["item_type"] == "task" and detail["task_status"] != "open")
+    if terminal:
+        return "parent_lifecycle_terminal"
+    return None
 
 
 def insert_notification_schedule_policy(connection: sqlite3.Connection, *, normalized: NormalizedNotificationPolicy) -> None:
