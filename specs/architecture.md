@@ -1,6 +1,6 @@
 # Spine Architecture
 
-Status: Draft v0.2.2
+Status: Draft v0.2.3
 Scope: Component boundaries, module posture, and runtime relationships
 
 ## 1. Architectural Doctrine
@@ -96,9 +96,36 @@ Interactive commands and runtime workers require fast admission to a current led
 
 The executing Spine package owns both bounded-admission authorities. `spine.command-runtime-contract-registry.v1` maps each exact public command to read/write mode and exact required implemented contract versions; it is runtime capability metadata, not ledger truth. `spine.sqlite-schema-object-manifest.v1` maps the implemented ledger-schema version to required table, index, and trigger names, types, and canonical SQLite-definition fingerprints; it is generated or reviewed from the canonical schema/migration corpus, not learned from the target ledger. The command resolver, dispatcher, access classification, `system.info` capability projection, migration verifier, and startup preflight MUST share these authorities or prove exhaustive parity. Extra non-colliding SQLite objects remain outside Spine authority and do not block admission.
 
-Worker preflight occurs before Tickerd kernel startup and before any work discovery, reconciliation, processing, attempt creation, or adapter access. Failure or timeout leaves health `DOWN`, readiness false, emits the structured `ledger_runtime_preflight_failed` diagnostic, and terminates that process nonzero; supervisor restart is the only retry. This preserves Tickerd's ownership of cadence and health mechanics while Spine owns the ledger-admission decision. A successful preflight permits Tickerd to enter its ordinary ready lifecycle but does not itself claim an `UP` cycle result.
+Worker preflight occurs before Tickerd kernel startup and before any work discovery, reconciliation, processing, attempt creation, or adapter access. It includes validation of the versioned operational-budget catalog in addition to the schema and runtime-contract checks. Failure or timeout leaves health `DOWN`, readiness false, emits the structured `ledger_runtime_preflight_failed` diagnostic—including deterministic budget violations for invalid configuration—and terminates that process nonzero; supervisor restart is the only retry. This preserves Tickerd's ownership of cadence and health mechanics while Spine owns the ledger-admission decision. A successful preflight permits Tickerd to enter its ordinary ready lifecycle but does not itself claim an `UP` cycle result.
 
 Deep ledger verification is a separate operator and migration concern. It reuses the bounded schema checks, then owns full SQLite integrity checking, full foreign-key checking, and unscoped Spine domain-invariant validation, may take time proportional to ledger size, and is appropriate after storage incidents or before or after controlled migrations. The explicit deep path does not become a prerequisite for every command or daemon restart. Runtime writes remain fail-closed through foreign-key enforcement, relational constraints, triggers, transactions, command validation, replay rules, and mutation-scoped invariant checks. `specs/agent-command-contract.md` Section 5 is normative for registry entries, manifest identity and comparison, failures, and acceptance tests.
+
+### 4.2 Operational Resilience Boundary
+
+`specs/operational-resilience.md` owns the cross-cutting requirements for sustained
+resource bounds, telemetry containment, disk/WAL pressure, worker failure isolation,
+retry and crash recovery, Tickerd capability admission, timezone-data availability,
+and operational qualification. It is a draft implementation target and does not imply
+that the current runtime already conforms.
+
+Spine owns work eligibility, attempt evidence, retry/recovery truth, and deterministic
+failure classification. Tickerd owns cadence, ownership, health, readiness, and event
+emission. Adapters own provider request mapping and outcome normalization. The host or
+supervisor owns process restart, filesystem quotas, reserved capacity, and external
+log rotation. None of those external roles may delete or reinterpret canonical Spine
+truth.
+
+A bounded response is not sufficient if its implementation first copies, counts,
+hydrates, or sorts the complete ledger. Routine commands, dry runs, worker cycles,
+discovery, expansion, and readback MUST be bounded by accepted request and configured
+cycle budgets. Deep verification, backup, migration, export, and future archival remain
+explicit offline/operator operations.
+
+Long-running file sinks require process-enforced bounds even when the host also applies
+rotation. Critical disk pressure must prevent new external effects before attempt
+preparation, preserve committed truth, and avoid restart or diagnostic amplification.
+Canonical ledger retention and archival remain a separate future lifecycle and are not
+authorized by a low-disk condition.
 
 ## 5. Relationship to the Governance Authority
 

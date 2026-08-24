@@ -125,6 +125,7 @@ The delivery is intentionally broad because recurrence identity, occurrence prov
 - `specs/recurrence.md`: recurrence normalization, identity, expansion, mutation, lineage, and occurrence provenance.
 - `specs/notifications.md`: notification schedules, opportunities, late handling, materialization, and reconciliation.
 - `specs/notification-rendering.md`: deterministic attempt-time prose, immutable evidence, and adapter-envelope binding.
+- `specs/operational-resilience.md`: draft cross-cutting resource bounds, failure containment, recovery, dependency admission, and sustained-operation proof.
 - `specs/ontology.md`: relational authority and lifecycle invariants.
 - `specs/agent-command-contract.md`: public command and receipt behavior.
 - `specs/schedule-show.md`: canonical aggregate schedule and delivery-lifecycle readback.
@@ -246,6 +247,34 @@ The fat slice is ready for one environment patch only when all of the following 
 - Conversational parsing as canonical truth; ingest must persist explicit structured facts.
 - Dashboards and broad external projections.
 - Release freeze-manifest promotion.
+
+## Next Initiative: Operational Resilience and Boundedness
+
+`specs/operational-resilience.md` is the draft authority for the next sustaining
+initiative. It converts the storage-growth incident and the broader runtime sweep into
+one cross-cutting contract without moving notification semantics into Tickerd or
+granting automatic deletion authority over the ledger.
+
+The planned delivery order is:
+
+1. **Containment:** wire process-enforced Tickerd event-file limits at every Spine sink;
+   retain host rotation/quota as defense in depth; expose storage pressure; validate
+   retry configuration; report exact Tickerd capability; and add a transitional
+   fail-closed dry-run size ceiling.
+2. **Recovery:** isolate poison-item reconciliation failures; add bounded backoff,
+   circuit breaking, and retry exhaustion; define in-progress lease recovery and
+   ambiguous external outcomes through an accepted decision, ontology amendment,
+   migration, readback, and operator workflow.
+3. **Scalability:** replace full-fetch and count/offset automatic discovery with fair
+   keyset traversal; make notification materialization continuation-complete; bound
+   agenda/readback computation; and enforce request, text, collection, and expansion
+   budgets at the core boundary.
+4. **Qualification:** run the required idle/backlog/provider-outage/crash/tzdb/WAL/disk-
+   pressure/large-ledger scenarios before declaring conformance.
+
+This initiative does not subsume the future ledger-storage lifecycle below. It adds
+budgets, alarms, stop conditions, and classification; archival or compaction still
+requires its own explicit authority and recovery proof.
 
 ### Future Horizon: Bounded Ledger Storage Lifecycle
 

@@ -1,6 +1,6 @@
 # Spine Agent Command Contract
 
-Status: Draft v0.4.7; executable scheduling, deterministic notification rendering, and bounded runtime preflight implemented on schema 9
+Status: Draft v0.4.8; executable scheduling, deterministic notification rendering, and bounded runtime preflight implemented on schema 9; operational-resilience extension not yet implemented
 Scope: Agent-facing command/request contract for authoring and inspecting Spine coordination truth
 Created: 2026-06-19
 
@@ -14,7 +14,7 @@ The CLI is the first expected transport adapter. Future MCP and localhost HTTP a
 
 ## 2. Authority
 
-This contract depends on `specs/overview.md`, `specs/architecture.md`, `specs/ontology.md`, `specs/recurrence.md`, `specs/notifications.md`, `specs/schedule-create.md`, `specs/schedule-show.md`, `specs/schedule-operator-tools.md`, `specs/schedule-operations.md`, the additive `specs/schedule-primary-location.md` capability, and `specs/SPINE_SPEC_VERSIONING_AND_FREEZE_POLICY.md`. If this document conflicts with `specs/ontology.md`, the ontology wins for ledger truth and this document must be corrected.
+This contract depends on `specs/overview.md`, `specs/architecture.md`, `specs/operational-resilience.md`, `specs/ontology.md`, `specs/recurrence.md`, `specs/notifications.md`, `specs/schedule-create.md`, `specs/schedule-show.md`, `specs/schedule-operator-tools.md`, `specs/schedule-operations.md`, the additive `specs/schedule-primary-location.md` capability, and `specs/SPINE_SPEC_VERSIONING_AND_FREEZE_POLICY.md`. If this document conflicts with `specs/ontology.md`, the ontology wins for ledger truth and this document must be corrected.
 
 Spine is the canonical coordination ledger and planning fabric. External tools are projections or side-effect targets. The authoring commands in this contract do not send externally.
 
@@ -153,9 +153,16 @@ A missing required name, a required name stored under the wrong SQLite object ty
 
 Successful runtime preflight is admission evidence, not a declaration that every ledger page and historical foreign key is healthy. Write commands separately rely on enabled SQLite foreign-key enforcement, constraints, indexes, triggers, atomic transactions, command-specific validation, replay checks, and transaction-scoped domain invariants. Failure of any such write-time control rolls back the command and returns its ordinary structured failure; runtime preflight does not weaken those controls.
 
-The worker-required runtime-contract set is the union of the registry requirements for `occurrence_provenance.regenerate`, `notification_work.materialize`, and `schedule.binding.reconcile`, plus `spine.notification-rendering.v1`, `spine.notification-rendering.concise-en-ca.v1`, and `spine.notification-rendering-input.v1`; it is exact and unconditional for the current worker because those are the automatic provenance, notification-materialization, binding-reconciliation, and ordinary-reminder rendering services it advertises. A Spine worker MUST complete that check plus the same schema-version and schema-manifest checks before it reports ready, starts the Tickerd kernel, lists or reconciles work, begins a side-effect attempt, or calls any delivery processor.
+The worker-required runtime-contract set is the union of the registry requirements for `occurrence_provenance.regenerate`, `notification_work.materialize`, and `schedule.binding.reconcile`, plus `spine.notification-rendering.v1`, `spine.notification-rendering.concise-en-ca.v1`, and `spine.notification-rendering-input.v1`; it is exact and unconditional for the current worker because those are the automatic provenance, notification-materialization, binding-reconciliation, and ordinary-reminder rendering services it advertises. A Spine worker MUST complete that check, validate the `spine.operational-budget-catalog.v1` effective values under `specs/operational-resilience.md` Section 3.1, and complete the same schema-version and schema-manifest checks before it reports ready, starts the Tickerd kernel, lists or reconciles work, begins a side-effect attempt, or calls any delivery processor.
 
-Worker startup initializes its configured health and event sinks before admission, with `state=DOWN` and `readiness=false`. If preflight fails or a configured preflight timeout expires, it persists that not-ready health snapshot and emits exactly one diagnostic to the configured event sink, or as one JSON object on stderr when the sink is unavailable. The diagnostic has `event=ledger_runtime_preflight_failed`; `reason` equal to `timeout`, `database_unavailable`, `schema_version_mismatch`, `schema_object_mismatch`, or `runtime_contract_mismatch`; and, when applicable, `object_type` plus `object_name`. For `runtime_contract_mismatch`, it instead has `required_contract_versions`, the lexicographically sorted unique non-empty array containing every missing exact contract identifier; the singular field `required_contract_version` is forbidden. It MUST then exit nonzero without starting any runtime cycle. The process does not retry internally; a configured supervisor MAY start a new process and thereby perform a fresh bounded preflight. No failed-start process may materialize notification work, reconcile bindings or work, create an attempt row, or contact an adapter.
+Worker admission evaluates failure families in this order: database availability and
+SQLite open, exact schema version, schema-object manifest, required runtime contracts,
+then effective budget catalog. The first failing family supplies the one diagnostic; a
+configured deadline expiring before admission completes instead supplies `reason=timeout`
+and discards any partial diagnostic. Budget violations are aggregated only within the
+budget family and are never combined with contract or schema mismatches.
+
+Worker startup initializes its configured health and event sinks before admission, with `state=DOWN` and `readiness=false`. If preflight fails or a configured preflight timeout expires, it persists that not-ready health snapshot and emits exactly one diagnostic to the configured event sink, or as one JSON object on stderr when the sink is unavailable. The diagnostic has `event=ledger_runtime_preflight_failed`; `reason` equal to `timeout`, `database_unavailable`, `schema_version_mismatch`, `schema_object_mismatch`, `runtime_contract_mismatch`, or `runtime_budget_invalid`; and, when applicable, `object_type` plus `object_name`. For `runtime_contract_mismatch`, it instead has `required_contract_versions`, the lexicographically sorted unique non-empty array containing every missing exact contract identifier; the singular field `required_contract_version` is forbidden. For `runtime_budget_invalid`, it instead has `budget_catalog_version=spine.operational-budget-catalog.v1` and the sorted non-empty `budget_violations` array defined by `specs/operational-resilience.md` Section 3.1; contract-version and schema-object fields are forbidden on that branch. It MUST then exit nonzero without starting any runtime cycle. The process does not retry internally; a configured supervisor MAY start a new process and thereby perform a fresh bounded preflight. No failed-start process may materialize notification work, reconcile bindings or work, create an attempt row, or contact an adapter.
 
 Worker tests MUST prove that each preflight failure family and timeout leaves readiness false, emits the diagnostic, exits nonzero, and invokes none of the work source, reconciler, processor, or adapter boundaries. A successful preflight permits ordinary Tickerd startup from `DOWN`/not-ready to its established ready state; it does not itself report the worker `UP`.
 
@@ -344,6 +351,20 @@ Every MVP write command must support the common `dry_run` context flag. Dry run 
 Every handler-level dry-run response includes `dry_run=true` once a canonical command has been resolved. Dry-run success returns the same command-specific success shape as the corresponding non-dry-run branch, plus `dry_run=true`. For a fresh branch, generated IDs such as `item_id`, `audit_id`, `command_receipt_id`, temporal-anchor IDs, supporting-set row IDs, `notification_policy_id`, and `work_instance_id` are deterministic would-be identities derived exactly as the commit path would derive them; effect booleans such as `created=true`, `updated=true`, `archived=true`, `cancelled=true`, `completed=true`, and `rescheduled=true` mean the command would mutate if run without dry run. For compatible same-command replay branches that would create no rows, dry-run returns the same stored identities and false effect booleans as the non-dry-run branch, plus `dry_run=true`. For no-op and duplicate-safe `if_absent=true` branches whose non-dry-run path creates only a command receipt, dry-run returns the deterministic would-be `command_receipt_id`, false effect booleans, and `dry_run=true` without persisting that receipt. Dry-run failures after handler invocation return the normal structured failure shape with `dry_run=true`; CLI preflight failures that happen before command-handler invocation follow Section 5 and may omit `dry_run`.
 
 Dry run never creates audit rows or command receipts, but it still returns the would-be `audit_id` or `command_receipt_id` when the equivalent non-dry-run success would create that artifact. A later non-dry-run invocation with the same request and context must return the same deterministic identities unless intervening ledger state changes cause a specified stale-version, duplicate, replay, lifecycle, archived-item, or semantic-conflict branch.
+
+The draft operational-resilience extension requires dry-run memory and work to be
+bounded by the selected command facts and output budget. Copying the complete ledger to
+an in-memory database is not conforming final behavior. Until bounded simulation is
+implemented, a release may fail closed before preview when a declared database-size
+ceiling would be exceeded; that transitional guard does not change would-be identity,
+validation, or no-mutation semantics for accepted previews.
+
+All transports MUST reject an encoded request that exceeds the command-family byte
+budget before full JSON materialization. Core command validation owns maximum durable
+text length, collection cardinality, and normalized expansion density so transport or
+lower-level command choice cannot bypass them. Exact limits and structured failures
+must land in the owning command/schema family before the runtime advertises operational-
+resilience conformance.
 
 The agent authoring command interface does not send reminders externally. Runtime workers may process eligible work into adapter side effects only after durable work exists. Real sends remain guarded by explicit worker active mode, explicit sender choice, explicit allow-real-send opt-in, pre-write `side_effect_attempts` durability, stale-work guards, and adapter outcome recording.
 

@@ -1,6 +1,6 @@
 # Spine Ontology
 
-Status: Draft v4.2.0; schema version 8 implementation aligned
+Status: Draft v4.2.1; schema version 9 implementation aligned; operational-resilience lifecycle extension not yet implemented
 Scope: First durable ontology and minimum data contract sketch for Spine
 
 ## 1. Ontology Goal
@@ -450,6 +450,9 @@ Minimum contract:
 - `local_date` (`text`, optional) — `YYYY-MM-DD`.
 - `local_time` (`text`, optional) — `HH:MM[:SS]`.
 - `timezone` (`text`, optional) — IANA TZ database name.
+- `timezone_database_version` (`text`, optional) — non-empty concrete IANA
+  timezone-database release identifier used to interpret the stored local facts. It
+  is a persisted value, not an authoring directive such as `system_current`.
 - `utc_instant` (`utc_instant`, optional).
 - `window_start_utc` (`utc_instant`, optional).
 - `window_end_utc` (`utc_instant`, optional).
@@ -459,19 +462,28 @@ Minimum contract:
 
 Deterministic temporal resolution (MVP):
 
-- `anchor_kind=instant_utc`: requires `utc_instant`; MUST NOT set local fields.
-- `anchor_kind=local_instant`: requires `local_date`, `local_time`, `timezone`; MUST NOT set `utc_instant`.
-- `anchor_kind=local_date`: requires `local_date`, `timezone`; MUST NOT set `utc_instant`.
-- `anchor_kind=utc_window`: requires `window_start_utc` and `window_end_utc` with `window_start_utc <= window_end_utc`.
+- `anchor_kind=instant_utc`: requires `utc_instant`; MUST NOT set local fields,
+  including `timezone` or `timezone_database_version`.
+- `anchor_kind=local_instant`: requires `local_date`, `local_time`, `timezone`, and
+  `timezone_database_version`; MUST NOT set `utc_instant`.
+- `anchor_kind=local_date`: requires `local_date`, `timezone`, and
+  `timezone_database_version`; MUST NOT set `utc_instant`.
+- `anchor_kind=utc_window`: requires `window_start_utc` and `window_end_utc` with
+  `window_start_utc <= window_end_utc`; MUST NOT set `timezone` or
+  `timezone_database_version`.
 - `anchor_kind=local_window` (MVP narrowed):
   - Semantics: the full local-day window in `timezone` starting at local `YYYY-MM-DDT00:00:00` (inclusive) and ending at the next local day `T00:00:00` (exclusive).
-  - Requires `local_date`, `timezone`.
+  - Requires `local_date`, `timezone`, and `timezone_database_version`.
   - MUST NOT set `local_time`, `utc_instant`, `window_start_utc`, or `window_end_utc`.
 
 Validation rules (minimum):
 
 - Any anchor missing its required fields MUST be rejected.
 - Any anchor that sets fields forbidden by its `anchor_kind` MUST be rejected.
+- Every timezone-bearing anchor stores the exact concrete
+  `timezone_database_version` resolved at authoring. Reads, replay, recurrence,
+  notification expansion, and temporal-binding reconciliation MUST use that stored
+  version and MUST NOT substitute the host's current timezone data.
 - A recurrence-bearing anchor MUST have `anchor_kind` in
   `{local_date, local_instant, instant_utc}` and MUST reference exactly one
   recurrence set whose `seed_anchor_id` equals the anchor id.
@@ -819,6 +831,17 @@ Deferred lifecycle posture (MVP):
 - Retry, failure recovery, cancellation-after-start, and terminal outcome coupling policies are deferred.
 - The MVP does not require a canonical retry representation, and tests SHOULD NOT assume whether a retry reuses the same work row, creates a replacement work row, or is handled by a later scheduler policy.
 
+Operational-resilience extension posture:
+
+- `specs/operational-resilience.md` requires a later ontology amendment for durable
+  in-progress ownership/expiry, retry exhaustion or quarantine, and recovery after
+  process death.
+- The current legal work-status and attempt-status enums remain closed until that
+  amendment and migration land. Implementations MUST NOT encode an ambiguous external
+  outcome as ordinary `failed` merely to permit an automatic retry.
+- The resilience document does not authorize deletion of terminal work, attempts,
+  audit, or replay evidence.
+
 Status values (minimum):
 
 - Legal stored values are `eligible`, `in_progress`, `succeeded`, `failed`, and `cancelled`.
@@ -946,6 +969,12 @@ Terminal attempt mechanics (MVP):
 - Terminal updates MUST preserve the original attempt identity and MUST populate `completed_at_utc`.
 - If response identity is captured, `response_hash` MUST use the canonical response hash shape defined in Section 2.
 - Retry posture, adapter-specific response payload capture, and audit emission rules remain deferred unless required by the minimum field constraints above.
+
+The current attempt enum has no distinct ambiguous-provider-outcome value. Before the
+operational-resilience recovery contract is implemented, an accepted decision and
+ontology migration MUST define operation-level idempotency, the stored ambiguous state,
+reconciliation, and its coupling to leased in-progress work. The value is not added by
+implication through this paragraph.
 
 A separate durable `adapter_results` store MUST NOT be introduced without an accepted decision.
 

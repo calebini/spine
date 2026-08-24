@@ -1,6 +1,6 @@
 # Spine Overview
 
-Status: Draft v0.2.0
+Status: Draft v0.2.1
 Scope: Canonical coordination ledger and planning fabric
 Created: 2026-05-31
 
@@ -111,6 +111,12 @@ Every external write MUST be represented by a persisted side-effect attempt with
 State transitions MUST be reason-coded once a reason-code catalog exists.
 
 Adapter failures MUST NOT mutate canonical coordination truth unless the domain transition itself is explicitly represented and valid.
+
+Routine operation MUST remain bounded under repetition, backlog, accumulated history,
+partial failure, and storage pressure. `specs/operational-resilience.md` owns the
+cross-cutting resource, containment, recovery, and qualification requirements. Those
+requirements do not authorize deletion of canonical evidence or transfer coordination
+authority to Tickerd, an adapter, or a host supervisor.
 
 High-level authoring convenience MUST compose canonical item, recurrence, notification, work, audit, and receipt models without becoming a second authority. A composite command either commits its complete requested canonical bundle or none of it, and it MUST remain separate from external delivery.
 

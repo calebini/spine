@@ -1,6 +1,6 @@
 # Spine Notification Scheduling
 
-Status: Draft v0.2.1; executable v1 contract family and scheduler-planning amendment implemented
+Status: Draft v0.2.2; executable v1 contract family and scheduler-planning amendment implemented; operational-resilience extension not yet implemented
 Scope: Canonical notification intent, bounded schedule expansion, durable work materialization, lifecycle reconciliation, and recurrence binding
 Authority: Normative notification-scheduling target; runtime conformance requires matching persistence, command, fixture, and implementation declarations
 
@@ -29,6 +29,12 @@ This contract supports one-time notifications, explicit sets of target-relative 
 `specs/schedule-create.md` owns only the composite transaction and high-level request/receipt mapping for initial item-plus-policy authoring. It does not define alternate notification schedules, opportunities, work identities, reconciliation, or delivery semantics.
 
 `specs/notification-rendering.md` owns the implemented downstream conversion of accepted ordinary reminder work into deterministic natural-language body text and immutable per-attempt rendering evidence. Rendering is not a notification-policy fact, does not enter schedule, opportunity, or work identity, and cannot authorize delivery.
+
+`specs/operational-resilience.md` owns cross-policy and cross-runtime resource bounds,
+failure isolation, retry exhaustion, crash recovery, ambiguous external outcomes,
+storage pressure, and sustained-operation proof. The executable v1 notification family
+does not claim that draft resilience extension until its ontology, commands, runtime,
+and tests are implemented together.
 
 Tickerd may request bounded expansion or materialization and may select eligible work. It MUST NOT own notification cadence, infer unstored schedule defaults, or deliver directly from a policy. An adapter MUST NOT run until a corresponding work instance exists and a side-effect attempt has been persisted.
 
@@ -142,6 +148,13 @@ Every opportunity read uses explicit `evaluated_at_utc`; materialization uses `m
 
 For `each_occurrence`, the producer derives the bounded target-occurrence lookback and lookahead needed for the schedule's maximum negative and positive offsets, then requests recurrence occurrences for only that expanded source range. If the source range cannot be derived exactly, expansion and materialization fail closed; no work is written.
 
+The limit is global to the requested response or mutation, not independently reusable
+for every policy or target in a way that permits unbounded intermediate accumulation.
+Implementations MUST bound intermediate candidates, diagnostics, sorting, and memory by
+the accepted operation budget. Core normalization also enforces maximum policy, offset,
+selector, and explicit-id cardinality; a lower-level command cannot bypass a composite
+surface limit.
+
 ## 7. Notification Opportunities
 
 A notification opportunity is virtual scheduling output, not work and not proof of delivery. It contains:
@@ -186,6 +199,13 @@ Materialization is atomic for its selected set. Closed effects are:
 The response reports ordered `created_work_instance_ids`, `retained_work_instance_ids`, and `cancelled_work_instance_ids`; arrays are empty when the effect says they are. Effect precedence is reconciled, created, all-retained, zero-selected.
 
 Materialization creates no side-effect attempt and invokes no adapter. Same-command compatible replay returns the stored receipt and identities without mutation. Incompatible command-id reuse fails before freshness checks.
+
+Materialization that claims the requested bounded set is complete MUST consume every
+required opportunity page, persist an explicit deterministic continuation, or fail
+before writing partial success. An internal `has_more=true` result cannot be ignored.
+Automatic planning and materialization MUST make fair progress beyond an already
+materialized first page. This resilience amendment is normative target behavior but is
+not an executable-v1 implementation declaration.
 
 ### 9.1 Automated Scheduler Planning and Durable No-Op Suppression
 
@@ -233,6 +253,14 @@ Each notification opportunity represents one intended reminder. Each materialize
 A delivery retry is not another scheduled reminder. Retries remain attempts or retry state under the same work instance. They MUST preserve the original `notification_opportunity_id`, nominal eligibility, and idempotency basis. A scheduler MUST NOT create another opportunity to retry a failed adapter call.
 
 Before adapter invocation, processing rechecks policy, item, target, occurrence provenance, routing, and work lifecycle freshness; persists `side_effect_attempts`; and then invokes the adapter. Failure before invocation creates no started attempt unless the existing side-effect contract explicitly requires a rejected attempt fact.
+
+The operational-resilience extension additionally requires bounded automatic retries,
+provider-level circuit breaking, recovery for expired in-progress work, and explicit
+handling of an external outcome that may have succeeded despite a local timeout or
+process death. Such an ambiguous outcome MUST NOT be retried automatically under a new
+idempotency identity. Exact lease fields, retry-exhaustion state, ambiguous attempt
+state, and operator reconciliation require an ontology/contract amendment before that
+extension is implemented; the current closed enums are not silently expanded here.
 
 When `spine.relative-temporal-binding.v1` is advertised, attempt start performs one additional authoritative lookup for notification work targeting the task's current `task_due` anchor. If that anchor has an active `follow_source` binding, processing MUST compute the binding state from current canonical source, target, revision, selector/provenance, binding, and `part_of` relation facts exactly as specified by `specs/relative-temporal-bindings.md`. Adapter invocation is permitted only when that state is exactly `current` and the current task due anchor remains semantically equal to the latest binding revision's target anchor. Any other state fails closed before a `side_effect_attempts` row with `attempt_status=started` is persisted. An eligible row is then cancellable as `notification_temporal_binding_stale` only when it also satisfies the owning reconciliation workflow's unstarted predicate and no earlier cancellation reason applies; protected retry, in-progress, and terminal rows remain evidence and do not regain authorization. Snapshot and retired bindings do not add this freshness gate.
 
