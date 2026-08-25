@@ -259,7 +259,9 @@ The planned delivery order is:
 
 1. **Containment:** wire process-enforced Tickerd event-file limits at every Spine sink;
    retain host rotation/quota as defense in depth; expose storage pressure; validate
-   retry configuration; report exact Tickerd capability; and add a transitional
+   retry configuration; implement `spine.tickerd-compatibility.v1` against Tickerd
+   `0.2.0`, capability `tickerd.runtime-capabilities.v1`, and audited revision
+   `ffe613c65ea3d6fc70a1dc3603c32068f06350df`; report that exact dependency; and add a transitional
    fail-closed dry-run size ceiling.
 2. **Recovery:** isolate poison-item reconciliation failures; add bounded backoff,
    circuit breaking, and retry exhaustion; define in-progress lease recovery and

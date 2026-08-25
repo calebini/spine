@@ -68,9 +68,11 @@ This specification does not:
 Spine MUST declare the exact Tickerd runtime contract or capability family it requires.
 Worker admission fails closed when the installed Tickerd release cannot prove those
 capabilities. Loading an arbitrary sibling source tree through `PYTHONPATH` is not a
-sufficient compatibility contract. Before implementation conformance is declared, this
-cross-repository promise MUST be registered in a dedicated repository compatibility
-specification with matching machine-readable capability and contract-test evidence.
+sufficient compatibility contract. `specs/compatibility.md` is the dedicated authority
+for the exact Tickerd baseline, machine-readable agreement, admission order,
+diagnostics, readback transition, and Spine-to-Tickerd safety mapping. This document
+continues to own the storage policy and resilience outcomes that the compatibility
+contract carries across that boundary.
 
 Host controls provide defense in depth. A process-level storage bound remains required
 even when external `logrotate`, a filesystem quota, or a dedicated volume is present.
@@ -253,9 +255,13 @@ command encountering a ledger-durability failure returns its ordinary structured
 environment failure after rollback or failed-commit handling; it does not claim or
 mutate worker health.
 
-The terminal diagnostic is one JSON object with `event=storage_safety_stop`, the
-selected `primary_reason`, `state=DOWN`, `readiness=false`, the declared
-`critical_storage_action`, and `reporting_failures` (an empty array when neither sink
+The terminal diagnostic uses Tickerd's generic `event=safety_stop` envelope with
+`reason=storage_safety_stop` for critical pressure or a latched ledger-durability
+failure, and `reason=storage_measurement_failed` when authoritative measurement cannot
+be completed. Spine supplies the bounded `spine.storage-safety-facts.v1` domain object
+as `reason_facts`; `specs/compatibility.md` defines its exact machine shape and the
+mapping to Tickerd outcomes. Tickerd supplies `state=DOWN`, `readiness=false`, the
+selected safety outcome, and `reporting_failures` (an empty array when neither sink
 failed). The worker first attempts to persist the not-ready health snapshot. It then
 attempts to emit the diagnostic once to the configured event sink, including
 `health_sink_unavailable` when the snapshot write failed. Only when the event sink

@@ -17,6 +17,7 @@ Authoritative starting points:
 - `specs/overview.md` defines purpose, doctrine, and non-goals.
 - `specs/architecture.md` defines component boundaries and runtime relationships.
 - `specs/operational-resilience.md` defines the draft cross-cutting target for bounded routine work, storage containment, failure isolation, retry/recovery, runtime compatibility, and sustained-operation proof. It is not yet an implementation declaration.
+- `specs/compatibility.md` defines the draft exact Spine consumer contract for Tickerd `0.2.0`, capability admission, dependency diagnostics, and the generic safety-stop mapping. Its runtime integration is not yet implemented.
 - `specs/ontology.md` sketches the first durable ontology and data model.
 - `specs/recurrence.md` defines the canonical flexible recurrence-set model, deterministic identity and expansion, mutation, and occurrence-provenance boundaries.
 - `contracts/schemas/recurrence-*.schema.json` and `contracts/recurrence-fixture-manifest.json` define the machine-readable recurrence contract family and initial fixtures.
@@ -75,7 +76,7 @@ This repository follows the Cortext1 component scaffold standard incrementally:
 - `docs/AGENT_QUICKSTART.md`: executable cold-start path for a new agent
 - `docs/AGENT_OPERATOR_GUIDE.md`: agent-facing contract for operating current Spine runtime surfaces safely
 - `docs/OPENCLAW_DEPLOYMENT_RUNBOOK.md`: operational rollout notes for the first OpenClaw replacement path
-- `contracts/`: machine-readable command, recurrence, notification, atomic schedule-create, canonical schedule-readback, builder, compact-projection, operational-lifecycle, primary-location, and relative-temporal-binding agreements plus fixture manifests
+- `contracts/`: machine-readable command, recurrence, notification, atomic schedule-create, canonical schedule-readback, builder, compact-projection, operational-lifecycle, primary-location, relative-temporal-binding, and runtime-compatibility agreements plus fixture manifests
 - `deploy/`: deployment templates for systemd and environment files
 - `src/spine/`: initial Python package scaffold
 - `src/spine/ledger/`: canonical local persistence boundary

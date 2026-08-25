@@ -1,0 +1,92 @@
+{
+  "contract_id": "spine.tickerd-compatibility.v1",
+  "schema_version": "spine.runtime-compatibility.v1",
+  "consumer": "spine",
+  "provider": {
+    "distribution_name": "tickerd",
+    "required_package_version": "0.2.0",
+    "audited_source_revision": "ffe613c65ea3d6fc70a1dc3603c32068f06350df",
+    "required_capability_id": "tickerd.runtime-capabilities.v1",
+    "descriptor_package": "tickerd",
+    "descriptor_resource": "contracts/tickerd.runtime-capabilities.v1.json",
+    "required_descriptor_sha256": "215f9aa6b54e6c0e6186796a55d78e1c5a270adc9b3ccefb433df5a3bb87b58b",
+    "required_descriptor_schema_version": "tickerd.capability-descriptor.v1",
+    "required_claim_ids": [
+      "bounded_durable_event_file_storage",
+      "collapsed_reconciliation_cadence",
+      "failure_propagation_and_fatal_threshold",
+      "generic_pre_cycle_safety_stop",
+      "health_and_readiness_transitions",
+      "meaningful_or_verbose_event_summaries",
+      "runtime_modes",
+      "singleton_ownership_heartbeat",
+      "tick_cadence_no_burst_catchup"
+    ],
+    "required_public_api": {
+      "descriptor_module": "tickerd.capabilities",
+      "descriptor_exports": [
+        "RUNTIME_CAPABILITY_DESCRIPTOR",
+        "RUNTIME_CAPABILITY_ID",
+        "require_runtime_capability"
+      ],
+      "consumer_module": "tickerd",
+      "consumer_exports": [
+        "RUNTIME_CAPABILITY_DESCRIPTOR",
+        "RUNTIME_CAPABILITY_ID",
+        "SafetyAction",
+        "SafetyContext",
+        "SafetyDecision",
+        "require_runtime_capability"
+      ],
+      "capability_export_identity_required": true,
+      "protocol_module": "tickerd.protocols",
+      "protocol_exports": [
+        "SafetyGate"
+      ]
+    }
+  },
+  "runtime_admission": {
+    "order_after": "spine_runtime_contracts",
+    "order_before": "spine_effective_budget_catalog",
+    "network_access": false,
+    "domain_row_access": false,
+    "failure_event": "ledger_runtime_preflight_failed",
+    "failure_reason": "runtime_dependency_mismatch",
+    "failure_dependency": "tickerd",
+    "mismatch_fields": [
+      "capability_id",
+      "descriptor_sha256",
+      "descriptor_shape",
+      "package_import",
+      "package_version",
+      "public_api",
+      "required_claims"
+    ]
+  },
+  "system_info": {
+    "response_contract": "spine.system-info.v2",
+    "required_implemented_contract_versions": [
+      "spine.system-info.v2",
+      "spine.tickerd-compatibility.v1"
+    ],
+    "dependency_name": "tickerd",
+    "compatibility_status": "compatible"
+  },
+  "safety_mapping": {
+    "provider_protocol": "tickerd.protocols.SafetyGate",
+    "stop_reason": "storage_safety_stop",
+    "measurement_failure_reason": "storage_measurement_failed",
+    "reason_facts_contract": "spine.storage-safety-facts.v1",
+    "critical_action_mapping": {
+      "exit_nonzero": "terminate_nonzero",
+      "suspend": "suspend"
+    },
+    "tickerd_terminal_event": "safety_stop",
+    "filesystem_roles": [
+      "ledger",
+      "worker_state"
+    ],
+    "maximum_measurements": 2,
+    "mid_cycle_latch_reason": "ledger_durability_failure"
+  }
+}

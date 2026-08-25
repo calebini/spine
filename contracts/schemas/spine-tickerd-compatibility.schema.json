@@ -1,0 +1,236 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cortext.local/spine/contracts/schemas/spine-tickerd-compatibility.schema.json",
+  "title": "Spine Tickerd Compatibility Contract v1",
+  "type": "object",
+  "required": [
+    "contract_id",
+    "schema_version",
+    "consumer",
+    "provider",
+    "runtime_admission",
+    "system_info",
+    "safety_mapping"
+  ],
+  "properties": {
+    "contract_id": { "const": "spine.tickerd-compatibility.v1" },
+    "schema_version": { "const": "spine.runtime-compatibility.v1" },
+    "consumer": { "const": "spine" },
+    "provider": {
+      "type": "object",
+      "required": [
+        "distribution_name",
+        "required_package_version",
+        "audited_source_revision",
+        "required_capability_id",
+        "descriptor_package",
+        "descriptor_resource",
+        "required_descriptor_sha256",
+        "required_descriptor_schema_version",
+        "required_claim_ids",
+        "required_public_api"
+      ],
+      "properties": {
+        "distribution_name": { "const": "tickerd" },
+        "required_package_version": { "const": "0.2.0" },
+        "audited_source_revision": {
+          "const": "ffe613c65ea3d6fc70a1dc3603c32068f06350df"
+        },
+        "required_capability_id": { "const": "tickerd.runtime-capabilities.v1" },
+        "descriptor_package": { "const": "tickerd" },
+        "descriptor_resource": {
+          "const": "contracts/tickerd.runtime-capabilities.v1.json"
+        },
+        "required_descriptor_sha256": {
+          "const": "215f9aa6b54e6c0e6186796a55d78e1c5a270adc9b3ccefb433df5a3bb87b58b"
+        },
+        "required_descriptor_schema_version": {
+          "const": "tickerd.capability-descriptor.v1"
+        },
+        "required_claim_ids": {
+          "type": "array",
+          "minItems": 9,
+          "maxItems": 9,
+          "uniqueItems": true,
+          "prefixItems": [
+            { "const": "bounded_durable_event_file_storage" },
+            { "const": "collapsed_reconciliation_cadence" },
+            { "const": "failure_propagation_and_fatal_threshold" },
+            { "const": "generic_pre_cycle_safety_stop" },
+            { "const": "health_and_readiness_transitions" },
+            { "const": "meaningful_or_verbose_event_summaries" },
+            { "const": "runtime_modes" },
+            { "const": "singleton_ownership_heartbeat" },
+            { "const": "tick_cadence_no_burst_catchup" }
+          ],
+          "items": false
+        },
+        "required_public_api": {
+          "type": "object",
+          "required": [
+            "descriptor_module",
+            "descriptor_exports",
+            "consumer_module",
+            "consumer_exports",
+            "capability_export_identity_required",
+            "protocol_module",
+            "protocol_exports"
+          ],
+          "properties": {
+            "descriptor_module": { "const": "tickerd.capabilities" },
+            "descriptor_exports": {
+              "type": "array",
+              "minItems": 3,
+              "maxItems": 3,
+              "uniqueItems": true,
+              "prefixItems": [
+                { "const": "RUNTIME_CAPABILITY_DESCRIPTOR" },
+                { "const": "RUNTIME_CAPABILITY_ID" },
+                { "const": "require_runtime_capability" }
+              ],
+              "items": false
+            },
+            "consumer_module": { "const": "tickerd" },
+            "consumer_exports": {
+              "type": "array",
+              "minItems": 6,
+              "maxItems": 6,
+              "uniqueItems": true,
+              "prefixItems": [
+                { "const": "RUNTIME_CAPABILITY_DESCRIPTOR" },
+                { "const": "RUNTIME_CAPABILITY_ID" },
+                { "const": "SafetyAction" },
+                { "const": "SafetyContext" },
+                { "const": "SafetyDecision" },
+                { "const": "require_runtime_capability" }
+              ],
+              "items": false
+            },
+            "capability_export_identity_required": { "const": true },
+            "protocol_module": { "const": "tickerd.protocols" },
+            "protocol_exports": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 1,
+              "uniqueItems": true,
+              "prefixItems": [{ "const": "SafetyGate" }],
+              "items": false
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "runtime_admission": {
+      "type": "object",
+      "required": [
+        "order_after",
+        "order_before",
+        "network_access",
+        "domain_row_access",
+        "failure_event",
+        "failure_reason",
+        "failure_dependency",
+        "mismatch_fields"
+      ],
+      "properties": {
+        "order_after": { "const": "spine_runtime_contracts" },
+        "order_before": { "const": "spine_effective_budget_catalog" },
+        "network_access": { "const": false },
+        "domain_row_access": { "const": false },
+        "failure_event": { "const": "ledger_runtime_preflight_failed" },
+        "failure_reason": { "const": "runtime_dependency_mismatch" },
+        "failure_dependency": { "const": "tickerd" },
+        "mismatch_fields": {
+          "type": "array",
+          "minItems": 7,
+          "maxItems": 7,
+          "uniqueItems": true,
+          "prefixItems": [
+            { "const": "capability_id" },
+            { "const": "descriptor_sha256" },
+            { "const": "descriptor_shape" },
+            { "const": "package_import" },
+            { "const": "package_version" },
+            { "const": "public_api" },
+            { "const": "required_claims" }
+          ],
+          "items": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "system_info": {
+      "type": "object",
+      "required": [
+        "response_contract",
+        "required_implemented_contract_versions",
+        "dependency_name",
+        "compatibility_status"
+      ],
+      "properties": {
+        "response_contract": { "const": "spine.system-info.v2" },
+        "required_implemented_contract_versions": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "uniqueItems": true,
+          "prefixItems": [
+            { "const": "spine.system-info.v2" },
+            { "const": "spine.tickerd-compatibility.v1" }
+          ],
+          "items": false
+        },
+        "dependency_name": { "const": "tickerd" },
+        "compatibility_status": { "const": "compatible" }
+      },
+      "additionalProperties": false
+    },
+    "safety_mapping": {
+      "type": "object",
+      "required": [
+        "provider_protocol",
+        "stop_reason",
+        "measurement_failure_reason",
+        "reason_facts_contract",
+        "critical_action_mapping",
+        "tickerd_terminal_event",
+        "filesystem_roles",
+        "maximum_measurements",
+        "mid_cycle_latch_reason"
+      ],
+      "properties": {
+        "provider_protocol": { "const": "tickerd.protocols.SafetyGate" },
+        "stop_reason": { "const": "storage_safety_stop" },
+        "measurement_failure_reason": { "const": "storage_measurement_failed" },
+        "reason_facts_contract": { "const": "spine.storage-safety-facts.v1" },
+        "critical_action_mapping": {
+          "type": "object",
+          "required": ["exit_nonzero", "suspend"],
+          "properties": {
+            "exit_nonzero": { "const": "terminate_nonzero" },
+            "suspend": { "const": "suspend" }
+          },
+          "additionalProperties": false
+        },
+        "tickerd_terminal_event": { "const": "safety_stop" },
+        "filesystem_roles": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "uniqueItems": true,
+          "prefixItems": [
+            { "const": "ledger" },
+            { "const": "worker_state" }
+          ],
+          "items": false
+        },
+        "maximum_measurements": { "const": 2 },
+        "mid_cycle_latch_reason": { "const": "ledger_durability_failure" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

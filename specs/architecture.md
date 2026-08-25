@@ -98,6 +98,14 @@ The executing Spine package owns both bounded-admission authorities. `spine.comm
 
 Worker preflight occurs before Tickerd kernel startup and before any work discovery, reconciliation, processing, attempt creation, or adapter access. It includes validation of the versioned operational-budget catalog in addition to the schema and runtime-contract checks. Failure or timeout leaves health `DOWN`, readiness false, emits the structured `ledger_runtime_preflight_failed` diagnostic—including deterministic budget violations for invalid configuration—and terminates that process nonzero; supervisor restart is the only retry. This preserves Tickerd's ownership of cadence and health mechanics while Spine owns the ledger-admission decision. A successful preflight permits Tickerd to enter its ordinary ready lifecycle but does not itself claim an `UP` cycle result.
 
+Exact Tickerd package and capability admission occurs between Spine runtime-contract
+validation and budget-catalog validation. `specs/compatibility.md` is the sole authority
+for that provider baseline, descriptor verification, dependency diagnostic, planned
+system-info readback, and safety-gate API mapping. Tickerd emits the generic
+`event=safety_stop` envelope; Spine supplies bounded storage-domain `reason_facts` and
+owns the thresholds and durability latch. Neither side duplicates the other's
+authority.
+
 Deep ledger verification is a separate operator and migration concern. It reuses the bounded schema checks, then owns full SQLite integrity checking, full foreign-key checking, and unscoped Spine domain-invariant validation, may take time proportional to ledger size, and is appropriate after storage incidents or before or after controlled migrations. The explicit deep path does not become a prerequisite for every command or daemon restart. Runtime writes remain fail-closed through foreign-key enforcement, relational constraints, triggers, transactions, command validation, replay rules, and mutation-scoped invariant checks. `specs/agent-command-contract.md` Section 5 is normative for registry entries, manifest identity and comparison, failures, and acceptance tests.
 
 ### 4.2 Operational Resilience Boundary

@@ -118,6 +118,11 @@ cross-cutting resource, containment, recovery, and qualification requirements. T
 requirements do not authorize deletion of canonical evidence or transfer coordination
 authority to Tickerd, an adapter, or a host supervisor.
 
+Exact runtime admission against Tickerd and the translation from Spine-owned storage
+facts into Tickerd's generic safety-stop protocol are governed by
+`specs/compatibility.md`. That compatibility boundary does not make Tickerd
+authoritative for coordination truth, work eligibility, or storage thresholds.
+
 High-level authoring convenience MUST compose canonical item, recurrence, notification, work, audit, and receipt models without becoming a second authority. A composite command either commits its complete requested canonical bundle or none of it, and it MUST remain separate from external delivery.
 
 Cross-item agenda views MUST remain bounded read models over canonical current truth. They MUST NOT introduce a second schedule store or silently paginate across changed source facts.
