@@ -11,6 +11,7 @@ from referencing import Registry, Resource
 from spine.commands import CommandContext, handle
 from spine.core.schedule import system_timezone_database_version
 from spine.ledger import connect, initialize_schema
+from spine.services import list_eligible_work
 
 
 class ScheduleCreateCommandTests(unittest.TestCase):
@@ -162,6 +163,78 @@ class ScheduleCreateCommandTests(unittest.TestCase):
         self.assertTrue(replay["ok"], replay)
         self.assertEqual(replay["effect"], "schedule_create_replay")
         self.assertEqual(replay["policies"], created["policies"])
+
+    def test_multiple_once_reminders_with_shared_intent_remain_processable(self) -> None:
+        request = self.event_request(command_id="schedule-multi-once")
+        request["reminders"] = [
+            {
+                "policy_key": "ninety_minutes",
+                "schedule": {
+                    "kind": "once",
+                    "at": {"kind": "target_offset", "offset_basis": "elapsed", "offset_seconds": "-9000"},
+                },
+                "late_handling": {"kind": "skip"},
+            },
+            {
+                "policy_key": "seventy_minutes",
+                "schedule": {
+                    "kind": "once",
+                    "at": {"kind": "target_offset", "offset_basis": "elapsed", "offset_seconds": "-7800"},
+                },
+                "late_handling": {"kind": "skip"},
+            },
+            {
+                "policy_key": "thirty_minutes",
+                "schedule": {
+                    "kind": "once",
+                    "at": {"kind": "target_offset", "offset_basis": "elapsed", "offset_seconds": "-1800"},
+                },
+                "late_handling": {"kind": "skip"},
+            },
+            {
+                "policy_key": "fifteen_minutes",
+                "schedule": {
+                    "kind": "once",
+                    "at": {"kind": "target_offset", "offset_basis": "elapsed", "offset_seconds": "-900"},
+                },
+                "late_handling": {"kind": "skip"},
+            },
+        ]
+        request["materialization"]["range"] = {
+            "kind": "item_relative",
+            "start_offset_seconds": "-9000",
+            "end_offset_seconds": "1",
+        }
+
+        created = handle("schedule.create", request, self.context)
+
+        self.assertTrue(created["ok"], created)
+        self.assertEqual(len(created["policies"]), 4)
+        self.assertEqual(len({policy["notification_intent_id"] for policy in created["policies"]}), 1)
+        self.assertEqual(len({policy["notification_policy_id"] for policy in created["policies"]}), 4)
+
+        reconciled = handle(
+            "notification_work.materialize",
+            {
+                "command_id": "schedule-multi-once-reconcile",
+                "actor_subject_id": "owner",
+                "item_id": created["item_id"],
+                "target_version": created["current_version"],
+                "materialized_at_utc": "2026-08-13T12:01:00Z",
+                "range_start_utc": "2026-08-14T11:00:00Z",
+                "range_end_utc": "2026-08-14T14:01:00Z",
+                "limit": "100",
+            },
+            self.context,
+        )
+
+        self.assertTrue(reconciled["ok"], reconciled)
+        self.assertEqual(
+            self.connection.execute("SELECT COUNT(*) FROM work_instances WHERE status = 'cancelled'").fetchone()[0],
+            0,
+        )
+        eligible = list_eligible_work(self.connection, now_utc="2026-08-14T14:00:00Z")
+        self.assertEqual(len(eligible), 4)
 
     def test_dry_run_returns_same_identities_and_persists_nothing(self) -> None:
         request = self.event_request()

@@ -306,9 +306,17 @@ def assert_work_instance_not_stale(connection: sqlite3.Connection, work_instance
                    dt.owner_group_id AS delivery_target_owner_group_id
             FROM notification_policies AS p
             JOIN delivery_targets AS dt ON dt.delivery_target_id = p.delivery_target_id
-            WHERE p.item_id = ? AND p.version = ? AND p.notification_intent_id = ?
+            WHERE p.item_id = ? AND p.version = ?
+              AND (p.policy_id = ? OR p.source_notification_policy_id = ?)
+            ORDER BY CASE WHEN p.policy_id = ? THEN 0 ELSE 1 END
             """,
-            (row["item_id"], row["current_version"], row["notification_intent_id"]),
+            (
+                row["item_id"],
+                row["current_version"],
+                row["notification_policy_id"],
+                row["notification_policy_id"],
+                row["notification_policy_id"],
+            ),
         ).fetchone()
         if policy is None or policy["status"] != NotificationPolicyStatus.ACTIVE.value:
             _raise_stale_work(work_instance_id, "current notification intent is not active")
