@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://cortext.local/spine/contracts/schemas/system-info-response.schema.json",
-  "title": "Spine System Information Response v1",
+  "title": "Spine System Information Response v2",
   "type": "object",
   "required": [
     "ok",
@@ -11,12 +11,13 @@
     "implemented_ledger_schema_version",
     "ledger_schema_version",
     "timezone_database_version",
-    "implemented_contract_versions"
+    "implemented_contract_versions",
+    "runtime_dependencies"
   ],
   "properties": {
     "ok": { "const": true },
     "command": { "const": "system.info" },
-    "response_contract": { "const": "spine.system-info.v1" },
+    "response_contract": { "const": "spine.system-info.v2" },
     "runtime_version": { "type": "string", "minLength": 1 },
     "implemented_ledger_schema_version": {
       "type": "string",
@@ -31,7 +32,30 @@
       "type": "array",
       "minItems": 1,
       "uniqueItems": true,
-      "items": { "type": "string", "minLength": 1 }
+      "items": { "type": "string", "minLength": 1 },
+      "allOf": [
+        { "contains": { "const": "spine.system-info.v2" }, "minContains": 1, "maxContains": 1 },
+        { "contains": { "const": "spine.tickerd-compatibility.v1" }, "minContains": 1, "maxContains": 1 }
+      ]
+    },
+    "runtime_dependencies": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "object",
+        "required": ["name", "package_version", "capability_id", "descriptor_sha256", "compatibility_contract", "status"],
+        "properties": {
+          "name": { "const": "tickerd" },
+          "package_version": { "const": "0.2.0" },
+          "capability_id": { "const": "tickerd.runtime-capabilities.v1" },
+          "descriptor_sha256": { "const": "215f9aa6b54e6c0e6186796a55d78e1c5a270adc9b3ccefb433df5a3bb87b58b" },
+          "compatibility_contract": { "const": "spine.tickerd-compatibility.v1" },
+          "status": { "const": "compatible" }
+        },
+        "additionalProperties": false
+      }
     }
   },
   "additionalProperties": false

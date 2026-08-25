@@ -13,13 +13,9 @@ SPINE_EXAMPLE_DB="$SPINE_EXAMPLE_ROOT/spine.sqlite"
 SPINE_EXAMPLE_OBSERVE_STATE="$SPINE_EXAMPLE_ROOT/observe-state"
 SPINE_EXAMPLE_ACTIVE_STATE="$SPINE_EXAMPLE_ROOT/active-state"
 
-if ! python3 -c 'import tickerd' >/dev/null 2>&1; then
-  SPINE_EXAMPLE_TICKERD_SRC="${TICKERD_SRC:-$(cd "$(dirname "$0")/../../tickerd/src" 2>/dev/null && pwd || true)}"
-  if [[ -z "$SPINE_EXAMPLE_TICKERD_SRC" || ! -d "$SPINE_EXAMPLE_TICKERD_SRC/tickerd" ]]; then
-    echo "Tickerd is not importable; install it or set TICKERD_SRC to its src directory." >&2
-    exit 1
-  fi
-  export PYTHONPATH="$SPINE_EXAMPLE_TICKERD_SRC${PYTHONPATH:+:$PYTHONPATH}"
+if ! python3 -c 'from importlib.metadata import version; assert version("tickerd") == "0.2.0"' >/dev/null 2>&1; then
+  echo "Exact Tickerd 0.2.0 distribution metadata is required; install the audited checkout first." >&2
+  exit 1
 fi
 
 spine-ledger-migrate --db "$SPINE_EXAMPLE_DB" --initialize-if-empty >"$SPINE_EXAMPLE_ROOT/migration.json"

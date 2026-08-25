@@ -22,9 +22,10 @@ from spine.adapters import (
     SpineTickerdWorkAdapter,
 )
 from spine.ledger import connect, initialize_schema
-from spine.runtime.preflight import admit_worker
+from spine.runtime.preflight import BootstrapEventSink, BootstrapHealthSink, WorkerBootstrapConfig, admit_worker
+from spine.runtime.storage_safety import SpineStorageSafetyGate, StorageSafetyLatch, StorageSafetyPolicy
 from spine.runtime.tickerd_observe import RUNTIME_MODES
-from spine.runtime.tickerd_runner import SpineRunnerPaths, _tickerd_runner_types, report_database_unavailable
+from spine.runtime.tickerd_runner import SpineRunnerPaths, _ledger_path, _tickerd_runner_types, report_database_unavailable
 
 FAKE_OPENCLAW_RESULTS = ("delivered", "transient", "permanent", "blocked", "binding_error", "send_exception")
 OPENCLAW_SENDERS = ("fake", "gateway")
@@ -102,9 +103,33 @@ def run_spine_worker(
     openclaw_sender_mode: str = "fake",
     openclaw_fake_result: str = "delivered",
     install_signal_handlers: bool = True,
+    event_log_max_bytes: int = 10 * 1024 * 1024,
+    event_log_backup_count: int = 5,
+    storage_warning_free_bytes: int = 1_073_741_824,
+    storage_critical_free_bytes: int = 536_870_912,
+    storage_reserve_bytes: int = 268_435_456,
+    critical_storage_action: str = "exit_nonzero",
 ) -> Any:
     """Run Spine work through Tickerd with the configured worker bindings."""
 
+    paths = SpineWorkerPaths.from_state_dir(state_dir)
+    paths.runner.state_dir.mkdir(parents=True, exist_ok=True)
+    bootstrap_config = WorkerBootstrapConfig(
+        event_log_max_bytes=event_log_max_bytes,
+        event_log_backup_count=event_log_backup_count,
+    )
+    preflight_failure = admit_worker(
+        connection,
+        config=bootstrap_config,
+        health_sink=BootstrapHealthSink(paths.runner.health_path),
+        event_sink=BootstrapEventSink(
+            paths.runner.events_path,
+            max_bytes=bootstrap_config.event_log_max_bytes,
+            backup_count=bootstrap_config.event_log_backup_count,
+        ),
+    )
+    if preflight_failure is not None:
+        return preflight_failure
     (
         TickerdConfig,
         RuntimeKernel,
@@ -113,23 +138,32 @@ def run_spine_worker(
         JsonlFileEventSink,
         ForegroundRunner,
     ) = _tickerd_runner_types()
-    paths = SpineWorkerPaths.from_state_dir(state_dir)
-    paths.runner.state_dir.mkdir(parents=True, exist_ok=True)
     config = TickerdConfig(
         tick_interval_ms=tick_interval_ms,
         reconcile_interval_ms=reconcile_interval_ms,
         max_work_items_per_tick=max_work_items_per_tick,
+        event_log_max_bytes=event_log_max_bytes,
+        event_log_backup_count=event_log_backup_count,
     )
     health = JsonFileHealthSink(paths.runner.health_path)
-    events = JsonlFileEventSink(paths.runner.events_path)
-    preflight_failure = admit_worker(
-        connection,
-        config=config,
-        health_sink=health,
-        event_sink=events,
+    events = JsonlFileEventSink.bounded(
+        paths.runner.events_path,
+        max_bytes=config.event_log_max_bytes,
+        backup_count=config.event_log_backup_count,
     )
-    if preflight_failure is not None:
-        return preflight_failure
+    latch = StorageSafetyLatch()
+    policy = StorageSafetyPolicy(
+        warning_free_bytes=storage_warning_free_bytes,
+        critical_free_bytes=storage_critical_free_bytes,
+        reserve_bytes=storage_reserve_bytes,
+        critical_storage_action=critical_storage_action,
+    )
+    safety_gate = SpineStorageSafetyGate(
+        ledger_path=_ledger_path(connection, paths.runner.state_dir),
+        worker_state_path=paths.runner.state_dir,
+        policy=policy,
+        latch=latch,
+    )
     processor = _worker_processor(
         paths=paths,
         bindings=bindings,
@@ -137,7 +171,12 @@ def run_spine_worker(
         openclaw_sender_mode=openclaw_sender_mode,
         openclaw_fake_result=openclaw_fake_result,
     )
-    adapter = SpineTickerdWorkAdapter(connection, runtime_mode=runtime_mode, processor=processor)
+    adapter = SpineTickerdWorkAdapter(
+        connection,
+        runtime_mode=runtime_mode,
+        processor=processor,
+        storage_safety_latch=latch,
+    )
     kernel = RuntimeKernel(
         config,
         mode_reader=adapter,
@@ -154,6 +193,7 @@ def run_spine_worker(
         health_sink=health,
         event_sink=events,
         install_signal_handlers=install_signal_handlers,
+        safety_gate=safety_gate,
     )
     return runner.run(max_cycles=max_cycles)
 
@@ -215,6 +255,12 @@ def main(argv: Sequence[str] | None = None) -> int:
             openclaw_sender_mode=args.openclaw_sender,
             openclaw_fake_result=args.openclaw_fake_result,
             install_signal_handlers=True,
+            event_log_max_bytes=args.event_log_max_bytes,
+            event_log_backup_count=args.event_log_backup_count,
+            storage_warning_free_bytes=args.storage_warning_free_bytes,
+            storage_critical_free_bytes=args.storage_critical_free_bytes,
+            storage_reserve_bytes=args.storage_reserve_bytes,
+            critical_storage_action=args.critical_storage_action,
         )
     finally:
         connection.close()
@@ -322,6 +368,12 @@ def _parse_args(argv: Sequence[str] | None) -> argparse.Namespace:
     parser.add_argument("--tick-interval-ms", type=int, default=1000, help="Tickerd tick interval.")
     parser.add_argument("--reconcile-interval-ms", type=int, default=5000, help="Tickerd reconcile cadence.")
     parser.add_argument("--max-work-items", type=int, default=100, help="Maximum work items to process per cycle.")
+    parser.add_argument("--event-log-max-bytes", type=int, default=10 * 1024 * 1024)
+    parser.add_argument("--event-log-backup-count", type=int, default=5)
+    parser.add_argument("--storage-warning-free-bytes", type=int, default=1_073_741_824)
+    parser.add_argument("--storage-critical-free-bytes", type=int, default=536_870_912)
+    parser.add_argument("--storage-reserve-bytes", type=int, default=268_435_456)
+    parser.add_argument("--critical-storage-action", choices=("suspend", "exit_nonzero"), default="exit_nonzero")
     return parser.parse_args(argv)
 
 

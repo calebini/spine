@@ -387,15 +387,26 @@ def _handle_system_info(request: Mapping[str, Any], context: CommandContext) -> 
             "environment_failure:ledger_schema_version",
             f"runtime requires ledger schema {IMPLEMENTED_LEDGER_SCHEMA_VERSION}; found {ledger_version}",
         )
+    from spine.runtime.compatibility import TickerdCompatibilityError, resolve_tickerd_compatibility
+
+    try:
+        tickerd = resolve_tickerd_compatibility()
+    except TickerdCompatibilityError as exc:
+        mismatch = ", ".join(exc.diagnostic["mismatch_fields"])
+        raise SpineValidationError(
+            "environment_failure:runtime_dependencies",
+            f"Tickerd runtime dependency mismatch: {mismatch}",
+        ) from exc
     return {
         "ok": True,
         "command": "system.info",
-        "response_contract": "spine.system-info.v1",
+        "response_contract": "spine.system-info.v2",
         "runtime_version": __version__,
         "implemented_ledger_schema_version": str(IMPLEMENTED_LEDGER_SCHEMA_VERSION),
         "ledger_schema_version": str(ledger_version),
         "timezone_database_version": system_timezone_database_version(),
         "implemented_contract_versions": sorted(IMPLEMENTED_CONTRACT_VERSIONS),
+        "runtime_dependencies": [tickerd.as_system_info()],
     }
 
 

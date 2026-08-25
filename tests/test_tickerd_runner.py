@@ -1,4 +1,5 @@
 import json
+import shutil
 import tempfile
 import unittest
 from pathlib import Path
@@ -33,6 +34,35 @@ class TickerdRunnerCliTests(unittest.TestCase):
 
 @unittest.skipUnless(TICKERD_AVAILABLE, "tickerd is not importable")
 class TickerdRunnerTests(unittest.TestCase):
+    def test_critical_storage_pressure_stops_before_first_cycle(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            state_dir = root / "state"
+            db_path = root / "spine.sqlite"
+            connection = connect(db_path)
+            try:
+                seed_demo_ledger(connection)
+                free = shutil.disk_usage(root).free
+                result = run_foreground(
+                    connection,
+                    state_dir=state_dir,
+                    max_cycles=1,
+                    tick_interval_ms=1,
+                    reconcile_interval_ms=1,
+                    storage_warning_free_bytes=free + 2,
+                    storage_critical_free_bytes=free + 1,
+                    storage_reserve_bytes=1,
+                    install_signal_handlers=False,
+                )
+            finally:
+                connection.close()
+            self.assertEqual(result.exit_code, 3)
+            self.assertEqual(result.cycles_completed, 0)
+            records = [json.loads(line) for line in (state_dir / "events.jsonl").read_text().splitlines()]
+            stop = next(record for record in records if record["event"] == "safety_stop")
+            self.assertEqual(stop["reason"], "storage_safety_stop")
+            self.assertEqual(stop["reason_facts"]["primary_reason"], "critical_storage_pressure")
+
     def test_foreground_runner_writes_lock_health_and_events(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

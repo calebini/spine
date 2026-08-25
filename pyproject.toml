@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "spine-ledger"
-version = "0.1.0"
+version = "0.2.0"
 description = "Canonical coordination ledger and planning fabric for Cortext1."
 readme = "README.md"
 requires-python = ">=3.12"
@@ -39,6 +39,7 @@ where = ["src"]
 
 [tool.setuptools.package-data]
 "spine.ledger" = ["schema.sql", "schema_object_manifest.v1.json", "migrations/*.sql"]
+"spine.contracts" = ["*.json"]
 "spine" = ["py.typed"]
 
 [tool.pytest.ini_options]

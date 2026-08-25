@@ -62,7 +62,7 @@ def _requirements(commands: set[str], *versions: str) -> None:
         _ADDITIONAL_REQUIREMENTS[command] = versions
 
 
-_requirements({"system.info"}, "spine.system-info.v1")
+_requirements({"system.info"}, "spine.system-info.v2", "spine.tickerd-compatibility.v1")
 _requirements({"item.occurrences"}, "spine.recurrence.contract.v1", "spine.item-occurrences.recurrence.v1")
 _requirements(
     {"recurrence.instance.add", "recurrence.instance.remove", "recurrence.instance.override", "recurrence.series.edit"},
@@ -226,6 +226,7 @@ WORKER_REQUIRED_CONTRACT_VERSIONS = tuple(
             "spine.notification-rendering.v1",
             "spine.notification-rendering.concise-en-ca.v1",
             "spine.notification-rendering-input.v1",
+            "spine.tickerd-compatibility.v1",
         }
     )
 )

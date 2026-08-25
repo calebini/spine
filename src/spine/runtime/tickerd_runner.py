@@ -12,7 +12,14 @@ from typing import Any
 
 from spine.adapters import SpineTickerdWorkAdapter
 from spine.ledger import connect, initialize_schema
-from spine.runtime.preflight import admit_worker, emit_worker_preflight_failure
+from spine.runtime.preflight import (
+    BootstrapEventSink,
+    BootstrapHealthSink,
+    WorkerBootstrapConfig,
+    admit_worker,
+    emit_worker_preflight_failure,
+)
+from spine.runtime.storage_safety import SpineStorageSafetyGate, StorageSafetyLatch, StorageSafetyPolicy
 from spine.runtime.tickerd_observe import RUNTIME_MODES
 
 
@@ -51,9 +58,33 @@ def run_foreground(
     install_signal_handlers: bool = True,
     scheduler_actor_subject_id: str | None = None,
     materialization_horizon_seconds: int = 86_400,
+    event_log_max_bytes: int = 10 * 1024 * 1024,
+    event_log_backup_count: int = 5,
+    storage_warning_free_bytes: int = 1_073_741_824,
+    storage_critical_free_bytes: int = 536_870_912,
+    storage_reserve_bytes: int = 268_435_456,
+    critical_storage_action: str = "exit_nonzero",
 ) -> Any:
     """Run Spine work through Tickerd's foreground runner."""
 
+    paths = SpineRunnerPaths.from_state_dir(state_dir)
+    paths.state_dir.mkdir(parents=True, exist_ok=True)
+    bootstrap_config = WorkerBootstrapConfig(
+        event_log_max_bytes=event_log_max_bytes,
+        event_log_backup_count=event_log_backup_count,
+    )
+    preflight_failure = admit_worker(
+        connection,
+        config=bootstrap_config,
+        health_sink=BootstrapHealthSink(paths.health_path),
+        event_sink=BootstrapEventSink(
+            paths.events_path,
+            max_bytes=bootstrap_config.event_log_max_bytes,
+            backup_count=bootstrap_config.event_log_backup_count,
+        ),
+    )
+    if preflight_failure is not None:
+        return preflight_failure
     (
         TickerdConfig,
         RuntimeKernel,
@@ -62,28 +93,38 @@ def run_foreground(
         JsonlFileEventSink,
         ForegroundRunner,
     ) = _tickerd_runner_types()
-    paths = SpineRunnerPaths.from_state_dir(state_dir)
-    paths.state_dir.mkdir(parents=True, exist_ok=True)
     config = TickerdConfig(
         tick_interval_ms=tick_interval_ms,
         reconcile_interval_ms=reconcile_interval_ms,
         max_work_items_per_tick=max_work_items_per_tick,
+        event_log_max_bytes=event_log_max_bytes,
+        event_log_backup_count=event_log_backup_count,
     )
     health = JsonFileHealthSink(paths.health_path)
-    events = JsonlFileEventSink(paths.events_path)
-    preflight_failure = admit_worker(
-        connection,
-        config=config,
-        health_sink=health,
-        event_sink=events,
+    events = JsonlFileEventSink.bounded(
+        paths.events_path,
+        max_bytes=config.event_log_max_bytes,
+        backup_count=config.event_log_backup_count,
     )
-    if preflight_failure is not None:
-        return preflight_failure
+    latch = StorageSafetyLatch()
+    policy = StorageSafetyPolicy(
+        warning_free_bytes=storage_warning_free_bytes,
+        critical_free_bytes=storage_critical_free_bytes,
+        reserve_bytes=storage_reserve_bytes,
+        critical_storage_action=critical_storage_action,
+    )
+    safety_gate = SpineStorageSafetyGate(
+        ledger_path=_ledger_path(connection, paths.state_dir),
+        worker_state_path=paths.state_dir,
+        policy=policy,
+        latch=latch,
+    )
     adapter = SpineTickerdWorkAdapter(
         connection,
         runtime_mode=runtime_mode,
         scheduler_actor_subject_id=scheduler_actor_subject_id,
         materialization_horizon_seconds=materialization_horizon_seconds,
+        storage_safety_latch=latch,
     )
     kernel = RuntimeKernel(
         config,
@@ -101,6 +142,7 @@ def run_foreground(
         health_sink=health,
         event_sink=events,
         install_signal_handlers=install_signal_handlers,
+        safety_gate=safety_gate,
     )
     return runner.run(max_cycles=max_cycles)
 
@@ -114,18 +156,18 @@ def report_database_unavailable(
 ) -> Any:
     """Emit the required failed-admission state when the ledger cannot be opened."""
 
-    TickerdConfig, _, _, JsonFileHealthSink, JsonlFileEventSink, _ = _tickerd_runner_types()
     paths = SpineRunnerPaths.from_state_dir(state_dir)
     paths.state_dir.mkdir(parents=True, exist_ok=True)
-    config = TickerdConfig(
-        tick_interval_ms=tick_interval_ms,
-        reconcile_interval_ms=reconcile_interval_ms,
-        max_work_items_per_tick=max_work_items_per_tick,
+    config = WorkerBootstrapConfig()
+    events = BootstrapEventSink(
+        paths.events_path,
+        max_bytes=config.event_log_max_bytes,
+        backup_count=config.event_log_backup_count,
     )
     return emit_worker_preflight_failure(
         config=config,
-        health_sink=JsonFileHealthSink(paths.health_path),
-        event_sink=JsonlFileEventSink(paths.events_path),
+        health_sink=BootstrapHealthSink(paths.health_path),
+        event_sink=events,
         reason="database_unavailable",
     )
 
@@ -174,6 +216,12 @@ def main(argv: Sequence[str] | None = None) -> int:
             install_signal_handlers=True,
             scheduler_actor_subject_id=args.scheduler_actor_subject_id,
             materialization_horizon_seconds=args.materialization_horizon_seconds,
+            event_log_max_bytes=args.event_log_max_bytes,
+            event_log_backup_count=args.event_log_backup_count,
+            storage_warning_free_bytes=args.storage_warning_free_bytes,
+            storage_critical_free_bytes=args.storage_critical_free_bytes,
+            storage_reserve_bytes=args.storage_reserve_bytes,
+            critical_storage_action=args.critical_storage_action,
         )
     finally:
         connection.close()
@@ -195,7 +243,19 @@ def _parse_args(argv: Sequence[str] | None) -> argparse.Namespace:
     parser.add_argument(
         "--materialization-horizon-seconds", type=int, default=86400, help="Bounded future notification horizon per reconcile cycle."
     )
+    parser.add_argument("--event-log-max-bytes", type=int, default=10 * 1024 * 1024)
+    parser.add_argument("--event-log-backup-count", type=int, default=5)
+    parser.add_argument("--storage-warning-free-bytes", type=int, default=1_073_741_824)
+    parser.add_argument("--storage-critical-free-bytes", type=int, default=536_870_912)
+    parser.add_argument("--storage-reserve-bytes", type=int, default=268_435_456)
+    parser.add_argument("--critical-storage-action", choices=("suspend", "exit_nonzero"), default="exit_nonzero")
     return parser.parse_args(argv)
+
+
+def _ledger_path(connection: sqlite3.Connection, fallback_root: Path) -> Path:
+    row = connection.execute("PRAGMA database_list").fetchone()
+    raw = "" if row is None else str(row[2])
+    return Path(raw) if raw else fallback_root / "in-memory-ledger.sqlite"
 
 
 def _tickerd_runner_types() -> tuple[Any, Any, Any, Any, Any, Any]:

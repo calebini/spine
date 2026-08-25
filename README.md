@@ -17,7 +17,7 @@ Authoritative starting points:
 - `specs/overview.md` defines purpose, doctrine, and non-goals.
 - `specs/architecture.md` defines component boundaries and runtime relationships.
 - `specs/operational-resilience.md` defines the draft cross-cutting target for bounded routine work, storage containment, failure isolation, retry/recovery, runtime compatibility, and sustained-operation proof. It is not yet an implementation declaration.
-- `specs/compatibility.md` defines the draft exact Spine consumer contract for Tickerd `0.2.0`, capability admission, dependency diagnostics, and the generic safety-stop mapping. Its runtime integration is not yet implemented.
+- `specs/compatibility.md` defines the implemented exact Spine consumer contract for Tickerd `0.2.0`, capability admission, dependency diagnostics, `system.info.v2`, and the generic safety-stop mapping.
 - `specs/ontology.md` sketches the first durable ontology and data model.
 - `specs/recurrence.md` defines the canonical flexible recurrence-set model, deterministic identity and expansion, mutation, and occurrence-provenance boundaries.
 - `contracts/schemas/recurrence-*.schema.json` and `contracts/recurrence-fixture-manifest.json` define the machine-readable recurrence contract family and initial fixtures.
@@ -94,18 +94,22 @@ Install Spine locally during development so runtime entry points do not depend o
 python3 -m pip install -e ".[dev,test]"
 ```
 
-With Tickerd installed, or with `TICKERD_SRC` pointing at a local Tickerd `src` directory, Spine can run a bounded observe-only Tickerd pass over a local SQLite ledger:
+Spine runtime `0.2.0` requires the audited Tickerd `0.2.0` distribution to be installed
+with package metadata. A bare `PYTHONPATH` source injection is intentionally rejected by
+worker admission. Install the audited checkout into the Spine environment first, then
+run the worker entrypoints normally:
 
 ```bash
+python3 -m pip install --no-deps /path/to/audited/tickerd
 spine-seed-demo /tmp/spine-demo.sqlite
 # For an already-created ledger, seed the demo only when absent:
 spine-seed-demo --if-absent /tmp/spine-demo.sqlite
-PYTHONPATH="$TICKERD_SRC" spine-tickerd-observe /tmp/spine-demo.sqlite
-PYTHONPATH="$TICKERD_SRC" spine-tickerd-runner \
+spine-tickerd-observe /tmp/spine-demo.sqlite
+spine-tickerd-runner \
   --db /tmp/spine-demo.sqlite \
   --state-dir /tmp/spine-state \
   --max-cycles 1
-PYTHONPATH="$TICKERD_SRC" spine-worker \
+spine-worker \
   --db /tmp/spine-worker.sqlite \
   --state-dir /tmp/spine-worker-state \
   --initialize-schema \
@@ -113,7 +117,7 @@ PYTHONPATH="$TICKERD_SRC" spine-worker \
   --bindings openclaw \
   --openclaw-sender fake \
   --max-cycles 1
-PYTHONPATH="$TICKERD_SRC" spine-openclaw-smoke \
+spine-openclaw-smoke \
   --db /tmp/spine-openclaw-smoke.sqlite \
   --state-dir /tmp/spine-openclaw-state \
   --seed-demo \
@@ -125,7 +129,7 @@ The seed command creates one subject, one task, one notification policy, and one
 The OpenClaw smoke is fake by default. A real OpenClaw gateway send requires an explicit operator opt-in:
 
 ```bash
-PYTHONPATH="$TICKERD_SRC" spine-openclaw-smoke \
+spine-openclaw-smoke \
   --db /tmp/spine-openclaw-gateway.sqlite \
   --state-dir /tmp/spine-openclaw-gateway-state \
   --seed-demo \

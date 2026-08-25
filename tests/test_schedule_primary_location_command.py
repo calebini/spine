@@ -4,6 +4,7 @@ import copy
 import json
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 from jsonschema import Draft202012Validator
 from referencing import Registry, Resource
@@ -14,6 +15,7 @@ from spine.commands.cli import _schedule_show_include
 from spine.commands.compact import compact_schedule_response
 from spine.ledger import LocationInput, connect, initialize_schema
 from spine.ledger.supporting import insert_location
+from spine.runtime.compatibility import TickerdCompatibilityInfo
 
 
 class SchedulePrimaryLocationCommandTests(unittest.TestCase):
@@ -392,7 +394,13 @@ class SchedulePrimaryLocationCommandTests(unittest.TestCase):
             "spine.schedule-primary-location-normalization.v1",
         }
         self.assertTrue(expected.issubset(IMPLEMENTED_CONTRACT_VERSIONS))
-        info = handle("system.info", {}, self.context)
+        tickerd_info = TickerdCompatibilityInfo(
+            package_version="0.2.0",
+            capability_id="tickerd.runtime-capabilities.v1",
+            descriptor_sha256="215f9aa6b54e6c0e6186796a55d78e1c5a270adc9b3ccefb433df5a3bb87b58b",
+        )
+        with patch("spine.runtime.compatibility.resolve_tickerd_compatibility", return_value=tickerd_info):
+            info = handle("system.info", {}, self.context)
         self.assertTrue(expected.issubset(set(info["implemented_contract_versions"])))
 
     def test_cli_include_parser_accepts_primary_location(self) -> None:

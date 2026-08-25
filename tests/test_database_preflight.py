@@ -22,6 +22,7 @@ from spine.core import SpineValidationError
 from spine.ledger import connect, initialize_schema
 from spine.ledger.migrate import verify_schema
 from spine.ledger.preflight import SCHEMA_OBJECT_MANIFEST_ID, expected_schema_objects, verify_runtime_schema
+from spine.runtime.compatibility import TickerdCompatibilityError, TickerdCompatibilityInfo
 from spine.runtime.tickerd_runner import SpineRunnerPaths, run_foreground
 
 try:
@@ -30,6 +31,12 @@ try:
     TICKERD_AVAILABLE = True
 except ImportError:
     TICKERD_AVAILABLE = False
+
+TICKERD_INFO = TickerdCompatibilityInfo(
+    package_version="0.2.0",
+    capability_id="tickerd.runtime-capabilities.v1",
+    descriptor_sha256="215f9aa6b54e6c0e6186796a55d78e1c5a270adc9b3ccefb433df5a3bb87b58b",
+)
 
 
 def _dispatch_commands() -> set[str]:
@@ -43,9 +50,7 @@ def _dispatch_commands() -> set[str]:
                 commands.add(comparator.value)
             elif isinstance(comparator, (ast.Set, ast.Tuple)):
                 commands.update(
-                    element.value
-                    for element in comparator.elts
-                    if isinstance(element, ast.Constant) and isinstance(element.value, str)
+                    element.value for element in comparator.elts if isinstance(element, ast.Constant) and isinstance(element.value, str)
                 )
     return commands
 
@@ -94,7 +99,7 @@ class CommandRuntimeContractRegistryTests(unittest.TestCase):
     def test_cli_runtime_contract_mismatch_fails_before_database_open(self) -> None:
         with patch(
             "spine.commands.registry.IMPLEMENTED_CONTRACT_VERSIONS",
-            frozenset(IMPLEMENTED_CONTRACT_VERSIONS - {"spine.system-info.v1"}),
+            frozenset(IMPLEMENTED_CONTRACT_VERSIONS - {"spine.system-info.v2"}),
         ):
             output = StringIO()
             with redirect_stdout(output):
@@ -103,7 +108,7 @@ class CommandRuntimeContractRegistryTests(unittest.TestCase):
         self.assertEqual(exit_code, 7)
         self.assertEqual(payload["error"]["code"], "environment_failure")
         self.assertEqual(payload["error"]["field"], "runtime_contracts")
-        self.assertIn("spine.system-info.v1", payload["error"]["message"])
+        self.assertIn("spine.system-info.v2", payload["error"]["message"])
 
 
 class BoundedSchemaPreflightTests(unittest.TestCase):
@@ -166,6 +171,7 @@ class BoundedSchemaPreflightTests(unittest.TestCase):
             output = StringIO()
             with (
                 patch("spine.ledger.migrate.verify_schema", side_effect=AssertionError("deep verifier invoked")),
+                patch("spine.runtime.compatibility.resolve_tickerd_compatibility", return_value=TICKERD_INFO),
                 redirect_stdout(output),
             ):
                 exit_code = command_main(["--db", str(path), "system", "info"])
@@ -174,6 +180,43 @@ class BoundedSchemaPreflightTests(unittest.TestCase):
 
 @unittest.skipUnless(TICKERD_AVAILABLE, "tickerd is not importable")
 class WorkerRuntimePreflightTests(unittest.TestCase):
+    def test_runtime_dependency_mismatch_is_down_and_stops_before_tickerd_construction(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            state_dir = Path(directory) / "state"
+            connection = connect(":memory:")
+            initialize_schema(connection)
+            diagnostic = {
+                "event": "ledger_runtime_preflight_failed",
+                "reason": "runtime_dependency_mismatch",
+                "dependency": "tickerd",
+                "compatibility_contract": "spine.tickerd-compatibility.v1",
+                "required_package_version": "0.2.0",
+                "installed_package_version": "0.1.0",
+                "required_capability_id": "tickerd.runtime-capabilities.v1",
+                "installed_capability_id": None,
+                "required_descriptor_sha256": "215f9aa6b54e6c0e6186796a55d78e1c5a270adc9b3ccefb433df5a3bb87b58b",
+                "installed_descriptor_sha256": None,
+                "mismatch_fields": ["capability_id", "package_version"],
+            }
+            try:
+                with (
+                    patch(
+                        "spine.runtime.preflight.resolve_tickerd_compatibility",
+                        side_effect=TickerdCompatibilityError(diagnostic),
+                    ),
+                    patch("spine.runtime.tickerd_runner._tickerd_runner_types") as runtime_types,
+                    patch("spine.runtime.tickerd_runner.SpineTickerdWorkAdapter") as adapter,
+                ):
+                    result = run_foreground(connection, state_dir=state_dir, install_signal_handlers=False)
+            finally:
+                connection.close()
+            self.assertEqual(result.exit_code, 3)
+            runtime_types.assert_not_called()
+            adapter.assert_not_called()
+            paths = SpineRunnerPaths.from_state_dir(state_dir)
+            record = json.loads(paths.events_path.read_text(encoding="utf-8"))
+            self.assertEqual(record, diagnostic)
+
     def test_runtime_contract_mismatch_is_sorted_down_and_stops_before_adapter(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             state_dir = Path(directory) / "state"
@@ -222,12 +265,17 @@ class WorkerRuntimePreflightTests(unittest.TestCase):
             adapter.assert_not_called()
             paths = SpineRunnerPaths.from_state_dir(state_dir)
             records = [json.loads(line) for line in paths.events_path.read_text(encoding="utf-8").splitlines()]
-            self.assertEqual(records, [{
-                "event": "ledger_runtime_preflight_failed",
-                "object_name": "work_instances_eligible_due_idx",
-                "object_type": "index",
-                "reason": "schema_object_mismatch",
-            }])
+            self.assertEqual(
+                records,
+                [
+                    {
+                        "event": "ledger_runtime_preflight_failed",
+                        "object_name": "work_instances_eligible_due_idx",
+                        "object_type": "index",
+                        "reason": "schema_object_mismatch",
+                    }
+                ],
+            )
 
     def test_worker_preflight_does_not_call_deep_verifier(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

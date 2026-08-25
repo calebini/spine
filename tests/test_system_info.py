@@ -6,6 +6,7 @@ import json
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 from jsonschema import Draft202012Validator
 
@@ -14,9 +15,15 @@ from spine.commands import CommandContext, handle
 from spine.commands.cli import main as cli_main
 from spine.core.schedule import system_timezone_database_version
 from spine.ledger import connect, initialize_schema
+from spine.runtime.compatibility import TickerdCompatibilityInfo
 
 ROOT = Path(__file__).parents[1]
 SYSTEM_INFO_SCHEMA = ROOT / "contracts" / "schemas" / "system-info-response.schema.json"
+TICKERD_INFO = TickerdCompatibilityInfo(
+    package_version="0.2.0",
+    capability_id="tickerd.runtime-capabilities.v1",
+    descriptor_sha256="215f9aa6b54e6c0e6186796a55d78e1c5a270adc9b3ccefb433df5a3bb87b58b",
+)
 
 
 class SystemInfoCommandTests(unittest.TestCase):
@@ -26,7 +33,8 @@ class SystemInfoCommandTests(unittest.TestCase):
             initialize_schema(connection)
             changes_before = connection.total_changes
 
-            response = handle("system.info", {}, CommandContext(ledger=connection))
+            with patch("spine.runtime.compatibility.resolve_tickerd_compatibility", return_value=TICKERD_INFO):
+                response = handle("system.info", {}, CommandContext(ledger=connection))
 
             self.assertEqual(connection.total_changes, changes_before)
             self.assertEqual(response["runtime_version"], __version__)
@@ -34,6 +42,8 @@ class SystemInfoCommandTests(unittest.TestCase):
             self.assertEqual(response["implemented_ledger_schema_version"], str(IMPLEMENTED_LEDGER_SCHEMA_VERSION))
             self.assertEqual(response["timezone_database_version"], system_timezone_database_version())
             self.assertEqual(response["implemented_contract_versions"], sorted(IMPLEMENTED_CONTRACT_VERSIONS))
+            self.assertEqual(response["response_contract"], "spine.system-info.v2")
+            self.assertEqual(response["runtime_dependencies"], [TICKERD_INFO.as_system_info()])
             schema = json.loads(SYSTEM_INFO_SCHEMA.read_text(encoding="utf-8"))
             Draft202012Validator(schema).validate(response)
         finally:
@@ -65,7 +75,10 @@ class SystemInfoCommandTests(unittest.TestCase):
             initialize_schema(connection)
             connection.close()
             stdout = io.StringIO()
-            with contextlib.redirect_stdout(stdout):
+            with (
+                patch("spine.runtime.compatibility.resolve_tickerd_compatibility", return_value=TICKERD_INFO),
+                contextlib.redirect_stdout(stdout),
+            ):
                 exit_code = cli_main(["--db", str(database), "--pretty", "system", "info"])
 
             payload = json.loads(stdout.getvalue())

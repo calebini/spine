@@ -11,10 +11,10 @@ WorkingDirectory=/opt/spine
 EnvironmentFile=/etc/spine/worker.env
 
 # Safe first boot: observe-only mode scans eligible work without executing side effects.
-ExecStart=/usr/bin/env PYTHONPATH=${TICKERD_SRC} /opt/spine/.venv/bin/spine-worker --db ${SPINE_DB} --state-dir ${SPINE_STATE_DIR} --mode observe_only --bindings ${SPINE_WORKER_BINDINGS} --openclaw-channel ${SPINE_OPENCLAW_CHANNEL} --openclaw-sender ${SPINE_OPENCLAW_SENDER} --trace-id spine-worker
+ExecStart=/opt/spine/.venv/bin/spine-worker --db ${SPINE_DB} --state-dir ${SPINE_STATE_DIR} --mode observe_only --bindings ${SPINE_WORKER_BINDINGS} --openclaw-channel ${SPINE_OPENCLAW_CHANNEL} --openclaw-sender ${SPINE_OPENCLAW_SENDER} --trace-id spine-worker --event-log-max-bytes ${SPINE_EVENT_LOG_MAX_BYTES} --event-log-backup-count ${SPINE_EVENT_LOG_BACKUP_COUNT} --storage-warning-free-bytes ${SPINE_STORAGE_WARNING_FREE_BYTES} --storage-critical-free-bytes ${SPINE_STORAGE_CRITICAL_FREE_BYTES} --storage-reserve-bytes ${SPINE_STORAGE_RESERVE_BYTES} --critical-storage-action ${SPINE_CRITICAL_STORAGE_ACTION}
 
 # Cutover shape, after observe-only and fake active trials have passed:
-# ExecStart=/usr/bin/env PYTHONPATH=${TICKERD_SRC} /opt/spine/.venv/bin/spine-worker --db ${SPINE_DB} --state-dir ${SPINE_STATE_DIR} --mode active --bindings openclaw --openclaw-channel whatsapp --openclaw-sender gateway --allow-real-send --trace-id spine-worker
+# ExecStart=/opt/spine/.venv/bin/spine-worker --db ${SPINE_DB} --state-dir ${SPINE_STATE_DIR} --mode active --bindings openclaw --openclaw-channel whatsapp --openclaw-sender gateway --allow-real-send --trace-id spine-worker --event-log-max-bytes ${SPINE_EVENT_LOG_MAX_BYTES} --event-log-backup-count ${SPINE_EVENT_LOG_BACKUP_COUNT} --storage-warning-free-bytes ${SPINE_STORAGE_WARNING_FREE_BYTES} --storage-critical-free-bytes ${SPINE_STORAGE_CRITICAL_FREE_BYTES} --storage-reserve-bytes ${SPINE_STORAGE_RESERVE_BYTES} --critical-storage-action ${SPINE_CRITICAL_STORAGE_ACTION}
 
 Restart=on-failure
 RestartSec=5

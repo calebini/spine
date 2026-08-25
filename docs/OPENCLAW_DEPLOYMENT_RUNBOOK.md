@@ -55,10 +55,12 @@ test "$(git -C "$SPINE_CHECKOUT" rev-parse HEAD)" = \
 
 If the initial status output is non-empty, stop instead of mixing deployment changes with local work. `EXPECTED_SPINE_REVISION` is release input supplied outside the repository; the equality check fails a pull of the wrong branch or tracking target. Keep the deployment-specific service stopped until installation, schema, and fake-path verification complete.
 
-If Tickerd is not installed as a package, export its source directory for runtime commands:
+Install the audited Tickerd checkout into the Spine environment. A source-only
+`PYTHONPATH` binding is not accepted by runtime admission:
 
 ```bash
-export TICKERD_SRC=/path/to/tickerd/src
+export TICKERD_CHECKOUT=/path/to/audited/tickerd
+"$SPINE_PYTHON" -m pip install --no-deps "$TICKERD_CHECKOUT"
 ```
 
 ## Filesystem Layout
@@ -67,7 +69,7 @@ Recommended production-shaped paths:
 
 ```text
 SPINE_CHECKOUT=/opt/spine
-TICKERD_SRC=/opt/tickerd/src
+TICKERD_CHECKOUT=/opt/tickerd
 SPINE_DB=/var/lib/spine/ledger.sqlite
 SPINE_STATE_DIR=/var/lib/spine/worker
 ```
@@ -76,7 +78,7 @@ For non-root trials, use an operator-owned equivalent:
 
 ```text
 SPINE_CHECKOUT=$HOME/spine
-TICKERD_SRC=$HOME/tickerd/src
+TICKERD_CHECKOUT=$HOME/tickerd
 SPINE_DB=$HOME/.spine/ledger.sqlite
 SPINE_STATE_DIR=$HOME/.spine/worker
 ```
@@ -108,9 +110,9 @@ Run the installed-script smoke help checks:
 "$SPINE_MIGRATE" --help
 "$SPINE_SEED_CANARY" --help
 "$SPINE_SEED_DEMO" --help
-PYTHONPATH="$TICKERD_SRC" "$SPINE_WORKER" --help
-PYTHONPATH="$TICKERD_SRC" "$SPINE_OPENCLAW_SMOKE" --help
-PYTHONPATH="$TICKERD_SRC" "$SPINE_TICKERD_RUNNER" --help
+"$SPINE_WORKER" --help
+"$SPINE_OPENCLAW_SMOKE" --help
+"$SPINE_TICKERD_RUNNER" --help
 ```
 
 ## Schema Migration
@@ -175,7 +177,7 @@ The command returns `predicted_openclaw_envelope`, including `channel_hint`, `ta
 Use fake mode before any real gateway send. This performs active Spine/Tickerd processing but writes only fake send evidence.
 
 ```bash
-PYTHONPATH="$TICKERD_SRC" "$SPINE_OPENCLAW_SMOKE" \
+"$SPINE_OPENCLAW_SMOKE" \
   --db /tmp/spine-openclaw-smoke.sqlite \
   --state-dir /tmp/spine-openclaw-state \
   --seed-demo \
@@ -226,7 +228,7 @@ The expected successful ledger terminal state is:
 Use observe-only mode to verify runtime cadence and work visibility without side effects:
 
 ```bash
-PYTHONPATH="$TICKERD_SRC" "$SPINE_WORKER" \
+"$SPINE_WORKER" \
   --db "$SPINE_DB" \
   --state-dir "$SPINE_STATE_DIR" \
   --mode observe_only \
@@ -279,7 +281,7 @@ Set exactly one gateway credential in the protected env file:
 Bounded gateway smoke:
 
 ```bash
-PYTHONPATH="$TICKERD_SRC" "$SPINE_WORKER" \
+"$SPINE_WORKER" \
   --db "$SPINE_DB" \
   --state-dir "$SPINE_STATE_DIR" \
   --mode active \
@@ -303,7 +305,7 @@ eligible for retry, and rerunning it can duplicate the external WhatsApp send.
 The long-running command shape is:
 
 ```bash
-PYTHONPATH="$TICKERD_SRC" "$SPINE_WORKER" \
+"$SPINE_WORKER" \
   --db "$SPINE_DB" \
   --state-dir "$SPINE_STATE_DIR" \
   --mode active \

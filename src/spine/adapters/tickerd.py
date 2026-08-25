@@ -22,6 +22,7 @@ from spine.protocols import (
     TickerdWorkItem,
     TickerdWorkItemFactory,
 )
+from spine.runtime.storage_safety import StorageSafetyLatch
 from spine.services import (
     cancel_work,
     fail_work,
@@ -75,6 +76,7 @@ class SpineTickerdWorkAdapter:
     processor: WorkProcessor | None = None
     scheduler_actor_subject_id: str | None = None
     materialization_horizon_seconds: int = 86_400
+    storage_safety_latch: StorageSafetyLatch | None = None
 
     def read_mode(self) -> TickerdRuntimeMode:
         """Return Tickerd's runtime mode without making Tickerd a hard import."""
@@ -85,9 +87,20 @@ class SpineTickerdWorkAdapter:
     def list_work_items(self, envelope: TickerdCycleEnvelope, limit: int) -> Sequence[TickerdWorkItem]:
         """Map eligible, non-stale Spine work instances into Tickerd work items."""
 
-        tickerd_types = _tickerd_public_types()
-        rows = list_eligible_work(self.connection, now_utc=_utc_z(envelope.actual_start_ts), limit=limit)
-        return tuple(tickerd_types.work_item(item_id=str(row["work_instance_id"]), payload=build_work_item_payload(row)) for row in rows)
+        self._require_storage_safe()
+        try:
+            tickerd_types = _tickerd_public_types()
+            rows = list_eligible_work(self.connection, now_utc=_utc_z(envelope.actual_start_ts), limit=limit)
+            return tuple(
+                tickerd_types.work_item(
+                    item_id=str(row["work_instance_id"]),
+                    payload=build_work_item_payload(row),
+                )
+                for row in rows
+            )
+        except sqlite3.Error as exc:
+            self._observe_sqlite_error(exc)
+            raise
 
     def process_work_item(
         self,
@@ -97,6 +110,21 @@ class SpineTickerdWorkAdapter:
         side_effects_allowed: bool,
     ) -> TickerdProcessResult:
         """Validate work freshness and delegate active processing only when configured."""
+
+        self._require_storage_safe()
+        try:
+            return self._process_work_item(item, envelope, side_effects_allowed=side_effects_allowed)
+        except sqlite3.Error as exc:
+            self._observe_sqlite_error(exc)
+            raise
+
+    def _process_work_item(
+        self,
+        item: TickerdWorkItem,
+        envelope: TickerdCycleEnvelope,
+        *,
+        side_effects_allowed: bool,
+    ) -> TickerdProcessResult:
 
         tickerd_types = _tickerd_public_types()
         try:
@@ -125,6 +153,8 @@ class SpineTickerdWorkAdapter:
                 outcome=outcome,
                 outcome_at_utc=_utc_z(envelope.actual_start_ts),
             )
+        except sqlite3.Error:
+            raise
         except Exception:
             fail_work(
                 self.connection,
@@ -138,19 +168,32 @@ class SpineTickerdWorkAdapter:
     def reconcile(self, envelope: TickerdCycleEnvelope, *, max_batches: int) -> TickerdReconcileResult:
         """Materialize the next bounded notification horizon before work selection."""
 
-        tickerd_types = _tickerd_public_types()
-        result = materialize_notification_horizon(
-            self.connection,
-            evaluated_at_utc=_utc_z(envelope.actual_start_ts),
-            horizon_seconds=self.materialization_horizon_seconds,
-            max_items=max(1, max_batches) * 100,
-            actor_subject_id=self.scheduler_actor_subject_id,
-        )
-        return tickerd_types.reconcile_result(
-            ok=not result.failures,
-            items_scanned=result.items_scanned,
-            items_repaired=result.items_repaired,
-        )
+        self._require_storage_safe()
+        try:
+            tickerd_types = _tickerd_public_types()
+            result = materialize_notification_horizon(
+                self.connection,
+                evaluated_at_utc=_utc_z(envelope.actual_start_ts),
+                horizon_seconds=self.materialization_horizon_seconds,
+                max_items=max(1, max_batches) * 100,
+                actor_subject_id=self.scheduler_actor_subject_id,
+            )
+            return tickerd_types.reconcile_result(
+                ok=not result.failures,
+                items_scanned=result.items_scanned,
+                items_repaired=result.items_repaired,
+            )
+        except sqlite3.Error as exc:
+            self._observe_sqlite_error(exc)
+            raise
+
+    def _require_storage_safe(self) -> None:
+        if self.storage_safety_latch is not None:
+            self.storage_safety_latch.require_safe()
+
+    def _observe_sqlite_error(self, exc: sqlite3.Error) -> None:
+        if self.storage_safety_latch is not None:
+            self.storage_safety_latch.observe_sqlite_error(exc)
 
 
 def build_work_item_payload(row: Mapping[str, object]) -> dict[str, object]:

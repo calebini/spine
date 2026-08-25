@@ -43,7 +43,7 @@ Agents must follow these rules:
 
 ## Environment and Ledger Entry Paths
 
-Spine requires Python 3.12 or newer. Operator workflows also use `sqlite3`; the executable first-success example uses `jq`. Tickerd must be installed or importable through `PYTHONPATH` before worker commands.
+Spine requires Python 3.12 or newer. Operator workflows also use `sqlite3`; the executable first-success example uses `jq`. The audited Tickerd `0.2.0` distribution must be installed with package metadata before worker commands; `PYTHONPATH` injection alone is rejected.
 
 Set explicit paths rather than relying on host defaults. `SPINE_CHECKOUT` is host-supplied; no checked-in path is authoritative for a deployment:
 
@@ -52,7 +52,7 @@ export SPINE_CHECKOUT=/absolute/path/to/spine
 export EXPECTED_SPINE_REVISION=approved-commit-or-tag
 export SPINE_DB=/absolute/path/to/ledger.sqlite
 export SPINE_STATE_DIR=/absolute/path/to/spine-worker-state
-export TICKERD_SRC=/absolute/path/to/tickerd/src
+export TICKERD_CHECKOUT=/absolute/path/to/audited/tickerd
 
 export SPINE_PYTHON="$SPINE_CHECKOUT/.venv/bin/python"
 export SPINE_COMMAND="$SPINE_CHECKOUT/.venv/bin/spine-command"
@@ -104,10 +104,11 @@ test "$(git -C "$SPINE_CHECKOUT" rev-parse HEAD)" = \
 
 `EXPECTED_SPINE_REVISION` is deployment input supplied outside the repository. The equality check prevents a successful pull on the wrong branch or tracking target from being mistaken for the approved build.
 
-If Tickerd is not installed as a package, include its source path for runtime commands:
+Install and verify the audited Tickerd distribution before runtime commands:
 
 ```bash
-export TICKERD_SRC=/path/to/tickerd/src
+"$SPINE_PYTHON" -m pip install --no-deps "$TICKERD_CHECKOUT"
+"$SPINE_PYTHON" -c 'from importlib.metadata import version; assert version("tickerd") == "0.2.0"'
 ```
 
 Current commands:
@@ -411,7 +412,7 @@ Run from `SPINE_CHECKOUT` only after choosing and completing the correct ledger 
 Observe current eligible work without side effects:
 
 ```bash
-PYTHONPATH="$TICKERD_SRC" "$SPINE_WORKER" \
+"$SPINE_WORKER" \
   --db "$SPINE_DB" \
   --state-dir "$SPINE_STATE_DIR" \
   --mode observe_only \
@@ -435,7 +436,7 @@ Seed a controlled canary without sending it:
 Run one fake active cycle:
 
 ```bash
-PYTHONPATH="$TICKERD_SRC" "$SPINE_WORKER" \
+"$SPINE_WORKER" \
   --db "$SPINE_DB" \
   --state-dir "$SPINE_STATE_DIR" \
   --mode active \
@@ -633,7 +634,7 @@ Gateway active success:
 Use `observe_only` for visibility checks:
 
 ```bash
-PYTHONPATH="$TICKERD_SRC" "$SPINE_WORKER" \
+"$SPINE_WORKER" \
   --db "$SPINE_DB" \
   --state-dir "$SPINE_STATE_DIR" \
   --mode observe_only \
@@ -654,7 +655,7 @@ Expected behavior:
 Use `active` with fake sender for bounded dry runs:
 
 ```bash
-PYTHONPATH="$TICKERD_SRC" "$SPINE_WORKER" \
+"$SPINE_WORKER" \
   --db "$SPINE_DB" \
   --state-dir "$SPINE_STATE_DIR" \
   --mode active \
@@ -673,7 +674,7 @@ Expected behavior:
 Use `active` with gateway only after explicit approval:
 
 ```bash
-PYTHONPATH="$TICKERD_SRC" "$SPINE_WORKER" \
+"$SPINE_WORKER" \
   --db "$SPINE_DB" \
   --state-dir "$SPINE_STATE_DIR" \
   --mode active \
@@ -735,7 +736,7 @@ Common event records:
 
 Use a deterministic failure class when reporting agent/operator failures:
 
-- `ENVIRONMENT_ERROR`: missing checkout, missing dependency, invalid `SPINE_DB`, invalid `TICKERD_SRC`.
+- `ENVIRONMENT_ERROR`: missing checkout, missing or incompatible installed dependency, or invalid `SPINE_DB`.
 - `VALIDATION_ERROR`: missing required reminder fields, invalid timestamp, invalid target, invalid channel.
 - `STATE_ERROR`: work row is missing, stale, already terminal, or not eligible.
 - `RUNTIME_ERROR`: worker, SQLite, Tickerd, or command execution failed unexpectedly.

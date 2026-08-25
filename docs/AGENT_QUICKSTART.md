@@ -30,7 +30,7 @@ From that Spine checkout, require:
 - Python 3.12 or newer;
 - `sqlite3` and `jq` on `PATH`;
 - Spine installed into the checkout-local virtual environment;
-- Tickerd installed into that environment or a `TICKERD_SRC` path pointing to its `src` directory.
+- the audited Tickerd `0.2.0` distribution installed into that environment with package metadata.
 
 Verify the checkout-local installation. Create the virtual environment first only when provisioning a new checkout:
 
@@ -45,12 +45,13 @@ test -x "$SPINE_COMMAND"
 test -x "$SPINE_MIGRATE"
 ```
 
-If Tickerd is not installed, point Python at a sibling checkout:
+Install the audited Tickerd checkout; a bare `PYTHONPATH` source injection is not
+deployment proof and fails worker admission:
 
 ```bash
-export TICKERD_SRC=/absolute/path/to/tickerd/src
-export PYTHONPATH="$TICKERD_SRC${PYTHONPATH:+:$PYTHONPATH}"
-"$SPINE_PYTHON" -c 'import tickerd; print("tickerd import ok")'
+export TICKERD_CHECKOUT=/absolute/path/to/audited/tickerd
+"$SPINE_PYTHON" -m pip install --no-deps "$TICKERD_CHECKOUT"
+"$SPINE_PYTHON" -c 'from importlib.metadata import version; print(version("tickerd"))'
 ```
 
 Do not continue to worker commands until that import succeeds.
@@ -106,6 +107,8 @@ Successful output includes:
 - equal `implemented_ledger_schema_version` and `ledger_schema_version`;
 - `timezone_database_version`, which must be copied exactly into local-date and local-instant authoring;
 - `implemented_contract_versions`.
+- `runtime_dependencies`, containing compatible Tickerd `0.2.0`, capability
+  `tickerd.runtime-capabilities.v1`, and the pinned descriptor hash.
 
 For `schedule.create`, callers do not need to copy the concrete timezone version into the request. Use `"timezone_database_version":{"kind":"system_current"}` and Spine pins the executing runtime's concrete version before mutation. The response and later `schedule.show` return that concrete version. Replaying the same `command_id` retains the originally pinned version; omission is not a default and remains invalid. Lower-level local-time authoring continues to use the concrete value discovered here.
 
@@ -135,7 +138,6 @@ Run it from the repository root:
 
 ```bash
 PATH="$SPINE_CHECKOUT/.venv/bin:$PATH" \
-TICKERD_SRC="${TICKERD_SRC:-$SPINE_CHECKOUT/../tickerd/src}" \
 "$SPINE_CHECKOUT/examples/agent-first-success.sh"
 ```
 

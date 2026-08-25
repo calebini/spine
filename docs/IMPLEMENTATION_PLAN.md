@@ -278,6 +278,12 @@ This initiative does not subsume the future ledger-storage lifecycle below. It a
 budgets, alarms, stop conditions, and classification; archival or compaction still
 requires its own explicit authority and recovery proof.
 
+Runtime `0.2.0` completes the Tickerd compatibility portion of containment: exact
+package/capability admission, `system.info.v2`, bounded worker event sinks, pre-cycle
+storage pressure stops, and a process-local durability latch. Retry-budget validation,
+the transitional dry-run ceiling, broader storage readback, and the recovery/scalability
+items remain future slices.
+
 ### Future Horizon: Bounded Ledger Storage Lifecycle
 
 Spine's ledger is canonical, append-oriented coordination evidence, so its storage

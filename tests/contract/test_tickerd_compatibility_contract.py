@@ -9,9 +9,7 @@ from importlib import metadata, resources
 from pathlib import Path
 from typing import Any
 
-from jsonschema import Draft202012Validator
-from jsonschema.exceptions import ValidationError
-
+from jsonschema import Draft202012Validator, ValidationError
 
 ROOT = Path(__file__).parents[2]
 CONTRACT_PATH = ROOT / "contracts" / "spine-tickerd-compatibility.v1.json"
@@ -40,7 +38,7 @@ def load_json(path: Path) -> dict[str, Any]:
 def thaw(value: Any) -> Any:
     if isinstance(value, dict) or hasattr(value, "items"):
         return {key: thaw(item) for key, item in value.items()}
-    if isinstance(value, tuple) or isinstance(value, list):
+    if isinstance(value, (tuple, list)):
         return [thaw(item) for item in value]
     return value
 

@@ -2,7 +2,7 @@
 
 __all__ = ["IMPLEMENTED_CONTRACT_VERSIONS", "IMPLEMENTED_LEDGER_SCHEMA_VERSION", "__version__"]
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"
 
 IMPLEMENTED_LEDGER_SCHEMA_VERSION = 9
 IMPLEMENTED_CONTRACT_VERSIONS = frozenset(
@@ -53,6 +53,7 @@ IMPLEMENTED_CONTRACT_VERSIONS = frozenset(
         "spine.schedule-binding-reconcile.v1",
         "spine.schedule-binding-reconcile-response.v1",
         "spine.schedule-binding-reconcile-receipt.v1",
-        "spine.system-info.v1",
+        "spine.system-info.v2",
+        "spine.tickerd-compatibility.v1",
     }
 )

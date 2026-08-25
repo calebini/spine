@@ -7,7 +7,7 @@ Current spec surface:
 - `overview.md`: purpose, doctrine, ontology, and non-goals
 - `architecture.md`: component boundaries and relationships to tickerd, the governance authority, adapters, and projections
 - `operational-resilience.md`: draft cross-cutting resource bounds, failure containment, recovery, runtime compatibility, and operational proof requirements
-- `compatibility.md`: draft exact Spine-to-Tickerd package, capability, admission, diagnostic, readback-transition, and safety-gate contract
+- `compatibility.md`: implemented exact Spine-to-Tickerd package, capability, admission, diagnostic, v2 readback, and safety-gate contract
 - `ontology.md`: first durable ontology and data model sketch
 - `recurrence.md`: canonical flexible recurrence-set model, deterministic expansion and identity, mutation, and occurrence provenance
 - `schedule-create.md`: implemented atomic operator-facing creation of one scheduled event/task, initial reminder policies, and optional bounded work
@@ -55,7 +55,7 @@ Executable contract artifacts:
 - `../contracts/spine-tickerd-compatibility.v1.json`: exact Tickerd provider baseline and Spine consumer requirements
 - `../contracts/schemas/spine-tickerd-compatibility.schema.json`: machine validation for the compatibility agreement
 - `../contracts/schemas/runtime-dependency-failure.schema.json`: planned fail-closed worker dependency diagnostic
-- `../contracts/schemas/system-info-response-v2.schema.json`: planned atomic dependency-readback transition
+- `../contracts/schemas/system-info-response-v2.schema.json`: implemented exact dependency-readback shape
 - `../contracts/schemas/storage-safety-facts.schema.json`: bounded Spine facts carried by Tickerd's generic safety-stop envelope
 - `../tests/contract/test_tickerd_compatibility_contract.py`: cross-repository compatibility and public-shape checks
 

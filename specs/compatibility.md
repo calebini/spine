@@ -1,6 +1,6 @@
 # Spine Runtime Compatibility Contract
 
-Status: Draft v0.1.0; Tickerd consumer contract specified, runtime integration not yet implemented
+Status: Implemented v0.1.0 on Spine runtime 0.2.0
 Scope: Exact cross-repository runtime admission and generic safety-stop mapping
 Authority: Normative Spine consumer requirements for supported Tickerd installations
 
@@ -19,9 +19,9 @@ The machine-readable companion is
 spine.tickerd-compatibility.v1
 ```
 
-This document and the machine contract are a future containment-slice target. Their
-presence does not mean the current Spine runtime performs the admission or safety-gate
-behavior below.
+The runtime packages this machine contract, validates it against the installed Tickerd
+distribution during worker admission and `system.info`, and supplies the storage safety
+gate and durability latch described below.
 
 ## 2. Exact Provider Baseline
 
@@ -159,7 +159,7 @@ exit, supervisor-only-retry, and no-processing requirements still apply.
 
 ## 6. System Readback Transition
 
-The containment implementation atomically promotes `system.info` from
+The containment implementation promotes `system.info` from
 `spine.system-info.v1` to `spine.system-info.v2`. The v2 shape is defined by
 `contracts/schemas/system-info-response-v2.schema.json`. It retains all v1 facts and
 adds `runtime_dependencies`, sorted lexicographically by `name`.
@@ -176,10 +176,10 @@ The Tickerd element contains:
 `system.info` returns success only after the resolved dependency is compatible. The
 `system.info` registry entry requires `spine.tickerd-compatibility.v1`, and the v2
 `implemented_contract_versions` contains both `spine.system-info.v2` and
-`spine.tickerd-compatibility.v1`. The
-current v1 runtime and schema remain authoritative until the implementation updates the
-command registry, implemented-contract declarations, handler, schema, documentation,
-and tests atomically. A v1 response MUST NOT append undeclared dependency fields.
+`spine.tickerd-compatibility.v1`. Spine runtime `0.2.0` implements that atomic
+transition: the command registry, implemented-contract declarations, handler, schema,
+documentation, and tests all name v2. A v1 response remains historical and MUST NOT be
+emitted by this runtime.
 
 ## 7. Spine Safety-Gate Mapping
 
@@ -282,5 +282,5 @@ locally modified provider without a new reviewed compatibility contract.
    prevents every later external effect in that process.
 6. Tickerd retains generic runtime authority; Spine retains storage measurement,
    thresholds, domain reason facts, ledger behavior, and side-effect authorization.
-7. Existing v1 `system.info` and current worker behavior remain accurately labeled
-   until the containment implementation lands atomically.
+7. `system.info.v2` and worker admission advertise the compatibility contract only
+   after exact validation succeeds.
