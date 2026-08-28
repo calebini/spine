@@ -1,6 +1,6 @@
 # Spine Overview
 
-Status: Draft v0.2.1
+Status: Draft v0.3.0
 Scope: Canonical coordination ledger and planning fabric
 Created: 2026-05-31
 
@@ -53,8 +53,10 @@ The shared core MUST support common concepts across profiles:
 - versioned item facts
 - first-class time models
 - first-class locations
+- explicit item archetype classification
 - item relationships and dependencies
 - participants, assignees, watchers, and notification recipients
+- reusable, owner-scoped notification profile definitions and snapshot applications
 - generated work instances
 - projection records
 - side-effect attempts
@@ -103,6 +105,12 @@ Spine does not own:
 ## 7. Determinism Requirements
 
 Spine MUST prefer explicit persisted facts over hidden inference.
+
+Archetype selection and notification-profile default resolution MUST be explicit,
+bounded, and receipt-bearing when they affect a write. Spine MUST NOT classify free
+text or traverse undeclared group membership to choose reminder behavior during
+canonical command handling. `specs/notification-profiles.md` owns that draft
+capability boundary.
 
 Historical UTC trigger and attempt timestamps MUST NOT be recomputed on read or replay.
 

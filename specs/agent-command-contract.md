@@ -347,6 +347,20 @@ The current schema-9 runtime implements this subsection. It resolves named CLI d
 
 The CLI accepts `--compact` only with `schedule.create` and `schedule.show`. On success it applies the `spine.schedule-compact.v1` projection defined in `specs/schedule-operator-tools.md`; omission returns the existing full JSON unchanged. Compact mode is transport presentation and does not alter core command semantics, receipt persistence, or readback authority.
 
+### 14.2 Draft Notification-Profile Command Family
+
+`specs/notification-profiles.md` defines a future command family for dynamic item
+archetypes, reusable notification profiles, deterministic scoped default bindings,
+and snapshot profile application. None of those planned identifiers is part of the
+implemented-command list or compiled command-to-contract registry in Section 3.
+
+The closed `spine.schedule-create.v1` and `spine.schedule-update.v1` request and
+response contracts remain unchanged. Profile-aware `schedule.build`,
+`schedule.create`, `schedule.update`, and `schedule.show` behavior requires explicit
+successor contract versions, matching schemas and fixtures, an ontology migration,
+and atomic runtime declaration. Existing direct multi-policy authoring and lower-level
+reminder commands remain valid independently of that future family.
+
 ## 15. Dry Run and External Send Boundary
 
 Every MVP write command must support the common `dry_run` context flag. Dry run runs the same deterministic validation, replay compatibility checks, stale-version checks, archived-item immutability checks, lifecycle validation, duplicate detection, generated-ID derivation, and output construction that the corresponding non-dry-run write would run before commit. Dry runs persist nothing and call no external systems.

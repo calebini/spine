@@ -1,6 +1,6 @@
 # Spine Ontology
 
-Status: Draft v4.2.1; schema version 9 implementation aligned; operational-resilience lifecycle extension not yet implemented
+Status: Draft v4.3.0; schema version 9 implementation aligned; notification-profile and operational-resilience extensions not yet implemented
 Scope: First durable ontology and minimum data contract sketch for Spine
 
 ## 1. Ontology Goal
@@ -328,6 +328,27 @@ Schema 8 adds an explicit temporal authority beside, not inside, the structural 
 - `temporal_binding_catalog_state` owns one monotonic generation used only to invalidate binding-list cursors. It is not schedule truth.
 
 At most one active binding governs `(target_item_id, target_anchor_role)`. A `part_of` relation alone has no temporal effect. Every bound task version retains an ordinary concrete temporal anchor; a follow-source change creates an ordinary next task version and binding revision atomically rather than changing time through a read join. Selected recurring sources require active bounded `occurrence_provenance` with `consumer=temporal_binding`. The complete field, state, hash, and reconciliation contract is normative in `specs/relative-temporal-bindings.md`.
+
+### 4.7 Item archetypes and notification-profile authorities
+
+The draft extension in `specs/notification-profiles.md` introduces distinct canonical
+authorities for:
+
+- owner-scoped item-archetype roots and immutable revisions;
+- zero or one primary archetype assignment per item version;
+- owner-scoped notification-profile roots and immutable template revisions;
+- exact-scope archetype-to-profile default bindings; and
+- immutable profile-application provenance mapped to ordinary notification intents
+  and policies.
+
+These authorities are not implemented in schema version 9. Their eventual migration
+MUST keep item type, archetype, profile, application, and notification policy separate.
+Archetype assignment is version-scoped item metadata and cannot add lifecycle or
+execution semantics. A profile application snapshots one exact revision and creates
+ordinary `notification_policies`; neither readback nor delivery may derive effective
+policy by joining an item to a later profile revision. Profile and binding mutations
+affect only future profile applications, whether selected explicitly or through a
+default binding.
 
 ## 5. Subjects and Groups
 

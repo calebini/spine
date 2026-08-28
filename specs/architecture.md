@@ -197,6 +197,29 @@ Tickerd may initiate bounded materialization and process eligible work. It does 
 
 `specs/relative-temporal-bindings.md` defines the implemented cross-item derivation layer. `schedule.related_task.create` is an atomic convenience boundary over ordinary task, anchor, `part_of`, binding, policy, provenance, work, audit, and receipt authorities. `schedule.binding.list` and `schedule.binding.reconcile` provide bounded eventual follow-source repair without synchronous source-mutation fan-out. Concrete target anchors remain the schedule authority for ordinary reads; binding revisions explain and govern derivation. Attempt-start freshness blocks stale follow-source work independently of sweep cadence. Tickerd may run the bounded reconciliation loop, but it does not own binding state or temporal derivation.
 
+### 8.1 Notification Profile and Archetype Boundary
+
+`specs/notification-profiles.md` defines the draft reusable-reminder authoring layer.
+Spine owns explicit item-archetype assignments, immutable notification-profile
+revisions, scoped default bindings, and immutable application provenance because those
+facts determine canonical scheduling intent. Item type remains the structural and
+lifecycle authority; an archetype adds classification metadata, not a new execution
+path.
+
+A profile is an authoring template, not a second notification engine. Profile-aware
+schedule orchestration resolves one exact revision, composes suppressions,
+replacements, and custom additions, then persists ordinary item-owned notification
+policies. Expansion, work, rendering, attempt admission, and delivery continue through
+the existing authorities. Profile revision or binding changes never mutate existing
+items through live inheritance.
+
+Core and service code MUST NOT classify free text, consult agent memory, or infer
+owner-scope precedence. The accepted command supplies an explicit archetype selection
+and ordered scope chain. Agent interpretation remains outside Spine and becomes
+canonical only through accepted command facts. Profile-aware behavior requires
+successor schedule contract versions; the implemented closed v1 schedule request
+shapes remain unchanged.
+
 One fresh success is one database transaction containing the complete new item bundle, initial policies, requested recurrence provenance and bounded work, one audit, and one command receipt. The orchestration service reuses internal deterministic domain and persistence functions; it MUST NOT chain public command handlers whose independent commits would expose partial state or synthetic subcommand receipts.
 
 An explicit or named context-default delivery target resolves only to an existing canonical route. Transport context cannot approve, create, update, or send through that route. The governance authority retains approval authority, and adapters remain inaccessible until later durable work processing passes the ordinary side-effect-attempt gate.
