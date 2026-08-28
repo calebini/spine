@@ -423,7 +423,7 @@ class SchedulePrimaryLocationCommandTests(unittest.TestCase):
 
     def event_request(self, command_id: str, *, materialize: bool = False) -> dict[str, object]:
         return {
-            "contract_version": "spine.schedule-create.v1",
+            "contract_version": "spine.schedule-create.v2",
             "command_id": command_id,
             "actor_subject_id": "owner",
             "created_at_utc": "2026-08-18T12:10:00Z",
@@ -445,8 +445,9 @@ class SchedulePrimaryLocationCommandTests(unittest.TestCase):
                 "channel": "whatsapp",
                 "target": {"resolution": "explicit", "delivery_target_id": "whatsapp-owner"},
             },
-            "reminders": [
-                {
+            "notification_plan": {
+                "mode": "none",
+                "custom_additions": [{
                     "policy_key": "countdown",
                     "schedule": {
                         "kind": "repeat_window",
@@ -464,8 +465,8 @@ class SchedulePrimaryLocationCommandTests(unittest.TestCase):
                         "cadence": {"kind": "fixed_elapsed", "interval_seconds": "1200"},
                     },
                     "late_handling": {"kind": "skip"},
-                }
-            ],
+                }],
+            },
             "materialization": (
                 {
                     "mode": "bounded",
@@ -492,7 +493,7 @@ class SchedulePrimaryLocationCommandTests(unittest.TestCase):
         updated_at: str = "2026-08-18T13:00:00Z",
     ) -> dict[str, object]:
         return {
-            "contract_version": "spine.schedule-update.v1",
+            "contract_version": "spine.schedule-update.v2",
             "command_id": command_id,
             "actor_subject_id": "owner",
             "item_id": item_id,

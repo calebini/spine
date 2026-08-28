@@ -2,9 +2,9 @@
 
 __all__ = ["IMPLEMENTED_CONTRACT_VERSIONS", "IMPLEMENTED_LEDGER_SCHEMA_VERSION", "__version__"]
 
-__version__ = "0.2.0"
+__version__ = "0.3.0"
 
-IMPLEMENTED_LEDGER_SCHEMA_VERSION = 9
+IMPLEMENTED_LEDGER_SCHEMA_VERSION = 10
 IMPLEMENTED_CONTRACT_VERSIONS = frozenset(
     {
         "spine.canonical-json.v1",
@@ -19,10 +19,16 @@ IMPLEMENTED_CONTRACT_VERSIONS = frozenset(
         "spine.notification-rendering.v1",
         "spine.notification-rendering.concise-en-ca.v1",
         "spine.notification-rendering-input.v1",
-        "spine.schedule-create.v1",
+        "spine.item-archetypes.v1",
+        "spine.notification-profiles.v1",
+        "spine.notification-profile-bindings.v1",
+        "spine.notification-profile-application.v1",
+        "spine.notification-profile-readback.v1",
+        "spine.notification-profile-catalog-cursor.v1",
+        "spine.schedule-create.v2",
         "spine.schedule-create-normalization.v1",
-        "spine.schedule-create-response.v1",
-        "spine.schedule-create-receipt.v1",
+        "spine.schedule-create-response.v2",
+        "spine.schedule-create-receipt.v2",
         "spine.schedule-compact.v1",
         "spine.schedule-countdown-builder.v1",
         "spine.schedule-countdown-builder-response.v1",
@@ -34,9 +40,9 @@ IMPLEMENTED_CONTRACT_VERSIONS = frozenset(
         "spine.schedule-operations-normalization.v1",
         "spine.schedule-agenda.v1",
         "spine.schedule-agenda-response.v1",
-        "spine.schedule-update.v1",
-        "spine.schedule-update-response.v1",
-        "spine.schedule-update-receipt.v1",
+        "spine.schedule-update.v2",
+        "spine.schedule-update-response.v2",
+        "spine.schedule-update-receipt.v2",
         "spine.schedule-cancel.v1",
         "spine.schedule-cancel-response.v1",
         "spine.schedule-cancel-receipt.v1",

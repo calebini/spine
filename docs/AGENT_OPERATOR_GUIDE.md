@@ -75,7 +75,7 @@ Then choose exactly one ledger entry path:
 - Existing current ledger requiring explicit deep verification: `"$SPINE_MIGRATE" --db "$SPINE_DB" --verify-only`.
 - Existing older ledger: stop its worker, take a recoverable copy, run `"$SPINE_MIGRATE" --db "$SPINE_DB"`, and only then run `--verify-only`.
 
-`spine-ledger-migrate --verify-only` is the explicit deep-integrity path: it checks the full SQLite database, foreign keys, and unscoped Spine ledger invariants and may take time proportional to database size, especially with a cold filesystem cache. Use it for controlled deployment, migration, or incident verification; do not put it in an interactive command loop or a worker heartbeat. The bounded-runtime-preflight amendment in `specs/agent-command-contract.md` requires ordinary `spine-command` and worker startup to use a separate structural check whose cost is independent of ledger size. Until the executing release declares and tests that amendment as implemented, operators MUST assume routine command startup may still perform the older deep verification and MUST NOT claim bounded-preflight behavior from documentation alone.
+`spine-ledger-migrate --verify-only` is the explicit deep-integrity path: it checks the full SQLite database, foreign keys, and unscoped Spine ledger invariants and may take time proportional to database size, especially with a cold filesystem cache. Use it for controlled deployment, migration, or incident verification; do not put it in an interactive command loop or a worker heartbeat. Ordinary `spine-command` and worker startup instead use a structural preflight whose cost is independent of ledger size. They verify the schema version, required schema-object fingerprints, and exact runtime contracts without running deep ledger-integrity scans.
 
 Do not require current-schema verification before an intended migration; an older valid schema is expected to fail that check. After initialization or migration, run:
 
@@ -84,9 +84,15 @@ Do not require current-schema verification before an intended migration; an olde
 "$SPINE_COMMAND" --db "$SPINE_DB" --pretty system info
 ```
 
-Require equal `implemented_ledger_schema_version` and `ledger_schema_version`. Before using the atomic and operator surfaces, also require `implemented_contract_versions` to include `spine.schedule-create.v1`, `spine.schedule-show.v1`, the complete agenda/update/cancel family, `spine.schedule-compact.v1`, and the countdown-builder family. Before authoring or reading primary locations, require `spine.schedule-primary-location.v1`, `spine.schedule-primary-location-authoring.v1`, `spine.schedule-primary-location-view.v1`, and `spine.schedule-primary-location-normalization.v1`. Before using related tasks, additionally require `spine.relative-temporal-binding.v1`, `spine.schedule-related-task-create.v1`, and both `spine.schedule-binding-list.v1` and `spine.schedule-binding-reconcile.v1` with their response/receipt/cursor versions.
+Require equal `implemented_ledger_schema_version` and `ledger_schema_version`. Before using the atomic and operator surfaces, also require `implemented_contract_versions` to include `spine.schedule-create.v2`, `spine.schedule-update.v2`, `spine.schedule-show.v1`, the complete agenda/cancel family, the item-archetype and notification-profile families, `spine.schedule-compact.v1`, and the countdown-builder family. Before authoring or reading primary locations, require `spine.schedule-primary-location.v1`, `spine.schedule-primary-location-authoring.v1`, `spine.schedule-primary-location-view.v1`, and `spine.schedule-primary-location-normalization.v1`. Before using related tasks, additionally require `spine.relative-temporal-binding.v1`, `spine.schedule-related-task-create.v1`, and both `spine.schedule-binding-list.v1` and `spine.schedule-binding-reconcile.v1` with their response/receipt/cursor versions.
 
 For `schedule.create`, prefer the request directive `"timezone_database_version":{"kind":"system_current"}`. Spine resolves it once during fresh execution, stores the concrete installed version, and returns that concrete value in receipts and readback. A compatible replay returns the original resolved version even if the host later installs newer timezone data. Operators may instead use `{"kind":"explicit","version":"<exact-version>"}`. Omission is invalid; Spine never chooses timezone data through a hidden default. For lower-level local-time commands that require the concrete string directly, use the value returned by `system.info`. Never copy a version from an example or another machine.
+
+Before using notification profiles, require `spine.item-archetypes.v1`,
+`spine.notification-profiles.v1`,
+`spine.notification-profile-bindings.v1`,
+`spine.notification-profile-application.v1`, and
+`spine.notification-profile-readback.v1`.
 
 ## Supported CLI Surfaces
 
@@ -122,6 +128,46 @@ Current commands:
 - `"$SPINE_CHECKOUT/.venv/bin/spine-openclaw-smoke"`: run a bounded fake OpenClaw smoke.
 
 The scheduling command surface is `schedule.build`, `schedule.create`, `schedule.related_task.create`, `schedule.show`, `agenda.show`, `schedule.update`, `schedule.cancel`, `schedule.binding.list`, `schedule.binding.reconcile`, `event.create`, `event.reschedule`, `task.create`, `item.occurrences`, `recurrence.instance.add`, `recurrence.instance.remove`, `recurrence.instance.override`, `recurrence.series.edit`, `occurrence_provenance.regenerate`, `reminder.create`, `reminder.edit`, `reminder.disable`, `notification.opportunities`, and `notification_work.materialize`. Prefer `schedule.related_task.create` when one intent includes a new task, `part_of` relation, event-relative due time, and optional reminders. Use `schedule.binding.list` and `.reconcile` for explicit follow-source lifecycle. Use the lower-level family for occurrence-specific or otherwise independent mutations. See `docs/AGENT_QUICKSTART.md` for the complete executable path; see `specs/agent-command-contract.md` for normative request, response, replay, and failure behavior.
+
+The dynamic catalog surface is `item_archetype.create|revise|retire|show|list`,
+`notification_profile.create|revise|retire|show|list`,
+`notification_profile.binding.set|remove|list`, and
+`notification_profile.resolve`.
+
+## Item Archetypes and Notification Profiles
+
+Archetypes classify an event or task without changing its structural `item_type`.
+Profiles are owner-scoped, versioned reminder templates. Both are Spine ledger truth,
+not prompt-only agent configuration. A profile never chooses a recipient, delivery
+target, timezone, recurrence rule, materialization horizon, or permission to send.
+
+Use this operator sequence:
+
+1. Create or select an archetype with `item_archetype.create|show|list`.
+2. Create a reusable profile with
+   `notification_profile.create`; profile templates contain only `schedule` and
+   `late_handling`.
+3. Optionally make it the scoped default with
+   `notification_profile.binding.set`.
+4. Submit `spine.schedule-create.v2` with `item.archetype` and a
+   `notification_plan` in `explicit` or `archetype_default` mode. The same
+   request still supplies recipient, delivery route, and materialization bounds.
+5. Verify with `schedule.show --include notification_profile,policies,work`.
+
+Application snapshots one exact profile revision into ordinary item-owned policies.
+Later profile revisions do not silently mutate existing items. Use
+`spine.schedule-update.v2` with
+`patch.notification_plan.action=upgrade_current_revision` for an explicit upgrade.
+Suppressions, replacements, and custom additions are composed atomically, so selecting
+a profile never removes the ability to add one-off reminders.
+
+The `spine.schedule-create.v2` and `spine.schedule-update.v2` surfaces support both
+profile-backed composition and direct custom additions. Lower-level reminder commands
+remain valid precision surfaces for independent policy lifecycle work.
+
+No starter defaults are silently installed by the migration. Operators create the
+profiles and bindings appropriate to their own preferences; this avoids applying
+someone else’s reminder policy to an existing or newly migrated ledger.
 
 ## Stable Scheduling Lifecycle Language
 

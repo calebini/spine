@@ -1,0 +1,47 @@
+{
+  "contract_version": "spine.schedule-create.v2",
+  "command_id": "fixture-schedule-create-profile",
+  "actor_subject_id": "subject_agent",
+  "created_at_utc": "2035-02-01T12:00:03Z",
+  "item": {
+    "item_type": "event",
+    "title": "Dentist appointment",
+    "archetype": {
+      "item_archetype_id": "item_archetype_example",
+      "revision_resolution": "current",
+      "selection_source": "agent_selected"
+    },
+    "event_detail": { "all_day": false }
+  },
+  "scheduled_time": {
+    "time_basis": "local_instant",
+    "local_date": "2035-02-14",
+    "local_time": "10:00:00",
+    "timezone": "America/Toronto",
+    "timezone_database_version": { "kind": "system_current" }
+  },
+  "delivery": {
+    "recipient_kind": "subject",
+    "recipient_subject_id": "subject_owner",
+    "channel": "whatsapp",
+    "target": {
+      "resolution": "explicit",
+      "delivery_target_id": "delivery_target_owner_whatsapp"
+    }
+  },
+  "notification_plan": {
+    "mode": "archetype_default",
+    "scope_chain": [
+      {
+        "owner_kind": "subject",
+        "owner_subject_id": "subject_owner"
+      },
+      { "owner_kind": "system" }
+    ],
+    "on_no_match": "fail",
+    "suppress_template_keys": [],
+    "replacements": [],
+    "custom_additions": []
+  },
+  "materialization": { "mode": "none" }
+}

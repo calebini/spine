@@ -2,7 +2,7 @@
   "scenario_id": "update.end_anchored_scheduled_time",
   "command": "schedule.update",
   "request": {
-    "contract_version": "spine.schedule-update.v1",
+    "contract_version": "spine.schedule-update.v2",
     "command_id": "schedule-update-end-anchored-time-001",
     "actor_subject_id": "subject_agent",
     "item_id": "item_timed_event_with_end",

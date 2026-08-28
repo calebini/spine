@@ -1,42 +1,356 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://cortext.local/spine/contracts/schemas/schedule-update-request.schema.json",
-  "title": "Spine Atomic Schedule Update Request v1",
+  "title": "Spine Atomic Schedule Update Request v2",
   "type": "object",
   "required": [
-    "contract_version", "command_id", "actor_subject_id", "item_id", "target_version",
-    "updated_at_utc", "patch", "materialization"
+    "contract_version",
+    "command_id",
+    "actor_subject_id",
+    "item_id",
+    "target_version",
+    "updated_at_utc",
+    "patch",
+    "materialization"
   ],
   "properties": {
-    "contract_version": { "const": "spine.schedule-update.v1" },
-    "command_id": { "$ref": "notification-types.schema.json#/$defs/id" },
-    "actor_subject_id": { "$ref": "notification-types.schema.json#/$defs/id" },
-    "item_id": { "$ref": "notification-types.schema.json#/$defs/id" },
-    "target_version": { "$ref": "notification-types.schema.json#/$defs/decimalPositive" },
-    "updated_at_utc": { "$ref": "notification-types.schema.json#/$defs/utcTimestamp" },
+    "contract_version": {
+      "const": "spine.schedule-update.v2"
+    },
+    "command_id": {
+      "$ref": "notification-types.schema.json#/$defs/id"
+    },
+    "actor_subject_id": {
+      "$ref": "notification-types.schema.json#/$defs/id"
+    },
+    "item_id": {
+      "$ref": "notification-types.schema.json#/$defs/id"
+    },
+    "target_version": {
+      "$ref": "notification-types.schema.json#/$defs/decimalPositive"
+    },
+    "updated_at_utc": {
+      "$ref": "notification-types.schema.json#/$defs/utcTimestamp"
+    },
     "patch": {
       "type": "object",
       "minProperties": 1,
       "properties": {
-        "item": { "$ref": "schedule-operations-types.schema.json#/$defs/itemPatch" },
+        "item": {
+          "$ref": "schedule-operations-types.schema.json#/$defs/itemPatch"
+        },
         "primary_location": {
           "oneOf": [
-            { "$ref": "schedule-primary-location-types.schema.json#/$defs/authoring" },
-            { "type": "null" }
+            {
+              "$ref": "schedule-primary-location-types.schema.json#/$defs/authoring"
+            },
+            {
+              "type": "null"
+            }
           ]
         },
-        "scheduled_time": { "$ref": "schedule-operations-types.schema.json#/$defs/scheduledTimeReplacement" },
-        "recurrence": { "$ref": "schedule-operations-types.schema.json#/$defs/recurrenceReplacement" },
-        "delivery": { "$ref": "schedule-create-request.schema.json#/$defs/delivery" },
-        "reminders": {
-          "type": "array",
-          "maxItems": 32,
-          "items": { "$ref": "schedule-operations-types.schema.json#/$defs/desiredReminder" }
+        "scheduled_time": {
+          "$ref": "schedule-operations-types.schema.json#/$defs/scheduledTimeReplacement"
+        },
+        "recurrence": {
+          "$ref": "schedule-operations-types.schema.json#/$defs/recurrenceReplacement"
+        },
+        "delivery": {
+          "$ref": "schedule-create-request.schema.json#/$defs/delivery"
+        },
+        "archetype": {
+          "$ref": "#/$defs/archetypeAction"
+        },
+        "notification_plan": {
+          "$ref": "#/$defs/profileAction"
         }
       },
       "additionalProperties": false
     },
-    "materialization": { "$ref": "schedule-create-request.schema.json#/$defs/materialization" }
+    "materialization": {
+      "$ref": "schedule-create-request.schema.json#/$defs/materialization"
+    }
   },
-  "additionalProperties": false
+  "additionalProperties": false,
+  "$defs": {
+    "archetypeAction": {
+      "oneOf": [
+        {
+          "type": "object",
+          "required": [
+            "action"
+          ],
+          "properties": {
+            "action": {
+              "const": "retain"
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": [
+            "action"
+          ],
+          "properties": {
+            "action": {
+              "const": "clear"
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": [
+            "action",
+            "item_archetype_id",
+            "revision_resolution",
+            "selection_source"
+          ],
+          "properties": {
+            "action": {
+              "const": "select"
+            },
+            "item_archetype_id": {
+              "$ref": "notification-types.schema.json#/$defs/id"
+            },
+            "revision_resolution": {
+              "enum": [
+                "current",
+                "exact"
+              ]
+            },
+            "item_archetype_revision_id": {
+              "$ref": "notification-types.schema.json#/$defs/id"
+            },
+            "selection_source": {
+              "enum": [
+                "operator_explicit",
+                "agent_selected",
+                "imported"
+              ]
+            },
+            "source_ref": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "allOf": [
+            {
+              "if": {
+                "properties": {
+                  "revision_resolution": {
+                    "const": "exact"
+                  }
+                },
+                "required": [
+                  "revision_resolution"
+                ]
+              },
+              "then": {
+                "required": [
+                  "item_archetype_revision_id"
+                ]
+              },
+              "else": {
+                "not": {
+                  "required": [
+                    "item_archetype_revision_id"
+                  ]
+                }
+              }
+            }
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "profileAction": {
+      "oneOf": [
+        {
+          "type": "object",
+          "required": [
+            "action"
+          ],
+          "properties": {
+            "action": {
+              "const": "retain"
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": [
+            "action",
+            "custom_additions"
+          ],
+          "properties": {
+            "action": {
+              "const": "clear"
+            },
+            "custom_additions": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 32,
+              "items": {
+                "$ref": "#/$defs/directCustomAddition"
+              }
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": [
+            "action"
+          ],
+          "properties": {
+            "action": {
+              "const": "upgrade_current_revision"
+            },
+            "suppress_template_keys": {
+              "$ref": "notification-profile-types.schema.json#/$defs/overlays/properties/suppress_template_keys"
+            },
+            "replacements": {
+              "$ref": "notification-profile-types.schema.json#/$defs/overlays/properties/replacements"
+            },
+            "custom_additions": {
+              "$ref": "notification-profile-types.schema.json#/$defs/overlays/properties/custom_additions"
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": [
+            "action",
+            "notification_profile_id",
+            "revision_resolution"
+          ],
+          "properties": {
+            "action": {
+              "const": "explicit"
+            },
+            "notification_profile_id": {
+              "$ref": "notification-types.schema.json#/$defs/id"
+            },
+            "revision_resolution": {
+              "enum": [
+                "current",
+                "exact"
+              ]
+            },
+            "notification_profile_revision_id": {
+              "$ref": "notification-types.schema.json#/$defs/id"
+            },
+            "suppress_template_keys": {
+              "$ref": "notification-profile-types.schema.json#/$defs/overlays/properties/suppress_template_keys"
+            },
+            "replacements": {
+              "$ref": "notification-profile-types.schema.json#/$defs/overlays/properties/replacements"
+            },
+            "custom_additions": {
+              "$ref": "notification-profile-types.schema.json#/$defs/overlays/properties/custom_additions"
+            }
+          },
+          "allOf": [
+            {
+              "if": {
+                "properties": {
+                  "revision_resolution": {
+                    "const": "exact"
+                  }
+                },
+                "required": [
+                  "revision_resolution"
+                ]
+              },
+              "then": {
+                "required": [
+                  "notification_profile_revision_id"
+                ]
+              },
+              "else": {
+                "not": {
+                  "required": [
+                    "notification_profile_revision_id"
+                  ]
+                }
+              }
+            }
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": [
+            "action",
+            "scope_chain",
+            "on_no_match"
+          ],
+          "properties": {
+            "action": {
+              "const": "archetype_default"
+            },
+            "scope_chain": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 8,
+              "uniqueItems": true,
+              "items": {
+                "$ref": "notification-profile-types.schema.json#/$defs/owner"
+              }
+            },
+            "on_no_match": {
+              "enum": [
+                "fail",
+                "use_custom_only"
+              ]
+            },
+            "suppress_template_keys": {
+              "$ref": "notification-profile-types.schema.json#/$defs/overlays/properties/suppress_template_keys"
+            },
+            "replacements": {
+              "$ref": "notification-profile-types.schema.json#/$defs/overlays/properties/replacements"
+            },
+            "custom_additions": {
+              "$ref": "notification-profile-types.schema.json#/$defs/overlays/properties/custom_additions"
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "directCustomAddition": {
+      "type": "object",
+      "required": [
+        "policy_key",
+        "schedule",
+        "late_handling"
+      ],
+      "properties": {
+        "policy_key": {
+          "$ref": "notification-profile-types.schema.json#/$defs/key"
+        },
+        "notification_intent_id": {
+          "$ref": "notification-types.schema.json#/$defs/id"
+        },
+        "notification_policy_id": {
+          "$ref": "notification-types.schema.json#/$defs/id"
+        },
+        "schedule": {
+          "$ref": "notification-types.schema.json#/$defs/schedule"
+        },
+        "late_handling": {
+          "$ref": "notification-types.schema.json#/$defs/lateHandling"
+        }
+      },
+      "dependentRequired": {
+        "notification_intent_id": ["notification_policy_id"],
+        "notification_policy_id": ["notification_intent_id"]
+      },
+      "additionalProperties": false
+    }
+  }
 }

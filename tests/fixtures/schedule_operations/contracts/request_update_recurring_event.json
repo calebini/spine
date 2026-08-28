@@ -1,5 +1,5 @@
 {
-  "contract_version": "spine.schedule-update.v1",
+  "contract_version": "spine.schedule-update.v2",
   "command_id": "schedule-update-recurring-event-001",
   "actor_subject_id": "subject_agent",
   "item_id": "item_recurring_event",
@@ -42,7 +42,9 @@
         "delivery_target_id": "delivery_target_owner_whatsapp_new"
       }
     },
-    "reminders": [
+    "notification_plan": {
+      "action": "clear",
+      "custom_additions": [
       {
         "policy_key": "countdown",
         "notification_intent_id": "notification_intent_countdown",
@@ -69,7 +71,8 @@
           "kind": "skip"
         }
       }
-    ]
+      ]
+    }
   },
   "materialization": {
     "mode": "none"

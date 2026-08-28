@@ -199,7 +199,7 @@ Tickerd may initiate bounded materialization and process eligible work. It does 
 
 ### 8.1 Notification Profile and Archetype Boundary
 
-`specs/notification-profiles.md` defines the draft reusable-reminder authoring layer.
+`specs/notification-profiles.md` defines the implemented reusable-reminder authoring layer.
 Spine owns explicit item-archetype assignments, immutable notification-profile
 revisions, scoped default bindings, and immutable application provenance because those
 facts determine canonical scheduling intent. Item type remains the structural and

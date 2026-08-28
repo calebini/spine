@@ -142,14 +142,14 @@ For verification only:
 
 `--verify-only` is a deliberate deep-ledger operation. It performs full SQLite integrity and foreign-key checks plus unscoped Spine ledger-invariant validation, so its runtime may grow with ledger size and a cold filesystem cache. Run it during a controlled migration, deployment verification window, or storage-incident investigation, not on every interactive command, worker heartbeat, or routine scheduler restart. The bounded-runtime-preflight amendment requires ordinary `spine-command` and worker startup to use a separate structural check, but deployment automation MUST verify that the selected release implements that amendment before relying on bounded startup latency.
 
-The current runtime requires ledger schema version 9. Run the normal migration command and explicit deep verification during initialization, schema-changing deployment, or a scheduled verification window, then require `system.info` to report schema 9 before starting the updated worker. A routine restart of an unchanged, already admitted schema MUST NOT acquire a new implicit deep-verification dependency. Do not run a current worker against an older ledger or an older worker against a migrated ledger.
+The current runtime requires ledger schema version 10. Run the normal migration command and explicit deep verification during initialization, schema-changing deployment, or a scheduled verification window, then require `system.info` to report schema 10 before starting the updated worker. A routine restart of an unchanged, already admitted schema MUST NOT acquire a new implicit deep-verification dependency. Do not run a current worker against an older ledger or an older worker against a migrated ledger.
 
 ```bash
 "$SPINE_MIGRATE" --db "$SPINE_DB" --verify-only
 "$SPINE_COMMAND" --db "$SPINE_DB" --pretty system info
 ```
 
-Require equal implemented and actual schema versions. If this deployment will use atomic scheduling, also require `spine.schedule-create.v1`, `spine.schedule-create-normalization.v1`, `spine.schedule-create-response.v1`, and `spine.schedule-create-receipt.v1` before accepting authoring traffic.
+Require equal implemented and actual schema versions. If this deployment will use atomic scheduling, also require `spine.schedule-create.v2`, `spine.schedule-create-normalization.v1`, `spine.schedule-create-response.v2`, `spine.schedule-create-receipt.v2`, and the item-archetype and notification-profile contract families before accepting authoring traffic.
 
 For persistent-ledger visibility checks, seed the deterministic demo row only when it is absent:
 

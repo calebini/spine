@@ -1,7 +1,7 @@
 {
   "manifest_version": "spine.sqlite-schema-object-manifest.v1",
   "schemas": {
-    "9": {
+    "10": {
       "objects": [
         {
           "definition_sha256": "d398d475608b90ad2f581456812626755656f58d3e67822c31232c3e3a2480e3",
@@ -31,6 +31,11 @@
         {
           "definition_sha256": "aca3ce21d652821c3731a3fa4a9cda185825f22a936d3367ed70bb91b92add81",
           "name": "command_receipts_item_created_idx",
+          "object_type": "index"
+        },
+        {
+          "definition_sha256": "19b20d95362420125f4b008b1867ba3ada0be4fb8baf64cfe0480dd5ba46617d",
+          "name": "coordination_catalog_audit_resource_idx",
           "object_type": "index"
         },
         {
@@ -74,6 +79,16 @@
           "object_type": "index"
         },
         {
+          "definition_sha256": "971ea5ffc3bb98378f69947bf33b8c389cd4f16da463c8d9f97bcc1f50660977",
+          "name": "item_archetype_assignments_archetype_idx",
+          "object_type": "index"
+        },
+        {
+          "definition_sha256": "0bf1e228e4dc5482079c39ff03ee4a7f5e3af6ca39c604ec48f8d1620c6e0c3d",
+          "name": "item_archetypes_owner_status_idx",
+          "object_type": "index"
+        },
+        {
           "definition_sha256": "7577e5ac0d0a6e97b08d6d34fb226860a8b3eeb76bcfd421e1604026e60a4556",
           "name": "item_locations_location_idx",
           "object_type": "index"
@@ -114,8 +129,83 @@
           "object_type": "index"
         },
         {
+          "definition_sha256": "11594eb93ae09b72df0c12f5747fab185596fa4e75f127fd7c8d7f69caee4a14",
+          "name": "notification_profile_application_policies_policy_idx",
+          "object_type": "index"
+        },
+        {
+          "definition_sha256": "f2b5fc5e68a91a20eefa2734fc16f9fb7b524e642a0b417c8c181772df206213",
+          "name": "notification_profile_applications_profile_idx",
+          "object_type": "index"
+        },
+        {
+          "definition_sha256": "00431a880ac9816a5b784495f82efca9c291b83691792f879425e176929b4b05",
+          "name": "notification_profile_bindings_active_scope_unique",
+          "object_type": "index"
+        },
+        {
+          "definition_sha256": "c640aa5b9b792d686228216e099aa3a28a7d54c3ebb81207193f89e4c75e405b",
+          "name": "notification_profile_bindings_profile_status_idx",
+          "object_type": "index"
+        },
+        {
+          "definition_sha256": "6700f110f3bfac01aae7893ff2e75cc85ed585eed87d2b166ac7ec7202b36b3f",
+          "name": "notification_profile_templates_revision_idx",
+          "object_type": "index"
+        },
+        {
+          "definition_sha256": "bc59cb957e4ba4061e87aeff4beccecf14984507b4884f5674addce120d8d407",
+          "name": "notification_profiles_owner_status_idx",
+          "object_type": "index"
+        },
+        {
           "definition_sha256": "130bc79e9e054cba60067f3ba698c20af258385ea32f8a4cb944c625563c742d",
           "name": "notification_renderings_item_attempt_idx",
+          "object_type": "index"
+        },
+        {
+          "definition_sha256": "00259463541656dd13e8969fbd08e88d9dee2f360dfd77435e6cdc5f65d43267",
+          "name": "occurrence_provenance_active_slot_unique",
+          "object_type": "index"
+        },
+        {
+          "definition_sha256": "2e5623a221daef5b01acb5c498b2e2f91eaf3c66a25d996fd819277743cd786e",
+          "name": "occurrence_provenance_item_consumer_range_idx",
+          "object_type": "index"
+        },
+        {
+          "definition_sha256": "4e7301dbb70e9a19fe0460bad090dded27dfe50201ffe34c42be2bf3a57091b2",
+          "name": "recurrence_exdates_revision_status_idx",
+          "object_type": "index"
+        },
+        {
+          "definition_sha256": "1b36c421521aa2db3266dd1a414e2fddd606a665c63745025dd9c01bff3b67bc",
+          "name": "recurrence_overrides_active_target_unique",
+          "object_type": "index"
+        },
+        {
+          "definition_sha256": "b8d0090aacc80e93b64d2ce8b7245cf204f2fb0eb6a84faac979855b83dde2e6",
+          "name": "recurrence_provenance_reports_open_idx",
+          "object_type": "index"
+        },
+        {
+          "definition_sha256": "7f79c3e508a4aaebb33c7ffe412893880e734817620ceab3f7d5d4818104410f",
+          "name": "recurrence_rdates_revision_status_idx",
+          "object_type": "index"
+        },
+        {
+          "definition_sha256": "4c7d7718410ef8fe40921f3af485fbb7f8997d964c45a7af6fe684a8cd664455",
+          "name": "recurrence_revisions_current_idx",
+          "object_type": "index"
+        },
+        {
+          "definition_sha256": "4862d0a73f63b21ad4b1d9d5db42992009ec2ae01472c546abc24ba5ca9fc77f",
+          "name": "recurrence_rules_revision_status_idx",
+          "object_type": "index"
+        },
+        {
+          "definition_sha256": "fca994ca095b1533e96d74b30fdd82bc533b27601eee1550d70ba00c9014821b",
+          "name": "recurrence_segments_active_idx",
           "object_type": "index"
         },
         {
@@ -184,6 +274,11 @@
           "object_type": "index"
         },
         {
+          "definition_sha256": "3ee12735314e5eb02e9d5d1d56778c734b39bf4bbaad5837d59246bfe46cd875",
+          "name": "work_instances_notification_opportunity_unique",
+          "object_type": "index"
+        },
+        {
           "definition_sha256": "e0a2148ffd7088503e3d1fbaec47dcd19ab1ebc173075f43f3d29df1f2c9698c",
           "name": "work_instances_source_work_idx",
           "object_type": "index"
@@ -201,6 +296,11 @@
         {
           "definition_sha256": "5ea98bd9f4d977f5c8019ad32a1f2dbbb8fbd9c92662398e0f7db3086b874908",
           "name": "command_receipts",
+          "object_type": "table"
+        },
+        {
+          "definition_sha256": "65cbcb14d5e776702e8ea6c72feaa59edc878369cf9a66fe96d512989001bd71",
+          "name": "coordination_catalog_audit_log",
           "object_type": "table"
         },
         {
@@ -234,6 +334,21 @@
           "object_type": "table"
         },
         {
+          "definition_sha256": "10f04a28a55120fe1c66183473bde19504f39a66375d3e16514bc1a21ec4614a",
+          "name": "item_archetype_assignments",
+          "object_type": "table"
+        },
+        {
+          "definition_sha256": "60d25f1b40c5afc466c4fe8f2d971219aebafea2cf7fd575fb8a31a22b6dfb42",
+          "name": "item_archetype_revisions",
+          "object_type": "table"
+        },
+        {
+          "definition_sha256": "4bda0f1ebba6b89a5d37a61a9e3d22690d194c24a66bc04fe2b8994d2b9e2c28",
+          "name": "item_archetypes",
+          "object_type": "table"
+        },
+        {
           "definition_sha256": "550a5875976ce2c66ea352d0343600e51a190f951ba05ed1a57efff01ee039d8",
           "name": "item_locations",
           "object_type": "table"
@@ -256,6 +371,36 @@
         {
           "definition_sha256": "6013e2b553b4002901ea7ac36a69a942df38d926531e0a48ea171f40cc8892b2",
           "name": "notification_policies",
+          "object_type": "table"
+        },
+        {
+          "definition_sha256": "21b3883c53f4ebbb875776036ed655531c582106713d46894e022b4d4551ea2a",
+          "name": "notification_profile_application_policies",
+          "object_type": "table"
+        },
+        {
+          "definition_sha256": "4ded32169ac367bf8f4a59ba31a71bf24e620a391c5cb22f4883730b7d133315",
+          "name": "notification_profile_applications",
+          "object_type": "table"
+        },
+        {
+          "definition_sha256": "954a65b240592a1c449d519b4f5aece04afc1a43678f3c5018536c29ee8e4bce",
+          "name": "notification_profile_bindings",
+          "object_type": "table"
+        },
+        {
+          "definition_sha256": "6994d3f50b2da2b84a4ed9d9115a758803f6ca4a4370fccc0120de46a438fe9b",
+          "name": "notification_profile_revisions",
+          "object_type": "table"
+        },
+        {
+          "definition_sha256": "6afd064b258b66de6d77f26c9039daf1fa56704e3d2de74755dd2b542f34ff6a",
+          "name": "notification_profile_templates",
+          "object_type": "table"
+        },
+        {
+          "definition_sha256": "93bd97f18ef0ad9491d11879304c5ae09e950dd0ae18312ac49a337dd0933ee9",
+          "name": "notification_profiles",
           "object_type": "table"
         },
         {

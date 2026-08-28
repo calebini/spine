@@ -1,6 +1,6 @@
 # Spine Agent Command Contract
 
-Status: Draft v0.4.9; executable scheduling, deterministic notification rendering, bounded runtime preflight, and exact Tickerd compatibility implemented on schema 9
+Status: Draft v0.5.0; executable scheduling, dynamic notification profiles, deterministic notification rendering, bounded runtime preflight, and exact Tickerd compatibility implemented on schema 10
 Scope: Agent-facing command/request contract for authoring and inspecting Spine coordination truth
 Created: 2026-06-19
 
@@ -14,7 +14,7 @@ The CLI is the first expected transport adapter. Future MCP and localhost HTTP a
 
 ## 2. Authority
 
-This contract depends on `specs/overview.md`, `specs/architecture.md`, `specs/operational-resilience.md`, `specs/compatibility.md`, `specs/ontology.md`, `specs/recurrence.md`, `specs/notifications.md`, `specs/schedule-create.md`, `specs/schedule-show.md`, `specs/schedule-operator-tools.md`, `specs/schedule-operations.md`, the additive `specs/schedule-primary-location.md` capability, and `specs/SPINE_SPEC_VERSIONING_AND_FREEZE_POLICY.md`. If this document conflicts with `specs/ontology.md`, the ontology wins for ledger truth and this document must be corrected.
+This contract depends on `specs/overview.md`, `specs/architecture.md`, `specs/operational-resilience.md`, `specs/compatibility.md`, `specs/ontology.md`, `specs/recurrence.md`, `specs/notifications.md`, `specs/schedule-create.md`, `specs/schedule-show.md`, `specs/schedule-operator-tools.md`, `specs/schedule-operations.md`, the additive `specs/schedule-primary-location.md` capability, `specs/notification-profiles.md`, and `specs/SPINE_SPEC_VERSIONING_AND_FREEZE_POLICY.md`. If this document conflicts with `specs/ontology.md`, the ontology wins for ledger truth and this document must be corrected.
 
 Spine is the canonical coordination ledger and planning fabric. External tools are projections or side-effect targets. The authoring commands in this contract do not send externally.
 
@@ -27,6 +27,16 @@ CLI invocations such as `spine event create` are transport aliases. MCP tools an
 `CommandContext` contains the ledger connection or path, `dry_run` boolean defaulting to `false`, transport metadata, optional `correlation_id`, optional runtime adapter bindings, and the normalized `delivery_target_defaults` mapping defined by `specs/schedule-create.md`. A delivery-target default maps a request key to an existing canonical delivery-target ID; it is not adapter configuration, route creation, approval, or permission to send. Command authoring and bounded scheduling reads require only the ledger and explicitly declared normalized context; they never invoke an external adapter. Runtime workers resolve configured bindings only after durable work exists and the pre-write attempt gate succeeds. The command core does not depend on argparse, FastAPI, MCP server APIs, or another transport framework.
 
 An unsupported canonical command identifier is a deterministic request failure and never mutates canonical rows. If the supplied identifier is syntactically dotted but not one of the MVP command identifiers, the command core returns `ok=false`, echoes that identifier in `command`, and reports `error.code=unsupported_command`, `error.field=command`. If a transport cannot resolve an invocation to a syntactically valid canonical command identifier, it returns `ok=false` without a `command` field and reports `error.code=unsupported_command`, `error.field=command`. The CLI maps both cases to exit `2` when transport control is recovered.
+
+The implemented dynamic-catalog command identifiers are
+`item_archetype.create`, `item_archetype.revise`,
+`item_archetype.retire`, `item_archetype.show`, `item_archetype.list`,
+`notification_profile.create`, `notification_profile.revise`,
+`notification_profile.retire`, `notification_profile.show`,
+`notification_profile.list`, `notification_profile.binding.set`,
+`notification_profile.binding.remove`, `notification_profile.binding.list`,
+and `notification_profile.resolve`. Together with the identifiers in the
+opening paragraph of this section, this is the closed implemented command set.
 
 ## 4. Common Request, Output, and Error Rules
 
@@ -100,7 +110,7 @@ For `reminder.create channel=whatsapp`, the CLI must resolve its local OpenClaw 
 
 `spine --db <path> system info` is the read-only environment-discovery command. It requires an initialized current ledger because it reports both runtime and ledger authority. Its request is exactly an empty JSON object; when `--input` is omitted, this command alone supplies that empty object without reading stdin. An explicitly supplied `--input` is still parsed and validated normally. It returns `ok=true`, `command=system.info`, `response_contract=spine.system-info.v2`, runtime version, implemented and actual ledger-schema versions as canonical decimal strings, the exact installed timezone-database version required by local schedule authoring, the sorted implemented contract-version array, and the exact compatible Tickerd dependency facts. It writes no ledger row and invokes no adapter. The exact response shape is `contracts/schemas/system-info-response.schema.json`.
 
-Runtime `0.2.0` completed the atomic v2 promotion specified by
+Runtime `0.3.0` includes the atomic v2 promotion specified by
 `specs/compatibility.md`; v1 is no longer an implemented response contract.
 
 Caller-supplied `command_id` is the stable MVP path. When `--generate-command-id` is implemented, the CLI derives the value as `cmd_<sha256>` over Spine canonical JSON containing `derivation_version=spine.cli-command-id.v1`, canonical `command`, the JSON request body excluding `command_id`, and the CLI-resolved database path string. The CLI-resolved database path string is the absolute lexical path formed by resolving `--db` relative to the process current working directory when needed, removing `.` and `..` path segments, preserving filesystem spelling and case, preserving symlink path spelling without resolving symlink targets, and omitting trailing separators except for filesystem root. Generated-ID tests must cover equivalent relative and absolute spellings that normalize to the same lexical path; symlink spellings are distinct unless their supplied lexical path also normalizes to the same string.
@@ -128,11 +138,11 @@ Every registry entry requires `spine.canonical-json.v1`. The following table is 
 | `occurrence_provenance.regenerate` | `spine.recurrence.contract.v1`, `spine.recurrence.normalization.v1` |
 | `reminder.create`, `reminder.edit`, `reminder.disable` | `spine.notification-schedule-authoring.v1`, `spine.notification-schedule.contract.v1`, `spine.notification-schedule.normalization.v1` |
 | `notification.opportunities`, `notification_work.materialize` | `spine.notification-schedule-authoring.v1`, `spine.notification-schedule.contract.v1`, `spine.notification-schedule.normalization.v1`, `spine.notification-opportunities.v1` |
-| `schedule.build` | `spine.schedule-create.v1`, `spine.schedule-create-normalization.v1`, `spine.schedule-countdown-builder.v1`, `spine.schedule-countdown-builder-response.v1`, `spine.notification-schedule.contract.v1` |
-| `schedule.create` | `spine.schedule-create.v1`, `spine.schedule-create-normalization.v1`, `spine.schedule-create-response.v1`, `spine.schedule-create-receipt.v1`, `spine.recurrence-authoring.v1`, `spine.recurrence.contract.v1`, `spine.recurrence.normalization.v1`, `spine.notification-schedule-authoring.v1`, `spine.notification-schedule.contract.v1`, `spine.notification-schedule.normalization.v1`, `spine.notification-opportunities.v1`, `spine.schedule-primary-location.v1`, `spine.schedule-primary-location-authoring.v1`, `spine.schedule-primary-location-view.v1`, `spine.schedule-primary-location-normalization.v1` |
+| `schedule.build` | `spine.schedule-create.v2`, `spine.schedule-create-normalization.v1`, `spine.schedule-countdown-builder.v1`, `spine.schedule-countdown-builder-response.v1`, `spine.notification-schedule.contract.v1` |
+| `schedule.create` | `spine.schedule-create.v2`, `spine.schedule-create-normalization.v1`, `spine.schedule-create-response.v2`, `spine.schedule-create-receipt.v2`, `spine.item-archetypes.v1`, `spine.notification-profiles.v1`, `spine.notification-profile-bindings.v1`, `spine.notification-profile-application.v1`, `spine.recurrence-authoring.v1`, `spine.recurrence.contract.v1`, `spine.recurrence.normalization.v1`, `spine.notification-schedule-authoring.v1`, `spine.notification-schedule.contract.v1`, `spine.notification-schedule.normalization.v1`, `spine.notification-opportunities.v1`, `spine.schedule-primary-location.v1`, `spine.schedule-primary-location-authoring.v1`, `spine.schedule-primary-location-view.v1`, `spine.schedule-primary-location-normalization.v1` |
 | `schedule.show` | `spine.schedule-show.v1`, `spine.schedule-compact.v1`, `spine.schedule-primary-location.v1`, `spine.schedule-primary-location-view.v1`, `spine.relative-temporal-binding.v1`, `spine.notification-rendering.v1`, `spine.notification-rendering.concise-en-ca.v1`, `spine.notification-rendering-input.v1` |
 | `agenda.show` | `spine.schedule-operations-normalization.v1`, `spine.schedule-agenda.v1`, `spine.schedule-agenda-response.v1`, `spine.schedule-primary-location.v1`, `spine.schedule-primary-location-view.v1`, `spine.relative-temporal-binding.v1` |
-| `schedule.update` | `spine.schedule-operations-normalization.v1`, `spine.schedule-update.v1`, `spine.schedule-update-response.v1`, `spine.schedule-update-receipt.v1`, `spine.recurrence-authoring.v1`, `spine.recurrence.contract.v1`, `spine.recurrence.normalization.v1`, `spine.notification-schedule-authoring.v1`, `spine.notification-schedule.contract.v1`, `spine.notification-schedule.normalization.v1`, `spine.notification-opportunities.v1`, `spine.schedule-primary-location.v1`, `spine.schedule-primary-location-authoring.v1`, `spine.schedule-primary-location-view.v1`, `spine.schedule-primary-location-normalization.v1`, `spine.relative-temporal-binding.v1` |
+| `schedule.update` | `spine.schedule-operations-normalization.v1`, `spine.schedule-update.v2`, `spine.schedule-update-response.v2`, `spine.schedule-update-receipt.v2`, `spine.item-archetypes.v1`, `spine.notification-profiles.v1`, `spine.notification-profile-bindings.v1`, `spine.notification-profile-application.v1`, `spine.recurrence-authoring.v1`, `spine.recurrence.contract.v1`, `spine.recurrence.normalization.v1`, `spine.notification-schedule-authoring.v1`, `spine.notification-schedule.contract.v1`, `spine.notification-schedule.normalization.v1`, `spine.notification-opportunities.v1`, `spine.schedule-primary-location.v1`, `spine.schedule-primary-location-authoring.v1`, `spine.schedule-primary-location-view.v1`, `spine.schedule-primary-location-normalization.v1`, `spine.relative-temporal-binding.v1` |
 | `schedule.cancel` | `spine.schedule-operations-normalization.v1`, `spine.schedule-cancel.v1`, `spine.schedule-cancel-response.v1`, `spine.schedule-cancel-receipt.v1`, `spine.notification-schedule.contract.v1`, `spine.relative-temporal-binding.v1` |
 | `schedule.related_task.create` | `spine.relative-temporal-binding.v1`, `spine.relative-temporal-binding-normalization.v1`, `spine.normalized-temporal-binding-revision-hash.v1`, `spine.temporal-binding-catalog.v1`, `spine.schedule-related-task-create.v1`, `spine.schedule-related-task-create-response.v1`, `spine.schedule-related-task-create-receipt.v1`, `spine.notification-schedule-authoring.v1`, `spine.notification-schedule.contract.v1`, `spine.notification-schedule.normalization.v1`, `spine.notification-opportunities.v1` |
 | `schedule.binding.list` | `spine.relative-temporal-binding.v1`, `spine.temporal-binding-catalog.v1`, `spine.schedule-binding-list.v1`, `spine.schedule-binding-list-response.v1`, `spine.schedule-binding-list-cursor.v1` |
@@ -143,6 +153,24 @@ The table sets are unconditional for the command entry. Optional request fields 
 The executing package's `IMPLEMENTED_CONTRACT_VERSIONS` declaration is the sole runtime capability set used for this comparison. Neither the registry nor the implemented set is stored in the ledger. Command dispatch, read/write classification, CLI command resolution, and preflight MUST consume the same registry or be covered by an exhaustive parity test against it; parallel hand-maintained registries that can disagree are non-conforming. `system.info.implemented_contract_versions` is the lexicographically sorted projection of the same implemented set.
 
 Command resolution first requires an entry in the registry. A missing entry follows the existing `unsupported_command` response and CLI exit `2` without opening the database. For a present entry, every exact `required_contract_versions` value MUST appear in `IMPLEMENTED_CONTRACT_VERSIONS`. Additional implemented versions are ignored for this command. A missing or differently versioned requirement fails before handler invocation with `ok=false`, the resolved `command`, `error.code=environment_failure`, `error.field=runtime_contracts`, a message containing the lexicographically sorted missing exact identifiers, and CLI exit `7`. Tests MUST enumerate every registry entry, prove dispatch and access-mode parity, prove exact-version rejection, and prove `system.info` ordering from the same authority.
+
+Runtime `0.3.0` defines the sole `schedule.create` registry row with
+`spine.schedule-create.v2`, `spine.schedule-create-response.v2`,
+`spine.schedule-create-receipt.v2`, `spine.item-archetypes.v1`,
+`spine.notification-profiles.v1`,
+`spine.notification-profile-bindings.v1`, and
+`spine.notification-profile-application.v1`. It defines the sole
+`schedule.update` row with `spine.schedule-update.v2`,
+`spine.schedule-update-response.v2`, `spine.schedule-update-receipt.v2`,
+and the same four profile-family versions.
+
+The dynamic-catalog registry rows are:
+
+| Commands | Additional `required_contract_versions` |
+|---|---|
+| `item_archetype.create`, `item_archetype.revise`, `item_archetype.retire`, `item_archetype.show`, `item_archetype.list` | `spine.item-archetypes.v1`, `spine.notification-profile-readback.v1`, `spine.notification-profile-catalog-cursor.v1` |
+| `notification_profile.create`, `notification_profile.revise`, `notification_profile.retire`, `notification_profile.show`, `notification_profile.list` | `spine.notification-profiles.v1`, `spine.notification-profile-readback.v1`, `spine.notification-profile-catalog-cursor.v1` |
+| `notification_profile.binding.set`, `notification_profile.binding.remove`, `notification_profile.binding.list`, `notification_profile.resolve` | `spine.item-archetypes.v1`, `spine.notification-profiles.v1`, `spine.notification-profile-bindings.v1`, `spine.notification-profile-readback.v1`, `spine.notification-profile-catalog-cursor.v1` |
 
 ### 5.3 Schema-Object Manifest
 
@@ -227,7 +255,7 @@ Fresh insert success returns `ok=true`, `command=subject.upsert`, `created=true`
 
 `schedule.show` is the read-only aggregate verification command defined by `specs/schedule-show.md`. It requires `item_id`; optional `include` values select policy, work, attempt, relation, temporal-binding, and advertised primary-location projections, and optional per-collection limits bound the applicable arrays. It always returns current item facts, stored and resolved schedule facts, recurrence when present, explicit authored/opportunity/work/delivery lifecycle dimensions, delivery-target snapshots, and complete summary counts. The exact request and response shapes are `contracts/schemas/schedule-show-request.schema.json` and `contracts/schemas/schedule-show-response.schema.json`. It creates no ledger row, invokes no adapter, and is the preferred operator readback after `schedule.create` or later worker processing.
 
-`schedule.build` is the read-only relative-event countdown compiler defined by `specs/schedule-operator-tools.md`. It requires an explicit reference instant, relative event delay, fixed-elapsed reminder cadence, timezone-data directive, actor, eventual `schedule.create` command ID, and delivery request. It resolves environment-dependent timezone and route facts into a concrete `spine.schedule-create.v1` request, consumes no command ID, creates no receipt, and writes nothing. Its exact request and response shapes are `contracts/schemas/schedule-countdown-builder-request.schema.json` and `contracts/schemas/schedule-countdown-builder-response.schema.json`.
+`schedule.build` is the read-only relative-event countdown compiler defined by `specs/schedule-operator-tools.md`. It requires an explicit reference instant, relative event delay, fixed-elapsed reminder cadence, timezone-data directive, actor, eventual `schedule.create` command ID, and delivery request. It resolves environment-dependent timezone and route facts into a concrete direct-plan `spine.schedule-create.v2` request, consumes no command ID, creates no receipt, and writes nothing. Its exact request and response shapes are `contracts/schemas/schedule-countdown-builder-request.schema.json` and `contracts/schemas/schedule-countdown-builder-response.schema.json`.
 
 ### 9.1 Operational Schedule Family
 
@@ -349,17 +377,16 @@ The CLI accepts `--compact` only with `schedule.create` and `schedule.show`. On 
 
 ### 14.2 Draft Notification-Profile Command Family
 
-`specs/notification-profiles.md` defines a future command family for dynamic item
+`specs/notification-profiles.md` defines the implemented command family for dynamic item
 archetypes, reusable notification profiles, deterministic scoped default bindings,
-and snapshot profile application. None of those planned identifiers is part of the
-implemented-command list or compiled command-to-contract registry in Section 3.
+and snapshot profile application. Its identifiers are part of the implemented-command
+list and compiled command-to-contract registry in Section 3.
 
-The closed `spine.schedule-create.v1` and `spine.schedule-update.v1` request and
-response contracts remain unchanged. Profile-aware `schedule.build`,
-`schedule.create`, `schedule.update`, and `schedule.show` behavior requires explicit
-successor contract versions, matching schemas and fixtures, an ontology migration,
-and atomic runtime declaration. Existing direct multi-policy authoring and lower-level
-reminder commands remain valid independently of that future family.
+The closed `spine.schedule-create.v2` and `spine.schedule-update.v2` request and
+response contracts are the sole implemented high-level schedule write surface.
+Their `notification_plan` field supports both reusable profile application and direct
+multi-policy authoring. Lower-level reminder commands remain independently valid
+precision surfaces.
 
 ## 15. Dry Run and External Send Boundary
 

@@ -155,6 +155,7 @@ def _schemas() -> dict[str, dict[str, object]]:
     return {
         path.name: _load_json(path)
         for path in sorted(SCHEMA_DIR.glob("notification-*.schema.json"))
+        if not path.name.startswith("notification-profile-")
     }
 
 

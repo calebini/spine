@@ -2,14 +2,16 @@
   "scenario_id": "update.duplicate_normalized_policy",
   "command": "schedule.update",
   "request": {
-    "contract_version": "spine.schedule-update.v1",
+    "contract_version": "spine.schedule-update.v2",
     "command_id": "schedule-update-duplicate-policy-001",
     "actor_subject_id": "subject_agent",
     "item_id": "item_recurring_event",
     "target_version": "3",
     "updated_at_utc": "2035-02-10T12:00:00Z",
     "patch": {
-      "reminders": [
+      "notification_plan": {
+        "action": "clear",
+        "custom_additions": [
         {
           "policy_key": "first",
           "notification_intent_id": "notification_intent_first",
@@ -42,7 +44,8 @@
           },
           "late_handling": { "kind": "skip" }
         }
-      ]
+        ]
+      }
     },
     "materialization": { "mode": "none" }
   },
@@ -67,7 +70,7 @@
     "error": {
       "code": "semantic_conflict",
       "message": "desired reminder entries normalize to the same notification policy",
-      "field": "patch.reminders"
+      "field": "patch.notification_plan"
     }
   },
   "mutation": "none",

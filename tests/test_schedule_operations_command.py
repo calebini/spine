@@ -90,7 +90,7 @@ class ScheduleOperationsCommandTests(unittest.TestCase):
         changed = handle(
             "schedule.update",
             {
-                "contract_version": "spine.schedule-update.v1",
+                "contract_version": "spine.schedule-update.v2",
                 "command_id": "agenda-stale-source",
                 "actor_subject_id": "owner",
                 "item_id": event["item_id"],
@@ -111,7 +111,7 @@ class ScheduleOperationsCommandTests(unittest.TestCase):
         self.assertTrue(created["ok"], created)
         policy = created["policies"][0]
         request = {
-            "contract_version": "spine.schedule-update.v1",
+            "contract_version": "spine.schedule-update.v2",
             "command_id": "schedule-update-reminder",
             "actor_subject_id": "owner",
             "item_id": created["item_id"],
@@ -119,8 +119,9 @@ class ScheduleOperationsCommandTests(unittest.TestCase):
             "updated_at_utc": "2026-08-13T13:00:00Z",
             "patch": {
                 "item": {"title": "Updated appointment"},
-                "reminders": [
-                    {
+                "notification_plan": {
+                    "action": "clear",
+                    "custom_additions": [{
                         "policy_key": "countdown",
                         "notification_intent_id": policy["notification_intent_id"],
                         "notification_policy_id": policy["notification_policy_id"],
@@ -132,8 +133,8 @@ class ScheduleOperationsCommandTests(unittest.TestCase):
                             "cadence": {"kind": "fixed_elapsed", "interval_seconds": "1800"},
                         },
                         "late_handling": {"kind": "skip"},
-                    }
-                ],
+                    }],
+                },
             },
             "materialization": self.materialization(),
         }
@@ -162,7 +163,7 @@ class ScheduleOperationsCommandTests(unittest.TestCase):
         missing = handle(
             "schedule.update",
             {
-                "contract_version": "spine.schedule-update.v1",
+                "contract_version": "spine.schedule-update.v2",
                 "command_id": "schedule-update-missing-recurrence",
                 "actor_subject_id": "owner",
                 "item_id": created["item_id"],
@@ -189,7 +190,7 @@ class ScheduleOperationsCommandTests(unittest.TestCase):
         updated = handle(
             "schedule.update",
             {
-                "contract_version": "spine.schedule-update.v1",
+                "contract_version": "spine.schedule-update.v2",
                 "command_id": "schedule-update-recurring",
                 "actor_subject_id": "owner",
                 "item_id": created["item_id"],
@@ -249,7 +250,7 @@ class ScheduleOperationsCommandTests(unittest.TestCase):
     def test_update_dry_run_matches_identities_and_persists_nothing(self) -> None:
         created = handle("schedule.create", self.event_request("dry-run-event"), self.context)
         request = {
-            "contract_version": "spine.schedule-update.v1",
+            "contract_version": "spine.schedule-update.v2",
             "command_id": "schedule-update-dry-run",
             "actor_subject_id": "owner",
             "item_id": created["item_id"],
@@ -286,7 +287,7 @@ class ScheduleOperationsCommandTests(unittest.TestCase):
                 response = handle(
                     "schedule.update",
                     {
-                        "contract_version": "spine.schedule-update.v1",
+                        "contract_version": "spine.schedule-update.v2",
                         "command_id": f"rollback-update-{phase}",
                         "actor_subject_id": "owner",
                         "item_id": created["item_id"],
@@ -354,7 +355,7 @@ class ScheduleOperationsCommandTests(unittest.TestCase):
         materialize: bool = False,
     ) -> dict[str, object]:
         return {
-            "contract_version": "spine.schedule-create.v1",
+            "contract_version": "spine.schedule-create.v2",
             "command_id": command_id,
             "actor_subject_id": "owner",
             "created_at_utc": "2026-08-13T12:00:00Z",
@@ -366,8 +367,9 @@ class ScheduleOperationsCommandTests(unittest.TestCase):
                 "channel": "whatsapp",
                 "target": {"resolution": "explicit", "delivery_target_id": "whatsapp-owner"},
             },
-            "reminders": [
-                {
+            "notification_plan": {
+                "mode": "none",
+                "custom_additions": [{
                     "policy_key": "countdown",
                     "schedule": {
                         "kind": "repeat_window",
@@ -377,14 +379,14 @@ class ScheduleOperationsCommandTests(unittest.TestCase):
                         "cadence": {"kind": "fixed_elapsed", "interval_seconds": "1200"},
                     },
                     "late_handling": {"kind": "skip"},
-                }
-            ],
+                }],
+            },
             "materialization": self.materialization() if materialize else {"mode": "none"},
         }
 
     def task_request(self, command_id: str) -> dict[str, object]:
         return {
-            "contract_version": "spine.schedule-create.v1",
+            "contract_version": "spine.schedule-create.v2",
             "command_id": command_id,
             "actor_subject_id": "owner",
             "created_at_utc": "2026-08-13T12:00:00Z",
@@ -409,16 +411,17 @@ class ScheduleOperationsCommandTests(unittest.TestCase):
                 "channel": "whatsapp",
                 "target": {"resolution": "explicit", "delivery_target_id": "whatsapp-owner"},
             },
-            "reminders": [
-                {
+            "notification_plan": {
+                "mode": "none",
+                "custom_additions": [{
                     "policy_key": "one_hour_before",
                     "schedule": {
                         "kind": "once",
                         "at": {"kind": "target_offset", "offset_basis": "elapsed", "offset_seconds": "-3600"},
                     },
                     "late_handling": {"kind": "skip"},
-                }
-            ],
+                }],
+            },
             "materialization": {"mode": "none"},
         }
 

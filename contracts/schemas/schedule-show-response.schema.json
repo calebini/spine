@@ -24,6 +24,7 @@
         { "type": "null" }
       ]
     },
+    "notification_profile": { "type": "object" },
     "scheduled_times": {
       "type": "array",
       "maxItems": 4,
@@ -39,7 +40,17 @@
     "included": {
       "type": "array",
       "uniqueItems": true,
-      "items": { "enum": ["attempts", "policies", "primary_location", "relations", "temporal_bindings", "work"] }
+      "items": {
+        "enum": [
+          "attempts",
+          "notification_profile",
+          "policies",
+          "primary_location",
+          "relations",
+          "temporal_bindings",
+          "work"
+        ]
+      }
     },
     "notification_policies": {
       "type": "array",
@@ -83,6 +94,16 @@
       },
       "then": { "required": ["primary_location"] },
       "else": { "not": { "required": ["primary_location"] } }
+    },
+    {
+      "if": {
+        "properties": {
+          "included": { "contains": { "const": "notification_profile" } }
+        },
+        "required": ["included"]
+      },
+      "then": { "required": ["notification_profile"] },
+      "else": { "not": { "required": ["notification_profile"] } }
     }
   ],
   "additionalProperties": false,

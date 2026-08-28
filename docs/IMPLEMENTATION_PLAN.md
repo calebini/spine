@@ -47,7 +47,7 @@ passes without a schema migration or public command change.
 
 ## Delivered Fat Slice: Atomic Schedule Creation
 
-The audited `spine.schedule-create.v1` contract is implemented as one environment-sized delivery. The operator-facing `schedule.create` command creates an event or task, its local-instant anchor, optional inherited recurrence, complete initial reminder-policy set, optional occurrence provenance, and optional bounded notification work in one transaction and returns one replay-safe composite receipt.
+The audited `spine.schedule-create.v2` contract is implemented as one environment-sized delivery. The operator-facing `schedule.create` command creates an event or task, its local-instant anchor, optional archetype and notification-profile application, optional inherited recurrence, complete initial reminder-policy set, optional occurrence provenance, and optional bounded notification work in one transaction and returns one replay-safe composite receipt.
 
 The delivery includes:
 

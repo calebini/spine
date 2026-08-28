@@ -8,7 +8,7 @@ from spine.models import EventStatus, ItemStatus, ItemType, RelationType, Tempor
 
 class Stage1ScaffoldTests(unittest.TestCase):
     def test_package_imports(self) -> None:
-        self.assertEqual(spine.__version__, "0.2.0")
+        self.assertEqual(spine.__version__, "0.3.0")
         self.assertEqual(ItemType.EVENT.value, "event")
         self.assertEqual(ItemStatus.ACTIVE.value, "active")
         self.assertEqual(EventStatus.SCHEDULED.value, "scheduled")

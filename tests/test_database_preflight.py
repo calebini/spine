@@ -11,6 +11,7 @@ from unittest.mock import patch
 from spine import IMPLEMENTED_CONTRACT_VERSIONS
 from spine.commands import core as command_core
 from spine.commands.cli import main as command_main
+from spine.commands.notification_profiles import PROFILE_COMMANDS
 from spine.commands.registry import (
     CANONICAL_JSON_CONTRACT,
     COMMAND_RUNTIME_CONTRACT_REGISTRY,
@@ -58,14 +59,23 @@ def _dispatch_commands() -> set[str]:
 class CommandRuntimeContractRegistryTests(unittest.TestCase):
     def test_registry_is_complete_sorted_and_exact(self) -> None:
         self.assertEqual(COMMAND_RUNTIME_CONTRACT_REGISTRY_ID, "spine.command-runtime-contract-registry.v1")
-        self.assertEqual(len(COMMAND_RUNTIME_CONTRACT_REGISTRY), 37)
-        self.assertEqual(set(COMMAND_RUNTIME_CONTRACT_REGISTRY), _dispatch_commands())
+        self.assertEqual(len(COMMAND_RUNTIME_CONTRACT_REGISTRY), 51)
+        self.assertEqual(
+            set(COMMAND_RUNTIME_CONTRACT_REGISTRY),
+            _dispatch_commands() | set(PROFILE_COMMANDS),
+        )
         expected_read_commands = {
             "agenda.show",
             "item.list",
             "item.occurrences",
             "item.show",
+            "item_archetype.list",
+            "item_archetype.show",
             "notification.opportunities",
+            "notification_profile.binding.list",
+            "notification_profile.list",
+            "notification_profile.resolve",
+            "notification_profile.show",
             "relation.list",
             "schedule.binding.list",
             "schedule.build",

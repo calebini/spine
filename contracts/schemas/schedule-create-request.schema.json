@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://cortext.local/spine/contracts/schemas/schedule-create-request.schema.json",
-  "title": "Spine Atomic Schedule Create Request v1",
+  "title": "Spine Atomic Schedule Create Request v2",
   "type": "object",
   "required": [
     "contract_version",
@@ -11,25 +11,68 @@
     "item",
     "scheduled_time",
     "delivery",
-    "reminders",
+    "notification_plan",
     "materialization"
   ],
   "properties": {
-    "contract_version": { "const": "spine.schedule-create.v1" },
-    "command_id": { "$ref": "notification-types.schema.json#/$defs/id" },
-    "actor_subject_id": { "$ref": "notification-types.schema.json#/$defs/id" },
-    "created_at_utc": { "$ref": "notification-types.schema.json#/$defs/utcTimestamp" },
-    "item": { "$ref": "#/$defs/item" },
-    "scheduled_time": { "$ref": "#/$defs/scheduledTime" },
-    "delivery": { "$ref": "#/$defs/delivery" },
-    "reminders": {
-      "type": "array",
-      "minItems": 1,
-      "maxItems": 32,
-      "items": { "$ref": "#/$defs/reminder" }
+    "contract_version": {
+      "const": "spine.schedule-create.v2"
     },
-    "materialization": { "$ref": "#/$defs/materialization" }
+    "command_id": {
+      "$ref": "notification-types.schema.json#/$defs/id"
+    },
+    "actor_subject_id": {
+      "$ref": "notification-types.schema.json#/$defs/id"
+    },
+    "created_at_utc": {
+      "$ref": "notification-types.schema.json#/$defs/utcTimestamp"
+    },
+    "item": {
+      "$ref": "#/$defs/item"
+    },
+    "scheduled_time": {
+      "$ref": "schedule-create-request.schema.json#/$defs/scheduledTime"
+    },
+    "delivery": {
+      "$ref": "schedule-create-request.schema.json#/$defs/delivery"
+    },
+    "notification_plan": {
+      "$ref": "notification-profile-types.schema.json#/$defs/createPlan"
+    },
+    "materialization": {
+      "$ref": "schedule-create-request.schema.json#/$defs/materialization"
+    }
   },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "notification_plan": {
+            "properties": {
+              "mode": {
+                "const": "archetype_default"
+              }
+            },
+            "required": [
+              "mode"
+            ]
+          }
+        },
+        "required": [
+          "notification_plan"
+        ]
+      },
+      "then": {
+        "properties": {
+          "item": {
+            "required": [
+              "archetype"
+            ]
+          }
+        }
+      }
+    }
+  ],
   "additionalProperties": false,
   "$defs": {
     "localDate": {
@@ -52,18 +95,30 @@
       "oneOf": [
         {
           "type": "object",
-          "required": ["kind", "version"],
+          "required": [
+            "kind",
+            "version"
+          ],
           "properties": {
-            "kind": { "const": "explicit" },
-            "version": { "type": "string", "minLength": 1 }
+            "kind": {
+              "const": "explicit"
+            },
+            "version": {
+              "type": "string",
+              "minLength": 1
+            }
           },
           "additionalProperties": false
         },
         {
           "type": "object",
-          "required": ["kind"],
+          "required": [
+            "kind"
+          ],
           "properties": {
-            "kind": { "const": "system_current" }
+            "kind": {
+              "const": "system_current"
+            }
           },
           "additionalProperties": false
         }
@@ -71,62 +126,134 @@
     },
     "subjectRole": {
       "type": "object",
-      "required": ["subject_id", "role"],
+      "required": [
+        "subject_id",
+        "role"
+      ],
       "properties": {
-        "subject_id": { "$ref": "notification-types.schema.json#/$defs/id" },
-        "role": { "enum": ["assignee", "owner"] },
-        "status": { "enum": ["active", "inactive"] }
+        "subject_id": {
+          "$ref": "notification-types.schema.json#/$defs/id"
+        },
+        "role": {
+          "enum": [
+            "assignee",
+            "owner"
+          ]
+        },
+        "status": {
+          "enum": [
+            "active",
+            "inactive"
+          ]
+        }
       },
       "additionalProperties": false
     },
     "eventDetail": {
       "type": "object",
-      "required": ["all_day"],
+      "required": [
+        "all_day"
+      ],
       "properties": {
-        "all_day": { "const": false },
-        "visibility": { "type": "string", "minLength": 1 },
-        "attendance_policy_ref": { "type": "string", "minLength": 1 }
+        "all_day": {
+          "const": false
+        },
+        "visibility": {
+          "type": "string",
+          "minLength": 1
+        },
+        "attendance_policy_ref": {
+          "type": "string",
+          "minLength": 1
+        }
       },
       "additionalProperties": false
     },
     "taskDetail": {
       "type": "object",
       "properties": {
-        "priority": { "type": "string", "minLength": 1 },
+        "priority": {
+          "type": "string",
+          "minLength": 1
+        },
         "subject_roles": {
           "type": "array",
           "uniqueItems": true,
           "description": "Complete initial role set. uniqueItems rejects identical objects; semantic validation also rejects any repeated (subject_id, role) pair regardless of status after omitted status defaults to active.",
-          "items": { "$ref": "#/$defs/subjectRole" }
+          "items": {
+            "$ref": "#/$defs/subjectRole"
+          }
         }
       },
       "additionalProperties": false
     },
     "item": {
       "type": "object",
-      "required": ["item_type", "title"],
+      "required": [
+        "item_type",
+        "title"
+      ],
       "properties": {
-        "item_type": { "enum": ["event", "task"] },
-        "title": { "type": "string", "minLength": 1 },
-        "summary": { "type": "string" },
-        "source_ref": { "type": "string" },
-        "primary_location": { "$ref": "schedule-primary-location-types.schema.json#/$defs/authoring" },
-        "event_detail": { "$ref": "#/$defs/eventDetail" },
-        "task_detail": { "$ref": "#/$defs/taskDetail" }
+        "item_type": {
+          "enum": [
+            "event",
+            "task"
+          ]
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "summary": {
+          "type": "string"
+        },
+        "source_ref": {
+          "type": "string"
+        },
+        "primary_location": {
+          "$ref": "schedule-primary-location-types.schema.json#/$defs/authoring"
+        },
+        "archetype": {
+          "$ref": "notification-profile-types.schema.json#/$defs/archetypeSelection"
+        },
+        "event_detail": {
+          "$ref": "schedule-create-request.schema.json#/$defs/eventDetail"
+        },
+        "task_detail": {
+          "$ref": "schedule-create-request.schema.json#/$defs/taskDetail"
+        }
       },
       "allOf": [
         {
           "if": {
-            "properties": { "item_type": { "const": "event" } },
-            "required": ["item_type"]
+            "properties": {
+              "item_type": {
+                "const": "event"
+              }
+            },
+            "required": [
+              "item_type"
+            ]
           },
           "then": {
-            "required": ["event_detail"],
-            "not": { "required": ["task_detail"] }
+            "required": [
+              "event_detail"
+            ],
+            "not": {
+              "required": [
+                "task_detail"
+              ]
+            }
           },
           "else": {
-            "required": ["task_detail"],
-            "not": { "required": ["event_detail"] }
+            "required": [
+              "task_detail"
+            ],
+            "not": {
+              "required": [
+                "event_detail"
+              ]
+            }
           }
         }
       ],
@@ -134,36 +261,76 @@
     },
     "inheritedRecurrence": {
       "type": "object",
-      "required": ["rules"],
+      "required": [
+        "rules"
+      ],
       "properties": {
         "rules": {
           "type": "array",
           "minItems": 1,
-          "items": { "$ref": "recurrence-types.schema.json#/$defs/authoringRule" }
+          "items": {
+            "$ref": "recurrence-types.schema.json#/$defs/authoringRule"
+          }
         },
         "rdates": {
           "type": "array",
-          "items": { "$ref": "recurrence-types.schema.json#/$defs/authoringRdate" }
+          "items": {
+            "$ref": "recurrence-types.schema.json#/$defs/authoringRdate"
+          }
         },
         "segments": {
           "type": "array",
           "minItems": 1,
-          "items": { "$ref": "recurrence-types.schema.json#/$defs/authoringSegment" }
+          "items": {
+            "$ref": "recurrence-types.schema.json#/$defs/authoringSegment"
+          }
         }
       },
       "allOf": [
         {
-          "if": { "required": ["segments"] },
+          "if": {
+            "required": [
+              "segments"
+            ]
+          },
           "then": {
             "properties": {
-              "rules": { "items": { "required": ["segment_label"] } },
-              "rdates": { "items": { "required": ["segment_label"] } }
+              "rules": {
+                "items": {
+                  "required": [
+                    "segment_label"
+                  ]
+                }
+              },
+              "rdates": {
+                "items": {
+                  "required": [
+                    "segment_label"
+                  ]
+                }
+              }
             }
           },
           "else": {
             "properties": {
-              "rules": { "items": { "not": { "required": ["segment_label"] } } },
-              "rdates": { "items": { "not": { "required": ["segment_label"] } } }
+              "rules": {
+                "items": {
+                  "not": {
+                    "required": [
+                      "segment_label"
+                    ]
+                  }
+                }
+              },
+              "rdates": {
+                "items": {
+                  "not": {
+                    "required": [
+                      "segment_label"
+                    ]
+                  }
+                }
+              }
             }
           }
         }
@@ -172,14 +339,33 @@
     },
     "scheduledTime": {
       "type": "object",
-      "required": ["time_basis", "local_date", "local_time", "timezone", "timezone_database_version"],
+      "required": [
+        "time_basis",
+        "local_date",
+        "local_time",
+        "timezone",
+        "timezone_database_version"
+      ],
       "properties": {
-        "time_basis": { "const": "local_instant" },
-        "local_date": { "$ref": "#/$defs/localDate" },
-        "local_time": { "$ref": "#/$defs/localTime" },
-        "timezone": { "type": "string", "minLength": 1 },
-        "timezone_database_version": { "$ref": "#/$defs/timezoneDatabaseVersionDirective" },
-        "recurrence": { "$ref": "#/$defs/inheritedRecurrence" }
+        "time_basis": {
+          "const": "local_instant"
+        },
+        "local_date": {
+          "$ref": "#/$defs/localDate"
+        },
+        "local_time": {
+          "$ref": "#/$defs/localTime"
+        },
+        "timezone": {
+          "type": "string",
+          "minLength": 1
+        },
+        "timezone_database_version": {
+          "$ref": "#/$defs/timezoneDatabaseVersionDirective"
+        },
+        "recurrence": {
+          "$ref": "#/$defs/inheritedRecurrence"
+        }
       },
       "additionalProperties": false
     },
@@ -187,18 +373,30 @@
       "oneOf": [
         {
           "type": "object",
-          "required": ["resolution", "delivery_target_id"],
+          "required": [
+            "resolution",
+            "delivery_target_id"
+          ],
           "properties": {
-            "resolution": { "const": "explicit" },
-            "delivery_target_id": { "$ref": "notification-types.schema.json#/$defs/id" }
+            "resolution": {
+              "const": "explicit"
+            },
+            "delivery_target_id": {
+              "$ref": "notification-types.schema.json#/$defs/id"
+            }
           },
           "additionalProperties": false
         },
         {
           "type": "object",
-          "required": ["resolution", "default_key"],
+          "required": [
+            "resolution",
+            "default_key"
+          ],
           "properties": {
-            "resolution": { "const": "context_default" },
+            "resolution": {
+              "const": "context_default"
+            },
             "default_key": {
               "type": "string",
               "pattern": "^[a-z][a-z0-9_-]{0,63}$"
@@ -210,27 +408,63 @@
     },
     "delivery": {
       "type": "object",
-      "required": ["recipient_kind", "channel", "target"],
+      "required": [
+        "recipient_kind",
+        "channel",
+        "target"
+      ],
       "properties": {
-        "recipient_kind": { "enum": ["subject", "subject_group"] },
-        "recipient_subject_id": { "$ref": "notification-types.schema.json#/$defs/id" },
-        "recipient_group_id": { "$ref": "notification-types.schema.json#/$defs/id" },
-        "channel": { "type": "string", "minLength": 1 },
-        "target": { "$ref": "#/$defs/deliveryTarget" }
+        "recipient_kind": {
+          "enum": [
+            "subject",
+            "subject_group"
+          ]
+        },
+        "recipient_subject_id": {
+          "$ref": "notification-types.schema.json#/$defs/id"
+        },
+        "recipient_group_id": {
+          "$ref": "notification-types.schema.json#/$defs/id"
+        },
+        "channel": {
+          "type": "string",
+          "minLength": 1
+        },
+        "target": {
+          "$ref": "#/$defs/deliveryTarget"
+        }
       },
       "allOf": [
         {
           "if": {
-            "properties": { "recipient_kind": { "const": "subject" } },
-            "required": ["recipient_kind"]
+            "properties": {
+              "recipient_kind": {
+                "const": "subject"
+              }
+            },
+            "required": [
+              "recipient_kind"
+            ]
           },
           "then": {
-            "required": ["recipient_subject_id"],
-            "not": { "required": ["recipient_group_id"] }
+            "required": [
+              "recipient_subject_id"
+            ],
+            "not": {
+              "required": [
+                "recipient_group_id"
+              ]
+            }
           },
           "else": {
-            "required": ["recipient_group_id"],
-            "not": { "required": ["recipient_subject_id"] }
+            "required": [
+              "recipient_group_id"
+            ],
+            "not": {
+              "required": [
+                "recipient_subject_id"
+              ]
+            }
           }
         }
       ],
@@ -238,14 +472,22 @@
     },
     "reminder": {
       "type": "object",
-      "required": ["policy_key", "schedule", "late_handling"],
+      "required": [
+        "policy_key",
+        "schedule",
+        "late_handling"
+      ],
       "properties": {
         "policy_key": {
           "type": "string",
           "pattern": "^[a-z][a-z0-9_-]{0,63}$"
         },
-        "schedule": { "$ref": "notification-types.schema.json#/$defs/schedule" },
-        "late_handling": { "$ref": "notification-types.schema.json#/$defs/lateHandling" }
+        "schedule": {
+          "$ref": "notification-types.schema.json#/$defs/schedule"
+        },
+        "late_handling": {
+          "$ref": "notification-types.schema.json#/$defs/lateHandling"
+        }
       },
       "additionalProperties": false
     },
@@ -253,21 +495,41 @@
       "oneOf": [
         {
           "type": "object",
-          "required": ["kind", "range_start_local", "range_end_local"],
+          "required": [
+            "kind",
+            "range_start_local",
+            "range_end_local"
+          ],
           "properties": {
-            "kind": { "const": "local_range" },
-            "range_start_local": { "$ref": "#/$defs/localDateTime" },
-            "range_end_local": { "$ref": "#/$defs/localDateTime" }
+            "kind": {
+              "const": "local_range"
+            },
+            "range_start_local": {
+              "$ref": "#/$defs/localDateTime"
+            },
+            "range_end_local": {
+              "$ref": "#/$defs/localDateTime"
+            }
           },
           "additionalProperties": false
         },
         {
           "type": "object",
-          "required": ["kind", "start_offset_seconds", "end_offset_seconds"],
+          "required": [
+            "kind",
+            "start_offset_seconds",
+            "end_offset_seconds"
+          ],
           "properties": {
-            "kind": { "const": "item_relative" },
-            "start_offset_seconds": { "$ref": "#/$defs/signedDecimal" },
-            "end_offset_seconds": { "$ref": "#/$defs/signedDecimal" }
+            "kind": {
+              "const": "item_relative"
+            },
+            "start_offset_seconds": {
+              "$ref": "#/$defs/signedDecimal"
+            },
+            "end_offset_seconds": {
+              "$ref": "#/$defs/signedDecimal"
+            }
           },
           "additionalProperties": false
         }
@@ -277,19 +539,34 @@
       "oneOf": [
         {
           "type": "object",
-          "required": ["mode"],
+          "required": [
+            "mode"
+          ],
           "properties": {
-            "mode": { "const": "none" }
+            "mode": {
+              "const": "none"
+            }
           },
           "additionalProperties": false
         },
         {
           "type": "object",
-          "required": ["mode", "evaluated_at_utc", "range", "limit"],
+          "required": [
+            "mode",
+            "evaluated_at_utc",
+            "range",
+            "limit"
+          ],
           "properties": {
-            "mode": { "const": "bounded" },
-            "evaluated_at_utc": { "$ref": "notification-types.schema.json#/$defs/utcTimestamp" },
-            "range": { "$ref": "#/$defs/materializationRange" },
+            "mode": {
+              "const": "bounded"
+            },
+            "evaluated_at_utc": {
+              "$ref": "notification-types.schema.json#/$defs/utcTimestamp"
+            },
+            "range": {
+              "$ref": "#/$defs/materializationRange"
+            },
             "limit": {
               "type": "string",
               "pattern": "^([1-9]|[1-9][0-9]|[1-9][0-9]{2}|1000)$"

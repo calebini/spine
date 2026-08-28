@@ -1,0 +1,12 @@
+{
+  "contract_version": "spine.notification-profile-bindings.v1",
+  "item_type": "event",
+  "item_archetype_id": "item_archetype_example",
+  "scope_chain": [
+    {
+      "owner_kind": "subject",
+      "owner_subject_id": "subject_owner"
+    },
+    { "owner_kind": "system" }
+  ]
+}

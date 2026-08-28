@@ -1,6 +1,6 @@
 # Spine Item Archetypes and Notification Profiles
 
-Status: Draft v0.1.0; not implemented
+Status: Implemented v1 on ledger schema 10
 Scope: Dynamic item classification, reusable notification-policy profiles, deterministic default resolution, and snapshot application
 Created: 2026-08-28
 
@@ -28,7 +28,7 @@ ordinary custom reminder policies within current command limits. That capability
 already exists. Profile application only reduces repetitive authoring and records why
 particular policies were created.
 
-## 2. Authority and Planned Contract Family
+## 2. Authority and Contract Family
 
 This specification depends on:
 
@@ -43,24 +43,27 @@ This specification depends on:
 - `specs/architecture.md` for provider-independent orchestration and authority
   boundaries.
 
-The planned capability family is:
+The implemented capability family is:
 
 - `spine.item-archetypes.v1`;
 - `spine.notification-profiles.v1`;
 - `spine.notification-profile-bindings.v1`;
-- `spine.notification-profile-application.v1`; and
-- `spine.notification-profile-readback.v1`.
+- `spine.notification-profile-application.v1`;
+- `spine.notification-profile-readback.v1`; and
+- `spine.notification-profile-catalog-cursor.v1`.
 
-The exact request, response, receipt, normalization, schema, and migration version
-constants remain to be assigned with the machine-contract package. A runtime MUST NOT
-advertise any member as implemented until the ontology migration, management commands,
-schedule integration, readback, schemas, fixtures, and behavioral tests required by
-this specification land atomically.
+The machine contracts are published under
+`contracts/schemas/notification-profile-*.schema.json`, with fixtures indexed by
+`contracts/notification-profile-fixture-manifest.json`. Runtime `0.3.0` advertises
+this family only with ledger schema 10, management commands, schedule integration,
+snapshot readback, fixtures, and behavioral tests.
 
-The existing closed `spine.schedule-create.v1` and `spine.schedule-update.v1`
-contracts remain valid and unchanged. Profile-aware authoring requires explicit
-successor versions of those contracts. It MUST NOT be activated by silently widening a
-closed v1 request or changing the meaning of its existing `reminders` field.
+`spine.schedule-create.v2` and `spine.schedule-update.v2` are the sole implemented
+high-level schedule authoring and mutation contracts. Both use the closed
+`notification_plan` shape defined here. Direct reminder authoring uses `mode=none` on
+create or `action=clear` on update with `custom_additions`; profile-backed authoring
+uses the explicit or archetype-default branches. The runtime MUST NOT accept an
+alternate top-level `reminders` field on either command.
 
 ## 3. Core Distinctions
 
@@ -406,7 +409,7 @@ bulk upgrade, background profile reconciliation, or live `follow_profile` mode.
 
 ## 10. Dynamic Management Commands
 
-The planned write commands are:
+The implemented write commands are:
 
 - `item_archetype.create`: create one root and first revision;
 - `item_archetype.revise`: create the next immutable revision;
@@ -424,7 +427,7 @@ receipt. Same-command compatible replay returns stored identities. Incompatible 
 fails before reference or freshness checks. Retired roots and bindings are not
 reactivated; create a new root or binding identity.
 
-The planned bounded reads are:
+The implemented bounded reads are:
 
 - `item_archetype.show|list`;
 - `notification_profile.show|list`;
@@ -443,14 +446,15 @@ required for v1.
 
 ### 11.1 Profile-aware schedule creation
 
-A successor `schedule.create` contract accepts:
+The implemented `spine.schedule-create.v2` contract accepts:
 
 - optional primary archetype selection under `item`; and
 - one closed `notification_plan` containing profile selection and effective-policy
   overlays from Sections 7 and 8.
 
-Mode `none` is the direct-reminder equivalent of current v1 behavior. Existing v1
-requests and responses remain supported unchanged.
+Mode `none` is the direct-reminder path within the sole v2 contract. It creates no
+profile application and composes the supplied custom additions directly into ordinary
+item-owned notification policies.
 
 The fresh response and receipt expose:
 
@@ -465,7 +469,7 @@ The fresh response and receipt expose:
 
 ### 11.2 Profile-aware schedule update
 
-A successor `schedule.update` contract accepts one complete desired notification plan
+The implemented `spine.schedule-update.v2` contract accepts one complete desired notification plan
 with profile action:
 
 - `retain`;
@@ -661,7 +665,8 @@ The capability is buildable when:
    reconciliation and do not alter delivery semantics.
 10. Every generated policy is inspectable by origin, and every delivery still requires
     ordinary work and `side_effect_attempts`.
-11. Existing v1 schedule clients remain byte-for-byte compatible.
+11. Direct and profile-backed scheduling both use the closed v2 notification-plan
+    surface, with no alternate high-level request shape.
 12. No agent prompt, free-text classifier, or group-membership traversal becomes
     hidden scheduling authority.
 

@@ -1,5 +1,5 @@
 {
-  "contract_version": "spine.schedule-create.v1",
+  "contract_version": "spine.schedule-create.v2",
   "command_id": "schedule-create-duplicate-task-role-001",
   "actor_subject_id": "subject_agent",
   "created_at_utc": "2035-02-01T12:00:00Z",
@@ -41,7 +41,9 @@
       "default_key": "owner_whatsapp"
     }
   },
-  "reminders": [
+  "notification_plan": {
+    "mode": "none",
+    "custom_additions": [
     {
       "policy_key": "one_hour_before",
       "schedule": {
@@ -57,7 +59,8 @@
         "grace_seconds": "900"
       }
     }
-  ],
+    ]
+  },
   "materialization": {
     "mode": "none"
   }

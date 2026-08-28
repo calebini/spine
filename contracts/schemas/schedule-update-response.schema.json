@@ -1,90 +1,212 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://cortext.local/spine/contracts/schemas/schedule-update-response.schema.json",
-  "title": "Spine Atomic Schedule Update Response v1",
+  "title": "Spine Atomic Schedule Update Response v2",
   "type": "object",
   "required": [
-    "ok", "command", "response_contract", "effect", "command_id", "command_receipt_id",
-    "item_id", "item_type", "target_version", "current_version", "truth_changed", "work_changed",
-    "changed_dimensions", "scheduled_time", "policies", "disabled_notification_intent_ids",
-    "work_reconciliation", "materialization", "phases", "receipt"
+    "ok",
+    "command",
+    "response_contract",
+    "effect",
+    "command_id",
+    "command_receipt_id",
+    "item_id",
+    "item_type",
+    "target_version",
+    "current_version",
+    "truth_changed",
+    "work_changed",
+    "changed_dimensions",
+    "scheduled_time",
+    "policies",
+    "disabled_notification_intent_ids",
+    "work_reconciliation",
+    "materialization",
+    "phases",
+    "receipt",
+    "archetype_action",
+    "notification_profile_action"
   ],
   "properties": {
-    "ok": { "const": true },
-    "command": { "const": "schedule.update" },
-    "response_contract": { "const": "spine.schedule-update-response.v1" },
+    "ok": {
+      "const": true
+    },
+    "command": {
+      "const": "schedule.update"
+    },
+    "response_contract": {
+      "const": "spine.schedule-update-response.v2"
+    },
     "effect": {
       "enum": [
-        "schedule_updated_and_reconciled", "schedule_updated", "schedule_reconciled",
-        "schedule_update_noop", "schedule_update_replay"
+        "schedule_updated_and_reconciled",
+        "schedule_updated",
+        "schedule_reconciled",
+        "schedule_update_noop",
+        "schedule_update_replay"
       ]
     },
-    "command_id": { "$ref": "notification-types.schema.json#/$defs/id" },
-    "command_receipt_id": { "$ref": "notification-types.schema.json#/$defs/id" },
-    "audit_id": { "$ref": "notification-types.schema.json#/$defs/id" },
-    "item_id": { "$ref": "notification-types.schema.json#/$defs/id" },
-    "item_type": { "enum": ["event", "task"] },
-    "target_version": { "$ref": "notification-types.schema.json#/$defs/decimalPositive" },
-    "current_version": { "$ref": "notification-types.schema.json#/$defs/decimalPositive" },
-    "truth_changed": { "type": "boolean" },
-    "work_changed": { "type": "boolean" },
+    "command_id": {
+      "$ref": "notification-types.schema.json#/$defs/id"
+    },
+    "command_receipt_id": {
+      "$ref": "notification-types.schema.json#/$defs/id"
+    },
+    "audit_id": {
+      "$ref": "notification-types.schema.json#/$defs/id"
+    },
+    "item_id": {
+      "$ref": "notification-types.schema.json#/$defs/id"
+    },
+    "item_type": {
+      "enum": [
+        "event",
+        "task"
+      ]
+    },
+    "target_version": {
+      "$ref": "notification-types.schema.json#/$defs/decimalPositive"
+    },
+    "current_version": {
+      "$ref": "notification-types.schema.json#/$defs/decimalPositive"
+    },
+    "truth_changed": {
+      "type": "boolean"
+    },
+    "work_changed": {
+      "type": "boolean"
+    },
     "changed_dimensions": {
       "type": "array",
       "uniqueItems": true,
-      "items": { "enum": ["item", "primary_location", "scheduled_time", "recurrence", "delivery", "reminders"] }
+      "items": {
+        "enum": [
+          "item",
+          "primary_location",
+          "scheduled_time",
+          "recurrence",
+          "delivery",
+          "reminders",
+          "archetype",
+          "notification_profile"
+        ]
+      }
     },
-    "scheduled_time": { "$ref": "schedule-create-response.schema.json#/$defs/resolvedSchedule" },
-    "primary_location_change": { "$ref": "schedule-primary-location-types.schema.json#/$defs/updateChange" },
-    "recurrence": { "$ref": "#/$defs/recurrenceSummary" },
+    "scheduled_time": {
+      "$ref": "schedule-create-response.schema.json#/$defs/resolvedSchedule"
+    },
+    "primary_location_change": {
+      "$ref": "schedule-primary-location-types.schema.json#/$defs/updateChange"
+    },
+    "recurrence": {
+      "$ref": "#/$defs/recurrenceSummary"
+    },
     "policies": {
       "type": "array",
       "maxItems": 32,
-      "items": { "$ref": "schedule-operations-types.schema.json#/$defs/policyResult" }
+      "items": {
+        "$ref": "schedule-operations-types.schema.json#/$defs/policyResult"
+      }
     },
     "disabled_notification_intent_ids": {
       "type": "array",
       "uniqueItems": true,
-      "items": { "$ref": "notification-types.schema.json#/$defs/id" }
+      "items": {
+        "$ref": "notification-types.schema.json#/$defs/id"
+      }
     },
-    "work_reconciliation": { "$ref": "schedule-operations-types.schema.json#/$defs/workReconciliation" },
+    "work_reconciliation": {
+      "$ref": "schedule-operations-types.schema.json#/$defs/workReconciliation"
+    },
     "materialization": {
       "oneOf": [
-        { "$ref": "schedule-create-response.schema.json#/$defs/materializationNone" },
-        { "$ref": "schedule-create-response.schema.json#/$defs/materializationBounded" }
+        {
+          "$ref": "schedule-create-response.schema.json#/$defs/materializationNone"
+        },
+        {
+          "$ref": "schedule-create-response.schema.json#/$defs/materializationBounded"
+        }
       ]
     },
-    "phases": { "$ref": "#/$defs/phases" },
+    "phases": {
+      "$ref": "#/$defs/phases"
+    },
     "receipt": {
       "allOf": [
-        { "$ref": "schedule-operations-types.schema.json#/$defs/receiptSummary" },
+        {
+          "$ref": "schedule-operations-types.schema.json#/$defs/receiptSummary"
+        },
         {
           "properties": {
-            "receipt_contract": { "const": "spine.schedule-update-receipt.v1" },
+            "receipt_contract": {
+              "const": "spine.schedule-update-receipt.v2"
+            },
             "effect": {
               "enum": [
-                "schedule_updated_and_reconciled", "schedule_updated",
-                "schedule_reconciled", "schedule_update_noop"
+                "schedule_updated_and_reconciled",
+                "schedule_updated",
+                "schedule_reconciled",
+                "schedule_update_noop"
               ]
             }
           }
         }
       ]
     },
-    "dry_run": { "type": "boolean" }
+    "dry_run": {
+      "type": "boolean"
+    },
+    "archetype_action": {
+      "enum": [
+        "retain",
+        "clear",
+        "select"
+      ]
+    },
+    "notification_profile_action": {
+      "enum": [
+        "retain",
+        "clear",
+        "explicit",
+        "archetype_default",
+        "upgrade_current_revision"
+      ]
+    },
+    "notification_profile": {
+      "type": "object"
+    }
   },
   "allOf": [
     {
       "if": {
         "properties": {
           "receipt": {
-            "properties": { "effect": { "const": "schedule_update_noop" } },
-            "required": ["effect"]
+            "properties": {
+              "effect": {
+                "const": "schedule_update_noop"
+              }
+            },
+            "required": [
+              "effect"
+            ]
           }
         },
-        "required": ["receipt"]
+        "required": [
+          "receipt"
+        ]
       },
-      "then": { "not": { "required": ["audit_id"] } },
-      "else": { "required": ["audit_id"] }
+      "then": {
+        "not": {
+          "required": [
+            "audit_id"
+          ]
+        }
+      },
+      "else": {
+        "required": [
+          "audit_id"
+        ]
+      }
     }
   ],
   "additionalProperties": false,
@@ -92,27 +214,74 @@
     "recurrenceSummary": {
       "type": "object",
       "required": [
-        "recurrence_set_id", "recurrence_revision_id", "revision_number",
-        "normalized_recurrence_set_hash", "diagnostics"
+        "recurrence_set_id",
+        "recurrence_revision_id",
+        "revision_number",
+        "normalized_recurrence_set_hash",
+        "diagnostics"
       ],
       "properties": {
-        "recurrence_set_id": { "$ref": "notification-types.schema.json#/$defs/id" },
-        "recurrence_revision_id": { "$ref": "notification-types.schema.json#/$defs/id" },
-        "revision_number": { "$ref": "notification-types.schema.json#/$defs/decimalPositive" },
-        "normalized_recurrence_set_hash": { "$ref": "notification-types.schema.json#/$defs/sha256" },
-        "diagnostics": { "type": "array", "items": { "type": "object" } }
+        "recurrence_set_id": {
+          "$ref": "notification-types.schema.json#/$defs/id"
+        },
+        "recurrence_revision_id": {
+          "$ref": "notification-types.schema.json#/$defs/id"
+        },
+        "revision_number": {
+          "$ref": "notification-types.schema.json#/$defs/decimalPositive"
+        },
+        "normalized_recurrence_set_hash": {
+          "$ref": "notification-types.schema.json#/$defs/sha256"
+        },
+        "diagnostics": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        }
       },
       "additionalProperties": false
     },
     "phases": {
       "type": "object",
-      "required": ["truth", "provenance", "opportunities", "work", "delivery"],
+      "required": [
+        "truth",
+        "provenance",
+        "opportunities",
+        "work",
+        "delivery"
+      ],
       "properties": {
-        "truth": { "enum": ["updated", "unchanged"] },
-        "provenance": { "enum": ["regenerated", "retained", "not_applicable"] },
-        "opportunities": { "enum": ["expanded", "not_requested"] },
-        "work": { "enum": ["none", "reconciled", "materialized", "reconciled_and_materialized"] },
-        "delivery": { "const": "not_attempted" }
+        "truth": {
+          "enum": [
+            "updated",
+            "unchanged"
+          ]
+        },
+        "provenance": {
+          "enum": [
+            "regenerated",
+            "retained",
+            "not_applicable"
+          ]
+        },
+        "opportunities": {
+          "enum": [
+            "expanded",
+            "not_requested"
+          ]
+        },
+        "work": {
+          "enum": [
+            "none",
+            "reconciled",
+            "materialized",
+            "reconciled_and_materialized"
+          ]
+        },
+        "delivery": {
+          "const": "not_attempted"
+        }
       },
       "additionalProperties": false
     }

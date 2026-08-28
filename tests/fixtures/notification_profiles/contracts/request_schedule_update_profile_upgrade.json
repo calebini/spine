@@ -1,0 +1,17 @@
+{
+  "contract_version": "spine.schedule-update.v2",
+  "command_id": "fixture-schedule-update-profile",
+  "actor_subject_id": "subject_agent",
+  "item_id": "item_example",
+  "target_version": "1",
+  "updated_at_utc": "2035-02-01T12:10:00Z",
+  "patch": {
+    "notification_plan": {
+      "action": "upgrade_current_revision",
+      "suppress_template_keys": [],
+      "replacements": [],
+      "custom_additions": []
+    }
+  },
+  "materialization": { "mode": "none" }
+}

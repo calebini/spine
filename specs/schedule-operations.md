@@ -1,6 +1,6 @@
 # Spine Operational Schedule Lifecycle
 
-Status: Implemented contract on current schema 9
+Status: Implemented on current schema 10; agenda/cancel v1 and update v2
 Scope: Cross-item agenda readback, atomic whole-schedule mutation, terminal cancellation, and notification-work reconciliation
 Created: 2026-08-16
 
@@ -32,7 +32,7 @@ The implemented version facts are:
 
 - `spine.schedule-operations-normalization.v1`;
 - `spine.schedule-agenda.v1` and `spine.schedule-agenda-response.v1`;
-- `spine.schedule-update.v1`, `spine.schedule-update-response.v1`, and `spine.schedule-update-receipt.v1`; and
+- `spine.schedule-update.v2`, `spine.schedule-update-response.v2`, and `spine.schedule-update-receipt.v2`; and
 - `spine.schedule-cancel.v1`, `spine.schedule-cancel-response.v1`, and `spine.schedule-cancel-receipt.v1`.
 
 The exact machine shapes live in `contracts/schemas/schedule-agenda-*.schema.json`, `contracts/schemas/schedule-update-*.schema.json`, and `contracts/schemas/schedule-cancel-*.schema.json`.
@@ -41,7 +41,7 @@ The runtime advertises these facts through `system.info.implemented_contract_ver
 
 ## 3. Shared Boundary
 
-Version 1 intentionally operates on `event` and `task` items. It owns no project, collection, dependency, approval, projection, or vendor synchronization behavior.
+This family intentionally operates on `event` and `task` items. It owns no project, collection, dependency, approval, projection, or vendor synchronization behavior.
 
 The write commands:
 
@@ -161,16 +161,16 @@ The response returns `limit`, `has_more`, required nullable `next_cursor`, both 
 
 The closed request requires:
 
-- `contract_version=spine.schedule-update.v1`;
+- `contract_version=spine.schedule-update.v2`;
 - `command_id`, `actor_subject_id`, `item_id`, `target_version`, and `updated_at_utc`;
 - non-empty `patch`; and
 - `materialization`, explicitly `none` or `bounded`.
 
-The target MUST be an active-shell scheduled event or open task whose primary event-start or task-due anchor has `anchor_kind=local_instant`. This target-shape requirement applies to every Version 1 patch dimension, including item-only, reminder-only, delivery-only, and reconciliation-only updates; another primary anchor kind fails with `invalid_request`, `field=primary_schedule.anchor_kind`. A terminal detail state fails with `invalid_state_transition`, `field=detail_status`.
+The target MUST be an active-shell scheduled event or open task whose primary event-start or task-due anchor has `anchor_kind=local_instant`. This target-shape requirement applies to every update patch dimension, including item-only, notification-plan-only, delivery-only, and reconciliation-only updates; another primary anchor kind fails with `invalid_request`, `field=primary_schedule.anchor_kind`. A terminal detail state fails with `invalid_state_transition`, `field=detail_status`.
 
-An otherwise eligible event may retain an end anchor while receiving an item, recurrence, delivery, reminder, or reconciliation-only update. When such an event has an end anchor, a request containing `patch.scheduled_time` fails with `invalid_request`, `field=patch.scheduled_time`, because Version 1 defines neither implicit duration preservation nor end-anchor replacement. Callers use `event.reschedule` for that temporal mutation until a later composite duration contract exists. The end anchor alone does not make non-time patch dimensions ineligible.
+An otherwise eligible event may retain an end anchor while receiving an item, recurrence, delivery, notification-plan, or reconciliation-only update. When such an event has an end anchor, a request containing `patch.scheduled_time` fails with `invalid_request`, `field=patch.scheduled_time`, because this contract defines neither implicit duration preservation nor end-anchor replacement. Callers use `event.reschedule` for that temporal mutation until a later composite duration contract exists. The end anchor alone does not make non-time patch dimensions ineligible.
 
-The patch may contain `item`, `scheduled_time`, `recurrence`, `delivery`, and `reminders`. A runtime advertising `spine.schedule-primary-location.v1` additionally accepts `primary_location` with omit-to-retain, null-to-clear, and closed create/reference replacement semantics from `specs/schedule-primary-location.md`. Omitted dimensions copy current truth exactly. At least one dimension is required, although normalized equality may produce a no-op.
+The patch may contain `item`, `scheduled_time`, `recurrence`, `delivery`, `archetype`, and `notification_plan`. A runtime advertising `spine.schedule-primary-location.v1` additionally accepts `primary_location` with omit-to-retain, null-to-clear, and closed create/reference replacement semantics from `specs/schedule-primary-location.md`. Omitted dimensions copy current truth exactly. At least one dimension is required, although normalized equality may produce a no-op.
 
 ### 5.2 Item and Scheduled-Time Patch
 
@@ -186,17 +186,22 @@ If current recurrence exists, changing `scheduled_time` requires a `recurrence` 
 
 For an existing recurrence set, replacement creates its next immutable revision under whole-series semantics and records lineage. For a non-recurring item, replacement creates the initial recurrence set bound to the resulting item version. Rule, segment, selector, identity, normalization, timezone, diagnostic, and density semantics remain wholly owned by `specs/recurrence.md`.
 
-Version 1 does not remove recurrence, split a series, or edit one occurrence. An attempted empty replacement is invalid; detaching a recurring item into a singleton remains deferred until retirement and downstream-provenance semantics are specified.
+The update contract does not remove recurrence, split a series, or edit one occurrence. An attempted empty replacement is invalid; detaching a recurring item into a singleton remains deferred until retirement and downstream-provenance semantics are specified.
 
-### 5.4 Reminder Replacement and Delivery
+### 5.4 Notification-Plan Replacement and Delivery
 
-`reminders`, when present, is the complete desired active reminder set and contains zero through 32 entries ordered canonically by unique `policy_key`.
+`notification_plan`, when present, uses the closed update-action shape from
+`specs/notification-profiles.md`. `action=retain` preserves the current application
+and policy set. `action=clear` removes any profile application and makes its one
+through 32 `custom_additions` the complete desired direct reminder set. The explicit,
+archetype-default, and current-revision-upgrade actions snapshot the resolved profile
+composition. Omitting `notification_plan` retains current application and policies.
 
 Each entry contains `policy_key`, schedule, and late handling. An existing intent additionally requires its current `notification_intent_id` and `notification_policy_id`; a new intent omits both. Supplying only one identity is invalid. Each referenced current policy MUST belong to the target item/version and be active. A current active intent omitted from the desired set receives a disabled successor. Disabled intents are not re-enabled, and a historical policy key cannot be rebound to another intent.
 
-For items first entering this composite surface, the caller may assign a new unique policy key to each referenced current active intent. The successful receipt establishes the stable key-to-intent mapping for later composite updates. On later calls, a key/intent mismatch against the latest compatible composite receipt fails with `semantic_conflict`, `field=patch.reminders[n].policy_key`.
+For direct replacement, the caller may assign a new unique policy key to each referenced current active intent. The successful receipt establishes the stable key-to-intent mapping for later composite updates. On later calls, a key/intent mismatch against the latest compatible composite receipt fails with `semantic_conflict`, `field=patch.notification_plan.custom_additions[n].policy_key`.
 
-`delivery`, when present, uses the same subject/group, channel, and explicit/context-default target shape and validation as `schedule.create`. It applies to the complete resulting active policy set. When reminders are omitted, delivery retargets all current active policies. When reminders are present, policies omitted from that desired set are disabled rather than retargeted. When reminders contain a new intent and delivery is omitted, the request is invalid because no route can be inherited for that new intent. Existing reminder entries preserve their current routes when delivery is omitted.
+`delivery`, when present, uses the same subject/group, channel, and explicit/context-default target shape and validation as `schedule.create`. It applies to the complete resulting active policy set. When `notification_plan` is omitted, delivery retargets all current active policies. When the plan replaces policies, policies omitted from the desired set are disabled rather than retargeted. When a replacement contains a new intent and delivery is omitted, the request is invalid because no route can be inherited for that new intent. Existing reminder entries preserve their current routes when delivery is omitted.
 
 Policies normalize through `specs/notifications.md`. Equal entries are copied forward under their existing intent, changed entries create successor policies, new entries create new intents, and omitted entries create disabled successors. Duplicate normalized policies remain a semantic conflict even when policy keys differ.
 
@@ -222,7 +227,7 @@ For one response, `cancelled_work_instance_ids`, `retained_work_instance_ids`, `
 Occurrence provenance is regenerated when recurrence truth, primary scheduled time, or recurrence-bound policy targeting changes, and whenever bounded materialization needs a source range not already proven current. Unresolved or non-actionable provenance fails the transaction.
 
 A primary-location-only truth change neither regenerates occurrence provenance nor
-cancels otherwise-current notification work. Location is not part of the Version 1
+cancels otherwise-current notification work. Location is not part of the
 recurrence, opportunity, work, route, or delivery freshness preimages.
 
 ### 5.6 Effects, Versioning, and Response
@@ -238,7 +243,7 @@ The stored command-receipt effect is closed over two booleans, `truth_changed` a
 
 Truth change creates exactly one next item version and one composite audit. Work-only reconciliation creates no item version but writes one composite audit. A complete no-op writes no item version or audit but still writes one replay receipt. Dry run returns deterministic would-be results and writes nothing.
 
-The response returns target and current versions, closed effect, `truth_changed`, `work_changed`, canonically ordered `changed_dimensions`, current scheduled-time resolution, optional recurrence summary, current active policy mapping, disabled intent IDs, work reconciliation arrays, materialization summary, phase states, audit ID when written, and receipt summary. Base `changed_dimensions` values are `item`, `scheduled_time`, `recurrence`, `delivery`, and `reminders`. The advertised primary-location capability inserts `primary_location` after `item` and returns the conditional `primary_location_change` result defined by `specs/schedule-primary-location.md`.
+The response returns target and current versions, closed effect, `truth_changed`, `work_changed`, canonically ordered `changed_dimensions`, archetype and notification-profile actions, current scheduled-time resolution, optional recurrence summary, current active policy mapping, disabled intent IDs, work reconciliation arrays, materialization summary, phase states, audit ID when written, and receipt summary. `changed_dimensions` values are ordered as `item`, `primary_location`, `archetype`, `scheduled_time`, `recurrence`, `delivery`, `notification_profile`, and `reminders`; absent dimensions are omitted.
 
 Compatible replay returns top-level `effect=schedule_update_replay` plus the stored receipt effect under `receipt.effect`; it creates no row and does not re-resolve timezone data, context defaults, provenance, opportunities, or work.
 
@@ -325,9 +330,9 @@ The table below closes the Version 1 failures that depend on schedule-operation 
 | `schedule.update` | `patch.scheduled_time` targets an event with an end anchor | 7 | `invalid_request` | `patch.scheduled_time` |
 | `schedule.update` | a recurring target changes `scheduled_time` without complete recurrence replacement | 7 | `missing_required_field` | `patch.recurrence` |
 | `schedule.update` | advertised primary-location reference does not resolve | 7 | `referenced_row_not_found` | `patch.primary_location.location_id` |
-| `schedule.update` | exactly one reminder intent/policy identity is supplied | 7 | `invalid_request` | the missing identity field under `patch.reminders[n]` |
-| `schedule.update` | a policy key is rebound to a different current intent | 7 | `semantic_conflict` | `patch.reminders[n].policy_key` |
-| `schedule.update` | two desired entries normalize to the same notification policy | 9 | `semantic_conflict` | `patch.reminders` |
+| `schedule.update` | exactly one direct-addition intent/policy identity is supplied | 7 | `invalid_request` | the missing identity field under `patch.notification_plan.custom_additions[n]` |
+| `schedule.update` | a policy key is rebound to a different current intent | 7 | `semantic_conflict` | `patch.notification_plan.custom_additions[n].policy_key` |
+| `schedule.update` | two desired entries normalize to the same notification policy | 9 | `semantic_conflict` | `patch.notification_plan` |
 | `schedule.update` | a new reminder has no inherited or supplied delivery route | 7 | `missing_required_field` | `patch.delivery` |
 | `schedule.update` | delivery-target resolution fails | 8 | inherited exact code and field from `schedule.create` | inherited responsible `patch.delivery` field |
 | `schedule.update` | successor recurrence, reminder, or materialization normalization fails | 9 | inherited exact code | inherited narrowest responsible `patch` or `materialization` field |
@@ -351,16 +356,15 @@ Arrays are canonically ordered:
 - policy mappings by `policy_key`;
 - intent IDs and work IDs lexically unless an opportunity order is explicitly returned;
 - materialized opportunity/work pairs by eligibility time, opportunity ID, then work ID; and
-- changed dimensions in the base fixed order `item`, `scheduled_time`, `recurrence`,
-  `delivery`, `reminders`; when `spine.schedule-primary-location.v1` is advertised,
-  the extended fixed order is `item`, `primary_location`, `scheduled_time`,
-  `recurrence`, `delivery`, `reminders`.
+- changed dimensions in the fixed order `item`, `primary_location`, `archetype`,
+  `scheduled_time`, `recurrence`, `delivery`, `notification_profile`, `reminders`,
+  omitting values that did not change.
 
 Receipt evidence MUST be sufficient to reconstruct compatible replay without querying mutable route defaults, current timezone versions, current successor state, or a newly evaluated opportunity range. Missing or contradictory required historical evidence fails with `runtime_failure`; replay never repairs it.
 
 ## 9. Explicit Non-Goals
 
-Version 1 does not define:
+This family does not define:
 
 - recurrence removal, one-occurrence edits, or series splitting through `schedule.update`;
 - event-duration shifting or event-end mutation;

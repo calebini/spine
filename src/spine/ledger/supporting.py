@@ -193,6 +193,17 @@ def copy_forward_supporting_sets(
         created_by_command_id=created_by_command_id,
     )
 
+    from spine.ledger.notification_profiles import copy_forward_profile_facts
+
+    copy_forward_profile_facts(
+        connection,
+        item_id=item_id,
+        previous_version=previous_version,
+        next_version=next_version,
+        created_at_utc=created_at_utc,
+        created_by_command_id=created_by_command_id,
+    )
+
 
 def current_locations(connection: sqlite3.Connection, *, item_id: str, version: int) -> list[dict[str, object]]:
     rows = connection.execute(

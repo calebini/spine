@@ -144,6 +144,13 @@ def handle(command: str, request: Mapping[str, Any], context: CommandContext) ->
 
 
 def _dispatch(command: str, request: Mapping[str, Any], context: CommandContext) -> dict[str, Any]:
+    from spine.commands.notification_profiles import (
+        PROFILE_COMMANDS,
+        handle_notification_profile_command,
+    )
+
+    if command in PROFILE_COMMANDS:
+        return handle_notification_profile_command(command, request, context)
     if command == "schedule.related_task.create":
         from spine.commands.temporal_bindings import handle_related_task_create
 
@@ -601,11 +608,13 @@ def _handle_schedule_show(request: Mapping[str, Any], context: CommandContext) -
     include_values: list[str] = []
     for value in raw_include:
         if not isinstance(value, str) or value not in {
-            "policies", "work", "attempts", "relations", "temporal_bindings", "primary_location"
+            "policies", "work", "attempts", "relations", "temporal_bindings",
+            "primary_location", "notification_profile"
         }:
             raise SpineValidationError(
                 "invalid_request:include",
-                "include values must be policies, work, attempts, relations, temporal_bindings, or primary_location",
+                "include values must be policies, work, attempts, relations, "
+                "temporal_bindings, primary_location, or notification_profile",
             )
         include_values.append(value)
     if len(include_values) != len(set(include_values)):
@@ -1361,10 +1370,16 @@ def _handle_schedule_create(request: Mapping[str, Any], context: CommandContext)
         "item",
         "scheduled_time",
         "delivery",
-        "reminders",
+        "notification_plan",
         "materialization",
     }
     _check_fields(command, request, allowed)
+    contract_version = request.get("contract_version")
+    if contract_version != "spine.schedule-create.v2":
+        raise SpineValidationError(
+            "invalid_request:contract_version",
+            "contract_version must be spine.schedule-create.v2",
+        )
     for required_field in (
         "contract_version",
         "command_id",
@@ -1373,13 +1388,11 @@ def _handle_schedule_create(request: Mapping[str, Any], context: CommandContext)
         "item",
         "scheduled_time",
         "delivery",
-        "reminders",
+        "notification_plan",
         "materialization",
     ):
         if required_field not in request:
             raise SpineValidationError(f"missing_{required_field}", f"{required_field} is required")
-    if request.get("contract_version") != "spine.schedule-create.v1":
-        raise SpineValidationError("invalid_request:contract_version", "contract_version must be spine.schedule-create.v1")
     raw_item = _schedule_object(request.get("item"), "item")
     normalized_primary_location = None
     if "primary_location" in raw_item:
@@ -1407,10 +1420,14 @@ def _handle_schedule_create(request: Mapping[str, Any], context: CommandContext)
             f"schedule.create requires ledger schema {IMPLEMENTED_LEDGER_SCHEMA_VERSION}",
         )
     required_contracts = {
-        "spine.schedule-create.v1",
+        "spine.schedule-create.v2",
         "spine.schedule-create-normalization.v1",
-        "spine.schedule-create-response.v1",
-        "spine.schedule-create-receipt.v1",
+        "spine.schedule-create-response.v2",
+        "spine.schedule-create-receipt.v2",
+        "spine.item-archetypes.v1",
+        "spine.notification-profiles.v1",
+        "spine.notification-profile-bindings.v1",
+        "spine.notification-profile-application.v1",
     }
     if normalized_primary_location is not None:
         required_contracts.update(
@@ -1451,6 +1468,21 @@ def _handle_schedule_create(request: Mapping[str, Any], context: CommandContext)
     )
     item_id = _derived_id(command, command_id, "item", "/item")
     audit_id = _derived_id(command, command_id, "audit", "/audit")
+    from spine.services.notification_profile_application import (
+        prepare_schedule_create_profile,
+    )
+
+    profile_prepared = prepare_schedule_create_profile(
+        context.ledger,
+        item=item_request,
+        item_id=item_id,
+        item_type=item_type,
+        notification_plan=request.get("notification_plan"),
+        command_id=command_id,
+        actor_subject_id=actor,
+        created_at_utc=created_at,
+    )
+    reminders_value = profile_prepared["reminders"]
 
     item_locations = ()
     primary_location_view: dict[str, Any] | None = None
@@ -1549,7 +1581,7 @@ def _handle_schedule_create(request: Mapping[str, Any], context: CommandContext)
         )
 
     normalized_policies = _schedule_normalize_policies(
-        request.get("reminders"),
+        reminders_value,
         item_id=item_id,
         item_type=item_type,
         recurring=recurrence is not None,
@@ -1596,6 +1628,24 @@ def _handle_schedule_create(request: Mapping[str, Any], context: CommandContext)
         _schedule_fail_if_requested(context, "item")
         for _, policy in normalized_policies:
             insert_notification_schedule_policy(connection, normalized=policy)
+        profile_persistence: dict[str, Any] | None = None
+        if profile_prepared is not None:
+            from spine.services.notification_profile_application import (
+                persist_schedule_create_profile,
+            )
+
+            profile_persistence = persist_schedule_create_profile(
+                connection,
+                prepared=profile_prepared,
+                item_id=item_id,
+                command_id=command_id,
+                actor_subject_id=actor,
+                created_at_utc=created_at,
+                policies=[
+                    (policy_key, policy.value)
+                    for policy_key, policy in normalized_policies
+                ],
+            )
         _schedule_fail_if_requested(context, "policies")
 
         provenance_ids: list[str] = []
@@ -1795,6 +1845,12 @@ def _handle_schedule_create(request: Mapping[str, Any], context: CommandContext)
             "materialization": materialization_facts,
             "phases": phases,
         }
+        if profile_prepared is not None and profile_persistence is not None:
+            result_facts["archetype"] = profile_persistence["archetype"]
+            result_facts["notification_profile"] = {
+                **dict(profile_prepared["projection"]),
+                "application": profile_persistence["notification_profile"],
+            }
         if normalized_primary_location is not None:
             if primary_location_view is None:
                 raise SpineValidationError(
@@ -2042,15 +2098,27 @@ def _handle_schedule_update(request: Mapping[str, Any], context: CommandContext)
         "materialization",
     }
     _check_fields(command, request, allowed)
-    if request.get("contract_version") != "spine.schedule-update.v1":
-        raise SpineValidationError("invalid_request:contract_version", "contract_version must be spine.schedule-update.v1")
+    contract_version = request.get("contract_version")
+    if contract_version != "spine.schedule-update.v2":
+        raise SpineValidationError(
+            "invalid_request:contract_version",
+            "contract_version must be spine.schedule-update.v2",
+        )
     command_id, actor, updated_at = _write_identity(command, request, "updated_at_utc", context)
     item_id = _required_str(request, "item_id")
     target_version = _version(request, "target_version")
     patch = _schedule_object(request.get("patch"), "patch")
     _schedule_exact_fields(
         patch,
-        {"item", "primary_location", "scheduled_time", "recurrence", "delivery", "reminders"},
+        {
+            "item",
+            "primary_location",
+            "scheduled_time",
+            "recurrence",
+            "delivery",
+            "archetype",
+            "notification_plan",
+        },
         "patch",
     )
     if not patch:
@@ -2077,9 +2145,13 @@ def _handle_schedule_update(request: Mapping[str, Any], context: CommandContext)
     if replay is not None:
         return _schedule_update_response(replay, response_effect="schedule_update_replay")
     required_contracts = {
-        "spine.schedule-update.v1",
-        "spine.schedule-update-response.v1",
-        "spine.schedule-update-receipt.v1",
+        "spine.schedule-update.v2",
+        "spine.schedule-update-response.v2",
+        "spine.schedule-update-receipt.v2",
+        "spine.item-archetypes.v1",
+        "spine.notification-profiles.v1",
+        "spine.notification-profile-bindings.v1",
+        "spine.notification-profile-application.v1",
     }
     if normalized_primary_patch is not _UNSET:
         required_contracts.update(
@@ -2117,7 +2189,7 @@ def _handle_schedule_update(request: Mapping[str, Any], context: CommandContext)
     if not isinstance(current_anchor, Mapping) or current_anchor.get("anchor_kind") != "local_instant":
         raise SpineValidationError(
             "invalid_request:primary_schedule.anchor_kind",
-            "schedule.update v1 requires a local_instant primary schedule",
+            "schedule.update requires a local_instant primary schedule",
         )
     if "scheduled_time" in patch and item["item_type"] == "event" and item["detail"].get("end_anchor") is not None:
         raise SpineValidationError(
@@ -2277,18 +2349,59 @@ def _handle_schedule_update(request: Mapping[str, Any], context: CommandContext)
             }
     current_policies = load_current_notification_policies(context.ledger, item_id=item_id)
     active_current = [value for value in current_policies if value["status"] == "active"]
-    policy_keys = _schedule_existing_policy_keys(context.ledger, item_id=item_id, policies=active_current)
-    established_policy_intents = _schedule_established_policy_intents(context.ledger, item_id=item_id)
     delivery = None
     if "delivery" in patch:
         try:
             delivery = _schedule_resolve_delivery(patch["delivery"], context)
         except SpineValidationError as exc:
             raise _schedule_prefix_validation(exc, "delivery", "patch.delivery") from exc
+    from spine.services.notification_profile_application import (
+        prepare_schedule_update_profile,
+    )
+
+    profile_prepared = prepare_schedule_update_profile(
+        context.ledger,
+        item_id=item_id,
+        item_version=target_version,
+        next_version=target_version + 1,
+        item_type=str(item["item_type"]),
+        archetype_patch_present="archetype" in patch,
+        archetype_patch=patch.get("archetype"),
+        notification_plan_present="notification_plan" in patch,
+        notification_plan=patch.get("notification_plan"),
+        command_id=command_id,
+        actor_subject_id=actor,
+        updated_at_utc=updated_at,
+    )
+    desired_reminders = (
+        profile_prepared["reminders"]
+        if profile_prepared["reminders"] is not None
+        else _UNSET
+    )
+    profile_replaces_policies = bool(profile_prepared["replace_application"])
+    policy_delivery = delivery
+    if profile_replaces_policies and policy_delivery is None:
+        if not active_current:
+            raise SpineValidationError(
+                "missing_patch:delivery",
+                "a profile replacement on an item without active reminders requires patch.delivery",
+            )
+        inherited_routes = [
+            _schedule_policy_route(value, None) for value in active_current
+        ]
+        first_route = inherited_routes[0]
+        if any(value != first_route for value in inherited_routes[1:]):
+            raise SpineValidationError(
+                "missing_patch:delivery",
+                "profile replacement requires patch.delivery when current reminders use different routes",
+            )
+        policy_delivery = first_route
+    policy_keys = _schedule_existing_policy_keys(context.ledger, item_id=item_id, policies=active_current)
+    established_policy_intents = _schedule_established_policy_intents(context.ledger, item_id=item_id)
     desired_policies, policy_effects, disabled_intents = _schedule_update_normalize_policies(
         active_current,
-        desired=patch.get("reminders", _UNSET),
-        delivery=delivery,
+        desired=desired_reminders,
+        delivery=policy_delivery,
         item=item,
         next_version=target_version + 1,
         command_id=command_id,
@@ -2312,11 +2425,27 @@ def _handle_schedule_update(request: Mapping[str, Any], context: CommandContext)
         changed_dimensions.append("recurrence")
     if delivery is not None and _schedule_delivery_changes(active_current, delivery):
         changed_dimensions.append("delivery")
-    if "reminders" in patch and _schedule_policy_set_changes(active_current, desired_policies):
+    if (
+        profile_replaces_policies
+        and _schedule_policy_set_changes(active_current, desired_policies)
+    ):
         changed_dimensions.append("reminders")
+    if profile_prepared["replace_assignment"]:
+        changed_dimensions.append("archetype")
+    if profile_prepared["application_changed"]:
+        changed_dimensions.append("notification_profile")
     changed_dimensions = [
         value
-        for value in ("item", "primary_location", "scheduled_time", "recurrence", "delivery", "reminders")
+        for value in (
+            "item",
+            "primary_location",
+            "archetype",
+            "scheduled_time",
+            "recurrence",
+            "delivery",
+            "notification_profile",
+            "reminders",
+        )
         if value in changed_dimensions
     ]
     truth_changed = bool(changed_dimensions)
@@ -2379,7 +2508,11 @@ def _handle_schedule_update(request: Mapping[str, Any], context: CommandContext)
     cancelled_ids, retained_ids, protected_ids, cancellation_reasons = _schedule_reconcile_work_plan(
         context.ledger,
         item_id=item_id,
-        active_policies=effective_policies if ("reminders" in patch or delivery is not None) else active_current,
+        active_policies=(
+            effective_policies
+            if (profile_replaces_policies or delivery is not None)
+            else active_current
+        ),
         target_changed="scheduled_time" in changed_dimensions,
         recurrence_changed="recurrence" in changed_dimensions,
     )
@@ -2425,7 +2558,7 @@ def _handle_schedule_update(request: Mapping[str, Any], context: CommandContext)
                         effect="schedule_recurrence_replaced",
                     )
                     insert_recurrence_lineage(connection, lineage=lineage)
-            if "reminders" in patch or delivery is not None:
+            if profile_replaces_policies or delivery is not None:
                 for prior in active_current:
                     remove_copied_notification_policy(
                         connection,
@@ -2439,6 +2572,27 @@ def _handle_schedule_update(request: Mapping[str, Any], context: CommandContext)
                     if str(prior["notification_intent_id"]) not in {
                         str(normalized.value["notification_intent_id"]) for _, normalized in desired_policies
                     }:
+                        prior_semantic_key = (
+                            prior["recipient_kind"],
+                            prior.get("recipient_subject_id"),
+                            prior.get("recipient_group_id"),
+                            prior["delivery_target_id"],
+                            prior["normalized_notification_schedule_hash"],
+                        )
+                        desired_semantic_keys = {
+                            (
+                                normalized.value["recipient_kind"],
+                                normalized.value.get("recipient_subject_id"),
+                                normalized.value.get("recipient_group_id"),
+                                normalized.value["delivery_target_id"],
+                                normalized.value[
+                                    "normalized_notification_schedule_hash"
+                                ],
+                            )
+                            for _, normalized in desired_policies
+                        }
+                        if prior_semantic_key in desired_semantic_keys:
+                            continue
                         disabled = _schedule_disabled_policy(
                             prior,
                             item_version=next_version,
@@ -2446,6 +2600,30 @@ def _handle_schedule_update(request: Mapping[str, Any], context: CommandContext)
                             updated_at=updated_at,
                         )
                         insert_notification_schedule_policy(connection, normalized=disabled)
+            profile_persistence = None
+            if profile_prepared is not None and (
+                profile_prepared["replace_assignment"]
+                or profile_prepared["replace_application"]
+            ):
+                from spine.services.notification_profile_application import (
+                    persist_schedule_update_profile,
+                )
+
+                profile_persistence = persist_schedule_update_profile(
+                    connection,
+                    prepared=profile_prepared,
+                    item_id=item_id,
+                    item_version=next_version,
+                    command_id=command_id,
+                    actor_subject_id=actor,
+                    updated_at_utc=updated_at,
+                    policies=[
+                        (policy_key, normalized.value)
+                        for policy_key, normalized in desired_policies
+                    ],
+                )
+        else:
+            profile_persistence = None
         _schedule_operations_fail_if_requested(context, command, "truth")
         for work_id in cancelled_ids:
             cancel_work_instance(
@@ -2531,6 +2709,18 @@ def _handle_schedule_update(request: Mapping[str, Any], context: CommandContext)
         }
         if primary_location_change is not None:
             result_facts["primary_location_change"] = primary_location_change
+        if profile_prepared is not None:
+            result_facts["archetype_action"] = profile_prepared["assignment_action"]
+            result_facts["notification_profile_action"] = profile_prepared["profile_action"]
+            if profile_prepared["projection"] is not None:
+                result_facts["notification_profile"] = {
+                    **dict(profile_prepared["projection"]),
+                    "application": (
+                        profile_persistence["notification_profile"]
+                        if profile_persistence is not None
+                        else None
+                    ),
+                }
         recurrence_value = successor_recurrence.value if isinstance(successor_recurrence, NormalizedRecurrenceSet) else successor_recurrence
         if recurrence_value is not None:
             result_facts["recurrence"] = {
@@ -5288,9 +5478,7 @@ def _schedule_semantic_request(
     allowed: set[str],
 ) -> dict[str, Any]:
     semantic = _semantic_request("schedule.create", command_id, actor, created_at, request, allowed)
-    reminders = semantic.get("reminders")
-    if isinstance(reminders, list) and all(isinstance(entry, dict) for entry in reminders):
-        semantic["reminders"] = sorted(reminders, key=lambda entry: str(entry.get("policy_key", "")))
+    _normalize_notification_plan_semantic(semantic.get("notification_plan"))
     item = semantic.get("item")
     if isinstance(item, dict):
         task_detail = item.get("task_detail")
@@ -5344,9 +5532,19 @@ def _nested_optional_str(value: Mapping[str, Any], key: str, field: str) -> str 
 
 
 def _schedule_validate_item_fields(item: Mapping[str, Any], *, item_type: str) -> None:
+    allowed = {
+        "item_type",
+        "title",
+        "summary",
+        "source_ref",
+        "primary_location",
+        "archetype",
+        "event_detail",
+        "task_detail",
+    }
     _schedule_exact_fields(
         item,
-        {"item_type", "title", "summary", "source_ref", "primary_location", "event_detail", "task_detail"},
+        allowed,
         "item",
     )
     if item_type == "event":
@@ -5647,23 +5845,30 @@ def _schedule_normalize_policies(
     delivery: Mapping[str, Any],
 ) -> tuple[tuple[str, NormalizedNotificationPolicy], ...]:
     if not isinstance(value, Sequence) or isinstance(value, (str, bytes, bytearray)):
-        raise SpineValidationError("invalid_request:reminders", "reminders must be an array")
+        raise SpineValidationError(
+            "invalid_request:notification_plan.custom_additions",
+            "custom_additions must be an array",
+        )
     if not 1 <= len(value) <= 32:
-        raise SpineValidationError("invalid_request:reminders", "reminders must contain 1 through 32 policies")
+        raise SpineValidationError(
+            "invalid_request:notification_plan.custom_additions",
+            "custom_additions must contain 1 through 32 policies",
+        )
     keyed: list[tuple[str, int, Mapping[str, Any]]] = []
     seen_keys: set[str] = set()
     for index, raw in enumerate(value):
-        reminder = _schedule_object(raw, f"reminders[{index}]")
-        _schedule_exact_fields(reminder, {"policy_key", "schedule", "late_handling"}, f"reminders[{index}]")
-        policy_key = _nested_required_str(reminder, "policy_key", f"reminders[{index}].policy_key")
+        field = f"notification_plan.custom_additions[{index}]"
+        reminder = _schedule_object(raw, field)
+        _schedule_exact_fields(reminder, {"policy_key", "schedule", "late_handling"}, field)
+        policy_key = _nested_required_str(reminder, "policy_key", f"{field}.policy_key")
         if re.fullmatch(r"[a-z][a-z0-9_-]{0,63}", policy_key) is None:
             raise SpineValidationError(
-                f"invalid_request:reminders[{index}].policy_key",
+                f"invalid_request:{field}.policy_key",
                 "policy_key has an invalid format",
             )
         if policy_key in seen_keys:
             raise SpineValidationError(
-                f"semantic_conflict:reminders[{index}].policy_key",
+                f"semantic_conflict:{field}.policy_key",
                 "policy_key must be unique",
             )
         seen_keys.add(policy_key)
@@ -5683,7 +5888,7 @@ def _schedule_normalize_policies(
             },
             item_id=item_id,
             item_version="1",
-            command_id=command_id,
+            command_id=f"{command_id}:{policy_key}",
             created_at_utc=created_at_utc,
             recipient_kind=str(delivery["recipient_kind"]),
             recipient_id=str(delivery["recipient_id"]),
@@ -5693,7 +5898,7 @@ def _schedule_normalize_policies(
         schedule_hash = str(normalized.value["normalized_notification_schedule_hash"])
         if schedule_hash in seen_schedules:
             raise SpineValidationError(
-                f"semantic_conflict:reminders[{index}]",
+                f"semantic_conflict:notification_plan.custom_additions[{index}]",
                 "reminder duplicates another normalized policy",
             )
         seen_schedules.add(schedule_hash)
@@ -5841,9 +6046,7 @@ def _schedule_update_semantic_request(
     semantic = _semantic_request("schedule.update", command_id, actor, updated_at, request, allowed)
     patch = semantic.get("patch")
     if isinstance(patch, dict):
-        reminders = patch.get("reminders")
-        if isinstance(reminders, list) and all(isinstance(value, dict) for value in reminders):
-            patch["reminders"] = sorted(reminders, key=lambda value: str(value.get("policy_key", "")))
+        _normalize_notification_plan_semantic(patch.get("notification_plan"))
         item = patch.get("item")
         if isinstance(item, dict):
             task_detail = item.get("task_detail")
@@ -5856,6 +6059,26 @@ def _schedule_update_semantic_request(
                     ),
                 )
     return semantic
+
+
+def _normalize_notification_plan_semantic(value: object) -> None:
+    """Canonicalize set-like plan collections before replay comparison."""
+
+    if not isinstance(value, dict):
+        return
+    additions = value.get("custom_additions")
+    if isinstance(additions, list) and all(isinstance(entry, dict) for entry in additions):
+        value["custom_additions"] = sorted(
+            additions, key=lambda entry: str(entry.get("policy_key", ""))
+        )
+    replacements = value.get("replacements")
+    if isinstance(replacements, list) and all(isinstance(entry, dict) for entry in replacements):
+        value["replacements"] = sorted(
+            replacements, key=lambda entry: str(entry.get("template_key", ""))
+        )
+    suppressions = value.get("suppress_template_keys")
+    if isinstance(suppressions, list) and all(isinstance(entry, str) for entry in suppressions):
+        value["suppress_template_keys"] = sorted(suppressions)
 
 
 def _schedule_prefix_validation(exc: SpineValidationError, old: str, new: str) -> SpineValidationError:
@@ -6066,42 +6289,46 @@ def _schedule_update_normalize_policies(
             keyed.append((policy_keys[str(prior["notification_intent_id"])], None, prior))
     else:
         if not isinstance(desired, Sequence) or isinstance(desired, (str, bytes, bytearray)) or len(desired) > 32:
-            raise SpineValidationError("invalid_request:patch.reminders", "patch.reminders must contain zero through 32 entries")
+            raise SpineValidationError(
+                "invalid_request:patch.notification_plan.custom_additions",
+                "custom_additions must contain zero through 32 entries",
+            )
         seen_keys: set[str] = set()
         seen_intents: set[str] = set()
         for index, raw in enumerate(desired):
-            entry = _schedule_object(raw, f"patch.reminders[{index}]")
+            field = f"patch.notification_plan.custom_additions[{index}]"
+            entry = _schedule_object(raw, field)
             _schedule_exact_fields(
                 entry,
                 {"policy_key", "notification_intent_id", "notification_policy_id", "schedule", "late_handling"},
-                f"patch.reminders[{index}]",
+                field,
             )
-            key = _nested_required_str(entry, "policy_key", f"patch.reminders[{index}].policy_key")
+            key = _nested_required_str(entry, "policy_key", f"{field}.policy_key")
             if re.fullmatch(r"[a-z][a-z0-9_-]{0,63}", key) is None or key in seen_keys:
-                raise SpineValidationError(f"semantic_conflict:patch.reminders[{index}].policy_key", "policy_key is invalid or duplicated")
+                raise SpineValidationError(f"semantic_conflict:{field}.policy_key", "policy_key is invalid or duplicated")
             seen_keys.add(key)
             intent_id = entry.get("notification_intent_id")
             policy_id = entry.get("notification_policy_id")
             if (intent_id is None) != (policy_id is None):
                 missing = "notification_intent_id" if intent_id is None else "notification_policy_id"
-                raise SpineValidationError(f"invalid_request:patch.reminders[{index}].{missing}", "both reminder identities are required")
+                raise SpineValidationError(f"invalid_request:{field}.{missing}", "both reminder identities are required")
             prior = None
             if intent_id is not None:
                 if not isinstance(intent_id, str) or not isinstance(policy_id, str):
-                    raise SpineValidationError(f"invalid_request:patch.reminders[{index}]", "reminder identities must be strings")
+                    raise SpineValidationError(f"invalid_request:{field}", "reminder identities must be strings")
                 prior = by_intent.get(intent_id)
                 if prior is None or prior["notification_policy_id"] != policy_id:
                     raise SpineValidationError(
-                        f"semantic_conflict:patch.reminders[{index}].notification_policy_id",
+                        f"semantic_conflict:{field}.notification_policy_id",
                         "policy is not current",
                     )
                 if intent_id in seen_intents:
-                    raise SpineValidationError(f"semantic_conflict:patch.reminders[{index}].notification_intent_id", "intent is duplicated")
+                    raise SpineValidationError(f"semantic_conflict:{field}.notification_intent_id", "intent is duplicated")
                 seen_intents.add(intent_id)
                 established = policy_keys.get(intent_id)
                 if intent_id in established_policy_intents and established is not None and established != key:
                     raise SpineValidationError(
-                        f"semantic_conflict:patch.reminders[{index}].policy_key",
+                        f"semantic_conflict:{field}.policy_key",
                         "policy_key is bound to another intent",
                     )
             elif delivery is None:
@@ -6157,7 +6384,7 @@ def _schedule_update_normalize_policies(
             effects[str(normalized.value["notification_intent_id"])] = "created"
         schedule_hash = str(normalized.value["normalized_notification_schedule_hash"])
         if schedule_hash in schedule_hashes:
-            raise SpineValidationError("semantic_conflict:patch.reminders", "two reminders normalize to the same policy")
+            raise SpineValidationError("semantic_conflict:patch.notification_plan", "two reminders normalize to the same policy")
         schedule_hashes.add(schedule_hash)
         result.append((key, normalized))
     resulting_intents = {str(value.value["notification_intent_id"]) for _, value in result}
@@ -6464,11 +6691,11 @@ def _schedule_update_response(receipt: Mapping[str, Any], *, response_effect: st
     return {
         "ok": True,
         "command": "schedule.update",
-        "response_contract": "spine.schedule-update-response.v1",
+        "response_contract": "spine.schedule-update-response.v2",
         "effect": response_effect,
         **dict(facts),
         "receipt": {
-            "receipt_contract": "spine.schedule-update-receipt.v1",
+            "receipt_contract": "spine.schedule-update-receipt.v2",
             "command_receipt_id": receipt["command_receipt_id"],
             "effect": receipt["effect"],
             "semantic_facts_hash": receipt["semantic_facts_hash"],
@@ -7357,11 +7584,11 @@ def _schedule_create_response(receipt: Mapping[str, Any], *, response_effect: st
     return {
         "ok": True,
         "command": "schedule.create",
-        "response_contract": "spine.schedule-create-response.v1",
+        "response_contract": "spine.schedule-create-response.v2",
         "effect": response_effect,
         **dict(facts),
         "receipt": {
-            "receipt_contract": "spine.schedule-create-receipt.v1",
+            "receipt_contract": "spine.schedule-create-receipt.v2",
             "command_receipt_id": receipt["command_receipt_id"],
             "effect": "schedule_created",
             "semantic_facts_hash": receipt["semantic_facts_hash"],

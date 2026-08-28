@@ -12,7 +12,7 @@ Contract versions:
 
 This contract defines two additive operator conveniences over the canonical scheduling surfaces:
 
-1. `schedule.build` deterministically compiles the common intent “event after a relative delay, then remind me repeatedly until it starts” into an ordinary `spine.schedule-create.v1` request.
+1. `schedule.build` deterministically compiles the common intent “event after a relative delay, then remind me repeatedly until it starts” into an ordinary direct-plan `spine.schedule-create.v2` request.
 2. CLI `--compact` projects successful `schedule.create` and `schedule.show` responses into one stable, audit-complete chat/operator shape.
 
 Neither feature creates a new scheduling ontology. `schedule.create` remains the only writer in this flow, `schedule.show` remains the canonical aggregate readback, and their full JSON responses remain the default.

@@ -1,6 +1,6 @@
 # Spine Ontology
 
-Status: Draft v4.3.0; schema version 9 implementation aligned; notification-profile and operational-resilience extensions not yet implemented
+Status: Draft v4.4.0; schema version 10 implementation aligned; notification-profile extension implemented
 Scope: First durable ontology and minimum data contract sketch for Spine
 
 ## 1. Ontology Goal
@@ -331,7 +331,7 @@ At most one active binding governs `(target_item_id, target_anchor_role)`. A `pa
 
 ### 4.7 Item archetypes and notification-profile authorities
 
-The draft extension in `specs/notification-profiles.md` introduces distinct canonical
+The implemented extension in `specs/notification-profiles.md` introduces distinct canonical
 authorities for:
 
 - owner-scoped item-archetype roots and immutable revisions;
@@ -341,8 +341,8 @@ authorities for:
 - immutable profile-application provenance mapped to ordinary notification intents
   and policies.
 
-These authorities are not implemented in schema version 9. Their eventual migration
-MUST keep item type, archetype, profile, application, and notification policy separate.
+Schema version 10 implements these authorities while keeping item type, archetype,
+profile, application, and notification policy separate.
 Archetype assignment is version-scoped item metadata and cannot add lifecycle or
 execution semantics. A profile application snapshots one exact revision and creates
 ordinary `notification_policies`; neither readback nor delivery may derive effective

@@ -48,7 +48,7 @@ allowed to quietly become canonical.
 
 ## What Works Today
 
-Spine `0.2.0` is an implemented alpha exercised in a staging agent environment. Its
+Spine `0.3.0` is an implemented alpha exercised in a staging agent environment. Its
 current SQLite ledger schema is version `9`.
 
 ### Atomic scheduling
@@ -290,16 +290,15 @@ design and compatibility promises live in `specs/`.
 
 Spine is substantial, but it is not finished.
 
-Implemented today: the schema-9 coordination ledger, command contracts, recurrence,
+Implemented today: the schema-10 coordination ledger, command contracts, recurrence,
 notifications, atomic scheduling, operational lifecycle, readback, locations, temporal
-bindings, deterministic notification rendering, durable attempt processing, Tickerd
-integration, and the first storage-containment controls.
+bindings, deterministic notification rendering, dynamic item archetypes, reusable
+notification profiles, durable attempt processing, Tickerd integration, and the first
+storage-containment controls.
 
 Still deliberately separate or in design:
 
 - governed contextual LLM advisories and agent-generated enrichment;
-- dynamic item archetypes and reusable notification profiles, specified in
-  [`specs/notification-profiles.md`](specs/notification-profiles.md);
 - canonical archival and retention policy for long-lived ledgers;
 - broader external projection adapters;
 - production qualification across sustained load and failure campaigns;

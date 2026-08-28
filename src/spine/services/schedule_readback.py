@@ -145,7 +145,65 @@ def build_schedule_readback(
 
         primary = current_primary_location(item)
         result["primary_location"] = primary_location_view(primary) if primary is not None else None
+    if "notification_profile" in include:
+        result["notification_profile"] = _notification_profile_projection(
+            connection,
+            item_id=item_id,
+            item_version=int(item["current_version"]),
+        )
     return result
+
+
+def _notification_profile_projection(
+    connection: sqlite3.Connection,
+    *,
+    item_id: str,
+    item_version: int,
+) -> dict[str, Any]:
+    from spine.ledger.notification_profiles import (
+        current_application,
+        current_assignment,
+    )
+
+    assignment = current_assignment(
+        connection, item_id=item_id, item_version=item_version
+    )
+    application = current_application(
+        connection, item_id=item_id, item_version=item_version
+    )
+    if application is None:
+        return {
+            "readback_contract": "spine.notification-profile-readback.v1",
+            "archetype_assignment": assignment,
+            "application": None,
+            "upgrade_available": False,
+            "effective_policy_diverged": False,
+        }
+    profile = application["profile"]
+    pinned_revision_id = str(application["notification_profile_revision_id"])
+    current_revision_id = str(profile["current_revision_id"])
+    mapped_policy_ids = {
+        str(value["notification_policy_id"]) for value in application["policies"]
+    }
+    current_policy_ids = {
+        str(row["policy_id"])
+        for row in connection.execute(
+            """
+            SELECT policy_id FROM notification_policies
+            WHERE item_id = ? AND version = ? AND status = 'active'
+            """,
+            (item_id, item_version),
+        ).fetchall()
+    }
+    return {
+        "readback_contract": "spine.notification-profile-readback.v1",
+        "archetype_assignment": assignment,
+        "application": application,
+        "pinned_notification_profile_revision_id": pinned_revision_id,
+        "current_notification_profile_revision_id": current_revision_id,
+        "upgrade_available": pinned_revision_id != current_revision_id,
+        "effective_policy_diverged": mapped_policy_ids != current_policy_ids,
+    }
 
 
 def _authoring_receipt(connection: sqlite3.Connection, item_id: str) -> dict[str, Any] | None:

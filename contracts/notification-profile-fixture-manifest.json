@@ -1,0 +1,39 @@
+{
+  "schema_version": "spine.notification-profile-contract-fixtures.v1",
+  "fixtures": [
+    {
+      "fixture_id": "item_archetype.create",
+      "fixture": "tests/fixtures/notification_profiles/contracts/request_item_archetype_create.json",
+      "schema": "contracts/schemas/notification-profile-commands.schema.json",
+      "schema_ref": "#/$defs/archetypeCreate"
+    },
+    {
+      "fixture_id": "notification_profile.create",
+      "fixture": "tests/fixtures/notification_profiles/contracts/request_notification_profile_create.json",
+      "schema": "contracts/schemas/notification-profile-commands.schema.json",
+      "schema_ref": "#/$defs/profileCreate"
+    },
+    {
+      "fixture_id": "notification_profile.binding.set",
+      "fixture": "tests/fixtures/notification_profiles/contracts/request_binding_set.json",
+      "schema": "contracts/schemas/notification-profile-commands.schema.json",
+      "schema_ref": "#/$defs/bindingSet"
+    },
+    {
+      "fixture_id": "notification_profile.resolve",
+      "fixture": "tests/fixtures/notification_profiles/contracts/request_resolve.json",
+      "schema": "contracts/schemas/notification-profile-commands.schema.json",
+      "schema_ref": "#/$defs/resolve"
+    },
+    {
+      "fixture_id": "schedule.create.profile_default",
+      "fixture": "tests/fixtures/notification_profiles/contracts/request_schedule_create_profile_default.json",
+      "schema": "contracts/schemas/schedule-create-request.schema.json"
+    },
+    {
+      "fixture_id": "schedule.update.profile_upgrade",
+      "fixture": "tests/fixtures/notification_profiles/contracts/request_schedule_update_profile_upgrade.json",
+      "schema": "contracts/schemas/schedule-update-request.schema.json"
+    }
+  ]
+}

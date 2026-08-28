@@ -52,7 +52,9 @@ class ScheduleOperationsContractFixtureTests(unittest.TestCase):
         request = _load(FIXTURE_DIR / "request_update_recurring_event.json")
 
         partial_identity = copy.deepcopy(request)
-        del partial_identity["patch"]["reminders"][0]["notification_policy_id"]
+        del partial_identity["patch"]["notification_plan"]["custom_additions"][0][
+            "notification_policy_id"
+        ]
         self.assertFalse(_valid(schema, partial_identity, self.registry))
 
         hidden_route = copy.deepcopy(request)
@@ -199,9 +201,9 @@ class ScheduleOperationsContractFixtureTests(unittest.TestCase):
             "spine.schedule-operations-normalization.v1",
             "spine.schedule-agenda.v1",
             "spine.schedule-agenda-response.v1",
-            "spine.schedule-update.v1",
-            "spine.schedule-update-response.v1",
-            "spine.schedule-update-receipt.v1",
+            "spine.schedule-update.v2",
+            "spine.schedule-update-response.v2",
+            "spine.schedule-update-receipt.v2",
             "spine.schedule-cancel.v1",
             "spine.schedule-cancel-response.v1",
             "spine.schedule-cancel-receipt.v1",
@@ -243,7 +245,7 @@ def _request_command(request: object) -> str | None:
         return None
     return {
         "spine.schedule-agenda.v1": "agenda.show",
-        "spine.schedule-update.v1": "schedule.update",
+        "spine.schedule-update.v2": "schedule.update",
         "spine.schedule-cancel.v1": "schedule.cancel",
     }.get(request.get("contract_version"))
 
@@ -306,15 +308,24 @@ def _schedule_operation_semantic_error(
     ):
         return _semantic_error("7", "missing_required_field", "patch.recurrence")
 
-    reminders = patch.get("reminders")
-    if isinstance(reminders, list) and context.get("policy_key_mapping_matches") is False:
-        return _semantic_error("7", "semantic_conflict", "patch.reminders[0].policy_key")
+    notification_plan = patch.get("notification_plan")
+    additions = (
+        notification_plan.get("custom_additions")
+        if isinstance(notification_plan, dict)
+        else None
+    )
+    if isinstance(additions, list) and context.get("policy_key_mapping_matches") is False:
+        return _semantic_error(
+            "7",
+            "semantic_conflict",
+            "patch.notification_plan.custom_additions[0].policy_key",
+        )
 
     normalized_hashes = context.get("normalized_policy_hashes")
     if isinstance(normalized_hashes, list) and len(normalized_hashes) != len(
         set(normalized_hashes)
     ):
-        return _semantic_error("9", "semantic_conflict", "patch.reminders")
+        return _semantic_error("9", "semantic_conflict", "patch.notification_plan")
     return None
 
 

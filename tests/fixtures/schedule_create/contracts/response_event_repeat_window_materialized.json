@@ -1,7 +1,7 @@
 {
   "ok": true,
   "command": "schedule.create",
-  "response_contract": "spine.schedule-create-response.v1",
+  "response_contract": "spine.schedule-create-response.v2",
   "effect": "schedule_created",
   "command_id": "schedule-create-event-countdown-001",
   "command_receipt_id": "command_receipt_schedule_create_event_countdown_001",
@@ -118,8 +118,20 @@
     "work": "materialized",
     "delivery": "not_attempted"
   },
+  "archetype": null,
+  "notification_profile": {
+    "selection_mode": "none",
+    "application": null,
+    "policy_origins": [
+      {
+        "policy_key": "countdown",
+        "policy_origin": "custom_addition",
+        "source_key": "countdown"
+      }
+    ]
+  },
   "receipt": {
-    "receipt_contract": "spine.schedule-create-receipt.v1",
+    "receipt_contract": "spine.schedule-create-receipt.v2",
     "command_receipt_id": "command_receipt_schedule_create_event_countdown_001",
     "effect": "schedule_created",
     "semantic_facts_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",

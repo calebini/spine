@@ -1,0 +1,30 @@
+{
+  "contract_version": "spine.notification-profiles.v1",
+  "command_id": "fixture-profile-create",
+  "actor_subject_id": "subject_agent",
+  "action_timestamp_utc": "2035-02-01T12:00:01Z",
+  "owner": {
+    "owner_kind": "subject",
+    "owner_subject_id": "subject_owner"
+  },
+  "profile_key": "appointment_standard",
+  "display_name": "Appointment standard",
+  "description": "One day before",
+  "revision": {
+    "compatible_item_types": ["event"],
+    "templates": [
+      {
+        "template_key": "day_before",
+        "schedule": {
+          "kind": "once",
+          "at": {
+            "kind": "target_offset",
+            "offset_basis": "elapsed",
+            "offset_seconds": "-86400"
+          }
+        },
+        "late_handling": { "kind": "skip" }
+      }
+    ]
+  }
+}

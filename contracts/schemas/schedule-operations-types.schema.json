@@ -160,7 +160,10 @@
       "required": ["receipt_contract", "command_receipt_id", "effect", "semantic_facts_hash", "created_at_utc"],
       "properties": {
         "receipt_contract": {
-          "enum": ["spine.schedule-update-receipt.v1", "spine.schedule-cancel-receipt.v1"]
+          "enum": [
+            "spine.schedule-update-receipt.v2",
+            "spine.schedule-cancel-receipt.v1"
+          ]
         },
         "command_receipt_id": { "$ref": "notification-types.schema.json#/$defs/id" },
         "effect": {

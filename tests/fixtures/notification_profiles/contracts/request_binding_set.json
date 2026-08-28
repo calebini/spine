@@ -1,0 +1,12 @@
+{
+  "contract_version": "spine.notification-profile-bindings.v1",
+  "command_id": "fixture-binding-set",
+  "actor_subject_id": "subject_agent",
+  "action_timestamp_utc": "2035-02-01T12:00:02Z",
+  "owner": {
+    "owner_kind": "subject",
+    "owner_subject_id": "subject_owner"
+  },
+  "item_archetype_id": "item_archetype_example",
+  "notification_profile_id": "notification_profile_example"
+}

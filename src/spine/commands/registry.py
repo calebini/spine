@@ -26,7 +26,13 @@ _READ_COMMANDS = frozenset(
         "item.list",
         "item.occurrences",
         "item.show",
+        "item_archetype.list",
+        "item_archetype.show",
         "notification.opportunities",
+        "notification_profile.binding.list",
+        "notification_profile.list",
+        "notification_profile.resolve",
+        "notification_profile.show",
         "relation.list",
         "schedule.binding.list",
         "schedule.build",
@@ -90,7 +96,7 @@ _requirements(
 )
 _requirements(
     {"schedule.build"},
-    "spine.schedule-create.v1",
+    "spine.schedule-create.v2",
     "spine.schedule-create-normalization.v1",
     "spine.schedule-countdown-builder.v1",
     "spine.schedule-countdown-builder-response.v1",
@@ -98,10 +104,10 @@ _requirements(
 )
 _requirements(
     {"schedule.create"},
-    "spine.schedule-create.v1",
+    "spine.schedule-create.v2",
     "spine.schedule-create-normalization.v1",
-    "spine.schedule-create-response.v1",
-    "spine.schedule-create-receipt.v1",
+    "spine.schedule-create-response.v2",
+    "spine.schedule-create-receipt.v2",
     "spine.recurrence-authoring.v1",
     "spine.recurrence.contract.v1",
     "spine.recurrence.normalization.v1",
@@ -113,6 +119,10 @@ _requirements(
     "spine.schedule-primary-location-authoring.v1",
     "spine.schedule-primary-location-view.v1",
     "spine.schedule-primary-location-normalization.v1",
+    "spine.item-archetypes.v1",
+    "spine.notification-profiles.v1",
+    "spine.notification-profile-bindings.v1",
+    "spine.notification-profile-application.v1",
 )
 _requirements(
     {"schedule.show"},
@@ -137,9 +147,9 @@ _requirements(
 _requirements(
     {"schedule.update"},
     "spine.schedule-operations-normalization.v1",
-    "spine.schedule-update.v1",
-    "spine.schedule-update-response.v1",
-    "spine.schedule-update-receipt.v1",
+    "spine.schedule-update.v2",
+    "spine.schedule-update-response.v2",
+    "spine.schedule-update-receipt.v2",
     "spine.recurrence-authoring.v1",
     "spine.recurrence.contract.v1",
     "spine.recurrence.normalization.v1",
@@ -152,6 +162,10 @@ _requirements(
     "spine.schedule-primary-location-view.v1",
     "spine.schedule-primary-location-normalization.v1",
     "spine.relative-temporal-binding.v1",
+    "spine.item-archetypes.v1",
+    "spine.notification-profiles.v1",
+    "spine.notification-profile-bindings.v1",
+    "spine.notification-profile-application.v1",
 )
 _requirements(
     {"schedule.cancel"},
@@ -193,6 +207,43 @@ _requirements(
     "spine.schedule-binding-reconcile.v1",
     "spine.schedule-binding-reconcile-response.v1",
     "spine.schedule-binding-reconcile-receipt.v1",
+)
+_requirements(
+    {
+        "item_archetype.create",
+        "item_archetype.revise",
+        "item_archetype.retire",
+        "item_archetype.show",
+        "item_archetype.list",
+    },
+    "spine.item-archetypes.v1",
+    "spine.notification-profile-readback.v1",
+    "spine.notification-profile-catalog-cursor.v1",
+)
+_requirements(
+    {
+        "notification_profile.create",
+        "notification_profile.revise",
+        "notification_profile.retire",
+        "notification_profile.show",
+        "notification_profile.list",
+    },
+    "spine.notification-profiles.v1",
+    "spine.notification-profile-readback.v1",
+    "spine.notification-profile-catalog-cursor.v1",
+)
+_requirements(
+    {
+        "notification_profile.binding.set",
+        "notification_profile.binding.remove",
+        "notification_profile.binding.list",
+        "notification_profile.resolve",
+    },
+    "spine.item-archetypes.v1",
+    "spine.notification-profiles.v1",
+    "spine.notification-profile-bindings.v1",
+    "spine.notification-profile-readback.v1",
+    "spine.notification-profile-catalog-cursor.v1",
 )
 
 

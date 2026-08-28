@@ -143,7 +143,7 @@ class ScheduleCreateCommandTests(unittest.TestCase):
     def test_policy_order_is_nonsemantic_for_replay(self) -> None:
         request = self.event_request(command_id="schedule-policy-order")
         request["materialization"] = {"mode": "none"}
-        request["reminders"].append(
+        request["notification_plan"]["custom_additions"].append(
             {
                 "policy_key": "one_day_before",
                 "schedule": {
@@ -155,7 +155,7 @@ class ScheduleCreateCommandTests(unittest.TestCase):
         )
         created = handle("schedule.create", request, self.context)
         reordered = copy.deepcopy(request)
-        reordered["reminders"].reverse()
+        reordered["notification_plan"]["custom_additions"].reverse()
 
         replay = handle("schedule.create", reordered, self.context)
 
@@ -164,9 +164,9 @@ class ScheduleCreateCommandTests(unittest.TestCase):
         self.assertEqual(replay["effect"], "schedule_create_replay")
         self.assertEqual(replay["policies"], created["policies"])
 
-    def test_multiple_once_reminders_with_shared_intent_remain_processable(self) -> None:
+    def test_multiple_once_custom_additions_remain_processable(self) -> None:
         request = self.event_request(command_id="schedule-multi-once")
-        request["reminders"] = [
+        request["notification_plan"]["custom_additions"] = [
             {
                 "policy_key": "ninety_minutes",
                 "schedule": {
@@ -210,7 +210,7 @@ class ScheduleCreateCommandTests(unittest.TestCase):
 
         self.assertTrue(created["ok"], created)
         self.assertEqual(len(created["policies"]), 4)
-        self.assertEqual(len({policy["notification_intent_id"] for policy in created["policies"]}), 1)
+        self.assertEqual(len({policy["notification_intent_id"] for policy in created["policies"]}), 4)
         self.assertEqual(len({policy["notification_policy_id"] for policy in created["policies"]}), 4)
 
         reconciled = handle(
@@ -301,7 +301,7 @@ class ScheduleCreateCommandTests(unittest.TestCase):
 
     def event_request(self, *, command_id: str = "schedule-event") -> dict[str, object]:
         return {
-            "contract_version": "spine.schedule-create.v1",
+            "contract_version": "spine.schedule-create.v2",
             "command_id": command_id,
             "actor_subject_id": "owner",
             "created_at_utc": "2026-08-13T12:00:00Z",
@@ -323,8 +323,9 @@ class ScheduleCreateCommandTests(unittest.TestCase):
                 "channel": "whatsapp",
                 "target": {"resolution": "explicit", "delivery_target_id": "whatsapp-owner"},
             },
-            "reminders": [
-                {
+            "notification_plan": {
+                "mode": "none",
+                "custom_additions": [{
                     "policy_key": "countdown",
                     "schedule": {
                         "kind": "repeat_window",
@@ -334,8 +335,8 @@ class ScheduleCreateCommandTests(unittest.TestCase):
                         "cadence": {"kind": "fixed_elapsed", "interval_seconds": "1200"},
                     },
                     "late_handling": {"kind": "skip"},
-                }
-            ],
+                }],
+            },
             "materialization": {
                 "mode": "bounded",
                 "evaluated_at_utc": "2026-08-13T12:00:00Z",
@@ -373,7 +374,7 @@ class ScheduleCreateCommandTests(unittest.TestCase):
             },
         }
         request["delivery"]["target"] = {"resolution": "context_default", "default_key": "owner_whatsapp"}
-        request["reminders"] = [
+        request["notification_plan"]["custom_additions"] = [
             {
                 "policy_key": "one_hour_before",
                 "schedule": {

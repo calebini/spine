@@ -1,6 +1,6 @@
 # Spine Atomic Schedule Creation
 
-Status: Implemented v0.1.1 on current ledger schema 9
+Status: Implemented v2 on current ledger schema 10
 Scope: One atomic operator-facing command for creating a scheduled event or task with notification policies and optional bounded work materialization
 Created: 2026-08-12
 
@@ -26,26 +26,27 @@ This specification depends on:
 - `specs/ontology.md` for item, version, temporal-anchor, notification-policy, work, audit, and receipt authority;
 - `specs/recurrence.md` for recurrence normalization, expansion, identity, DST, and occurrence-provenance semantics;
 - `specs/notifications.md` for notification schedule normalization, opportunity identity, bounded materialization, reconciliation, and delivery separation;
+- `specs/notification-profiles.md` for archetype assignment, profile selection, direct custom additions, and immutable application provenance;
 - `specs/agent-command-contract.md` for shared command, replay, error, dry-run, transport, and CLI rules; and
 - `specs/architecture.md` for provider-independent orchestration and approval boundaries.
 
 The version facts are:
 
-- `contract_version=spine.schedule-create.v1`;
+- `contract_version=spine.schedule-create.v2`;
 - `normalization_version=spine.schedule-create-normalization.v1`;
-- `response_contract=spine.schedule-create-response.v1`;
-- `receipt_contract=spine.schedule-create-receipt.v1`; and
+- `response_contract=spine.schedule-create-response.v2`;
+- `receipt_contract=spine.schedule-create-receipt.v2`; and
 - `canonical_json_version=spine.canonical-json.v1`.
 
 The request and response schemas are `contracts/schemas/schedule-create-request.schema.json` and `contracts/schemas/schedule-create-response.schema.json`.
 
-The current schema-9 runtime implements this surface and declares all four schedule-create version facts through `system.info.implemented_contract_versions`. The transport-neutral command identifier is `schedule.create`; the CLI alias is `spine ... schedule create`.
+The current schema-10 runtime implements this surface and declares the complete schedule-create, item-archetype, and notification-profile contract families through `system.info.implemented_contract_versions`. The transport-neutral command identifier is `schedule.create`; the CLI alias is `spine ... schedule create`.
 
 ## 3. Boundary and Non-Goals
 
 `schedule.create` owns orchestration over one new item. It does not introduce a new canonical entity, alternative reminder model, second recurrence engine, route-approval system, or delivery path.
 
-The base Version 1 contract intentionally supports:
+The Version 2 contract intentionally supports:
 
 - exactly one new `event` or `task`;
 - one required `local_instant` event-start or task-due schedule;
@@ -59,7 +60,7 @@ The additive `spine.schedule-primary-location.v1` capability permits zero or one
 primary location without changing any of these time, recurrence, route, policy, or
 materialization limits.
 
-Version 1 intentionally does not support:
+Version 2 intentionally does not support:
 
 - updates to an existing item;
 - all-day, local-date, fixed-UTC, window, event-end, or task-defer anchors;
@@ -78,14 +79,14 @@ The implemented `schedule.update` and `schedule.cancel` lifecycle surfaces are s
 
 The request is a closed JSON object with exactly these required top-level fields:
 
-- `contract_version`, exactly `spine.schedule-create.v1`;
+- `contract_version`, exactly `spine.schedule-create.v2`;
 - `command_id`;
 - `actor_subject_id`;
 - `created_at_utc`;
 - `item`;
 - `scheduled_time`;
 - `delivery`;
-- `reminders`; and
+- `notification_plan`; and
 - `materialization`.
 
 Unknown fields fail under the public command contract. `command_id`, actor resolution, timestamp encoding, canonical decimal strings, and canonical JSON follow `specs/agent-command-contract.md` and `specs/ontology.md`.
@@ -94,7 +95,7 @@ Unknown fields fail under the public command contract. `command_id`, actor resol
 
 `item` contains required `item_type` and `title`, optional `summary` and `source_ref`, and exactly one type detail object matching `item_type`. When the runtime advertises `spine.schedule-primary-location.v1`, it also accepts optional `primary_location` using the closed create/reference shape in `specs/schedule-primary-location.md`; otherwise that field fails as unsupported.
 
-- `item_type=event` requires `event_detail` and forbids `task_detail`. `event_detail.all_day` is exactly `false`; optional fields are `visibility` and `attendance_policy_ref`. Version 1 creates a scheduled point event without an end anchor.
+- `item_type=event` requires `event_detail` and forbids `task_detail`. `event_detail.all_day` is exactly `false`; optional fields are `visibility` and `attendance_policy_ref`. Version 2 creates a scheduled point event without an end anchor.
 - `item_type=task` requires `task_detail` and forbids `event_detail`. Optional `task_detail` fields are `priority` and `subject_roles`. `subject_roles` is the complete initial assignee/owner set and follows the lower-level `task.create` role rules: each entry accepts `role=assignee|owner`, accepts `status=active|inactive`, and derives `status=active` when omitted. After per-entry defaulting and before canonical ordering or identity derivation, every `(subject_id, role)` pair MUST be unique regardless of status. A repeated pair, including one whose entries differ only because one is `active` and the other is `inactive`, fails with `invalid_request`, `field=item.task_detail.subject_roles`, and CLI exit `2`.
 
 The command creates the item shell, common version `1`, and matching event or task detail directly. It does not first create an item and then advance it through reminder versions. The returned `current_version` is therefore `"1"`.
@@ -113,7 +114,7 @@ The command creates the item shell, common version `1`, and matching event or ta
 
 For `explicit`, the named version MUST be available to the executing runtime and is the persisted version. For `system_current`, the handler reads the exact version reported by the same runtime authority as `system.info.timezone_database_version`, resolves it once before mutation, and persists that string everywhere a local schedule requires it. The directive object remains part of the request semantic facts; the resolved string is part of normalized facts and the receipt.
 
-A fresh command MUST resolve the initial local datetime to exactly one UTC instant. A nonexistent or ambiguous initial local datetime fails closed. Version 1 does not silently choose an offset for the initial anchor. The responsible fields are `scheduled_time.local_date` or `scheduled_time.local_time` after timezone and pinned-data validation.
+A fresh command MUST resolve the initial local datetime to exactly one UTC instant. A nonexistent or ambiguous initial local datetime fails closed. Version 2 does not silently choose an offset for the initial anchor. The responsible fields are `scheduled_time.local_date` or `scheduled_time.local_time` after timezone and pinned-data validation.
 
 This initial-anchor rule does not change recurrence candidate semantics. After a valid seed is accepted, later recurrence candidates use `specs/recurrence.md`: nonexistent candidates are omitted and ambiguous candidates select the earliest valid UTC instant with deterministic diagnostics.
 
@@ -148,17 +149,20 @@ Zero matches, multiple matches, an absent key, an inactive target, or an owner/c
 
 The fresh receipt snapshots the resolved `delivery_target_id`, `resolution_source`, `default_key` when used, `channel`, `adapter_name`, and `target_ref`. Replay returns that snapshot and MUST NOT resolve the default again or substitute a target that later becomes the context default.
 
-### 4.5 Reminder policies
+### 4.5 Notification plan and reminder policies
 
-`reminders` is an array of one to 32 entries. Each entry contains:
+`notification_plan` is the closed create-plan shape from
+`specs/notification-profiles.md`. It selects exactly one of `mode=none`,
+`mode=explicit`, or `mode=archetype_default`. `mode=none` is the direct authoring
+path and requires one through 32 `custom_additions`; it does not create a profile
+application. The other modes resolve and snapshot one exact profile revision and may
+suppress, replace, or add policies as that specification defines.
 
-- unique request-local `policy_key` matching `^[a-z][a-z0-9_-]{0,63}$`;
-- a `schedule` from `notification-types.schema.json#/$defs/schedule`; and
-- `late_handling` from `notification-types.schema.json#/$defs/lateHandling`.
-
-Policy keys are compared byte-for-byte, MUST be unique, and establish deterministic request and response order. Canonical processing sorts policies by `policy_key` before identity derivation. Array order is not semantic and MUST NOT change identities or replay compatibility.
-
-Different policy keys do not permit duplicate canonical policies. After target, schedule, late-handling, recipient, channel, and route normalization, two entries with the same structured duplicate-safe notification identity fail with `semantic_conflict`, `field=reminders[n]` on the later canonical policy-key entry.
+Every resulting policy has a unique `policy_key`, a notification `schedule`, and
+`late_handling`. Policy-key, set-equivalence, canonical ordering, profile provenance,
+and duplicate-normalized-policy rules are defined by `specs/notification-profiles.md`
+and `specs/notifications.md`. Array order is not semantic and MUST NOT change
+identities or replay compatibility.
 
 For a non-recurring item, each policy is normalized with target `{anchor_role: event_start|task_due, application_scope: item}`. For a recurring item, each policy is normalized with target `{anchor_role: event_start|task_due, application_scope: each_occurrence}`. `selected_occurrence` is impossible before a persisted occurrence exists and is not accepted by this command.
 
@@ -237,7 +241,7 @@ On fresh non-dry-run success, exactly one `command_receipts` row is written. Com
 - `command=schedule.create`;
 - `effect=schedule_created`;
 - original request semantic facts and their hash;
-- `receipt_contract=spine.schedule-create-receipt.v1` in result facts;
+- `receipt_contract=spine.schedule-create-receipt.v2` in result facts;
 - the resolved timezone-database version and initial UTC instant;
 - the resolved delivery snapshot;
 - item, recurrence, policy, opportunity, work, provenance, and audit identities produced by the request; and
@@ -257,11 +261,12 @@ A compatible replay creates no row and performs no current-environment capabilit
 
 ## 8. Success Response
 
-A success follows `spine.schedule-create-response.v1` and returns:
+A success follows `spine.schedule-create-response.v2` and returns:
 
 - `ok=true`, `command=schedule.create`, `response_contract`, and `effect`;
 - `command_id`, `command_receipt_id`, `audit_id`, and `created_at_utc`;
 - item identity, type, version `1`, title, and accepted local/UTC schedule facts;
+- nullable archetype assignment and the complete notification-profile/direct-plan projection;
 - optional `primary_location` exactly when the request supplied it and the runtime
   advertises the primary-location capability;
 - optional recurrence set, revision, normalized hash, and timezone-resolution diagnostics;
@@ -288,7 +293,7 @@ The opportunity/work evidence array orders by `eligible_at_utc`, `notification_o
 
 The response never uses `delivered`, `sent`, or an adapter-success value. Delivery is later worker state proven by `side_effect_attempts` and work lifecycle evidence.
 
-CLI callers may request `--compact`, which projects this successful response under `spine.schedule-compact.v1`. Full `spine.schedule-create-response.v1` JSON remains the default, and projection occurs only after canonical command handling. A compact dry run is explicitly marked as a preview.
+CLI callers may request `--compact`, which projects this successful response under `spine.schedule-compact.v1`. Full `spine.schedule-create-response.v2` JSON remains the default, and projection occurs only after canonical command handling. A compact dry run is explicitly marked as a preview.
 
 ## 9. Validation and Failure Ordering
 
@@ -315,7 +320,7 @@ Errors use the common public codes and CLI exits. Required fail-closed cases inc
 - nonexistent or ambiguous initial/boundary local time: `invalid_request` on the responsible local date/time field;
 - illegal recurrence or reminder cadence: `invalid_request` on the narrowest recurrence/reminder field;
 - duplicate task `(subject_id, role)` pair regardless of status: `invalid_request`, `field=item.task_detail.subject_roles`;
-- duplicate policy key: `semantic_conflict`, `field=reminders[n].policy_key`;
+- duplicate policy key: `semantic_conflict`, `field=notification_plan.custom_additions[n].policy_key` or the corresponding profile-composition field;
 - absent or ambiguous context default: `referenced_row_not_found` or `semantic_conflict`, `field=delivery.target.default_key`;
 - explicit target missing: `referenced_row_not_found`, `field=delivery.target.delivery_target_id`;
 - advertised primary-location reference missing: `referenced_row_not_found`,

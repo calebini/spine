@@ -1,7 +1,7 @@
 {
   "ok": true,
   "command": "schedule.update",
-  "response_contract": "spine.schedule-update-response.v1",
+  "response_contract": "spine.schedule-update-response.v2",
   "effect": "schedule_updated_and_reconciled",
   "command_id": "schedule-update-recurring-event-001",
   "command_receipt_id": "command_receipt_schedule_update_recurring_event_001",
@@ -68,8 +68,10 @@
     "work": "reconciled",
     "delivery": "not_attempted"
   },
+  "archetype_action": "retain",
+  "notification_profile_action": "clear",
   "receipt": {
-    "receipt_contract": "spine.schedule-update-receipt.v1",
+    "receipt_contract": "spine.schedule-update-receipt.v2",
     "command_receipt_id": "command_receipt_schedule_update_recurring_event_001",
     "effect": "schedule_updated_and_reconciled",
     "semantic_facts_hash": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",

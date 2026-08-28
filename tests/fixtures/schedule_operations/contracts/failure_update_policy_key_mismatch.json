@@ -2,14 +2,16 @@
   "scenario_id": "update.policy_key_mismatch",
   "command": "schedule.update",
   "request": {
-    "contract_version": "spine.schedule-update.v1",
+    "contract_version": "spine.schedule-update.v2",
     "command_id": "schedule-update-policy-key-mismatch-001",
     "actor_subject_id": "subject_agent",
     "item_id": "item_recurring_event",
     "target_version": "3",
     "updated_at_utc": "2035-02-10T12:00:00Z",
     "patch": {
-      "reminders": [
+      "notification_plan": {
+        "action": "clear",
+        "custom_additions": [
         {
           "policy_key": "countdown",
           "notification_intent_id": "notification_intent_wrong",
@@ -26,7 +28,8 @@
           },
           "late_handling": { "kind": "skip" }
         }
-      ]
+        ]
+      }
     },
     "materialization": { "mode": "none" }
   },
@@ -47,7 +50,7 @@
     "error": {
       "code": "semantic_conflict",
       "message": "policy key does not match its current notification intent",
-      "field": "patch.reminders[0].policy_key"
+      "field": "patch.notification_plan.custom_additions[0].policy_key"
     }
   },
   "mutation": "none",

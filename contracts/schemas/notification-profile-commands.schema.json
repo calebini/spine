@@ -1,0 +1,255 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cortext.local/spine/contracts/schemas/notification-profile-commands.schema.json",
+  "title": "Spine Notification Profile Management Commands v1",
+  "$defs": {
+    "writeIdentity": {
+      "type": "object",
+      "required": [
+        "command_id",
+        "actor_subject_id",
+        "action_timestamp_utc"
+      ],
+      "properties": {
+        "command_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+        "actor_subject_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+        "action_timestamp_utc": { "$ref": "notification-types.schema.json#/$defs/utcTimestamp" }
+      }
+    },
+    "archetypeCreate": {
+      "allOf": [
+        { "$ref": "#/$defs/writeIdentity" },
+        {
+          "type": "object",
+          "required": ["contract_version", "owner", "archetype_key", "revision"],
+          "properties": {
+            "contract_version": { "const": "spine.item-archetypes.v1" },
+            "owner": { "$ref": "notification-profile-types.schema.json#/$defs/owner" },
+            "archetype_key": { "$ref": "notification-profile-types.schema.json#/$defs/key" },
+            "revision": { "$ref": "notification-profile-types.schema.json#/$defs/archetypeRevision" }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "archetypeRevise": {
+      "allOf": [
+        { "$ref": "#/$defs/writeIdentity" },
+        {
+          "type": "object",
+          "required": [
+            "contract_version",
+            "item_archetype_id",
+            "expected_current_revision_id",
+            "revision"
+          ],
+          "properties": {
+            "contract_version": { "const": "spine.item-archetypes.v1" },
+            "item_archetype_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+            "expected_current_revision_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+            "revision": { "$ref": "notification-profile-types.schema.json#/$defs/archetypeRevision" }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "archetypeRetire": {
+      "allOf": [
+        { "$ref": "#/$defs/writeIdentity" },
+        {
+          "type": "object",
+          "required": ["contract_version", "item_archetype_id", "reason_code"],
+          "properties": {
+            "contract_version": { "const": "spine.item-archetypes.v1" },
+            "item_archetype_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+            "reason_code": { "type": "string", "minLength": 1 }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "archetypeShow": {
+      "type": "object",
+      "required": ["contract_version", "item_archetype_id"],
+      "properties": {
+        "contract_version": { "const": "spine.item-archetypes.v1" },
+        "item_archetype_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+        "item_archetype_revision_id": { "$ref": "notification-types.schema.json#/$defs/id" }
+      },
+      "additionalProperties": false
+    },
+    "archetypeList": {
+      "type": "object",
+      "required": ["contract_version", "owner", "limit"],
+      "properties": {
+        "contract_version": { "const": "spine.item-archetypes.v1" },
+        "owner": { "$ref": "notification-profile-types.schema.json#/$defs/owner" },
+        "status": { "enum": ["active", "retired"] },
+        "cursor": { "type": "string", "minLength": 1 },
+        "limit": { "type": "string", "pattern": "^([1-9]|[1-9][0-9]|[1-4][0-9]{2}|500)$" }
+      },
+      "additionalProperties": false
+    },
+    "profileCreate": {
+      "allOf": [
+        { "$ref": "#/$defs/writeIdentity" },
+        {
+          "type": "object",
+          "required": [
+            "contract_version",
+            "owner",
+            "profile_key",
+            "display_name",
+            "description",
+            "revision"
+          ],
+          "properties": {
+            "contract_version": { "const": "spine.notification-profiles.v1" },
+            "owner": { "$ref": "notification-profile-types.schema.json#/$defs/owner" },
+            "profile_key": { "$ref": "notification-profile-types.schema.json#/$defs/key" },
+            "display_name": { "type": "string", "minLength": 1, "maxLength": 160 },
+            "description": {
+              "oneOf": [
+                { "type": "string", "minLength": 1, "maxLength": 2000 },
+                { "type": "null" }
+              ]
+            },
+            "revision": { "$ref": "notification-profile-types.schema.json#/$defs/profileRevision" }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "profileRevise": {
+      "allOf": [
+        { "$ref": "#/$defs/writeIdentity" },
+        {
+          "type": "object",
+          "required": [
+            "contract_version",
+            "notification_profile_id",
+            "expected_current_revision_id",
+            "revision"
+          ],
+          "properties": {
+            "contract_version": { "const": "spine.notification-profiles.v1" },
+            "notification_profile_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+            "expected_current_revision_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+            "revision": { "$ref": "notification-profile-types.schema.json#/$defs/profileRevision" }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "profileRetire": {
+      "allOf": [
+        { "$ref": "#/$defs/writeIdentity" },
+        {
+          "type": "object",
+          "required": ["contract_version", "notification_profile_id", "reason_code"],
+          "properties": {
+            "contract_version": { "const": "spine.notification-profiles.v1" },
+            "notification_profile_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+            "reason_code": { "type": "string", "minLength": 1 }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "profileShow": {
+      "type": "object",
+      "required": ["contract_version", "notification_profile_id"],
+      "properties": {
+        "contract_version": { "const": "spine.notification-profiles.v1" },
+        "notification_profile_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+        "notification_profile_revision_id": { "$ref": "notification-types.schema.json#/$defs/id" }
+      },
+      "additionalProperties": false
+    },
+    "profileList": {
+      "type": "object",
+      "required": ["contract_version", "owner", "limit"],
+      "properties": {
+        "contract_version": { "const": "spine.notification-profiles.v1" },
+        "owner": { "$ref": "notification-profile-types.schema.json#/$defs/owner" },
+        "status": { "enum": ["active", "retired"] },
+        "cursor": { "type": "string", "minLength": 1 },
+        "limit": { "type": "string", "pattern": "^([1-9]|[1-9][0-9]|[1-4][0-9]{2}|500)$" }
+      },
+      "additionalProperties": false
+    },
+    "bindingSet": {
+      "allOf": [
+        { "$ref": "#/$defs/writeIdentity" },
+        {
+          "type": "object",
+          "required": [
+            "contract_version",
+            "owner",
+            "item_archetype_id",
+            "notification_profile_id"
+          ],
+          "properties": {
+            "contract_version": { "const": "spine.notification-profile-bindings.v1" },
+            "owner": { "$ref": "notification-profile-types.schema.json#/$defs/owner" },
+            "item_archetype_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+            "notification_profile_id": { "$ref": "notification-types.schema.json#/$defs/id" }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "bindingRemove": {
+      "allOf": [
+        { "$ref": "#/$defs/writeIdentity" },
+        {
+          "type": "object",
+          "required": [
+            "contract_version",
+            "notification_profile_binding_id"
+          ],
+          "properties": {
+            "contract_version": { "const": "spine.notification-profile-bindings.v1" },
+            "notification_profile_binding_id": { "$ref": "notification-types.schema.json#/$defs/id" }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "bindingList": {
+      "type": "object",
+      "required": ["contract_version", "owner", "limit"],
+      "properties": {
+        "contract_version": { "const": "spine.notification-profile-bindings.v1" },
+        "owner": { "$ref": "notification-profile-types.schema.json#/$defs/owner" },
+        "item_archetype_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+        "status": { "enum": ["active", "retired"] },
+        "cursor": { "type": "string", "minLength": 1 },
+        "limit": { "type": "string", "pattern": "^([1-9]|[1-9][0-9]|[1-4][0-9]{2}|500)$" }
+      },
+      "additionalProperties": false
+    },
+    "resolve": {
+      "type": "object",
+      "required": [
+        "contract_version",
+        "item_type",
+        "item_archetype_id",
+        "scope_chain"
+      ],
+      "properties": {
+        "contract_version": { "const": "spine.notification-profile-bindings.v1" },
+        "item_type": { "enum": ["event", "task"] },
+        "item_archetype_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+        "scope_chain": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 8,
+          "uniqueItems": true,
+          "items": { "$ref": "notification-profile-types.schema.json#/$defs/owner" }
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

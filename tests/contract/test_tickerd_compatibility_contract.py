@@ -103,9 +103,9 @@ class SpineTickerdCompatibilityContractTests(unittest.TestCase):
             "ok": True,
             "command": "system.info",
             "response_contract": "spine.system-info.v2",
-            "runtime_version": "0.2.0",
-            "implemented_ledger_schema_version": "9",
-            "ledger_schema_version": "9",
+            "runtime_version": "0.3.0",
+            "implemented_ledger_schema_version": "10",
+            "ledger_schema_version": "10",
             "timezone_database_version": "2026c",
             "implemented_contract_versions": [
                 "spine.canonical-json.v1",

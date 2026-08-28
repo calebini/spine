@@ -120,7 +120,7 @@ class RelativeTemporalBindingCommandTests(unittest.TestCase):
         moved = handle(
             "schedule.update",
             {
-                "contract_version": "spine.schedule-update.v1",
+                "contract_version": "spine.schedule-update.v2",
                 "command_id": "move-source-event",
                 "actor_subject_id": "owner",
                 "item_id": self.event["item_id"],
@@ -203,7 +203,7 @@ class RelativeTemporalBindingCommandTests(unittest.TestCase):
         response = handle(
             "schedule.update",
             {
-                "contract_version": "spine.schedule-update.v1",
+                "contract_version": "spine.schedule-update.v2",
                 "command_id": "direct-bound-task-move",
                 "actor_subject_id": "owner",
                 "item_id": created["task"]["item_id"],
@@ -285,7 +285,7 @@ class RelativeTemporalBindingCommandTests(unittest.TestCase):
         updated = handle(
             "schedule.update",
             {
-                "contract_version": "spine.schedule-update.v1",
+                "contract_version": "spine.schedule-update.v2",
                 "command_id": "retitle-source-event",
                 "actor_subject_id": "owner",
                 "item_id": self.event["item_id"],
@@ -460,7 +460,7 @@ class RelativeTemporalBindingCommandTests(unittest.TestCase):
         return handle(
             "schedule.update",
             {
-                "contract_version": "spine.schedule-update.v1",
+                "contract_version": "spine.schedule-update.v2",
                 "command_id": command_id,
                 "actor_subject_id": "owner",
                 "item_id": item_id,
@@ -485,7 +485,7 @@ class RelativeTemporalBindingCommandTests(unittest.TestCase):
 
     def _event_request(self) -> dict[str, object]:
         return {
-            "contract_version": "spine.schedule-create.v1",
+            "contract_version": "spine.schedule-create.v2",
             "command_id": "binding-source-event",
             "actor_subject_id": "owner",
             "created_at_utc": "2026-08-17T11:00:00Z",
@@ -503,13 +503,14 @@ class RelativeTemporalBindingCommandTests(unittest.TestCase):
                 "channel": "whatsapp",
                 "target": {"resolution": "explicit", "delivery_target_id": "whatsapp-owner"},
             },
-            "reminders": [
-                {
+            "notification_plan": {
+                "mode": "none",
+                "custom_additions": [{
                     "policy_key": "source_notice",
                     "schedule": {"kind": "once", "at": {"kind": "target_offset", "offset_basis": "elapsed", "offset_seconds": "-3600"}},
                     "late_handling": {"kind": "skip"},
-                }
-            ],
+                }],
+            },
             "materialization": {"mode": "none"},
         }
 

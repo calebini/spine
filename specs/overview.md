@@ -109,7 +109,7 @@ Spine MUST prefer explicit persisted facts over hidden inference.
 Archetype selection and notification-profile default resolution MUST be explicit,
 bounded, and receipt-bearing when they affect a write. Spine MUST NOT classify free
 text or traverse undeclared group membership to choose reminder behavior during
-canonical command handling. `specs/notification-profiles.md` owns that draft
+canonical command handling. `specs/notification-profiles.md` owns that implemented
 capability boundary.
 
 Historical UTC trigger and attempt timestamps MUST NOT be recomputed on read or replay.

@@ -338,6 +338,9 @@ The executable example captures these with `jq` and stops when any expected coun
 | Disable notification policy | `reminder.disable` | Yes | No |
 | Expand virtual opportunities | `notification.opportunities` | No | No |
 | Persist actionable work | `notification_work.materialize` | Yes | No |
+| Create/revise an item archetype | `item_archetype.create|revise` | Yes | No |
+| Create/revise a reminder profile | `notification_profile.create|revise` | Yes | No |
+| Bind or resolve an archetype default | `notification_profile.binding.set|resolve` | Set only | No |
 
 The complete command catalog, including ordinary item and relation commands, is normative in `specs/agent-command-contract.md`.
 
@@ -358,7 +361,7 @@ Never infer a write from the relational schema. Use public commands and verify t
 
 An agent is ready to operate when it can truthfully report all of the following:
 
-- the ledger verifies at schema 9;
+- the ledger verifies at schema 10;
 - `system.info` reports matching implemented and actual schema versions;
 - it used the locally reported timezone-data version for local schedules;
 - it can explain recurrence cadence versus notification cadence versus retry;

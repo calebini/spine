@@ -43,7 +43,7 @@ def build_relative_event_countdown(
     if primary_location is not None:
         item["primary_location"] = dict(primary_location)
     request = {
-        "contract_version": "spine.schedule-create.v1",
+        "contract_version": "spine.schedule-create.v2",
         "command_id": command_id,
         "actor_subject_id": actor_subject_id,
         "created_at_utc": _utc_text(reference_time),
@@ -59,8 +59,10 @@ def build_relative_event_countdown(
             },
         },
         "delivery": dict(delivery),
-        "reminders": [
-            {
+        "notification_plan": {
+            "mode": "none",
+            "custom_additions": [
+                {
                 "policy_key": policy_key,
                 "schedule": {
                     "kind": "repeat_window",
@@ -81,8 +83,9 @@ def build_relative_event_countdown(
                     },
                 },
                 "late_handling": {"kind": "skip"},
-            }
-        ],
+                }
+            ],
+        },
         "materialization": {
             "mode": "bounded",
             "evaluated_at_utc": _utc_text(reference_time),
