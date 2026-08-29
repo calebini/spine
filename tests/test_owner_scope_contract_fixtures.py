@@ -31,7 +31,7 @@ class OwnerScopeContractFixtureTests(unittest.TestCase):
         manifest = _load(MANIFEST)
         self.assertEqual(
             manifest["schema_version"],
-            "spine.owner-scope-discovery-contract-fixtures.v1",
+            "spine.owner-scope-discovery-contract-fixtures.v2",
         )
         fixture_ids: list[str] = []
         for entry in manifest["fixtures"]:
@@ -60,6 +60,10 @@ class OwnerScopeContractFixtureTests(unittest.TestCase):
         numeric_limit = copy.deepcopy(request)
         numeric_limit["limit"] = 50
         self.assertFalse(_valid(schema, numeric_limit, self.registry))
+
+        legacy_taxonomy = copy.deepcopy(request)
+        legacy_taxonomy["group_kinds"] = ["household"]
+        self.assertFalse(_valid(schema, legacy_taxonomy, self.registry))
 
 
 def _load(path: Path) -> dict[str, object]:

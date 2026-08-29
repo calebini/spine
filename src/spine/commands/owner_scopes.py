@@ -17,14 +17,13 @@ from spine.core.hashing import hash_canonical_json
 from spine.ledger.preflight import verify_runtime_schema
 
 COMMAND = "owner_scope.list"
-CONTRACT_VERSION = "spine.owner-scope-discovery.v1"
-RESPONSE_CONTRACT = "spine.owner-scope-list-response.v1"
-CURSOR_CONTRACT = "spine.owner-scope-list-cursor.v1"
+CONTRACT_VERSION = "spine.owner-scope-discovery.v2"
+RESPONSE_CONTRACT = "spine.owner-scope-list-response.v2"
+CURSOR_CONTRACT = "spine.owner-scope-list-cursor.v2"
 
 _OWNER_KIND_ORDER = ("system", "subject", "subject_group")
 _STATUS_ORDER = ("active", "inactive")
 _SUBJECT_KIND_ORDER = ("person", "agent")
-_GROUP_KIND_ORDER = ("household", "project", "team", "transport_group")
 _OWNER_KIND_RANK = {kind: index for index, kind in enumerate(_OWNER_KIND_ORDER)}
 
 
@@ -40,7 +39,6 @@ def handle_owner_scope_list(
             "owner_kinds",
             "statuses",
             "subject_kinds",
-            "group_kinds",
             "limit",
             "cursor",
         },
@@ -65,13 +63,6 @@ def handle_owner_scope_list(
         selected_owner_kinds=owner_kinds,
         allowed=_SUBJECT_KIND_ORDER,
     )
-    group_kinds = _normalize_scoped_filter(
-        request,
-        field="group_kinds",
-        owner_kind="subject_group",
-        selected_owner_kinds=owner_kinds,
-        allowed=_GROUP_KIND_ORDER,
-    )
     limit_text, limit = _limit(request.get("limit"))
     query_hash = hash_canonical_json(
         {
@@ -79,7 +70,6 @@ def handle_owner_scope_list(
             "owner_kinds": list(owner_kinds),
             "statuses": list(statuses),
             "subject_kinds": list(subject_kinds),
-            "group_kinds": list(group_kinds),
         }
     )
     connection = _connection(context)
@@ -110,7 +100,6 @@ def handle_owner_scope_list(
             owner_kinds=owner_kinds,
             statuses=statuses,
             subject_kinds=subject_kinds,
-            group_kinds=group_kinds,
             last=last,
             bound=limit + 1,
         )
@@ -137,7 +126,6 @@ def handle_owner_scope_list(
         "owner_kinds": list(owner_kinds),
         "statuses": list(statuses),
         "subject_kinds": list(subject_kinds),
-        "group_kinds": list(group_kinds),
         "limit": limit_text,
         "query_hash": query_hash,
         "source_generation": source_generation,
@@ -153,7 +141,6 @@ def _select_entries(
     owner_kinds: tuple[str, ...],
     statuses: tuple[str, ...],
     subject_kinds: tuple[str, ...],
-    group_kinds: tuple[str, ...],
     last: tuple[str, str, str] | None,
     bound: int,
 ) -> list[tuple[tuple[str, str, str], dict[str, Any]]]:
@@ -212,13 +199,9 @@ def _select_entries(
 
     if "subject_group" in owner_kinds and last_rank <= 2 and len(selected) < bound:
         after_id = last[1] if last is not None and last_rank == 2 else None
-        rows = _bounded_identity_rows(
+        rows = _bounded_group_rows(
             connection,
-            table="subject_groups",
-            id_field="group_id",
-            kind_field="group_kind",
             statuses=statuses,
-            identity_kinds=group_kinds,
             after_id=after_id,
             bound=bound - len(selected),
         )
@@ -235,7 +218,7 @@ def _select_entries(
                         "owner_kind": "subject_group",
                         "owner_group_id": str(row["group_id"]),
                     },
-                    "identity_kind": str(row["group_kind"]),
+                    "identity_kind": "subject_group",
                     "display_name": str(row["display_name"]),
                     "status": str(row["status"]),
                     "source": "subject_groups",
@@ -272,6 +255,30 @@ def _bounded_identity_rows(
             params.append(bound)
             rows.extend(connection.execute(query, tuple(params)).fetchall())
     rows.sort(key=lambda row: str(row[id_field]).encode("utf-8"))
+    return rows[:bound]
+
+
+def _bounded_group_rows(
+    connection: sqlite3.Connection,
+    *,
+    statuses: tuple[str, ...],
+    after_id: str | None,
+    bound: int,
+) -> list[sqlite3.Row]:
+    rows: list[sqlite3.Row] = []
+    for status in statuses:
+        query = (
+            "SELECT group_id, display_name, status "
+            "FROM subject_groups WHERE status = ?"
+        )
+        params: list[Any] = [status]
+        if after_id is not None:
+            query += " AND group_id > ?"
+            params.append(after_id)
+        query += " ORDER BY group_id LIMIT ?"
+        params.append(bound)
+        rows.extend(connection.execute(query, tuple(params)).fetchall())
+    rows.sort(key=lambda row: str(row["group_id"]).encode("utf-8"))
     return rows[:bound]
 
 

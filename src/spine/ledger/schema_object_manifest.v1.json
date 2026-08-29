@@ -1,7 +1,7 @@
 {
   "manifest_version": "spine.sqlite-schema-object-manifest.v1",
   "schemas": {
-    "11": {
+    "12": {
       "objects": [
         {
           "definition_sha256": "d398d475608b90ad2f581456812626755656f58d3e67822c31232c3e3a2480e3",
@@ -249,7 +249,7 @@
           "object_type": "index"
         },
         {
-          "definition_sha256": "6713da463d8eaa639599cb18afa827312847388744024f7ece7b673ad6e2fff7",
+          "definition_sha256": "e2bb7c4d96f9ebf6e69c68a7dfa1dbfc331410fc51230d830ea91b1ea8644e2d",
           "name": "subject_groups_owner_scope_list_idx",
           "object_type": "index"
         },
@@ -559,7 +559,7 @@
           "object_type": "table"
         },
         {
-          "definition_sha256": "81fe868ac81400d1761067335a10b957bf4dd27345b87958e0c06cece64e9c3b",
+          "definition_sha256": "c67e2d6d984b8cb38e66b6b462f6742067c6188412642e904c95650d6fb96e1a",
           "name": "subject_groups",
           "object_type": "table"
         },
@@ -649,7 +649,7 @@
           "object_type": "trigger"
         },
         {
-          "definition_sha256": "e5645579cfa0b320058b002cebbb35f39963c8998edbb4d4872900d6ca367699",
+          "definition_sha256": "084c8445a135fccb79d7525b1c8ac7e78c284765dced77448119b051e205a188",
           "name": "subject_groups_owner_scope_update",
           "object_type": "trigger"
         },

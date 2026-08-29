@@ -320,11 +320,10 @@ def _handle_subject_group_upsert(request: Mapping[str, Any], context: CommandCon
     _check_fields(
         "subject_group.upsert",
         request,
-        {"command_id", "actor_subject_id", "group_id", "group_kind", "display_name", "status", "updated_at_utc"},
+        {"command_id", "actor_subject_id", "group_id", "display_name", "status", "updated_at_utc"},
     )
     command_id, actor, updated_at_utc = _write_identity("subject_group.upsert", request, "updated_at_utc", context)
     group_id = _required_str(request, "group_id")
-    group_kind = _enum(request.get("group_kind"), "group_kind", {"household", "project", "team", "transport_group"})
     display_name = _required_str(request, "display_name")
     status = _enum(request.get("status", "active"), "status", {"active", "inactive"})
     semantic_facts = {
@@ -333,7 +332,6 @@ def _handle_subject_group_upsert(request: Mapping[str, Any], context: CommandCon
         "actor_subject_id": actor,
         "action_timestamp_utc": updated_at_utc,
         "group_id": group_id,
-        "group_kind": group_kind,
         "display_name": display_name,
         "status": status,
     }
@@ -345,7 +343,7 @@ def _handle_subject_group_upsert(request: Mapping[str, Any], context: CommandCon
     existing = _subject_group(context.ledger, group_id, required=False)
     created = existing is None
     updated = created or any(
-        existing[key] != value for key, value in {"group_kind": group_kind, "display_name": display_name, "status": status}.items()
+        existing[key] != value for key, value in {"display_name": display_name, "status": status}.items()
     )
     effect = "subject_group_created" if created else "subject_group_updated" if updated else "subject_group_noop"
     receipt = _make_receipt(
@@ -367,20 +365,20 @@ def _handle_subject_group_upsert(request: Mapping[str, Any], context: CommandCon
             context.ledger.execute(
                 """
                 INSERT INTO subject_groups (
-                  group_id, group_kind, display_name, status, created_at_utc, updated_at_utc
+                  group_id, display_name, status, created_at_utc, updated_at_utc
                 )
-                VALUES (?, ?, ?, ?, ?, ?)
+                VALUES (?, ?, ?, ?, ?)
                 """,
-                (group_id, group_kind, display_name, status, updated_at_utc, updated_at_utc),
+                (group_id, display_name, status, updated_at_utc, updated_at_utc),
             )
         elif updated:
             context.ledger.execute(
                 """
                 UPDATE subject_groups
-                SET group_kind = ?, display_name = ?, status = ?, updated_at_utc = ?
+                SET display_name = ?, status = ?, updated_at_utc = ?
                 WHERE group_id = ?
                 """,
-                (group_kind, display_name, status, updated_at_utc, group_id),
+                (display_name, status, updated_at_utc, group_id),
             )
         insert_command_receipt(context.ledger, receipt)
     return _subject_group_response(
@@ -8698,7 +8696,6 @@ def _subject_group_response(group: Mapping[str, Any] | None, *, created: bool, u
         "created": created,
         "updated": updated,
         "group_id": group["group_id"],
-        "group_kind": group["group_kind"],
         "display_name": group["display_name"],
         "status": group["status"],
         "created_at_utc": group["created_at_utc"],

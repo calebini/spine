@@ -25,13 +25,6 @@ class SubjectStatus(StrEnum):
     INACTIVE = "inactive"
 
 
-class SubjectGroupKind(StrEnum):
-    HOUSEHOLD = "household"
-    TEAM = "team"
-    PROJECT = "project"
-    TRANSPORT_GROUP = "transport_group"
-
-
 class SubjectMembershipRole(StrEnum):
     MEMBER = "member"
     OWNER = "owner"

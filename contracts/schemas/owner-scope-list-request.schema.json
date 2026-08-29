@@ -1,11 +1,11 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://cortext.local/spine/contracts/schemas/owner-scope-list-request.schema.json",
-  "title": "Spine Owner-Scope List Request v1",
+  "title": "Spine Owner-Scope List Request v2",
   "type": "object",
   "required": ["contract_version", "limit"],
   "properties": {
-    "contract_version": { "const": "spine.owner-scope-discovery.v1" },
+    "contract_version": { "const": "spine.owner-scope-discovery.v2" },
     "owner_kinds": {
       "type": "array",
       "minItems": 1,
@@ -27,15 +27,6 @@
       "uniqueItems": true,
       "items": { "enum": ["person", "agent"] }
     },
-    "group_kinds": {
-      "type": "array",
-      "minItems": 1,
-      "maxItems": 4,
-      "uniqueItems": true,
-      "items": {
-        "enum": ["household", "project", "team", "transport_group"]
-      }
-    },
     "limit": {
       "type": "string",
       "pattern": "^([1-9]|[1-9][0-9]|[1-4][0-9]{2}|500)$"
@@ -51,17 +42,6 @@
         }
       },
       "then": { "not": { "required": ["subject_kinds"] } }
-    },
-    {
-      "if": {
-        "required": ["owner_kinds"],
-        "properties": {
-          "owner_kinds": {
-            "not": { "contains": { "const": "subject_group" } }
-          }
-        }
-      },
-      "then": { "not": { "required": ["group_kinds"] } }
     }
   ],
   "additionalProperties": false

@@ -41,7 +41,7 @@ def initialize_schema(connection: sqlite3.Connection) -> None:
         version = connection.execute(
             "SELECT MAX(schema_version) FROM ledger_schema"
         ).fetchone()[0]
-        if version == 11:
+        if version == 12:
             return
         raise SpineValidationError(
             "ledger_schema_requires_migration",
@@ -59,6 +59,7 @@ def initialize_schema(connection: sqlite3.Connection) -> None:
             (9, "0009_notification_rendering.sql"),
             (10, "0010_notification_profiles.sql"),
             (11, "0011_owner_scope_discovery.sql"),
+            (12, "0012_arbitrary_subject_groups.sql"),
         ):
             migration = resources.files("spine.ledger.migrations").joinpath(name).read_text(encoding="utf-8")
             try:

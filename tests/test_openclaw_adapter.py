@@ -94,7 +94,6 @@ class OpenClawAdapterTests(unittest.TestCase):
                 "command_id": "cmd-openclaw-group",
                 "actor_subject_id": SUBJECT_ID,
                 "group_id": "openclaw-group",
-                "group_kind": "transport_group",
                 "display_name": "OpenClaw group",
                 "updated_at_utc": NOW,
             },

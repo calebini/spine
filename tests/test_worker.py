@@ -214,7 +214,6 @@ class SpineWorkerRuntimeTests(unittest.TestCase):
                             "command_id": "cmd-worker-multi-group",
                             "actor_subject_id": "worker-multi-agent",
                             "group_id": "worker-multi-group",
-                            "group_kind": "transport_group",
                             "display_name": "Worker multi group",
                             "updated_at_utc": "2026-07-19T10:01:00Z",
                         },

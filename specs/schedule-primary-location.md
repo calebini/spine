@@ -1,6 +1,6 @@
 # Spine Primary-Location Schedule Support
 
-Status: Implemented v0.1.0 (introduced on schema 9; active on schema 11)
+Status: Implemented v0.1.0 (introduced on schema 9; active on schema 12)
 Scope: Additive primary-location authoring, mutation, readback, builder pass-through, and operator projections for scheduled events and tasks
 Created: 2026-08-18
 

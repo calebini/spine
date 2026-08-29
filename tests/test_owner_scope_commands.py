@@ -26,23 +26,20 @@ class OwnerScopeCommandTests(unittest.TestCase):
         self._subject("caleb", "person", "Caleb", "active", "subject-caleb")
         self._subject("lynn", "person", "Lynn", "inactive", "subject-lynn")
         self._group(
-            "family-household",
-            "household",
-            "Family household",
+            "kinflow",
+            "Kinflow",
             "active",
             "group-family",
         )
         self._group(
-            "stage-whatsapp-group",
-            "transport_group",
             "stage-ops",
+            "Stage Ops",
             "active",
             "group-stage",
         )
         self._group(
-            "work-project",
-            "project",
-            "Work project",
+            "weekend-crew",
+            "Weekend Crew",
             "inactive",
             "group-project",
         )
@@ -57,7 +54,7 @@ class OwnerScopeCommandTests(unittest.TestCase):
 
         self.assertTrue(response["ok"], response)
         self.assertEqual(
-            response["response_contract"], "spine.owner-scope-list-response.v1"
+            response["response_contract"], "spine.owner-scope-list-response.v2"
         )
         self.assertEqual(
             response["owner_kinds"], ["system", "subject", "subject_group"]
@@ -65,17 +62,13 @@ class OwnerScopeCommandTests(unittest.TestCase):
         self.assertEqual(response["statuses"], ["active"])
         self.assertEqual(response["subject_kinds"], ["person", "agent"])
         self.assertEqual(
-            response["group_kinds"],
-            ["household", "project", "team", "transport_group"],
-        )
-        self.assertEqual(
             [entry["owner_scope_key"] for entry in response["entries"]],
             [
                 "system",
                 "subject:actor",
                 "subject:caleb",
-                "subject_group:family-household",
-                "subject_group:stage-whatsapp-group",
+                "subject_group:kinflow",
+                "subject_group:stage-ops",
             ],
         )
         self.assertEqual(response["source_generation"], "6")
@@ -90,18 +83,17 @@ class OwnerScopeCommandTests(unittest.TestCase):
             limit="20",
             owner_kinds=["subject_group"],
             statuses=["inactive", "active"],
-            group_kinds=["transport_group", "project"],
         )
         self.assertTrue(response["ok"], response)
         self.assertEqual(response["owner_kinds"], ["subject_group"])
         self.assertEqual(response["statuses"], ["active", "inactive"])
         self.assertEqual(response["subject_kinds"], [])
-        self.assertEqual(response["group_kinds"], ["project", "transport_group"])
         self.assertEqual(
             [entry["owner_scope_key"] for entry in response["entries"]],
             [
-                "subject_group:stage-whatsapp-group",
-                "subject_group:work-project",
+                "subject_group:kinflow",
+                "subject_group:stage-ops",
+                "subject_group:weekend-crew",
             ],
         )
 
@@ -121,8 +113,8 @@ class OwnerScopeCommandTests(unittest.TestCase):
                 "system",
                 "subject:actor",
                 "subject:caleb",
-                "subject_group:family-household",
-                "subject_group:stage-whatsapp-group",
+                "subject_group:kinflow",
+                "subject_group:stage-ops",
             ],
         )
 
@@ -161,9 +153,8 @@ class OwnerScopeCommandTests(unittest.TestCase):
         self.assertEqual(self._generation(), 6)
 
         updated = self._group(
-            "work-project",
-            "team",
-            "Work team",
+            "weekend-crew",
+            "Weekend Crew Updated",
             "active",
             "group-project-update",
         )
@@ -175,9 +166,24 @@ class OwnerScopeCommandTests(unittest.TestCase):
         self.assertEqual(unknown["error"]["code"], "unsupported_field")
         self.assertEqual(unknown["error"]["field"], "actor_subject_id")
 
+        classified_group = handle(
+            "subject_group.upsert",
+            {
+                "command_id": "classified-group",
+                "actor_subject_id": "actor",
+                "group_id": "classified-group",
+                "group_kind": "household",
+                "display_name": "Classified group",
+                "updated_at_utc": "2035-02-01T12:00:02Z",
+            },
+            self.context,
+        )
+        self.assertEqual(classified_group["error"]["code"], "unsupported_field")
+        self.assertEqual(classified_group["error"]["field"], "group_kind")
+
         numeric = handle(
             "owner_scope.list",
-            {"contract_version": "spine.owner-scope-discovery.v1", "limit": 10},
+            {"contract_version": "spine.owner-scope-discovery.v2", "limit": 10},
             self.context,
         )
         self.assertEqual(numeric["error"]["field"], "limit")
@@ -207,12 +213,12 @@ class OwnerScopeCommandTests(unittest.TestCase):
         group_plan = self.connection.execute(
             """
             EXPLAIN QUERY PLAN
-            SELECT group_id, group_kind, display_name, status
+            SELECT group_id, display_name, status
             FROM subject_groups
-            WHERE status = ? AND group_kind = ? AND group_id > ?
+            WHERE status = ? AND group_id > ?
             ORDER BY group_id LIMIT ?
             """,
-            ("active", "household", "", 51),
+            ("active", "", 51),
         ).fetchall()
         self.assertIn(
             "subjects_owner_scope_list_idx",
@@ -234,7 +240,7 @@ class OwnerScopeCommandTests(unittest.TestCase):
                 first = handle(
                     "owner_scope.list",
                     {
-                        "contract_version": "spine.owner-scope-discovery.v1",
+                        "contract_version": "spine.owner-scope-discovery.v2",
                         "limit": "1",
                     },
                     context,
@@ -249,7 +255,7 @@ class OwnerScopeCommandTests(unittest.TestCase):
             request_path.write_text(
                 json.dumps(
                     {
-                        "contract_version": "spine.owner-scope-discovery.v1",
+                        "contract_version": "spine.owner-scope-discovery.v2",
                         "limit": "1",
                         "cursor": first["next_cursor"],
                     }
@@ -276,7 +282,7 @@ class OwnerScopeCommandTests(unittest.TestCase):
         return handle(
             "owner_scope.list",
             {
-                "contract_version": "spine.owner-scope-discovery.v1",
+                "contract_version": "spine.owner-scope-discovery.v2",
                 "limit": limit,
                 **facts,
             },
@@ -327,7 +333,6 @@ class OwnerScopeCommandTests(unittest.TestCase):
     def _group(
         self,
         group_id: str,
-        group_kind: str,
         display_name: str,
         status: str,
         command_id: str,
@@ -338,7 +343,6 @@ class OwnerScopeCommandTests(unittest.TestCase):
                 "command_id": command_id,
                 "actor_subject_id": "actor",
                 "group_id": group_id,
-                "group_kind": group_kind,
                 "display_name": display_name,
                 "status": status,
                 "updated_at_utc": "2035-02-01T12:00:01Z",

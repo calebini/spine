@@ -145,7 +145,7 @@ Spine:
 
 ```bash
 "$SPINE_COMMAND" --db "$SPINE_DB" --input - --pretty owner_scope list <<'JSON'
-{"contract_version":"spine.owner-scope-discovery.v1","limit":"100"}
+{"contract_version":"spine.owner-scope-discovery.v2","limit":"100"}
 JSON
 ```
 

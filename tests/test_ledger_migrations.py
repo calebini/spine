@@ -38,7 +38,7 @@ class LedgerMigrationTests(unittest.TestCase):
         self.assertTrue(result.initialized)
         self.assertTrue(result.verified)
         verification = verify_schema(self.connection)
-        self.assertEqual(verification.schema_version, 11)
+        self.assertEqual(verification.schema_version, 12)
         self.assertEqual(verification.integrity_check, "ok")
 
     def test_empty_database_requires_explicit_initialization(self) -> None:
@@ -51,8 +51,8 @@ class LedgerMigrationTests(unittest.TestCase):
         result = migrate_schema(self.connection)
 
         self.assertEqual(result.before_version, 6)
-        self.assertEqual(result.applied_versions, (7, 8, 9, 10, 11))
-        self.assertEqual(result.after_version, 11)
+        self.assertEqual(result.applied_versions, (7, 8, 9, 10, 11, 12))
+        self.assertEqual(result.after_version, 12)
         self.assertTrue(result.verified)
         columns = {row["name"] for row in self.connection.execute("PRAGMA table_info(temporal_anchors)")}
         self.assertNotIn("recurrence_rule", columns)
@@ -79,8 +79,8 @@ class LedgerMigrationTests(unittest.TestCase):
 
         result = migrate_schema(self.connection)
 
-        self.assertEqual(result.applied_versions, (9, 10, 11))
-        self.assertEqual(result.after_version, 11)
+        self.assertEqual(result.applied_versions, (9, 10, 11, 12))
+        self.assertEqual(result.after_version, 12)
         self.assertIsNotNone(
             self.connection.execute("SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'notification_renderings'").fetchone()
         )
@@ -133,14 +133,44 @@ class LedgerMigrationTests(unittest.TestCase):
                 )
                 """
             )
+            self.connection.execute(
+                """
+                INSERT INTO subject_memberships (
+                  membership_id, group_id, subject_id, role, status, starts_at_utc
+                ) VALUES (
+                  'existing-membership', 'existing-group', 'existing-subject',
+                  'owner', 'active', '2026-08-01T00:00:00Z'
+                )
+                """
+            )
 
         result = migrate_schema(self.connection)
 
-        self.assertEqual(result.applied_versions, (11,))
+        self.assertEqual(result.applied_versions, (11, 12))
         generation = self.connection.execute(
             "SELECT owner_scope_generation FROM owner_scope_catalog_state"
         ).fetchone()[0]
         self.assertEqual(generation, 0)
+        group_columns = {row["name"] for row in self.connection.execute("PRAGMA table_info(subject_groups)")}
+        self.assertNotIn("group_kind", group_columns)
+        group = self.connection.execute(
+            "SELECT display_name, status FROM subject_groups WHERE group_id = ?",
+            ("existing-group",),
+        ).fetchone()
+        self.assertEqual(dict(group), {"display_name": "Existing group", "status": "active"})
+        membership = self.connection.execute(
+            "SELECT group_id, subject_id, role, status FROM subject_memberships WHERE membership_id = ?",
+            ("existing-membership",),
+        ).fetchone()
+        self.assertEqual(
+            dict(membership),
+            {
+                "group_id": "existing-group",
+                "subject_id": "existing-subject",
+                "role": "owner",
+                "status": "active",
+            },
+        )
         with self.connection:
             self.connection.execute(
                 "UPDATE subjects SET display_name = ? WHERE subject_id = ?",
@@ -279,7 +309,7 @@ class LedgerMigrationTests(unittest.TestCase):
             payload = json.loads(output.getvalue())
             self.assertEqual(exit_code, 0)
             self.assertEqual(payload["before_version"], 0)
-            self.assertEqual(payload["after_version"], 11)
+            self.assertEqual(payload["after_version"], 12)
             self.assertTrue(payload["initialized"])
 
     def _initialize_v6(self) -> None:

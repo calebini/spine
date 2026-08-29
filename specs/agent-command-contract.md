@@ -1,6 +1,6 @@
 # Spine Agent Command Contract
 
-Status: Draft v0.5.0; executable scheduling, dynamic notification profiles, deterministic notification rendering, bounded runtime preflight, and exact Tickerd compatibility implemented on schema 11
+Status: Draft v0.5.0; executable scheduling, dynamic notification profiles, deterministic notification rendering, bounded runtime preflight, and exact Tickerd compatibility implemented on schema 12
 Scope: Agent-facing command/request contract for authoring and inspecting Spine coordination truth
 Created: 2026-06-19
 
@@ -133,7 +133,7 @@ Every registry entry requires `spine.canonical-json.v1`. The following table is 
 |---|---|
 | `subject.upsert`, `subject_group.upsert`, `delivery_target.upsert`, `item.show`, `item.list`, `item.archive`, `event.create`, `event.update`, `event.reschedule`, `event.cancel`, `task.create`, `task.update`, `task.complete`, `task.cancel`, `relation.create`, `relation.list` | none |
 | `system.info` | `spine.system-info.v2`, `spine.tickerd-compatibility.v1` |
-| `owner_scope.list` | `spine.owner-scope-discovery.v1`, `spine.owner-scope-list-response.v1`, `spine.owner-scope-list-cursor.v1` |
+| `owner_scope.list` | `spine.owner-scope-discovery.v2`, `spine.owner-scope-list-response.v2`, `spine.owner-scope-list-cursor.v2` |
 | `item.occurrences` | `spine.recurrence.contract.v1`, `spine.item-occurrences.recurrence.v1` |
 | `recurrence.instance.add`, `recurrence.instance.remove`, `recurrence.instance.override`, `recurrence.series.edit` | `spine.recurrence-authoring.v1`, `spine.recurrence.contract.v1`, `spine.recurrence.normalization.v1` |
 | `occurrence_provenance.regenerate` | `spine.recurrence.contract.v1`, `spine.recurrence.normalization.v1` |
@@ -242,7 +242,7 @@ Bootstrap is allowed only when no subjects exist and `actor_subject_id` equals `
 
 Fresh insert success returns `ok=true`, `command=subject.upsert`, `created=true`, `updated=false`, `subject_id`, `subject_kind`, `display_name`, `status`, `created_at_utc`, `updated_at_utc`, and `command_receipt_id`. Existing-subject changed update success returns the same fields with `created=false`, `updated=true`, persisted subject facts after mutation, and the fresh `command_receipt_id`. Existing-subject no-op success returns persisted subject facts with `created=false`, `updated=false`, creates no subject row update, and returns the fresh `command_receipt_id`. Compatible same-command replay returns stored result facts and original `command_receipt_id` with `created=false` and `updated=false`; incompatible same-`command_id` replay fails with `semantic_conflict` before mutation.
 
-`subject_group.upsert` ensures a canonical group exists for first-class group delivery and other group-owned coordination surfaces. Minimum input fields are `command_id`, `actor_subject_id`, caller-supplied stable `group_id`, `group_kind`, `display_name`, and `updated_at_utc`; `status` is optional and defaults to `active`. `group_kind` accepts `household`, `project`, `team`, and `transport_group`. `status` accepts `active` and `inactive`. Fresh insert and update response shape mirrors `subject.upsert` with `command=subject_group.upsert`, `group_id`, `group_kind`, `display_name`, `status`, timestamps, `created`, `updated`, and `command_receipt_id`.
+`subject_group.upsert` ensures a canonical group exists for first-class group delivery and other group-owned coordination surfaces. Minimum input fields are `command_id`, `actor_subject_id`, caller-supplied stable `group_id`, `display_name`, and `updated_at_utc`; `status` is optional and defaults to `active`. `status` accepts `active` and `inactive`. Fresh insert and update response shape mirrors `subject.upsert` with `command=subject_group.upsert`, `group_id`, `display_name`, `status`, timestamps, `created`, `updated`, and `command_receipt_id`.
 
 `specs/owner-scope-discovery.md` defines the implemented read-only
 `owner_scope.list` projection over system, subject, and subject-group owner scopes.

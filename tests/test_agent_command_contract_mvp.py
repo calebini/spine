@@ -1336,7 +1336,6 @@ def build_mvp_fixture_responses() -> dict[str, object]:
             "command_id": "cmd-fixture-subject-group",
             "actor_subject_id": "agent",
             "group_id": "stage-group",
-            "group_kind": "transport_group",
             "display_name": "Stage group",
             "updated_at_utc": "2026-06-06T10:00:30Z",
         },

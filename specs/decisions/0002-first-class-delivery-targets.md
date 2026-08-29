@@ -26,11 +26,11 @@ The model must keep three distinct facts separate:
 - which channel should be used
 - where an adapter should send
 
-Group delivery needs to be an ordinary routing case, not an exception. A household, team, project group, or stage WhatsApp group may be the intended recipient owner for a reminder. That owner should be represented as a group in Spine and routed through a delivery target.
+Group delivery needs to be an ordinary routing case, not an exception. Any operator-defined group may be the intended recipient owner for a reminder. That owner should be represented as a group in Spine and routed through a delivery target.
 
 ## Consequences
 
-`subjects` remains for people, agents, and durable subject identity anchors. `subject_groups` remains for households, teams, and other actor groupings.
+`subjects` remains for people, agents, and durable subject identity anchors. `subject_groups` remains for arbitrary operator-defined actor groupings; Spine assigns no built-in group taxonomy.
 
 Reminder authoring identifies both the recipient owner and the selected delivery target. `work_subject_ref` records recipient-owner provenance; it is never a transport destination.
 

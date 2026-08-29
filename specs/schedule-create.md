@@ -1,6 +1,6 @@
 # Spine Atomic Schedule Creation
 
-Status: Implemented v2 on current ledger schema 11
+Status: Implemented v2 on current ledger schema 12
 Scope: One atomic operator-facing command for creating a scheduled event or task with notification policies and optional bounded work materialization
 Created: 2026-08-12
 

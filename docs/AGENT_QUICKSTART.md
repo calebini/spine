@@ -126,7 +126,7 @@ notification profile, or binding:
 
 ```bash
 "$SPINE_COMMAND" --db "$SPINE_DB" --input - --pretty owner_scope list <<'JSON'
-{"contract_version":"spine.owner-scope-discovery.v1","limit":"100"}
+{"contract_version":"spine.owner-scope-discovery.v2","limit":"100"}
 JSON
 ```
 
@@ -377,7 +377,7 @@ Never infer a write from the relational schema. Use public commands and verify t
 
 An agent is ready to operate when it can truthfully report all of the following:
 
-- the ledger verifies at schema 11;
+- the ledger verifies at schema 12;
 - `system.info` reports matching implemented and actual schema versions;
 - it used the locally reported timezone-data version for local schedules;
 - it can explain recurrence cadence versus notification cadence versus retry;

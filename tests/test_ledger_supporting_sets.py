@@ -243,7 +243,6 @@ class LedgerSupportingSetTests(unittest.TestCase):
                 self.connection,
                 group=SubjectGroupInput(
                     group_id="stage-group",
-                    group_kind="transport_group",
                     display_name="Stage WhatsApp",
                 ),
                 default_created_at_utc=NOW,
@@ -290,7 +289,6 @@ class LedgerSupportingSetTests(unittest.TestCase):
                 self.connection,
                 group=SubjectGroupInput(
                     group_id="unrouted-group",
-                    group_kind="team",
                     display_name="Unrouted Team",
                 ),
                 default_created_at_utc=NOW,

@@ -1,6 +1,6 @@
 # Spine Relative Temporal Bindings and Atomic Related-Task Creation
 
-Status: Implemented v1 (introduced on schema 8; active on current schema 11)
+Status: Implemented v1 (introduced on schema 8; active on current schema 12)
 Scope: Explicit cross-item temporal derivation, bounded discovery/reconciliation, and atomic creation of a task that is part of an existing event
 Created: 2026-08-17
 

@@ -59,7 +59,6 @@ def seed_canary_reminder(
                 "command_id": f"{prefix}-group-upsert",
                 "actor_subject_id": ids["actor_subject_id"],
                 "group_id": ids["group_id"],
-                "group_kind": "transport_group",
                 "display_name": f"{prefix} delivery group",
                 "updated_at_utc": now_utc,
             },

@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://cortext.local/spine/contracts/schemas/owner-scope-list-response.schema.json",
-  "title": "Spine Owner-Scope List Response v1",
+  "title": "Spine Owner-Scope List Response v2",
   "type": "object",
   "required": [
     "ok",
@@ -10,7 +10,6 @@
     "owner_kinds",
     "statuses",
     "subject_kinds",
-    "group_kinds",
     "limit",
     "query_hash",
     "source_generation",
@@ -21,7 +20,7 @@
   "properties": {
     "ok": { "const": true },
     "command": { "const": "owner_scope.list" },
-    "response_contract": { "const": "spine.owner-scope-list-response.v1" },
+    "response_contract": { "const": "spine.owner-scope-list-response.v2" },
     "owner_kinds": {
       "type": "array",
       "minItems": 1,
@@ -41,14 +40,6 @@
       "maxItems": 2,
       "uniqueItems": true,
       "items": { "enum": ["person", "agent"] }
-    },
-    "group_kinds": {
-      "type": "array",
-      "maxItems": 4,
-      "uniqueItems": true,
-      "items": {
-        "enum": ["household", "project", "team", "transport_group"]
-      }
     },
     "limit": {
       "type": "string",
@@ -132,10 +123,7 @@
             "system",
             "person",
             "agent",
-            "household",
-            "project",
-            "team",
-            "transport_group"
+            "subject_group"
           ]
         },
         "display_name": { "type": "string", "minLength": 1 },

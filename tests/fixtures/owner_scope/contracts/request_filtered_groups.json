@@ -1,7 +1,6 @@
 {
-  "contract_version": "spine.owner-scope-discovery.v1",
+  "contract_version": "spine.owner-scope-discovery.v2",
   "owner_kinds": ["subject_group"],
   "statuses": ["inactive", "active"],
-  "group_kinds": ["transport_group", "project"],
   "limit": "20"
 }

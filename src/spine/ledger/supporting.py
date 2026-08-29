@@ -19,7 +19,6 @@ from spine.models.enums import (
     ItemLocationRole,
     ItemSubjectRole,
     LocationKind,
-    SubjectGroupKind,
 )
 
 
@@ -67,7 +66,6 @@ class SubjectGroupInput:
     """Input row for a first-class subject group."""
 
     group_id: str
-    group_kind: SubjectGroupKind | str
     display_name: str
     status: str = "active"
     created_at_utc: str | None = None
@@ -240,13 +238,12 @@ def insert_subject_group(
     connection.execute(
         """
         INSERT INTO subject_groups (
-          group_id, group_kind, display_name, status, created_at_utc, updated_at_utc
+          group_id, display_name, status, created_at_utc, updated_at_utc
         )
-        VALUES (?, ?, ?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?)
         """,
         (
             group.group_id,
-            enum_value(group.group_kind),
             group.display_name,
             enum_value(group.status),
             created_at_utc,

@@ -15,7 +15,6 @@ from spine.models import (
     ProjectionStatus,
     RelationStatus,
     RelationType,
-    SubjectGroupKind,
     SubjectKind,
     SubjectMembershipRole,
     SubjectMembershipStatus,
@@ -33,7 +32,6 @@ class EnumTests(unittest.TestCase):
         self.assertEqual({value.value for value in ItemStatus}, {"active", "archived"})
         self.assertEqual({value.value for value in SubjectKind}, {"person", "agent"})
         self.assertEqual({value.value for value in SubjectStatus}, {"active", "inactive"})
-        self.assertEqual({value.value for value in SubjectGroupKind}, {"household", "project", "team", "transport_group"})
         self.assertEqual({value.value for value in SubjectMembershipRole}, {"member", "owner"})
         self.assertEqual({value.value for value in SubjectMembershipStatus}, {"active", "ended"})
         self.assertEqual({value.value for value in EventStatus}, {"scheduled", "cancelled"})

@@ -1,6 +1,6 @@
 # Spine Owner-Scope Discovery
 
-Status: Implemented v1 on ledger schema 11
+Status: Implemented v2 on ledger schema 12
 Scope: Bounded, read-only discovery of canonical subject, subject-group, and system owner scopes
 Created: 2026-08-29
 
@@ -13,7 +13,9 @@ discover which canonical scopes exist before authoring a reusable definition.
 
 Before ledger schema 11, the runtime could create or update exact identities through `subject.upsert`
 and `subject_group.upsert` but exposed no canonical read command that enumerated them.
-Ledger schema 11 closes that operator-surface gap: routine agents no longer need table
+Ledger schema 11 closed that operator-surface gap. Ledger schema 12 removes the
+premature built-in subject-group taxonomy, and discovery v2 exposes every group as the
+same structural identity kind: routine agents no longer need table
 knowledge to choose a valid owner.
 
 This specification defines one bounded read projection, `owner_scope.list`. It does
@@ -31,9 +33,9 @@ This specification depends on:
 
 The implemented contract family is:
 
-- `contract_version=spine.owner-scope-discovery.v1`;
-- `response_contract=spine.owner-scope-list-response.v1`; and
-- `cursor_contract=spine.owner-scope-list-cursor.v1`.
+- `contract_version=spine.owner-scope-discovery.v2`;
+- `response_contract=spine.owner-scope-list-response.v2`; and
+- `cursor_contract=spine.owner-scope-list-cursor.v2`.
 
 These identifiers are advertised together in `system.info.implemented_contract_versions`
 and the compiled command registry only when the schema, request and response artifacts,
@@ -44,7 +46,7 @@ runtime behavior, fixtures, and tests are present atomically.
 `owner_scope.list` is a read-only projection over canonical identity rows. It:
 
 - enumerates exact owner values legal for owner-scoped commands;
-- distinguishes people, agents, and other subject kinds from group kinds;
+- distinguishes people and agents from arbitrary subject-group identities;
 - exposes stable IDs, display names, and lifecycle status;
 - supports bounded deterministic filtering and pagination; and
 - creates no audit, command receipt, item version, profile, binding, delivery target,
@@ -53,11 +55,10 @@ runtime behavior, fixtures, and tests are present atomically.
 It does not:
 
 - create, revise, activate, deactivate, merge, or delete an identity;
-- infer group membership or household relationships;
 - claim that a subject is authorized to administer another owner;
 - enumerate delivery addresses, adapter targets, or credentials;
 - enumerate the archetypes, profiles, or bindings owned by a returned scope;
-- make a transport group equivalent to a household group; or
+- infer a taxonomy, purpose, membership, or channel context from a group name; or
 - replace the existing per-owner `item_archetype.list`,
   `notification_profile.list`, or `notification_profile.binding.list` commands.
 
@@ -71,24 +72,19 @@ The transport-neutral command identifier is `owner_scope.list`.
 
 The request is a closed JSON object with:
 
-- required `contract_version`, exactly `spine.owner-scope-discovery.v1`;
+- required `contract_version`, exactly `spine.owner-scope-discovery.v2`;
 - optional `owner_kinds`, a non-empty unique subset of
   `system|subject|subject_group`, defaulting to all three in that order;
 - optional `statuses`, a non-empty unique subset of `active|inactive`, defaulting to
   `active`;
 - optional `subject_kinds`, a non-empty unique subset of `person|agent`, applicable
   only when `subject` is selected;
-- optional `group_kinds`, a non-empty unique subset of
-  `household|project|team|transport_group`, applicable only when `subject_group` is
-  selected;
 - required decimal-string `limit` in `1..500`; and
 - optional non-empty opaque `cursor`.
 
 Unknown fields fail with `unsupported_field`. A `subject_kinds` filter when `subject`
-is absent, or a `group_kinds` filter when `subject_group` is absent, fails with
-`invalid_request` at the filter field. Filters are sets: their input order is not
-semantic. Normalization orders subject kinds as `person`, `agent` and group kinds as
-`household`, `project`, `team`, `transport_group`.
+is absent fails with `invalid_request` at that field. Filters are sets: their input
+order is not semantic. Normalization orders subject kinds as `person`, `agent`.
 
 The request has no `command_id`, actor, or evaluation timestamp because it is a
 bounded read that consumes no idempotency key and depends on no ambient time.
@@ -131,13 +127,14 @@ For `owner_kind=subject_group`:
 
 - `owner={"owner_kind":"subject_group","owner_group_id":"<group_id>"}`;
 - `owner_scope_key=subject_group:<group_id>`;
-- `identity_kind` is the stored `group_kind`;
+- `identity_kind=subject_group`, identifying the structural owner kind without
+  assigning a built-in purpose;
 - `display_name` and `status` are current stored group facts; and
 - `source=subject_groups`.
 
 IDs and display names are returned exactly as canonical ledger facts. The command
-does not rewrite a `transport_group` as a `household`, infer that two similarly named
-owners are equivalent, or select a recommended owner.
+does not infer taxonomy, membership, authority, channel context, owner
+equivalence, or a recommended owner from a group ID or display name.
 
 ## 6. Ordering, Generation, and Pagination
 
@@ -150,14 +147,15 @@ The total result order is:
 The normalized `query_hash` is the Spine canonical-JSON hash of:
 
 - contract version;
-- normalized owner-kind, status, subject-kind, and group-kind filters; and
+- normalized owner-kind, status, and subject-kind filters; and
 - requested limit excluded, so callers may reduce or increase page size between pages
   without changing selection semantics.
 
 The implementation MUST maintain one ledger-local `owner_scope_generation` decimal
 counter. The schema migration initializes it once after existing subjects and groups
-are admitted. Every fresh subject or subject-group insert and every change to identity
-kind, display name, or status increments it exactly once in the same transaction.
+are admitted. Every fresh subject or subject-group insert increments it exactly once. A subject
+identity-kind, display-name, or status change and a group display-name or status change
+also increments it exactly once in the same transaction.
 No-op upserts and compatible replay do not increment it. The derived system entry does
 not increment it because its facts are protocol constants.
 
@@ -167,13 +165,13 @@ value. This gives deterministic stale-page detection without hashing or scanning
 complete identity catalog on every page.
 
 Implementations MUST provide schema-versioned indexes capable of selecting the next
-`limit+1` matching subject and group rows by status, identity kind, and ID. Work and
+`limit+1` matching subject and group rows by status and ID. Work and
 memory are bounded by the fixed filter count and requested page size rather than total
 ledger size.
 
 The opaque cursor binds:
 
-- `cursor_contract=spine.owner-scope-list-cursor.v1`;
+- `cursor_contract=spine.owner-scope-list-cursor.v2`;
 - `query_hash`;
 - `source_generation`; and
 - the last emitted ordering tuple.
@@ -188,10 +186,10 @@ Success returns a closed object containing:
 
 - `ok=true`;
 - `command=owner_scope.list`;
-- `response_contract=spine.owner-scope-list-response.v1`;
-- normalized `owner_kinds`, `statuses`, `subject_kinds`, and `group_kinds`; absent kind
-  filters expand to the complete closed set when their owner kind is selected and to
-  an empty array otherwise;
+- `response_contract=spine.owner-scope-list-response.v2`;
+- normalized `owner_kinds`, `statuses`, and `subject_kinds`; the absent subject-kind
+  filter expands to the complete closed set when `subject` is selected and to an empty
+  array otherwise;
 - accepted decimal-string `limit`;
 - `query_hash` and decimal-string `source_generation`;
 - ordered `entries`;
@@ -239,7 +237,7 @@ Every failure writes nothing and returns no partial page.
 
 ## 9. Operator Posture
 
-When `system.info` advertises `spine.owner-scope-discovery.v1`, agents MUST use
+When `system.info` advertises `spine.owner-scope-discovery.v2`, agents MUST use
 `owner_scope.list` for ordinary owner discovery. Independently preserved provisioning
 or bootstrap bundles remain useful disaster-recovery evidence, but they do not replace
 the current ledger projection. Direct read-only SQLite inspection is a diagnostic path
@@ -254,11 +252,11 @@ contract tests covering:
 - the derived system entry;
 - active subjects and groups in deterministic order;
 - inactive inclusion and default active filtering;
-- subject-kind and group-kind filters;
+- subject-kind filtering and arbitrary subject-group discovery;
 - empty results;
 - pagination and page-size changes;
 - query-mismatched and stale cursors;
-- display-name, status, kind, and set-change generation invalidation;
+- display-name, status, subject-kind, and set-change generation invalidation;
 - transactional generation increments, with no increment for no-op or replay;
 - indexed `limit+1` selection without a complete identity-catalog scan;
 - closed request and response fields;
@@ -272,7 +270,8 @@ The capability is ready when:
 
 1. An agent can discover every canonical owner scope needed for catalog authoring
    without raw SQL or prior knowledge of subject/group IDs.
-2. Results distinguish subject and group kinds without conflating ownership,
+2. Results distinguish subject identity kinds from the structural group identity kind
+   without conflating ownership,
    participation, notification recipient, delivery route, or command actor roles.
 3. The read is bounded, deterministically ordered, snapshot-bound, and replay-free.
 4. Existing per-owner archetype, profile, and binding lists remain the granular catalog

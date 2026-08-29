@@ -1,14 +1,13 @@
 {
   "ok": true,
   "command": "owner_scope.list",
-  "response_contract": "spine.owner-scope-list-response.v1",
+  "response_contract": "spine.owner-scope-list-response.v2",
   "owner_kinds": ["system", "subject", "subject_group"],
   "statuses": ["active"],
   "subject_kinds": ["person", "agent"],
-  "group_kinds": ["household", "project", "team", "transport_group"],
   "limit": "50",
-  "query_hash": "1c4804bed7125d84faa2acead9a12623ab7a364cdfa3fe83ebf94165f9c14120",
-  "source_generation": "3",
+  "query_hash": "d9f02d8173d0cdf5ff5d78dea76a9152bc0f4a794be808a16ae55242fb363cf2",
+  "source_generation": "2",
   "entries": [
     {
       "owner_scope_key": "system",
@@ -30,13 +29,13 @@
       "source": "subjects"
     },
     {
-      "owner_scope_key": "subject_group:family-household",
+      "owner_scope_key": "subject_group:kinflow",
       "owner": {
         "owner_kind": "subject_group",
-        "owner_group_id": "family-household"
+        "owner_group_id": "kinflow"
       },
-      "identity_kind": "household",
-      "display_name": "Family household",
+      "identity_kind": "subject_group",
+      "display_name": "Kinflow",
       "status": "active",
       "source": "subject_groups"
     }

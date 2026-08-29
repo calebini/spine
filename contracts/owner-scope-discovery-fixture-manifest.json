@@ -1,5 +1,5 @@
 {
-  "schema_version": "spine.owner-scope-discovery-contract-fixtures.v1",
+  "schema_version": "spine.owner-scope-discovery-contract-fixtures.v2",
   "fixtures": [
     {
       "fixture_id": "owner_scope.list.request_default_active",

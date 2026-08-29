@@ -1,6 +1,6 @@
 # Spine Deterministic Notification Rendering
 
-Status: Implemented v1 (introduced on schema 9; active on schema 11)
+Status: Implemented v1 (introduced on schema 9; active on schema 12)
 Scope: Deterministic, concise, natural-language rendering of ordinary notification-reminder work at attempt start
 Authority: Normative design target for notification prose and its per-attempt evidence; scheduling, work, delivery, and item truth remain owned by their existing contracts
 

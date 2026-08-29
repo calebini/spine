@@ -367,22 +367,20 @@ Minimum contract:
 
 ### 5.2 subject_groups
 
-Owns canonical household, project, team, and transport-group identities.
+Owns arbitrary durable group identities defined by operators.
 
 Minimum contract:
 
 - `group_id` (`id`, required) — primary key.
-- `group_kind` (`text`, required) — complete schema-version-10 enum:
-  `household`, `project`, `team`, `transport_group`. No additional stored value is
-  legal until the ontology, schema migration, command contract, and machine-readable
-  contracts admit it atomically.
 - `display_name` (`text`, required).
 - `status` (`text`, required) — enum: `active`, `inactive`.
 - `created_at_utc` (`utc_instant`, required).
 - `updated_at_utc` (`utc_instant`, required).
 
-A `transport_group` is a canonical group identity and may own catalog or delivery
-configuration. It is not itself a transport address or delivery target; routable
+Spine reserves no subject-group IDs, labels, or purpose taxonomy. `group_id` and
+`display_name` are operator-defined identity facts; membership, roles, policies, and
+routing defaults are explicit separate records and MUST NOT be inferred from either
+string. A subject group is not itself a transport address or delivery target; routable
 endpoint facts remain exclusively in `delivery_targets`.
 
 ### 5.3 subject_memberships
@@ -407,10 +405,10 @@ Lifecycle posture (MVP):
 - Ending a membership MUST set `ends_at_utc` and MUST ensure `ends_at_utc >= starts_at_utc`.
 - Renewing a membership after `ended` MUST create a new `subject_memberships` row with a new `membership_id` and a new `starts_at_utc`; mutating an `ended` row back to `active` MUST be rejected.
 
-Family scheduler mapping:
+Generic coordination mapping:
 
-- household = `subject_groups` row (`group_kind=household`)
-- family member = `subjects` row with `subject_memberships` row linking to the household
+- durable group = `subject_groups` row
+- group member = `subjects` row with an explicit `subject_memberships` row linking to the group
 - event attendees = `item_subject_roles` rows with `role=participant`
 - notification recipients = `notification_policies` rows (optionally aligned with an `item_subject_roles` row with `role=recipient`)
 
@@ -444,7 +442,7 @@ Constraints:
 
 Group delivery posture:
 
-- Delivery to a household, team, project group, or transport group is first-class when represented by `owner_kind=subject_group`.
+- Delivery to an arbitrary subject group is first-class when represented by `owner_kind=subject_group`.
 - A group-owned target represents delivery to the group as a recipient owner. It is not a shortcut for selecting each group member's personal target.
 - Fanout from a group to individual member targets is a separate routing policy and MUST NOT be inferred from the existence of a group-owned delivery target.
 

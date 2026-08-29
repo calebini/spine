@@ -72,9 +72,9 @@ def _requirements(commands: set[str], *versions: str) -> None:
 _requirements({"system.info"}, "spine.system-info.v2", "spine.tickerd-compatibility.v1")
 _requirements(
     {"owner_scope.list"},
-    "spine.owner-scope-discovery.v1",
-    "spine.owner-scope-list-response.v1",
-    "spine.owner-scope-list-cursor.v1",
+    "spine.owner-scope-discovery.v2",
+    "spine.owner-scope-list-response.v2",
+    "spine.owner-scope-list-cursor.v2",
 )
 _requirements({"item.occurrences"}, "spine.recurrence.contract.v1", "spine.item-occurrences.recurrence.v1")
 _requirements(
