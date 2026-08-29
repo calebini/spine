@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cortext.local/spine/contracts/schemas/owner-scope-list-request.schema.json",
+  "title": "Spine Owner-Scope List Request v1",
+  "type": "object",
+  "required": ["contract_version", "limit"],
+  "properties": {
+    "contract_version": { "const": "spine.owner-scope-discovery.v1" },
+    "owner_kinds": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 3,
+      "uniqueItems": true,
+      "items": { "enum": ["system", "subject", "subject_group"] }
+    },
+    "statuses": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 2,
+      "uniqueItems": true,
+      "items": { "enum": ["active", "inactive"] }
+    },
+    "subject_kinds": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 2,
+      "uniqueItems": true,
+      "items": { "enum": ["person", "agent"] }
+    },
+    "group_kinds": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 4,
+      "uniqueItems": true,
+      "items": {
+        "enum": ["household", "project", "team", "transport_group"]
+      }
+    },
+    "limit": {
+      "type": "string",
+      "pattern": "^([1-9]|[1-9][0-9]|[1-4][0-9]{2}|500)$"
+    },
+    "cursor": { "type": "string", "minLength": 1 }
+  },
+  "allOf": [
+    {
+      "if": {
+        "required": ["owner_kinds"],
+        "properties": {
+          "owner_kinds": { "not": { "contains": { "const": "subject" } } }
+        }
+      },
+      "then": { "not": { "required": ["subject_kinds"] } }
+    },
+    {
+      "if": {
+        "required": ["owner_kinds"],
+        "properties": {
+          "owner_kinds": {
+            "not": { "contains": { "const": "subject_group" } }
+          }
+        }
+      },
+      "then": { "not": { "required": ["group_kinds"] } }
+    }
+  ],
+  "additionalProperties": false
+}

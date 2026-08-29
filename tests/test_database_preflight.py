@@ -59,7 +59,7 @@ def _dispatch_commands() -> set[str]:
 class CommandRuntimeContractRegistryTests(unittest.TestCase):
     def test_registry_is_complete_sorted_and_exact(self) -> None:
         self.assertEqual(COMMAND_RUNTIME_CONTRACT_REGISTRY_ID, "spine.command-runtime-contract-registry.v1")
-        self.assertEqual(len(COMMAND_RUNTIME_CONTRACT_REGISTRY), 51)
+        self.assertEqual(len(COMMAND_RUNTIME_CONTRACT_REGISTRY), 52)
         self.assertEqual(
             set(COMMAND_RUNTIME_CONTRACT_REGISTRY),
             _dispatch_commands() | set(PROFILE_COMMANDS),
@@ -76,6 +76,7 @@ class CommandRuntimeContractRegistryTests(unittest.TestCase):
             "notification_profile.list",
             "notification_profile.resolve",
             "notification_profile.show",
+            "owner_scope.list",
             "relation.list",
             "schedule.binding.list",
             "schedule.build",

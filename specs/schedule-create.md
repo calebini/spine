@@ -1,6 +1,6 @@
 # Spine Atomic Schedule Creation
 
-Status: Implemented v2 on current ledger schema 10
+Status: Implemented v2 on current ledger schema 11
 Scope: One atomic operator-facing command for creating a scheduled event or task with notification policies and optional bounded work materialization
 Created: 2026-08-12
 
@@ -40,7 +40,7 @@ The version facts are:
 
 The request and response schemas are `contracts/schemas/schedule-create-request.schema.json` and `contracts/schemas/schedule-create-response.schema.json`.
 
-The current schema-10 runtime implements this surface and declares the complete schedule-create, item-archetype, and notification-profile contract families through `system.info.implemented_contract_versions`. The transport-neutral command identifier is `schedule.create`; the CLI alias is `spine ... schedule create`.
+The current schema-11 runtime implements this surface and declares the complete schedule-create, item-archetype, and notification-profile contract families through `system.info.implemented_contract_versions`. The transport-neutral command identifier is `schedule.create`; the CLI alias is `spine ... schedule create`.
 
 ## 3. Boundary and Non-Goals
 

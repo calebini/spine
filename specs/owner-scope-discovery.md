@@ -1,6 +1,6 @@
 # Spine Owner-Scope Discovery
 
-Status: Draft v1; not implemented
+Status: Implemented v1 on ledger schema 11
 Scope: Bounded, read-only discovery of canonical subject, subject-group, and system owner scopes
 Created: 2026-08-29
 
@@ -11,11 +11,10 @@ targets, and other reusable definitions to be owned by an exact system, subject,
 subject-group scope. An operator choosing an owner therefore needs a supported way to
 discover which canonical scopes exist before authoring a reusable definition.
 
-The current runtime can create or update exact identities through `subject.upsert`
-and `subject_group.upsert`, but it has no canonical read command that enumerates those
-identities. Operators must otherwise rely on host configuration, an independently
-preserved bootstrap bundle, or a read-only SQLite diagnostic. That is an operator-
-surface gap: routine agents should not need table knowledge to choose a valid owner.
+Before ledger schema 11, the runtime could create or update exact identities through `subject.upsert`
+and `subject_group.upsert` but exposed no canonical read command that enumerated them.
+Ledger schema 11 closes that operator-surface gap: routine agents no longer need table
+knowledge to choose a valid owner.
 
 This specification defines one bounded read projection, `owner_scope.list`. It does
 not add a new identity authority, infer group membership, or change ownership.
@@ -30,15 +29,15 @@ This specification depends on:
   admission rules; and
 - `specs/architecture.md` for ledger authority and projection boundaries.
 
-The planned contract family is:
+The implemented contract family is:
 
 - `contract_version=spine.owner-scope-discovery.v1`;
 - `response_contract=spine.owner-scope-list-response.v1`; and
 - `cursor_contract=spine.owner-scope-list-cursor.v1`.
 
-These identifiers are not implemented and MUST NOT appear in
-`system.info.implemented_contract_versions` or the compiled command registry until
-the request/response schemas, fixtures, runtime behavior, and tests land atomically.
+These identifiers are advertised together in `system.info.implemented_contract_versions`
+and the compiled command registry only when the schema, request and response artifacts,
+runtime behavior, fixtures, and tests are present atomically.
 
 ## 3. Boundary
 
@@ -238,23 +237,14 @@ Expected errors use the shared command contract and CLI mapping:
 
 Every failure writes nothing and returns no partial page.
 
-## 9. Transitional Operator Posture
+## 9. Operator Posture
 
-Until `owner_scope.list` is implemented, an operator may use this bounded fallback:
-
-1. run `system.info` and verify runtime/schema compatibility;
-2. prefer the independently preserved provisioning or bootstrap bundle;
-3. when that bundle is incomplete, inspect only the `subjects` and `subject_groups`
-   table schemas;
-4. open the ledger explicitly read-only;
-5. select only the identity, kind, display-name, and status columns needed for owner
-   choice; and
-6. order results deterministically.
-
-This fallback is diagnostic, not an alternate public contract. It authorizes no raw
-SQLite write, schema mutation, hidden membership inference, or reuse of SQL as routine
-agent choreography. Once the runtime advertises `spine.owner-scope-discovery.v1`,
-agents MUST prefer `owner_scope.list` for ordinary owner discovery.
+When `system.info` advertises `spine.owner-scope-discovery.v1`, agents MUST use
+`owner_scope.list` for ordinary owner discovery. Independently preserved provisioning
+or bootstrap bundles remain useful disaster-recovery evidence, but they do not replace
+the current ledger projection. Direct read-only SQLite inspection is a diagnostic path
+for runtime recovery only; it is not an alternate public contract and never authorizes
+raw writes, schema mutation, hidden membership inference, or routine SQL choreography.
 
 ## 10. Conformance Requirements
 

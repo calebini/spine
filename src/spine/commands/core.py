@@ -167,6 +167,10 @@ def _dispatch(command: str, request: Mapping[str, Any], context: CommandContext)
         return _handle_subject_upsert(request, context)
     if command == "subject_group.upsert":
         return _handle_subject_group_upsert(request, context)
+    if command == "owner_scope.list":
+        from spine.commands.owner_scopes import handle_owner_scope_list
+
+        return handle_owner_scope_list(request, context)
     if command == "delivery_target.upsert":
         return _handle_delivery_target_upsert(request, context)
     if command == "system.info":

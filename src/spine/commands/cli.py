@@ -28,6 +28,7 @@ EXIT_BY_ERROR = {
     "referenced_row_not_found": 4,
     "stale_version": 5,
     "semantic_conflict": 6,
+    "stale_cursor": 6,
     "environment_failure": 7,
 }
 

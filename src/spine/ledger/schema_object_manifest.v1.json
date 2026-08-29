@@ -1,7 +1,7 @@
 {
   "manifest_version": "spine.sqlite-schema-object-manifest.v1",
   "schemas": {
-    "10": {
+    "11": {
       "objects": [
         {
           "definition_sha256": "d398d475608b90ad2f581456812626755656f58d3e67822c31232c3e3a2480e3",
@@ -249,6 +249,11 @@
           "object_type": "index"
         },
         {
+          "definition_sha256": "6713da463d8eaa639599cb18afa827312847388744024f7ece7b673ad6e2fff7",
+          "name": "subject_groups_owner_scope_list_idx",
+          "object_type": "index"
+        },
+        {
           "definition_sha256": "3d63f7bdb1d73e47becf2e093e7f0105885bccd0e337b9ce4faf438ecf98e511",
           "name": "subject_memberships_group_status_idx",
           "object_type": "index"
@@ -256,6 +261,11 @@
         {
           "definition_sha256": "589b122ddba6a399698de6393119d0c87c58bc5dbae55a66937ab84e391c713e",
           "name": "subject_memberships_subject_status_idx",
+          "object_type": "index"
+        },
+        {
+          "definition_sha256": "abef3acd1b2966e13708cf4c486446d55ebba3a6f4005f347cc8c066591ff410",
+          "name": "subjects_owner_scope_list_idx",
           "object_type": "index"
         },
         {
@@ -459,6 +469,11 @@
           "object_type": "table"
         },
         {
+          "definition_sha256": "acbee2efe4883badda25ecd74e07f914f791b11b606dd4d93b9e6a8a3372348d",
+          "name": "owner_scope_catalog_state",
+          "object_type": "table"
+        },
+        {
           "definition_sha256": "f99d429f3158eddd0b1de15da99dc57755e2368a0b430bc69dae5b659a811685",
           "name": "recurrence_exdates",
           "object_type": "table"
@@ -626,6 +641,26 @@
         {
           "definition_sha256": "116d4c1553d957a72c59830f07d5f017b3836bf18ed1e14acc954f617f8a7ecd",
           "name": "side_effect_attempts_staleness_insert",
+          "object_type": "trigger"
+        },
+        {
+          "definition_sha256": "e51d1622bd66a4a6d5f4f356738af86feae7a09bd862edeafa016f6886142a5b",
+          "name": "subject_groups_owner_scope_insert",
+          "object_type": "trigger"
+        },
+        {
+          "definition_sha256": "e5645579cfa0b320058b002cebbb35f39963c8998edbb4d4872900d6ca367699",
+          "name": "subject_groups_owner_scope_update",
+          "object_type": "trigger"
+        },
+        {
+          "definition_sha256": "180cee8fd20ad4fc3ccb67b0fa98e7dd6feb577781506468d1ab1a01f002939c",
+          "name": "subjects_owner_scope_insert",
+          "object_type": "trigger"
+        },
+        {
+          "definition_sha256": "e7075052f6658efa8c5cb16a3cdfc4b146bd7321f786e3a7737df2ebaecd0652",
+          "name": "subjects_owner_scope_update",
           "object_type": "trigger"
         },
         {

@@ -134,6 +134,26 @@ The dynamic catalog surface is `item_archetype.create|revise|retire|show|list`,
 `notification_profile.binding.set|remove|list`, and
 `notification_profile.resolve`.
 
+The canonical owner-discovery surface is `owner_scope.list`. Use it before choosing
+the owner of an archetype, profile, or binding; do not query `subjects` or
+`subject_groups` directly during ordinary agent operation.
+
+## Discover Canonical Owner Scopes
+
+Before creating an owner-scoped catalog definition, read the exact active owners from
+Spine:
+
+```bash
+"$SPINE_COMMAND" --db "$SPINE_DB" --input - --pretty owner_scope list <<'JSON'
+{"contract_version":"spine.owner-scope-discovery.v1","limit":"100"}
+JSON
+```
+
+The result distinguishes `system`, `subject`, and `subject_group` owners and preserves
+identity kind, display name, and status. It does not infer authorization, membership,
+recipient, route, or actor roles. Follow `next_cursor` when `has_more=true`; restart
+from the first page on `stale_cursor`. The command writes no receipt or audit row.
+
 ## Item Archetypes and Notification Profiles
 
 Archetypes classify an event or task without changing its structural `item_type`.

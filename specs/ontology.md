@@ -1,6 +1,6 @@
 # Spine Ontology
 
-Status: Draft v4.4.1; schema version 10 implementation aligned; notification-profile extension implemented
+Status: Draft v4.4.2; schema version 11 implementation aligned; owner-scope discovery and notification-profile extensions implemented
 Scope: First durable ontology and minimum data contract sketch for Spine
 
 ## 1. Ontology Goal

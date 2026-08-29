@@ -1,0 +1,46 @@
+{
+  "ok": true,
+  "command": "owner_scope.list",
+  "response_contract": "spine.owner-scope-list-response.v1",
+  "owner_kinds": ["system", "subject", "subject_group"],
+  "statuses": ["active"],
+  "subject_kinds": ["person", "agent"],
+  "group_kinds": ["household", "project", "team", "transport_group"],
+  "limit": "50",
+  "query_hash": "1c4804bed7125d84faa2acead9a12623ab7a364cdfa3fe83ebf94165f9c14120",
+  "source_generation": "3",
+  "entries": [
+    {
+      "owner_scope_key": "system",
+      "owner": {"owner_kind": "system"},
+      "identity_kind": "system",
+      "display_name": "Spine system",
+      "status": "active",
+      "source": "derived_system"
+    },
+    {
+      "owner_scope_key": "subject:anchor",
+      "owner": {
+        "owner_kind": "subject",
+        "owner_subject_id": "anchor"
+      },
+      "identity_kind": "agent",
+      "display_name": "Anchor",
+      "status": "active",
+      "source": "subjects"
+    },
+    {
+      "owner_scope_key": "subject_group:family-household",
+      "owner": {
+        "owner_kind": "subject_group",
+        "owner_group_id": "family-household"
+      },
+      "identity_kind": "household",
+      "display_name": "Family household",
+      "status": "active",
+      "source": "subject_groups"
+    }
+  ],
+  "has_more": false,
+  "next_cursor": null
+}

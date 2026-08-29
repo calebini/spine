@@ -1,6 +1,6 @@
 # Spine Item Archetypes and Notification Profiles
 
-Status: Implemented v1 on ledger schema 10
+Status: Implemented v1 on ledger schema 11
 Scope: Dynamic item classification, reusable notification-policy profiles, deterministic default resolution, and snapshot application
 Created: 2026-08-28
 
@@ -40,7 +40,7 @@ This specification depends on:
   authoring and mutation;
 - `specs/agent-command-contract.md` for transport, replay, dry-run, validation, and
   error rules; and
-- `specs/owner-scope-discovery.md` for the planned bounded read surface used to choose
+- `specs/owner-scope-discovery.md` for the implemented bounded read surface used to choose
   an exact catalog owner without raw SQL; and
 - `specs/architecture.md` for provider-independent orchestration and authority
   boundaries.
@@ -57,7 +57,7 @@ The implemented capability family is:
 The machine contracts are published under
 `contracts/schemas/notification-profile-*.schema.json`, with fixtures indexed by
 `contracts/notification-profile-fixture-manifest.json`. Runtime `0.3.0` advertises
-this family only with ledger schema 10, management commands, schedule integration,
+this family on ledger schema 11, management commands, schedule integration,
 snapshot readback, fixtures, and behavioral tests.
 
 `spine.schedule-create.v2` and `spine.schedule-update.v2` are the sole implemented
@@ -302,7 +302,7 @@ command still supplies one recipient and delivery route under existing rules.
 Cross-owner fallback is never inferred from subject membership. A caller that wants a
 personal, household, then system search supplies that exact ordered scope chain.
 
-The planned `owner_scope.list` projection in `specs/owner-scope-discovery.md`
+The implemented `owner_scope.list` projection in `specs/owner-scope-discovery.md`
 enumerates legal canonical owner scopes. It does not select an owner, infer authority,
 or replace the per-owner catalog list commands defined below.
 

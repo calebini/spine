@@ -1,6 +1,6 @@
 # Spine Primary-Location Schedule Support
 
-Status: Implemented v0.1.0 (introduced on schema 9; active on schema 10)
+Status: Implemented v0.1.0 (introduced on schema 9; active on schema 11)
 Scope: Additive primary-location authoring, mutation, readback, builder pass-through, and operator projections for scheduled events and tasks
 Created: 2026-08-18
 
@@ -42,7 +42,7 @@ The additive capability constants are:
 The machine-readable shared type contract is
 `contracts/schemas/schedule-primary-location-types.schema.json`.
 
-The current schema-9 runtime may advertise this complete family only when the request schemas,
+The current schema-11 runtime may advertise this complete family only when the request schemas,
 response schemas, fixtures, command handlers, builder, readback, compact projection,
 version-copy behavior, replay verification, and behavioral tests all conform. No
 ledger migration is required: schema 8 already has the canonical tables, enums,

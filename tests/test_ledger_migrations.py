@@ -38,7 +38,7 @@ class LedgerMigrationTests(unittest.TestCase):
         self.assertTrue(result.initialized)
         self.assertTrue(result.verified)
         verification = verify_schema(self.connection)
-        self.assertEqual(verification.schema_version, 10)
+        self.assertEqual(verification.schema_version, 11)
         self.assertEqual(verification.integrity_check, "ok")
 
     def test_empty_database_requires_explicit_initialization(self) -> None:
@@ -51,8 +51,8 @@ class LedgerMigrationTests(unittest.TestCase):
         result = migrate_schema(self.connection)
 
         self.assertEqual(result.before_version, 6)
-        self.assertEqual(result.applied_versions, (7, 8, 9, 10))
-        self.assertEqual(result.after_version, 10)
+        self.assertEqual(result.applied_versions, (7, 8, 9, 10, 11))
+        self.assertEqual(result.after_version, 11)
         self.assertTrue(result.verified)
         columns = {row["name"] for row in self.connection.execute("PRAGMA table_info(temporal_anchors)")}
         self.assertNotIn("recurrence_rule", columns)
@@ -79,8 +79,8 @@ class LedgerMigrationTests(unittest.TestCase):
 
         result = migrate_schema(self.connection)
 
-        self.assertEqual(result.applied_versions, (9, 10))
-        self.assertEqual(result.after_version, 10)
+        self.assertEqual(result.applied_versions, (9, 10, 11))
+        self.assertEqual(result.after_version, 11)
         self.assertIsNotNone(
             self.connection.execute("SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'notification_renderings'").fetchone()
         )
@@ -94,6 +94,62 @@ class LedgerMigrationTests(unittest.TestCase):
                 "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'notification_profiles'"
             ).fetchone()
         )
+
+    def test_schema_10_migration_starts_generation_after_existing_catalog_rows(self) -> None:
+        self._initialize_v6()
+        from spine.ledger.migrate import _apply_migration
+
+        for version, migration_name in (
+            (7, "0007_canonical_scheduling_notifications.sql"),
+            (8, "0008_relative_temporal_bindings.sql"),
+            (9, "0009_notification_rendering.sql"),
+            (10, "0010_notification_profiles.sql"),
+        ):
+            _apply_migration(
+                self.connection,
+                version=version,
+                migration_name=migration_name,
+            )
+        with self.connection:
+            self.connection.execute(
+                """
+                INSERT INTO subjects (
+                  subject_id, subject_kind, display_name, status,
+                  created_at_utc, updated_at_utc
+                ) VALUES (
+                  'existing-subject', 'person', 'Existing subject', 'active',
+                  '2026-08-01T00:00:00Z', '2026-08-01T00:00:00Z'
+                )
+                """
+            )
+            self.connection.execute(
+                """
+                INSERT INTO subject_groups (
+                  group_id, group_kind, display_name, status,
+                  created_at_utc, updated_at_utc
+                ) VALUES (
+                  'existing-group', 'household', 'Existing group', 'active',
+                  '2026-08-01T00:00:00Z', '2026-08-01T00:00:00Z'
+                )
+                """
+            )
+
+        result = migrate_schema(self.connection)
+
+        self.assertEqual(result.applied_versions, (11,))
+        generation = self.connection.execute(
+            "SELECT owner_scope_generation FROM owner_scope_catalog_state"
+        ).fetchone()[0]
+        self.assertEqual(generation, 0)
+        with self.connection:
+            self.connection.execute(
+                "UPDATE subjects SET display_name = ? WHERE subject_id = ?",
+                ("Updated subject", "existing-subject"),
+            )
+        generation = self.connection.execute(
+            "SELECT owner_scope_generation FROM owner_scope_catalog_state"
+        ).fetchone()[0]
+        self.assertEqual(generation, 1)
 
     def test_preflight_rejects_each_populated_provisional_scheduling_surface(self) -> None:
         for surface in ("recurrence_rule", "notification_policy", "work_instance"):
@@ -223,7 +279,7 @@ class LedgerMigrationTests(unittest.TestCase):
             payload = json.loads(output.getvalue())
             self.assertEqual(exit_code, 0)
             self.assertEqual(payload["before_version"], 0)
-            self.assertEqual(payload["after_version"], 10)
+            self.assertEqual(payload["after_version"], 11)
             self.assertTrue(payload["initialized"])
 
     def _initialize_v6(self) -> None:

@@ -33,6 +33,7 @@ _READ_COMMANDS = frozenset(
         "notification_profile.list",
         "notification_profile.resolve",
         "notification_profile.show",
+        "owner_scope.list",
         "relation.list",
         "schedule.binding.list",
         "schedule.build",
@@ -69,6 +70,12 @@ def _requirements(commands: set[str], *versions: str) -> None:
 
 
 _requirements({"system.info"}, "spine.system-info.v2", "spine.tickerd-compatibility.v1")
+_requirements(
+    {"owner_scope.list"},
+    "spine.owner-scope-discovery.v1",
+    "spine.owner-scope-list-response.v1",
+    "spine.owner-scope-list-cursor.v1",
+)
 _requirements({"item.occurrences"}, "spine.recurrence.contract.v1", "spine.item-occurrences.recurrence.v1")
 _requirements(
     {"recurrence.instance.add", "recurrence.instance.remove", "recurrence.instance.override", "recurrence.series.edit"},

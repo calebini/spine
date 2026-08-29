@@ -35,6 +35,9 @@ class ImplementedContractDeclarationTests(unittest.TestCase):
                 "spine.schedule-countdown-builder.v1",
                 "spine.schedule-countdown-builder-response.v1",
                 "spine.schedule-show.v1",
+                "spine.owner-scope-discovery.v1",
+                "spine.owner-scope-list-response.v1",
+                "spine.owner-scope-list-cursor.v1",
                 "spine.system-info.v2",
                 "spine.tickerd-compatibility.v1",
             }.issubset(IMPLEMENTED_CONTRACT_VERSIONS)

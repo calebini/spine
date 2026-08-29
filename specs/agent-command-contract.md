@@ -1,6 +1,6 @@
 # Spine Agent Command Contract
 
-Status: Draft v0.5.0; executable scheduling, dynamic notification profiles, deterministic notification rendering, bounded runtime preflight, and exact Tickerd compatibility implemented on schema 10
+Status: Draft v0.5.0; executable scheduling, dynamic notification profiles, deterministic notification rendering, bounded runtime preflight, and exact Tickerd compatibility implemented on schema 11
 Scope: Agent-facing command/request contract for authoring and inspecting Spine coordination truth
 Created: 2026-06-19
 
@@ -20,7 +20,7 @@ Spine is the canonical coordination ledger and planning fabric. External tools a
 
 ## 3. Command Core Shape
 
-The stable command core lives behind the importable Python handler signature `spine.commands.handle(command: str, request: Mapping, context: CommandContext) -> Mapping`. The canonical command identifier is the dotted `resource.verb` value. Currently implemented contract command identifiers are `system.info`, `subject.upsert`, `subject_group.upsert`, `delivery_target.upsert`, `item.show`, `item.list`, `item.occurrences`, `item.archive`, `event.create`, `event.update`, `event.reschedule`, `event.cancel`, `task.create`, `schedule.build`, `schedule.create`, `schedule.show`, `agenda.show`, `schedule.update`, `schedule.cancel`, `schedule.related_task.create`, `schedule.binding.list`, `schedule.binding.reconcile`, `task.update`, `task.complete`, `task.cancel`, `relation.create`, `relation.list`, `reminder.create`, `reminder.edit`, `reminder.disable`, `notification.opportunities`, `notification_work.materialize`, `recurrence.instance.add`, `recurrence.instance.remove`, `recurrence.instance.override`, `recurrence.series.edit`, and `occurrence_provenance.regenerate`.
+The stable command core lives behind the importable Python handler signature `spine.commands.handle(command: str, request: Mapping, context: CommandContext) -> Mapping`. The canonical command identifier is the dotted `resource.verb` value. Currently implemented contract command identifiers are `system.info`, `subject.upsert`, `subject_group.upsert`, `delivery_target.upsert`, `item.show`, `item.list`, `item.occurrences`, `item.archive`, `event.create`, `event.update`, `event.reschedule`, `event.cancel`, `task.create`, `schedule.build`, `schedule.create`, `schedule.show`, `agenda.show`, `schedule.update`, `schedule.cancel`, `schedule.related_task.create`, `schedule.binding.list`, `schedule.binding.reconcile`, `task.update`, `task.complete`, `task.cancel`, `relation.create`, `relation.list`, `reminder.create`, `reminder.edit`, `reminder.disable`, `notification.opportunities`, `notification_work.materialize`, `recurrence.instance.add`, `recurrence.instance.remove`, `recurrence.instance.override`, `recurrence.series.edit`, `occurrence_provenance.regenerate`, and `owner_scope.list`.
 
 CLI invocations such as `spine event create` are transport aliases. MCP tools and localhost HTTP routes may use local names, but each request and response maps to exactly one canonical command and returns that command in the `command` field.
 
@@ -64,9 +64,9 @@ Produced-row identity uses stable request paths. Item shells use `/item`. Audit 
 
 Temporal-anchor inputs are objects with `anchor_kind` and the fields permitted by the ontology. `instant_utc` requires `utc_instant` and forbids local fields. `local_instant` requires `local_date`, `local_time`, `timezone`, and `timezone_database_version` and forbids `utc_instant`. `local_date` requires `local_date`, `timezone`, and `timezone_database_version` and forbids `utc_instant`. `utc_window` requires `window_start_utc` and `window_end_utc` with start less than or equal to end. `local_window` represents a full local-day window, requires `local_date`, `timezone`, and `timezone_database_version`, and forbids `local_time`, `utc_instant`, `window_start_utc`, and `window_end_utc`.
 
-Every structured success response contains `ok=true`, `command`, and the command-specific stable identities and effect booleans. Every structured failure response contains `ok=false`, `command` when known, `error.code`, `error.message`, and `error.field` when a single request field or stored field is responsible. Common error codes are `invalid_request`, `unsupported_command`, `unsupported_field`, `missing_required_field`, `invalid_timestamp`, `referenced_row_not_found`, `wrong_item_type`, `stale_version`, `invalid_state_transition`, `semantic_conflict`, `environment_failure`, and `runtime_failure`.
+Every structured success response contains `ok=true`, `command`, and the command-specific stable identities and effect booleans. Every structured failure response contains `ok=false`, `command` when known, `error.code`, `error.message`, and `error.field` when a single request field or stored field is responsible. Common error codes are `invalid_request`, `stale_cursor`, `unsupported_command`, `unsupported_field`, `missing_required_field`, `invalid_timestamp`, `referenced_row_not_found`, `wrong_item_type`, `stale_version`, `invalid_state_transition`, `semantic_conflict`, `environment_failure`, and `runtime_failure`.
 
-CLI exit codes are normative: `0` success, `1` recovered unexpected runtime failure, `2` invalid request shape, unsupported commands, unsupported fields, missing required fields, invalid timestamps, invalid limits, wrong item type, and invalid lifecycle transitions, `3` CLI path/input/preflight failures, `4` unresolved references, `5` stale target versions, `6` semantic conflicts including incompatible replay and duplicate create without `if_absent`, and `7` environment failures such as a required OpenClaw binding missing for `channel=whatsapp`.
+CLI exit codes are normative: `0` success, `1` recovered unexpected runtime failure, `2` invalid request shape, unsupported commands, unsupported fields, missing required fields, invalid timestamps, invalid limits, wrong item type, and invalid lifecycle transitions, `3` CLI path/input/preflight failures, `4` unresolved references, `5` stale target versions, `6` semantic conflicts, stale cursors, incompatible replay, and duplicate create without `if_absent`, and `7` environment failures such as a required OpenClaw binding missing for `channel=whatsapp`.
 
 Deterministic ordering is part of output identity. Unless a command states a narrower order, user-visible lists order by stored canonical timestamp ascending, then stable ID ascending. `item.show` nested collections order locations by `role`, `item_locations.created_at_utc`, then `item_location_id`; subject roles by `role`, `item_subject_roles.created_at_utc`, then `item_subject_role_id`; notification policies by `notification_policies.created_at_utc`, then `policy_id`; and requested relations by the `relation.list` order. Outputs include truncation flags whenever a limit can hide additional rows. Public response limit fields echo the accepted request limit as a stringified decimal value.
 
@@ -133,6 +133,7 @@ Every registry entry requires `spine.canonical-json.v1`. The following table is 
 |---|---|
 | `subject.upsert`, `subject_group.upsert`, `delivery_target.upsert`, `item.show`, `item.list`, `item.archive`, `event.create`, `event.update`, `event.reschedule`, `event.cancel`, `task.create`, `task.update`, `task.complete`, `task.cancel`, `relation.create`, `relation.list` | none |
 | `system.info` | `spine.system-info.v2`, `spine.tickerd-compatibility.v1` |
+| `owner_scope.list` | `spine.owner-scope-discovery.v1`, `spine.owner-scope-list-response.v1`, `spine.owner-scope-list-cursor.v1` |
 | `item.occurrences` | `spine.recurrence.contract.v1`, `spine.item-occurrences.recurrence.v1` |
 | `recurrence.instance.add`, `recurrence.instance.remove`, `recurrence.instance.override`, `recurrence.series.edit` | `spine.recurrence-authoring.v1`, `spine.recurrence.contract.v1`, `spine.recurrence.normalization.v1` |
 | `occurrence_provenance.regenerate` | `spine.recurrence.contract.v1`, `spine.recurrence.normalization.v1` |
@@ -243,12 +244,10 @@ Fresh insert success returns `ok=true`, `command=subject.upsert`, `created=true`
 
 `subject_group.upsert` ensures a canonical group exists for first-class group delivery and other group-owned coordination surfaces. Minimum input fields are `command_id`, `actor_subject_id`, caller-supplied stable `group_id`, `group_kind`, `display_name`, and `updated_at_utc`; `status` is optional and defaults to `active`. `group_kind` accepts `household`, `project`, `team`, and `transport_group`. `status` accepts `active` and `inactive`. Fresh insert and update response shape mirrors `subject.upsert` with `command=subject_group.upsert`, `group_id`, `group_kind`, `display_name`, `status`, timestamps, `created`, `updated`, and `command_receipt_id`.
 
-`specs/owner-scope-discovery.md` defines the planned read-only
+`specs/owner-scope-discovery.md` defines the implemented read-only
 `owner_scope.list` projection over system, subject, and subject-group owner scopes.
-It is not part of the implemented-command list or compiled command-to-contract
-registry until its schemas, fixtures, behavior, and tests land atomically. Until then,
-read-only ledger inspection is a bounded operator diagnostic rather than a public
-command contract and never authorizes raw SQLite writes.
+It is part of the closed implemented-command set and compiled command-to-contract
+registry. Ordinary owner discovery uses this command rather than raw SQLite inspection.
 
 `delivery_target.upsert` ensures an explicit adapter delivery endpoint exists without treating transport addresses as subjects. Required fields are `command_id`, `actor_subject_id`, `delivery_target_id`, `owner_kind`, `channel`, `adapter_name`, `target_ref`, and `updated_at_utc`; `display_name`, `account_id`, and `status` are optional, with `status` defaulting to `active`. For `owner_kind=subject`, exactly `owner_subject_id` must be supplied and must resolve. For `owner_kind=subject_group`, exactly `owner_group_id` must be supplied and must resolve. Once a target is referenced by notification policy or work rows, routing identity fields (`owner_kind`, owner ID, `channel`, `adapter_name`, `account_id`, and `target_ref`) cannot be changed by upsert; display and status changes remain valid. Fresh insert and update response shape returns the persisted owner, channel, adapter, account, target, display, status, timestamp facts, `created`, `updated`, and `command_receipt_id`.
 
@@ -266,7 +265,7 @@ command contract and never authorizes raw SQLite writes.
 
 ### 9.1 Operational Schedule Family
 
-`specs/schedule-operations.md` defines three implemented command identifiers whose version facts are declared by the current schema-9 runtime:
+`specs/schedule-operations.md` defines three implemented command identifiers whose version facts are declared by the current schema-11 runtime:
 
 - `agenda.show`: a read-only, pinned-local-time, cross-item range view with recurrence expansion, stable snapshot pagination, and optional notification/work summaries;
 - `schedule.update`: one target-version-guarded transaction over whole-item facts, primary local schedule, whole-series recurrence replacement, complete desired reminder set, delivery retargeting, mandatory stale-work reconciliation, optional bounded replacement work, one audit when effects occur, and one receipt; and
@@ -378,11 +377,11 @@ The command creates policies directly on item version `1` and returns one compos
 
 Delivery resolution accepts an existing explicit target or a named normalized context default. It never creates or approves a route. Materialization accepts a bounded local or item-relative horizon and performs UTC normalization internally. No branch starts work, writes a side-effect attempt, invokes an adapter, or reports delivery.
 
-The current schema-9 runtime implements this subsection. It resolves named CLI defaults from repeatable `--delivery-target-default KEY=DELIVERY_TARGET_ID` options and exposes all schedule-create version facts through `system.info`.
+The current schema-11 runtime implements this subsection. It resolves named CLI defaults from repeatable `--delivery-target-default KEY=DELIVERY_TARGET_ID` options and exposes all schedule-create version facts through `system.info`.
 
 The CLI accepts `--compact` only with `schedule.create` and `schedule.show`. On success it applies the `spine.schedule-compact.v1` projection defined in `specs/schedule-operator-tools.md`; omission returns the existing full JSON unchanged. Compact mode is transport presentation and does not alter core command semantics, receipt persistence, or readback authority.
 
-### 14.2 Draft Notification-Profile Command Family
+### 14.2 Implemented Notification-Profile Command Family
 
 `specs/notification-profiles.md` defines the implemented command family for dynamic item
 archetypes, reusable notification profiles, deterministic scoped default bindings,

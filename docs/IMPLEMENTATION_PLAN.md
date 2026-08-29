@@ -1,13 +1,13 @@
 # Spine Implementation Plan
 
 Status: Deterministic notification rendering implemented and verified
-Last reconciled with repository state: 2026-08-24
+Last reconciled with repository state: 2026-08-29
 
 This is a non-normative delivery plan. The specifications and machine-readable contracts remain authoritative.
 
-## Planned Sustaining Slice: Canonical Owner-Scope Discovery
+## Delivered Sustaining Slice: Canonical Owner-Scope Discovery
 
-`specs/owner-scope-discovery.md` defines a bounded read-only `owner_scope.list`
+Schema 11 implements the contract in `specs/owner-scope-discovery.md` as a bounded read-only `owner_scope.list`
 projection so agents can discover active system, subject, and subject-group owner
 scopes before creating archetypes, notification profiles, and bindings. The slice
 removes routine table knowledge from owner selection while retaining existing

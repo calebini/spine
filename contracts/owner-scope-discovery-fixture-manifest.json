@@ -1,0 +1,20 @@
+{
+  "schema_version": "spine.owner-scope-discovery-contract-fixtures.v1",
+  "fixtures": [
+    {
+      "fixture_id": "owner_scope.list.request_default_active",
+      "fixture": "tests/fixtures/owner_scope/contracts/request_default_active.json",
+      "schema": "contracts/schemas/owner-scope-list-request.schema.json"
+    },
+    {
+      "fixture_id": "owner_scope.list.request_filtered_groups",
+      "fixture": "tests/fixtures/owner_scope/contracts/request_filtered_groups.json",
+      "schema": "contracts/schemas/owner-scope-list-request.schema.json"
+    },
+    {
+      "fixture_id": "owner_scope.list.response_default_active",
+      "fixture": "tests/fixtures/owner_scope/contracts/response_default_active.json",
+      "schema": "contracts/schemas/owner-scope-list-response.schema.json"
+    }
+  ]
+}

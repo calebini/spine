@@ -1,6 +1,6 @@
 # Spine Agent Quickstart
 
-Status: executable cold-start path for the current schema-9 runtime
+Status: executable cold-start path for the current schema-11 runtime
 Audience: an agent with repository access and no prior Spine context
 
 Use this document to reach a verified first success. Use `docs/AGENT_OPERATOR_GUIDE.md` afterward for migration, long-running operation, real-send controls, inspection, and troubleshooting.
@@ -60,7 +60,7 @@ Do not continue to worker commands until that import succeeds.
 
 ### New disposable ledger
 
-Create a unique directory and initialize a new schema-9 ledger:
+Create a unique directory and initialize a new schema-11 ledger:
 
 ```bash
 export SPINE_DEMO_ROOT="$(mktemp -d /tmp/spine-agent-quickstart.XXXXXX)"
@@ -86,7 +86,7 @@ Stop its worker first. Do not run current-schema `--verify-only` as a prerequisi
 
 ```bash
 export SPINE_DB=/absolute/path/to/ledger.sqlite
-cp "$SPINE_DB" "$SPINE_DB.pre-schema-9"
+cp "$SPINE_DB" "$SPINE_DB.pre-schema-11"
 "$SPINE_MIGRATE" --db "$SPINE_DB"
 "$SPINE_MIGRATE" --db "$SPINE_DB" --verify-only
 ```
@@ -118,6 +118,22 @@ To capture the timezone-data version:
 export SPINE_TZ_VERSION="$("$SPINE_COMMAND" --db "$SPINE_DB" system info | jq -r '.timezone_database_version')"
 test -n "$SPINE_TZ_VERSION"
 ```
+
+## Discover Canonical Owners Before Catalog Authoring
+
+Use the public bounded read instead of SQLite when choosing the owner of an archetype,
+notification profile, or binding:
+
+```bash
+"$SPINE_COMMAND" --db "$SPINE_DB" --input - --pretty owner_scope list <<'JSON'
+{"contract_version":"spine.owner-scope-discovery.v1","limit":"100"}
+JSON
+```
+
+The default page returns active system, subject, and subject-group scopes in canonical
+order. A returned owner is a catalog scope only; it does not imply actor authority,
+group membership, notification recipient, or delivery route. Continue with the opaque
+cursor when present and restart on `stale_cursor`.
 
 ## Ten-Minute Automated First Success
 
@@ -361,7 +377,7 @@ Never infer a write from the relational schema. Use public commands and verify t
 
 An agent is ready to operate when it can truthfully report all of the following:
 
-- the ledger verifies at schema 10;
+- the ledger verifies at schema 11;
 - `system.info` reports matching implemented and actual schema versions;
 - it used the locally reported timezone-data version for local schedules;
 - it can explain recurrence cadence versus notification cadence versus retry;

@@ -1,6 +1,6 @@
 # Spine Deterministic Notification Rendering
 
-Status: Implemented v1 (introduced on schema 9; active on schema 10)
+Status: Implemented v1 (introduced on schema 9; active on schema 11)
 Scope: Deterministic, concise, natural-language rendering of ordinary notification-reminder work at attempt start
 Authority: Normative design target for notification prose and its per-attempt evidence; scheduling, work, delivery, and item truth remain owned by their existing contracts
 
@@ -62,7 +62,7 @@ The v1 capability is atomic. A runtime MUST NOT advertise
 renderer, immutable rendering evidence, attempt-envelope binding, readback, failure
 semantics, and conformance vectors together.
 
-The schema-9 runtime implements and advertises all four constants, persists rendering
+The schema-11 runtime implements and advertises all four constants, persists rendering
 evidence in `notification_renderings`, binds OpenClaw request envelopes to that
 evidence, and exposes it through `schedule.show` attempt readback.
 
