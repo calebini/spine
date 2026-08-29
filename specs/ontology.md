@@ -1,6 +1,6 @@
 # Spine Ontology
 
-Status: Draft v4.4.0; schema version 10 implementation aligned; notification-profile extension implemented
+Status: Draft v4.4.1; schema version 10 implementation aligned; notification-profile extension implemented
 Scope: First durable ontology and minimum data contract sketch for Spine
 
 ## 1. Ontology Goal
@@ -367,16 +367,23 @@ Minimum contract:
 
 ### 5.2 subject_groups
 
-Owns households, teams, and other actor groupings.
+Owns canonical household, project, team, and transport-group identities.
 
 Minimum contract:
 
 - `group_id` (`id`, required) — primary key.
-- `group_kind` (`text`, required) — enum (minimum): `household`, `team`.
+- `group_kind` (`text`, required) — complete schema-version-10 enum:
+  `household`, `project`, `team`, `transport_group`. No additional stored value is
+  legal until the ontology, schema migration, command contract, and machine-readable
+  contracts admit it atomically.
 - `display_name` (`text`, required).
 - `status` (`text`, required) — enum: `active`, `inactive`.
 - `created_at_utc` (`utc_instant`, required).
 - `updated_at_utc` (`utc_instant`, required).
+
+A `transport_group` is a canonical group identity and may own catalog or delivery
+configuration. It is not itself a transport address or delivery target; routable
+endpoint facts remain exclusively in `delivery_targets`.
 
 ### 5.3 subject_memberships
 

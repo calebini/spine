@@ -243,6 +243,13 @@ Fresh insert success returns `ok=true`, `command=subject.upsert`, `created=true`
 
 `subject_group.upsert` ensures a canonical group exists for first-class group delivery and other group-owned coordination surfaces. Minimum input fields are `command_id`, `actor_subject_id`, caller-supplied stable `group_id`, `group_kind`, `display_name`, and `updated_at_utc`; `status` is optional and defaults to `active`. `group_kind` accepts `household`, `project`, `team`, and `transport_group`. `status` accepts `active` and `inactive`. Fresh insert and update response shape mirrors `subject.upsert` with `command=subject_group.upsert`, `group_id`, `group_kind`, `display_name`, `status`, timestamps, `created`, `updated`, and `command_receipt_id`.
 
+`specs/owner-scope-discovery.md` defines the planned read-only
+`owner_scope.list` projection over system, subject, and subject-group owner scopes.
+It is not part of the implemented-command list or compiled command-to-contract
+registry until its schemas, fixtures, behavior, and tests land atomically. Until then,
+read-only ledger inspection is a bounded operator diagnostic rather than a public
+command contract and never authorizes raw SQLite writes.
+
 `delivery_target.upsert` ensures an explicit adapter delivery endpoint exists without treating transport addresses as subjects. Required fields are `command_id`, `actor_subject_id`, `delivery_target_id`, `owner_kind`, `channel`, `adapter_name`, `target_ref`, and `updated_at_utc`; `display_name`, `account_id`, and `status` are optional, with `status` defaulting to `active`. For `owner_kind=subject`, exactly `owner_subject_id` must be supplied and must resolve. For `owner_kind=subject_group`, exactly `owner_group_id` must be supplied and must resolve. Once a target is referenced by notification policy or work rows, routing identity fields (`owner_kind`, owner ID, `channel`, `adapter_name`, `account_id`, and `target_ref`) cannot be changed by upsert; display and status changes remain valid. Fresh insert and update response shape returns the persisted owner, channel, adapter, account, target, display, status, timestamp facts, `created`, `updated`, and `command_receipt_id`.
 
 ## 9. Item Commands

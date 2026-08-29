@@ -49,6 +49,7 @@ The initial expected profiles are:
 The shared core MUST support common concepts across profiles:
 
 - subjects and subject groups
+- bounded owner-scope discovery for reusable catalog authoring
 - coordination items
 - versioned item facts
 - first-class time models

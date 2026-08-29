@@ -40,6 +40,8 @@ This specification depends on:
   authoring and mutation;
 - `specs/agent-command-contract.md` for transport, replay, dry-run, validation, and
   error rules; and
+- `specs/owner-scope-discovery.md` for the planned bounded read surface used to choose
+  an exact catalog owner without raw SQL; and
 - `specs/architecture.md` for provider-independent orchestration and authority
   boundaries.
 
@@ -299,6 +301,10 @@ command still supplies one recipient and delivery route under existing rules.
 
 Cross-owner fallback is never inferred from subject membership. A caller that wants a
 personal, household, then system search supplies that exact ordered scope chain.
+
+The planned `owner_scope.list` projection in `specs/owner-scope-discovery.md`
+enumerates legal canonical owner scopes. It does not select an owner, infer authority,
+or replace the per-owner catalog list commands defined below.
 
 ## 7. Selection and Default Resolution
 

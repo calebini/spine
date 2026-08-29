@@ -49,7 +49,7 @@ allowed to quietly become canonical.
 ## What Works Today
 
 Spine `0.3.0` is an implemented alpha exercised in a staging agent environment. Its
-current SQLite ledger schema is version `9`.
+current SQLite ledger schema is version `10`.
 
 ### Atomic scheduling
 

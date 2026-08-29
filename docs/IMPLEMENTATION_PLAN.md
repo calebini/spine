@@ -5,6 +5,16 @@ Last reconciled with repository state: 2026-08-24
 
 This is a non-normative delivery plan. The specifications and machine-readable contracts remain authoritative.
 
+## Planned Sustaining Slice: Canonical Owner-Scope Discovery
+
+`specs/owner-scope-discovery.md` defines a bounded read-only `owner_scope.list`
+projection so agents can discover active system, subject, and subject-group owner
+scopes before creating archetypes, notification profiles, and bindings. The slice
+removes routine table knowledge from owner selection while retaining existing
+per-owner catalog list commands. It requires closed schemas, fixtures, cursor and
+generation tests, indexed bounded selection, runtime registry parity, and a no-write
+proof before advertisement.
+
 ## Delivered Slice: Deterministic Notification Rendering
 
 The schema-9 runtime now turns admitted ordinary reminder work into deterministic,
