@@ -21,6 +21,7 @@ IMPLEMENTED_CONTRACT_VERSIONS = frozenset(
         "spine.notification-rendering-input.v1",
         "spine.item-archetypes.v1",
         "spine.notification-profiles.v1",
+        "spine.notification-profile-metadata-update.v1",
         "spine.notification-profile-bindings.v1",
         "spine.notification-profile-application.v1",
         "spine.notification-profile-readback.v1",

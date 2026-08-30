@@ -49,6 +49,7 @@ The implemented capability family is:
 
 - `spine.item-archetypes.v1`;
 - `spine.notification-profiles.v1`;
+- `spine.notification-profile-metadata-update.v1`;
 - `spine.notification-profile-bindings.v1`;
 - `spine.notification-profile-application.v1`;
 - `spine.notification-profile-readback.v1`; and
@@ -143,6 +144,8 @@ profile revision on read or at delivery time.
     never invokes an adapter.
 12. Profile management and resolution are bounded, replay-safe, auditable, and
     independent of ledger-wide scans.
+13. Updating profile display metadata never changes the profile key, owner, current
+    revision, bindings, applications, item policies, work, or delivery attempts.
 
 ## 5. Canonical Logical Model
 
@@ -217,6 +220,14 @@ A profile root owns:
 `(owner_kind, owner_id, profile_key)` is unique. An operator may dynamically create
 an unbound profile. A system starter profile is read-only and may be cloned into an
 operator-owned profile by a future convenience command.
+
+The profile ID, owner, `profile_key`, creation facts, and retirement facts are root
+identity or lifecycle authority and are not editable. `display_name` and `description`
+are mutable presentation metadata. They may be replaced only through
+`notification_profile.metadata.update`, which records the accepted metadata change
+without creating a profile revision. A metadata correction therefore preserves the
+exact revision and binding selected by existing applications; it does not rewrite
+historical receipts, policies, work, or attempts.
 
 ### 5.5 Notification profile revisions
 
@@ -421,6 +432,8 @@ The implemented write commands are:
 - `item_archetype.revise`: create the next immutable revision;
 - `item_archetype.retire`: retire the root for future use;
 - `notification_profile.create`: create one root and first revision;
+- `notification_profile.metadata.update`: replace root display name and description
+  without changing profile behavior;
 - `notification_profile.revise`: create the next immutable revision;
 - `notification_profile.retire`: retire the root;
 - `notification_profile.binding.set`: create or replace one scoped default binding;
@@ -428,10 +441,53 @@ The implemented write commands are:
 - `notification_profile.binding.remove`: retire one active binding.
 
 Every write requires `command_id`, `actor_subject_id`, an explicit action timestamp,
-closed semantic input, deterministic identity, one audit record, and one command
-receipt. Same-command compatible replay returns stored identities. Incompatible reuse
-fails before reference or freshness checks. Retired roots and bindings are not
-reactivated; create a new root or binding identity.
+closed semantic input, deterministic identity, and one command receipt. Every changed
+write creates one audit record; a defined no-op creates none. Same-command compatible
+replay returns stored identities. Incompatible reuse fails before reference or
+freshness checks. Retired roots and bindings are not reactivated; create a new root or
+binding identity.
+
+`notification_profile.metadata.update` uses the exact contract
+`spine.notification-profile-metadata-update.v1`. Its closed request contains
+`notification_profile_id`, a complete `expected_metadata` object, and a complete
+replacement `metadata` object. Each metadata object contains exactly `display_name`
+and nullable `description`; partial patch semantics are not supported. The profile
+must be active and operator-owned.
+
+After compatible replay is checked, `expected_metadata` MUST exactly equal the
+current persisted display name and description. A mismatch fails with
+`stale_version`, `field=expected_metadata`, before mutation. A changed replacement
+updates both fields atomically, writes one audit record and one receipt, and returns
+`effect=notification_profile_metadata_updated`. An identical replacement writes no
+audit row, writes one receipt, and returns
+`effect=notification_profile_metadata_update_noop`. Compatible same-command replay
+returns the original receipt. Both effects return the unchanged profile ID and current
+profile-revision ID plus the accepted metadata and active status.
+
+Metadata replacement changes profile show/list/resolve presentation only. It MUST
+invalidate an outstanding `notification_profile.list` catalog cursor by changing the
+catalog snapshot hash. It MUST NOT create or retire a revision or binding, alter
+profile resolution, mutate an application or item-owned policy, reconcile work, or
+invoke an adapter.
+
+The closed durable `command_receipts.effect` vocabulary for this dynamic-catalog
+family is:
+
+- archetypes: `item_archetype_created`, `item_archetype_revised`,
+  `item_archetype_retired`, and `item_archetype_retire_noop`;
+- profile roots: `notification_profile_created`, `notification_profile_revised`,
+  `notification_profile_retired`, `notification_profile_retire_noop`,
+  `notification_profile_metadata_updated`, and
+  `notification_profile_metadata_update_noop`; and
+- bindings: `notification_profile_binding_set`,
+  `notification_profile_binding_set_noop`,
+  `notification_profile_binding_removed`, and
+  `notification_profile_binding_remove_noop`.
+
+Read effects such as `notification_profile_resolved` are response facts and are never
+persisted as command-receipt effects. The runtime MUST reject an internal attempt to
+persist an unregistered dynamic-catalog effect, and contract tests MUST keep this set
+aligned with the normative list.
 
 The implemented bounded reads are:
 
@@ -627,6 +683,8 @@ Before implementation, the machine-contract package MUST include success and fai
 fixtures for at least:
 
 - dynamic creation of an unbound profile;
+- profile metadata change, no-op, compatible replay, stale preimage rejection, and
+  proof that the current revision and binding remain unchanged;
 - revision with future-only current-pointer effect;
 - personal and group defaults for one archetype;
 - explicit ordered scope-chain resolution;
@@ -675,6 +733,8 @@ The capability is buildable when:
     surface, with no alternate high-level request shape.
 12. No agent prompt, free-text classifier, or group-membership traversal becomes
     hidden scheduling authority.
+13. Operators can correct a profile display name or description without changing its
+    behavioral revision, binding, applied policies, work, or attempt history.
 
 ## 17. Deferred Decisions
 

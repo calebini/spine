@@ -141,6 +141,31 @@
       ],
       "unevaluatedProperties": false
     },
+    "profileMetadataUpdate": {
+      "allOf": [
+        { "$ref": "#/$defs/writeIdentity" },
+        {
+          "type": "object",
+          "required": [
+            "contract_version",
+            "notification_profile_id",
+            "expected_metadata",
+            "metadata"
+          ],
+          "properties": {
+            "contract_version": {
+              "const": "spine.notification-profile-metadata-update.v1"
+            },
+            "notification_profile_id": {
+              "$ref": "notification-types.schema.json#/$defs/id"
+            },
+            "expected_metadata": { "$ref": "#/$defs/profileMetadata" },
+            "metadata": { "$ref": "#/$defs/profileMetadata" }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
     "profileRetire": {
       "allOf": [
         { "$ref": "#/$defs/writeIdentity" },
@@ -247,6 +272,24 @@
           "maxItems": 8,
           "uniqueItems": true,
           "items": { "$ref": "notification-profile-types.schema.json#/$defs/owner" }
+        }
+      },
+      "additionalProperties": false
+    },
+    "profileMetadata": {
+      "type": "object",
+      "required": ["display_name", "description"],
+      "properties": {
+        "display_name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "description": {
+          "oneOf": [
+            { "type": "string", "minLength": 1, "maxLength": 2000 },
+            { "type": "null" }
+          ]
         }
       },
       "additionalProperties": false

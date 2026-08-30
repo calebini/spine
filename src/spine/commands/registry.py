@@ -240,6 +240,13 @@ _requirements(
     "spine.notification-profile-catalog-cursor.v1",
 )
 _requirements(
+    {"notification_profile.metadata.update"},
+    "spine.notification-profiles.v1",
+    "spine.notification-profile-metadata-update.v1",
+    "spine.notification-profile-readback.v1",
+    "spine.notification-profile-catalog-cursor.v1",
+)
+_requirements(
     {
         "notification_profile.binding.set",
         "notification_profile.binding.remove",

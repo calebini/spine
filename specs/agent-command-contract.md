@@ -32,6 +32,7 @@ The implemented dynamic-catalog command identifiers are
 `item_archetype.create`, `item_archetype.revise`,
 `item_archetype.retire`, `item_archetype.show`, `item_archetype.list`,
 `notification_profile.create`, `notification_profile.revise`,
+`notification_profile.metadata.update`,
 `notification_profile.retire`, `notification_profile.show`,
 `notification_profile.list`, `notification_profile.binding.set`,
 `notification_profile.binding.remove`, `notification_profile.binding.list`,
@@ -171,6 +172,7 @@ The dynamic-catalog registry rows are:
 |---|---|
 | `item_archetype.create`, `item_archetype.revise`, `item_archetype.retire`, `item_archetype.show`, `item_archetype.list` | `spine.item-archetypes.v1`, `spine.notification-profile-readback.v1`, `spine.notification-profile-catalog-cursor.v1` |
 | `notification_profile.create`, `notification_profile.revise`, `notification_profile.retire`, `notification_profile.show`, `notification_profile.list` | `spine.notification-profiles.v1`, `spine.notification-profile-readback.v1`, `spine.notification-profile-catalog-cursor.v1` |
+| `notification_profile.metadata.update` | `spine.notification-profiles.v1`, `spine.notification-profile-metadata-update.v1`, `spine.notification-profile-readback.v1`, `spine.notification-profile-catalog-cursor.v1` |
 | `notification_profile.binding.set`, `notification_profile.binding.remove`, `notification_profile.binding.list`, `notification_profile.resolve` | `spine.item-archetypes.v1`, `spine.notification-profiles.v1`, `spine.notification-profile-bindings.v1`, `spine.notification-profile-readback.v1`, `spine.notification-profile-catalog-cursor.v1` |
 
 ### 5.3 Schema-Object Manifest
@@ -216,7 +218,7 @@ Terminal lifecycle duplicate handling is shared by `item.archive`, `event.cancel
 
 The MVP command receipt storage artifact is `command_receipts`. Required stored fields are `command_receipt_id`, `command`, `command_id`, `actor_subject_id`, `action_timestamp_utc`, optional `item_id`, optional `target_version`, `effect`, `result_identity_facts`, `semantic_facts_hash`, `semantic_facts`, and `created_at_utc`. `command_receipt_id` is a text command-derived ID using row role `command_receipt` and request path `/`. `command` and `command_id` are text, `actor_subject_id` is text, timestamps are UTC timestamp strings, `item_id` is nullable text, `target_version` is a nullable text public version string when present, `effect` is text, and `result_identity_facts` and `semantic_facts` are canonical JSON objects. `semantic_facts_hash` is the Spine canonical hash of `semantic_facts`. `command_id` is unique across `command_receipts`; implementations must support lookup by `command_id` before fresh mutation. If an existing receipt has the same `command_id`, the handler compares the stored command and semantic facts for compatible replay and otherwise fails with `semantic_conflict`. For `subject.upsert`, `command_receipts.action_timestamp_utc` is always the request `updated_at_utc` for fresh insert, changed update, no-op, and compatible replay comparison; the persisted subject `created_at_utc` is a result fact, not a separate request fact. Unless a command states a narrower rule, `command_receipts.created_at_utc` equals `action_timestamp_utc`.
 
-Allowed `command_receipts.effect` values are the response effect boolean name plus result state: `subject_created`, `subject_updated`, `subject_noop`, `item_archived`, `event_created`, `event_updated`, `event_update_noop`, `event_rescheduled`, `event_reschedule_noop`, `event_cancelled`, `task_created`, `task_updated`, `task_update_noop`, `task_completed`, `task_cancelled`, `relation_created`, `reminder_created`, `reminder_duplicate_noop`, `reminder_updated`, `reminder_edit_noop`, `reminder_disabled`, `reminder_disable_noop`, `notification_work_created`, `notification_work_reconciled`, `notification_work_all_retained`, `notification_work_zero_selected`, `schedule_created`, `schedule_updated_and_reconciled`, `schedule_updated`, `schedule_reconciled`, `schedule_update_noop`, and `schedule_cancelled`, plus the closed recurrence and provenance effects registered by `specs/recurrence.md`. `schedule_create_replay`, `schedule_update_replay`, and `schedule_cancel_replay` are response-branch effects only and MUST NOT be persisted in `command_receipts.effect`; each replay receipt summary continues to report its stored fresh-success effect. `result_identity_facts` must contain only stable response reconstruction identities, including `command_receipt_id`, command-specific item/version/work/relation identities, `audit_id` when an audit row was created, and generated identities that the corresponding success response returns. `semantic_facts` must contain replay comparison facts for the receipt-producing command: command, command id, actor, action timestamp, target item/version facts when relevant, normalized request facts, generated or referenced identities, resulting persisted facts, and effect booleans. For notification commands this includes version constants, intent and policy identities, normalized target/schedule/late-handling facts, schedule hash, recurrence provenance when present, and effect-specific work-id arrays. Stored receipt semantic facts are the sole authority for deciding compatible same-command replay.
+Allowed `command_receipts.effect` values are the response effect boolean name plus result state: `subject_created`, `subject_updated`, `subject_noop`, `item_archived`, `event_created`, `event_updated`, `event_update_noop`, `event_rescheduled`, `event_reschedule_noop`, `event_cancelled`, `task_created`, `task_updated`, `task_update_noop`, `task_completed`, `task_cancelled`, `relation_created`, `reminder_created`, `reminder_duplicate_noop`, `reminder_updated`, `reminder_edit_noop`, `reminder_disabled`, `reminder_disable_noop`, `notification_work_created`, `notification_work_reconciled`, `notification_work_all_retained`, `notification_work_zero_selected`, `schedule_created`, `schedule_updated_and_reconciled`, `schedule_updated`, `schedule_reconciled`, `schedule_update_noop`, and `schedule_cancelled`, plus the closed recurrence and provenance effects registered by `specs/recurrence.md` and the closed dynamic-catalog effects registered by `specs/notification-profiles.md` Section 10. `schedule_create_replay`, `schedule_update_replay`, and `schedule_cancel_replay` are response-branch effects only and MUST NOT be persisted in `command_receipts.effect`; each replay receipt summary continues to report its stored fresh-success effect. `result_identity_facts` must contain only stable response reconstruction identities, including `command_receipt_id`, command-specific item/version/work/relation identities, `audit_id` when an audit row was created, and generated identities that the corresponding success response returns. `semantic_facts` must contain replay comparison facts for the receipt-producing command: command, command id, actor, action timestamp, target item/version facts when relevant, normalized request facts, generated or referenced identities, resulting persisted facts, and effect booleans. For notification commands this includes version constants, intent and policy identities, normalized target/schedule/late-handling facts, schedule hash, recurrence provenance when present, and effect-specific work-id arrays. Stored receipt semantic facts are the sole authority for deciding compatible same-command replay.
 
 All write-command success branches use `command_receipts` for same-command replay and global command-ID collision detection. No-op `event.update`, no-op `task.update`, no-op `event.reschedule`, and `reminder.create if_absent=true` duplicate-safe success create no item version or audit row, but still create one command receipt.
 
@@ -265,7 +267,7 @@ registry. Ordinary owner discovery uses this command rather than raw SQLite insp
 
 ### 9.1 Operational Schedule Family
 
-`specs/schedule-operations.md` defines three implemented command identifiers whose version facts are declared by the current schema-11 runtime:
+`specs/schedule-operations.md` defines three implemented command identifiers whose version facts are declared by the current schema-12 runtime:
 
 - `agenda.show`: a read-only, pinned-local-time, cross-item range view with recurrence expansion, stable snapshot pagination, and optional notification/work summaries;
 - `schedule.update`: one target-version-guarded transaction over whole-item facts, primary local schedule, whole-series recurrence replacement, complete desired reminder set, delivery retargeting, mandatory stale-work reconciliation, optional bounded replacement work, one audit when effects occur, and one receipt; and
@@ -377,7 +379,7 @@ The command creates policies directly on item version `1` and returns one compos
 
 Delivery resolution accepts an existing explicit target or a named normalized context default. It never creates or approves a route. Materialization accepts a bounded local or item-relative horizon and performs UTC normalization internally. No branch starts work, writes a side-effect attempt, invokes an adapter, or reports delivery.
 
-The current schema-11 runtime implements this subsection. It resolves named CLI defaults from repeatable `--delivery-target-default KEY=DELIVERY_TARGET_ID` options and exposes all schedule-create version facts through `system.info`.
+The current schema-12 runtime implements this subsection. It resolves named CLI defaults from repeatable `--delivery-target-default KEY=DELIVERY_TARGET_ID` options and exposes all schedule-create version facts through `system.info`.
 
 The CLI accepts `--compact` only with `schedule.create` and `schedule.show`. On success it applies the `spine.schedule-compact.v1` projection defined in `specs/schedule-operator-tools.md`; omission returns the existing full JSON unchanged. Compact mode is transport presentation and does not alter core command semantics, receipt persistence, or readback authority.
 
@@ -387,6 +389,12 @@ The CLI accepts `--compact` only with `schedule.create` and `schedule.show`. On 
 archetypes, reusable notification profiles, deterministic scoped default bindings,
 and snapshot profile application. Its identifiers are part of the implemented-command
 list and compiled command-to-contract registry in Section 3.
+
+`notification_profile.metadata.update` is the sole root-metadata correction surface.
+It uses a complete expected/replacement display-metadata preimage and preserves the
+profile key, owner, behavioral revision, bindings, applications, policies, work, and
+attempts. Exact validation, replay, no-op, audit, receipt, and cursor-invalidation
+semantics are normative in `specs/notification-profiles.md` Section 10.
 
 The closed `spine.schedule-create.v2` and `spine.schedule-update.v2` request and
 response contracts are the sole implemented high-level schedule write surface.

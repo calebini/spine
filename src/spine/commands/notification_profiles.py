@@ -19,9 +19,11 @@ from spine.core import SpineValidationError
 from spine.core.canonical_json import canonical_json_bytes, canonical_json_text
 from spine.core.hashing import hash_canonical_json
 from spine.core.notification_profiles import (
+    DYNAMIC_CATALOG_RECEIPT_EFFECTS,
     ITEM_ARCHETYPE_CONTRACT,
     NOTIFICATION_PROFILE_BINDING_CONTRACT,
     NOTIFICATION_PROFILE_CONTRACT,
+    NOTIFICATION_PROFILE_METADATA_UPDATE_CONTRACT,
     normalize_archetype_revision,
     normalize_catalog_key,
     normalize_owner,
@@ -43,6 +45,7 @@ PROFILE_COMMANDS = frozenset(
         "item_archetype.show",
         "item_archetype.list",
         "notification_profile.create",
+        "notification_profile.metadata.update",
         "notification_profile.revise",
         "notification_profile.retire",
         "notification_profile.show",
@@ -73,6 +76,7 @@ _CONTRACT_BY_COMMAND = {
         if command.startswith("notification_profile.binding.")
         or command == "notification_profile.resolve"
     },
+    "notification_profile.metadata.update": NOTIFICATION_PROFILE_METADATA_UPDATE_CONTRACT,
 }
 
 
@@ -96,6 +100,7 @@ def handle_notification_profile_command(
             value, ctx, kind="item_archetype"
         ),
         "notification_profile.create": _profile_create,
+        "notification_profile.metadata.update": _profile_metadata_update,
         "notification_profile.revise": _profile_revise,
         "notification_profile.retire": lambda value, ctx: _retire_root(
             value, ctx, kind="notification_profile"
@@ -418,6 +423,101 @@ def _profile_create(
     return _success(command, receipt)
 
 
+def _profile_metadata_update(
+    request: Mapping[str, Any], context: CommandContext
+) -> dict[str, Any]:
+    command = "notification_profile.metadata.update"
+    _check(
+        command,
+        request,
+        {
+            "contract_version",
+            "command_id",
+            "actor_subject_id",
+            "action_timestamp_utc",
+            "notification_profile_id",
+            "expected_metadata",
+            "metadata",
+        },
+    )
+    _require_contract(command, request)
+    connection = _connection(context)
+    command_id, actor, timestamp = _write_identity(request, context)
+    profile_id = _required_string(request, "notification_profile_id")
+    expected_metadata = _normalize_profile_metadata(
+        request.get("expected_metadata"), "expected_metadata"
+    )
+    metadata = _normalize_profile_metadata(request.get("metadata"), "metadata")
+    semantic = {
+        **dict(request),
+        "expected_metadata": expected_metadata,
+        "metadata": metadata,
+    }
+    replay = _compatible_replay(connection, command, command_id, semantic)
+    if replay is not None:
+        return _success(command, replay)
+    root = load_profile(connection, profile_id, active_required=True)
+    _require_operator_owned(root)
+    current_metadata = {
+        "display_name": str(root["display_name"]),
+        "description": root["description"],
+    }
+    if current_metadata != expected_metadata:
+        raise SpineValidationError(
+            "stale_version:expected_metadata",
+            "expected_metadata does not match current profile metadata",
+        )
+    changed = current_metadata != metadata
+    effect = (
+        "notification_profile_metadata_updated"
+        if changed
+        else "notification_profile_metadata_update_noop"
+    )
+    facts = {
+        "notification_profile_id": profile_id,
+        "notification_profile_revision_id": str(root["current_revision_id"]),
+        "display_name": metadata["display_name"],
+        "description": metadata["description"],
+        "status": "active",
+    }
+    receipt = _make_receipt(
+        command,
+        command_id,
+        actor,
+        timestamp,
+        effect,
+        semantic,
+        facts,
+    )
+    with connection:
+        if changed:
+            connection.execute(
+                """
+                UPDATE notification_profiles
+                SET display_name = ?, description = ?
+                WHERE notification_profile_id = ?
+                """,
+                (metadata["display_name"], metadata["description"], profile_id),
+            )
+            _insert_audit(
+                connection,
+                command,
+                command_id,
+                actor,
+                timestamp,
+                "notification_profile",
+                profile_id,
+                "metadata_updated",
+                {
+                    **facts,
+                    "expected_metadata": expected_metadata,
+                    "metadata": metadata,
+                },
+            )
+        insert_command_receipt(connection, receipt)
+    return _success(command, receipt)
+
+
 def _profile_revise(
     request: Mapping[str, Any], context: CommandContext
 ) -> dict[str, Any]:
@@ -505,6 +605,37 @@ def _profile_revise(
         )
         insert_command_receipt(connection, receipt)
     return _success(command, receipt)
+
+
+def _normalize_profile_metadata(value: Any, field: str) -> dict[str, Any]:
+    metadata = _mapping(value, field)
+    unexpected = sorted(set(metadata) - {"display_name", "description"})
+    if unexpected:
+        raise SpineValidationError(
+            f"unsupported_field:{field}.{unexpected[0]}",
+            f"unsupported field: {field}.{unexpected[0]}",
+        )
+    missing = sorted({"display_name", "description"} - set(metadata))
+    if missing:
+        raise SpineValidationError(
+            f"missing_required_field:{field}.{missing[0]}",
+            f"missing required field: {field}.{missing[0]}",
+        )
+    display_name = metadata.get("display_name")
+    if not isinstance(display_name, str) or not 1 <= len(display_name) <= 160:
+        raise SpineValidationError(
+            f"invalid_request:{field}.display_name",
+            f"{field}.display_name must be a non-empty string up to 160 characters",
+        )
+    description = metadata.get("description")
+    if description is not None and (
+        not isinstance(description, str) or not 1 <= len(description) <= 2000
+    ):
+        raise SpineValidationError(
+            f"invalid_request:{field}.description",
+            f"{field}.description must be null or a non-empty string up to 2000 characters",
+        )
+    return {"display_name": display_name, "description": description}
 
 
 def _insert_profile_revision(
@@ -686,8 +817,11 @@ def _list_roots(
     table = "item_archetypes" if kind == "item_archetype" else "notification_profiles"
     id_field = f"{kind}_id"
     key_field = "archetype_key" if kind == "item_archetype" else "profile_key"
+    metadata_columns = (
+        ", display_name, description" if kind == "notification_profile" else ""
+    )
     query = (
-        f"SELECT {id_field}, {key_field}, status, current_revision_id "
+        f"SELECT {id_field}, {key_field}, status, current_revision_id{metadata_columns} "
         f"FROM {table} "
         "WHERE owner_kind = ? AND owner_subject_id IS ? AND owner_group_id IS ?"
     )
@@ -701,17 +835,19 @@ def _list_roots(
         params.append(status)
     query += f" ORDER BY {key_field}, {id_field}"
     rows = connection.execute(query, tuple(params)).fetchall()
-    snapshot_hash = hash_canonical_json(
-        [
-            {
-                "id": str(row[id_field]),
-                "key": str(row[key_field]),
-                "status": str(row["status"]),
-                "current_revision_id": str(row["current_revision_id"]),
-            }
-            for row in rows
-        ]
-    )
+    snapshot_facts: list[dict[str, Any]] = []
+    for row in rows:
+        facts: dict[str, Any] = {
+            "id": str(row[id_field]),
+            "key": str(row[key_field]),
+            "status": str(row["status"]),
+            "current_revision_id": str(row["current_revision_id"]),
+        }
+        if kind == "notification_profile":
+            facts["display_name"] = str(row["display_name"])
+            facts["description"] = row["description"]
+        snapshot_facts.append(facts)
+    snapshot_hash = hash_canonical_json(snapshot_facts)
     query_facts = {
         "kind": kind,
         "owner": owner,
@@ -1194,6 +1330,8 @@ def _make_receipt(
     semantic: Mapping[str, Any],
     facts: Mapping[str, Any],
 ) -> dict[str, Any]:
+    if effect not in DYNAMIC_CATALOG_RECEIPT_EFFECTS:
+        raise RuntimeError(f"unregistered dynamic-catalog receipt effect: {effect}")
     return command_receipt(
         command=command,
         command_id=command_id,

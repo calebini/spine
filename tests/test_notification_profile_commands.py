@@ -8,6 +8,7 @@ from jsonschema import Draft202012Validator
 from referencing import Registry, Resource
 
 from spine.commands import CommandContext, handle
+from spine.core.notification_profiles import DYNAMIC_CATALOG_RECEIPT_EFFECTS
 from spine.ledger import connect, initialize_schema
 
 ROOT = Path(__file__).parents[1]
@@ -39,6 +40,13 @@ class NotificationProfileCommandTests(unittest.TestCase):
 
     def tearDown(self) -> None:
         self.connection.close()
+
+    def test_dynamic_catalog_receipt_effect_vocabulary_is_normative(self) -> None:
+        specification = (ROOT / "specs/notification-profiles.md").read_text(
+            encoding="utf-8"
+        )
+        for effect in DYNAMIC_CATALOG_RECEIPT_EFFECTS:
+            self.assertIn(f"`{effect}`", specification)
 
     def test_dynamic_catalog_resolution_revision_and_replay(self) -> None:
         archetype = self._create_archetype()
@@ -101,6 +109,211 @@ class NotificationProfileCommandTests(unittest.TestCase):
         )
         self.assertTrue(revised["ok"], revised)
         self.assertEqual(revised["revision_number"], "2")
+
+    def test_profile_metadata_update_preserves_revision_binding_and_replays(self) -> None:
+        archetype = self._create_archetype()
+        profile = self._create_profile()
+        binding = self._bind(archetype, profile)
+        request = {
+            "contract_version": "spine.notification-profile-metadata-update.v1",
+            "command_id": "profile-metadata-update",
+            "actor_subject_id": "subject_agent",
+            "action_timestamp_utc": "2035-02-01T12:00:03Z",
+            "notification_profile_id": profile["notification_profile_id"],
+            "expected_metadata": {
+                "display_name": "Appointment standard",
+                "description": "One day before",
+            },
+            "metadata": {
+                "display_name": "Medical appointment standard",
+                "description": "One day before",
+            },
+        }
+
+        updated = handle(
+            "notification_profile.metadata.update", request, self.context
+        )
+        self.assertTrue(updated["ok"], updated)
+        self.assertEqual(
+            updated["effect"], "notification_profile_metadata_updated"
+        )
+        self.assertEqual(
+            updated["notification_profile_revision_id"],
+            profile["notification_profile_revision_id"],
+        )
+        self.assertEqual(updated["display_name"], "Medical appointment standard")
+        self.assertEqual(
+            self.connection.execute(
+                "SELECT COUNT(*) FROM notification_profile_revisions"
+            ).fetchone()[0],
+            1,
+        )
+        audit_payload = json.loads(
+            self.connection.execute(
+                """SELECT payload_json FROM coordination_catalog_audit_log
+                   WHERE resource_kind = 'notification_profile'
+                     AND resource_id = ? AND action = 'metadata_updated'""",
+                (profile["notification_profile_id"],),
+            ).fetchone()[0]
+        )
+        self.assertEqual(audit_payload["expected_metadata"], request["expected_metadata"])
+        self.assertEqual(audit_payload["metadata"], request["metadata"])
+
+        shown = handle(
+            "notification_profile.show",
+            {
+                "contract_version": "spine.notification-profiles.v1",
+                "notification_profile_id": profile["notification_profile_id"],
+            },
+            self.context,
+        )
+        self.assertEqual(
+            shown["notification_profile"]["display_name"],
+            "Medical appointment standard",
+        )
+        self.assertEqual(
+            shown["notification_profile"]["current_revision_id"],
+            profile["notification_profile_revision_id"],
+        )
+
+        resolved = handle(
+            "notification_profile.resolve",
+            {
+                "contract_version": "spine.notification-profile-bindings.v1",
+                "item_type": "event",
+                "item_archetype_id": archetype["item_archetype_id"],
+                "scope_chain": [
+                    {
+                        "owner_kind": "subject",
+                        "owner_subject_id": "subject_owner",
+                    }
+                ],
+            },
+            self.context,
+        )
+        self.assertEqual(
+            resolved["binding"]["notification_profile_binding_id"],
+            binding["notification_profile_binding_id"],
+        )
+        self.assertEqual(
+            resolved["profile"]["revision"]["notification_profile_revision_id"],
+            profile["notification_profile_revision_id"],
+        )
+
+        replay = handle(
+            "notification_profile.metadata.update", request, self.context
+        )
+        self.assertEqual(
+            replay["receipt"]["command_receipt_id"],
+            updated["receipt"]["command_receipt_id"],
+        )
+        self.assertEqual(
+            self.connection.execute(
+                """SELECT COUNT(*) FROM coordination_catalog_audit_log
+                   WHERE resource_kind = 'notification_profile'
+                     AND resource_id = ? AND action = 'metadata_updated'""",
+                (profile["notification_profile_id"],),
+            ).fetchone()[0],
+            1,
+        )
+
+        noop = handle(
+            "notification_profile.metadata.update",
+            {
+                **request,
+                "command_id": "profile-metadata-noop",
+                "action_timestamp_utc": "2035-02-01T12:00:04Z",
+                "expected_metadata": dict(request["metadata"]),
+            },
+            self.context,
+        )
+        self.assertEqual(
+            noop["effect"], "notification_profile_metadata_update_noop"
+        )
+        self.assertEqual(
+            self.connection.execute(
+                """SELECT COUNT(*) FROM coordination_catalog_audit_log
+                   WHERE resource_kind = 'notification_profile'
+                     AND resource_id = ? AND action = 'metadata_updated'""",
+                (profile["notification_profile_id"],),
+            ).fetchone()[0],
+            1,
+        )
+
+        stale = handle(
+            "notification_profile.metadata.update",
+            {
+                **request,
+                "command_id": "profile-metadata-stale",
+                "action_timestamp_utc": "2035-02-01T12:00:05Z",
+            },
+            self.context,
+        )
+        self.assertFalse(stale["ok"], stale)
+        self.assertEqual(stale["error"]["code"], "stale_version")
+        self.assertEqual(stale["error"]["field"], "expected_metadata")
+
+    def test_profile_metadata_update_invalidates_catalog_cursor(self) -> None:
+        first = self._create_profile()
+        second_request = {
+            "contract_version": "spine.notification-profiles.v1",
+            "command_id": "profile-create-second",
+            "actor_subject_id": "subject_agent",
+            "action_timestamp_utc": "2035-02-01T12:00:02Z",
+            "owner": {
+                "owner_kind": "subject",
+                "owner_subject_id": "subject_owner",
+            },
+            "profile_key": "appointment_second",
+            "display_name": "Appointment second",
+            "description": None,
+            "revision": {
+                "compatible_item_types": ["event"],
+                "templates": [self._template("day_before", "-86400")],
+            },
+        }
+        second = handle(
+            "notification_profile.create", second_request, self.context
+        )
+        self.assertTrue(second["ok"], second)
+        list_request = {
+            "contract_version": "spine.notification-profiles.v1",
+            "owner": {
+                "owner_kind": "subject",
+                "owner_subject_id": "subject_owner",
+            },
+            "limit": "1",
+        }
+        page_one = handle("notification_profile.list", list_request, self.context)
+        self.assertTrue(page_one["has_more"])
+
+        updated = handle(
+            "notification_profile.metadata.update",
+            {
+                "contract_version": "spine.notification-profile-metadata-update.v1",
+                "command_id": "profile-metadata-cursor",
+                "actor_subject_id": "subject_agent",
+                "action_timestamp_utc": "2035-02-01T12:00:03Z",
+                "notification_profile_id": first["notification_profile_id"],
+                "expected_metadata": {
+                    "display_name": "Appointment standard",
+                    "description": "One day before",
+                },
+                "metadata": {
+                    "display_name": "Appointment standard corrected",
+                    "description": "One day before",
+                },
+            },
+            self.context,
+        )
+        self.assertTrue(updated["ok"], updated)
+        stale = handle(
+            "notification_profile.list",
+            {**list_request, "cursor": page_one["next_cursor"]},
+            self.context,
+        )
+        self.assertFalse(stale["ok"], stale)
+        self.assertEqual(stale["error"]["code"], "stale_cursor")
 
     def test_profile_aware_schedule_create_is_atomic_and_pinned(self) -> None:
         archetype = self._create_archetype()

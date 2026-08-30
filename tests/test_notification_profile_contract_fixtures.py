@@ -31,7 +31,7 @@ class NotificationProfileContractFixtureTests(unittest.TestCase):
         manifest = _load(MANIFEST)
         self.assertEqual(
             manifest["schema_version"],
-            "spine.notification-profile-contract-fixtures.v1",
+            "spine.notification-profile-contract-fixtures.v2",
         )
         fixture_ids: list[str] = []
         for entry in manifest["fixtures"]:
@@ -88,6 +88,27 @@ class NotificationProfileContractFixtureTests(unittest.TestCase):
             )
         }
         self.assertTrue(_valid(schema, request, self.registry))
+
+    def test_metadata_update_requires_closed_complete_preimages(self) -> None:
+        request = _load(
+            ROOT
+            / "tests/fixtures/notification_profiles/contracts/request_notification_profile_metadata_update.json"
+        )
+        schema = {
+            "$ref": (
+                self.schemas["notification-profile-commands.schema.json"]["$id"]
+                + "#/$defs/profileMetadataUpdate"
+            )
+        }
+        self.assertTrue(_valid(schema, request, self.registry))
+
+        missing_preimage = copy.deepcopy(request)
+        del missing_preimage["expected_metadata"]["description"]
+        self.assertFalse(_valid(schema, missing_preimage, self.registry))
+
+        unknown_metadata = copy.deepcopy(request)
+        unknown_metadata["metadata"]["profile_key"] = "replacement"
+        self.assertFalse(_valid(schema, unknown_metadata, self.registry))
 
 
 def _load(path: Path) -> dict[str, object]:

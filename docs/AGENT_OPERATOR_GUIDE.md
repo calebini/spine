@@ -90,6 +90,7 @@ For `schedule.create`, prefer the request directive `"timezone_database_version"
 
 Before using notification profiles, require `spine.item-archetypes.v1`,
 `spine.notification-profiles.v1`,
+`spine.notification-profile-metadata-update.v1`,
 `spine.notification-profile-bindings.v1`,
 `spine.notification-profile-application.v1`, and
 `spine.notification-profile-readback.v1`.
@@ -131,6 +132,7 @@ The scheduling command surface is `schedule.build`, `schedule.create`, `schedule
 
 The dynamic catalog surface is `item_archetype.create|revise|retire|show|list`,
 `notification_profile.create|revise|retire|show|list`,
+`notification_profile.metadata.update`,
 `notification_profile.binding.set|remove|list`, and
 `notification_profile.resolve`.
 
@@ -167,6 +169,10 @@ Use this operator sequence:
 2. Create a reusable profile with
    `notification_profile.create`; profile templates contain only `schedule` and
    `late_handling`.
+   Correct its display name or description with
+   `notification_profile.metadata.update`; supply the complete current metadata as
+   `expected_metadata` and the complete desired replacement as `metadata`. This does
+   not revise its templates or disturb bindings and applied reminders.
 3. Optionally make it the scoped default with
    `notification_profile.binding.set`.
 4. Submit `spine.schedule-create.v2` with `item.archetype` and a

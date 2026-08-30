@@ -16,9 +16,29 @@ from spine.core.notifications import (
 
 ITEM_ARCHETYPE_CONTRACT = "spine.item-archetypes.v1"
 NOTIFICATION_PROFILE_CONTRACT = "spine.notification-profiles.v1"
+NOTIFICATION_PROFILE_METADATA_UPDATE_CONTRACT = "spine.notification-profile-metadata-update.v1"
 NOTIFICATION_PROFILE_BINDING_CONTRACT = "spine.notification-profile-bindings.v1"
 NOTIFICATION_PROFILE_APPLICATION_CONTRACT = "spine.notification-profile-application.v1"
 NOTIFICATION_PROFILE_READBACK_CONTRACT = "spine.notification-profile-readback.v1"
+
+DYNAMIC_CATALOG_RECEIPT_EFFECTS = frozenset(
+    {
+        "item_archetype_created",
+        "item_archetype_revised",
+        "item_archetype_retired",
+        "item_archetype_retire_noop",
+        "notification_profile_created",
+        "notification_profile_revised",
+        "notification_profile_retired",
+        "notification_profile_retire_noop",
+        "notification_profile_metadata_updated",
+        "notification_profile_metadata_update_noop",
+        "notification_profile_binding_set",
+        "notification_profile_binding_set_noop",
+        "notification_profile_binding_removed",
+        "notification_profile_binding_remove_noop",
+    }
+)
 
 _KEY = re.compile(r"[a-z][a-z0-9_-]{0,63}")
 _ITEM_TYPES = frozenset({"event", "task"})
