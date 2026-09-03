@@ -1,7 +1,7 @@
 # Scheduled Agent Autonomy
 
 Status: Design exploration; non-normative; not an implementation commitment  
-Last updated: 2026-08-17  
+Last updated: 2026-09-04
 Scope: How scheduled Spine truth might initiate bounded agent reasoning, tool use, useful advisories, and later governed actions
 
 ## Purpose
@@ -99,6 +99,73 @@ External writes, purchases, bookings, messages to third parties, or canonical Sp
 A particular notification trigger delegates contextualization to an agent before final delivery. At eligibility time, the agent receives the reminder, item or occurrence snapshot, and mandate. It may enrich the eventual notification, request clarification, or decide that no message is warranted.
 
 This model directly supports the golf-trip example.
+
+### Notification-template activation hypothesis
+
+For reminder-linked advisories, the current preferred design is to make the
+notification template the explicit activation locus without turning that template
+into an agent program. A template may eventually carry an optional immutable reference
+to a versioned contextual-advisory definition and a bounded fallback posture. It must
+not embed executable code, a provider-specific prompt, an unrestricted tool plan, or a
+model-selected schedule.
+
+Conceptually:
+
+    item or recurrence occurrence
+                |
+    notification profile snapshot
+                |
+    notification template and trigger
+                |
+    deterministic opportunity
+                |
+    optional advisory request
+                |
+    governed external agent execution
+                |
+    accepted advisory or deterministic fallback
+                |
+    ordinary notification work and delivery attempts
+
+This separation assigns distinct responsibilities:
+
+- The notification template states **when** contextualization is requested, **which
+  immutable advisory definition** applies, and **what fallback posture** is allowed.
+- The advisory definition states the objective, context scope, allowed capabilities,
+  budgets, evidence shape, usefulness deadline, and permitted outcomes. It may give an
+  agent discretion to decide what is useful without prescribing weather, traffic, or
+  another fixed lookup.
+- Spine expands the temporal trigger deterministically, binds it to exact item,
+  occurrence, profile-revision, template, advisory-definition, and destination facts,
+  and retains lifecycle and provenance evidence.
+- The governance authority controls capability and boundary crossing. An external
+  agent runtime chooses and invokes allowed read-only tools and synthesizes the result.
+- Accepted advisory prose returns through ordinary Spine notification work. The agent
+  runtime does not deliver directly.
+
+Ordinary notification templates remain valid and useful without an advisory reference.
+An advisory outage, timeout, stale result, denial, or invalid result should normally
+fall back to the template's deterministic reminder rather than erase it. A successful
+no_action outcome may suppress derivative advisory prose only when the accepted
+advisory definition explicitly permits silence; the later contract must distinguish
+that intentional outcome from execution failure.
+
+Context should be gathered close enough to delivery to satisfy declared freshness and
+usefulness deadlines rather than being rendered when a distant notification
+opportunity is first expanded. Recurring items create independently source-bound
+advisory work per applicable occurrence. Replay must reuse accepted evidence and must
+not invoke the model or tools again.
+
+Reusable packs may eventually distribute owner-neutral advisory definitions and
+notification-template activation references. Installation must snapshot or resolve
+their exact immutable versions through supported contracts. The pack remains a
+declarative artifact: it does not execute, contain operator item data, choose concrete
+credentials, or become the advisory runtime.
+
+This hypothesis is specific to contextual reminders. Proactive planning sweeps remain
+a separate trigger model and must not be smuggled into notification-template semantics.
+The exact schema, policy family, work kind, installer behavior, and compatibility
+declarations remain decisions for the next normative specification pass.
 
 ### Proactive planning sweep
 

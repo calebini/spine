@@ -325,3 +325,115 @@ Backups protect recovery but do not reduce the active ledger. WAL checkpointing 
 controls the WAL sidecar, and `VACUUM` only reclaims pages after an independently
 authorized retention operation. Rotating whole database files is not an acceptable
 substitute because it would fragment Spine's canonical authority.
+
+### Future Horizon: Archetype Facets and Workflow Recipes
+
+Spine's current archetypes are intentionally thin, owner-scoped semantic identities.
+Their future value should grow primarily through separately versioned capabilities
+that bind to them, rather than through rigid event subclasses or an expanding set of
+archetype-specific core tables. This horizon is subordinate to the ordered Operational
+Resilience and Boundedness initiative above and does not authorize implementation.
+
+The intended boundary is:
+
+- Spine owns a generic, versioned facet substrate and the canonical facet values
+  attached to immutable item versions.
+- Reusable packs may define owner-neutral facet schemas and workflow recipes, but pack
+  artifacts do not contain an operator's item data and do not execute at runtime.
+- Domain-specific facts such as airline, flight number, provider, or opponent remain
+  typed facet values unless a concept becomes broadly useful enough to promote into
+  Spine's generic coordination model.
+- External, volatile facts such as a live flight gate, delay, weather forecast, or
+  vendor status remain provenance-bearing observations and must not silently overwrite
+  canonical scheduled facts.
+- Workflow recipes remain declarative authoring conveniences outside Spine. A
+  deterministic runner or agent may expand an explicitly selected recipe through
+  Spine's public commands; Spine owns the resulting items, relationships, temporal
+  bindings, policies, and receipts.
+- A future owner-scoped activation preference may record which exact recipe version is
+  suggested, automatic, or disabled for an archetype, without moving recipe execution
+  into Spine.
+
+The future work should proceed in this order:
+
+1. Accept an architecture decision defining the core-versus-facet promotion rule,
+   schema ownership, immutable schema versioning, provenance, query/index requirements,
+   and the boundary between canonical facts and external observations.
+2. Specify a generic facet registry, versioned item-facet persistence, command
+   authoring and mutation surfaces, deterministic validation, and complete readback.
+   Arbitrary unregistered attribute bags and direct database writes remain prohibited.
+3. Prove the substrate narrowly with `flight_details.v1`, covering airline, flight
+   number, and typed origin/destination references while retaining departure, arrival,
+   time-zone, lifecycle, and primary-location authority in Spine's generic model.
+4. Specify external observation provenance and expiry before adding live terminal,
+   gate, delay, or status enrichment.
+5. Specify pack-distributed workflow recipes, deterministic plan/apply/verify behavior,
+   owner-scoped activation preferences, and explicit authorization before allowing
+   recipe-driven authoring.
+
+Starter packs may anticipate these future references in design notes, but released
+pack contracts must not claim facet or recipe capabilities until the corresponding
+Spine contracts, migrations, commands, readback, and compatibility declarations exist.
+
+### Future Horizon: Notification-Activated Contextual Advisories
+
+The first contextual-advisory product path should enrich an explicitly selected
+notification rather than create an independent, hidden scheduling system. The current
+design hypothesis is that a notification template is the right activation locus, while
+the advisory definition, governance decision, model/tool execution, and accepted
+evidence remain separate versioned artifacts with distinct owners. This horizon does
+not authorize implementation and does not expand the current notification-profile
+contracts.
+
+The intended boundary is:
+
+- A notification template may optionally reference an immutable contextual-advisory
+  definition and declare deterministic fallback behavior. It defines trigger timing,
+  not executable logic, prompts, credentials, providers, or a runtime-selected plan.
+- Spine remains the temporal and coordination authority. It owns deterministic
+  opportunity and work identity, exact item or occurrence provenance, source and
+  deadline freshness, derivative notification lineage, and delivery readback.
+- A separate advisory definition bounds the objective, visible context, capability
+  profile, tool/model/runtime budgets, evidence requirements, usefulness deadline,
+  allowed outcomes, and whether intentional silence is permitted.
+- The governance authority grants or denies capability. An external agent runtime may
+  decide what to investigate only within that grant and cannot mutate Spine or deliver
+  directly.
+- Ordinary deterministic reminder rendering remains the reliable default. Advisory
+  outage, timeout, denial, invalid evidence, or stale evidence normally falls back to
+  the base reminder and must never be misreported as a successful no_action outcome.
+- Context is acquired near delivery under explicit freshness bounds. Temporal
+  expansion remains model-free, and recurrence produces separately bound advisory work
+  for each applicable occurrence.
+- Reusable packs may eventually distribute owner-neutral advisory definitions and
+  template activation references, but pack artifacts remain declarative and have no
+  runtime or operator data.
+- Proactive planning sweeps are a separate trigger model. They may reuse mandate, run,
+  evidence, and governance machinery, but they must not inherit authority merely from
+  notification-template support.
+
+The delivery sequence should be:
+
+1. Publish and operationally prove the Version 1 pack format using only archetypes,
+   notification profiles, and owner-scoped default bindings.
+2. Reconcile specs/contextual-advisories.md with the notification-template activation
+   decision and accept the remaining policy-family, work-kind, evidence-ownership,
+   context-minimization, budget, and operator-surface decisions.
+3. Specify immutable advisory definitions, notification-template references,
+   deterministic fallback and silence semantics, per-occurrence identity, freshness,
+   replay, reconciliation, and complete readback.
+4. Define and audit cross-system capability, governance, submission, execution-result,
+   and evidence-acceptance contracts before creating runtime adapters.
+5. Implement one bounded read-only vertical slice: a location-bearing event, one
+   target-relative template activation, bounded agent-selected research, and zero or
+   one accepted advisory routed through ordinary notification delivery. Use the golf
+   preparation scenario as a conformance example, not a hard-coded weather workflow.
+6. Only after the Spine and advisory-runtime capabilities exist, introduce a new pack
+   manifest version that may independently carry facet schemas, advisory definitions,
+   and template activation references. Version 1 packs and installations remain valid.
+
+The companion non-normative exploration is
+docs/design-notes/scheduled-agent-autonomy.md. The existing
+specs/contextual-advisories.md draft remains the starting point for normative work;
+this horizon records the newer design direction that its open trigger decision must
+resolve.
