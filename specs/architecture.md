@@ -243,3 +243,25 @@ Implementation directories should be added when behavior exists:
 - `src/spine/protocols/` for stable public interfaces
 
 Core code MUST NOT depend on adapters.
+
+## 11. Proposed Identity and Access Boundary
+
+`specs/identity-and-access.md` defines the draft architecture for interchangeable
+authentication adapters, explicit external-principal-to-subject mappings, trusted
+delegated command context, and subject/group resource access. It is not an implemented
+authentication or privacy guarantee. Its first delivery target is authenticated
+single-operator access to one ledger, followed by explicitly specified group roles,
+item ownership, sharing, and delivery-mandate enforcement.
+
+Under that proposal, Spine evaluates access to its own resources from canonical
+ownership and grants; authentication adapters verify external identity. The governance
+authority continues to own consequential-action approval and execution-evidence
+acceptance. Both gates apply where required. Agents cannot manufacture caller identity
+or inherit broader service authority for a delegated request. Message origin and the
+audience receiving a response are separate trust decisions.
+
+HTTP, CLI, agent, and worker adapters will share an admission boundary over the existing
+command/services layer. Browser login is not a prerequisite for accepted background
+schedules. Existing owner fields, membership roles, and item subject roles do not
+constitute the proposed per-user access model until the owning contracts, migrations,
+and enforcement tests land.

@@ -317,6 +317,12 @@ The implemented `owner_scope.list` projection in `specs/owner-scope-discovery.md
 enumerates legal canonical owner scopes. It does not select an owner, infer authority,
 or replace the per-owner catalog list commands defined below.
 
+`specs/identity-and-access.md` proposes the future shared authentication/authorization
+boundary. It distinguishes permission to use a catalog from permission to administer
+it, and item access ownership from catalog ownership. Its access checks must preserve
+explicit scope-chain resolution and existing application snapshots. It is not yet an
+implemented permissions contract and adds no fields or new resolution behavior here.
+
 ## 7. Selection and Default Resolution
 
 A profile-aware schedule request selects exactly one mode:

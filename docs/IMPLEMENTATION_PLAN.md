@@ -437,3 +437,24 @@ docs/design-notes/scheduled-agent-autonomy.md. The existing
 specs/contextual-advisories.md draft remains the starting point for normative work;
 this horizon records the newer design direction that its open trigger decision must
 resolve.
+
+### Proposed Initiative: Identity, Access, and Web API Admission
+
+`specs/identity-and-access.md` is the first architecture draft for interchangeable
+authentication, external identity mappings, delegated human/agent context, and
+subject/group access. It does not declare runtime enforcement or change the ordering
+of the operational-resilience work above.
+
+The first implementation target is authenticated single-operator access to one ledger
+through a shared admission boundary, followed by an HTTP transport over existing
+command handlers and the bounded read improvements needed by a GUI. Provider-specific
+trust/enrollment contracts, context and failure schemas, command/resource permission
+mapping, and an explicit local/service authentication posture precede implementation.
+
+Per-user isolation follows separately: explicit item ownership and adoption of existing
+records, group member/admin/owner roles, grants, authorized list pagination, revocation,
+audience-aware chat responses, and durable worker delivery mandates. Catalog/profile
+snapshot semantics and canonical scheduling behavior remain governed by their existing
+contracts. The draft's acceptance scenarios identify the future cross-transport proofs;
+they are not existing test results. No authentication provider, schema migration,
+deployment, or audit run has been authorized by this roadmap entry.

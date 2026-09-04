@@ -321,6 +321,9 @@ Start with the document that matches the job:
 - **Understand the product:** [`specs/overview.md`](specs/overview.md)
 - **Understand ownership and boundaries:**
   [`specs/architecture.md`](specs/architecture.md)
+- **Review the proposed identity and access model:**
+  [`specs/identity-and-access.md`](specs/identity-and-access.md) — draft authentication,
+  subject mapping, group roles, and authorization; not implemented.
 - **Operate Spine as an agent:**
   [`docs/AGENT_OPERATOR_GUIDE.md`](docs/AGENT_OPERATOR_GUIDE.md)
 - **Reach a safe first success:**

@@ -91,6 +91,11 @@ bounded read that consumes no idempotency key and depends on no ambient time.
 Deployment authorization for identity discovery remains outside this data contract;
 the command itself MUST NOT silently filter results by inferred group membership.
 
+The draft `specs/identity-and-access.md` describes the later authorization boundary.
+Any access-scoped successor discovery surface must declare its filtered semantics
+explicitly; this v2 complete-inventory contract and its owner identities must not be
+silently repurposed as permission grants or a per-user visibility guarantee.
+
 ## 5. Entry Shape
 
 Every result entry is a closed object containing:

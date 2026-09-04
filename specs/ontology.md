@@ -412,6 +412,13 @@ Generic coordination mapping:
 - event attendees = `item_subject_roles` rows with `role=participant`
 - notification recipients = `notification_policies` rows (optionally aligned with an `item_subject_roles` row with `role=recipient`)
 
+The proposed access-control interpretation is tracked in `specs/identity-and-access.md`.
+It proposes explicit external-identity mappings, an `admin` group role, one accountable
+access owner per item, grants, and delivery mandates. These require a later ontology
+amendment and migration; this draft reference does not extend the current membership
+enum or turn `item_subject_roles.owner`, participation, profile ownership, or delivery
+recipients into an implemented authorization mechanism.
+
 ### 5.4 delivery_targets
 
 Owns adapter-routable delivery endpoints for subjects and subject groups.

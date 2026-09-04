@@ -430,6 +430,14 @@ The agent authoring command interface does not send reminders externally. Runtim
 
 Every transport adapter over this contract calls the same command handlers, preserves canonical dotted identifiers, request and response semantics, error names, stale-version behavior, archived-item immutability behavior, command-specific duplicate retry precedence, no-send authoring boundary, and exactly-one-structured-response discipline. Adapters must not introduce transport-specific business rules that make CLI, MCP, and HTTP behavior diverge.
 
+The proposed authentication and authorization extension is specified separately in
+`specs/identity-and-access.md`. It introduces a trusted admission context outside the
+model/client-controlled payload and requires current access checks before disclosure
+of replay evidence. Actor existence in this implemented contract is attribution, not
+proof of authentication or permission. The extension requires successor context,
+error, audit-linkage, and command-to-permission contracts before enforcement; this
+reference does not add request fields or change current replay/actor behavior.
+
 ## 16.1 Executable Contract Artifacts
 
 Golden command response fixtures under `tests/fixtures/command_responses/` are executable examples of implemented public JSON shapes. They are not an alternate source of authority; when fixture tests reveal ambiguity, this spec must be aligned narrowly before behavior is treated as stable.
