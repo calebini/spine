@@ -4,6 +4,9 @@
 
 Plans should survive the agent that made them.
 
+[Explore the Spine field guide →](https://calebini.github.io/spine/)
+Operator documentation and ten interactive architecture diagrams.
+
 Spine gives assistants and operators a durable, deterministic account of what is
 planned, when it is due, how it relates to everything else, what work should be
 generated, and what actually happened. Calendars, messengers, maps, dashboards, and
@@ -311,6 +314,10 @@ Draft work is not advertised as an implemented compatibility promise. See
 
 Start with the document that matches the job:
 
+- **Explore the illustrated product guide:**
+  [Spine field guide](https://calebini.github.io/spine/) — operator chapters and a ten-view
+  architecture atlas. Also open [`docs/site/index.html`](docs/site/index.html) locally, or follow the
+  [`site preview instructions`](docs/site/README.md).
 - **Understand the product:** [`specs/overview.md`](specs/overview.md)
 - **Understand ownership and boundaries:**
   [`specs/architecture.md`](specs/architecture.md)

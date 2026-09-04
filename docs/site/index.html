@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en" class="theme-cortex-dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="The Spine field guide. Learn to operate the canonical coordination ledger and explore its architecture through ten illustrated system views.">
+  <meta name="theme-color" content="#05080F">
+  <title>Spine — The coordination field guide</title>
+  <link rel="icon" type="image/svg+xml" href="assets/spine.svg">
+  <link rel="preload" href="assets/fonts/syne-semibold.ttf" as="font" type="font/ttf" crossorigin>
+  <link rel="preload" href="assets/fonts/inter-regular.ttf" as="font" type="font/ttf" crossorigin>
+  <link rel="stylesheet" href="styles.css">
+  <script src="diagrams.js" defer></script>
+  <script src="content.js" defer></script>
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <aside class="sidebar" id="sidebar" aria-label="Documentation navigation">
+    <a href="#overview" class="brand" aria-label="Spine documentation home"><img src="assets/spine.svg" width="27" height="36" alt=""><span>spine<span class="brand-dot">.</span></span></a>
+    <div class="edition">CORTEXT1 / FIELD GUIDE <span>01</span></div>
+    <button class="search-trigger" type="button"><span class="search-icon" aria-hidden="true">⌕</span> Find anything <kbd>⌘ K</kbd></button>
+    <nav>
+      <div class="nav-label">THE PRODUCT</div>
+      <a href="#overview" data-route="overview"><span class="nav-icon">◈</span> Overview</a>
+      <a href="#getting-started" data-route="getting-started"><span class="nav-icon">↗</span> Getting started</a>
+      <div class="nav-label">THE OPERATOR GUIDE</div>
+      <a href="#scheduling" data-route="scheduling"><span class="nav-icon">⊞</span> Create & manage plans</a>
+      <a href="#time" data-route="time"><span class="nav-icon">◷</span> Time & relationships</a>
+      <a href="#delivery" data-route="delivery"><span class="nav-icon">⇢</span> Work & delivery</a>
+      <a href="#operations" data-route="operations"><span class="nav-icon">⌁</span> Operate & recover</a>
+      <div class="nav-label">INSIDE SPINE <span>10 VIEWS</span></div>
+      <a href="#architecture" data-route="architecture"><span class="nav-icon">⌘</span> Architecture atlas</a>
+      <div class="diagram-nav" id="diagram-nav"></div>
+      <div class="nav-label">REFERENCE</div>
+      <a href="#reference" data-route="reference"><span class="nav-icon">≡</span> Commands & sources</a>
+    </nav>
+    <div class="sidebar-footer"><span class="tiny-mark" aria-hidden="true">▥</span><div>Coordination, made durable.<small>SPINE 0.3.0 <span>·</span> ALPHA</small></div></div>
+  </aside>
+  <div class="mobile-shade" id="mobile-shade"></div>
+  <div class="workspace">
+    <header class="topbar">
+      <button class="icon-button menu-button" id="menu-button" aria-label="Open navigation" aria-expanded="false" aria-controls="sidebar">☰</button>
+      <div class="breadcrumb"><span>Documentation</span><i>/</i><span id="breadcrumb">Overview</span></div>
+      <div class="topbar-actions"><span class="version-label">LOCAL-FIRST BY DESIGN</span><label class="theme-control"><span class="sr-only">Color theme</span><select id="theme-select" aria-label="Color theme"><option value="cortex-dark">Cortex dark</option><option value="voltage-blue">Voltage blue</option><option value="cortex-purple">Cortex purple</option><option value="signal-live">Signal live</option><option value="inverted">Inverted</option></select></label><button class="small-button fullscreen-button" data-fullscreen type="button" aria-label="Enter native fullscreen" aria-pressed="false" title="Enter native fullscreen"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 3H3v6m12-6h6v6M3 15v6h6m12-6v6h-6"/></svg><span class="fullscreen-label">Full screen</span></button><a href="../../README.md" class="source-top">Repository guide <span>↗</span></a></div>
+    </header>
+    <main id="main" tabindex="-1"></main>
+    <footer class="site-footer"><a href="#overview">spine.</a><span>A Cortext1 component · Built around durable truth.</span><a href="#reference">Sources & provenance ↗</a></footer>
+  </div>
+  <dialog id="search-dialog" class="search-dialog" aria-labelledby="search-title"><div class="dialog-heading"><span id="search-title">Find your way through Spine</span><button class="icon-button" data-close-dialog aria-label="Close search">×</button></div><label class="sr-only" for="search-input">Search documentation</label><input id="search-input" type="search" placeholder="Try “replay”, “timezone”, or “delivery”…" autocomplete="off"><div id="search-results" role="list" aria-live="polite"></div><div class="search-help">Search chapters, diagrams, and commands <kbd>ESC</kbd> to close</div></dialog>
+  <dialog id="diagram-dialog" class="diagram-dialog" aria-labelledby="expanded-title">
+    <div class="dialog-heading">
+      <span id="expanded-title" class="sr-only">Architecture diagram</span>
+      <select id="diagram-picker" aria-label="Choose diagram"></select>
+      <div>
+        <button class="small-button" id="expanded-trace" data-trace="01" type="button" aria-pressed="false">▷ Trace flow</button>
+        <button class="small-button" id="zoom-out" aria-label="Zoom out">−</button>
+        <span id="zoom-level">100%</span>
+        <button class="small-button" id="zoom-in" aria-label="Zoom in">+</button>
+        <button class="small-button" id="zoom-reset">Fit</button>
+        <button class="small-button fullscreen-button" data-fullscreen type="button" aria-label="Enter native fullscreen" aria-pressed="false" title="Enter native fullscreen"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 3H3v6m12-6h6v6M3 15v6h6m12-6v6h-6"/></svg></button>
+        <button class="icon-button" data-close-dialog aria-label="Close expanded diagram">×</button>
+      </div>
+    </div>
+    <div id="expanded-canvas" tabindex="0" aria-label="Scrollable diagram. Use zoom controls to inspect detail."><div id="expanded-art"></div></div>
+    <div class="expanded-footer">Scroll to explore · Vector artwork stays sharp at every scale <span>ESC TO CLOSE</span></div>
+    <p class="fullscreen-feedback" id="fullscreen-dialog-status" role="status" aria-live="polite"></p>
+  </dialog>
+  <div id="toast" role="status" aria-live="polite"></div>
+  <noscript><div class="no-script">This illustrated guide needs JavaScript to navigate its chapters. Read the <a href="../AGENT_QUICKSTART.md">plain-text quickstart</a> or the <a href="../../specs/architecture.md">architecture specification</a>.</div></noscript>
+</body>
+</html>
