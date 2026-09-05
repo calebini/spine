@@ -79,6 +79,11 @@ Publish the immediate subset's exact request/evidence shapes and tests before de
 it implemented. The protected `spine.permission-enforcement.v1` family cannot be advertised
 merely for passing these trusted-identity checks.
 
+[trusted-multi-operator-web-api.md](trusted-multi-operator-web-api.md) develops this
+immediate slice: HTTP identity context, provisioning, exact command subset, scoped
+queries, write/replay behavior and first-release budgets. It does not activate the
+deferred protected contracts below or silently alter the canonical CLI commands.
+
 ### 1.2 Preserved deferred protected delivery
 
 The remaining first-delivery language below and Sections 2-12 describe the future

@@ -276,6 +276,12 @@ outside the command core. Human sessions and executor identities are separate.
 
 The future web backend calls shared command handlers directly. Today's CLI retains
 direct trusted-local full ledger access; the worker remains a trusted local process.
+`specs/trusted-multi-operator-web-api.md` defines the first HTTP/provisioning slice:
+explicit selected-account context, a closed scheduling/catalog-use allowlist, and
+separately versioned permission-scoped agenda/item projections. It must filter before
+expansion and preserve domain transaction/receipt behavior. It does not authenticate
+operators or change existing local command/worker semantics. Its provisioning/schema
+and wire artifacts remain release prerequisites, not implemented declarations.
 Web permissions do not constrain those host privileges. Mixed CLI/web/worker access
 requires concurrency, stale-version, timeout, and retry tests before web release.
 Existing local delivery is not claimed to enforce the deferred per-user mandate contract.

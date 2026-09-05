@@ -23,6 +23,10 @@ That draft's Section 1 now targets honest multi-operator identification on a res
 trusted web deployment. Verified authentication/session and executor machinery are
 preserved as deferred; no new fields or authentication guarantees are added here.
 
+[trusted-multi-operator-web-api.md](trusted-multi-operator-web-api.md) specifies the
+proposed first HTTP allowlist, outer envelope, local provisioning and access-scoped
+reads. Existing inner request/response families and the direct CLI remain unchanged.
+
 ## 2. Authority
 
 This contract depends on `specs/overview.md`, `specs/architecture.md`, `specs/operational-resilience.md`, `specs/compatibility.md`, `specs/ontology.md`, `specs/recurrence.md`, `specs/notifications.md`, `specs/schedule-create.md`, `specs/schedule-show.md`, `specs/schedule-operator-tools.md`, `specs/schedule-operations.md`, the additive `specs/schedule-primary-location.md` capability, `specs/notification-profiles.md`, and `specs/SPINE_SPEC_VERSIONING_AND_FREEZE_POLICY.md`. If this document conflicts with `specs/ontology.md`, the ontology wins for ledger truth and this document must be corrected.

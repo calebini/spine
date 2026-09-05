@@ -458,9 +458,16 @@ verified web sessions, access epochs, bounded queries, receipt linkage and deliv
 authorization. Section 1 separates the immediate trusted slice from the preserved
 deferred protected path; it declares no runtime or schema support.
 
-Next: define the supported trusted web command subset, identity selection/switching,
-explicit owner/role provisioning, bounded policy-filtered queries and honest evidence.
-Publish the required contracts and test both operators' behavior before building.
+`specs/trusted-multi-operator-web-api.md` now drafts that first service slice: honest
+per-request identity context, local plan/apply provisioning, thirteen allowlisted
+scheduling/catalog-use commands, scoped agenda and unscheduled-item reads, permission
+checks, atomic owner/attribution evidence, replay and bounded service operation.
+It preserves current task-completion behavior rather than claiming that completion
+automatically cancels all queued work.
+
+Next: bounded audit and manual fixes, then publish HTTP/provisioning/evidence schemas,
+the exact web command registry and positive/negative/concurrency fixtures. Ratify/load-test
+budget ceilings and validate both operators' role behavior before implementation.
 Unsupported commands or unresolved ownership must fail, not imply full access.
 Owner-only item transfer and admin/owner-approved member route use are ratified policy;
 their full administration UI and future delivery-security machinery need not ship first.

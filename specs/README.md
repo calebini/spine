@@ -4,6 +4,7 @@ This directory contains Spine's normative design and compatibility promises.
 
 Current spec surface:
 
+- `trusted-multi-operator-web-api.md`: first trusted web API slice; identity selection, local provisioning, scheduling routes, bounded permission-filtered reads, replay and deployment gates; not implemented
 - `permission-enforcement-and-web-admission.md`: trusted multi-operator identification first; preserves deferred verified web/session, command/effect and delivery-enforcement contracts; no runtime declaration
 - `permissions.md`: draft ownership, roles and grants; independent access and identity modes, with trusted-local CLI exception
 
