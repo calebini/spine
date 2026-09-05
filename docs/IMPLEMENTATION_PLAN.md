@@ -440,6 +440,13 @@ resolve.
 
 ### Proposed Initiative: Identity, Access, and Web API Admission
 
+Revised immediate scope: `specs/accounts-and-chat-attribution.md` separates stable login
+accounts from subjects. Observed phone metadata supports provisional attribution, not
+verified authentication. Complete account/identifier/binding and enrollment contracts,
+then audit before building. Signup grants no existing group/data access; web linking
+requires verification and safe recovery. Protected admission described below is future
+work, not a prerequisite for this staging scope. No instrumentation is authorized here.
+
 `specs/identity-and-access.md` is the first architecture draft for interchangeable
 authentication, external identity mappings, delegated human/agent context, and
 subject/group access. It does not declare runtime enforcement or change the ordering

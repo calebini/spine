@@ -4,6 +4,11 @@ Status: Draft v0.1.0; consumer qualification proposal; not implemented or audite
 Created: 2026-09-05
 Scope: Message-specific identity evidence and protected command delegation for the first chat adapter
 
+The immediate staging scope is [accounts-and-chat-attribution.md](accounts-and-chat-attribution.md).
+Stable observed prompt metadata supports account lookup but does not satisfy this
+stronger qualification. Broker instrumentation is deferred. Future verified origin
+resolves a login account and its explicit subject binding, not a phone-number subject ID.
+
 ## 1. Authority and Evidence Status
 
 [single-operator-admission.md](single-operator-admission.md) defines Spine admission;

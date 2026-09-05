@@ -4,6 +4,14 @@ Status: Draft v0.1.0; proposed contract; not implemented or audited
 Created: 2026-09-05
 Scope: Protected admission for one operator, delegated chat commands, local administration, and service work
 
+## Revised Delivery Position
+
+[accounts-and-chat-attribution.md](accounts-and-chat-attribution.md) defines the immediate
+staging scope. This protected service remains future work, not a staging prerequisite.
+Mappings below resolve a login account and then its explicit subject binding. The
+receiving `account_id` in an issuer tuple is a channel account, distinct from the login
+account ID. Exact schemas must distinguish them. The guarantees below are not weakened.
+
 ## 1. Outcome and Authority
 
 This first slice admits authenticated requests to one configured ledger without

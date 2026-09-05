@@ -1,8 +1,18 @@
 # Spine Identity and Access
 
-Status: Draft v0.2.0; architecture proposal; current revision not implemented or audited
+Status: Draft v0.3.0; architecture proposal; current revision not implemented or audited
 Created: 2026-09-05
 Scope: Authentication adapters, subject mapping, ownership, group roles, delegated requests, and authorization across Spine surfaces
+
+## Revised Staging Direction
+
+[accounts-and-chat-attribution.md](accounts-and-chat-attribution.md) defines the immediate
+lower-assurance scope: stable login accounts distinct from subjects, phone-first
+provisional enrollment, and observed rather than verified chat attribution. The protected
+rules below remain a future target. References to first delivery below mean the first
+protected delivery. Principal-to-subject mappings are composed through a stable account
+and its explicit subject binding; the account draft owns this refinement. Account IDs
+never substitute for subject IDs. Observation does not satisfy verified authentication.
 
 ## 1. Purpose and Delivery Boundary
 

@@ -246,6 +246,12 @@ Core code MUST NOT depend on adapters.
 
 ## 11. Proposed Identity and Access Boundary
 
+The immediate lower-assurance proposal is `specs/accounts-and-chat-attribution.md`.
+Accounts own login identity and authentication-method references; subjects remain
+coordination identities with explicit bindings. Observed chat metadata supports
+provisional attribution, not verified authorization. Protected admission below is
+future work, not a requirement for this staging scope.
+
 `specs/identity-and-access.md` defines the draft architecture for interchangeable
 authentication adapters, explicit external-principal-to-subject mappings, trusted
 delegated command context, and subject/group resource access. It is not an implemented

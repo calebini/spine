@@ -4,6 +4,7 @@ This directory contains Spine's normative design and compatibility promises.
 
 Current spec surface:
 
+- `accounts-and-chat-attribution.md`: proposed immediate staging scope; stable login accounts distinct from subjects, phone-first enrollment, and lower-assurance attribution
 - `overview.md`: purpose, doctrine, ontology, and non-goals
 - `architecture.md`: component boundaries and relationships to tickerd, the governance authority, adapters, and projections
 - `operational-resilience.md`: draft cross-cutting resource bounds, failure containment, recovery, runtime compatibility, and operational proof requirements
