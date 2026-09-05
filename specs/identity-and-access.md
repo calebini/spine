@@ -1,6 +1,6 @@
 # Spine Identity and Access
 
-Status: Draft v0.3.0; architecture proposal; current revision not implemented or audited
+Status: Draft v0.4.0; architecture proposal; current revision not implemented or audited
 Created: 2026-09-05
 Scope: Authentication adapters, subject mapping, ownership, group roles, delegated requests, and authorization across Spine surfaces
 
@@ -13,6 +13,12 @@ rules below remain a future target. References to first delivery below mean the 
 protected delivery. Principal-to-subject mappings are composed through a stable account
 and its explicit subject binding; the account draft owns this refinement. Account IDs
 never substitute for subject IDs. Observation does not satisfy verified authentication.
+
+[permissions.md](permissions.md) owns the multi-user resource/role model and the
+explicit single-operator and multi-user deployment modes. Specification targets
+multi-user behavior even when implementation first enables single-operator full access.
+The direct CLI remains trusted-local and full-scope. Protected executor enforcement
+and OpenClaw qualification remain separate future work.
 
 ## 1. Purpose and Delivery Boundary
 
@@ -205,101 +211,25 @@ methods belong to the deployment's qualified authentication policy, not archetyp
 
 ## 7. Ownership and Resource Access
 
-Each coordination item in the later per-user mode has exactly one accountable access
-owner: one subject or one subject group. Additional collaboration is expressed through
-grants. System ownership remains legal for catalog families that already support it;
-it is not a new item-owner kind.
+[permissions.md](permissions.md) Sections 2-4 own access modes, item/canonical-catalog
+ownership, and operation-level permissions. One item owner is a subject or group;
+participation, assignment, profile use, and chat context are not ownership. Existing
+storage requires explicit adoption before multi-user enforcement. This architectural
+document does not maintain a competing permission table.
 
-Existing owner columns on catalogs and delivery targets remain authoritative for those
-resources. Their values MUST NOT be duplicated in a competing ownership registry.
-Items need a new explicit ownership relation or equivalent canonical extension because
-today's `item_subject_roles.owner` cannot express a group and may contain multiple
-subjects. A later ontology amendment MUST define its physical representation and
-reconcile that role; legacy role rows MUST NOT become an alternate authorization path.
+## 8. Group Roles
 
-Access ownership is independent of participation, task assignment, creation actor,
-profile ownership, notification recipients, and conversation context. None of these
-implicitly transfers or shares an item. A private item can use a shared archetype and
-profile without becoming group-owned.
-
-New item creation in per-user mode supplies an explicit owner through its command
-contract. A frontend can propose the current subject or selected group, but MUST make
-that choice visible and submit it explicitly. The server authorizes creation in that
-scope. Cross-owner relations require permission to link both objects and expose no
-implicit access inheritance. `part_of`, recurrence, and follow-source time bindings
-do not act as sharing grants.
-
-Ownership changes require a dedicated operation, target-scope acceptance authority,
-current ownership revision, audit, and explicit treatment of grants and delivery
-mandates. Transferring an item never transfers ownership of its referenced profiles,
-routes, locations, or related items. Revocation and transfer affect current access to
-history as well as the current version; historical access does not survive by guessing
-an old item version or receipt ID.
-
-Shared locations and other reusable references require their own resource-access
-mapping before per-user admission. A containing item's permissions cannot confer write
-authority over a shared location used by other items.
-
-## 8. Group Roles and Proposed Default Policy
-
-Groups remain arbitrary operator-defined identities. Roles describe authority, not a
-family/team taxonomy. The proposed fixed roles are `member`, `admin`, and `owner`.
-These are proposed access roles; today's membership enum is not changed by this draft.
-
-| Operation on group-owned resources | Member | Admin | Group owner |
-|---|---|---|---|
-| Read items and use shared archetypes/profiles | Yes | Yes | Yes |
-| Create items in the group | Yes | Yes | Yes |
-| Edit/complete/cancel items they created | While actively a member | Yes | Yes |
-| Edit other members' items | Explicit item grant | Yes | Yes |
-| Revise shared catalogs and default bindings | No | Yes | Yes |
-| Manage ordinary item sharing and group routes | No | Yes | Yes |
-| Add/end ordinary memberships | No | Yes | Yes |
-| Appoint/remove admins | No | No | Yes |
-| Transfer group ownership or retire the group | No | No | Yes |
-
-This table is the proposed starting policy for review. Group items are visible to all
-active members under this policy; private exceptions belong to subject-owned items
-with explicit sharing. An admin's authority covers group-owned resources only. It does
-not extend to members' privately owned items.
-
-A creator-derived editing entitlement binds to the verified initiating subject and
-original creation evidence, never caller-supplied subject roles or the executor's ID.
-It expires with group membership and does not include sharing or ownership transfer.
-
-Each active group has one active owner under this proposal. Owner handoff is atomic;
-ending or deactivating the last owner without a successor is rejected. Admins cannot
-promote themselves, remove the owner, or relink identities. Global identity enrollment
-is separate from administering one group. Nested groups, custom roles, explicit deny
-rules, and group hierarchy inheritance are deferred.
-
-An active membership requires an active subject and group, active membership status,
-and an effective start time no later than the trusted evaluation time. Ending membership
-removes group-derived permissions and creator entitlements. Separate subject-specific
-grants survive until explicitly revoked; access inspection MUST explain every remaining
-grant so removing membership is not misreported as removing all access.
+[permissions.md](permissions.md) Section 5 owns the proposed member/admin/owner matrix,
+creator-entitlement limits, designated ownership, handoff, and suspension/recovery.
+Roles are scoped memberships, not global account types or a separate identity system.
+The matrix remains draft; current membership enums are not extended by this reference.
 
 ## 9. Permissions and Explicit Grants
 
-Permissions distinguish resource reads, catalog use, item creation, item mutation,
-catalog mutation, route use, content release, access administration, and ownership
-transfer. Exact operation identifiers and per-command requirements are a prerequisite,
-not a free-form permission-string API.
-
-An explicit grant names an exact resource, grantee subject/group, permitted operations,
-granting authority, revision, effective interval, and status. Initial grants are
-additive; absent permission denies. Edit includes the necessary read permission but
-not sharing, ownership transfer, or release to an arbitrary destination. Item grants
-do not grant catalog administration or group membership administration. Initially,
-explicit sharing grants carry read/edit or catalog read/use, not re-delegation power.
-
-Catalog-use permission includes access to the selected definition needed to validate
-and explain its application. It does not include revision, retirement, or rebinding.
-An access inspection surface must explain effective permissions to the authorized
-subject without exposing another principal's private grants.
-
-Mutating a route or sharing an item remains subject to applicable governance policy.
-Possession of a resource permission does not satisfy a separately required approval.
+[permissions.md](permissions.md) Sections 4-10 own additive grants, evaluation,
+revocation, mode transitions, and inspection. Ownership, group roles, and grants produce
+resource authority; authenticated executor/delegation and response-audience limits can
+restrict it, never expand it. External-action governance remains a separate gate.
 
 ## 10. Archetypes, Profiles, and Existing Schedules
 
@@ -495,7 +425,7 @@ These are required future behavioral tests, not claims of existing coverage:
 | IA-13 | Compatible authorized replay returns stored evidence without a second effect; lost access prevents receipt disclosure |
 | IA-14 | Logout leaves accepted schedules running; revoked delivery authority prevents new attempts while preserving actual past outcomes |
 | IA-15 | Ending membership removes group-derived and creator permissions; explicitly independent grants are reported accurately |
-| IA-16 | Ownership handoff cannot leave an active group ownerless or silently transfer related resources and route authority |
+| IA-16 | Ownership handoff requires an explicit successor; suspension blocks access without automatic promotion, and related resources retain their owners |
 | IA-17 | Repeated reads, denials, and idle checks meet latency/storage bounds without unbounded durable evidence growth |
 | IA-18 | CLI, HTTP, agent, and worker adapters enforce equivalent access for equivalent contexts; unavailable authorization fails closed |
 | IA-19 | Adoption leaves existing authorized schedules, recurrence, profiles, bindings, receipts, and delivery semantics unchanged except explicitly approved access changes |

@@ -1,6 +1,6 @@
 # Accounts and Trusted-Agent Chat Attribution
 
-Status: Draft v0.2.0; account lifecycle and attribution contract; not implemented or audited
+Status: Draft v0.3.0; account lifecycle and attribution contract; not implemented or audited
 Created: 2026-09-05
 
 ## 1. Decision and Scope
@@ -15,6 +15,14 @@ They are not weakened or claimed satisfied by this staging approach.
 This draft adds an account abstraction separate from the coordination subject defined
 in [ontology.md](ontology.md). It records onboarding and linking requirements, not new
 runtime commands, an implemented account schema, or permission to enroll real users.
+
+[permissions.md](permissions.md) owns the full multi-user access model. Single-operator
+mode admits only its configured operator with ledger-wide application access; multi-user
+mode admits authenticated active accounts with per-resource permissions. An unbound
+account has account self-service only, not coordination access. Group roles do not change
+account identity, and signup grants no resource rights. Both modes use these same records.
+The first implementation may support only single-operator mode without claiming
+multi-user enforcement.
 
 ## 2. Identity Layers
 

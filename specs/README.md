@@ -4,6 +4,8 @@ This directory contains Spine's normative design and compatibility promises.
 
 Current spec surface:
 
+- `permissions.md`: draft multi-user ownership, group roles, explicit grants, single-operator full-access mode, and trusted-local CLI exception
+
 - `accounts-and-chat-attribution.md`: proposed immediate staging scope; stable login accounts distinct from subjects, phone-first enrollment, and lower-assurance attribution
 - `overview.md`: purpose, doctrine, ontology, and non-goals
 - `architecture.md`: component boundaries and relationships to tickerd, the governance authority, adapters, and projections

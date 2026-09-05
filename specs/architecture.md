@@ -246,35 +246,26 @@ Core code MUST NOT depend on adapters.
 
 ## 11. Proposed Identity and Access Boundary
 
-The immediate lower-assurance proposal is `specs/accounts-and-chat-attribution.md`.
-Accounts own login identity and authentication-method references; subjects remain
-coordination identities with explicit bindings. Observed chat metadata supports
-provisional attribution, not verified authorization. Protected admission below is
-future work, not a requirement for this staging scope.
+`specs/accounts-and-chat-attribution.md` owns accounts, login identifiers, subject
+bindings, and lower-assurance staging attribution. Observed chat metadata does not
+prove web authentication; accounts and coordination subjects remain distinct.
 
-`specs/identity-and-access.md` defines the draft architecture for interchangeable
-authentication adapters, explicit external-principal-to-subject mappings, trusted
-delegated command context, and subject/group resource access. It is not an implemented
-authentication or privacy guarantee. Its first delivery target is authenticated
-single-operator access to one ledger, followed by explicitly specified group roles,
-item ownership, sharing, and delivery-mandate enforcement.
+`specs/identity-and-access.md` owns authentication/delegation architecture;
+`specs/permissions.md` owns the full multi-user ownership, role, and grant model.
+Single-operator mode gives the configured operator full application scope without
+rewriting owners. Multi-user mode enforces subject/group resource permissions.
+An implementation may enable only single-operator mode while preserving this design.
 
-Under that proposal, Spine evaluates access to its own resources from canonical
-ownership and grants; authentication adapters verify external identity. The governance
-authority continues to own consequential-action approval and execution-evidence
-acceptance. Both gates apply where required. Agents cannot manufacture caller identity
-or inherit broader service authority for a delegated request. Message origin and the
-audience receiving a response are separate trust decisions.
+Authentication adapters establish identity. Spine owns resource authorization; the
+governance authority retains consequential-action approvals. Provider types remain
+outside the command core. Human sessions and executor identities are separate.
 
-HTTP, CLI, agent, and worker adapters will share an admission boundary over the existing
-command/services layer. Browser login is not a prerequisite for accepted background
-schedules. Existing owner fields, membership roles, and item subject roles do not
-constitute the proposed per-user access model until the owning contracts, migrations,
-and enforcement tests land.
+The future web backend calls shared command handlers directly. Today's CLI retains
+direct trusted-local full ledger access; the worker remains a trusted local process.
+Web permissions do not constrain those host privileges. Mixed CLI/web/worker access
+requires concurrency, stale-version, timeout, and retry tests before web release.
 
-The first-slice proposal in `specs/single-operator-admission.md` places the ledger
-behind protected admission, with independent service grants and no agent-accessible
-raw-database bypass. `specs/openclaw-admission.md` defines consumer qualification of
-message-specific origin and response-history isolation. These are proposed deployment
-boundaries, not claims about the current OpenClaw installation. The chat/agent path
-precedes web integration; provider types remain outside the Spine command core.
+`specs/single-operator-admission.md` and `specs/openclaw-admission.md` retain the stronger
+future target for protected executor admission and provider qualification. Moving CLI
+behind that service or introducing an OpenClaw extension is not required now. These
+draft references declare no implemented authentication or per-user isolation.

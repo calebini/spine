@@ -438,34 +438,29 @@ specs/contextual-advisories.md draft remains the starting point for normative wo
 this horizon records the newer design direction that its open trigger decision must
 resolve.
 
-### Proposed Initiative: Identity, Access, and Web API Admission
+### Proposed Initiative: Accounts, Multi-User Permissions, and Web API
 
-Revised immediate scope: `specs/accounts-and-chat-attribution.md` separates stable login
-accounts from subjects. Observed phone metadata supports provisional attribution, not
-verified authentication. Complete account/identifier/binding and enrollment contracts,
-then audit before building. Signup grants no existing group/data access; web linking
-requires verification and safe recovery. Protected admission described below is future
-work, not a prerequisite for this staging scope. No instrumentation is authorized here.
+Specify the full multi-user model now, even if implementation first supports one
+operator. `specs/accounts-and-chat-attribution.md` owns accounts and attribution;
+`specs/identity-and-access.md` owns authentication/delegation architecture;
+`specs/permissions.md` owns resource permissions, group roles, and access modes.
 
-`specs/identity-and-access.md` is the first architecture draft for interchangeable
-authentication, external identity mappings, delegated human/agent context, and
-subject/group access. It does not declare runtime enforcement or change the ordering
-of the operational-resilience work above.
+The configured single operator receives full application scope. Multi-user callers
+receive ownership/role/grant-based access. Roles belong to subject groups, not account
+types. Signup and profile use grant no implicit group access. Observed chat identity
+is not verified web identity in either mode.
 
-The first implementation target is authenticated single-operator access to one ledger
-through the existing chat/agent path and a shared protected admission boundary.
-`specs/single-operator-admission.md` and `specs/openclaw-admission.md` now specify that
-proposed first slice. The user-supplied initial inspection is preserved as provisional
-evidence in `docs/design-notes/openclaw-identity-inspection.md`, not provider guarantees.
-Qualify origin propagation, tool isolation, alternative execution paths, and response
-history first; then publish machine contracts, numeric bounds, evidence migration, and
-the complete command/effect registry. Audit before implementing. An HTTP transport and
-bounded GUI reads subsequently reuse the admitted command/services layer.
+Next: ratify role/policy defaults, publish account/permission machine contracts, and
+define the web service/session interface over shared handlers. Audit before building.
+The first release may reject multi-user mode until full enforcement, ownership adoption,
+authorized-read, revocation, and delivery-authorization tests are complete.
 
-Per-user isolation follows separately: explicit item ownership and adoption of existing
-records, group member/admin/owner roles, grants, authorized list pagination, revocation,
-audience-aware chat responses, and durable worker delivery mandates. Catalog/profile
-snapshot semantics and canonical scheduling behavior remain governed by their existing
-contracts. The draft's acceptance scenarios identify the future cross-transport proofs;
-they are not existing test results. No authentication provider, schema migration,
-deployment, or audit run has been authorized by this roadmap entry.
+Keep the CLI as a direct trusted-local full-scope path for now. The web backend does
+not shell out to it; both reuse command/services code. Mixed CLI/web/worker operation
+needs concurrency and replay verification. Moving CLI behind a service is a separate
+future enforcement choice, not a prerequisite for facets or accounts.
+
+Protected executor and OpenClaw qualification drafts remain future work. Preserve the
+provisional inspection note without requiring new instrumentation or token machinery
+for current trusted-local staging. No deployment or external audit is authorized
+merely by this roadmap entry.

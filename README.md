@@ -324,6 +324,9 @@ Start with the document that matches the job:
 - **Review the immediate account/onboarding proposal:**
   [`specs/accounts-and-chat-attribution.md`](specs/accounts-and-chat-attribution.md) —
   phone-first accounts and lower-assurance attribution; not implemented.
+- **Review the proposed resource permission model:**
+  [`specs/permissions.md`](specs/permissions.md) — multi-user roles and grants,
+  single-operator full-access mode, and trusted-local CLI exception; not implemented.
 - **Review the proposed identity and access model:**
   [`specs/identity-and-access.md`](specs/identity-and-access.md) — draft authentication,
   subject mapping, group roles, and authorization; not implemented.
