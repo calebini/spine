@@ -324,6 +324,10 @@ Start with the document that matches the job:
 - **Review the proposed identity and access model:**
   [`specs/identity-and-access.md`](specs/identity-and-access.md) — draft authentication,
   subject mapping, group roles, and authorization; not implemented.
+- **Review the proposed first chat-admission slice:**
+  [`specs/single-operator-admission.md`](specs/single-operator-admission.md) and
+  [`specs/openclaw-admission.md`](specs/openclaw-admission.md) — protected command
+  admission and OpenClaw qualification; neither is implemented.
 - **Operate Spine as an agent:**
   [`docs/AGENT_OPERATOR_GUIDE.md`](docs/AGENT_OPERATOR_GUIDE.md)
 - **Reach a safe first success:**

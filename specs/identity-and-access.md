@@ -1,6 +1,6 @@
 # Spine Identity and Access
 
-Status: Draft v0.1.0; architecture proposal; not implemented or audited
+Status: Draft v0.2.0; architecture proposal; current revision not implemented or audited
 Created: 2026-09-05
 Scope: Authentication adapters, subject mapping, ownership, group roles, delegated requests, and authorization across Spine surfaces
 
@@ -25,6 +25,12 @@ This is not an HTTP routing specification, identity-provider implementation, pas
 store, general policy language, or replacement for external-action governance. It does
 not add facets, contextual-advisory execution, or new scheduling behavior.
 
+The first-slice proposal is now developed in
+[single-operator-admission.md](single-operator-admission.md), with the initial chat
+provider qualification in [openclaw-admission.md](openclaw-admission.md). Chat/agent
+admission is prioritized; a web adapter later reuses the same trusted-context boundary.
+These leaf drafts do not implement or ratify the later group-role/access model below.
+
 ## 2. Authority and Current Baseline
 
 Related authorities are [ontology.md](ontology.md),
@@ -32,8 +38,11 @@ Related authorities are [ontology.md](ontology.md),
 [notification-profiles.md](notification-profiles.md),
 [owner-scope-discovery.md](owner-scope-discovery.md),
 [notifications.md](notifications.md), [architecture.md](architecture.md),
-[operational-resilience.md](operational-resilience.md), and
-[contextual-advisories.md](contextual-advisories.md).
+[operational-resilience.md](operational-resilience.md).
+
+[contextual-advisories.md](contextual-advisories.md) is background context for future
+consumers, not a normative dependency of this identity/access proposal.
+Contextual-advisory behavior is outside this draft's scope.
 
 The implemented baseline has canonical subjects, arbitrary subject groups,
 subject memberships with `member` and `owner` roles, versioned item subject roles,
@@ -504,7 +513,8 @@ The next specification pass must close these concrete dependencies:
 7. Define bounded cross-process revocation, read snapshots, caches, attempt-start
    authorization, and evidence storage before claiming per-user isolation.
 
-Audit the single-operator contract and its trust boundary first. Implement it with the
-HTTP adapter and existing command services, then qualify the group/resource extension
+Qualify the chat-origin path, complete the single-operator machine contracts, and audit
+that trust boundary first. Implement the protected chat/agent path over existing command
+services; an HTTP adapter subsequently reuses it. Qualify the group/resource extension
 separately. This document authorizes no runtime change, identity-provider selection,
 deployment, or external audit by itself.

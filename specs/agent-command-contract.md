@@ -438,6 +438,13 @@ proof of authentication or permission. The extension requires successor context,
 error, audit-linkage, and command-to-permission contracts before enforcement; this
 reference does not add request fields or change current replay/actor behavior.
 
+The first-slice draft is `specs/single-operator-admission.md`; the proposed chat bridge
+qualification is `specs/openclaw-admission.md`. They require exact command/effect
+registry coverage, including lower-level commands and embedded administration, with
+authentication outside model-authored JSON. Their proposed outer admission envelope
+does not alter current command schemas, errors, version declarations, or historical
+receipts. Protected runtime support must be declared and tested before deployment.
+
 ## 16.1 Executable Contract Artifacts
 
 Golden command response fixtures under `tests/fixtures/command_responses/` are executable examples of implemented public JSON shapes. They are not an alternate source of authority; when fixture tests reveal ambiguity, this spec must be aligned narrowly before behavior is treated as stable.

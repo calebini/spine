@@ -193,7 +193,7 @@ Tickerd may initiate bounded materialization and process eligible work. It does 
 
 `specs/schedule-operator-tools.md` defines provider-independent operator compilation and projection conveniences. `schedule.build` resolves explicit input facts into a normal `schedule.create` request without consuming its command ID or writing ledger state. CLI `--compact` projects canonical schedule responses after command handling; it cannot replace, mutate, or become an alternate source for their full receipts and read models.
 
-`specs/schedule-operations.md` defines the implemented provider-independent operational lifecycle layer. `agenda.show` is a computed cross-item read model, not an agenda entity or projection authority. `schedule.update` and `schedule.cancel` are composite services over existing item, recurrence, policy, provenance, work, audit, and receipt authorities. Their defining responsibility is atomic truth mutation plus mandatory stale-work reconciliation; they do not own recurrence math, notification cadence, delivery execution, or adapter state. The current schema-11 runtime declares the complete version family and proves it with behavioral tests.
+`specs/schedule-operations.md` defines the implemented provider-independent operational lifecycle layer. `agenda.show` is a computed cross-item read model, not an agenda entity or projection authority. `schedule.update` and `schedule.cancel` are composite services over existing item, recurrence, policy, provenance, work, audit, and receipt authorities. Their defining responsibility is atomic truth mutation plus mandatory stale-work reconciliation; they do not own recurrence math, notification cadence, delivery execution, or adapter state. The current schema-12 runtime declares the complete version family and proves it with behavioral tests.
 
 `specs/relative-temporal-bindings.md` defines the implemented cross-item derivation layer. `schedule.related_task.create` is an atomic convenience boundary over ordinary task, anchor, `part_of`, binding, policy, provenance, work, audit, and receipt authorities. `schedule.binding.list` and `schedule.binding.reconcile` provide bounded eventual follow-source repair without synchronous source-mutation fan-out. Concrete target anchors remain the schedule authority for ordinary reads; binding revisions explain and govern derivation. Attempt-start freshness blocks stale follow-source work independently of sweep cadence. Tickerd may run the bounded reconciliation loop, but it does not own binding state or temporal derivation.
 
@@ -265,3 +265,10 @@ command/services layer. Browser login is not a prerequisite for accepted backgro
 schedules. Existing owner fields, membership roles, and item subject roles do not
 constitute the proposed per-user access model until the owning contracts, migrations,
 and enforcement tests land.
+
+The first-slice proposal in `specs/single-operator-admission.md` places the ledger
+behind protected admission, with independent service grants and no agent-accessible
+raw-database bypass. `specs/openclaw-admission.md` defines consumer qualification of
+message-specific origin and response-history isolation. These are proposed deployment
+boundaries, not claims about the current OpenClaw installation. The chat/agent path
+precedes web integration; provider types remain outside the Spine command core.

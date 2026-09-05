@@ -21,6 +21,8 @@ Current spec surface:
 - `notification-profiles.md`: implemented dynamic item-archetype catalog, reusable versioned notification profiles, deterministic scoped defaults, and snapshot application
 - `owner-scope-discovery.md`: implemented bounded read contract for discovering canonical system, subject, and subject-group owner scopes without raw SQL
 - `identity-and-access.md`: draft authentication-adapter, subject-mapping, item ownership, group-role, delegation, and authorization architecture; single-operator delivery first, per-user access later; not implemented
+- `single-operator-admission.md`: proposed first-slice protected admission, command/effect permissions, replay, service grants, and deployment enforcement; not implemented
+- `openclaw-admission.md`: proposed message-specific chat bridge and provider qualification, including sender evidence, execution isolation, and response audiences; no qualified provider build yet
 - `agent-command-contract.md`: draft agent-facing command/request contract for authoring and inspecting Spine coordination truth
 - `SPINE_SPEC_VERSIONING_AND_FREEZE_POLICY.md`: lightweight policy for spec versions, runtime declarations, and one-way freeze-manifest pinning
 - `decisions/0001-kinflow-is-donor-not-foundation.md`: accepted decision on the Kinflow relationship

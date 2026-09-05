@@ -446,10 +446,14 @@ subject/group access. It does not declare runtime enforcement or change the orde
 of the operational-resilience work above.
 
 The first implementation target is authenticated single-operator access to one ledger
-through a shared admission boundary, followed by an HTTP transport over existing
-command handlers and the bounded read improvements needed by a GUI. Provider-specific
-trust/enrollment contracts, context and failure schemas, command/resource permission
-mapping, and an explicit local/service authentication posture precede implementation.
+through the existing chat/agent path and a shared protected admission boundary.
+`specs/single-operator-admission.md` and `specs/openclaw-admission.md` now specify that
+proposed first slice. The user-supplied initial inspection is preserved as provisional
+evidence in `docs/design-notes/openclaw-identity-inspection.md`, not provider guarantees.
+Qualify origin propagation, tool isolation, alternative execution paths, and response
+history first; then publish machine contracts, numeric bounds, evidence migration, and
+the complete command/effect registry. Audit before implementing. An HTTP transport and
+bounded GUI reads subsequently reuse the admitted command/services layer.
 
 Per-user isolation follows separately: explicit item ownership and adoption of existing
 records, group member/admin/owner roles, grants, authorized list pagination, revocation,

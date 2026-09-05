@@ -23,6 +23,14 @@ The runtime packages this machine contract, validates it against the installed T
 distribution during worker admission and `system.info`, and supplies the storage safety
 gate and durability latch described below.
 
+### Proposed Chat-Bridge Qualification (Not Implemented)
+
+`specs/openclaw-admission.md` defines prospective Spine consumer requirements on an
+OpenClaw bridge, paired with `specs/single-operator-admission.md`. No OpenClaw build,
+hook, or authentication capability is qualified by this Tickerd contract. Shipping the
+bridge requires its own exact compatibility record, machine contracts, and contract
+tests; the draft adds no runtime dependency or new requirement on Tickerd.
+
 ## 2. Exact Provider Baseline
 
 The initial compatible provider baseline is:
