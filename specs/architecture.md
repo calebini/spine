@@ -254,7 +254,21 @@ prove web authentication; accounts and coordination subjects remain distinct.
 `specs/permissions.md` owns the full multi-user ownership, role, and grant model.
 Single-operator mode gives the configured operator full application scope without
 rewriting owners. Multi-user mode enforces subject/group resource permissions.
-An implementation may enable only single-operator mode while preserving this design.
+Identity posture is independent. First delivery targets `multi_user` with
+`trusted_identity`: two honestly identified operators, not verified sign-in.
+Permissions apply to the selected/mapped subject; impersonation is not prevented.
+
+`specs/permission-enforcement-and-web-admission.md` develops the proposed persistence,
+command/effect registry, verified web sessions, revocation fences, bounded authorized
+queries and delivery mandates. Section 1 scopes the immediate trusted-identity web
+surface; verified sessions, recovery and protected agent admission remain deferred.
+Account credentials, when introduced, remain
+authentication state; access evidence uses existing canonical receipt/attempt authorities.
+Unresolved multi-user authority choices remain disabled pending ratification. No runtime
+or schema capability is declared by this reference.
+
+Trusted selection must be limited to trusted devices/operators, not an openly reachable
+website. Changing identity posture later does not replace accounts, subjects or owners.
 
 Authentication adapters establish identity. Spine owns resource authorization; the
 governance authority retains consequential-action approvals. Provider types remain
@@ -264,6 +278,7 @@ The future web backend calls shared command handlers directly. Today's CLI retai
 direct trusted-local full ledger access; the worker remains a trusted local process.
 Web permissions do not constrain those host privileges. Mixed CLI/web/worker access
 requires concurrency, stale-version, timeout, and retry tests before web release.
+Existing local delivery is not claimed to enforce the deferred per-user mandate contract.
 
 `specs/single-operator-admission.md` and `specs/openclaw-admission.md` retain the stronger
 future target for protected executor admission and provider qualification. Moving CLI

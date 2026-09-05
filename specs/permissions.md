@@ -1,12 +1,12 @@
 # Spine Resource Permissions and Access Modes
 
-Status: Draft v0.1.0; multi-user design; not implemented or audited
+Status: Draft v0.2.0; trusted multi-operator identification first; protected authentication deferred; not implemented or audited
 Created: 2026-09-05
 
 ## 1. Scope and Authority
 
-Specify the full multi-user permission model even if the first implementation enables
-only single-operator access. These are deployment modes of one architecture, not two
+Specify the full multi-user permission model with trusted multi-operator identification
+as the first delivery. Single-operator and multi-user are modes of one architecture, not two
 different account or item ontologies. This document owns proposed resource permissions,
 group roles, and mode semantics. [accounts-and-chat-attribution.md](accounts-and-chat-attribution.md)
 owns accounts and assurance; [identity-and-access.md](identity-and-access.md) owns
@@ -14,8 +14,9 @@ authentication and delegation boundaries; [ontology.md](ontology.md) remains the
 implemented storage authority. No current enums, schemas, or commands change here.
 
 The role defaults in Section 5 develop the earlier proposal and remain subject to
-review. Full machine contracts, authentication qualification, and enforcement tests
-are required before claiming multi-user support. The direct CLI remains a trusted-local
+review. Supported-operation contracts and policy tests precede multi-user behavior;
+authentication qualification additionally precedes verified-identity or secure-isolation
+claims. The direct CLI remains a trusted-local
 full-scope administrative path; this draft does not move it behind a service.
 
 ## 2. Access Modes
@@ -26,7 +27,16 @@ request flag, account attribute, group role, or caller-selectable parameter.
 | Mode | Sign-in and application access |
 |---|---|
 | `single_operator` | Only the explicitly configured active operator account is admitted to the coordination application; it has full ledger-wide application permissions |
-| `multi_user` | Each properly authenticated active account is admitted; coordination access requires its current active subject binding and resource permissions |
+| `multi_user` | Each admitted active account uses its current subject binding and resource permissions, not automatic ledger-wide operator access |
+
+Identity posture is independent: `identity_mode=trusted_identity` accepts honest web
+selection or registered observed-agent attribution; `verified_identity` requires
+qualified authentication. The first target is `multi_user` plus `trusted_identity`.
+Permissions apply to the selected identity but cannot prevent choosing someone else's.
+These are administrator-configured modes, never per-request downgrade flags.
+[permission-enforcement-and-web-admission.md](permission-enforcement-and-web-admission.md)
+Section 1 defines the trusted deployment and deferred protected gates. No openly reachable
+website or authenticated-isolation claim is permitted under trusted identity.
 
 In multi-user mode an unbound account may access only its explicitly defined account
 onboarding/self-service surface, not coordination records. Provisional, suspended, or
@@ -150,7 +160,8 @@ eligible acting owner rather than silently restore suspended access.
 
 The proposed decision order is:
 
-1. Authenticate the caller and require current account state and accepted assurance.
+1. Establish the account under the configured identity posture and require eligible
+   account/binding state; verify authentication proof only in `verified_identity`.
 2. Resolve deployment mode and current account-to-subject binding.
 3. Establish the requested command, complete resource set, and all nested effects.
 4. In single-operator mode, require the configured operator; otherwise evaluate current
@@ -161,8 +172,9 @@ The proposed decision order is:
    preconditions. Commit authorized mutations with current policy/ownership revisions.
 
 No permissions from distinct identities are unioned into a more privileged caller.
-Web is not automatically high-assurance; the actual authentication method/session
-determines assurance. Account presence and prompt metadata cannot supply a missing
+Web is not automatically high-assurance; trusted selection is explicitly unverified.
+In protected admission the actual method/session determines assurance.
+Account presence and prompt metadata cannot supply a missing
 verified principal or authenticated executor. The trusted-local exception is not
 implemented as a request-selectable fallback through this evaluator.
 
@@ -214,12 +226,15 @@ by these permission rules alone.
 
 ## 9. Mode Changes and Adoption
 
-Single-operator mode may be implemented first with full application access for the
-configured account. It must advertise that mode, not multi-user isolation. A build
-without the complete multi-user contracts rejects multi-user configuration at startup.
+The immediate target is trusted multi-operator use with a declared supported-operation
+policy surface. Reject unsupported identity/access combinations and operations, and
+advertise actual trust posture, not authenticated isolation. Single-operator full scope
+remains optional. Complete protected-mode gates apply when enabling `verified_identity`,
+not as a requirement to build every future feature for the trusted first slice.
 
 Switching to multi-user mode is privileged deployment administration, never a browser
-or chat parameter. It requires verified accounts/bindings, explicit item owners,
+or chat parameter. It requires eligible accounts under the configured identity posture,
+explicit subject bindings and item owners,
 resolved memberships, grant/route policy, revision-aware reads/replay, and activation
 tests. Ambiguous existing ownership needs an operator decision, not an inferred backfill.
 
@@ -266,7 +281,7 @@ is a separate future enforcement change, not a prerequisite for the data/role mo
 | PERM-01 | Active authenticated accounts sign in without acquiring existing records or group roles |
 | PERM-02 | Only the configured single operator receives ledger-wide application access; other accounts and unknown callers do not |
 | PERM-03 | Multi-user callers see own, group-role-accessible, and explicitly shared resources only |
-| PERM-04 | Members cannot edit others' items or administer catalogs/routes without the required grant |
+| PERM-04 | Members cannot edit another subject's items without an explicit edit grant; group catalog and delivery-route administration requires the admin or owner role under the proposed defaults |
 | PERM-05 | Admins can manage their group's resources but not private member items or owner-only actions |
 | PERM-06 | Owner handoff and suspension/recovery preserve access revocation without self-promotion or automatic succession |
 | PERM-07 | Direct and embedded effects enforce the same permissions; failures roll back the entire composite |
@@ -275,8 +290,11 @@ is a separate future enforcement change, not a prerequisite for the data/role mo
 | PERM-10 | Profile snapshots and existing domain identities remain unchanged by access changes |
 | PERM-11 | Mode changes do not rewrite owners or silently backfill account/group roles |
 | PERM-12 | Trusted-local CLI retains existing behavior; tests and docs do not claim that web checks constrain host administrators |
+| PERM-13 | Two trusted operators retain distinct bindings and role-based behavior; identity switching clears context and never claims authentication or grants full scope |
 
-Before multi-user implementation, publish physical ownership/role/grant schemas,
+The immediate trusted slice requires exact schemas/tests for its declared policy surface;
+the full list below gates protected multi-user implementation, not every trusted feature.
+Before protected multi-user implementation, publish physical ownership/role/grant schemas,
 command-to-permission/effect mappings, sign-in/session admission, provisioning and
 adoption commands, bounded authorized query contracts, delivery authorization, recovery,
 and concurrency fixtures. Role and policy defaults require ratification and a bounded

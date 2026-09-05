@@ -4,9 +4,10 @@ This directory contains Spine's normative design and compatibility promises.
 
 Current spec surface:
 
-- `permissions.md`: draft multi-user ownership, group roles, explicit grants, single-operator full-access mode, and trusted-local CLI exception
+- `permission-enforcement-and-web-admission.md`: trusted multi-operator identification first; preserves deferred verified web/session, command/effect and delivery-enforcement contracts; no runtime declaration
+- `permissions.md`: draft ownership, roles and grants; independent access and identity modes, with trusted-local CLI exception
 
-- `accounts-and-chat-attribution.md`: proposed immediate staging scope; stable login accounts distinct from subjects, phone-first enrollment, and lower-assurance attribution
+- `accounts-and-chat-attribution.md`: immediate trusted web identification and observed chat attribution for distinct accounts/subjects; verified web login/recovery preserved but deferred
 - `overview.md`: purpose, doctrine, ontology, and non-goals
 - `architecture.md`: component boundaries and relationships to tickerd, the governance authority, adapters, and projections
 - `operational-resilience.md`: draft cross-cutting resource bounds, failure containment, recovery, runtime compatibility, and operational proof requirements
@@ -23,9 +24,9 @@ Current spec surface:
 - `notification-rendering.md`: implemented schema-9 deterministic ordinary-reminder prose and immutable per-attempt rendering evidence
 - `notification-profiles.md`: implemented dynamic item-archetype catalog, reusable versioned notification profiles, deterministic scoped defaults, and snapshot application
 - `owner-scope-discovery.md`: implemented bounded read contract for discovering canonical system, subject, and subject-group owner scopes without raw SQL
-- `identity-and-access.md`: draft authentication-adapter, subject-mapping, item ownership, group-role, delegation, and authorization architecture; single-operator delivery first, per-user access later; not implemented
-- `single-operator-admission.md`: proposed first-slice protected admission, command/effect permissions, replay, service grants, and deployment enforcement; not implemented
-- `openclaw-admission.md`: proposed message-specific chat bridge and provider qualification, including sender evidence, execution isolation, and response audiences; no qualified provider build yet
+- `identity-and-access.md`: protected authentication/delegation architecture preserved as deferred; immediate trusted multi-operator scope is identified separately; not implemented
+- `single-operator-admission.md`: deferred protected admission, command/effect permissions, replay, service grants, and deployment enforcement; not implemented
+- `openclaw-admission.md`: deferred message-specific bridge and qualification, including sender evidence, isolation and audiences; no qualified provider build yet
 - `agent-command-contract.md`: draft agent-facing command/request contract for authoring and inspecting Spine coordination truth
 - `SPINE_SPEC_VERSIONING_AND_FREEZE_POLICY.md`: lightweight policy for spec versions, runtime declarations, and one-way freeze-manifest pinning
 - `decisions/0001-kinflow-is-donor-not-foundation.md`: accepted decision on the Kinflow relationship

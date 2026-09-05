@@ -12,6 +12,17 @@ The command contract is the public behavior core over Spine canonical ledger and
 
 The CLI is the first expected transport adapter. Future MCP and localhost HTTP adapters call the same handlers and preserve the same request, response, and error semantics.
 
+The proposed protected wrapper is specified in
+[permission-enforcement-and-web-admission.md](permission-enforcement-and-web-admission.md).
+It adds an explicit future outer admission envelope, command/effect exposure registry,
+current access checks and atomic authorization evidence; it does not silently add fields
+to today's closed command requests or declare new implemented commands. The direct
+trusted-local CLI retains its current full scope. Protected handler transaction
+integration and access-scoped successor projections require implementation and tests.
+That draft's Section 1 now targets honest multi-operator identification on a restricted
+trusted web deployment. Verified authentication/session and executor machinery are
+preserved as deferred; no new fields or authentication guarantees are added here.
+
 ## 2. Authority
 
 This contract depends on `specs/overview.md`, `specs/architecture.md`, `specs/operational-resilience.md`, `specs/compatibility.md`, `specs/ontology.md`, `specs/recurrence.md`, `specs/notifications.md`, `specs/schedule-create.md`, `specs/schedule-show.md`, `specs/schedule-operator-tools.md`, `specs/schedule-operations.md`, the additive `specs/schedule-primary-location.md` capability, `specs/notification-profiles.md`, and `specs/SPINE_SPEC_VERSIONING_AND_FREEZE_POLICY.md`. If this document conflicts with `specs/ontology.md`, the ontology wins for ledger truth and this document must be corrected.

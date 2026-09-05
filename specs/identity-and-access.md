@@ -1,14 +1,15 @@
 # Spine Identity and Access
 
-Status: Draft v0.4.0; architecture proposal; current revision not implemented or audited
+Status: Draft v0.5.0; protected authentication/delegation deferred; current revision not implemented or audited
 Created: 2026-09-05
 Scope: Authentication adapters, subject mapping, ownership, group roles, delegated requests, and authorization across Spine surfaces
 
 ## Revised Staging Direction
 
 [accounts-and-chat-attribution.md](accounts-and-chat-attribution.md) defines the immediate
-lower-assurance scope: stable login accounts distinct from subjects, phone-first
-provisional enrollment, and observed rather than verified chat attribution. The protected
+trusted multi-operator scope: stable accounts distinct from subjects, honest web identity
+selection, and observed rather than verified chat attribution. Authentication and
+automated recovery are deferred. The protected
 rules below remain a future target. References to first delivery below mean the first
 protected delivery. Principal-to-subject mappings are composed through a stable account
 and its explicit subject binding; the account draft owns this refinement. Account IDs
@@ -19,6 +20,14 @@ explicit single-operator and multi-user deployment modes. Specification targets
 multi-user behavior even when implementation first enables single-operator full access.
 The direct CLI remains trusted-local and full-scope. Protected executor enforcement
 and OpenClaw qualification remain separate future work.
+
+[permission-enforcement-and-web-admission.md](permission-enforcement-and-web-admission.md)
+is the successor enforcement draft. It specifies proposed persistence, command/effect
+dispositions, session/epoch semantics and delivery gates. Its Section 1 now prioritizes
+`multi_user` plus `trusted_identity`; the protected web/session and chat-first paths
+below are deferred, not prerequisites for that trusted web interface. The audited
+role policy in `permissions.md` remains authoritative, including catalog/route admin
+rights being separate from item edit grants.
 
 ## 1. Purpose and Delivery Boundary
 

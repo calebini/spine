@@ -1,13 +1,13 @@
 # Accounts and Trusted-Agent Chat Attribution
 
-Status: Draft v0.3.0; account lifecycle and attribution contract; not implemented or audited
+Status: Draft v0.4.0; trusted multi-operator identification first; verified authentication deferred; not implemented or audited
 Created: 2026-09-05
 
 ## 1. Decision and Scope
 
-The immediate direction is lower-assurance trusted-agent attribution, not deployment
-of the protected admission service. Observed sender metadata may help an agent resolve
-an account, but is not independently verified authentication. The stronger designs in
+The immediate direction is trusted multi-operator identification, through honest web
+account selection and lower-assurance chat attribution, not protected authentication.
+Observed sender metadata helps resolve an account, not verify it. The stronger designs in
 [single-operator-admission.md](single-operator-admission.md) and
 [openclaw-admission.md](openclaw-admission.md) remain future qualification targets.
 They are not weakened or claimed satisfied by this staging approach.
@@ -18,11 +18,12 @@ runtime commands, an implemented account schema, or permission to enroll real us
 
 [permissions.md](permissions.md) owns the full multi-user access model. Single-operator
 mode admits only its configured operator with ledger-wide application access; multi-user
-mode admits authenticated active accounts with per-resource permissions. An unbound
-account has account self-service only, not coordination access. Group roles do not change
+mode applies per-resource permissions to admitted active accounts. Independent
+`identity_mode=trusted_identity|verified_identity` distinguishes identification from
+verified authentication. An unbound account has self-service only, not coordination access. Group roles do not change
 account identity, and signup grants no resource rights. Both modes use these same records.
-The first implementation may support only single-operator mode without claiming
-multi-user enforcement.
+First delivery supports multiple preprovisioned trusted operators without claiming
+authenticated isolation; verified sign-in and automated recovery are deferred.
 
 ## 2. Identity Layers
 
@@ -92,6 +93,29 @@ It MUST NOT advertise verified caller authentication or per-user isolation. Exis
 operator privileges remain a staging trust decision, not permissions granted by the
 observed ID. General multi-user access is not safe merely because accounts exist.
 
+### 4.1 Trusted Web Identification
+
+The immediate web interface lets each operator select their preprovisioned account
+from a configured eligible list. It does not authenticate possession of a phone,
+password, or WhatsApp account. Each selected account resolves its explicit subject
+binding; owners, memberships/roles and supported grants determine permitted operations.
+Do not merge the two operators or assign full scope simply because they use the system.
+
+Evidence labels web identity `self_selected` and chat attribution `agent_observed`;
+neither is verified. Recheck current account/binding state per request. Unknown,
+inactive/suspended/closed, unbound or ambiguous selections fail without an operator
+fallback. Switching identity discards previous interaction context and pending intents;
+the browser must not reuse another account's cached private data or pending command.
+
+Anyone with access to this interface can select another identity. Restrict deployment
+to trusted devices/operators, disclose the limitation and do not advertise secure
+per-user isolation. The local CLI and agent remain trusted privileged paths.
+[permission-enforcement-and-web-admission.md](permission-enforcement-and-web-admission.md)
+Section 1 owns this first-delivery boundary. Manual trusted-local account/binding repair
+is sufficient recovery now; passwords, passkeys, OTPs and emergency-code delivery are
+not prerequisites. Sections 6 and 12 below preserve the deferred verified path; their
+verification requirements do not apply to honest selection or become satisfied by it.
+
 ## 5. Chat-First Enrollment
 
 The desired user experience is to begin in chat and obtain an account immediately.
@@ -116,7 +140,7 @@ Automatic enrollment needs rate, count, storage, and retry bounds before impleme
 repeated observations must not create durable rows per message. The current staging
 operator flow may continue with manually provisioned mappings until those commands exist.
 
-## 6. Continue on the Web
+## 6. Continue on the Web — Deferred Verified Path
 
 Entering the phone number locates an account candidate without disclosing whether it
 exists. Web access requires a verification challenge or another accepted authentication
@@ -269,9 +293,9 @@ Observation source labels are evidence claims with provenance, not inputs that a
 may freely promote to `verified`. Verification evidence can be accepted only from the
 configured authentication component. Staging observation does not bypass this rule.
 
-## 12. First-Party Web Boundary
+## 12. First-Party Web Boundary — Deferred Verified Path
 
-The intended initial web design is first-party account authentication using established
+The future verified web design is first-party account authentication using established
 authentication/session components hosted with the application. It does not require a
 separate identity provider, an OAuth authorization server, federation, or a custom
 signed-token protocol. Session management and the particular password/passkey/challenge
@@ -341,7 +365,8 @@ These specifications are still required; this logical draft is not implementatio
 
 Product decisions to ratify are optional new-subject creation during enrollment,
 operator approval for staging activation/registration, closed-account recovery posture,
-and the first web authentication method. Initial account management may be a module
+and, for the deferred verified path only, the web authentication method. The immediate
+trusted multi-operator slice does not depend on that choice. Account management may be a module
 within the application; a separate identity service is not required.
 
 Audit this bounded account contract before implementation. Broader group/resource

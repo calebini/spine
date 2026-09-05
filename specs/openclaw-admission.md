@@ -1,12 +1,14 @@
 # OpenClaw to Spine Admission Boundary
 
-Status: Draft v0.1.0; consumer qualification proposal; not implemented or audited
+Status: Draft v0.1.1; deferred protected-agent qualification proposal; not implemented or audited
 Created: 2026-09-05
 Scope: Message-specific identity evidence and protected command delegation for the first chat adapter
 
 The immediate staging scope is [accounts-and-chat-attribution.md](accounts-and-chat-attribution.md).
 Stable observed prompt metadata supports account lookup but does not satisfy this
-stronger qualification. Broker instrumentation is deferred. Future verified origin
+stronger qualification. Trusted multi-operator use requires no OpenClaw extension or
+executor token now. All protected-origin requirements below remain deferred and intact.
+Broker instrumentation is deferred. Future verified origin
 resolves a login account and its explicit subject binding, not a phone-number subject ID.
 
 ## 1. Authority and Evidence Status

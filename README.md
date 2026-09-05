@@ -323,14 +323,19 @@ Start with the document that matches the job:
   [`specs/architecture.md`](specs/architecture.md)
 - **Review the immediate account/onboarding proposal:**
   [`specs/accounts-and-chat-attribution.md`](specs/accounts-and-chat-attribution.md) —
-  phone-first accounts and lower-assurance attribution; not implemented.
+  distinct accounts, trusted web selection and lower-assurance chat attribution; not implemented.
 - **Review the proposed resource permission model:**
   [`specs/permissions.md`](specs/permissions.md) — multi-user roles and grants,
-  single-operator full-access mode, and trusted-local CLI exception; not implemented.
+  independent identity/access modes and the trusted-local CLI exception; not implemented.
+- **Review the proposed enforcement and web-admission contract:**
+  [`specs/permission-enforcement-and-web-admission.md`](specs/permission-enforcement-and-web-admission.md)
+  — trusted multi-operator identification first; verified sessions, recovery and
+  protected delivery deferred. Restricted trusted deployment only; no authenticated
+  isolation claim. Draft, not implemented.
 - **Review the proposed identity and access model:**
   [`specs/identity-and-access.md`](specs/identity-and-access.md) — draft authentication,
-  subject mapping, group roles, and authorization; not implemented.
-- **Review the proposed first chat-admission slice:**
+  subject mapping, group roles, and authorization; protected authentication deferred.
+- **Review the deferred protected chat-admission design:**
   [`specs/single-operator-admission.md`](specs/single-operator-admission.md) and
   [`specs/openclaw-admission.md`](specs/openclaw-admission.md) — protected command
   admission and OpenClaw qualification; neither is implemented.

@@ -440,25 +440,42 @@ resolve.
 
 ### Proposed Initiative: Accounts, Multi-User Permissions, and Web API
 
-Specify the full multi-user model now, even if implementation first supports one
-operator. `specs/accounts-and-chat-attribution.md` owns accounts and attribution;
+First delivery: multiple trusted operators, initially two, selecting their identity
+honestly in the web interface and using registered observed attribution in WhatsApp.
+`specs/accounts-and-chat-attribution.md` owns accounts and attribution;
 `specs/identity-and-access.md` owns authentication/delegation architecture;
 `specs/permissions.md` owns resource permissions, group roles, and access modes.
 
-The configured single operator receives full application scope. Multi-user callers
-receive ownership/role/grant-based access. Roles belong to subject groups, not account
-types. Signup and profile use grant no implicit group access. Observed chat identity
-is not verified web identity in either mode.
+Use `access_mode=multi_user` and `identity_mode=trusted_identity`. Accounts bind to
+distinct subjects; owners, roles and grants govern the selected identity's operations.
+No automatic full-scope grant for both operators and no impersonation protection claim.
+Restrict deployment to trusted devices/operators. Unknown identities never fall back
+to an operator. Single-operator full scope remains a separate optional access mode.
 
-Next: ratify role/policy defaults, publish account/permission machine contracts, and
-define the web service/session interface over shared handlers. Audit before building.
-The first release may reject multi-user mode until full enforcement, ownership adoption,
-authorized-read, revocation, and delivery-authorization tests are complete.
+`specs/permission-enforcement-and-web-admission.md` is the next normative draft:
+physical ownership/role/grant revisions, an exhaustive current-command disposition,
+verified web sessions, access epochs, bounded queries, receipt linkage and delivery
+authorization. Section 1 separates the immediate trusted slice from the preserved
+deferred protected path; it declares no runtime or schema support.
+
+Next: define the supported trusted web command subset, identity selection/switching,
+explicit owner/role provisioning, bounded policy-filtered queries and honest evidence.
+Publish the required contracts and test both operators' behavior before building.
+Unsupported commands or unresolved ownership must fail, not imply full access.
+Owner-only item transfer and admin/owner-approved member route use are ratified policy;
+their full administration UI and future delivery-security machinery need not ship first.
+
+Defer verified web sign-in, automated/WhatsApp-code recovery, executor tokens and
+protected agent admission. Manual host-side account/binding repair is enough recovery
+now. Retain the stronger specs for later qualification; do not make authentication-method
+selection a blocker for the trusted web interface. Audit the bounded slice before build.
 
 Keep the CLI as a direct trusted-local full-scope path for now. The web backend does
 not shell out to it; both reuse command/services code. Mixed CLI/web/worker operation
 needs concurrency and replay verification. Moving CLI behind a service is a separate
 future enforcement choice, not a prerequisite for facets or accounts.
+Existing trusted-local worker delivery continues without claiming per-user mandate
+enforcement. Stronger audience/derivation decisions gate those deferred protected features.
 
 Protected executor and OpenClaw qualification drafts remain future work. Preserve the
 provisional inspection note without requiring new instrumentation or token machinery

@@ -420,6 +420,11 @@ amendment and migration; this draft reference does not extend the current member
 enum or turn `item_subject_roles.owner`, participation, profile ownership, or delivery
 recipients into an implemented authorization mechanism.
 
+`specs/permission-enforcement-and-web-admission.md` develops proposed physical owner,
+membership-revision, grant, admission-fence and delivery-mandate shapes. They remain a
+successor design, not additions to this implemented table/enum contract. Explicit
+ontology amendments, schema versions, migrations and fixtures are required before use.
+
 ### 5.4 delivery_targets
 
 Owns adapter-routable delivery endpoints for subjects and subject groups.
