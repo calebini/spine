@@ -40,7 +40,7 @@ The version facts are:
 
 The request and response schemas are `contracts/schemas/schedule-create-request.schema.json` and `contracts/schemas/schedule-create-response.schema.json`.
 
-The current schema-11 runtime implements this surface and declares the complete schedule-create, item-archetype, and notification-profile contract families through `system.info.implemented_contract_versions`. The transport-neutral command identifier is `schedule.create`; the CLI alias is `spine ... schedule create`.
+The current schema-12 runtime implements this surface and declares the complete schedule-create, item-archetype, and notification-profile contract families through `system.info.implemented_contract_versions`. The transport-neutral command identifier is `schedule.create`; the CLI alias is `spine ... schedule create`.
 
 ## 3. Boundary and Non-Goals
 

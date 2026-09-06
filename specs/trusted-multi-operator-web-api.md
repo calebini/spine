@@ -103,7 +103,7 @@ owner/membership/grant authorities of the enforcement draft, not a JSON identity
 or an alternative permission store maintained by the UI.
 
 The closed plan request contains contract version, one target ledger identity,
-`expected_access_revision`, and explicit arrays of operators, group memberships,
+`expected_access_epoch`, and explicit arrays of operators, group memberships,
 item-owner adoptions, optional item/catalog grants and route-member approvals. Each
 array is a complete *batch of operations*, not replacement of the whole ledger. Omission
 does nothing. Each operation is explicitly `create`, `set`, or `revoke` where supported;
@@ -128,7 +128,7 @@ group is automatically treated as a membership or access owner.
 
 Plan is a bounded read: return normalized operations, referenced versions, warnings,
 blocking conflicts and `plan_hash` over canonical JSON. It writes nothing. Apply requires
-the full identical normalized plan, hash, expected access revision, `command_id`, local
+the full identical normalized plan, hash, expected access epoch, `command_id`, local
 administrative `actor_subject_id` and timestamp; it verifies current references and
 commits the entire batch with one audit/receipt, or commits none. No approval inference
 from a prior plan. Replay follows global command-ID rules; changing facts under the
@@ -141,10 +141,12 @@ change. The machine schema must publish those row roles and exact paths. The ver
 plan schema must also define each operation's fields and closed effect/failure enums.
 This is a release prerequisite, not permission to invent a backfill during deployment.
 
-Apply advances one canonical `access_revision`, the access epoch defined by the
-enforcement draft. Current-state/history constraints follow that draft; mode and subject
-bindings are not duplicated. Bootstrap creates the singleton access revision explicitly.
-Access-relevant changes through supported local commands update the same revision while
+Apply advances the canonical persisted `access_epoch` defined by the enforcement
+draft. Web response/evidence `access_epoch` and request `expected_access_epoch` refer
+to that same singleton epoch, not a separate web revision or alias. Current-state/history
+constraints follow that draft; mode and subject
+bindings are not duplicated. Bootstrap creates the singleton access epoch explicitly.
+Access-relevant changes through supported local commands update the same epoch while
 web service is running. Raw administrative writes require quiescing/revalidating the
 service; unrestricted host access remains outside application isolation.
 
@@ -166,8 +168,8 @@ at most 256 UTF-8 bytes, no control characters. New timestamps are UTC second pr
 |---|---|
 | `GET /health/ready` | No ledger details; 200 ready or 503 not ready |
 | `GET /api/v1/info` | Capability/registry versions, fixed trust/access modes, public limits, timezone default/version, server time and warning; no DB path, host secrets or raw system inventory |
-| `GET /api/v1/operators` | Section 3 chooser plus current access revision |
-| `POST /api/v1/context` | Empty body; selected account/subject, accessible owner scopes, usable route choices, per-scope operations and current access revision |
+| `GET /api/v1/operators` | Section 3 chooser plus current access epoch |
+| `POST /api/v1/context` | Empty body; selected account/subject, accessible owner scopes, usable route choices, per-scope operations and current access epoch |
 | `POST /api/v1/agenda` | Section 7 access-scoped agenda |
 | `POST /api/v1/items` | Section 7 access-scoped item list, including unscheduled tasks |
 | `POST /api/v1/commands/{command}` | Closed dispatch in Section 6, not arbitrary commands |
@@ -179,16 +181,16 @@ cross-site form to mutate the ledger. Disable credentialed cross-origin access, 
 proxy identity headers and state-changing GET. These rules may be implemented with
 ordinary framework protections; they do not introduce a user-authentication credential.
 
-Command body is `{contract_version, request, create_owner_scope?, expected_access_revision?}`.
+Command body is `{contract_version, request, create_owner_scope?, expected_access_epoch?}`.
 Contract version is the outer API version; `request` is exactly the existing command
 payload. `create_owner_scope` is required for `schedule.build` and `schedule.create`
 and forbidden otherwise. It is a canonical subject/group owner discriminator; no system
-owner for an item. `expected_access_revision` is required for writes, optional for reads
+owner for an item. `expected_access_epoch` is required for writes, optional for reads
 and builder; mismatches fail before a fresh mutation, with replay exceptions in Section 8.
 Do not inject these fields into the current inner command schema.
 
 Success contains outer contract version, `ok=true`, identity basis, selected account
-and subject, selection ID, evaluated access revision, `result_contract`, and `result`.
+and subject, selection ID, evaluated access epoch, `result_contract`, and `result`.
 For ordinary commands, `result` is the unmodified canonical command response; outer
 metadata is not another receipt. Original historical actor fields remain historical.
 For the new scoped reads, result contract is explicitly separate, per Section 7.
@@ -206,7 +208,7 @@ domain creations; `ok` is never assumed from network completion alone.
 | `identity_unavailable` | 403 | Unknown/ineligible/unbound selection; never maps to another user |
 | `operation_unavailable` | 404 | Command/feature not on this release's allowlist |
 | `resource_unavailable` | 404 | Missing or unauthorized resource, same outward response |
-| `access_changed` | 409 | Supplied access revision or cursor context no longer current |
+| `access_changed` | 409 | Supplied access epoch or cursor context no longer current |
 | `command_id_unavailable` | 409 | Existing command ID cannot be used/disclosed by this identity |
 | `capacity_exceeded` | 429 | Configured work/rate budget exceeded, no partial result |
 | `admission_unavailable` | 503 | Required authority, runtime or storage unavailable; no fallback |
@@ -312,7 +314,7 @@ denies. Exclude unowned/unreadable items before expansion, counts, sorting or di
 
 Reuse canonical agenda entry fields, ordering and summary meaning. The new scoped result
 adds owner scope and allowed operations per entry and binds its snapshot to the selected
-identity/access revision. It is not labeled `spine.schedule-agenda-response.v1` because
+identity/access epoch. It is not labeled `spine.schedule-agenda-response.v1` because
 selection and cursor semantics differ. Authorize candidate items using indexed owner/
 membership/grant predicates, then invoke shared expansion/projection helpers. Do not
 run whole-ledger `agenda.show` then hide rows in the browser or inject a guessed item
@@ -327,7 +329,7 @@ an omission shape inside an unchanged canonical response. Historical route/attem
 content is checked too; private data is not made readable by requesting `attempts`.
 
 Scoped cursor payloads bind API/query version, ledger/realm, account/subject/binding
-revision, access revision, normalized query including limit, authorized source snapshot,
+revision, access epoch, normalized query including limit, authorized source snapshot,
 last ordering key and expiry. Use an integrity-protected opaque cursor through an
 established library; its key protects pagination integrity, not user authentication.
 Publish encoding/normalization fixtures before implementation. Cursor expiry is 15
@@ -337,7 +339,7 @@ against a changed snapshot. Snapshot construction processes only bounded authori
 facts. Repeated scans, offset pagination, hidden-item counts and full-ledger hashes
 are forbidden. Overflow fails, not false `has_more=false` or partial evidence.
 
-Use one bounded read snapshot and recheck account/binding/access revision before response
+Use one bounded read snapshot and recheck account/binding/access epoch before response
 release. A change requires retry from a fresh context. The UI must also discard late
 responses after identity switch. A later revocation cannot retract bytes already released.
 
@@ -360,7 +362,7 @@ authoring. Bounded dry-run support is deferred at this HTTP surface, not silentl
 implemented by copying the whole database.
 
 Persist a nonsecret one-to-one web receipt linkage: existing receipt ID, account and
-subject, binding revision, `identity_basis=self_selected`, access revision at acceptance,
+subject, binding revision, `identity_basis=self_selected`, access epoch at acceptance,
 outer API/registry version, create-owner scope when present and canonical semantic
 envelope hash. Linkage is access/attribution evidence, not a second replay ledger.
 Exclude selection ID, network address, Origin, browser metadata and read-evaluation time
@@ -368,7 +370,7 @@ from semantic hashing. Existing inner request/hash and row-ID derivations remain
 Exact sidecar schema and registered ID derivation must ship with the implementation.
 
 After current identity and disclosure checks, same-account compatible replay precedes
-fresh expected-access/domain-version checks. It returns the original domain receipt,
+fresh expected-access-epoch/domain-version checks. It returns the original domain receipt,
 not another effect, with current outer access metadata labeled separately. A foreign
 account command ID or local historical receipt without web attribution yields
 `command_id_unavailable` without leaking its contents. It may still be viewed through
