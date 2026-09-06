@@ -1,0 +1,157 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cortext.local/spine/contracts/schemas/trusted-web-http.schema.json",
+  "$defs": {
+    "selectionHeaders": {
+      "type": "object",
+      "properties": {
+        "X-Spine-Account-ID": {
+          "$ref": "trusted-web-types.schema.json#/$defs/id"
+        },
+        "X-Spine-Selection-ID": {
+          "$ref": "trusted-web-types.schema.json#/$defs/id"
+        },
+        "Origin": {
+          "type": "string",
+          "format": "uri",
+          "maxLength": 512
+        },
+        "Host": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "Content-Type": {
+          "const": "application/json"
+        }
+      },
+      "required": [
+        "X-Spine-Account-ID",
+        "X-Spine-Selection-ID",
+        "Origin",
+        "Host",
+        "Content-Type"
+      ],
+      "additionalProperties": false
+    },
+    "contextRequest": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "ready": {
+      "type": "object",
+      "properties": {
+        "is_ready": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "is_ready"
+      ],
+      "additionalProperties": false
+    },
+    "info": {
+      "type": "object",
+      "properties": {
+        "contract_version": {
+          "const": "spine.trusted-web-api.v1"
+        },
+        "registry_version": {
+          "const": "spine.trusted-web-command-registry.v1"
+        },
+        "registry_hash": {
+          "$ref": "trusted-web-types.schema.json#/$defs/sha256"
+        },
+        "access_mode": {
+          "const": "multi_user"
+        },
+        "identity_mode": {
+          "const": "trusted_identity"
+        },
+        "warning": {
+          "const": "Trusted identification — identity is not verified"
+        },
+        "server_time_utc": {
+          "$ref": "trusted-web-types.schema.json#/$defs/utc"
+        },
+        "timezone": {
+          "$ref": "trusted-web-types.schema.json#/$defs/id"
+        },
+        "timezone_database_version": {
+          "$ref": "trusted-web-types.schema.json#/$defs/id"
+        },
+        "limits": {
+          "type": "object",
+          "properties": {
+            "request_bytes": {
+              "$ref": "trusted-web-types.schema.json#/$defs/epoch"
+            },
+            "response_bytes": {
+              "$ref": "trusted-web-types.schema.json#/$defs/epoch"
+            },
+            "list_rows": {
+              "$ref": "trusted-web-types.schema.json#/$defs/epoch"
+            },
+            "resolved_resources": {
+              "$ref": "trusted-web-types.schema.json#/$defs/epoch"
+            },
+            "selectable_accounts": {
+              "$ref": "trusted-web-types.schema.json#/$defs/epoch"
+            },
+            "account_grant_matches": {
+              "$ref": "trusted-web-types.schema.json#/$defs/epoch"
+            },
+            "provisioning_operations": {
+              "$ref": "trusted-web-types.schema.json#/$defs/epoch"
+            },
+            "request_milliseconds": {
+              "$ref": "trusted-web-types.schema.json#/$defs/epoch"
+            },
+            "busy_milliseconds": {
+              "$ref": "trusted-web-types.schema.json#/$defs/epoch"
+            },
+            "sql_vm_steps": {
+              "$ref": "trusted-web-types.schema.json#/$defs/epoch"
+            },
+            "cursor_seconds": {
+              "$ref": "trusted-web-types.schema.json#/$defs/epoch"
+            },
+            "agenda_elapsed_days": {
+              "$ref": "trusted-web-types.schema.json#/$defs/epoch"
+            }
+          },
+          "required": [
+            "request_bytes",
+            "response_bytes",
+            "list_rows",
+            "resolved_resources",
+            "selectable_accounts",
+            "account_grant_matches",
+            "provisioning_operations",
+            "request_milliseconds",
+            "busy_milliseconds",
+            "sql_vm_steps",
+            "cursor_seconds",
+            "agenda_elapsed_days"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "contract_version",
+        "registry_version",
+        "registry_hash",
+        "access_mode",
+        "identity_mode",
+        "warning",
+        "server_time_utc",
+        "timezone",
+        "timezone_database_version",
+        "limits"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

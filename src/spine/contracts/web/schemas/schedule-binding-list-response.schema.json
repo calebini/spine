@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cortext.local/spine/contracts/schemas/schedule-binding-list-response.schema.json",
+  "title": "Spine Temporal Binding List Response v1",
+  "type": "object",
+  "required": [
+    "ok", "command", "response_contract", "binding_catalog_generation",
+    "bindings", "has_more", "next_cursor"
+  ],
+  "properties": {
+    "ok": { "const": true },
+    "command": { "const": "schedule.binding.list" },
+    "response_contract": { "const": "spine.schedule-binding-list-response.v1" },
+    "binding_catalog_generation": { "$ref": "notification-types.schema.json#/$defs/decimalNonNegative" },
+    "bindings": {
+      "type": "array", "maxItems": 1000,
+      "items": { "$ref": "relative-temporal-binding-types.schema.json#/$defs/bindingView" }
+    },
+    "has_more": { "type": "boolean" },
+    "next_cursor": { "type": ["string", "null"] }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "has_more": { "const": true } }, "required": ["has_more"] },
+      "then": { "properties": { "next_cursor": { "type": "string", "minLength": 1 } } },
+      "else": { "properties": { "next_cursor": { "type": "null" } } }
+    }
+  ],
+  "additionalProperties": false
+}

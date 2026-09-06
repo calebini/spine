@@ -1,0 +1,84 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cortext.local/spine/contracts/schemas/notification-policy.schema.json",
+  "title": "Spine Canonical Notification Policy v1",
+  "type": "object",
+  "required": [
+    "contract_version",
+    "normalization_version",
+    "canonical_json_version",
+    "notification_intent_id",
+    "notification_policy_id",
+    "notification_schedule_id",
+    "item_id",
+    "item_version",
+    "intent_created_item_version",
+    "intent_created_by_command_id",
+    "recipient_kind",
+    "channel",
+    "delivery_target_id",
+    "target",
+    "schedule",
+    "normalized_notification_schedule_hash",
+    "late_handling",
+    "status",
+    "created_at_utc",
+    "created_by_command_id"
+  ],
+  "properties": {
+    "contract_version": { "const": "spine.notification-schedule.contract.v1" },
+    "normalization_version": { "const": "spine.notification-schedule.normalization.v1" },
+    "canonical_json_version": { "const": "spine.canonical-json.v1" },
+    "notification_intent_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+    "notification_policy_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+    "notification_schedule_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+    "source_notification_policy_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+    "item_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+    "item_version": { "$ref": "notification-types.schema.json#/$defs/decimalPositive" },
+    "intent_created_item_version": { "$ref": "notification-types.schema.json#/$defs/decimalPositive" },
+    "intent_created_by_command_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+    "recipient_kind": { "enum": ["subject", "subject_group"] },
+    "recipient_subject_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+    "recipient_group_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+    "channel": { "type": "string", "minLength": 1 },
+    "delivery_target_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+    "target": {
+      "allOf": [
+        { "$ref": "notification-types.schema.json#/$defs/target" },
+        {
+          "if": {
+            "properties": { "application_scope": { "const": "selected_occurrence" } },
+            "required": ["application_scope"]
+          },
+          "then": { "required": ["target_occurrence_selector"] }
+        }
+      ]
+    },
+    "schedule": { "$ref": "notification-types.schema.json#/$defs/schedule" },
+    "normalized_notification_schedule_hash": { "$ref": "notification-types.schema.json#/$defs/sha256" },
+    "late_handling": { "$ref": "notification-types.schema.json#/$defs/lateHandling" },
+    "status": { "enum": ["active", "disabled"] },
+    "created_at_utc": { "$ref": "notification-types.schema.json#/$defs/utcTimestamp" },
+    "created_by_command_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+    "disabled_at_utc": { "$ref": "notification-types.schema.json#/$defs/utcTimestamp" }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "recipient_kind": { "const": "subject" } }, "required": ["recipient_kind"] },
+      "then": {
+        "required": ["recipient_subject_id"],
+        "not": { "required": ["recipient_group_id"] }
+      },
+      "else": {
+        "required": ["recipient_group_id"],
+        "not": { "required": ["recipient_subject_id"] }
+      }
+    },
+    {
+      "if": { "properties": { "status": { "const": "disabled" } }, "required": ["status"] },
+      "then": { "required": ["disabled_at_utc"] },
+      "else": { "not": { "required": ["disabled_at_utc"] } }
+    }
+  ],
+  "additionalProperties": false
+}

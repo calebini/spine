@@ -144,6 +144,9 @@ def handle(command: str, request: Mapping[str, Any], context: CommandContext) ->
 
 
 def _dispatch(command: str, request: Mapping[str, Any], context: CommandContext) -> dict[str, Any]:
+    if command in {"web_access.plan", "web_access.apply"}:
+        from spine.web.provisioning import handle as provision
+        return provision(command, dict(request), context)
     from spine.commands.notification_profiles import (
         PROFILE_COMMANDS,
         handle_notification_profile_command,
@@ -649,7 +652,10 @@ def _handle_schedule_show(request: Mapping[str, Any], context: CommandContext) -
     )
 
 
-def _handle_agenda_show(request: Mapping[str, Any], context: CommandContext) -> dict[str, Any]:
+def _handle_agenda_show(
+    request: Mapping[str, Any], context: CommandContext, *, candidate_item_ids: Sequence[str] | None = None,
+    maximum_range_days: int = 366,
+) -> dict[str, Any]:
     command = "agenda.show"
     allowed = {
         "contract_version",
@@ -745,20 +751,24 @@ def _handle_agenda_show(request: Mapping[str, Any], context: CommandContext) -> 
         timezone=view_timezone,
         timezone_database_version=concrete_timezone_version,
     )
-    if range_end <= range_start or range_end - range_start > timedelta(days=366):
+    if range_end <= range_start or range_end - range_start > timedelta(days=maximum_range_days):
         raise SpineValidationError(
             "invalid_request:range_end_local",
-            "agenda range must be non-empty, increasing, and no longer than 366 elapsed days",
+            f"agenda range must be non-empty, increasing, and no longer than {maximum_range_days} elapsed days",
         )
 
-    item_rows = context.ledger.execute(
-        """
-        SELECT item_id
-        FROM coordination_items
-        WHERE item_type IN ('event', 'task')
-        ORDER BY item_id
-        """
-    ).fetchall()
+    if candidate_item_ids is None:
+        item_rows = context.ledger.execute(
+            "SELECT item_id FROM coordination_items WHERE item_type IN ('event','task') ORDER BY item_id"
+        ).fetchall()
+    else:
+        if len(candidate_item_ids) > 100:
+            raise SpineValidationError("capacity_exceeded", "bounded candidate set exceeded")
+        marks = ",".join("?" for _ in candidate_item_ids) or "NULL"
+        item_rows = context.ledger.execute(
+            f"SELECT item_id FROM coordination_items WHERE item_id IN ({marks}) AND item_type IN ('event','task') ORDER BY item_id",
+            tuple(candidate_item_ids),
+        ).fetchall()
     items = [_hydrated_item(context.ledger, str(row["item_id"])) for row in item_rows]
     items = [
         item for item in items

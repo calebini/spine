@@ -1,0 +1,407 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cortext.local/spine/contracts/schemas/trusted-web-provisioning-plan-request.schema.json",
+  "type": "object",
+  "properties": {
+    "contract_version": {
+      "const": "spine.trusted-web-provisioning.v1"
+    },
+    "ledger_id": {
+      "$ref": "trusted-web-types.schema.json#/$defs/id"
+    },
+    "expected_access_epoch": {
+      "$ref": "trusted-web-types.schema.json#/$defs/decimal"
+    },
+    "operators": {
+      "type": "array",
+      "items": {
+        "oneOf": [
+          {
+            "$ref": "#/$defs/operatorCreate"
+          },
+          {
+            "$ref": "#/$defs/operatorSet"
+          }
+        ]
+      },
+      "maxItems": 100
+    },
+    "memberships": {
+      "type": "array",
+      "items": {
+        "oneOf": [
+          {
+            "$ref": "#/$defs/membershipCreate"
+          },
+          {
+            "$ref": "#/$defs/membershipSet"
+          },
+          {
+            "$ref": "#/$defs/membershipRevoke"
+          }
+        ]
+      },
+      "maxItems": 100
+    },
+    "item_adoptions": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/itemAdopt"
+      },
+      "maxItems": 100
+    },
+    "grants": {
+      "type": "array",
+      "items": {
+        "oneOf": [
+          {
+            "$ref": "#/$defs/grantCreate"
+          },
+          {
+            "$ref": "#/$defs/grantRevoke"
+          }
+        ]
+      },
+      "maxItems": 100
+    },
+    "route_approvals": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/routeSet"
+      },
+      "maxItems": 100
+    }
+  },
+  "required": [
+    "contract_version",
+    "ledger_id",
+    "expected_access_epoch"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "operatorCreate": {
+      "type": "object",
+      "properties": {
+        "operation": {
+          "const": "create"
+        },
+        "subject_id": {
+          "$ref": "trusted-web-types.schema.json#/$defs/id"
+        },
+        "display_name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "activation_basis": {
+          "const": "trusted_local_approval"
+        }
+      },
+      "required": [
+        "operation",
+        "subject_id",
+        "display_name",
+        "activation_basis"
+      ],
+      "additionalProperties": false
+    },
+    "operatorSet": {
+      "type": "object",
+      "properties": {
+        "operation": {
+          "const": "set"
+        },
+        "account_id": {
+          "$ref": "trusted-web-types.schema.json#/$defs/id"
+        },
+        "expected_account_revision": {
+          "$ref": "trusted-web-types.schema.json#/$defs/epoch"
+        },
+        "binding_id": {
+          "$ref": "trusted-web-types.schema.json#/$defs/id"
+        },
+        "expected_binding_revision": {
+          "$ref": "trusted-web-types.schema.json#/$defs/epoch"
+        },
+        "eligible": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "operation",
+        "account_id",
+        "expected_account_revision",
+        "binding_id",
+        "expected_binding_revision",
+        "eligible"
+      ],
+      "additionalProperties": false
+    },
+    "membershipCreate": {
+      "type": "object",
+      "properties": {
+        "operation": {
+          "const": "create"
+        },
+        "group_id": {
+          "$ref": "trusted-web-types.schema.json#/$defs/id"
+        },
+        "subject_id": {
+          "$ref": "trusted-web-types.schema.json#/$defs/id"
+        },
+        "role": {
+          "enum": [
+            "member",
+            "admin",
+            "owner"
+          ]
+        },
+        "starts_at_utc": {
+          "$ref": "trusted-web-types.schema.json#/$defs/utc"
+        }
+      },
+      "required": [
+        "operation",
+        "group_id",
+        "subject_id",
+        "role",
+        "starts_at_utc"
+      ],
+      "additionalProperties": false
+    },
+    "membershipSet": {
+      "type": "object",
+      "properties": {
+        "operation": {
+          "const": "set"
+        },
+        "membership_id": {
+          "$ref": "trusted-web-types.schema.json#/$defs/id"
+        },
+        "expected_revision": {
+          "$ref": "trusted-web-types.schema.json#/$defs/epoch"
+        },
+        "role": {
+          "enum": [
+            "member",
+            "admin",
+            "owner"
+          ]
+        }
+      },
+      "required": [
+        "operation",
+        "membership_id",
+        "expected_revision",
+        "role"
+      ],
+      "additionalProperties": false
+    },
+    "membershipRevoke": {
+      "type": "object",
+      "properties": {
+        "operation": {
+          "const": "revoke"
+        },
+        "membership_id": {
+          "$ref": "trusted-web-types.schema.json#/$defs/id"
+        },
+        "expected_revision": {
+          "$ref": "trusted-web-types.schema.json#/$defs/epoch"
+        },
+        "ends_at_utc": {
+          "$ref": "trusted-web-types.schema.json#/$defs/utc"
+        }
+      },
+      "required": [
+        "operation",
+        "membership_id",
+        "expected_revision",
+        "ends_at_utc"
+      ],
+      "additionalProperties": false
+    },
+    "itemAdopt": {
+      "type": "object",
+      "properties": {
+        "operation": {
+          "const": "create"
+        },
+        "item_id": {
+          "$ref": "trusted-web-types.schema.json#/$defs/id"
+        },
+        "expected_item_version": {
+          "$ref": "trusted-web-types.schema.json#/$defs/epoch"
+        },
+        "owner_scope": {
+          "$ref": "trusted-web-types.schema.json#/$defs/owner"
+        }
+      },
+      "required": [
+        "operation",
+        "item_id",
+        "expected_item_version",
+        "owner_scope"
+      ],
+      "additionalProperties": false
+    },
+    "grantCreate": {
+      "type": "object",
+      "properties": {
+        "operation": {
+          "const": "create"
+        },
+        "resource_kind": {
+          "enum": [
+            "item",
+            "item_archetype",
+            "notification_profile"
+          ]
+        },
+        "resource_id": {
+          "$ref": "trusted-web-types.schema.json#/$defs/id"
+        },
+        "resource_owner_revision": {
+          "$ref": "trusted-web-types.schema.json#/$defs/epoch"
+        },
+        "grantee": {
+          "$ref": "trusted-web-types.schema.json#/$defs/owner"
+        },
+        "operations": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 2,
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "item.read",
+              "item.edit",
+              "catalog.read",
+              "catalog.use"
+            ]
+          }
+        },
+        "starts_at_utc": {
+          "$ref": "trusted-web-types.schema.json#/$defs/utc"
+        },
+        "ends_at_utc": {
+          "oneOf": [
+            {
+              "$ref": "trusted-web-types.schema.json#/$defs/utc"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "operation",
+        "resource_kind",
+        "resource_id",
+        "resource_owner_revision",
+        "grantee",
+        "operations",
+        "starts_at_utc",
+        "ends_at_utc"
+      ],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "resource_kind": {
+                "const": "item"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "operations": {
+                "items": {
+                  "enum": [
+                    "item.read",
+                    "item.edit"
+                  ]
+                },
+                "contains": {
+                  "const": "item.read"
+                }
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "operations": {
+                "items": {
+                  "enum": [
+                    "catalog.read",
+                    "catalog.use"
+                  ]
+                },
+                "contains": {
+                  "const": "catalog.read"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "grantRevoke": {
+      "type": "object",
+      "properties": {
+        "operation": {
+          "const": "revoke"
+        },
+        "grant_id": {
+          "$ref": "trusted-web-types.schema.json#/$defs/id"
+        },
+        "expected_revision": {
+          "$ref": "trusted-web-types.schema.json#/$defs/epoch"
+        }
+      },
+      "required": [
+        "operation",
+        "grant_id",
+        "expected_revision"
+      ],
+      "additionalProperties": false
+    },
+    "routeSet": {
+      "type": "object",
+      "properties": {
+        "operation": {
+          "const": "set"
+        },
+        "delivery_target_id": {
+          "$ref": "trusted-web-types.schema.json#/$defs/id"
+        },
+        "owner_group_id": {
+          "$ref": "trusted-web-types.schema.json#/$defs/id"
+        },
+        "expected_route_security_revision": {
+          "$ref": "trusted-web-types.schema.json#/$defs/epoch"
+        },
+        "expected_approval_revision": {
+          "$ref": "trusted-web-types.schema.json#/$defs/decimal"
+        },
+        "status": {
+          "enum": [
+            "approved",
+            "revoked"
+          ]
+        }
+      },
+      "required": [
+        "operation",
+        "delivery_target_id",
+        "owner_group_id",
+        "expected_route_security_revision",
+        "expected_approval_revision",
+        "status"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "contract_version": "spine.trusted-web-cursor-vectors.v1",
+  "library": "itsdangerous 2.2",
+  "test_key": "PUBLIC-TEST-KEY-NOT-FOR-DEPLOYMENT",
+  "payload": {
+    "contract_version": "spine.trusted-web-cursor.v1",
+    "query_kind": "items",
+    "ledger_id": "ledger-example",
+    "realm_id": "local",
+    "account_id": "account-example",
+    "subject_id": "subject-example",
+    "binding_id": "binding-example",
+    "binding_revision": "1",
+    "access_epoch": "1",
+    "recovery_epoch": "1",
+    "query_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "source_snapshot_hash": "1111111111111111111111111111111111111111111111111111111111111111",
+    "last_ordering_key": [
+      "item-example"
+    ],
+    "issued_at_utc": "2026-09-06T09:00:00Z",
+    "expires_at_utc": "2026-09-06T09:15:00Z"
+  },
+  "wire": ".eJylkcFuwyAMht-Fc1ORSqvUPMdOmyZEyK-GNYHUhqxV1XcfNGzKYTvV4oC_39j6zU0Y7wJpE9QMYuudaARP1mEbKHJAV32hrUwk9rSda7ER5wi6qpN1XSq1ASMnOKA7gpTNbLlXuOhxGpBEgh7Gonmjh4S0MT66sMCSrF5wbD9hilySldym4dYdF7kkf8iE2RZL9TITzAqTN31BBOPnbGcNF4O95gzkk5HN-EgGip2euPfhp3P9ZOStaw7KUwfKdk-4iub98SW_y_jYCMsc0SkdVAwmzd3J3b6Sh0ruX-WhkTKdt9QLl8kS-L-6-uVRd_8G8wuqKw.P9icOSJM8Bz9qIWdUr4STy_X7oSmIcXADWAZ--fsYJ0"
+}

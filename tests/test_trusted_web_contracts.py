@@ -53,7 +53,7 @@ class TrustedWebContractTests(unittest.TestCase):
         for schema in self.schemas.values():
             Draft202012Validator.check_schema(schema)
         manifest = load(ROOT / "contracts/trusted-web-fixture-manifest.json")
-        self.assertEqual(manifest["runtime_acceptance"], "pending")
+        self.assertEqual(manifest["runtime_acceptance"], "local_tests_added_deployment_gui_pending")
         ids = []
         for entry in manifest["fixtures"]:
             with self.subTest(fixture=entry["fixture_id"]):
@@ -79,9 +79,10 @@ class TrustedWebContractTests(unittest.TestCase):
             self.assertEqual(e["requires_expected_access_epoch"], current.access_mode == "write")
         self.assertFalse({"web_access.plan", "web_access.apply", "system.info"} & set(names))
 
-    def test_no_unimplemented_runtime_advertisement(self) -> None:
-        self.assertFalse(any(v.startswith("spine.trusted-web") for v in IMPLEMENTED_CONTRACT_VERSIONS))
-        self.assertNotIn("web_access.apply", COMMAND_RUNTIME_CONTRACT_REGISTRY)
+    def test_implemented_subset_does_not_advertise_authentication(self) -> None:
+        self.assertIn("spine.trusted-web-api.v1", IMPLEMENTED_CONTRACT_VERSIONS)
+        self.assertIn("web_access.apply", COMMAND_RUNTIME_CONTRACT_REGISTRY)
+        self.assertNotIn("spine.protected-admission.v1", IMPLEMENTED_CONTRACT_VERSIONS)
 
     def test_transitive_inner_schema_pins(self) -> None:
         pins = load(ROOT / "contracts/trusted-web-schema-pins.v1.json")["files"]
@@ -194,15 +195,15 @@ class TrustedWebContractTests(unittest.TestCase):
         response["error"]["sql"] = "SELECT private_data"
         self.assertFalse(self.validator("trusted-web-error.schema.json").is_valid(response))
 
-    def test_all_future_oracles_are_explicitly_pending(self) -> None:
+    def test_backend_oracles_and_external_gates_are_distinguished(self) -> None:
         acceptance = load(ROOT / "contracts/trusted-web-acceptance.v1.json")
-        self.assertEqual(acceptance["status"], "runtime_oracles_pending")
+        self.assertEqual(acceptance["status"], "backend_tests_added_deployment_gui_pending")
         self.assertEqual(
             [s["id"] for s in acceptance["scenarios"]],
             [f"WEB-{i:02}" for i in range(1, 16)],
         )
         for scenario in acceptance["scenarios"]:
-            self.assertEqual(scenario["verification"], "pending_backend")
+            self.assertEqual(scenario["verification"], "backend_tests_added")
             self.assertTrue(scenario["given"])
             self.assertTrue(scenario["when"])
             self.assertTrue(scenario["then"])

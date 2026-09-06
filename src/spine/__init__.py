@@ -2,12 +2,20 @@
 
 __all__ = ["IMPLEMENTED_CONTRACT_VERSIONS", "IMPLEMENTED_LEDGER_SCHEMA_VERSION", "__version__"]
 
-__version__ = "0.3.0"
+__version__ = "0.4.0"
 
-IMPLEMENTED_LEDGER_SCHEMA_VERSION = 12
+IMPLEMENTED_LEDGER_SCHEMA_VERSION = 13
 IMPLEMENTED_CONTRACT_VERSIONS = frozenset(
     {
         "spine.canonical-json.v1",
+        "spine.trusted-web-api.v1",
+        "spine.trusted-web-command-registry.v1",
+        "spine.trusted-web-provisioning.v1",
+        "spine.trusted-web-items.v1",
+        "spine.trusted-web-agenda.v1",
+        "spine.trusted-web-context.v1",
+        "spine.trusted-web-cursor.v1",
+        "spine.trusted-web-task-complete-result.v1",
         "spine.recurrence-authoring.v1",
         "spine.recurrence.contract.v1",
         "spine.recurrence.normalization.v1",

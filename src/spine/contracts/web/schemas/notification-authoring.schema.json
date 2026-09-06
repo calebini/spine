@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cortext.local/spine/contracts/schemas/notification-authoring.schema.json",
+  "title": "Spine Notification Schedule Authoring v1",
+  "type": "object",
+  "required": ["authoring_contract", "target", "schedule", "late_handling"],
+  "properties": {
+    "authoring_contract": { "const": "spine.notification-schedule-authoring.v1" },
+    "target": {
+      "allOf": [
+        { "$ref": "notification-types.schema.json#/$defs/target" },
+        { "not": { "required": ["target_occurrence_selector"] } }
+      ]
+    },
+    "schedule": { "$ref": "notification-types.schema.json#/$defs/schedule" },
+    "late_handling": { "$ref": "notification-types.schema.json#/$defs/lateHandling" }
+  },
+  "additionalProperties": false
+}

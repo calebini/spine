@@ -1,6 +1,6 @@
 # Spine Resource Permissions and Access Modes
 
-Status: Draft v0.2.0; trusted multi-operator identification first; protected authentication deferred; not implemented or audited
+Status: Draft v0.2.1; trusted web subset implemented in schema 13; broader protected authentication and administration remain deferred
 Created: 2026-09-05
 
 ## 1. Scope and Authority
@@ -11,7 +11,7 @@ different account or item ontologies. This document owns proposed resource permi
 group roles, and mode semantics. [accounts-and-chat-attribution.md](accounts-and-chat-attribution.md)
 owns accounts and assurance; [identity-and-access.md](identity-and-access.md) owns
 authentication and delegation boundaries; [ontology.md](ontology.md) remains the
-implemented storage authority. No current enums, schemas, or commands change here.
+implemented storage authority. Schema 13 implements only the bounded subset in the trusted web API specification; broader protected features below remain proposed.
 
 The role defaults in Section 5 develop the earlier proposal and remain subject to
 review. Supported-operation contracts and policy tests precede multi-user behavior;
@@ -115,8 +115,7 @@ an independent valid grant; access inspection must explain the remaining authori
 Roles are membership facts scoped to one arbitrary subject group, not account types
 or reserved group labels. The proposed effective roles are member, admin, and owner.
 Admin includes member rights; owner includes admin rights. No group hierarchy or
-cross-group inheritance is implied. Their physical membership representation requires
-an explicit ontology extension before implementation.
+cross-group inheritance is implied. Their schema-13 physical membership representation is defined in the ontology for the adopted trusted web subset.
 
 | Operation on group-owned resources | Member | Admin | Owner |
 |---|---|---|---|

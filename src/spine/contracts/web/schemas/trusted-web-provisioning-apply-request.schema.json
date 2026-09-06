@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cortext.local/spine/contracts/schemas/trusted-web-provisioning-apply-request.schema.json",
+  "type": "object",
+  "properties": {
+    "contract_version": {
+      "const": "spine.trusted-web-provisioning.v1"
+    },
+    "command_id": {
+      "$ref": "trusted-web-types.schema.json#/$defs/id"
+    },
+    "actor_subject_id": {
+      "$ref": "trusted-web-types.schema.json#/$defs/id"
+    },
+    "action_timestamp_utc": {
+      "$ref": "trusted-web-types.schema.json#/$defs/utc"
+    },
+    "expected_access_epoch": {
+      "$ref": "trusted-web-types.schema.json#/$defs/decimal"
+    },
+    "plan": {
+      "$ref": "trusted-web-provisioning-plan-response.schema.json"
+    }
+  },
+  "required": [
+    "contract_version",
+    "command_id",
+    "actor_subject_id",
+    "action_timestamp_utc",
+    "expected_access_epoch",
+    "plan"
+  ],
+  "additionalProperties": false
+}

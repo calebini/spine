@@ -274,14 +274,14 @@ Authentication adapters establish identity. Spine owns resource authorization; t
 governance authority retains consequential-action approvals. Provider types remain
 outside the command core. Human sessions and executor identities are separate.
 
-The future web backend calls shared command handlers directly. Today's CLI retains
+The optional trusted-identity web backend calls shared command handlers directly. Today's CLI retains
 direct trusted-local full ledger access; the worker remains a trusted local process.
 `specs/trusted-multi-operator-web-api.md` defines the first HTTP/provisioning slice:
 explicit selected-account context, a closed scheduling/catalog-use allowlist, and
 separately versioned permission-scoped agenda/item projections. It must filter before
 expansion and preserve domain transaction/receipt behavior. It does not authenticate
-operators or change existing local command/worker semantics. Its provisioning/schema
-and wire artifacts remain release prerequisites, not implemented declarations.
+operators or change existing local command/worker semantics. Its schema-13 provisioning and wire artifacts are implemented; actual trusted-network
+reachability remains a deployment prerequisite.
 Web permissions do not constrain those host privileges. Mixed CLI/web/worker access
 requires concurrency, stale-version, timeout, and retry tests before web release.
 Existing local delivery is not claimed to enforce the deferred per-user mandate contract.
@@ -290,3 +290,17 @@ Existing local delivery is not claimed to enforce the deferred per-user mandate 
 future target for protected executor admission and provider qualification. Moving CLI
 behind that service or introducing an OpenClaw extension is not required now. These
 draft references declare no implemented authentication or per-user isolation.
+
+
+## Trusted web implementation boundary
+
+Spine 0.4.0/schema 13 adds `spine.web` as a transport/permission adapter, with Flask
+request handling and a bounded Waitress listener. It reuses canonical scheduling
+handlers through an explicitly transaction-owning ledger connection. Local callers
+retain their ordinary connection behavior. Accounts/access heads and immutable
+revisions are ledger truth; a browser remains a projection. Offline schema pins and
+compiled resolver identifiers must match before readiness. No CLI subprocess, external
+schema lookup, OAuth server, OpenClaw extension or web-triggered transport send exists.
+
+The backend is opt-in and deliberately unverified identity selection on a restricted
+network. See `docs/TRUSTED_WEB_OPERATIONS.md`; verified admission is still deferred.

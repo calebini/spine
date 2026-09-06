@@ -1,0 +1,149 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cortext.local/spine/contracts/schemas/trusted-web-query-response.schema.json",
+  "$defs": {
+    "context": {
+      "type": "object",
+      "properties": {
+        "contract_version": {
+          "const": "spine.trusted-web-api.v1"
+        },
+        "ok": {
+          "const": true
+        },
+        "identity_basis": {
+          "const": "self_selected"
+        },
+        "account_id": {
+          "$ref": "trusted-web-types.schema.json#/$defs/id"
+        },
+        "subject_id": {
+          "$ref": "trusted-web-types.schema.json#/$defs/id"
+        },
+        "selection_id": {
+          "$ref": "trusted-web-types.schema.json#/$defs/id"
+        },
+        "access_epoch": {
+          "$ref": "trusted-web-types.schema.json#/$defs/epoch"
+        },
+        "result_contract": {
+          "const": "spine.trusted-web-context.v1"
+        },
+        "result": {
+          "$ref": "trusted-web-context-response.schema.json"
+        }
+      },
+      "required": [
+        "contract_version",
+        "ok",
+        "identity_basis",
+        "account_id",
+        "subject_id",
+        "selection_id",
+        "access_epoch",
+        "result_contract",
+        "result"
+      ],
+      "additionalProperties": false
+    },
+    "items": {
+      "type": "object",
+      "properties": {
+        "contract_version": {
+          "const": "spine.trusted-web-api.v1"
+        },
+        "ok": {
+          "const": true
+        },
+        "identity_basis": {
+          "const": "self_selected"
+        },
+        "account_id": {
+          "$ref": "trusted-web-types.schema.json#/$defs/id"
+        },
+        "subject_id": {
+          "$ref": "trusted-web-types.schema.json#/$defs/id"
+        },
+        "selection_id": {
+          "$ref": "trusted-web-types.schema.json#/$defs/id"
+        },
+        "access_epoch": {
+          "$ref": "trusted-web-types.schema.json#/$defs/epoch"
+        },
+        "result_contract": {
+          "const": "spine.trusted-web-items.v1"
+        },
+        "result": {
+          "$ref": "trusted-web-items-response.schema.json"
+        }
+      },
+      "required": [
+        "contract_version",
+        "ok",
+        "identity_basis",
+        "account_id",
+        "subject_id",
+        "selection_id",
+        "access_epoch",
+        "result_contract",
+        "result"
+      ],
+      "additionalProperties": false
+    },
+    "agenda": {
+      "type": "object",
+      "properties": {
+        "contract_version": {
+          "const": "spine.trusted-web-api.v1"
+        },
+        "ok": {
+          "const": true
+        },
+        "identity_basis": {
+          "const": "self_selected"
+        },
+        "account_id": {
+          "$ref": "trusted-web-types.schema.json#/$defs/id"
+        },
+        "subject_id": {
+          "$ref": "trusted-web-types.schema.json#/$defs/id"
+        },
+        "selection_id": {
+          "$ref": "trusted-web-types.schema.json#/$defs/id"
+        },
+        "access_epoch": {
+          "$ref": "trusted-web-types.schema.json#/$defs/epoch"
+        },
+        "result_contract": {
+          "const": "spine.trusted-web-agenda.v1"
+        },
+        "result": {
+          "$ref": "trusted-web-agenda-response.schema.json"
+        }
+      },
+      "required": [
+        "contract_version",
+        "ok",
+        "identity_basis",
+        "account_id",
+        "subject_id",
+        "selection_id",
+        "access_epoch",
+        "result_contract",
+        "result"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "oneOf": [
+    {
+      "$ref": "#/$defs/context"
+    },
+    {
+      "$ref": "#/$defs/items"
+    },
+    {
+      "$ref": "#/$defs/agenda"
+    }
+  ]
+}

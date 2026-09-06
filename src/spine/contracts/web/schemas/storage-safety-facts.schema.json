@@ -1,0 +1,107 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cortext.local/spine/contracts/schemas/storage-safety-facts.schema.json",
+  "title": "Spine Storage Safety Reason Facts v1",
+  "type": "object",
+  "required": [
+    "reason_facts_contract",
+    "primary_reason",
+    "pressure_state",
+    "critical_storage_action",
+    "measured_at_utc",
+    "measurements"
+  ],
+  "properties": {
+    "reason_facts_contract": { "const": "spine.storage-safety-facts.v1" },
+    "primary_reason": {
+      "enum": [
+        "critical_storage_pressure",
+        "ledger_durability_failure",
+        "storage_measurement_failure"
+      ]
+    },
+    "pressure_state": {
+      "enum": ["normal", "warning", "critical", "unknown"]
+    },
+    "critical_storage_action": {
+      "enum": ["suspend", "exit_nonzero"]
+    },
+    "measured_at_utc": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$"
+    },
+    "measurements": {
+      "type": "array",
+      "maxItems": 2,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/filesystemMeasurement" }
+    },
+    "measurement_error_category": {
+      "enum": ["path_unavailable", "stat_failed", "unsupported_filesystem"]
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": { "primary_reason": { "const": "critical_storage_pressure" } },
+        "required": ["primary_reason"]
+      },
+      "then": {
+        "properties": {
+          "pressure_state": { "const": "critical" },
+          "measurements": { "minItems": 1 }
+        },
+        "not": { "required": ["measurement_error_category"] }
+      }
+    },
+    {
+      "if": {
+        "properties": { "primary_reason": { "const": "storage_measurement_failure" } },
+        "required": ["primary_reason"]
+      },
+      "then": {
+        "properties": { "pressure_state": { "const": "unknown" } },
+        "required": ["measurement_error_category"]
+      },
+      "else": {
+        "not": { "required": ["measurement_error_category"] }
+      }
+    }
+  ],
+  "$defs": {
+    "decimalBytes": {
+      "type": "string",
+      "pattern": "^(0|[1-9][0-9]*)$"
+    },
+    "filesystemMeasurement": {
+      "type": "object",
+      "required": [
+        "roles",
+        "filesystem_id",
+        "free_bytes",
+        "warning_free_bytes",
+        "critical_free_bytes",
+        "reserve_bytes"
+      ],
+      "properties": {
+        "roles": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 2,
+          "uniqueItems": true,
+          "items": { "enum": ["ledger", "worker_state"] }
+        },
+        "filesystem_id": {
+          "type": "string",
+          "pattern": "^(0|[1-9][0-9]*)$"
+        },
+        "free_bytes": { "$ref": "#/$defs/decimalBytes" },
+        "warning_free_bytes": { "$ref": "#/$defs/decimalBytes" },
+        "critical_free_bytes": { "$ref": "#/$defs/decimalBytes" },
+        "reserve_bytes": { "$ref": "#/$defs/decimalBytes" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

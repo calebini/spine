@@ -38,7 +38,7 @@ class LedgerMigrationTests(unittest.TestCase):
         self.assertTrue(result.initialized)
         self.assertTrue(result.verified)
         verification = verify_schema(self.connection)
-        self.assertEqual(verification.schema_version, 12)
+        self.assertEqual(verification.schema_version, 13)
         self.assertEqual(verification.integrity_check, "ok")
 
     def test_empty_database_requires_explicit_initialization(self) -> None:
@@ -51,8 +51,8 @@ class LedgerMigrationTests(unittest.TestCase):
         result = migrate_schema(self.connection)
 
         self.assertEqual(result.before_version, 6)
-        self.assertEqual(result.applied_versions, (7, 8, 9, 10, 11, 12))
-        self.assertEqual(result.after_version, 12)
+        self.assertEqual(result.applied_versions, (7, 8, 9, 10, 11, 12, 13))
+        self.assertEqual(result.after_version, 13)
         self.assertTrue(result.verified)
         columns = {row["name"] for row in self.connection.execute("PRAGMA table_info(temporal_anchors)")}
         self.assertNotIn("recurrence_rule", columns)
@@ -79,8 +79,8 @@ class LedgerMigrationTests(unittest.TestCase):
 
         result = migrate_schema(self.connection)
 
-        self.assertEqual(result.applied_versions, (9, 10, 11, 12))
-        self.assertEqual(result.after_version, 12)
+        self.assertEqual(result.applied_versions, (9, 10, 11, 12, 13))
+        self.assertEqual(result.after_version, 13)
         self.assertIsNotNone(
             self.connection.execute("SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'notification_renderings'").fetchone()
         )
@@ -146,7 +146,7 @@ class LedgerMigrationTests(unittest.TestCase):
 
         result = migrate_schema(self.connection)
 
-        self.assertEqual(result.applied_versions, (11, 12))
+        self.assertEqual(result.applied_versions, (11, 12, 13))
         generation = self.connection.execute(
             "SELECT owner_scope_generation FROM owner_scope_catalog_state"
         ).fetchone()[0]
@@ -309,7 +309,7 @@ class LedgerMigrationTests(unittest.TestCase):
             payload = json.loads(output.getvalue())
             self.assertEqual(exit_code, 0)
             self.assertEqual(payload["before_version"], 0)
-            self.assertEqual(payload["after_version"], 12)
+            self.assertEqual(payload["after_version"], 13)
             self.assertTrue(payload["initialized"])
 
     def _initialize_v6(self) -> None:

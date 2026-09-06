@@ -1,0 +1,77 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cortext.local/spine/contracts/schemas/trusted-web-error.schema.json",
+  "type": "object",
+  "required": [
+    "contract_version",
+    "ok",
+    "error",
+    "correlation_id",
+    "selection_id"
+  ],
+  "properties": {
+    "contract_version": {
+      "const": "spine.trusted-web-api.v1"
+    },
+    "ok": {
+      "const": false
+    },
+    "error": {
+      "type": "object",
+      "required": [
+        "code",
+        "message"
+      ],
+      "properties": {
+        "code": {
+          "enum": [
+            "invalid_request",
+            "identity_unavailable",
+            "operation_unavailable",
+            "resource_unavailable",
+            "access_changed",
+            "command_id_unavailable",
+            "capacity_exceeded",
+            "admission_unavailable",
+            "domain_failure",
+            "domain_conflict"
+          ]
+        },
+        "message": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "domain_code": {
+          "type": "string",
+          "maxLength": 128
+        },
+        "field": {
+          "type": "string",
+          "maxLength": 128
+        }
+      },
+      "additionalProperties": false
+    },
+    "correlation_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256,
+      "pattern": "^[^\\u0000-\\u001f\\u007f]+$"
+    },
+    "selection_id": {
+      "oneOf": [
+        {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^[^\\u0000-\\u001f\\u007f]+$"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "additionalProperties": false
+}

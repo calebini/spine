@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cortext.local/spine/contracts/schemas/schedule-cancel-request.schema.json",
+  "title": "Spine Atomic Schedule Cancel Request v1",
+  "type": "object",
+  "required": [
+    "contract_version", "command_id", "actor_subject_id", "item_id", "target_version", "cancelled_at_utc"
+  ],
+  "properties": {
+    "contract_version": { "const": "spine.schedule-cancel.v1" },
+    "command_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+    "actor_subject_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+    "item_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+    "target_version": { "$ref": "notification-types.schema.json#/$defs/decimalPositive" },
+    "cancelled_at_utc": { "$ref": "notification-types.schema.json#/$defs/utcTimestamp" },
+    "reason_code": { "type": "string", "minLength": 1 }
+  },
+  "additionalProperties": false
+}

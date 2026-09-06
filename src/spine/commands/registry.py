@@ -39,6 +39,7 @@ _READ_COMMANDS = frozenset(
         "schedule.build",
         "schedule.show",
         "system.info",
+        "web_access.plan",
     }
 )
 
@@ -69,6 +70,7 @@ def _requirements(commands: set[str], *versions: str) -> None:
         _ADDITIONAL_REQUIREMENTS[command] = versions
 
 
+_requirements({"web_access.plan", "web_access.apply"}, "spine.trusted-web-provisioning.v1")
 _requirements({"system.info"}, "spine.system-info.v2", "spine.tickerd-compatibility.v1")
 _requirements(
     {"owner_scope.list"},

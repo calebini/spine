@@ -388,3 +388,14 @@ An agent is ready to operate when it can truthfully report all of the following:
 - observe-only produced no attempt and no fake-send evidence;
 - bounded active fake mode produced a durable `side_effect_attempts` row;
 - it knows that gateway mode requires separate explicit approval.
+
+
+## Optional trusted web backend
+
+Spine 0.4.0/schema 13 adds a separately started trusted-identity backend. Existing
+CLI scheduling commands and worker authority are unchanged; do not rewrite agent
+workflows to use HTTP automatically. `web_access.plan` and `web_access.apply` are
+explicit local administration commands for account bindings, group roles, ownership
+adoption, grants, and route member-use approval. No automatic subject/account or
+historical-item adoption occurs. See [TRUSTED_WEB_OPERATIONS.md](TRUSTED_WEB_OPERATIONS.md).
+The backend is not authenticated sign-in and must not be exposed publicly.

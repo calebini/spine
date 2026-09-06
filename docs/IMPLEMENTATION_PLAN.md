@@ -1,6 +1,6 @@
 # Spine Implementation Plan
 
-Status: Trusted web contract bundle added; backend and runtime acceptance pending
+Status: Trusted web backend implemented and locally verified; staging deployment and browser GUI remain next
 Last updated: 2026-09-06 (web API delivery sequence; historical delivery sections retained)
 
 This is a non-normative delivery plan. The specifications and machine-readable contracts remain authoritative.
@@ -487,10 +487,9 @@ material product/boundary decisions instead of inventing them in schemas or runt
 The first bundle is indexed in [TRUSTED_WEB_CONTRACTS.md](TRUSTED_WEB_CONTRACTS.md):
 closed registry, pinned inner schema dependencies, HTTP/provisioning/evidence schemas,
 plan/ID vectors and positive/negative fixtures. The dedicated static suite checks these
-artifacts; `WEB-01`–`WEB-15` runtime scenarios remain explicitly pending. This is not
-an implemented web capability. Cursor signed-wire qualification and minimal persistence
-DDL/indexes must be completed with the backend; catalog nested-result authorization
-cannot be replaced by the general canonical response schema.
+artifacts; runtime tests now accompany the `WEB-01`–`WEB-15` scenario mapping. Schema 13
+and signed-wire vectors are implemented. Catalog nested-result authorization remains
+an executable resolver concern, not a claim made by the broad canonical response schema.
 
 Add machine-readable artifacts to this repository; this does not mean external publication
 or deployment. Cover:
@@ -513,7 +512,15 @@ Exit gate: artifacts validate, registry/fixture coverage is checked, and no unre
 logical decision prevents the backend from being implemented. Runtime-dependent oracles
 remain explicitly pending until exercised in the next stages.
 
-### 2. Implement One Cohesive Backend Slice
+### 2. Cohesive Backend Slice — Implemented
+
+Spine 0.4.0 adds the optional `spine-web` entry point, local plan/apply provisioning,
+schema-13 access heads/history and owner indexes, complete-or-deny resolvers, shared
+outer transactions, exact runtime pins, signed cursors, bounded private HTTP admission,
+and no-write reads. Existing local CLI and worker remain full-scope. See
+`docs/TRUSTED_WEB_OPERATIONS.md` for provisioning and paired rollback.
+
+The original delivery scope below remains the checklist:
 
 Build the minimal migrations, account/subject selection and permission state, local
 provisioning commands, bounded HTTP service, scoped reads and allowlisted scheduling/
@@ -527,7 +534,18 @@ Keep the browser GUI as a separate follow-on deliverable; the backend must be te
 with an API client and fixtures without a completed GUI. These are internal implementation
 gates, not a requirement to deploy many small intermediate slices.
 
-### 3. Verify Before Release
+### 3. Verification — Local Checks Added; Deployment Gates Remain
+
+The runtime suite exercises all thirteen commands, canonical scheduling results,
+private/group rights, route approval invalidation, same-ID concurrent creates, local
+writer contention, stale revisions/cursors, failure rollback, immutable access history,
+1,000 idle reads, and a ledger with 100,000 unrelated receipts. Budgets remain fixed;
+overflow returns capacity rather than false completeness. No external transport was
+invoked. Full regression verification remains required for each release.
+
+Still perform the network/TLS and two-device staging acceptance below. Actual browser
+identity-switch/discard behavior belongs to the forthcoming GUI, not these backend tests.
+
 
 Execute the `WEB-01`–`WEB-15` oracles, focused contract/runtime tests and the appropriate
 full regression suite. Explicitly cover two distinct selected subjects; member/admin/owner

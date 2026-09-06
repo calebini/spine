@@ -1,0 +1,96 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cortext.local/spine/contracts/schemas/trusted-web-provisioning-apply-response.schema.json",
+  "type": "object",
+  "properties": {
+    "contract_version": {
+      "const": "spine.trusted-web-provisioning.v1"
+    },
+    "ok": {
+      "const": true
+    },
+    "command": {
+      "const": "web_access.apply"
+    },
+    "command_id": {
+      "$ref": "trusted-web-types.schema.json#/$defs/id"
+    },
+    "command_receipt_id": {
+      "$ref": "trusted-web-types.schema.json#/$defs/id"
+    },
+    "audit_id": {
+      "$ref": "trusted-web-types.schema.json#/$defs/id"
+    },
+    "effect": {
+      "enum": [
+        "web_access_applied",
+        "web_access_noop"
+      ]
+    },
+    "changed": {
+      "type": "boolean"
+    },
+    "replayed": {
+      "type": "boolean"
+    },
+    "access_epoch": {
+      "$ref": "trusted-web-types.schema.json#/$defs/epoch"
+    },
+    "plan_hash": {
+      "$ref": "trusted-web-types.schema.json#/$defs/sha256"
+    },
+    "results": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "operation_path": {
+            "type": "string",
+            "minLength": 1
+          },
+          "effect": {
+            "enum": [
+              "created",
+              "updated",
+              "revoked",
+              "retained"
+            ]
+          },
+          "row_ids": {
+            "type": "array",
+            "items": {
+              "$ref": "trusted-web-types.schema.json#/$defs/id"
+            },
+            "maxItems": 4
+          },
+          "current_revision": {
+            "$ref": "trusted-web-types.schema.json#/$defs/epoch"
+          }
+        },
+        "required": [
+          "operation_path",
+          "effect",
+          "row_ids",
+          "current_revision"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 100
+    }
+  },
+  "required": [
+    "contract_version",
+    "ok",
+    "command",
+    "command_id",
+    "command_receipt_id",
+    "audit_id",
+    "effect",
+    "changed",
+    "replayed",
+    "access_epoch",
+    "plan_hash",
+    "results"
+  ],
+  "additionalProperties": false
+}

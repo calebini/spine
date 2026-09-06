@@ -1,0 +1,306 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cortext.local/spine/contracts/schemas/trusted-web-command-request.schema.json",
+  "$defs": {
+    "item_archetype.list": {
+      "type": "object",
+      "required": [
+        "contract_version",
+        "request"
+      ],
+      "properties": {
+        "contract_version": {
+          "const": "spine.trusted-web-api.v1"
+        },
+        "request": {
+          "$ref": "notification-profile-commands.schema.json#/$defs/archetypeList"
+        },
+        "expected_access_epoch": {
+          "$ref": "trusted-web-types.schema.json#/$defs/epoch"
+        }
+      },
+      "additionalProperties": false
+    },
+    "item_archetype.show": {
+      "type": "object",
+      "required": [
+        "contract_version",
+        "request"
+      ],
+      "properties": {
+        "contract_version": {
+          "const": "spine.trusted-web-api.v1"
+        },
+        "request": {
+          "$ref": "notification-profile-commands.schema.json#/$defs/archetypeShow"
+        },
+        "expected_access_epoch": {
+          "$ref": "trusted-web-types.schema.json#/$defs/epoch"
+        }
+      },
+      "additionalProperties": false
+    },
+    "item.occurrences": {
+      "type": "object",
+      "required": [
+        "contract_version",
+        "request"
+      ],
+      "properties": {
+        "contract_version": {
+          "const": "spine.trusted-web-api.v1"
+        },
+        "request": {
+          "$ref": "trusted-web-command-payloads.schema.json#/$defs/itemOccurrencesRequest"
+        },
+        "expected_access_epoch": {
+          "$ref": "trusted-web-types.schema.json#/$defs/epoch"
+        }
+      },
+      "additionalProperties": false
+    },
+    "notification_profile.binding.list": {
+      "type": "object",
+      "required": [
+        "contract_version",
+        "request"
+      ],
+      "properties": {
+        "contract_version": {
+          "const": "spine.trusted-web-api.v1"
+        },
+        "request": {
+          "$ref": "notification-profile-commands.schema.json#/$defs/bindingList"
+        },
+        "expected_access_epoch": {
+          "$ref": "trusted-web-types.schema.json#/$defs/epoch"
+        }
+      },
+      "additionalProperties": false
+    },
+    "notification_profile.list": {
+      "type": "object",
+      "required": [
+        "contract_version",
+        "request"
+      ],
+      "properties": {
+        "contract_version": {
+          "const": "spine.trusted-web-api.v1"
+        },
+        "request": {
+          "$ref": "notification-profile-commands.schema.json#/$defs/profileList"
+        },
+        "expected_access_epoch": {
+          "$ref": "trusted-web-types.schema.json#/$defs/epoch"
+        }
+      },
+      "additionalProperties": false
+    },
+    "notification_profile.resolve": {
+      "type": "object",
+      "required": [
+        "contract_version",
+        "request"
+      ],
+      "properties": {
+        "contract_version": {
+          "const": "spine.trusted-web-api.v1"
+        },
+        "request": {
+          "$ref": "notification-profile-commands.schema.json#/$defs/resolve"
+        },
+        "expected_access_epoch": {
+          "$ref": "trusted-web-types.schema.json#/$defs/epoch"
+        }
+      },
+      "additionalProperties": false
+    },
+    "notification_profile.show": {
+      "type": "object",
+      "required": [
+        "contract_version",
+        "request"
+      ],
+      "properties": {
+        "contract_version": {
+          "const": "spine.trusted-web-api.v1"
+        },
+        "request": {
+          "$ref": "notification-profile-commands.schema.json#/$defs/profileShow"
+        },
+        "expected_access_epoch": {
+          "$ref": "trusted-web-types.schema.json#/$defs/epoch"
+        }
+      },
+      "additionalProperties": false
+    },
+    "schedule.build": {
+      "type": "object",
+      "required": [
+        "contract_version",
+        "request",
+        "create_owner_scope"
+      ],
+      "properties": {
+        "contract_version": {
+          "const": "spine.trusted-web-api.v1"
+        },
+        "request": {
+          "$ref": "schedule-countdown-builder-request.schema.json"
+        },
+        "create_owner_scope": {
+          "$ref": "trusted-web-types.schema.json#/$defs/owner"
+        },
+        "expected_access_epoch": {
+          "$ref": "trusted-web-types.schema.json#/$defs/epoch"
+        }
+      },
+      "additionalProperties": false
+    },
+    "schedule.cancel": {
+      "type": "object",
+      "required": [
+        "contract_version",
+        "request",
+        "expected_access_epoch"
+      ],
+      "properties": {
+        "contract_version": {
+          "const": "spine.trusted-web-api.v1"
+        },
+        "request": {
+          "$ref": "schedule-cancel-request.schema.json"
+        },
+        "expected_access_epoch": {
+          "$ref": "trusted-web-types.schema.json#/$defs/epoch"
+        }
+      },
+      "additionalProperties": false
+    },
+    "schedule.create": {
+      "type": "object",
+      "required": [
+        "contract_version",
+        "request",
+        "create_owner_scope",
+        "expected_access_epoch"
+      ],
+      "properties": {
+        "contract_version": {
+          "const": "spine.trusted-web-api.v1"
+        },
+        "request": {
+          "$ref": "schedule-create-request.schema.json"
+        },
+        "create_owner_scope": {
+          "$ref": "trusted-web-types.schema.json#/$defs/owner"
+        },
+        "expected_access_epoch": {
+          "$ref": "trusted-web-types.schema.json#/$defs/epoch"
+        }
+      },
+      "additionalProperties": false
+    },
+    "schedule.show": {
+      "type": "object",
+      "required": [
+        "contract_version",
+        "request"
+      ],
+      "properties": {
+        "contract_version": {
+          "const": "spine.trusted-web-api.v1"
+        },
+        "request": {
+          "$ref": "schedule-show-request.schema.json"
+        },
+        "expected_access_epoch": {
+          "$ref": "trusted-web-types.schema.json#/$defs/epoch"
+        }
+      },
+      "additionalProperties": false
+    },
+    "schedule.update": {
+      "type": "object",
+      "required": [
+        "contract_version",
+        "request",
+        "expected_access_epoch"
+      ],
+      "properties": {
+        "contract_version": {
+          "const": "spine.trusted-web-api.v1"
+        },
+        "request": {
+          "$ref": "schedule-update-request.schema.json"
+        },
+        "expected_access_epoch": {
+          "$ref": "trusted-web-types.schema.json#/$defs/epoch"
+        }
+      },
+      "additionalProperties": false
+    },
+    "task.complete": {
+      "type": "object",
+      "required": [
+        "contract_version",
+        "request",
+        "expected_access_epoch"
+      ],
+      "properties": {
+        "contract_version": {
+          "const": "spine.trusted-web-api.v1"
+        },
+        "request": {
+          "$ref": "trusted-web-command-payloads.schema.json#/$defs/taskCompleteRequest"
+        },
+        "expected_access_epoch": {
+          "$ref": "trusted-web-types.schema.json#/$defs/epoch"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "oneOf": [
+    {
+      "$ref": "#/$defs/item_archetype.list"
+    },
+    {
+      "$ref": "#/$defs/item_archetype.show"
+    },
+    {
+      "$ref": "#/$defs/item.occurrences"
+    },
+    {
+      "$ref": "#/$defs/notification_profile.binding.list"
+    },
+    {
+      "$ref": "#/$defs/notification_profile.list"
+    },
+    {
+      "$ref": "#/$defs/notification_profile.resolve"
+    },
+    {
+      "$ref": "#/$defs/notification_profile.show"
+    },
+    {
+      "$ref": "#/$defs/schedule.build"
+    },
+    {
+      "$ref": "#/$defs/schedule.cancel"
+    },
+    {
+      "$ref": "#/$defs/schedule.create"
+    },
+    {
+      "$ref": "#/$defs/schedule.show"
+    },
+    {
+      "$ref": "#/$defs/schedule.update"
+    },
+    {
+      "$ref": "#/$defs/task.complete"
+    }
+  ]
+}

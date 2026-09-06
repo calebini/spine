@@ -1,0 +1,106 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cortext.local/spine/contracts/schemas/schedule-related-task-create-response.schema.json",
+  "title": "Spine Atomic Related Task Create Response v1",
+  "type": "object",
+  "required": [
+    "ok", "command", "response_contract", "effect", "command_id", "command_receipt_id",
+    "audit_id", "task", "source", "relationship", "temporal_binding", "scheduled_time",
+    "delivery", "policies", "materialization", "work_instance_ids", "phases",
+    "delivery_state", "receipt"
+  ],
+  "properties": {
+    "ok": { "const": true },
+    "command": { "const": "schedule.related_task.create" },
+    "response_contract": { "const": "spine.schedule-related-task-create-response.v1" },
+    "effect": { "enum": ["related_task_schedule_created", "related_task_schedule_create_replay"] },
+    "dry_run": { "const": true },
+    "command_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+    "command_receipt_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+    "audit_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+    "task": { "type": "object", "additionalProperties": true },
+    "source": { "type": "object", "additionalProperties": true },
+    "relationship": { "type": "object", "additionalProperties": true },
+    "temporal_binding": { "$ref": "#/$defs/createdBinding" },
+    "scheduled_time": { "$ref": "#/$defs/scheduledTime" },
+    "delivery": {
+      "oneOf": [
+        { "type": "object", "additionalProperties": true },
+        { "type": "null" }
+      ]
+    },
+    "policies": { "type": "array", "maxItems": 32, "items": { "type": "object", "additionalProperties": true } },
+    "materialization": { "type": "object", "additionalProperties": true },
+    "work_instance_ids": {
+      "type": "array", "maxItems": 1000, "uniqueItems": true,
+      "items": { "$ref": "notification-types.schema.json#/$defs/id" }
+    },
+    "phases": { "type": "object", "additionalProperties": true },
+    "delivery_state": { "const": "not_attempted_by_command" },
+    "receipt": { "$ref": "#/$defs/receipt" }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "createdBinding": {
+      "type": "object",
+      "required": [
+        "temporal_binding_id", "binding_contract", "target_item_id", "target_anchor_role",
+        "source_item_id", "source_anchor_role", "relationship_id", "binding_mode",
+        "source_terminal_behavior", "created_by_command_id", "created_by_subject_id",
+        "created_at_utc", "binding_status", "latest_revision", "binding_state"
+      ],
+      "properties": {
+        "temporal_binding_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+        "binding_contract": { "const": "spine.relative-temporal-binding.v1" },
+        "target_item_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+        "target_anchor_role": { "const": "task_due" },
+        "source_item_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+        "source_anchor_role": { "const": "event_start" },
+        "relationship_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+        "binding_mode": { "enum": ["snapshot", "follow_source"] },
+        "source_terminal_behavior": {
+          "oneOf": [
+            { "enum": ["cancel_target", "detach_at_last_value", "require_decision"] },
+            { "type": "null" }
+          ]
+        },
+        "created_by_command_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+        "created_by_subject_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+        "created_at_utc": { "$ref": "notification-types.schema.json#/$defs/utcTimestamp" },
+        "binding_status": { "const": "active" },
+        "latest_revision": { "$ref": "relative-temporal-binding-types.schema.json#/$defs/bindingRevision" },
+        "binding_state": { "enum": ["snapshot_resolved", "current"] }
+      },
+      "additionalProperties": false
+    },
+    "scheduledTime": {
+      "type": "object",
+      "required": [
+        "anchor_id", "anchor_role", "local_date", "local_time", "timezone",
+        "timezone_database_version", "utc_instant"
+      ],
+      "properties": {
+        "anchor_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+        "anchor_role": { "const": "task_due" },
+        "local_date": { "$ref": "notification-types.schema.json#/$defs/localDate" },
+        "local_time": { "$ref": "notification-types.schema.json#/$defs/localTime" },
+        "timezone": { "type": "string", "minLength": 1 },
+        "timezone_database_version": { "type": "string", "minLength": 1 },
+        "utc_instant": { "$ref": "notification-types.schema.json#/$defs/utcTimestamp" }
+      },
+      "additionalProperties": false
+    },
+    "receipt": {
+      "type": "object",
+      "required": ["receipt_contract", "command_receipt_id", "effect", "semantic_facts_hash", "created_at_utc"],
+      "properties": {
+        "receipt_contract": { "const": "spine.schedule-related-task-create-receipt.v1" },
+        "command_receipt_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+        "effect": { "const": "related_task_schedule_created" },
+        "semantic_facts_hash": { "$ref": "notification-types.schema.json#/$defs/sha256" },
+        "created_at_utc": { "$ref": "notification-types.schema.json#/$defs/utcTimestamp" }
+      },
+      "additionalProperties": false
+    }
+  }
+}

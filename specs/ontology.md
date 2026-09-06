@@ -392,7 +392,7 @@ Minimum contract:
 - `membership_id` (`id`, required) — primary key.
 - `group_id` (`id`, required) — FK to `subject_groups.group_id`.
 - `subject_id` (`id`, required) — FK to `subjects.subject_id`.
-- `role` (`text`, required) — enum (minimum): `member`, `owner`.
+- `role` (`text`, required) — enum: `member`, `admin`, `owner` (schema 13).
 - `status` (`text`, required) — enum: `active`, `ended`.
 - `starts_at_utc` (`utc_instant`, required).
 - `ends_at_utc` (`utc_instant`, optional) — required when `status=ended`.
@@ -412,18 +412,55 @@ Generic coordination mapping:
 - event attendees = `item_subject_roles` rows with `role=participant`
 - notification recipients = `notification_policies` rows (optionally aligned with an `item_subject_roles` row with `role=recipient`)
 
-The proposed authentication boundary is tracked in `specs/identity-and-access.md`;
-`specs/permissions.md` owns multi-user resource permissions and access modes.
-These drafts propose explicit identity mappings, an `admin` group role, one accountable
-access owner per item, grants, and delivery mandates. These require a later ontology
-amendment and migration; this draft reference does not extend the current membership
-enum or turn `item_subject_roles.owner`, participation, profile ownership, or delivery
-recipients into an implemented authorization mechanism.
+The protected authentication boundary in `specs/identity-and-access.md` remains deferred.
+`specs/permissions.md` defines resource policy; its trusted web subset is implemented
+by `specs/trusted-multi-operator-web-api.md` on schema 13. Local CLI/worker authority
+is unchanged. `item_subject_roles.owner` and notification recipients are not access owners.
 
-`specs/permission-enforcement-and-web-admission.md` develops proposed physical owner,
-membership-revision, grant, admission-fence and delivery-mandate shapes. They remain a
-successor design, not additions to this implemented table/enum contract. Explicit
-ontology amendments, schema versions, migrations and fixtures are required before use.
+### 5.3.1 Schema-13 trusted web access subset
+
+- `ledger_access_state` binds one stable ledger/realm to `multi_user` /
+  `trusted_identity`, canonical access epoch, and recovery epoch. No request selects
+  these facts. Bootstrap is explicit; migration does not provision an operator.
+- `login_accounts`, `account_subject_bindings`, and `web_operators` separate an active
+  account, its one active subject binding per ledger, and chooser eligibility. Unique
+  active binding indexes prevent two accounts binding the same subject in one ledger.
+  Account creation records `trusted_local_approval`, not a verified identity claim.
+- `adopted_access_groups` identifies the bounded subset using member/admin/owner
+  permissions. `subject_memberships.current_revision` and immutable
+  `subject_membership_revisions` preserve role/status/interval history. Previously
+  stored membership IDs remain intact; migrated revision evidence explicitly has no
+  invented actor or receipt. Provisioning checks unique active membership and exactly
+  one designated owner per resulting adopted group under the writer transaction.
+- `item_access_owners` contains one subject/group owner and current revision per item;
+  `item_access_owner_revisions` stores complete state and immutable evidence. Search
+  indexes select items by owner. New web group items record the initiating subject's
+  creator entitlement; adopted historical items receive none.
+- `access_grants`, `access_grant_revisions`, and revision-keyed
+  `access_grant_operations` store item read/edit or catalog read/use, grantee, interval,
+  resource-owner revision and granting subject. Resource kinds are closed and checked
+  against fixed tables; referenced resource deletion is blocked. Revocation is terminal.
+- `route_security_revisions` and `route_member_use_approvals` plus immutable approval
+  revisions fence same-group authoring by members. Owner/status/routing changes advance
+  security/access revisions; display metadata alone does not. This is not a worker
+  delivery mandate or automatic cancellation.
+- Account, binding, chooser, owner, grant and approval revision tables store complete
+  resulting state with `changed_at_utc`, `changed_by_subject_id`, and the existing
+  `command_receipt_id`. Searchable heads are maintained atomically with their revision;
+  deferred foreign keys require a matching immutable revision before commit. No-op
+  operations and replay do not append a revision.
+- `access_audit_log` records one provisioning audit with actor, plan hash and epoch.
+  `web_receipt_links` is one-to-one attribution beside the canonical command receipt:
+  account, subject, binding/revision, self-selected basis, accepted epoch, API/registry
+  versions, create-owner discriminator and semantic envelope hash. It is not a second
+  replay authority. Creation, ownership, linkage and domain receipt commit together.
+
+Each changed provisioning batch advances the shared epoch once; ordinary domain edits
+retain item-version semantics. New web ownership advances the epoch. Supported local
+subject/group status and route-security updates advance the same fence. Runtime reads,
+failed requests and idle HTTP activity create no canonical rows. The migration is
+`0013_trusted_web_access.sql`; deferred sessions, authentication methods, executor tokens,
+transfers and per-attempt mandates are not instantiated by it.
 
 ### 5.4 delivery_targets
 

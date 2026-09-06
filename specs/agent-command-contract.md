@@ -1,6 +1,6 @@
 # Spine Agent Command Contract
 
-Status: Draft v0.5.0; executable scheduling, dynamic notification profiles, deterministic notification rendering, bounded runtime preflight, and exact Tickerd compatibility implemented on schema 12
+Status: Draft v0.5.0; executable scheduling, dynamic notification profiles, deterministic notification rendering, bounded runtime preflight, and exact Tickerd compatibility and the trusted web backend implemented on schema 13
 Scope: Agent-facing command/request contract for authoring and inspecting Spine coordination truth
 Created: 2026-06-19
 
@@ -24,8 +24,14 @@ trusted web deployment. Verified authentication/session and executor machinery a
 preserved as deferred; no new fields or authentication guarantees are added here.
 
 [trusted-multi-operator-web-api.md](trusted-multi-operator-web-api.md) specifies the
-proposed first HTTP allowlist, outer envelope, local provisioning and access-scoped
+implemented trusted-identity HTTP allowlist, outer envelope, local provisioning and access-scoped
 reads. Existing inner request/response families and the direct CLI remain unchanged.
+
+Local `web_access.plan` and `web_access.apply` use exact
+`spine.trusted-web-provisioning.v1` plus `spine.canonical-json.v1` in the compiled
+runtime registry; plan is read-only and apply is a receipt-bearing atomic write.
+Their closed schemas and normalized ID paths are in the trusted web bundle. They are
+not exposed through the HTTP command registry. Existing CLI privileges do not change.
 
 ## 2. Authority
 
@@ -35,7 +41,7 @@ Spine is the canonical coordination ledger and planning fabric. External tools a
 
 ## 3. Command Core Shape
 
-The stable command core lives behind the importable Python handler signature `spine.commands.handle(command: str, request: Mapping, context: CommandContext) -> Mapping`. The canonical command identifier is the dotted `resource.verb` value. Currently implemented contract command identifiers are `system.info`, `subject.upsert`, `subject_group.upsert`, `delivery_target.upsert`, `item.show`, `item.list`, `item.occurrences`, `item.archive`, `event.create`, `event.update`, `event.reschedule`, `event.cancel`, `task.create`, `schedule.build`, `schedule.create`, `schedule.show`, `agenda.show`, `schedule.update`, `schedule.cancel`, `schedule.related_task.create`, `schedule.binding.list`, `schedule.binding.reconcile`, `task.update`, `task.complete`, `task.cancel`, `relation.create`, `relation.list`, `reminder.create`, `reminder.edit`, `reminder.disable`, `notification.opportunities`, `notification_work.materialize`, `recurrence.instance.add`, `recurrence.instance.remove`, `recurrence.instance.override`, `recurrence.series.edit`, `occurrence_provenance.regenerate`, and `owner_scope.list`.
+The stable command core lives behind the importable Python handler signature `spine.commands.handle(command: str, request: Mapping, context: CommandContext) -> Mapping`. The canonical command identifier is the dotted `resource.verb` value. Currently implemented contract command identifiers are `system.info`, `subject.upsert`, `subject_group.upsert`, `delivery_target.upsert`, `item.show`, `item.list`, `item.occurrences`, `item.archive`, `event.create`, `event.update`, `event.reschedule`, `event.cancel`, `task.create`, `schedule.build`, `schedule.create`, `schedule.show`, `agenda.show`, `schedule.update`, `schedule.cancel`, `schedule.related_task.create`, `schedule.binding.list`, `schedule.binding.reconcile`, `task.update`, `task.complete`, `task.cancel`, `relation.create`, `relation.list`, `reminder.create`, `reminder.edit`, `reminder.disable`, `notification.opportunities`, `notification_work.materialize`, `recurrence.instance.add`, `recurrence.instance.remove`, `recurrence.instance.override`, `recurrence.series.edit`, `occurrence_provenance.regenerate`, `owner_scope.list`, `web_access.plan`, and `web_access.apply`.
 
 CLI invocations such as `spine event create` are transport aliases. MCP tools and localhost HTTP routes may use local names, but each request and response maps to exactly one canonical command and returns that command in the `command` field.
 

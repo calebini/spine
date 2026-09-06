@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cortext.local/spine/contracts/schemas/schedule-countdown-builder-response.schema.json",
+  "title": "Spine Relative Event Countdown Builder Response v1",
+  "type": "object",
+  "required": [
+    "ok", "command", "response_contract", "effect", "reference_time_utc", "event_at_utc",
+    "timezone", "timezone_database_version", "estimated_reminder_count", "schedule_create_request"
+  ],
+  "properties": {
+    "ok": { "const": true },
+    "command": { "const": "schedule.build" },
+    "response_contract": { "const": "spine.schedule-countdown-builder-response.v1" },
+    "effect": { "const": "schedule_create_request_built" },
+    "reference_time_utc": { "$ref": "notification-types.schema.json#/$defs/utcTimestamp" },
+    "event_at_utc": { "$ref": "notification-types.schema.json#/$defs/utcTimestamp" },
+    "timezone": { "type": "string", "minLength": 1 },
+    "timezone_database_version": { "type": "string", "minLength": 1 },
+    "estimated_reminder_count": { "$ref": "notification-types.schema.json#/$defs/decimalPositive" },
+    "schedule_create_request": { "$ref": "schedule-create-request.schema.json" }
+  },
+  "additionalProperties": false
+}

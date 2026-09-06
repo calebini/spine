@@ -7,6 +7,7 @@ from importlib import resources
 from pathlib import Path
 
 from spine.core.errors import SpineValidationError
+from spine.ledger.transactions import LedgerConnection
 
 DEFAULT_BUSY_TIMEOUT_MS = 5000
 
@@ -15,7 +16,7 @@ def connect(path: str | Path = ":memory:", *, busy_timeout_ms: int = DEFAULT_BUS
     """Open a SQLite connection with Spine-required connection settings."""
 
     database = str(path)
-    connection = sqlite3.connect(database)
+    connection = sqlite3.connect(database, factory=LedgerConnection)
     connection.row_factory = sqlite3.Row
     connection.execute("PRAGMA foreign_keys = ON")
     connection.execute(f"PRAGMA busy_timeout = {int(busy_timeout_ms)}")
@@ -41,7 +42,7 @@ def initialize_schema(connection: sqlite3.Connection) -> None:
         version = connection.execute(
             "SELECT MAX(schema_version) FROM ledger_schema"
         ).fetchone()[0]
-        if version == 12:
+        if version == 13:
             return
         raise SpineValidationError(
             "ledger_schema_requires_migration",
@@ -60,6 +61,7 @@ def initialize_schema(connection: sqlite3.Connection) -> None:
             (10, "0010_notification_profiles.sql"),
             (11, "0011_owner_scope_discovery.sql"),
             (12, "0012_arbitrary_subject_groups.sql"),
+            (13, "0013_trusted_web_access.sql"),
         ):
             migration = resources.files("spine.ledger.migrations").joinpath(name).read_text(encoding="utf-8")
             try:

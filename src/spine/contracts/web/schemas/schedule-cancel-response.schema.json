@@ -1,0 +1,82 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cortext.local/spine/contracts/schemas/schedule-cancel-response.schema.json",
+  "title": "Spine Atomic Schedule Cancel Response v1",
+  "type": "object",
+  "required": [
+    "ok", "command", "response_contract", "effect", "command_id", "command_receipt_id", "audit_id",
+    "item_id", "item_type", "target_version", "current_version", "detail_status",
+    "recurrence_ids", "notification_intent_ids", "notification_policy_ids",
+    "cancelled_work_instance_ids", "protected_stale_work_instance_ids", "phases", "receipt"
+  ],
+  "properties": {
+    "ok": { "const": true },
+    "command": { "const": "schedule.cancel" },
+    "response_contract": { "const": "spine.schedule-cancel-response.v1" },
+    "effect": { "enum": ["schedule_cancelled", "schedule_cancel_replay"] },
+    "command_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+    "command_receipt_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+    "audit_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+    "item_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+    "item_type": { "enum": ["event", "task"] },
+    "target_version": { "$ref": "notification-types.schema.json#/$defs/decimalPositive" },
+    "current_version": { "$ref": "notification-types.schema.json#/$defs/decimalPositive" },
+    "detail_status": { "const": "cancelled" },
+    "recurrence_ids": {
+      "type": "object",
+      "required": [],
+      "properties": {
+        "recurrence_set_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+        "recurrence_revision_id": { "$ref": "notification-types.schema.json#/$defs/id" }
+      },
+      "dependentRequired": {
+        "recurrence_set_id": ["recurrence_revision_id"],
+        "recurrence_revision_id": ["recurrence_set_id"]
+      },
+      "additionalProperties": false
+    },
+    "notification_intent_ids": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "$ref": "notification-types.schema.json#/$defs/id" }
+    },
+    "notification_policy_ids": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "$ref": "notification-types.schema.json#/$defs/id" }
+    },
+    "cancelled_work_instance_ids": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "$ref": "notification-types.schema.json#/$defs/id" }
+    },
+    "protected_stale_work_instance_ids": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "$ref": "notification-types.schema.json#/$defs/id" }
+    },
+    "phases": {
+      "type": "object",
+      "required": ["item", "work", "delivery"],
+      "properties": {
+        "item": { "const": "cancelled" },
+        "work": { "enum": ["none", "reconciled"] },
+        "delivery": { "const": "not_attempted" }
+      },
+      "additionalProperties": false
+    },
+    "receipt": {
+      "allOf": [
+        { "$ref": "schedule-operations-types.schema.json#/$defs/receiptSummary" },
+        {
+          "properties": {
+            "receipt_contract": { "const": "spine.schedule-cancel-receipt.v1" },
+            "effect": { "const": "schedule_cancelled" }
+          }
+        }
+      ]
+    },
+    "dry_run": { "type": "boolean" }
+  },
+  "additionalProperties": false
+}

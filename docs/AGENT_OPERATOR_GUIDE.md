@@ -878,3 +878,14 @@ Use repository evidence in this order:
 4. `contracts/schemas/` for machine-readable request and response shapes.
 5. `tests/fixtures/schedule_create/contracts/`, `tests/fixtures/recurrence/contracts/`, and `tests/fixtures/notifications/contracts/` for structural examples.
 6. `tests/fixtures/recurrence/vectors/` and `tests/fixtures/notifications/vectors/` for computed identity evidence.
+
+
+## Optional trusted web backend
+
+Spine 0.4.0/schema 13 adds a separately started trusted-identity backend. Existing
+CLI scheduling commands and worker authority are unchanged; do not rewrite agent
+workflows to use HTTP automatically. `web_access.plan` and `web_access.apply` are
+explicit local administration commands for account bindings, group roles, ownership
+adoption, grants, and route member-use approval. No automatic subject/account or
+historical-item adoption occurs. See [TRUSTED_WEB_OPERATIONS.md](TRUSTED_WEB_OPERATIONS.md).
+The backend is not authenticated sign-in and must not be exposed publicly.

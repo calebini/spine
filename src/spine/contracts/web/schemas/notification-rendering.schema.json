@@ -1,0 +1,165 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cortext.local/spine/contracts/schemas/notification-rendering.schema.json",
+  "title": "Spine Notification Rendering Evidence v1",
+  "$ref": "#/$defs/rendering",
+  "$defs": {
+    "rendering": {
+      "type": "object",
+      "required": [
+        "notification_rendering_id",
+        "attempt_id",
+        "work_instance_id",
+        "notification_opportunity_id",
+        "notification_intent_id",
+        "item_id",
+        "rendered_item_version",
+        "rendering_contract",
+        "rendering_profile",
+        "input_normalization_version",
+        "canonical_json_version",
+        "rendering_input_hash",
+        "rendered_content_hash",
+        "body_text",
+        "phrase_kind",
+        "attempted_at_utc",
+        "target_scheduled_fact",
+        "display_time_basis",
+        "display_timezone",
+        "created_at_utc",
+        "source_input",
+        "phrase_facts",
+        "primary_location"
+      ],
+      "properties": {
+        "notification_rendering_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+        "attempt_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+        "work_instance_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+        "notification_opportunity_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+        "notification_intent_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+        "item_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+        "rendered_item_version": { "$ref": "notification-types.schema.json#/$defs/decimalPositive" },
+        "rendering_contract": { "const": "spine.notification-rendering.v1" },
+        "rendering_profile": { "const": "spine.notification-rendering.concise-en-ca.v1" },
+        "input_normalization_version": { "const": "spine.notification-rendering-input.v1" },
+        "canonical_json_version": { "const": "spine.canonical-json.v1" },
+        "rendering_input_hash": { "$ref": "notification-types.schema.json#/$defs/sha256" },
+        "rendered_content_hash": { "$ref": "notification-types.schema.json#/$defs/sha256" },
+        "body_text": { "type": "string", "minLength": 1, "maxLength": 1024 },
+        "phrase_kind": {
+          "enum": [
+            "future_relative",
+            "future_calendar",
+            "now",
+            "past_relative",
+            "past_calendar",
+            "date_calendar"
+          ]
+        },
+        "attempted_at_utc": { "$ref": "notification-types.schema.json#/$defs/utcTimestamp" },
+        "target_scheduled_fact": { "type": "string", "minLength": 1 },
+        "target_at_utc": { "$ref": "notification-types.schema.json#/$defs/utcTimestamp" },
+        "display_time_basis": { "enum": ["local_date", "local_instant", "instant_utc"] },
+        "display_timezone": { "type": "string", "minLength": 1 },
+        "timezone_database_version": { "type": "string", "minLength": 1 },
+        "delta_seconds": { "$ref": "notification-types.schema.json#/$defs/signedDecimal" },
+        "occurrence_provenance_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+        "recurrence_revision_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+        "occurrence_key": { "$ref": "notification-types.schema.json#/$defs/id" },
+        "temporal_binding_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+        "temporal_binding_revision_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+        "created_at_utc": { "$ref": "notification-types.schema.json#/$defs/utcTimestamp" },
+        "source_input": { "$ref": "#/$defs/sourceInput" },
+        "phrase_facts": { "$ref": "#/$defs/phraseFacts" },
+        "primary_location": {
+          "oneOf": [
+            { "$ref": "#/$defs/locationSnapshot" },
+            { "type": "null" }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "sourceInput": {
+      "type": "object",
+      "required": [
+        "attempt_id",
+        "attempted_at_utc",
+        "work_instance_id",
+        "notification_opportunity_id",
+        "notification_intent_id",
+        "item_id",
+        "rendered_item_version",
+        "item_type",
+        "title",
+        "anchor_role",
+        "target_scheduled_fact",
+        "display_time_basis",
+        "display_timezone",
+        "timezone_database_version",
+        "primary_location"
+      ],
+      "properties": {
+        "attempt_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+        "attempted_at_utc": { "$ref": "notification-types.schema.json#/$defs/utcTimestamp" },
+        "work_instance_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+        "notification_opportunity_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+        "notification_intent_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+        "item_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+        "rendered_item_version": { "$ref": "notification-types.schema.json#/$defs/decimalPositive" },
+        "item_type": { "enum": ["event", "task"] },
+        "title": { "type": "string", "minLength": 1 },
+        "anchor_role": { "enum": ["event_start", "task_due"] },
+        "target_scheduled_fact": { "type": "string", "minLength": 1 },
+        "target_at_utc": { "$ref": "notification-types.schema.json#/$defs/utcTimestamp" },
+        "display_time_basis": { "enum": ["local_date", "local_instant", "instant_utc"] },
+        "display_timezone": { "type": "string", "minLength": 1 },
+        "timezone_database_version": {
+          "oneOf": [
+            { "type": "string", "minLength": 1 },
+            { "type": "null" }
+          ]
+        },
+        "recurrence_revision_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+        "occurrence_key": { "$ref": "notification-types.schema.json#/$defs/id" },
+        "occurrence_provenance_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+        "temporal_binding_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+        "temporal_binding_revision_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+        "primary_location": {
+          "oneOf": [
+            { "$ref": "#/$defs/locationSnapshot" },
+            { "type": "null" }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "locationSnapshot": {
+      "type": "object",
+      "required": ["location_id", "item_location_id", "location_kind", "location_label"],
+      "properties": {
+        "location_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+        "item_location_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+        "location_kind": { "enum": ["address", "place", "virtual", "relative", "unknown"] },
+        "location_label": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": false
+    },
+    "phraseFacts": {
+      "type": "object",
+      "required": ["normalized_title", "location_clause"],
+      "properties": {
+        "normalized_title": { "type": "string", "minLength": 1 },
+        "location_clause": { "type": "string" },
+        "delta_seconds": { "$ref": "notification-types.schema.json#/$defs/signedDecimal" },
+        "display_minutes": { "$ref": "notification-types.schema.json#/$defs/decimalPositive" },
+        "duration": { "type": "string", "minLength": 1 },
+        "reference_date": { "$ref": "notification-types.schema.json#/$defs/localDate" },
+        "target_date": { "$ref": "notification-types.schema.json#/$defs/localDate" },
+        "calendar_label": { "type": "string", "minLength": 1 },
+        "clock": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": false
+    }
+  }
+}

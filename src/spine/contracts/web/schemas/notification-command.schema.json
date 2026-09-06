@@ -1,0 +1,204 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cortext.local/spine/contracts/schemas/notification-command.schema.json",
+  "title": "Spine Notification Scheduling Commands v1",
+  "oneOf": [
+    {
+      "type": "object",
+      "required": ["command", "request"],
+      "properties": {
+        "command": { "const": "reminder.create" },
+        "request": {
+          "type": "object",
+          "required": [
+            "command_id", "actor_subject_id", "item_id", "target_version", "created_at_utc",
+            "recipient_kind", "channel", "delivery_target_id", "notification"
+          ],
+          "properties": {
+            "command_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+            "actor_subject_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+            "item_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+            "target_version": { "$ref": "notification-types.schema.json#/$defs/decimalPositive" },
+            "created_at_utc": { "$ref": "notification-types.schema.json#/$defs/utcTimestamp" },
+            "recipient_kind": { "enum": ["subject", "subject_group"] },
+            "recipient_subject_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+            "recipient_group_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+            "channel": { "type": "string", "minLength": 1 },
+            "delivery_target_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+            "if_absent": { "type": "boolean" },
+            "notification": { "$ref": "notification-authoring.schema.json" }
+          },
+          "allOf": [
+            {
+              "if": { "properties": { "recipient_kind": { "const": "subject" } }, "required": ["recipient_kind"] },
+              "then": {
+                "required": ["recipient_subject_id"],
+                "not": { "required": ["recipient_group_id"] }
+              },
+              "else": {
+                "required": ["recipient_group_id"],
+                "not": { "required": ["recipient_subject_id"] }
+              }
+            }
+          ],
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "required": ["command", "request"],
+      "properties": {
+        "command": { "const": "reminder.edit" },
+        "request": {
+          "type": "object",
+          "required": [
+            "command_id", "actor_subject_id", "item_id", "target_version",
+            "notification_intent_id", "notification_policy_id", "updated_at_utc", "patch"
+          ],
+          "properties": {
+            "command_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+            "actor_subject_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+            "item_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+            "target_version": { "$ref": "notification-types.schema.json#/$defs/decimalPositive" },
+            "notification_intent_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+            "notification_policy_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+            "updated_at_utc": { "$ref": "notification-types.schema.json#/$defs/utcTimestamp" },
+            "patch": {
+              "type": "object",
+              "minProperties": 1,
+              "properties": {
+                "recipient_kind": { "enum": ["subject", "subject_group"] },
+                "recipient_subject_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+                "recipient_group_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+                "channel": { "type": "string", "minLength": 1 },
+                "delivery_target_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+                "target": { "$ref": "notification-types.schema.json#/$defs/target" },
+                "schedule": { "$ref": "notification-types.schema.json#/$defs/schedule" },
+                "late_handling": { "$ref": "notification-types.schema.json#/$defs/lateHandling" }
+              },
+              "allOf": [
+                {
+                  "if": {
+                    "anyOf": [
+                      { "required": ["recipient_kind"] },
+                      { "required": ["recipient_subject_id"] },
+                      { "required": ["recipient_group_id"] }
+                    ]
+                  },
+                  "then": { "required": ["recipient_kind"] }
+                },
+                {
+                  "if": {
+                    "properties": { "recipient_kind": { "const": "subject" } },
+                    "required": ["recipient_kind"]
+                  },
+                  "then": {
+                    "required": ["recipient_subject_id"],
+                    "not": { "required": ["recipient_group_id"] }
+                  }
+                },
+                {
+                  "if": {
+                    "properties": { "recipient_kind": { "const": "subject_group" } },
+                    "required": ["recipient_kind"]
+                  },
+                  "then": {
+                    "required": ["recipient_group_id"],
+                    "not": { "required": ["recipient_subject_id"] }
+                  }
+                }
+              ],
+              "additionalProperties": false
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "required": ["command", "request"],
+      "properties": {
+        "command": { "const": "reminder.disable" },
+        "request": {
+          "type": "object",
+          "required": [
+            "command_id", "actor_subject_id", "item_id", "target_version",
+            "notification_intent_id", "notification_policy_id", "disabled_at_utc"
+          ],
+          "properties": {
+            "command_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+            "actor_subject_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+            "item_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+            "target_version": { "$ref": "notification-types.schema.json#/$defs/decimalPositive" },
+            "notification_intent_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+            "notification_policy_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+            "disabled_at_utc": { "$ref": "notification-types.schema.json#/$defs/utcTimestamp" },
+            "reason_code": { "type": "string", "minLength": 1 }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "required": ["command", "request"],
+      "properties": {
+        "command": { "const": "notification.opportunities" },
+        "request": {
+          "type": "object",
+          "required": ["item_id", "evaluated_at_utc", "range_start_utc", "range_end_utc", "limit"],
+          "properties": {
+            "item_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+            "evaluated_at_utc": { "$ref": "notification-types.schema.json#/$defs/utcTimestamp" },
+            "notification_intent_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+            "range_start_utc": { "$ref": "notification-types.schema.json#/$defs/utcTimestamp" },
+            "range_end_utc": { "$ref": "notification-types.schema.json#/$defs/utcTimestamp" },
+            "limit": { "$ref": "notification-types.schema.json#/$defs/decimalPositive" },
+            "cursor": { "type": "string", "minLength": 1 },
+            "include_diagnostics": { "type": "boolean" }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "required": ["command", "request"],
+      "properties": {
+        "command": { "const": "notification_work.materialize" },
+        "request": {
+          "type": "object",
+          "required": [
+            "command_id", "actor_subject_id", "item_id", "target_version", "materialized_at_utc",
+            "range_start_utc", "range_end_utc", "limit"
+          ],
+          "properties": {
+            "command_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+            "actor_subject_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+            "item_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+            "target_version": { "$ref": "notification-types.schema.json#/$defs/decimalPositive" },
+            "materialized_at_utc": { "$ref": "notification-types.schema.json#/$defs/utcTimestamp" },
+            "notification_intent_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+            "range_start_utc": { "$ref": "notification-types.schema.json#/$defs/utcTimestamp" },
+            "range_end_utc": { "$ref": "notification-types.schema.json#/$defs/utcTimestamp" },
+            "limit": { "$ref": "notification-types.schema.json#/$defs/decimalPositive" },
+            "notification_opportunity_ids": {
+              "type": "array",
+              "minItems": 1,
+              "uniqueItems": true,
+              "items": { "$ref": "notification-types.schema.json#/$defs/id" }
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    }
+  ]
+}

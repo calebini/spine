@@ -1,6 +1,6 @@
 # Trusted Multi-Operator Web API
 
-Status: Draft v0.1.1; logical draft passed bounded recheck; contract artifacts added; backend not implemented
+Status: v0.1.2; trusted-identity backend implemented in Spine 0.4.0 / schema 13; browser and deployment qualification remain separate
 Created: 2026-09-06
 Proposed capability: `spine.trusted-web-api.v1`
 
@@ -24,8 +24,9 @@ scheduling engine or an authentication system. [ontology.md](ontology.md),
 [schedule-operator-tools.md](schedule-operator-tools.md), and
 [notification-profiles.md](notification-profiles.md) retain their domain authority.
 
-This draft declares no runtime capability. Implementation requires corresponding
-schemas, migrations, registry entries and fixtures. No current CLI contract is changed.
+The implemented backend declares `spine.trusted-web-api.v1` and the pinned supporting
+families. Its optional `web` package extra supplies HTTP and schema libraries. Local
+`web_access.plan` / `web_access.apply` are additive; existing CLI contracts are unchanged.
 
 ## 2. Deliberate Trust and Release Boundaries
 
@@ -283,7 +284,8 @@ a local capability pending the stronger disclosure contract. Existing same-owner
 bindings and their domain freshness rules are preserved.
 
 Resolvers inspect normalized resulting state, implicit defaults and all returned
-references before mutation. A new inline location is part of item authoring; attaching
+references before commit. Tentative in-transaction rows are never released and roll
+back entirely if resultant-state authorization fails. A new inline location is part of item authoring; attaching
 an existing location whose sharing authority is undefined denies. Relation/subject-role
 changes embedded in a supported command cannot bypass applicable reference checks.
 No partial composite commits and no automatic route creation. Missing resolver/effect
@@ -467,7 +469,7 @@ design is separate; this slice specifies the service it can safely and honestly 
 The first machine bundle is `contracts/spine.trusted-web-command-registry.v1.json`,
 `contracts/schemas/trusted-web-*.schema.json`, and the associated normalization, schema-pin,
 fixture and acceptance artifacts indexed in [TRUSTED_WEB_CONTRACTS.md](../docs/TRUSTED_WEB_CONTRACTS.md).
-It remains contract-only; no capability is added to `system.info`.
+The bundle is implemented by the optional backend; `system.info` declares the supported families, not verified authentication.
 
 Registry null request-version fields denote the existing untagged `schedule.show`,
 `item.occurrences` and `task.complete` payloads, not acceptance of any supplied version.
@@ -489,5 +491,49 @@ semantic checks in addition to schemas.
 Cursor schemas capture the protected payload and include recovery epoch. They do not
 make plain JSON a valid cursor. Preserve the original 15-minute expiry across pages;
 publish signed wire/tamper vectors with the chosen established library before release.
-Minimal DDL/index implementation, complete result/reference checks and executable
-`WEB-01`–`WEB-15` coverage remain prerequisites for backend readiness.
+Schema 13, executable backend tests, and signed vectors now accompany the bundle.
+Network reachability and actual browser identity-switch behavior remain deployment/GUI
+gates; local backend tests do not certify those external boundaries.
+
+
+### 10.2 Implemented service profile
+
+`spine-web` uses Flask and Waitress; `spine.web.service` owns request-local connections,
+permission decisions and the outer transaction. Existing helper context managers cannot
+commit independently inside that transaction. Local CLI/worker connections preserve
+normal SQLite behavior. No model, subprocess, transport send, or network schema fetch
+runs in web authoring. Both read snapshots share one elapsed/SQL budget; current
+resource rights are rechecked before release, including time-expiring grants.
+
+The private deployment has four request slots and at most sixteen server connections,
+with bounded headers, bodies and socket inactivity. Exact Host/Origin is mandatory;
+forwarded identity headers are not authority. Public readiness/info/operator reads
+write nothing. Returned JSON numbers retain existing inner response types; canonical
+hashes retain Spine's number-free preimages. Persisted integer reference facts are
+encoded as decimal strings before plan hashing.
+
+Schema 13 stores the deliberately small account/operator/access subset in the ontology.
+Only adopted groups are subject to the resulting one-owner/unique-active-membership
+checks: provisioning validates the bounded final set under the writer lock, including
+atomic handoff. Historical unadopted groups do not prevent migration. This is the
+immediate subset's application-level final-state check, not the deferred protected
+model's proposed global partial-unique-index rollout. Raw administration requires
+quiescing and revalidating the service as already specified.
+
+Signed cursors use ItsDangerous URLSafeSerializer, salt `spine.trusted-web-cursor.v1`,
+SHA-256 signing, and a random process-local key. New web ownership IDs use the
+existing command derivation with prefix/row role `item_access_owner`, command
+`schedule.create`, and path `/create_owner_scope`; no second item identity is introduced. The public test vector uses a known
+**test-only** key. Restart/restore rotates the runtime key; old cursors fail. Agenda
+cursors additionally bind an opaque canonical `domain_cursor`, preserving its exact
+ordering and source-snapshot fence without reimplementing recurrence pagination.
+
+The initial candidate ceiling is 100, not just a page-size limit. Exceeding it returns
+`capacity_exceeded`; explicit readable `item_ids` can narrow agenda candidates before
+expansion. Items are enumerated through ownership/grantee indexes, not the entire
+coordination ledger. This bounded first profile must not be represented as unbounded
+search over a large personal catalog. Future scalable indexed paging can extend this
+profile without widening current budgets silently.
+
+See [TRUSTED_WEB_OPERATIONS.md](../docs/TRUSTED_WEB_OPERATIONS.md) for provisioning,
+network restrictions, error/retry interpretation, backup and paired rollback.

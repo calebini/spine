@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cortext.local/spine/contracts/schemas/trusted-web-items-request.schema.json",
+  "type": "object",
+  "properties": {
+    "contract_version": {
+      "const": "spine.trusted-web-items.v1"
+    },
+    "owner_scope": {
+      "$ref": "trusted-web-types.schema.json#/$defs/owner"
+    },
+    "item_types": {
+      "type": "array",
+      "items": {
+        "enum": [
+          "event",
+          "task"
+        ]
+      },
+      "maxItems": 2,
+      "minItems": 1,
+      "uniqueItems": true,
+      "default": [
+        "event",
+        "task"
+      ]
+    },
+    "include_terminal": {
+      "type": "boolean",
+      "default": false
+    },
+    "limit": {
+      "$ref": "trusted-web-types.schema.json#/$defs/limit",
+      "default": "50"
+    },
+    "cursor": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 8192
+    }
+  },
+  "required": [
+    "contract_version"
+  ],
+  "additionalProperties": false
+}

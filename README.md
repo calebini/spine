@@ -51,8 +51,22 @@ allowed to quietly become canonical.
 
 ## What Works Today
 
-Spine `0.3.0` is an implemented alpha exercised in a staging agent environment. Its
-current SQLite ledger schema is version `10`.
+Spine `0.4.0` is an implemented alpha; its scheduling core is exercised in a staging
+agent environment. The current SQLite ledger schema is version `13`. The new optional
+trusted multi-operator backend is locally verified and awaits staging deployment.
+
+### Trusted multi-operator web backend
+
+An optional backend now serves scoped agenda/items, canonical scheduling commands,
+and archetype/profile reads for honestly selected operator accounts. It shares the
+same ledger and command handlers as the CLI. Explicit ownership, group roles,
+revisioned grants, atomic attribution, signed cursors, and bounded requests keep the
+interface deliberate without introducing an identity provider.
+
+This is **trusted identification, not authentication**. Restrict network access to
+trusted devices. The browser GUI and verified sign-in are separate follow-ons;
+existing local CLI and worker privileges are unchanged.
+[Provision and operate the backend](docs/TRUSTED_WEB_OPERATIONS.md).
 
 ### Atomic scheduling
 

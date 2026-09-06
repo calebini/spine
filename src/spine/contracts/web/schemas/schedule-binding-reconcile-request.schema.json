@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cortext.local/spine/contracts/schemas/schedule-binding-reconcile-request.schema.json",
+  "title": "Spine Temporal Binding Reconcile Request v1",
+  "type": "object",
+  "required": [
+    "contract_version", "command_id", "actor_subject_id", "reconciled_at_utc",
+    "temporal_binding_id", "target_temporal_binding_revision_id", "source_target_version",
+    "target_target_version", "expected_binding_state", "materialization"
+  ],
+  "properties": {
+    "contract_version": { "const": "spine.schedule-binding-reconcile.v1" },
+    "command_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+    "actor_subject_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+    "reconciled_at_utc": { "$ref": "notification-types.schema.json#/$defs/utcTimestamp" },
+    "temporal_binding_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+    "target_temporal_binding_revision_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+    "source_target_version": { "$ref": "notification-types.schema.json#/$defs/decimalPositive" },
+    "source_recurrence_revision_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+    "target_target_version": { "$ref": "notification-types.schema.json#/$defs/decimalPositive" },
+    "expected_binding_state": { "$ref": "relative-temporal-binding-types.schema.json#/$defs/bindingState" },
+    "operator_resolution": { "enum": ["cancel_target", "detach_at_current_target"] },
+    "materialization": { "$ref": "schedule-create-request.schema.json#/$defs/materialization" }
+  },
+  "additionalProperties": false
+}

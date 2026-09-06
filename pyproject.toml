@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "spine-ledger"
-version = "0.3.0"
+version = "0.4.0"
 description = "Canonical coordination ledger and planning fabric for Cortext1."
 readme = "README.md"
 requires-python = ">=3.12"
@@ -14,6 +14,7 @@ authors = [
 ]
 
 [project.optional-dependencies]
+web = ["Flask>=3.1,<4", "itsdangerous>=2.2,<3", "waitress>=3.0,<4", "jsonschema>=4.23"]
 test = [
   "jsonschema>=4.23",
   "pytest>=8",
@@ -33,13 +34,14 @@ spine-seed-demo = "spine.runtime.seed_demo:main"
 spine-tickerd-observe = "spine.runtime.tickerd_observe:main"
 spine-tickerd-runner = "spine.runtime.tickerd_runner:main"
 spine-worker = "spine.runtime.worker:main"
+spine-web = "spine.web.http:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
 
 [tool.setuptools.package-data]
 "spine.ledger" = ["schema.sql", "schema_object_manifest.v1.json", "migrations/*.sql"]
-"spine.contracts" = ["*.json"]
+"spine.contracts" = ["*.json", "web/*.json", "web/schemas/*.json"]
 "spine" = ["py.typed"]
 
 [tool.pytest.ini_options]

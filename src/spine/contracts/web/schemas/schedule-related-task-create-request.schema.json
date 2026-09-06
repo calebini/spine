@@ -1,0 +1,109 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cortext.local/spine/contracts/schemas/schedule-related-task-create-request.schema.json",
+  "title": "Spine Atomic Related Task Create Request v1",
+  "type": "object",
+  "required": [
+    "contract_version", "command_id", "actor_subject_id", "created_at_utc", "source",
+    "task", "relationship", "temporal_binding", "reminders", "materialization"
+  ],
+  "properties": {
+    "contract_version": { "const": "spine.schedule-related-task-create.v1" },
+    "command_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+    "actor_subject_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+    "created_at_utc": { "$ref": "notification-types.schema.json#/$defs/utcTimestamp" },
+    "source": { "$ref": "#/$defs/source" },
+    "task": { "$ref": "#/$defs/task" },
+    "relationship": {
+      "type": "object",
+      "required": ["relation_type"],
+      "properties": { "relation_type": { "const": "part_of" } },
+      "additionalProperties": false
+    },
+    "temporal_binding": { "$ref": "#/$defs/temporalBinding" },
+    "delivery": { "$ref": "schedule-create-request.schema.json#/$defs/delivery" },
+    "reminders": {
+      "type": "array",
+      "maxItems": 32,
+      "items": { "$ref": "schedule-create-request.schema.json#/$defs/reminder" }
+    },
+    "materialization": { "$ref": "schedule-create-request.schema.json#/$defs/materialization" }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "reminders": { "minItems": 1 } }, "required": ["reminders"] },
+      "then": { "required": ["delivery"] },
+      "else": { "not": { "required": ["delivery"] } }
+    }
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "source": {
+      "type": "object",
+      "required": ["item_id", "target_version", "anchor_role", "scope"],
+      "properties": {
+        "item_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+        "target_version": { "$ref": "notification-types.schema.json#/$defs/decimalPositive" },
+        "anchor_role": { "const": "event_start" },
+        "scope": { "enum": ["item", "selected_occurrence"] },
+        "source_recurrence_revision_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+        "target_occurrence_key": { "$ref": "notification-types.schema.json#/$defs/id" },
+        "target_occurrence_selector": { "$ref": "relative-temporal-binding-types.schema.json#/$defs/occurrenceSelector" }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "scope": { "const": "selected_occurrence" } }, "required": ["scope"] },
+          "then": {
+            "required": ["source_recurrence_revision_id", "target_occurrence_key", "target_occurrence_selector"]
+          },
+          "else": {
+            "not": {
+              "anyOf": [
+                { "required": ["source_recurrence_revision_id"] },
+                { "required": ["target_occurrence_key"] },
+                { "required": ["target_occurrence_selector"] }
+              ]
+            }
+          }
+        }
+      ],
+      "additionalProperties": false
+    },
+    "task": {
+      "type": "object",
+      "required": ["title"],
+      "properties": {
+        "title": { "type": "string", "minLength": 1 },
+        "summary": { "type": "string" },
+        "source_ref": { "type": "string" },
+        "priority": { "type": "string", "minLength": 1 },
+        "subject_roles": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "schedule-create-request.schema.json#/$defs/subjectRole" }
+        }
+      },
+      "additionalProperties": false
+    },
+    "temporalBinding": {
+      "type": "object",
+      "required": ["binding_mode", "offset_basis", "offset_seconds"],
+      "properties": {
+        "binding_mode": { "enum": ["snapshot", "follow_source"] },
+        "source_terminal_behavior": {
+          "enum": ["cancel_target", "detach_at_last_value", "require_decision"]
+        },
+        "offset_basis": { "const": "elapsed" },
+        "offset_seconds": { "$ref": "notification-types.schema.json#/$defs/signedDecimal" }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "binding_mode": { "const": "follow_source" } }, "required": ["binding_mode"] },
+          "then": { "required": ["source_terminal_behavior"] },
+          "else": { "not": { "required": ["source_terminal_behavior"] } }
+        }
+      ],
+      "additionalProperties": false
+    }
+  }
+}
