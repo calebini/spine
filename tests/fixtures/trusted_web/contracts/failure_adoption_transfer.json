@@ -1,0 +1,16 @@
+{
+  "contract_version": "spine.trusted-web-provisioning.v1",
+  "ledger_id": "ledger-demo",
+  "expected_access_epoch": "1",
+  "item_adoptions": [
+    {
+      "operation": "set",
+      "item_id": "item-demo",
+      "expected_item_version": "1",
+      "owner_scope": {
+        "owner_kind": "subject_group",
+        "owner_group_id": "group-demo"
+      }
+    }
+  ]
+}

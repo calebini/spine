@@ -1,0 +1,60 @@
+{
+  "contract_version": "spine.trusted-web-normalization.v1",
+  "status": "draft_contract_only",
+  "canonical_json": "spine.canonical-json.v1",
+  "plan_hash_fields": [
+    "normalized_plan",
+    "references"
+  ],
+  "plan_hash_excludes": [
+    "warnings",
+    "conflicts",
+    "can_apply"
+  ],
+  "semantic_envelope_hash_fields": [
+    "api_version",
+    "registry_version",
+    "command",
+    "account_id",
+    "subject_id",
+    "binding_id",
+    "binding_revision",
+    "create_owner_scope",
+    "request"
+  ],
+  "semantic_envelope_hash_excludes": [
+    "selection_id",
+    "Origin",
+    "network_address",
+    "access_epoch",
+    "expected_access_epoch"
+  ],
+  "operation_array_order": [
+    "operators",
+    "memberships",
+    "item_adoptions",
+    "grants",
+    "route_approvals"
+  ],
+  "id_derivation": "spine.command-id.v1",
+  "command": "web_access.apply",
+  "row_roles": {
+    "account": "account",
+    "binding": "account_subject_binding",
+    "membership": "subject_membership",
+    "item_adoption": "item_access_owner",
+    "grant": "access_grant"
+  },
+  "normalization_rules": [
+    "Absent operation arrays become empty arrays.",
+    "Sort each array by canonical JSON bytes of its normalized operation before assigning zero-based indexes.",
+    "Reject duplicate semantic targets, including targets reached by different identifiers after bounded resolution.",
+    "Operation paths are /<array>/<decimal index>; account binding rows append /binding.",
+    "Resolve existing referenced facts before hashing; references are unique and sorted by (kind,id).",
+    "Existing IDs never change. Use command_derived_id with prefix=row_role and the normalized operation path.",
+    "Do not include advisory warnings/conflicts in plan hash; apply independently rejects conflicts.",
+    "Semantic request is canonical inner request after domain normalization, not transport JSON; create_owner_scope is null for non-create commands.",
+    "Binding revision is hash-bearing; a changed binding denies old replay instead of rewriting attribution.",
+    "No-op apply preserves the access epoch unless bootstrap creates epoch 1. Changed apply increments it once; compatible replay increments nothing."
+  ]
+}

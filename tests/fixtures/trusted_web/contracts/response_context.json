@@ -1,0 +1,28 @@
+{
+  "contract_version": "spine.trusted-web-context.v1",
+  "owner_scopes": [
+    {
+      "owner_scope": {
+        "owner_kind": "subject_group",
+        "owner_group_id": "group-demo"
+      },
+      "allowed_operations": [
+        "read",
+        "create"
+      ]
+    }
+  ],
+  "routes": [],
+  "catalog_scopes": [
+    {
+      "owner_scope": {
+        "owner_kind": "subject_group",
+        "owner_group_id": "group-demo"
+      },
+      "operations": [
+        "catalog.read",
+        "catalog.use"
+      ]
+    }
+  ]
+}

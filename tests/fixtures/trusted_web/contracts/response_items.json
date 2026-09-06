@@ -1,0 +1,24 @@
+{
+  "contract_version": "spine.trusted-web-items.v1",
+  "entries": [
+    {
+      "item_id": "task-demo",
+      "item_type": "task",
+      "current_version": "1",
+      "title": "Unscheduled task",
+      "status": "active",
+      "detail_status": "open",
+      "owner_scope": {
+        "owner_kind": "subject_group",
+        "owner_group_id": "group-demo"
+      },
+      "allowed_operations": [
+        "read",
+        "edit"
+      ]
+    }
+  ],
+  "limit": "50",
+  "has_more": false,
+  "next_cursor": null
+}

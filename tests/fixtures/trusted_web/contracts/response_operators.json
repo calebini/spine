@@ -1,0 +1,18 @@
+{
+  "contract_version": "spine.trusted-web-api.v1",
+  "access_epoch": "1",
+  "operators": [
+    {
+      "account_id": "account-a",
+      "subject_id": "subject-a",
+      "account_display_name": "Operator a",
+      "subject_display_name": "Person a"
+    },
+    {
+      "account_id": "account-b",
+      "subject_id": "subject-b",
+      "account_display_name": "Operator b",
+      "subject_display_name": "Person b"
+    }
+  ]
+}

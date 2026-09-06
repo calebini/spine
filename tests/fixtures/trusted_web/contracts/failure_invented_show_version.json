@@ -1,0 +1,7 @@
+{
+  "contract_version": "spine.trusted-web-api.v1",
+  "request": {
+    "item_id": "private-item",
+    "contract_version": "spine.schedule-show.v1"
+  }
+}

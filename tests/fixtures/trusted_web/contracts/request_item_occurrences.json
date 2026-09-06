@@ -1,0 +1,9 @@
+{
+  "contract_version": "spine.trusted-web-api.v1",
+  "request": {
+    "item_id": "event-demo",
+    "range_start": "2026-09-06T00:00:00Z",
+    "range_end": "2026-09-07T00:00:00Z",
+    "limit": "100"
+  }
+}

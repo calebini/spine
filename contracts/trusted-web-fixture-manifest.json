@@ -1,0 +1,197 @@
+{
+  "schema_version": "spine.trusted-web-fixtures.v1",
+  "status": "contract_only",
+  "runtime_acceptance": "pending",
+  "fixtures": [
+    {
+      "fixture_id": "request_item_archetype_list",
+      "fixture": "tests/fixtures/trusted_web/contracts/request_item_archetype_list.json",
+      "schema": "contracts/schemas/trusted-web-command-request.schema.json",
+      "schema_ref": "#/$defs/item_archetype.list",
+      "valid": true
+    },
+    {
+      "fixture_id": "request_item_archetype_show",
+      "fixture": "tests/fixtures/trusted_web/contracts/request_item_archetype_show.json",
+      "schema": "contracts/schemas/trusted-web-command-request.schema.json",
+      "schema_ref": "#/$defs/item_archetype.show",
+      "valid": true
+    },
+    {
+      "fixture_id": "request_item_occurrences",
+      "fixture": "tests/fixtures/trusted_web/contracts/request_item_occurrences.json",
+      "schema": "contracts/schemas/trusted-web-command-request.schema.json",
+      "schema_ref": "#/$defs/item.occurrences",
+      "valid": true
+    },
+    {
+      "fixture_id": "request_notification_profile_binding_list",
+      "fixture": "tests/fixtures/trusted_web/contracts/request_notification_profile_binding_list.json",
+      "schema": "contracts/schemas/trusted-web-command-request.schema.json",
+      "schema_ref": "#/$defs/notification_profile.binding.list",
+      "valid": true
+    },
+    {
+      "fixture_id": "request_notification_profile_list",
+      "fixture": "tests/fixtures/trusted_web/contracts/request_notification_profile_list.json",
+      "schema": "contracts/schemas/trusted-web-command-request.schema.json",
+      "schema_ref": "#/$defs/notification_profile.list",
+      "valid": true
+    },
+    {
+      "fixture_id": "request_notification_profile_resolve",
+      "fixture": "tests/fixtures/trusted_web/contracts/request_notification_profile_resolve.json",
+      "schema": "contracts/schemas/trusted-web-command-request.schema.json",
+      "schema_ref": "#/$defs/notification_profile.resolve",
+      "valid": true
+    },
+    {
+      "fixture_id": "request_notification_profile_show",
+      "fixture": "tests/fixtures/trusted_web/contracts/request_notification_profile_show.json",
+      "schema": "contracts/schemas/trusted-web-command-request.schema.json",
+      "schema_ref": "#/$defs/notification_profile.show",
+      "valid": true
+    },
+    {
+      "fixture_id": "request_schedule_build",
+      "fixture": "tests/fixtures/trusted_web/contracts/request_schedule_build.json",
+      "schema": "contracts/schemas/trusted-web-command-request.schema.json",
+      "schema_ref": "#/$defs/schedule.build",
+      "valid": true
+    },
+    {
+      "fixture_id": "request_schedule_cancel",
+      "fixture": "tests/fixtures/trusted_web/contracts/request_schedule_cancel.json",
+      "schema": "contracts/schemas/trusted-web-command-request.schema.json",
+      "schema_ref": "#/$defs/schedule.cancel",
+      "valid": true
+    },
+    {
+      "fixture_id": "request_schedule_create",
+      "fixture": "tests/fixtures/trusted_web/contracts/request_schedule_create.json",
+      "schema": "contracts/schemas/trusted-web-command-request.schema.json",
+      "schema_ref": "#/$defs/schedule.create",
+      "valid": true
+    },
+    {
+      "fixture_id": "request_schedule_show",
+      "fixture": "tests/fixtures/trusted_web/contracts/request_schedule_show.json",
+      "schema": "contracts/schemas/trusted-web-command-request.schema.json",
+      "schema_ref": "#/$defs/schedule.show",
+      "valid": true
+    },
+    {
+      "fixture_id": "request_schedule_update",
+      "fixture": "tests/fixtures/trusted_web/contracts/request_schedule_update.json",
+      "schema": "contracts/schemas/trusted-web-command-request.schema.json",
+      "schema_ref": "#/$defs/schedule.update",
+      "valid": true
+    },
+    {
+      "fixture_id": "request_task_complete",
+      "fixture": "tests/fixtures/trusted_web/contracts/request_task_complete.json",
+      "schema": "contracts/schemas/trusted-web-command-request.schema.json",
+      "schema_ref": "#/$defs/task.complete",
+      "valid": true
+    },
+    {
+      "fixture_id": "failure_invented_show_version",
+      "fixture": "tests/fixtures/trusted_web/contracts/failure_invented_show_version.json",
+      "schema": "contracts/schemas/trusted-web-command-request.schema.json",
+      "schema_ref": "#/$defs/schedule.show",
+      "valid": false
+    },
+    {
+      "fixture_id": "failure_unknown_outer_field",
+      "fixture": "tests/fixtures/trusted_web/contracts/failure_unknown_outer_field.json",
+      "schema": "contracts/schemas/trusted-web-command-request.schema.json",
+      "schema_ref": "#/$defs/schedule.show",
+      "valid": false
+    },
+    {
+      "fixture_id": "failure_missing_epoch",
+      "fixture": "tests/fixtures/trusted_web/contracts/failure_missing_epoch.json",
+      "schema": "contracts/schemas/trusted-web-command-request.schema.json",
+      "schema_ref": "#/$defs/schedule.create",
+      "valid": false
+    },
+    {
+      "fixture_id": "request_items",
+      "fixture": "tests/fixtures/trusted_web/contracts/request_items.json",
+      "schema": "contracts/schemas/trusted-web-items-request.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "failure_items_limit",
+      "fixture": "tests/fixtures/trusted_web/contracts/failure_items_limit.json",
+      "schema": "contracts/schemas/trusted-web-items-request.schema.json",
+      "valid": false
+    },
+    {
+      "fixture_id": "response_items",
+      "fixture": "tests/fixtures/trusted_web/contracts/response_items.json",
+      "schema": "contracts/schemas/trusted-web-items-response.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "response_operators",
+      "fixture": "tests/fixtures/trusted_web/contracts/response_operators.json",
+      "schema": "contracts/schemas/trusted-web-operators-response.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "response_context",
+      "fixture": "tests/fixtures/trusted_web/contracts/response_context.json",
+      "schema": "contracts/schemas/trusted-web-context-response.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "request_agenda",
+      "fixture": "tests/fixtures/trusted_web/contracts/request_agenda.json",
+      "schema": "contracts/schemas/trusted-web-agenda-request.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "response_agenda",
+      "fixture": "tests/fixtures/trusted_web/contracts/response_agenda.json",
+      "schema": "contracts/schemas/trusted-web-agenda-response.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "response_denied",
+      "fixture": "tests/fixtures/trusted_web/contracts/response_denied.json",
+      "schema": "contracts/schemas/trusted-web-error.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "request_provisioning",
+      "fixture": "tests/fixtures/trusted_web/contracts/request_provisioning.json",
+      "schema": "contracts/schemas/trusted-web-provisioning-plan-request.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "failure_adoption_transfer",
+      "fixture": "tests/fixtures/trusted_web/contracts/failure_adoption_transfer.json",
+      "schema": "contracts/schemas/trusted-web-provisioning-plan-request.schema.json",
+      "valid": false
+    },
+    {
+      "fixture_id": "failure_admin_grant",
+      "fixture": "tests/fixtures/trusted_web/contracts/failure_admin_grant.json",
+      "schema": "contracts/schemas/trusted-web-provisioning-plan-request.schema.json",
+      "valid": false
+    },
+    {
+      "fixture_id": "response_provisioning_plan",
+      "fixture": "tests/fixtures/trusted_web/contracts/response_provisioning_plan.json",
+      "schema": "contracts/schemas/trusted-web-provisioning-plan-response.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "request_provisioning_apply",
+      "fixture": "tests/fixtures/trusted_web/contracts/request_provisioning_apply.json",
+      "schema": "contracts/schemas/trusted-web-provisioning-apply-request.schema.json",
+      "valid": true
+    }
+  ]
+}

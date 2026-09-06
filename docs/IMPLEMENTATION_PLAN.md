@@ -1,6 +1,6 @@
 # Spine Implementation Plan
 
-Status: Trusted multi-operator web API logical draft audited; contract codification next
+Status: Trusted web contract bundle added; backend and runtime acceptance pending
 Last updated: 2026-09-06 (web API delivery sequence; historical delivery sections retained)
 
 This is a non-normative delivery plan. The specifications and machine-readable contracts remain authoritative.
@@ -482,7 +482,15 @@ No additional broad spec draft or routine audit loop is scheduled now. Resolve c
 gaps exposed by codification with narrow updates to the existing authorities; escalate
 material product/boundary decisions instead of inventing them in schemas or runtime code.
 
-### 1. Codify the Contracts — Next Work
+### 1. Codify the Contracts — Initial Bundle Added
+
+The first bundle is indexed in [TRUSTED_WEB_CONTRACTS.md](TRUSTED_WEB_CONTRACTS.md):
+closed registry, pinned inner schema dependencies, HTTP/provisioning/evidence schemas,
+plan/ID vectors and positive/negative fixtures. The dedicated static suite checks these
+artifacts; `WEB-01`–`WEB-15` runtime scenarios remain explicitly pending. This is not
+an implemented web capability. Cursor signed-wire qualification and minimal persistence
+DDL/indexes must be completed with the backend; catalog nested-result authorization
+cannot be replaced by the general canonical response schema.
 
 Add machine-readable artifacts to this repository; this does not mean external publication
 or deployment. Cover:

@@ -1,0 +1,24 @@
+{
+  "contract_version": "spine.trusted-web-api.v1",
+  "request": {
+    "contract_version": "spine.schedule-countdown-builder.v1",
+    "command_id": "build-demo",
+    "actor_subject_id": "subject-a",
+    "reference_time_utc": "2026-09-06T09:00:00Z",
+    "title": "Lesson",
+    "timezone": "UTC",
+    "timezone_database_version": { "kind": "system_current" },
+    "event_delay_seconds": "7200",
+    "reminder_interval_seconds": "1800",
+    "delivery": {
+      "recipient_kind": "subject_group",
+      "recipient_group_id": "group-demo",
+      "channel": "whatsapp",
+      "target": { "resolution": "explicit", "delivery_target_id": "route-demo" }
+    }
+  },
+  "create_owner_scope": {
+    "owner_kind": "subject_group",
+    "owner_group_id": "group-demo"
+  }
+}

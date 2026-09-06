@@ -1,0 +1,11 @@
+{
+  "contract_version": "spine.trusted-web-api.v1",
+  "request": {
+    "command_id": "complete-demo",
+    "actor_subject_id": "subject-a",
+    "item_id": "task-demo",
+    "target_version": "1",
+    "completed_at_utc": "2026-09-06T09:00:00Z"
+  },
+  "expected_access_epoch": "1"
+}

@@ -1,0 +1,7 @@
+{
+  "contract_version": "spine.trusted-web-api.v1",
+  "request": {
+    "contract_version": "spine.notification-profiles.v1",
+    "notification_profile_id": "catalog-demo"
+  }
+}

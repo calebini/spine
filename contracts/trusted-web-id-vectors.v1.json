@@ -1,0 +1,22 @@
+{
+  "contract_version": "spine.trusted-web-id-vectors.v1",
+  "command": "web_access.apply",
+  "command_id": "provision-demo",
+  "vectors": [
+    {
+      "row_role": "account",
+      "request_path": "/operators/0",
+      "expected_id": "account_3b8bded59a9584f5792b363301465e8fba722113aedcf9614e3c7a0ed82f87b3"
+    },
+    {
+      "row_role": "account_subject_binding",
+      "request_path": "/operators/0/binding",
+      "expected_id": "account_subject_binding_702c03d45cf6268a0fcf266a785cfc3876c1729c355e3e09d265f96eee2ef02a"
+    },
+    {
+      "row_role": "subject_membership",
+      "request_path": "/memberships/0",
+      "expected_id": "subject_membership_893c74ce6b7f65e9377d3122eb00bbbbc634ec7b6cc02b0c1065b86b42d1d247"
+    }
+  ]
+}

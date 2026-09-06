@@ -1,0 +1,22 @@
+{
+  "contract_version": "spine.trusted-web-provisioning.v1",
+  "ledger_id": "ledger-demo",
+  "expected_access_epoch": "0",
+  "operators": [
+    {
+      "operation": "create",
+      "subject_id": "subject-a",
+      "display_name": "Operator A",
+      "activation_basis": "trusted_local_approval"
+    }
+  ],
+  "memberships": [
+    {
+      "operation": "create",
+      "group_id": "group-demo",
+      "subject_id": "subject-a",
+      "role": "owner",
+      "starts_at_utc": "2026-09-06T09:00:00Z"
+    }
+  ]
+}

@@ -1,0 +1,134 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cortext.local/spine/contracts/schemas/trusted-web-command-registry.schema.json",
+  "type": "object",
+  "properties": {
+    "contract_version": {
+      "const": "spine.trusted-web-command-registry.v1"
+    },
+    "status": {
+      "const": "draft_contract_only"
+    },
+    "baseline_spine_version": {
+      "const": "0.3.0"
+    },
+    "baseline_ledger_schema": {
+      "const": "12"
+    },
+    "commands": {
+      "type": "array",
+      "minItems": 13,
+      "maxItems": 13,
+      "items": {
+        "type": "object",
+        "properties": {
+          "command": {
+            "enum": [
+              "item_archetype.list",
+              "item_archetype.show",
+              "item.occurrences",
+              "notification_profile.binding.list",
+              "notification_profile.list",
+              "notification_profile.resolve",
+              "notification_profile.show",
+              "schedule.build",
+              "schedule.cancel",
+              "schedule.create",
+              "schedule.show",
+              "schedule.update",
+              "task.complete"
+            ]
+          },
+          "access_mode": {
+            "enum": [
+              "read",
+              "write"
+            ]
+          },
+          "request_schema": {
+            "type": "string",
+            "minLength": 1
+          },
+          "response_schema": {
+            "type": "string",
+            "minLength": 1
+          },
+          "request_contract_version": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "response_contract_version": {
+            "type": "string",
+            "minLength": 1
+          },
+          "request_version_field": {
+            "enum": [
+              null,
+              "contract_version"
+            ]
+          },
+          "response_version_field": {
+            "enum": [
+              null,
+              "response_contract"
+            ]
+          },
+          "required_contract_versions": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "resolver": {
+            "enum": [
+              "catalog_scope_and_returned_references",
+              "item_read_all_returned_references",
+              "catalog_scope_chain_read_use",
+              "create_scope_and_references",
+              "item_edit_stop_intent",
+              "item_edit_and_resulting_release"
+            ]
+          },
+          "projection": {
+            "const": "canonical_complete_or_deny"
+          },
+          "requires_create_owner_scope": {
+            "type": "boolean"
+          },
+          "requires_expected_access_epoch": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "command",
+          "access_mode",
+          "request_schema",
+          "response_schema",
+          "request_contract_version",
+          "response_contract_version",
+          "request_version_field",
+          "response_version_field",
+          "required_contract_versions",
+          "resolver",
+          "projection",
+          "requires_create_owner_scope",
+          "requires_expected_access_epoch"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "contract_version",
+    "status",
+    "baseline_spine_version",
+    "baseline_ledger_schema",
+    "commands"
+  ],
+  "additionalProperties": false
+}

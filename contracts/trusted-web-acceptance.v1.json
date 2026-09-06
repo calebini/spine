@@ -1,0 +1,308 @@
+{
+  "contract_version": "spine.trusted-web-acceptance.v1",
+  "status": "runtime_oracles_pending",
+  "scenarios": [
+    {
+      "id": "WEB-01",
+      "name": "two_operator_roles",
+      "given": {
+        "accounts": [
+          "account-a",
+          "account-b"
+        ],
+        "subjects": [
+          "subject-a",
+          "subject-b"
+        ],
+        "roles": [
+          "member",
+          "admin",
+          "owner"
+        ]
+      },
+      "when": [
+        "select each eligible account",
+        "read context for private and group scopes"
+      ],
+      "then": {
+        "identity_basis": "self_selected",
+        "automatic_full_scope": false,
+        "subject_bindings_distinct": true
+      },
+      "verification": "pending_backend"
+    },
+    {
+      "id": "WEB-02",
+      "name": "selection_denied_or_switched",
+      "given": {
+        "account_states": [
+          "unknown",
+          "suspended",
+          "unbound"
+        ]
+      },
+      "when": [
+        "request context",
+        "complete delayed account-a read after switching to account-b"
+      ],
+      "then": {
+        "error": "identity_unavailable",
+        "late_response_discarded": true,
+        "mutation_count": 0
+      },
+      "verification": "pending_backend"
+    },
+    {
+      "id": "WEB-03",
+      "name": "member_cannot_edit_other_creator",
+      "given": {
+        "selected_role": "member",
+        "item_creator": "another-subject",
+        "explicit_edit_grant": false
+      },
+      "when": [
+        "attempt schedule.update",
+        "attempt task.complete"
+      ],
+      "then": {
+        "error": "resource_unavailable",
+        "mutation_count": 0,
+        "receipt_count": 0
+      },
+      "verification": "pending_backend"
+    },
+    {
+      "id": "WEB-04",
+      "name": "concurrent_adoption",
+      "given": {
+        "item_owner": null,
+        "access_epoch": "1"
+      },
+      "when": [
+        "plan adoption A at epoch 1",
+        "plan adoption B at epoch 1",
+        "apply A",
+        "apply B"
+      ],
+      "then": {
+        "first_commits": true,
+        "second_conflicts": true,
+        "item_id_preserved": true,
+        "owner_count": 1
+      },
+      "verification": "pending_backend"
+    },
+    {
+      "id": "WEB-05",
+      "name": "same_group_route_approval",
+      "given": {
+        "item_group": "group-a",
+        "route_group": "group-a",
+        "member_approval": "approved"
+      },
+      "when": [
+        "create using approved same-group route",
+        "repeat with revoked approval",
+        "repeat with foreign-group route"
+      ],
+      "then": {
+        "first_allowed": true,
+        "revoked_denied": true,
+        "cross_group_denied": true,
+        "denied_partial_writes": 0
+      },
+      "verification": "pending_backend"
+    },
+    {
+      "id": "WEB-06",
+      "name": "domain_parity",
+      "given": {
+        "request_fixture": "request_schedule_create.json"
+      },
+      "when": [
+        "create with profile defaults and custom reminders",
+        "repeat canonical equivalents for recurrence and primary location"
+      ],
+      "then": {
+        "domain_results_match": true,
+        "manual_timezone_calculation": false
+      },
+      "verification": "pending_backend"
+    },
+    {
+      "id": "WEB-07",
+      "name": "filter_before_expansion",
+      "given": {
+        "visible_item": "event-a",
+        "hidden_item": "event-b",
+        "hidden_timezone": "unavailable"
+      },
+      "when": [
+        "request visible agenda range"
+      ],
+      "then": {
+        "hidden_expansion_calls": 0,
+        "hidden_diagnostics": 0,
+        "hidden_counts": 0
+      },
+      "verification": "pending_backend"
+    },
+    {
+      "id": "WEB-08",
+      "name": "items_and_cursor",
+      "given": {
+        "unscheduled_task": "task-a"
+      },
+      "when": [
+        "list items",
+        "change owner access epoch",
+        "continue old cursor"
+      ],
+      "then": {
+        "unscheduled_task_visible": true,
+        "continuation_error": "access_changed",
+        "local_item_list_unchanged": true
+      },
+      "verification": "pending_backend"
+    },
+    {
+      "id": "WEB-09",
+      "name": "nested_history_denied",
+      "given": {
+        "readable_item": "event-a",
+        "hidden_attempt_route": "route-b"
+      },
+      "when": [
+        "schedule.show including attempts",
+        "repeat with evidence budget exceeded"
+      ],
+      "then": {
+        "first_error": "resource_unavailable",
+        "second_error": "capacity_exceeded",
+        "partial_response": false
+      },
+      "verification": "pending_backend"
+    },
+    {
+      "id": "WEB-10",
+      "name": "ambiguous_commit_replay",
+      "given": {
+        "command_id": "create-once",
+        "account": "account-a"
+      },
+      "when": [
+        "commit schedule.create then drop response",
+        "retry same account and command ID",
+        "retry as account-b",
+        "retry changed owner/payload"
+      ],
+      "then": {
+        "effect_count": 1,
+        "canonical_receipt_count": 1,
+        "foreign_error": "command_id_unavailable",
+        "changed_payload_conflicts": true
+      },
+      "verification": "pending_backend"
+    },
+    {
+      "id": "WEB-11",
+      "name": "mixed_writers",
+      "given": {
+        "item_version": "1"
+      },
+      "when": [
+        "CLI updates target to version 2",
+        "web writes expected version 1",
+        "worker attempts current work"
+      ],
+      "then": {
+        "stale_web_denied": true,
+        "partial_web_effects": 0,
+        "worker_semantics_unchanged": true
+      },
+      "verification": "pending_backend"
+    },
+    {
+      "id": "WEB-12",
+      "name": "complete_not_cancel",
+      "given": {
+        "task": "task-a",
+        "work": [
+          "queued",
+          "already_attempted"
+        ]
+      },
+      "when": [
+        "task.complete",
+        "schedule.show"
+      ],
+      "then": {
+        "completion_committed": true,
+        "work_reconciliation": "not_performed_by_this_command",
+        "attempt_history_preserved": true,
+        "no_recall_claim": true
+      },
+      "verification": "pending_backend"
+    },
+    {
+      "id": "WEB-13",
+      "name": "bounded_reads",
+      "given": {
+        "idle_requests": 1000
+      },
+      "when": [
+        "poll ready and context",
+        "query large ledger under budgets"
+      ],
+      "then": {
+        "canonical_receipt_delta": 0,
+        "deep_preflight_calls": 0,
+        "logs_bounded": true,
+        "overflow_fails_closed": true
+      },
+      "verification": "pending_backend"
+    },
+    {
+      "id": "WEB-14",
+      "name": "http_admission",
+      "given": {
+        "invalid_inputs": [
+          "foreign_origin",
+          "foreign_host",
+          "oversize_body",
+          "unknown_command",
+          "mode_mismatch",
+          "duplicate_json_key"
+        ]
+      },
+      "when": [
+        "submit each invalid request"
+      ],
+      "then": {
+        "effects": 0,
+        "unregistered_handler_calls": 0,
+        "structured_errors": true
+      },
+      "verification": "pending_backend"
+    },
+    {
+      "id": "WEB-15",
+      "name": "restricted_reachability",
+      "given": {
+        "deployment": "trusted_network_only"
+      },
+      "when": [
+        "connect from allowed device",
+        "connect from disallowed device",
+        "inspect warning and advertised capabilities"
+      ],
+      "then": {
+        "allowed_reachable": true,
+        "disallowed_reachable": false,
+        "identity_verified": false,
+        "executor_authentication_advertised": false
+      },
+      "verification": "pending_backend"
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "contract_version": "spine.trusted-web-schema-pins.v1",
+  "hash_algorithm": "sha256",
+  "files": {
+    "command-response.schema.json": "b7dea325198dba813ea9d526b40e7d78c9c7eb5c2d839f261fd07eb47af2227f",
+    "notification-policy.schema.json": "b1981662b5ba6086cb6f067c73ce48c59fd30d7d186dd99e17f59b8d3647f768",
+    "notification-profile-commands.schema.json": "573d7b1bed42a1190887291f860c6edac0b6b52199c72023c3afd2b354743781",
+    "notification-profile-types.schema.json": "182353b53719d924cb062d898d7e3cae1f0de9e124bb2b793c26fa6a59ab6b8c",
+    "notification-rendering.schema.json": "48b315544171fb817d9f13befc461defa9572edcc94bcba7e5ed3df89e27c8e7",
+    "notification-types.schema.json": "48507bcf78b6df80a6c9ca8ebf7b0a5fa7e26b8b691befdc1e7353ae63b7b2c1",
+    "recurrence-occurrence-response.schema.json": "0a7119b4659c657033ddb76f0bb696208c1f83489190aba0f9e22c0b80916332",
+    "recurrence-set.schema.json": "e2b34874dcd4e1e9d227e240c512f35e9b7aad884b0ec60875b82cfb6149601f",
+    "recurrence-types.schema.json": "a52316c562ca1cda2144db79676cc5799fcd631f8116d70b0c76a2dd6fd9cf86",
+    "relative-temporal-binding-types.schema.json": "7063f6610fff4e3957582dcf04349eb65b3bcd7293ed89ff2838b2a778e205a7",
+    "schedule-cancel-request.schema.json": "33c682b1328c074633fb931888d0bbf83065c4aaaf8c05d8220a85ba9ccb8f8f",
+    "schedule-cancel-response.schema.json": "25fc07f7338cbb0eeb915b9512583471f2f990a5cd1e43e10a37f393c8173427",
+    "schedule-countdown-builder-request.schema.json": "0f31ea4452c0530561a922e775c5331a912b75257e35b00d48786f4b88abca66",
+    "schedule-countdown-builder-response.schema.json": "05443f2a8f4886e98cb89cea62f0ce482a1cb0980865f4b7934cf1b1ca663ea5",
+    "schedule-create-request.schema.json": "36def6761f9d2d7359a72896244ffd38437190cf1f594641b02de1ddc059109b",
+    "schedule-create-response.schema.json": "f03998dab3b48dc176141da6357af35e231a21b57b91ba5384cf416d653f1bc1",
+    "schedule-operations-types.schema.json": "65086ba4602baeb9875a36cd15f8581500d82368fa3194049efaeac473726e0a",
+    "schedule-primary-location-types.schema.json": "661d062c440cb2b299132fe6d67390f1888c9639ca17945523744241a31217e3",
+    "schedule-show-request.schema.json": "87634f8cda149aa36b037f160c71f389bcb56a7eca04e082d2f3aa6b0e397306",
+    "schedule-show-response.schema.json": "c1b5dbed8c34174be59860582495c222cbdb1feda2b9053bf9f3073177fd9841",
+    "schedule-update-request.schema.json": "bf07717fd22a69ea754e22fde45251a666cc04fc588ccfd24885fff2cb2928c0",
+    "schedule-update-response.schema.json": "6962469c0ec4ac549664ef1b44315fa43005c874d579db8e96bfc19db4a9d1ef",
+    "trusted-web-command-payloads.schema.json": "d6de90931bb477b2d00449b70e6bddd05b7b756ea5ade1bc409f5ccb847b6300"
+  }
+}

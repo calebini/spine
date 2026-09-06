@@ -1,0 +1,18 @@
+{
+  "contract_version": "spine.trusted-web-budgets.v1",
+  "status": "proposed_unbenchmarked",
+  "ceilings": {
+    "request_bytes": 1048576,
+    "response_bytes": 4194304,
+    "list_rows": 100,
+    "resolved_resources": 100,
+    "selectable_accounts": 32,
+    "account_grant_matches": 100,
+    "provisioning_operations": 100,
+    "request_milliseconds": 5000,
+    "busy_milliseconds": 2000,
+    "sql_vm_steps": 100000,
+    "cursor_seconds": 900,
+    "agenda_elapsed_days": 31
+  }
+}

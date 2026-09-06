@@ -1,0 +1,1048 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cortext.local/spine/contracts/schemas/trusted-web-command-response.schema.json",
+  "$defs": {
+    "item_archetype.list": {
+      "type": "object",
+      "required": [
+        "contract_version",
+        "ok",
+        "identity_basis",
+        "account_id",
+        "subject_id",
+        "selection_id",
+        "access_epoch",
+        "result_contract",
+        "result"
+      ],
+      "properties": {
+        "contract_version": {
+          "const": "spine.trusted-web-api.v1"
+        },
+        "ok": {
+          "const": true
+        },
+        "identity_basis": {
+          "const": "self_selected"
+        },
+        "account_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^[^\\u0000-\\u001f\\u007f]+$"
+        },
+        "subject_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^[^\\u0000-\\u001f\\u007f]+$"
+        },
+        "selection_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^[^\\u0000-\\u001f\\u007f]+$"
+        },
+        "access_epoch": {
+          "type": "string",
+          "pattern": "^[1-9][0-9]*$"
+        },
+        "result_contract": {
+          "const": "spine.item-archetypes.v1"
+        },
+        "result": {
+          "allOf": [
+            {
+              "$ref": "command-response.schema.json"
+            },
+            {
+              "type": "object",
+              "required": [
+                "ok",
+                "command",
+                "response_contract"
+              ],
+              "properties": {
+                "ok": {
+                  "const": true
+                },
+                "command": {
+                  "const": "item_archetype.list"
+                },
+                "response_contract": {
+                  "const": "spine.item-archetypes.v1"
+                }
+              }
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "item_archetype.show": {
+      "type": "object",
+      "required": [
+        "contract_version",
+        "ok",
+        "identity_basis",
+        "account_id",
+        "subject_id",
+        "selection_id",
+        "access_epoch",
+        "result_contract",
+        "result"
+      ],
+      "properties": {
+        "contract_version": {
+          "const": "spine.trusted-web-api.v1"
+        },
+        "ok": {
+          "const": true
+        },
+        "identity_basis": {
+          "const": "self_selected"
+        },
+        "account_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^[^\\u0000-\\u001f\\u007f]+$"
+        },
+        "subject_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^[^\\u0000-\\u001f\\u007f]+$"
+        },
+        "selection_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^[^\\u0000-\\u001f\\u007f]+$"
+        },
+        "access_epoch": {
+          "type": "string",
+          "pattern": "^[1-9][0-9]*$"
+        },
+        "result_contract": {
+          "const": "spine.item-archetypes.v1"
+        },
+        "result": {
+          "allOf": [
+            {
+              "$ref": "command-response.schema.json"
+            },
+            {
+              "type": "object",
+              "required": [
+                "ok",
+                "command",
+                "response_contract"
+              ],
+              "properties": {
+                "ok": {
+                  "const": true
+                },
+                "command": {
+                  "const": "item_archetype.show"
+                },
+                "response_contract": {
+                  "const": "spine.item-archetypes.v1"
+                }
+              }
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "item.occurrences": {
+      "type": "object",
+      "required": [
+        "contract_version",
+        "ok",
+        "identity_basis",
+        "account_id",
+        "subject_id",
+        "selection_id",
+        "access_epoch",
+        "result_contract",
+        "result"
+      ],
+      "properties": {
+        "contract_version": {
+          "const": "spine.trusted-web-api.v1"
+        },
+        "ok": {
+          "const": true
+        },
+        "identity_basis": {
+          "const": "self_selected"
+        },
+        "account_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^[^\\u0000-\\u001f\\u007f]+$"
+        },
+        "subject_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^[^\\u0000-\\u001f\\u007f]+$"
+        },
+        "selection_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^[^\\u0000-\\u001f\\u007f]+$"
+        },
+        "access_epoch": {
+          "type": "string",
+          "pattern": "^[1-9][0-9]*$"
+        },
+        "result_contract": {
+          "const": "spine.item-occurrences.recurrence.v1"
+        },
+        "result": {
+          "allOf": [
+            {
+              "$ref": "recurrence-occurrence-response.schema.json"
+            },
+            {
+              "type": "object",
+              "required": [
+                "ok",
+                "command",
+                "response_contract"
+              ],
+              "properties": {
+                "ok": {
+                  "const": true
+                },
+                "command": {
+                  "const": "item.occurrences"
+                },
+                "response_contract": {
+                  "const": "spine.item-occurrences.recurrence.v1"
+                }
+              }
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "notification_profile.binding.list": {
+      "type": "object",
+      "required": [
+        "contract_version",
+        "ok",
+        "identity_basis",
+        "account_id",
+        "subject_id",
+        "selection_id",
+        "access_epoch",
+        "result_contract",
+        "result"
+      ],
+      "properties": {
+        "contract_version": {
+          "const": "spine.trusted-web-api.v1"
+        },
+        "ok": {
+          "const": true
+        },
+        "identity_basis": {
+          "const": "self_selected"
+        },
+        "account_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^[^\\u0000-\\u001f\\u007f]+$"
+        },
+        "subject_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^[^\\u0000-\\u001f\\u007f]+$"
+        },
+        "selection_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^[^\\u0000-\\u001f\\u007f]+$"
+        },
+        "access_epoch": {
+          "type": "string",
+          "pattern": "^[1-9][0-9]*$"
+        },
+        "result_contract": {
+          "const": "spine.notification-profile-bindings.v1"
+        },
+        "result": {
+          "allOf": [
+            {
+              "$ref": "command-response.schema.json"
+            },
+            {
+              "type": "object",
+              "required": [
+                "ok",
+                "command",
+                "response_contract"
+              ],
+              "properties": {
+                "ok": {
+                  "const": true
+                },
+                "command": {
+                  "const": "notification_profile.binding.list"
+                },
+                "response_contract": {
+                  "const": "spine.notification-profile-bindings.v1"
+                }
+              }
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "notification_profile.list": {
+      "type": "object",
+      "required": [
+        "contract_version",
+        "ok",
+        "identity_basis",
+        "account_id",
+        "subject_id",
+        "selection_id",
+        "access_epoch",
+        "result_contract",
+        "result"
+      ],
+      "properties": {
+        "contract_version": {
+          "const": "spine.trusted-web-api.v1"
+        },
+        "ok": {
+          "const": true
+        },
+        "identity_basis": {
+          "const": "self_selected"
+        },
+        "account_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^[^\\u0000-\\u001f\\u007f]+$"
+        },
+        "subject_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^[^\\u0000-\\u001f\\u007f]+$"
+        },
+        "selection_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^[^\\u0000-\\u001f\\u007f]+$"
+        },
+        "access_epoch": {
+          "type": "string",
+          "pattern": "^[1-9][0-9]*$"
+        },
+        "result_contract": {
+          "const": "spine.notification-profiles.v1"
+        },
+        "result": {
+          "allOf": [
+            {
+              "$ref": "command-response.schema.json"
+            },
+            {
+              "type": "object",
+              "required": [
+                "ok",
+                "command",
+                "response_contract"
+              ],
+              "properties": {
+                "ok": {
+                  "const": true
+                },
+                "command": {
+                  "const": "notification_profile.list"
+                },
+                "response_contract": {
+                  "const": "spine.notification-profiles.v1"
+                }
+              }
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "notification_profile.resolve": {
+      "type": "object",
+      "required": [
+        "contract_version",
+        "ok",
+        "identity_basis",
+        "account_id",
+        "subject_id",
+        "selection_id",
+        "access_epoch",
+        "result_contract",
+        "result"
+      ],
+      "properties": {
+        "contract_version": {
+          "const": "spine.trusted-web-api.v1"
+        },
+        "ok": {
+          "const": true
+        },
+        "identity_basis": {
+          "const": "self_selected"
+        },
+        "account_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^[^\\u0000-\\u001f\\u007f]+$"
+        },
+        "subject_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^[^\\u0000-\\u001f\\u007f]+$"
+        },
+        "selection_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^[^\\u0000-\\u001f\\u007f]+$"
+        },
+        "access_epoch": {
+          "type": "string",
+          "pattern": "^[1-9][0-9]*$"
+        },
+        "result_contract": {
+          "const": "spine.notification-profile-bindings.v1"
+        },
+        "result": {
+          "allOf": [
+            {
+              "$ref": "command-response.schema.json"
+            },
+            {
+              "type": "object",
+              "required": [
+                "ok",
+                "command",
+                "response_contract"
+              ],
+              "properties": {
+                "ok": {
+                  "const": true
+                },
+                "command": {
+                  "const": "notification_profile.resolve"
+                },
+                "response_contract": {
+                  "const": "spine.notification-profile-bindings.v1"
+                }
+              }
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "notification_profile.show": {
+      "type": "object",
+      "required": [
+        "contract_version",
+        "ok",
+        "identity_basis",
+        "account_id",
+        "subject_id",
+        "selection_id",
+        "access_epoch",
+        "result_contract",
+        "result"
+      ],
+      "properties": {
+        "contract_version": {
+          "const": "spine.trusted-web-api.v1"
+        },
+        "ok": {
+          "const": true
+        },
+        "identity_basis": {
+          "const": "self_selected"
+        },
+        "account_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^[^\\u0000-\\u001f\\u007f]+$"
+        },
+        "subject_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^[^\\u0000-\\u001f\\u007f]+$"
+        },
+        "selection_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^[^\\u0000-\\u001f\\u007f]+$"
+        },
+        "access_epoch": {
+          "type": "string",
+          "pattern": "^[1-9][0-9]*$"
+        },
+        "result_contract": {
+          "const": "spine.notification-profiles.v1"
+        },
+        "result": {
+          "allOf": [
+            {
+              "$ref": "command-response.schema.json"
+            },
+            {
+              "type": "object",
+              "required": [
+                "ok",
+                "command",
+                "response_contract"
+              ],
+              "properties": {
+                "ok": {
+                  "const": true
+                },
+                "command": {
+                  "const": "notification_profile.show"
+                },
+                "response_contract": {
+                  "const": "spine.notification-profiles.v1"
+                }
+              }
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "schedule.build": {
+      "type": "object",
+      "required": [
+        "contract_version",
+        "ok",
+        "identity_basis",
+        "account_id",
+        "subject_id",
+        "selection_id",
+        "access_epoch",
+        "result_contract",
+        "result"
+      ],
+      "properties": {
+        "contract_version": {
+          "const": "spine.trusted-web-api.v1"
+        },
+        "ok": {
+          "const": true
+        },
+        "identity_basis": {
+          "const": "self_selected"
+        },
+        "account_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^[^\\u0000-\\u001f\\u007f]+$"
+        },
+        "subject_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^[^\\u0000-\\u001f\\u007f]+$"
+        },
+        "selection_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^[^\\u0000-\\u001f\\u007f]+$"
+        },
+        "access_epoch": {
+          "type": "string",
+          "pattern": "^[1-9][0-9]*$"
+        },
+        "result_contract": {
+          "const": "spine.schedule-countdown-builder-response.v1"
+        },
+        "result": {
+          "allOf": [
+            {
+              "$ref": "schedule-countdown-builder-response.schema.json"
+            },
+            {
+              "type": "object",
+              "required": [
+                "ok",
+                "command",
+                "response_contract"
+              ],
+              "properties": {
+                "ok": {
+                  "const": true
+                },
+                "command": {
+                  "const": "schedule.build"
+                },
+                "response_contract": {
+                  "const": "spine.schedule-countdown-builder-response.v1"
+                }
+              }
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "schedule.cancel": {
+      "type": "object",
+      "required": [
+        "contract_version",
+        "ok",
+        "identity_basis",
+        "account_id",
+        "subject_id",
+        "selection_id",
+        "access_epoch",
+        "result_contract",
+        "result"
+      ],
+      "properties": {
+        "contract_version": {
+          "const": "spine.trusted-web-api.v1"
+        },
+        "ok": {
+          "const": true
+        },
+        "identity_basis": {
+          "const": "self_selected"
+        },
+        "account_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^[^\\u0000-\\u001f\\u007f]+$"
+        },
+        "subject_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^[^\\u0000-\\u001f\\u007f]+$"
+        },
+        "selection_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^[^\\u0000-\\u001f\\u007f]+$"
+        },
+        "access_epoch": {
+          "type": "string",
+          "pattern": "^[1-9][0-9]*$"
+        },
+        "result_contract": {
+          "const": "spine.schedule-cancel-response.v1"
+        },
+        "result": {
+          "allOf": [
+            {
+              "$ref": "schedule-cancel-response.schema.json"
+            },
+            {
+              "type": "object",
+              "required": [
+                "ok",
+                "command",
+                "response_contract"
+              ],
+              "properties": {
+                "ok": {
+                  "const": true
+                },
+                "command": {
+                  "const": "schedule.cancel"
+                },
+                "response_contract": {
+                  "const": "spine.schedule-cancel-response.v1"
+                }
+              }
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "schedule.create": {
+      "type": "object",
+      "required": [
+        "contract_version",
+        "ok",
+        "identity_basis",
+        "account_id",
+        "subject_id",
+        "selection_id",
+        "access_epoch",
+        "result_contract",
+        "result"
+      ],
+      "properties": {
+        "contract_version": {
+          "const": "spine.trusted-web-api.v1"
+        },
+        "ok": {
+          "const": true
+        },
+        "identity_basis": {
+          "const": "self_selected"
+        },
+        "account_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^[^\\u0000-\\u001f\\u007f]+$"
+        },
+        "subject_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^[^\\u0000-\\u001f\\u007f]+$"
+        },
+        "selection_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^[^\\u0000-\\u001f\\u007f]+$"
+        },
+        "access_epoch": {
+          "type": "string",
+          "pattern": "^[1-9][0-9]*$"
+        },
+        "result_contract": {
+          "const": "spine.schedule-create-response.v2"
+        },
+        "result": {
+          "allOf": [
+            {
+              "$ref": "schedule-create-response.schema.json"
+            },
+            {
+              "type": "object",
+              "required": [
+                "ok",
+                "command",
+                "response_contract"
+              ],
+              "properties": {
+                "ok": {
+                  "const": true
+                },
+                "command": {
+                  "const": "schedule.create"
+                },
+                "response_contract": {
+                  "const": "spine.schedule-create-response.v2"
+                }
+              }
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "schedule.show": {
+      "type": "object",
+      "required": [
+        "contract_version",
+        "ok",
+        "identity_basis",
+        "account_id",
+        "subject_id",
+        "selection_id",
+        "access_epoch",
+        "result_contract",
+        "result"
+      ],
+      "properties": {
+        "contract_version": {
+          "const": "spine.trusted-web-api.v1"
+        },
+        "ok": {
+          "const": true
+        },
+        "identity_basis": {
+          "const": "self_selected"
+        },
+        "account_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^[^\\u0000-\\u001f\\u007f]+$"
+        },
+        "subject_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^[^\\u0000-\\u001f\\u007f]+$"
+        },
+        "selection_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^[^\\u0000-\\u001f\\u007f]+$"
+        },
+        "access_epoch": {
+          "type": "string",
+          "pattern": "^[1-9][0-9]*$"
+        },
+        "result_contract": {
+          "const": "spine.schedule-show.v1"
+        },
+        "result": {
+          "allOf": [
+            {
+              "$ref": "schedule-show-response.schema.json"
+            },
+            {
+              "type": "object",
+              "required": [
+                "ok",
+                "command",
+                "response_contract"
+              ],
+              "properties": {
+                "ok": {
+                  "const": true
+                },
+                "command": {
+                  "const": "schedule.show"
+                },
+                "response_contract": {
+                  "const": "spine.schedule-show.v1"
+                }
+              }
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "schedule.update": {
+      "type": "object",
+      "required": [
+        "contract_version",
+        "ok",
+        "identity_basis",
+        "account_id",
+        "subject_id",
+        "selection_id",
+        "access_epoch",
+        "result_contract",
+        "result"
+      ],
+      "properties": {
+        "contract_version": {
+          "const": "spine.trusted-web-api.v1"
+        },
+        "ok": {
+          "const": true
+        },
+        "identity_basis": {
+          "const": "self_selected"
+        },
+        "account_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^[^\\u0000-\\u001f\\u007f]+$"
+        },
+        "subject_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^[^\\u0000-\\u001f\\u007f]+$"
+        },
+        "selection_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^[^\\u0000-\\u001f\\u007f]+$"
+        },
+        "access_epoch": {
+          "type": "string",
+          "pattern": "^[1-9][0-9]*$"
+        },
+        "result_contract": {
+          "const": "spine.schedule-update-response.v2"
+        },
+        "result": {
+          "allOf": [
+            {
+              "$ref": "schedule-update-response.schema.json"
+            },
+            {
+              "type": "object",
+              "required": [
+                "ok",
+                "command",
+                "response_contract"
+              ],
+              "properties": {
+                "ok": {
+                  "const": true
+                },
+                "command": {
+                  "const": "schedule.update"
+                },
+                "response_contract": {
+                  "const": "spine.schedule-update-response.v2"
+                }
+              }
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "task.complete": {
+      "type": "object",
+      "required": [
+        "contract_version",
+        "ok",
+        "identity_basis",
+        "account_id",
+        "subject_id",
+        "selection_id",
+        "access_epoch",
+        "result_contract",
+        "result",
+        "work_reconciliation"
+      ],
+      "properties": {
+        "contract_version": {
+          "const": "spine.trusted-web-api.v1"
+        },
+        "ok": {
+          "const": true
+        },
+        "identity_basis": {
+          "const": "self_selected"
+        },
+        "account_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^[^\\u0000-\\u001f\\u007f]+$"
+        },
+        "subject_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^[^\\u0000-\\u001f\\u007f]+$"
+        },
+        "selection_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^[^\\u0000-\\u001f\\u007f]+$"
+        },
+        "access_epoch": {
+          "type": "string",
+          "pattern": "^[1-9][0-9]*$"
+        },
+        "result_contract": {
+          "const": "spine.trusted-web-task-complete-result.v1"
+        },
+        "result": {
+          "allOf": [
+            {
+              "$ref": "trusted-web-command-payloads.schema.json#/$defs/taskCompleteResponse"
+            },
+            {
+              "type": "object",
+              "required": [
+                "ok",
+                "command"
+              ],
+              "properties": {
+                "ok": {
+                  "const": true
+                },
+                "command": {
+                  "const": "task.complete"
+                }
+              }
+            }
+          ]
+        },
+        "work_reconciliation": {
+          "const": "not_performed_by_this_command"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "oneOf": [
+    {
+      "$ref": "#/$defs/item_archetype.list"
+    },
+    {
+      "$ref": "#/$defs/item_archetype.show"
+    },
+    {
+      "$ref": "#/$defs/item.occurrences"
+    },
+    {
+      "$ref": "#/$defs/notification_profile.binding.list"
+    },
+    {
+      "$ref": "#/$defs/notification_profile.list"
+    },
+    {
+      "$ref": "#/$defs/notification_profile.resolve"
+    },
+    {
+      "$ref": "#/$defs/notification_profile.show"
+    },
+    {
+      "$ref": "#/$defs/schedule.build"
+    },
+    {
+      "$ref": "#/$defs/schedule.cancel"
+    },
+    {
+      "$ref": "#/$defs/schedule.create"
+    },
+    {
+      "$ref": "#/$defs/schedule.show"
+    },
+    {
+      "$ref": "#/$defs/schedule.update"
+    },
+    {
+      "$ref": "#/$defs/task.complete"
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "contract_version": "spine.trusted-web-provisioning.v1",
+  "ledger_id": "ledger-demo",
+  "expected_access_epoch": "1",
+  "grants": [
+    {
+      "operation": "create",
+      "resource_kind": "item",
+      "resource_id": "item-demo",
+      "resource_owner_revision": "1",
+      "grantee": {
+        "owner_kind": "subject_group",
+        "owner_group_id": "group-demo"
+      },
+      "operations": [
+        "item.read",
+        "admin"
+      ],
+      "starts_at_utc": "2026-09-06T09:00:00Z",
+      "ends_at_utc": null
+    }
+  ]
+}

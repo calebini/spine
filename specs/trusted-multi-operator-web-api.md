@@ -1,6 +1,6 @@
 # Trusted Multi-Operator Web API
 
-Status: Draft v0.1.0; first delivery specification; not implemented or audited
+Status: Draft v0.1.1; logical draft passed bounded recheck; contract artifacts added; backend not implemented
 Created: 2026-09-06
 Proposed capability: `spine.trusted-web-api.v1`
 
@@ -456,7 +456,38 @@ at the chosen release, not floating versions; new API families remain undeclared
 their behavior ships. Align the ontology/migration with the minimal account/access state
 used here, not the entire deferred identity-provider/mandate design.
 
-The next step is a bounded audit of this draft and its direct policy/domain dependencies,
-then manual fixes and contract/fixture publication. No external audit, deployment or
+The logical draft and manual corrections passed bounded consistency recheck
+`trusted-multi-operator-web-api-contract-audit-002`. This does not certify subsequent
+machine artifacts or runtime behavior. No external audit, deployment or
 runtime implementation is authorized merely by this document. The future GUI's visual
 design is separate; this slice specifies the service it can safely and honestly consume.
+
+### 10.1 Contract Codification
+
+The first machine bundle is `contracts/spine.trusted-web-command-registry.v1.json`,
+`contracts/schemas/trusted-web-*.schema.json`, and the associated normalization, schema-pin,
+fixture and acceptance artifacts indexed in [TRUSTED_WEB_CONTRACTS.md](../docs/TRUSTED_WEB_CONTRACTS.md).
+It remains contract-only; no capability is added to `system.info`.
+
+Registry null request-version fields denote the existing untagged `schedule.show`,
+`item.occurrences` and `task.complete` payloads, not acceptance of any supplied version.
+For the untagged task-completion result only, the outer result label is
+`spine.trusted-web-task-complete-result.v1`; the inner response remains unchanged.
+Schema fingerprints and required runtime versions pin these shapes without inventing
+new inner CLI fields. Route-specific definitions, not schema inference, select commands.
+
+`contracts/trusted-web-normalization.v1.json` defines the plan/envelope hash preimages,
+array normalization and registered ID paths for this slice. Provisioning epoch 0 means
+no access-state row yet, never a live epoch; bootstrap creates epoch 1. Unchanged fresh
+apply retains the epoch while still producing the normal explicit-command receipt.
+Compatible replay advances nothing. This refines "apply advances" to the canonical
+authorization-relevant-change rule; ordinary non-access edits retain item versions.
+Initial item adoption omits creator entitlement rather than fabricating proof. Total
+provisioning operations, reference checks and commit-time owner invariants remain
+semantic checks in addition to schemas.
+
+Cursor schemas capture the protected payload and include recovery epoch. They do not
+make plain JSON a valid cursor. Preserve the original 15-minute expiry across pages;
+publish signed wire/tamper vectors with the chosen established library before release.
+Minimal DDL/index implementation, complete result/reference checks and executable
+`WEB-01`–`WEB-15` coverage remain prerequisites for backend readiness.

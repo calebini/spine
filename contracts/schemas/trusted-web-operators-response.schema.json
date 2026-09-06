@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cortext.local/spine/contracts/schemas/trusted-web-operators-response.schema.json",
+  "type": "object",
+  "properties": {
+    "contract_version": {
+      "const": "spine.trusted-web-api.v1"
+    },
+    "access_epoch": {
+      "$ref": "trusted-web-types.schema.json#/$defs/epoch"
+    },
+    "operators": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "account_id": {
+            "$ref": "trusted-web-types.schema.json#/$defs/id"
+          },
+          "subject_id": {
+            "$ref": "trusted-web-types.schema.json#/$defs/id"
+          },
+          "account_display_name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "subject_display_name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          }
+        },
+        "required": [
+          "account_id",
+          "subject_id",
+          "account_display_name",
+          "subject_display_name"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 32,
+      "minItems": 0
+    }
+  },
+  "required": [
+    "contract_version",
+    "access_epoch",
+    "operators"
+  ],
+  "additionalProperties": false
+}

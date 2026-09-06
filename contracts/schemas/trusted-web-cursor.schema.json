@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cortext.local/spine/contracts/schemas/trusted-web-cursor.schema.json",
+  "type": "object",
+  "properties": {
+    "contract_version": {
+      "const": "spine.trusted-web-cursor.v1"
+    },
+    "query_kind": {
+      "enum": [
+        "items",
+        "agenda"
+      ]
+    },
+    "ledger_id": {
+      "$ref": "trusted-web-types.schema.json#/$defs/id"
+    },
+    "realm_id": {
+      "$ref": "trusted-web-types.schema.json#/$defs/id"
+    },
+    "account_id": {
+      "$ref": "trusted-web-types.schema.json#/$defs/id"
+    },
+    "subject_id": {
+      "$ref": "trusted-web-types.schema.json#/$defs/id"
+    },
+    "binding_id": {
+      "$ref": "trusted-web-types.schema.json#/$defs/id"
+    },
+    "binding_revision": {
+      "$ref": "trusted-web-types.schema.json#/$defs/epoch"
+    },
+    "access_epoch": {
+      "$ref": "trusted-web-types.schema.json#/$defs/epoch"
+    },
+    "recovery_epoch": {
+      "$ref": "trusted-web-types.schema.json#/$defs/epoch"
+    },
+    "query_hash": {
+      "$ref": "trusted-web-types.schema.json#/$defs/sha256"
+    },
+    "source_snapshot_hash": {
+      "$ref": "trusted-web-types.schema.json#/$defs/sha256"
+    },
+    "last_ordering_key": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 8,
+      "minItems": 1
+    },
+    "issued_at_utc": {
+      "$ref": "trusted-web-types.schema.json#/$defs/utc"
+    },
+    "expires_at_utc": {
+      "$ref": "trusted-web-types.schema.json#/$defs/utc"
+    }
+  },
+  "required": [
+    "contract_version",
+    "query_kind",
+    "ledger_id",
+    "realm_id",
+    "account_id",
+    "subject_id",
+    "binding_id",
+    "binding_revision",
+    "access_epoch",
+    "recovery_epoch",
+    "query_hash",
+    "source_snapshot_hash",
+    "last_ordering_key",
+    "issued_at_utc",
+    "expires_at_utc"
+  ],
+  "additionalProperties": false
+}

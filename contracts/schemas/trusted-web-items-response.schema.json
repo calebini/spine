@@ -1,0 +1,114 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cortext.local/spine/contracts/schemas/trusted-web-items-response.schema.json",
+  "type": "object",
+  "properties": {
+    "contract_version": {
+      "const": "spine.trusted-web-items.v1"
+    },
+    "entries": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "item_id": {
+            "$ref": "trusted-web-types.schema.json#/$defs/id"
+          },
+          "item_type": {
+            "enum": [
+              "event",
+              "task"
+            ]
+          },
+          "current_version": {
+            "$ref": "trusted-web-types.schema.json#/$defs/epoch"
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1
+          },
+          "status": {
+            "enum": [
+              "active",
+              "archived"
+            ]
+          },
+          "detail_status": {
+            "enum": [
+              "open",
+              "done",
+              "cancelled",
+              "scheduled",
+              "completed"
+            ]
+          },
+          "owner_scope": {
+            "$ref": "trusted-web-types.schema.json#/$defs/owner"
+          },
+          "allowed_operations": {
+            "$ref": "trusted-web-types.schema.json#/$defs/operations"
+          }
+        },
+        "required": [
+          "item_id",
+          "item_type",
+          "current_version",
+          "title",
+          "status",
+          "detail_status",
+          "owner_scope",
+          "allowed_operations"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 100,
+      "minItems": 0
+    },
+    "limit": {
+      "$ref": "trusted-web-types.schema.json#/$defs/limit"
+    },
+    "has_more": {
+      "type": "boolean"
+    },
+    "next_cursor": {
+      "$ref": "trusted-web-types.schema.json#/$defs/cursor"
+    }
+  },
+  "required": [
+    "contract_version",
+    "entries",
+    "limit",
+    "has_more",
+    "next_cursor"
+  ],
+  "additionalProperties": false,
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "has_more": {
+            "const": false
+          }
+        },
+        "required": [
+          "has_more"
+        ]
+      },
+      "then": {
+        "properties": {
+          "next_cursor": {
+            "type": "null"
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "next_cursor": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    }
+  ]
+}

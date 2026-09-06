@@ -1,0 +1,48 @@
+{
+  "contract_version": "spine.trusted-web-provisioning.v1",
+  "ok": true,
+  "command": "web_access.plan",
+  "normalized_plan": {
+    "contract_version": "spine.trusted-web-provisioning.v1",
+    "ledger_id": "ledger-demo",
+    "expected_access_epoch": "0",
+    "operators": [
+      {
+        "operation": "create",
+        "subject_id": "subject-a",
+        "display_name": "Operator A",
+        "activation_basis": "trusted_local_approval"
+      }
+    ],
+    "memberships": [
+      {
+        "operation": "create",
+        "group_id": "group-demo",
+        "subject_id": "subject-a",
+        "role": "owner",
+        "starts_at_utc": "2026-09-06T09:00:00Z"
+      }
+    ],
+    "item_adoptions": [],
+    "grants": [],
+    "route_approvals": []
+  },
+  "references": [
+    {
+      "kind": "subject",
+      "id": "subject-a",
+      "revision": null,
+      "state_hash": "de958839010814bf5fb29da85a0e17f55f6c9a007a01186888d4da37362320d6"
+    },
+    {
+      "kind": "subject_group",
+      "id": "group-demo",
+      "revision": null,
+      "state_hash": "5d0880146161d0dff7e36039962ee9d6d818d175aaf390cc5189e0b7729656ae"
+    }
+  ],
+  "plan_hash": "605c265f255d12444ef53f5addc4cd1757f7d0b3f012b2baab71c5ad3395d647",
+  "can_apply": true,
+  "conflicts": [],
+  "warnings": []
+}

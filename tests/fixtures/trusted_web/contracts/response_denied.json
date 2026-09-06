@@ -1,0 +1,10 @@
+{
+  "contract_version": "spine.trusted-web-api.v1",
+  "ok": false,
+  "error": {
+    "code": "resource_unavailable",
+    "message": "Resource unavailable"
+  },
+  "correlation_id": "request-demo",
+  "selection_id": "selection-a"
+}

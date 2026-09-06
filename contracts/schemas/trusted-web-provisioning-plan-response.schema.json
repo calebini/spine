@@ -1,0 +1,247 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cortext.local/spine/contracts/schemas/trusted-web-provisioning-plan-response.schema.json",
+  "type": "object",
+  "properties": {
+    "contract_version": {
+      "const": "spine.trusted-web-provisioning.v1"
+    },
+    "ok": {
+      "const": true
+    },
+    "command": {
+      "const": "web_access.plan"
+    },
+    "normalized_plan": {
+      "$ref": "#/$defs/normalizedPlan"
+    },
+    "references": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "enum": [
+              "subject",
+              "subject_group",
+              "account",
+              "binding",
+              "membership",
+              "item",
+              "grant",
+              "route",
+              "catalog"
+            ]
+          },
+          "id": {
+            "$ref": "trusted-web-types.schema.json#/$defs/id"
+          },
+          "revision": {
+            "oneOf": [
+              {
+                "$ref": "trusted-web-types.schema.json#/$defs/decimal"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "state_hash": {
+            "$ref": "trusted-web-types.schema.json#/$defs/sha256"
+          }
+        },
+        "required": [
+          "kind",
+          "id",
+          "revision",
+          "state_hash"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 100
+    },
+    "plan_hash": {
+      "$ref": "trusted-web-types.schema.json#/$defs/sha256"
+    },
+    "can_apply": {
+      "type": "boolean"
+    },
+    "conflicts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "enum": [
+              "missing_reference",
+              "stale_reference",
+              "duplicate_target",
+              "owner_required",
+              "already_owned",
+              "invalid_state",
+              "invalid_grant",
+              "capacity_exceeded"
+            ]
+          },
+          "operation_path": {
+            "type": "string",
+            "pattern": "^/(operators|memberships|item_adoptions|grants|route_approvals)/[0-9]+$"
+          }
+        },
+        "required": [
+          "code",
+          "operation_path"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 100
+    },
+    "warnings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "enum": [
+              "creator_entitlement_not_adopted",
+              "new_account_unverified"
+            ]
+          },
+          "operation_path": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "code",
+          "operation_path"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 100
+    }
+  },
+  "required": [
+    "contract_version",
+    "ok",
+    "command",
+    "normalized_plan",
+    "references",
+    "plan_hash",
+    "can_apply",
+    "conflicts",
+    "warnings"
+  ],
+  "additionalProperties": false,
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "can_apply": {
+            "const": true
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "conflicts": {
+            "maxItems": 0
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "conflicts": {
+            "minItems": 1
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "normalizedPlan": {
+      "type": "object",
+      "properties": {
+        "contract_version": {
+          "const": "spine.trusted-web-provisioning.v1"
+        },
+        "ledger_id": {
+          "$ref": "trusted-web-types.schema.json#/$defs/id"
+        },
+        "expected_access_epoch": {
+          "$ref": "trusted-web-types.schema.json#/$defs/decimal"
+        },
+        "operators": {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              {
+                "$ref": "trusted-web-provisioning-plan-request.schema.json#/$defs/operatorCreate"
+              },
+              {
+                "$ref": "trusted-web-provisioning-plan-request.schema.json#/$defs/operatorSet"
+              }
+            ]
+          },
+          "maxItems": 100
+        },
+        "memberships": {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              {
+                "$ref": "trusted-web-provisioning-plan-request.schema.json#/$defs/membershipCreate"
+              },
+              {
+                "$ref": "trusted-web-provisioning-plan-request.schema.json#/$defs/membershipSet"
+              },
+              {
+                "$ref": "trusted-web-provisioning-plan-request.schema.json#/$defs/membershipRevoke"
+              }
+            ]
+          },
+          "maxItems": 100
+        },
+        "item_adoptions": {
+          "type": "array",
+          "items": {
+            "$ref": "trusted-web-provisioning-plan-request.schema.json#/$defs/itemAdopt"
+          },
+          "maxItems": 100
+        },
+        "grants": {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              {
+                "$ref": "trusted-web-provisioning-plan-request.schema.json#/$defs/grantCreate"
+              },
+              {
+                "$ref": "trusted-web-provisioning-plan-request.schema.json#/$defs/grantRevoke"
+              }
+            ]
+          },
+          "maxItems": 100
+        },
+        "route_approvals": {
+          "type": "array",
+          "items": {
+            "$ref": "trusted-web-provisioning-plan-request.schema.json#/$defs/routeSet"
+          },
+          "maxItems": 100
+        }
+      },
+      "required": [
+        "contract_version",
+        "ledger_id",
+        "expected_access_epoch",
+        "operators",
+        "memberships",
+        "item_adoptions",
+        "grants",
+        "route_approvals"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

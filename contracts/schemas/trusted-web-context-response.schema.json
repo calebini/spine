@@ -1,0 +1,114 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cortext.local/spine/contracts/schemas/trusted-web-context-response.schema.json",
+  "type": "object",
+  "properties": {
+    "contract_version": {
+      "const": "spine.trusted-web-context.v1"
+    },
+    "owner_scopes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "owner_scope": {
+            "$ref": "trusted-web-types.schema.json#/$defs/owner"
+          },
+          "allowed_operations": {
+            "$ref": "trusted-web-types.schema.json#/$defs/operations"
+          }
+        },
+        "required": [
+          "owner_scope",
+          "allowed_operations"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 100,
+      "minItems": 0
+    },
+    "routes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "delivery_target_id": {
+            "$ref": "trusted-web-types.schema.json#/$defs/id"
+          },
+          "display_name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "owner_scope": {
+            "$ref": "trusted-web-types.schema.json#/$defs/owner"
+          },
+          "channel": {
+            "$ref": "trusted-web-types.schema.json#/$defs/id"
+          },
+          "route_security_revision": {
+            "$ref": "trusted-web-types.schema.json#/$defs/epoch"
+          },
+          "member_approval_revision": {
+            "oneOf": [
+              {
+                "$ref": "trusted-web-types.schema.json#/$defs/epoch"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "delivery_target_id",
+          "display_name",
+          "owner_scope",
+          "channel",
+          "route_security_revision",
+          "member_approval_revision"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 100,
+      "minItems": 0
+    },
+    "catalog_scopes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "owner_scope": {
+            "$ref": "notification-profile-types.schema.json#/$defs/owner"
+          },
+          "operations": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "catalog.read",
+                "catalog.use"
+              ]
+            },
+            "maxItems": 2,
+            "minItems": 1,
+            "uniqueItems": true
+          }
+        },
+        "required": [
+          "owner_scope",
+          "operations"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 100,
+      "minItems": 0
+    }
+  },
+  "required": [
+    "contract_version",
+    "owner_scopes",
+    "routes",
+    "catalog_scopes"
+  ],
+  "additionalProperties": false
+}

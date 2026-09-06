@@ -1,0 +1,7 @@
+{
+  "contract_version": "spine.trusted-web-api.v1",
+  "request": {
+    "contract_version": "spine.item-archetypes.v1",
+    "item_archetype_id": "catalog-demo"
+  }
+}

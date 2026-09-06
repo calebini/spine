@@ -1,0 +1,93 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cortext.local/spine/contracts/schemas/trusted-web-receipt-link.schema.json",
+  "type": "object",
+  "properties": {
+    "contract_version": {
+      "const": "spine.trusted-web-receipt-link.v1"
+    },
+    "command_receipt_id": {
+      "$ref": "trusted-web-types.schema.json#/$defs/id"
+    },
+    "command_id": {
+      "$ref": "trusted-web-types.schema.json#/$defs/id"
+    },
+    "command": {
+      "enum": [
+        "schedule.cancel",
+        "schedule.create",
+        "schedule.update",
+        "task.complete"
+      ]
+    },
+    "account_id": {
+      "$ref": "trusted-web-types.schema.json#/$defs/id"
+    },
+    "subject_id": {
+      "$ref": "trusted-web-types.schema.json#/$defs/id"
+    },
+    "binding_id": {
+      "$ref": "trusted-web-types.schema.json#/$defs/id"
+    },
+    "binding_revision": {
+      "$ref": "trusted-web-types.schema.json#/$defs/epoch"
+    },
+    "identity_basis": {
+      "const": "self_selected"
+    },
+    "access_epoch": {
+      "$ref": "trusted-web-types.schema.json#/$defs/epoch"
+    },
+    "api_version": {
+      "const": "spine.trusted-web-api.v1"
+    },
+    "registry_version": {
+      "const": "spine.trusted-web-command-registry.v1"
+    },
+    "create_owner_scope": {
+      "$ref": "trusted-web-types.schema.json#/$defs/owner"
+    },
+    "semantic_envelope_hash": {
+      "$ref": "trusted-web-types.schema.json#/$defs/sha256"
+    }
+  },
+  "required": [
+    "contract_version",
+    "command_receipt_id",
+    "command_id",
+    "command",
+    "account_id",
+    "subject_id",
+    "binding_id",
+    "binding_revision",
+    "identity_basis",
+    "access_epoch",
+    "api_version",
+    "registry_version",
+    "semantic_envelope_hash"
+  ],
+  "additionalProperties": false,
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "command": {
+            "const": "schedule.create"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "create_owner_scope"
+        ]
+      },
+      "else": {
+        "not": {
+          "required": [
+            "create_owner_scope"
+          ]
+        }
+      }
+    }
+  ]
+}

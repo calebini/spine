@@ -1,0 +1,14 @@
+{
+  "contract_version": "spine.trusted-web-api.v1",
+  "request": {
+    "contract_version": "spine.notification-profile-bindings.v1",
+    "item_type": "event",
+    "item_archetype_id": "archetype-demo",
+    "scope_chain": [
+      {
+        "owner_kind": "subject_group",
+        "owner_group_id": "group-demo"
+      }
+    ]
+  }
+}
