@@ -1,7 +1,7 @@
 # Spine Implementation Plan
 
-Status: Deterministic notification rendering implemented and verified
-Last reconciled with repository state: 2026-08-29
+Status: Trusted multi-operator web API logical draft audited; contract codification next
+Last updated: 2026-09-06 (web API delivery sequence; historical delivery sections retained)
 
 This is a non-normative delivery plan. The specifications and machine-readable contracts remain authoritative.
 
@@ -438,10 +438,11 @@ specs/contextual-advisories.md draft remains the starting point for normative wo
 this horizon records the newer design direction that its open trigger decision must
 resolve.
 
-### Proposed Initiative: Accounts, Multi-User Permissions, and Web API
+## Next Delivery: Trusted Multi-Operator Web API
 
 First delivery: multiple trusted operators, initially two, selecting their identity
-honestly in the web interface and using registered observed attribution in WhatsApp.
+honestly in the web interface. Existing WhatsApp agent operation remains unchanged;
+new protected chat admission or account-attribution integration is not a gate for this slice.
 `specs/accounts-and-chat-attribution.md` owns accounts and attribution;
 `specs/identity-and-access.md` owns authentication/delegation architecture;
 `specs/permissions.md` owns resource permissions, group roles, and access modes.
@@ -452,7 +453,7 @@ No automatic full-scope grant for both operators and no impersonation protection
 Restrict deployment to trusted devices/operators. Unknown identities never fall back
 to an operator. Single-operator full scope remains a separate optional access mode.
 
-`specs/permission-enforcement-and-web-admission.md` is the next normative draft:
+`specs/permission-enforcement-and-web-admission.md` preserves the broader normative draft:
 physical ownership/role/grant revisions, an exhaustive current-command disposition,
 verified web sessions, access epochs, bounded queries, receipt linkage and delivery
 authorization. Section 1 separates the immediate trusted slice from the preserved
@@ -465,9 +466,88 @@ checks, atomic owner/attribution evidence, replay and bounded service operation.
 It preserves current task-completion behavior rather than claiming that completion
 automatically cancels all queued work.
 
-Next: bounded audit and manual fixes, then publish HTTP/provisioning/evidence schemas,
-the exact web command registry and positive/negative/concurrency fixtures. Ratify/load-test
-budget ceilings and validate both operators' role behavior before implementation.
+### Audit Status
+
+- Web API draft committed in `63aee41`; manual corrections committed in `a0f9da1`.
+- `trusted-multi-operator-web-api-contract-audit-001`: `pass_with_minor_clarification`,
+  boundary preserved; one terminology clarification and one stale schema reference.
+- `trusted-multi-operator-web-api-contract-audit-002`: focused recheck `pass`, boundary
+  preserved, zero findings. The corrections use canonical `access_epoch` /
+  `expected_access_epoch` and align the schedule-create reference to schema 12.
+- Reports are retained under `whetstone_runs/` in each run's `change_audit/` directory.
+  This is bounded logical consistency evidence, not full convergence, runtime verification
+  or qualification of every future permission/authentication feature.
+
+No additional broad spec draft or routine audit loop is scheduled now. Resolve concrete
+gaps exposed by codification with narrow updates to the existing authorities; escalate
+material product/boundary decisions instead of inventing them in schemas or runtime code.
+
+### 1. Codify the Contracts — Next Work
+
+Add machine-readable artifacts to this repository; this does not mean external publication
+or deployment. Cover:
+
+- HTTP request/response and error envelopes, identity selection, operator/context reads,
+  scoped agenda/item projections and cursor encoding/normalization.
+- Local `web_access.plan` / `web_access.apply` provisioning, normalized plan hashes,
+  explicit operation paths, registered row-ID roles, effects and failure shapes.
+- Minimal account/access persistence and receipt-attribution linkage, including the
+  shared access epoch and atomic ownership/evidence requirements; align the ontology
+  and migration design without adopting the entire deferred authentication model.
+- The closed thirteen-command web registry with pinned inner request/response versions,
+  required contracts, resource/effect resolvers and projection rules. Do not change the
+  canonical inner CLI families or advertise unimplemented web capabilities.
+- Positive/negative/replay/concurrency fixture scenarios mapped to `WEB-01`–`WEB-15` in
+  the web spec. Define expected state/evidence as well as wire shapes; schema validation
+  alone is not proof of permission or transaction behavior.
+
+Exit gate: artifacts validate, registry/fixture coverage is checked, and no unresolved
+logical decision prevents the backend from being implemented. Runtime-dependent oracles
+remain explicitly pending until exercised in the next stages.
+
+### 2. Implement One Cohesive Backend Slice
+
+Build the minimal migrations, account/subject selection and permission state, local
+provisioning commands, bounded HTTP service, scoped reads and allowlisted scheduling/
+catalog-use handlers. Reuse shared transaction-owned command services, not CLI subprocesses
+or separately committing composites. Commit owner/attribution facts with canonical effects
+and receipts; preserve replay, current versions and all existing scheduling capabilities.
+
+Include readiness, request-integrity checks, capacity limits and bounded diagnostics.
+Use established HTTP framework mechanisms without adding authentication/session machinery.
+Keep the browser GUI as a separate follow-on deliverable; the backend must be testable
+with an API client and fixtures without a completed GUI. These are internal implementation
+gates, not a requirement to deploy many small intermediate slices.
+
+### 3. Verify Before Release
+
+Execute the `WEB-01`–`WEB-15` oracles, focused contract/runtime tests and the appropriate
+full regression suite. Explicitly cover two distinct selected subjects; member/admin/owner
+and private/group boundaries; denied nested/history disclosure; default profiles and custom
+reminders; recurrence/location; task completion versus work reconciliation; and unchanged
+local CLI/worker behavior. Test identity-switch correlation using a client harness; reserve
+actual browser cache/late-response UX verification for GUI acceptance.
+
+Exercise same-ID retries after ambiguous outcomes, atomic rollback, foreign-ID disclosure,
+access-epoch changes, stale cursors and simultaneous CLI/web/worker activity. Benchmark
+production-sized fixtures, qualify the proposed SQL/time/response ceilings and ratify any
+adjustments explicitly. Prove bounded preflight and absence of read/idle receipt or log floods.
+Passing static fixtures alone does not meet this gate.
+
+### 4. Restricted Staging Deployment and Evaluation
+
+After separate deployment approval, back up the ledger and provisioning evidence, migrate
+with schema-compatible rollback/restore instructions, and explicitly provision both operators
+and their intended scopes. Do not infer ownership or adopt every historical item automatically.
+Verify allowed/disallowed reachability, readiness, permission-aware readbacks, canonical
+schedule canaries and continued local worker operation; observe resource use and retry behavior.
+Use controlled fixtures or separately approved sends, not unsolicited delivery canaries.
+Update generic operator guidance and report residual limitations. Browser UI design/build
+and its visible unverified-identity warning remain a separate tracked follow-on, required
+before calling the operator-facing web experience complete.
+
+### Boundaries Preserved Throughout
+
 Unsupported commands or unresolved ownership must fail, not imply full access.
 Owner-only item transfer and admin/owner-approved member route use are ratified policy;
 their full administration UI and future delivery-security machinery need not ship first.
@@ -475,7 +555,8 @@ their full administration UI and future delivery-security machinery need not shi
 Defer verified web sign-in, automated/WhatsApp-code recovery, executor tokens and
 protected agent admission. Manual host-side account/binding repair is enough recovery
 now. Retain the stronger specs for later qualification; do not make authentication-method
-selection a blocker for the trusted web interface. Audit the bounded slice before build.
+selection a blocker for the trusted web interface. The bounded logical audit is complete;
+contract codification and executable verification remain delivery gates.
 
 Keep the CLI as a direct trusted-local full-scope path for now. The web backend does
 not shell out to it; both reuse command/services code. Mixed CLI/web/worker operation
