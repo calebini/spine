@@ -2,9 +2,9 @@
 
 __all__ = ["IMPLEMENTED_CONTRACT_VERSIONS", "IMPLEMENTED_LEDGER_SCHEMA_VERSION", "__version__"]
 
-__version__ = "0.4.0"
+__version__ = "0.5.0"
 
-IMPLEMENTED_LEDGER_SCHEMA_VERSION = 13
+IMPLEMENTED_LEDGER_SCHEMA_VERSION = 14
 IMPLEMENTED_CONTRACT_VERSIONS = frozenset(
     {
         "spine.canonical-json.v1",
@@ -71,7 +71,8 @@ IMPLEMENTED_CONTRACT_VERSIONS = frozenset(
         "spine.schedule-binding-reconcile.v1",
         "spine.schedule-binding-reconcile-response.v1",
         "spine.schedule-binding-reconcile-receipt.v1",
-        "spine.system-info.v2",
+        "spine.system-info.v3",
+        "spine.ledger-instance.v1",
         "spine.tickerd-compatibility.v1",
     }
 )

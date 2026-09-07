@@ -1,5 +1,13 @@
 # Trusted multi-operator backend
 
+Current runtime 0.5.0 requires schema 14 and returns system.info v3 with a separate
+ledger_instance_id. The web API below remains v1; its provisioned ledger_id is
+unchanged. Back up before migration: schema-13 identity backfill reads/sorts stored
+data and needs maintenance time and temporary-storage headroom. Record the instance
+ID after migration; ordinary subsequent backups/restores preserve it. See
+[ledger identity](../specs/ledger-instance-identity.md) for clone and rollback limits.
+
+
 Spine 0.4.0 / schema 13 adds an optional backend, not a browser GUI or an
 authentication system. Operators select an account honestly; anyone who can reach
 the interface can select any offered account. Keep access restricted to trusted

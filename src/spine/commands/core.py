@@ -399,7 +399,13 @@ def _handle_system_info(request: Mapping[str, Any], context: CommandContext) -> 
             "environment_failure:ledger_schema_version",
             f"runtime requires ledger schema {IMPLEMENTED_LEDGER_SCHEMA_VERSION}; found {ledger_version}",
         )
+    from spine.ledger.identity import read_ledger_instance_id
     from spine.runtime.compatibility import TickerdCompatibilityError, resolve_tickerd_compatibility
+
+    try:
+        ledger_instance_id = read_ledger_instance_id(context.ledger)
+    except SpineValidationError as exc:
+        raise SpineValidationError("environment_failure:ledger_instance_id", "ledger instance identity unavailable") from exc
 
     try:
         tickerd = resolve_tickerd_compatibility()
@@ -412,7 +418,8 @@ def _handle_system_info(request: Mapping[str, Any], context: CommandContext) -> 
     return {
         "ok": True,
         "command": "system.info",
-        "response_contract": "spine.system-info.v2",
+        "response_contract": "spine.system-info.v3",
+        "ledger_instance_id": ledger_instance_id,
         "runtime_version": __version__,
         "implemented_ledger_schema_version": str(IMPLEMENTED_LEDGER_SCHEMA_VERSION),
         "ledger_schema_version": str(ledger_version),

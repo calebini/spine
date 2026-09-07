@@ -11,6 +11,7 @@ from typing import Any
 
 from spine import IMPLEMENTED_LEDGER_SCHEMA_VERSION
 from spine.core import SpineValidationError
+from spine.ledger.identity import read_ledger_instance_id
 
 SCHEMA_OBJECT_MANIFEST_ID = "spine.sqlite-schema-object-manifest.v1"
 CURRENT_SCHEMA_VERSION = IMPLEMENTED_LEDGER_SCHEMA_VERSION
@@ -118,6 +119,7 @@ def verify_runtime_schema(connection: sqlite3.Connection) -> RuntimeSchemaVerifi
             )
         counts[item.object_type] += 1
 
+    read_ledger_instance_id(connection)
     return RuntimeSchemaVerificationResult(
         schema_version=schema_version,
         table_count=counts["table"],

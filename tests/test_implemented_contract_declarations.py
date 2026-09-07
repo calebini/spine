@@ -39,7 +39,8 @@ class ImplementedContractDeclarationTests(unittest.TestCase):
                 "spine.owner-scope-list-response.v2",
                 "spine.owner-scope-list-cursor.v2",
                 "spine.notification-profile-metadata-update.v1",
-                "spine.system-info.v2",
+                "spine.system-info.v3",
+                "spine.ledger-instance.v1",
                 "spine.tickerd-compatibility.v1",
             }.issubset(IMPLEMENTED_CONTRACT_VERSIONS)
         )

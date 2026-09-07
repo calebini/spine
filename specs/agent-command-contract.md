@@ -1,10 +1,15 @@
 # Spine Agent Command Contract
 
-Status: Draft v0.5.0; executable scheduling, dynamic notification profiles, deterministic notification rendering, bounded runtime preflight, and exact Tickerd compatibility and the trusted web backend implemented on schema 13
+Status: Draft v0.5.0; executable scheduling, dynamic notification profiles, deterministic notification rendering, bounded runtime preflight, and exact Tickerd compatibility and the trusted web backend implemented on schema 14
 Scope: Agent-facing command/request contract for authoring and inspecting Spine coordination truth
 Created: 2026-06-19
 
 ## 1. Purpose
+
+The implemented [ledger-instance-identity.md](ledger-instance-identity.md) defines
+`system.info` v3 instance identity and schema-14 fail-closed metadata validation.
+The web provisioning ledger_id remains a separate access namespace. Identity is not
+authentication and adds no implicit expected-ID field to mutation requests.
 
 This document defines the first agent-operable Spine command contract. It lets local agents create, inspect, update, cancel, archive, relate, and prepare reminders for Spine items through stable request and response handlers without ad hoc SQL or embedded ledger calls in prompts.
 
@@ -130,10 +135,10 @@ The CLI adapter accepts `--db <path>` unless the command is pure help or version
 
 For `reminder.create channel=whatsapp`, the CLI must resolve its local OpenClaw configuration before invoking the command handler and pass the normalized `context.adapter_bindings.openclaw` object defined in Section 3. The command handler never reads CLI flags, process environment, OpenClaw client state, or adapter discovery directly. If the CLI cannot construct the normalized present binding object, the handler-visible context is missing the binding and the command fails with the Section 14 `environment_failure` result.
 
-`spine --db <path> system info` is the read-only environment-discovery command. It requires an initialized current ledger because it reports both runtime and ledger authority. Its request is exactly an empty JSON object; when `--input` is omitted, this command alone supplies that empty object without reading stdin. An explicitly supplied `--input` is still parsed and validated normally. It returns `ok=true`, `command=system.info`, `response_contract=spine.system-info.v2`, runtime version, implemented and actual ledger-schema versions as canonical decimal strings, the exact installed timezone-database version required by local schedule authoring, the sorted implemented contract-version array, and the exact compatible Tickerd dependency facts. It writes no ledger row and invokes no adapter. The exact response shape is `contracts/schemas/system-info-response.schema.json`.
+`spine --db <path> system info` is the read-only environment-discovery command. It requires an initialized current ledger because it reports both runtime and ledger authority. Its request is exactly an empty JSON object; when `--input` is omitted, this command alone supplies that empty object without reading stdin. An explicitly supplied `--input` is still parsed and validated normally. It returns `ok=true`, `command=system.info`, `response_contract=spine.system-info.v3`, the immutable ledger_instance_id, runtime version, implemented and actual ledger-schema versions as canonical decimal strings, the exact installed timezone-database version required by local schedule authoring, the sorted implemented contract-version array, and the exact compatible Tickerd dependency facts. It writes no ledger row and invokes no adapter. The exact response shape is `contracts/schemas/system-info-response.schema.json`.
 
-Runtime `0.3.0` includes the atomic v2 promotion specified by
-`specs/compatibility.md`; v1 is no longer an implemented response contract.
+Runtime `0.5.0` includes the atomic v3 promotion specified by
+`specs/compatibility.md`; v1/v2 response schemas remain historical rather than emitted contracts.
 
 Caller-supplied `command_id` is the stable MVP path. When `--generate-command-id` is implemented, the CLI derives the value as `cmd_<sha256>` over Spine canonical JSON containing `derivation_version=spine.cli-command-id.v1`, canonical `command`, the JSON request body excluding `command_id`, and the CLI-resolved database path string. The CLI-resolved database path string is the absolute lexical path formed by resolving `--db` relative to the process current working directory when needed, removing `.` and `..` path segments, preserving filesystem spelling and case, preserving symlink path spelling without resolving symlink targets, and omitting trailing separators except for filesystem root. Generated-ID tests must cover equivalent relative and absolute spellings that normalize to the same lexical path; symlink spellings are distinct unless their supplied lexical path also normalizes to the same string.
 
@@ -154,7 +159,7 @@ Every registry entry requires `spine.canonical-json.v1`. The following table is 
 | Commands | Additional `required_contract_versions` |
 |---|---|
 | `subject.upsert`, `subject_group.upsert`, `delivery_target.upsert`, `item.show`, `item.list`, `item.archive`, `event.create`, `event.update`, `event.reschedule`, `event.cancel`, `task.create`, `task.update`, `task.complete`, `task.cancel`, `relation.create`, `relation.list` | none |
-| `system.info` | `spine.system-info.v2`, `spine.tickerd-compatibility.v1` |
+| `system.info` | `spine.ledger-instance.v1`, `spine.system-info.v3`, `spine.tickerd-compatibility.v1` |
 | `owner_scope.list` | `spine.owner-scope-discovery.v2`, `spine.owner-scope-list-response.v2`, `spine.owner-scope-list-cursor.v2` |
 | `item.occurrences` | `spine.recurrence.contract.v1`, `spine.item-occurrences.recurrence.v1` |
 | `recurrence.instance.add`, `recurrence.instance.remove`, `recurrence.instance.override`, `recurrence.series.edit` | `spine.recurrence-authoring.v1`, `spine.recurrence.contract.v1`, `spine.recurrence.normalization.v1` |
@@ -472,7 +477,7 @@ Golden command response fixtures under `tests/fixtures/command_responses/` are e
 
 The reusable implemented-command fixture package lives at `tests/fixtures/command_responses/mvp/`. `contracts/command-fixture-manifest.json` indexes that runtime evidence, and `contracts/schemas/command-response.schema.json` guards its shared response envelope.
 
-The read-only environment-discovery response is `spine.system-info.v2` and is guarded by `contracts/schemas/system-info-response.schema.json`. Contract tests compare its runtime, ledger-schema, timezone-database, implemented-contract, and exact Tickerd dependency declarations with the executing package and current ledger without pinning one machine's timezone-data version into a portable fixture.
+The read-only environment-discovery response is `spine.system-info.v3` and is guarded by `contracts/schemas/system-info-response.schema.json`. Contract tests compare its runtime, ledger-schema, timezone-database, implemented-contract, and exact Tickerd dependency declarations with the executing package and current ledger without pinning one machine's timezone-data version into a portable fixture.
 
 `contracts/schemas/system-info-response-v2.schema.json` retains the explicitly named v2
 shape used by cross-repository contract tests; the unsuffixed schema path is the

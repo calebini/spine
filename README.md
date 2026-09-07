@@ -51,8 +51,8 @@ allowed to quietly become canonical.
 
 ## What Works Today
 
-Spine `0.4.0` is an implemented alpha; its scheduling core is exercised in a staging
-agent environment. The current SQLite ledger schema is version `13`. The new optional
+Spine `0.5.0` is an implemented alpha; its scheduling core is exercised in a staging
+agent environment. The current SQLite ledger schema is version `14`. The new optional
 trusted multi-operator backend is locally verified and awaits staging deployment.
 
 ### Trusted multi-operator web backend
@@ -325,6 +325,9 @@ Draft work is not advertised as an implemented compatibility promise. See
 [`specs/README.md`](specs/README.md) for status labels and the complete normative index.
 
 ## Documentation
+
+- **Ledger identity:** [Ledger instance identity](specs/ledger-instance-identity.md) —
+  stable backup-preserved instance ID, schema-14 migration and system.info v3.
 
 Start with the document that matches the job:
 

@@ -167,27 +167,19 @@ exit, supervisor-only-retry, and no-processing requirements still apply.
 
 ## 6. System Readback Transition
 
-The containment implementation promotes `system.info` from
-`spine.system-info.v1` to `spine.system-info.v2`. The v2 shape is defined by
-`contracts/schemas/system-info-response-v2.schema.json`. It retains all v1 facts and
-adds `runtime_dependencies`, sorted lexicographically by `name`.
+Spine 0.5.0 / schema 14 emits `spine.system-info.v3`, as defined by
+`contracts/schemas/system-info-response-v3.schema.json` and the generic current
+response schema. It retains the v2 Tickerd dependency facts and adds immutable
+`ledger_instance_id`; see [ledger-instance-identity.md](ledger-instance-identity.md).
+V2 remains a frozen historical schema, not the current emitted response.
 
-The Tickerd element contains:
-
-- `name=tickerd`;
-- installed `package_version`;
-- `capability_id`;
-- raw-resource `descriptor_sha256`;
-- `compatibility_contract=spine.tickerd-compatibility.v1`; and
-- `status=compatible`.
-
-`system.info` returns success only after the resolved dependency is compatible. The
-`system.info` registry entry requires `spine.tickerd-compatibility.v1`, and the v2
-`implemented_contract_versions` contains both `spine.system-info.v2` and
-`spine.tickerd-compatibility.v1`. Spine runtime `0.2.0` implements that atomic
-transition: the command registry, implemented-contract declarations, handler, schema,
-documentation, and tests all name v2. A v1 response remains historical and MUST NOT be
-emitted by this runtime.
+The Tickerd provider pin, descriptor digest, required public API, safety mapping and
+`spine.tickerd-compatibility.v1` capability are unchanged. The consumer artifact's
+system_info section now identifies v3; this is a Spine readback transition, not a
+new Tickerd requirement. Dependency facts remain lexicographically ordered by name.
+Success requires a compatible provider and valid ledger identity. The registry and
+implemented declarations require v3 and `spine.ledger-instance.v1`; exact-v2 consumers
+must update. No authenticated identity or cloned-database detection is implied.
 
 ## 7. Spine Safety-Gate Mapping
 

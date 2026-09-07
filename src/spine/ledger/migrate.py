@@ -14,6 +14,7 @@ from pathlib import Path
 
 from spine.core import SpineValidationError
 from spine.ledger.common import utc_z_from_datetime
+from spine.ledger.identity import install_identity, read_ledger_instance_id
 from spine.ledger.preflight import CURRENT_SCHEMA_VERSION, current_schema_version, verify_runtime_schema
 from spine.ledger.sqlite import assert_ledger_invariants, connect, initialize_schema
 
@@ -87,6 +88,8 @@ def migrate_schema(
 
     if verify:
         verify_schema(connection)
+
+    read_ledger_instance_id(connection)
 
     return MigrationResult(
         before_version=0 if initialized else before_version,
@@ -162,6 +165,9 @@ def main(argv: Sequence[str] | None = None) -> int:
 
 
 def _apply_migration(connection: sqlite3.Connection, *, version: int, migration_name: str) -> None:
+    if version == 14:
+        install_identity(connection, fresh=False, applied_at_utc=_utc_now())
+        return
     if version == 4 and _delivery_target_schema_present(connection):
         with connection:
             _ensure_delivery_target_schema_indexes(connection)

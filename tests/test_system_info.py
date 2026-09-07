@@ -37,12 +37,14 @@ class SystemInfoCommandTests(unittest.TestCase):
                 response = handle("system.info", {}, CommandContext(ledger=connection))
 
             self.assertEqual(connection.total_changes, changes_before)
+            from spine.ledger.identity import read_ledger_instance_id
+            self.assertEqual(response["ledger_instance_id"], read_ledger_instance_id(connection))
             self.assertEqual(response["runtime_version"], __version__)
             self.assertEqual(response["ledger_schema_version"], str(IMPLEMENTED_LEDGER_SCHEMA_VERSION))
             self.assertEqual(response["implemented_ledger_schema_version"], str(IMPLEMENTED_LEDGER_SCHEMA_VERSION))
             self.assertEqual(response["timezone_database_version"], system_timezone_database_version())
             self.assertEqual(response["implemented_contract_versions"], sorted(IMPLEMENTED_CONTRACT_VERSIONS))
-            self.assertEqual(response["response_contract"], "spine.system-info.v2")
+            self.assertEqual(response["response_contract"], "spine.system-info.v3")
             self.assertEqual(response["runtime_dependencies"], [TICKERD_INFO.as_system_info()])
             schema = json.loads(SYSTEM_INFO_SCHEMA.read_text(encoding="utf-8"))
             Draft202012Validator(schema).validate(response)

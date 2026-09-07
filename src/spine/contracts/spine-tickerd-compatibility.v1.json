@@ -64,9 +64,9 @@
     ]
   },
   "system_info": {
-    "response_contract": "spine.system-info.v2",
+    "response_contract": "spine.system-info.v3",
     "required_implemented_contract_versions": [
-      "spine.system-info.v2",
+      "spine.system-info.v3",
       "spine.tickerd-compatibility.v1"
     ],
     "dependency_name": "tickerd",

@@ -13,6 +13,12 @@ The goal is to make ownership, entity boundaries, and near-term interoperability
 
 ## 2. Design Principles
 
+Schema 14 adds a single immutable `ledger_instance_metadata` row independent of
+subjects, items and web access namespaces. Its authoritative shape, generation,
+backfill and restore semantics are defined in
+[ledger-instance-identity.md](ledger-instance-identity.md). No per-item ownership or
+permission fact is inferred from the ledger instance identifier.
+
 The schema MUST be local-first, auditable, deterministic, and replayable.
 
 The schema MUST prefer explicit records over hidden inference.

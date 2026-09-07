@@ -17,6 +17,11 @@ Local agents and dashboards consume Spine truth or propose candidate actions; th
 
 ## 2. Boundary Summary
 
+[Ledger instance identity](ledger-instance-identity.md) is Spine-owned authoritative
+metadata, validated through bounded preflight and exposed by system.info v3.
+Only explicit migration performs logical backfill; workers, adapters and web
+provisioning cannot regenerate it. It detects accidental targeting, not impersonation.
+
 Spine owns:
 
 - coordination item identity
@@ -290,7 +295,6 @@ Existing local delivery is not claimed to enforce the deferred per-user mandate 
 future target for protected executor admission and provider qualification. Moving CLI
 behind that service or introducing an OpenClaw extension is not required now. These
 draft references declare no implemented authentication or per-user isolation.
-
 
 ## Trusted web implementation boundary
 

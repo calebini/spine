@@ -170,14 +170,14 @@
         "compatibility_status"
       ],
       "properties": {
-        "response_contract": { "const": "spine.system-info.v2" },
+        "response_contract": { "const": "spine.system-info.v3" },
         "required_implemented_contract_versions": {
           "type": "array",
           "minItems": 2,
           "maxItems": 2,
           "uniqueItems": true,
           "prefixItems": [
-            { "const": "spine.system-info.v2" },
+            { "const": "spine.system-info.v3" },
             { "const": "spine.tickerd-compatibility.v1" }
           ],
           "items": false

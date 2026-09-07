@@ -111,7 +111,7 @@ class CommandRuntimeContractRegistryTests(unittest.TestCase):
     def test_cli_runtime_contract_mismatch_fails_before_database_open(self) -> None:
         with patch(
             "spine.commands.registry.IMPLEMENTED_CONTRACT_VERSIONS",
-            frozenset(IMPLEMENTED_CONTRACT_VERSIONS - {"spine.system-info.v2"}),
+            frozenset(IMPLEMENTED_CONTRACT_VERSIONS - {"spine.system-info.v3"}),
         ):
             output = StringIO()
             with redirect_stdout(output):
@@ -120,7 +120,7 @@ class CommandRuntimeContractRegistryTests(unittest.TestCase):
         self.assertEqual(exit_code, 7)
         self.assertEqual(payload["error"]["code"], "environment_failure")
         self.assertEqual(payload["error"]["field"], "runtime_contracts")
-        self.assertIn("spine.system-info.v2", payload["error"]["message"])
+        self.assertIn("spine.system-info.v3", payload["error"]["message"])
 
 
 class BoundedSchemaPreflightTests(unittest.TestCase):

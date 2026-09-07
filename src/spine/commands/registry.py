@@ -71,7 +71,7 @@ def _requirements(commands: set[str], *versions: str) -> None:
 
 
 _requirements({"web_access.plan", "web_access.apply"}, "spine.trusted-web-provisioning.v1")
-_requirements({"system.info"}, "spine.system-info.v2", "spine.tickerd-compatibility.v1")
+_requirements({"system.info"}, "spine.system-info.v3", "spine.ledger-instance.v1", "spine.tickerd-compatibility.v1")
 _requirements(
     {"owner_scope.list"},
     "spine.owner-scope-discovery.v2",

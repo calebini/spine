@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://cortext.local/spine/contracts/schemas/system-info-response.schema.json",
+  "$id": "https://cortext.local/spine/contracts/schemas/system-info-response-v3.schema.json",
   "title": "Spine System Information Response v3",
   "type": "object",
   "required": [

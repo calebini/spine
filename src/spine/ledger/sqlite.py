@@ -7,6 +7,7 @@ from importlib import resources
 from pathlib import Path
 
 from spine.core.errors import SpineValidationError
+from spine.ledger.identity import install_identity, read_ledger_instance_id
 from spine.ledger.transactions import LedgerConnection
 
 DEFAULT_BUSY_TIMEOUT_MS = 5000
@@ -42,7 +43,8 @@ def initialize_schema(connection: sqlite3.Connection) -> None:
         version = connection.execute(
             "SELECT MAX(schema_version) FROM ledger_schema"
         ).fetchone()[0]
-        if version == 13:
+        if version == 14:
+            read_ledger_instance_id(connection)
             return
         raise SpineValidationError(
             "ledger_schema_requires_migration",
@@ -77,6 +79,8 @@ def initialize_schema(connection: sqlite3.Connection) -> None:
             connection.commit()
     finally:
         connection.execute("PRAGMA foreign_keys = ON")
+
+    install_identity(connection, fresh=True, applied_at_utc="1970-01-01T00:00:00Z")
 
 
 def _is_file_backed_database(database: str) -> bool:

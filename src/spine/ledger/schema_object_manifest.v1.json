@@ -1,7 +1,7 @@
 {
   "manifest_version": "spine.sqlite-schema-object-manifest.v1",
   "schemas": {
-    "13": {
+    "14": {
       "objects": [
         {
           "object_type": "index",
@@ -460,6 +460,11 @@
         },
         {
           "object_type": "table",
+          "name": "ledger_instance_metadata",
+          "definition_sha256": "e607c6600f106ef32cb49cc4ab64ad0c282d44cb9faa611c58bb6ea19505c10b"
+        },
+        {
+          "object_type": "table",
           "name": "ledger_schema",
           "definition_sha256": "9418d5d712cc9ebed82b0d5affef760bb097c47f52232b63180c4d04fde16912"
         },
@@ -777,6 +782,21 @@
           "object_type": "trigger",
           "name": "item_access_owner_revisions_update",
           "definition_sha256": "6f33f1201b1cd0add5bbe1a6cf96a8571bc76608fdca59538f65c581a7c352b7"
+        },
+        {
+          "object_type": "trigger",
+          "name": "ledger_instance_metadata_no_delete",
+          "definition_sha256": "ecc9e8ebf5fcdfb86c90597e661c6111aaeb40d4187a48e0c43d4b9b556dcb86"
+        },
+        {
+          "object_type": "trigger",
+          "name": "ledger_instance_metadata_no_replace",
+          "definition_sha256": "c5f0bca9f29d30c08d5383c4faac646b32d478f190a0d46bec8430e88268d5cf"
+        },
+        {
+          "object_type": "trigger",
+          "name": "ledger_instance_metadata_no_update",
+          "definition_sha256": "63a6fb2f1713ebaaff7aa1537df27a0e4ea34c97741ceefb3867e110a7e25187"
         },
         {
           "object_type": "trigger",

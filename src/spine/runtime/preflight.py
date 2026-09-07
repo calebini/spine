@@ -104,6 +104,11 @@ def admit_worker(
     try:
         verify_runtime_schema(connection)
     except SpineValidationError as exc:
+        if exc.code == "ledger_instance_invalid":
+            return emit_worker_preflight_failure(
+                config=config, health_sink=health_sink, event_sink=event_sink,
+                reason="ledger_instance_invalid",
+            )
         if exc.code.startswith("ledger_schema_object_") or exc.code.startswith("ledger_schema_missing_"):
             object_type, object_name = _schema_object_identity(exc.message)
             return emit_worker_preflight_failure(
