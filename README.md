@@ -329,6 +329,11 @@ Draft work is not advertised as an implemented compatibility promise. See
 - **Ledger identity:** [Ledger instance identity](specs/ledger-instance-identity.md) —
   stable backup-preserved instance ID, schema-14 migration and system.info v3.
 
+
+- **Proposed archetype extensions:** [Archetype facets](specs/archetype-facets.md) and
+  [Decision 0004](specs/decisions/0004-versioned-item-facets.md) — typed domain facts,
+  schema ownership and versioning; draft, not implemented.
+
 Start with the document that matches the job:
 
 - **Explore the illustrated product guide:**

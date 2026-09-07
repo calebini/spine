@@ -19,6 +19,13 @@ backfill and restore semantics are defined in
 [ledger-instance-identity.md](ledger-instance-identity.md). No per-item ownership or
 permission fact is inferred from the ledger instance identifier.
 
+
+The proposed [archetype-facets.md](archetype-facets.md) adds owner-scoped schema roots,
+immutable schema revisions, archetype bindings and item-version facet snapshots.
+Facets remain optional, inherit item access, and cannot redefine time, location,
+lifecycle or notification authority. These proposed entities are not schema-13 tables;
+machine contracts and a migration plan remain required before implementation.
+
 The schema MUST be local-first, auditable, deterministic, and replayable.
 
 The schema MUST prefer explicit records over hidden inference.

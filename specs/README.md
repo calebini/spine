@@ -6,6 +6,9 @@ Current spec surface:
 
 - `ledger-instance-identity.md`: implemented schema-14 immutable ledger identity, deterministic migration, bounded validation, system.info v3 and restore semantics
 
+- `archetype-facets.md`: draft registered typed item facts, immutable schema revisions, archetype bindings, permission-aware bounded readback/query, and flight proof; not implemented
+- `decisions/0004-versioned-item-facets.md`: proposed core-versus-domain-data boundary and pack/schema ownership
+
 - `trusted-multi-operator-web-api.md`: first trusted web API slice; identity selection, local provisioning, scheduling routes, bounded permission-filtered reads, replay and deployment gates; not implemented
 - `permission-enforcement-and-web-admission.md`: trusted multi-operator identification first; preserves deferred verified web/session, command/effect and delivery-enforcement contracts; no runtime declaration
 - `permissions.md`: draft ownership, roles and grants; independent access and identity modes, with trusted-local CLI exception

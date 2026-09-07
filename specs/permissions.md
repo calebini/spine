@@ -223,6 +223,12 @@ bounded context and output acceptance, not general ledger access. Neither future
 requires changing the account identity or group-role model, and neither is implemented
 by these permission rules alone.
 
+The draft [archetype-facets.md](archetype-facets.md) specifies that distinction:
+item read/edit covers values; catalog administration/use covers definitions and new
+attachments. Stored definition snapshots remain interpretable by item readers, while
+nested references retain current disclosure checks. Same-owner archetype/schema
+bindings are the proposed first slice. No current web route is expanded by this draft.
+
 ## 9. Mode Changes and Adoption
 
 The immediate target is trusted multi-operator use with a declared supported-operation

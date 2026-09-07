@@ -11,6 +11,13 @@ The implemented [ledger-instance-identity.md](ledger-instance-identity.md) defin
 The web provisioning ledger_id remains a separate access namespace. Identity is not
 authentication and adds no implicit expected-ID field to mutation requests.
 
+
+Proposed facet-schema, archetype-facet-binding and item-facet commands are cataloged
+in [archetype-facets.md](archetype-facets.md). They are specification reservations only,
+not additions to the implemented-command list or trusted web allowlist. Publication
+requires machine schemas, identity/error vectors, bounded resolvers, migration and
+work-freshness tests. No existing schedule request accepts new facet fields by implication.
+
 This document defines the first agent-operable Spine command contract. It lets local agents create, inspect, update, cancel, archive, relate, and prepare reminders for Spine items through stable request and response handlers without ad hoc SQL or embedded ledger calls in prompts.
 
 The command contract is the public behavior core over Spine canonical ledger and services APIs. It inherits ledger validation, versioning, hashing, audit, timestamp, relation, work, and side-effect safety rules. It is not a separate coordination authority.

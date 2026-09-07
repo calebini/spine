@@ -328,6 +328,13 @@ substitute because it would fragment Spine's canonical authority.
 
 ### Future Horizon: Archetype Facets and Workflow Recipes
 
+Specification work started 2026-09-07: `specs/decisions/0004-versioned-item-facets.md`
+and `specs/archetype-facets.md` now define the proposed first facet slice. They remain
+unaudited drafts, not implementation authorization. Next gates are bounded review,
+machine contracts/fixtures, a migration/index plan, and exact notification-work
+freshness behavior on facet-only item edits. Workflow recipes and external observations
+remain separate future work; current pack and web registries are unchanged.
+
 Spine's current archetypes are intentionally thin, owner-scoped semantic identities.
 Their future value should grow primarily through separately versioned capabilities
 that bind to them, rather than through rigid event subclasses or an expanding set of

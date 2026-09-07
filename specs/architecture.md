@@ -22,6 +22,13 @@ metadata, validated through bounded preflight and exposed by system.info v3.
 Only explicit migration performs logical backfill; workers, adapters and web
 provisioning cannot regenerate it. It detects accidental targeting, not impersonation.
 
+
+Proposed domain-attribute support is specified in [archetype-facets.md](archetype-facets.md)
+and [Decision 0004](decisions/0004-versioned-item-facets.md). Spine would own registered
+schemas and item-versioned canonical values; packs distribute definitions, not runtime
+code or user data. Facets do not replace core scheduling semantics or external observation
+provenance. This is a draft extension, not a current runtime capability.
+
 Spine owns:
 
 - coordination item identity
@@ -295,6 +302,7 @@ Existing local delivery is not claimed to enforce the deferred per-user mandate 
 future target for protected executor admission and provider qualification. Moving CLI
 behind that service or introducing an OpenClaw extension is not required now. These
 draft references declare no implemented authentication or per-user isolation.
+
 
 ## Trusted web implementation boundary
 

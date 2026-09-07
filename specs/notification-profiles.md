@@ -96,6 +96,11 @@ resolution unless a future contract defines their precedence.
 
 ### 3.3 Notification profile
 
+The separate draft [archetype-facets.md](archetype-facets.md) proposes typed item data
+bound to archetypes. Facet-schema bindings are not notification-profile bindings:
+they neither select profiles nor create, modify, or enrich reminder policies.
+Existing archetype/profile commands and their closed payloads remain unchanged.
+
 A notification profile is an owner-scoped, dynamically authored, versioned collection
 of notification-policy templates. A profile describes schedule and late-handling
 behavior only. It does not own:
