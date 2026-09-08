@@ -1,7 +1,8 @@
 # Spine Archetype Facets
 
-Status: Draft v0.1 — proposed contract, not implemented or audited
+Status: Draft v0.2 — proposed contract; first bounded audit findings manually patched, recheck pending; not implemented
 Date: 2026-09-07
+Updated: 2026-09-08
 Scope: Registered typed item facts, immutable schema revisions, archetype bindings,
 bounded authoring/readback, and a flight-details proof
 
@@ -82,7 +83,7 @@ Each field has a key in the same ASCII key domain, a boolean `required`, and one
 | `text` | Nonempty NFC string, no control characters; declared `max_length` 1–1024 Unicode code points. Whitespace is preserved, not trimmed. |
 | `enum` | One exact string from 1–64 unique NFC choices, each 1–128 code points. Case-sensitive. |
 | `boolean` | JSON true/false, without string/number coercion. |
-| `integer` | Canonical signed decimal string, no leading zeros, plus sign or negative zero; inclusive declared min/max within signed 64-bit range. |
+| `integer` | Canonical signed decimal string: either `0` or an optional ASCII minus sign followed by an ASCII digit `1`–`9` and zero or more ASCII digits `0`–`9`. Leading zeros, plus signs and negative zero are forbidden. Inclusive declared min/max use the same encoding and stay within signed 64-bit range. |
 | `date` | Valid proleptic Gregorian `YYYY-MM-DD`, years 0001–9999; descriptive only, never a temporal anchor. |
 | `reference` | Existing Spine `subject` or `location` ID; declaration fixes the target kind. No polymorphic object or arbitrary URI. |
 
@@ -102,10 +103,56 @@ with `derivation_version=spine.facet-definition.v1` and the entire normalized re
 definition excluding generated IDs, revision number and hash. Catalog owner is a
 root fact, not part of the portable definition hash.
 
-Root, revision, binding, and authoring-row IDs follow the existing command-derived
-ID rule, with command, command_id, row_role and canonical request_path. A new revision
-number is previous+1 under the same transaction; it is never caller-selected. A
-definition-equivalent publish is a no-op, with no revision increment.
+### 3.1 Produced-row identity registry
+
+The following is the complete proposed identity mapping for the facet commands in
+Section 4. It extends the owning-contract registry in `agent-command-contract.md`
+Section 4; it does not add commands to the current runtime registry. The generated
+encoding is `<prefix>_<sha256>` over `spine.canonical-json.v1` with exactly
+`derivation_version=spine.command-id.v1`, the canonical `command`, caller `command_id`,
+`row_role`, and `request_path`. Prefixes below exclude the separating underscore.
+Paths are fixed logical production paths, not caller-selectable JSON pointers;
+payload nesting, transport envelopes and input array ordering do not alter them.
+
+| Producing branch / artifact | Identity field or composite key | row_role | Prefix | request_path |
+| --- | --- | --- | --- | --- |
+| `facet_schema.create`: new root | `facet_schema_id` | `facet_schema` | `facet_schema` | `/facet_schema` |
+| `facet_schema.create`: first revision | `facet_schema_revision_id` | `facet_schema_revision` | `facet_schema_revision` | `/facet_schema/revision` |
+| Changed `facet_schema.publish`: new revision | `facet_schema_revision_id` | `facet_schema_revision` | `facet_schema_revision` | `/facet_schema/revision` |
+| Changed `item_archetype.facet_binding.set`: new/replacement binding | `facet_binding_id` | `archetype_facet_binding` | `archetype_facet_binding` | `/facet_binding` |
+| Changed `item.facets.update`: item version and complete snapshot | `(item_id, item_version)` | none | none | none |
+| Snapshot entry, newly set or copied forward | `(item_id, item_version, facet_key)` | none | none | none |
+| Every changed facet write: one audit row | `audit_id` | `audit` | `audit` | `/audit` |
+| Every fresh successful facet write, including no-op: one receipt | `command_receipt_id` | `command_receipt` | `command_receipt` | `/` |
+
+The three new roles are reserved by this proposed registry; `audit` and
+`command_receipt` reuse the existing common roles. No other generated facet row IDs
+are permitted. Before runtime advertisement, executable role registration and golden
+preimage/digest fixtures MUST match this table exactly.
+
+A new root's first revision_number is `1`; a changed publish uses previous+1 in
+the same transaction and retains the root ID; revision numbers are never caller-selected.
+Retirement retains root and revision
+IDs; it produces only the changed-write audit and receipt, not a new revision.
+Binding replacement retains the prior binding as superseded and creates the one new
+binding above. Binding remove retires the existing binding ID without producing a
+replacement or tombstone binding; an absent-binding no-op produces only a receipt.
+
+For an item update, a changed `set` entry points to that command's receipt as its
+source authoring receipt. Retained entries, including a structurally identical `set` in an
+otherwise changed batch, preserve their prior source receipt, schema/binding IDs and
+archetype evidence. Entry equality compares normalized values, schema revision, binding
+and archetype evidence, excluding the source receipt and composite version key. Changing
+a schema revision or binding is therefore a changed entry even when values are equal. Copy-forward changes the composite item-version key, not those
+source facts. There is no separate generated value ID or authoring-row ID. A remove
+omits the entry from the new snapshot; prior snapshots remain intact, and the command
+receipt records the removed key. No facet tombstone ID is generated. Existing generic
+supporting rows continue to follow their owning copy-forward identity rules.
+
+Definition-equivalent publishes and other successful no-ops create no domain revision,
+binding, snapshot, or audit row; they create the one common fresh-command receipt.
+Compatible replay creates no rows, including no second receipt. Failed commands create
+none of these artifacts. These rules apply to all six facet write commands in Section 4.
 
 ## 4. Proposed command surfaces
 
@@ -265,8 +312,12 @@ Required fixture families and observable oracles:
    unknown fields and missing required fields have deterministic outcomes.
 3. Revision isolation: publish leaves old snapshots byte-identical; explicit upgrade
    succeeds only against the active binding and expected item version.
-4. Atomic mutation: two-key failure rolls back both; no-op preserves item version;
-   replay adds no second revision; same-ID conflict leaves original receipt intact.
+4. Atomic mutation and identity: golden preimages/digests cover every generated row
+   in Section 3.1; create/publish revisions differ by their command facts, and reordered
+   change arrays do not change normalized identity. Two-key failure rolls back both;
+   no-op preserves item version and emits only its receipt; replay emits no rows;
+   retire/remove do not invent replacement IDs; copied entries retain source evidence
+   under their new composite keys; same-ID conflict leaves the original receipt intact.
 5. Lifecycle: retire prevents new attachment but permits retained reads/removal;
    archetype change with nonempty facets fails without loss.
 6. Access: foreign catalogs/references deny without leakage; catalog administrator

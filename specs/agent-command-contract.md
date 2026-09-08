@@ -96,6 +96,15 @@ Registered ordinary command-derived row roles and prefixes are: `item` -> `item`
 
 Produced-row identity uses stable request paths. Item shells use `/item`. Audit rows use `/audit` or `/audit/<effect>` when a command creates more than one audit row. Command receipts use `/`. Relations use `/relation`. Temporal anchors use their command field path. Initial supporting-set rows use array-indexed paths under `/locations` and `/subject_roles`. Notification rows use the content-addressed preimages in `specs/notifications.md`; audit and receipt rows still use this command-path registry. Copied version-scoped rows use `/copy_forward/<row_role>/<prior_id>` unless the owning structured contract defines successor identity. Composite artifacts whose identity is `(item_id, version)`, including item versions, event details, and task details, do not receive separate generated IDs.
 
+The proposed facet-family extension is defined by [archetype-facets.md](archetype-facets.md)
+Section 3.1: `facet_schema` -> `facet_schema`, `facet_schema_revision` ->
+`facet_schema_revision`, and `archetype_facet_binding` -> `archetype_facet_binding`,
+with exact production paths and branch rules in that table. Facet snapshots and
+entries use composite item-version keys rather than generated value IDs; audit and
+receipt rows reuse the common roles above. This reserves the owning-spec mapping,
+not implemented commands: executable registration and identity vectors remain required
+before advertising any facet capability. Existing runtime roles and paths are unchanged.
+
 Temporal-anchor inputs are objects with `anchor_kind` and the fields permitted by the ontology. `instant_utc` requires `utc_instant` and forbids local fields. `local_instant` requires `local_date`, `local_time`, `timezone`, and `timezone_database_version` and forbids `utc_instant`. `local_date` requires `local_date`, `timezone`, and `timezone_database_version` and forbids `utc_instant`. `utc_window` requires `window_start_utc` and `window_end_utc` with start less than or equal to end. `local_window` represents a full local-day window, requires `local_date`, `timezone`, and `timezone_database_version`, and forbids `local_time`, `utc_instant`, `window_start_utc`, and `window_end_utc`.
 
 Every structured success response contains `ok=true`, `command`, and the command-specific stable identities and effect booleans. Every structured failure response contains `ok=false`, `command` when known, `error.code`, `error.message`, and `error.field` when a single request field or stored field is responsible. Common error codes are `invalid_request`, `stale_cursor`, `unsupported_command`, `unsupported_field`, `missing_required_field`, `invalid_timestamp`, `referenced_row_not_found`, `wrong_item_type`, `stale_version`, `invalid_state_transition`, `semantic_conflict`, `environment_failure`, and `runtime_failure`.
