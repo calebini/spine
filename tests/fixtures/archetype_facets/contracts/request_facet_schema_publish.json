@@ -1,0 +1,44 @@
+{
+  "contract_version": "spine.facet-schemas.v1",
+  "command_id": "fixture-facet_schema.publish",
+  "actor_subject_id": "operator",
+  "action_timestamp_utc": "2026-09-09T10:00:00Z",
+  "facet_schema_id": "facet_schema_c0742a134b0891560b65c377fd3ef4936b12fb8aa1f6a3aba7087760479261c4",
+  "expected_current_revision_id": "facet_schema_revision_fcbda5c8b6c18df146f519ce33d83e46ab7a59017b0912c41b0eda4b363af4a8",
+  "definition": {
+    "display_name": "Flight details revised",
+    "description": "Descriptive flight identifiers and airport references.",
+    "compatible_item_types": [
+      "event"
+    ],
+    "fields": [
+      {
+        "key": "origin",
+        "required": true,
+        "type": "reference",
+        "target_kind": "location",
+        "queryable": true
+      },
+      {
+        "key": "flight_number",
+        "required": true,
+        "type": "text",
+        "max_length": "32",
+        "queryable": true
+      },
+      {
+        "key": "airline",
+        "required": false,
+        "type": "text",
+        "max_length": "128"
+      },
+      {
+        "key": "destination",
+        "required": true,
+        "type": "reference",
+        "target_kind": "location",
+        "queryable": true
+      }
+    ]
+  }
+}

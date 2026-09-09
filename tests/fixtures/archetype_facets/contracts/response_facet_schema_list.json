@@ -1,0 +1,24 @@
+{
+  "ok": true,
+  "command": "facet_schema.list",
+  "response_contract": "spine.facet-schemas.v1",
+  "owner": {
+    "owner_kind": "subject_group",
+    "owner_group_id": "travel-team"
+  },
+  "schemas": [
+    {
+      "facet_schema_id": "facet_schema_c0742a134b0891560b65c377fd3ef4936b12fb8aa1f6a3aba7087760479261c4",
+      "owner": {
+        "owner_kind": "subject_group",
+        "owner_group_id": "travel-team"
+      },
+      "schema_key": "flight_details",
+      "current_revision_id": "facet_schema_revision_fcbda5c8b6c18df146f519ce33d83e46ab7a59017b0912c41b0eda4b363af4a8",
+      "status": "active"
+    }
+  ],
+  "limit": "25",
+  "has_more": false,
+  "next_cursor": null
+}

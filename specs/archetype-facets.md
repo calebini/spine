@@ -1,8 +1,8 @@
 # Spine Archetype Facets
 
-Status: Draft v0.2 — proposed contract; first bounded audit findings manually patched, recheck pending; not implemented
+Status: Draft v0.3 — machine contracts and static fixtures added after a clean v0.2 bounded recheck; new codification not yet audited; not implemented
 Date: 2026-09-07
-Updated: 2026-09-08
+Updated: 2026-09-09
 Scope: Registered typed item facts, immutable schema revisions, archetype bindings,
 bounded authoring/readback, and a flight-details proof
 
@@ -159,7 +159,8 @@ none of these artifacts. These rules apply to all six facet write commands in Se
 All mutation requests use the owning proposed family, `command_id`, actor and explicit
 action timestamp under the existing common command contract. Fresh requests require
 the expected target revision/version. Read requests do not write receipts. Exact JSON
-schemas and field spelling of common envelopes must be published before implementation.
+schemas and field spelling of common envelopes are now recorded in Section 10;
+the remaining implementation gates still apply.
 
 | Command | Additional request facts | Terminal effects |
 | --- | --- | --- |
@@ -304,6 +305,11 @@ a migration/index plan. No promised runtime family is advertised before executab
 tests pass. Audit this draft first; then close the listed machine-contract and work
 freshness gates without widening it to workflow recipes or live enrichment.
 
+The structural schemas, fixture manifest and pure normalization/identity vectors are
+now present (Section 10). They do not satisfy the persisted-state, permission, cursor,
+work-freshness, concurrency or query-plan acceptance families below. Their tests must
+not be reported as proof of those runtime behaviors.
+
 Required fixture families and observable oracles:
 
 1. Definition normalization: equivalent field order yields identical hashes; unknown
@@ -334,3 +340,103 @@ Required fixture families and observable oracles:
 Draft decisions requiring review are the deliberately scalar type subset, same-owner
 bindings, optional rather than mandatory facets, series-level values, and two-command
 initial authoring. These are proposed defaults, not previously ratified capabilities.
+
+## 10. Machine-contract codification (draft)
+
+The repository-only proposed registry is
+`contracts/archetype-facet-contract-registry.v1.json`. It maps all eleven commands to
+their exact request/response schema fragments and family versions. It is not imported
+by runtime preflight, CLI dispatch, package capability declarations or the web allowlist.
+The five `contracts/schemas/archetype-facet-*.schema.json` files define types, requests,
+successes, handler failures and the fixture-manifest structure. The fixture manifest is
+`contracts/archetype-facet-fixture-manifest.json`; fixtures and pure vectors live under
+`tests/fixtures/archetype_facets/`. These are draft contracts, not an installed feature.
+
+### 10.1 Wire choices
+
+The canonical command is supplied by the transport route, not duplicated inside its
+request. Each request requires the exact owning `contract_version`. Writes require
+`command_id`, `actor_subject_id`, `action_timestamp_utc` (whole-second UTC `Z` form).
+Requests are closed: unknown properties fail. Read requests carry no write identity.
+IDs use the existing nonempty-string ID domain; generated IDs must additionally obey
+Section 3.1, as checked by identity vectors rather than invented by a caller.
+
+Definitions are passed as `definition`, with `fields` an array of declarations using
+`key`, `type`, `required`, optional `queryable`, and type-specific properties.
+`max_length`, integer `min`/`max`, revision/item versions and page limits are canonical
+decimal strings, not JSON numbers. Integer bounds are both required. Display metadata
+uses the existing catalog lengths: display_name 1–160 code points, description null
+or 1–2000 code points. NFC normalization precedes length and byte checks. Text controls
+mean U+0000–U+001F and U+007F–U+009F; unpaired surrogates are rejected everywhere.
+The exact definition preimage is
+`{derivation_version: "spine.facet-definition.v1", definition: <normalized definition>}`.
+The 32 KiB definition bound measures that normalized definition, not its enclosing
+hash preimage. The 64 KiB values bound measures a canonical object mapping each
+facet_key to its values object; per-entry provenance/definitions are not included.
+Each individual values object remains limited to 16 KiB.
+
+Publish/retire use `expected_current_revision_id`. Binding set/remove require
+`expected_binding_id`, including explicit null for no active binding. A missing active
+binding with a non-null expectation is a conflict, not the absent-remove no-op.
+Item updates use `expected_item_version`; optional historical read selection uses
+`item_version`. A `set` requires `expected_binding_id` non-null; its values are a full
+replacement. Duplicate declaration/change/entry keys are semantic errors, even when
+the array elements differ structurally. Arbitrary scalar strings in the envelope are
+not authorization to bypass the exact pinned field type and declaration constraints.
+
+### 10.2 Success, failure and readback
+
+Successes contain `response_contract` equal to the command's owning family. All fresh
+writes include `command_id`, `command_receipt_id`, the closed effect, and `changed`.
+Changed writes include `audit_id`; no-ops forbid it. Compatible replay returns that
+recorded outcome, including its original changed/audit facts, without creating rows.
+It is not a newly performed change and must not be interpreted as another delivery.
+
+Catalog receipts report `prior_revision_id`, `facet_schema_revision_id` and
+`revision_number`; create has prior=null and number=1. Publish increments only on
+change; retire and no-op preserve the revision. Binding set reports prior/resulting
+IDs and schema revision. Remove reports the same retired binding ID as prior/result;
+the absent-remove no-op reports both IDs as null. Item receipts report prior/resulting
+item versions and sorted `changed_facet_keys` (empty on no-op). Changed versions advance
+by one. `reconciliation_performed` reports whether work reconciliation actually ran;
+no-op requires false. The sample changed receipt is for an item with no policies or
+work and uses false. This boolean does not resolve or claim safety for queued, leased
+or attempted work. Section 5 remains a blocking integration gate.
+
+Schema show returns a `root` and selected immutable `revision`; the selected revision
+must belong to that root, but can differ from its current pointer. Stored definitions
+are fully normalized, including explicit queryable=false. Item show returns sorted
+`entries`; each contains the pinned schema revision/definition/hash, facet binding ID,
+`archetype` assignment evidence (root/revision, selection_source and source_ref when
+present), values, `source_command_receipt_id`, and `references` sorted by field key.
+Reference state contains exactly one entry for every reference-valued field present.
+Its ID/kind must agree with the pinned definition and value. An unreadable reference
+denies the whole result; inactive but readable references are returned as inactive.
+An empty snapshot returns entries=[], not null or an omitted field.
+
+Handler failures use the existing ok/command/error envelope. The proposed facet
+domain reasons in Section 4 are carried as `error.code`; exact CLI exit mappings are
+in the draft registry. Definition/value errors use exit 2, binding/archetype conflicts
+6, retired-schema use 2, and missing/inactive/unreadable references uniformly 4 with
+`facet_reference_unavailable`. Paths identify fields but never echo private values.
+Admission/permission and operational-capacity envelopes remain owned by their adapters;
+the facet handler schema does not replace or freeze them. Resolver mappings, admission
+ordering and the exact capacity wrapper remain pre-implementation gates. Fixture error
+messages are illustrative safe prose, not byte-exact public message constants.
+
+### 10.3 Pagination and validation limits
+
+Catalog list defaults status=active and limit=25; explicit status selects active or
+retired. Binding list returns only active bindings. Query returns current matching
+item IDs/versions. All pages include the accepted decimal-string limit, `has_more`
+and `next_cursor`; has_more=false requires null, true requires a nonempty opaque
+cursor at most 4096 characters. Returned collection length cannot exceed limit.
+Root IDs, facet keys and item IDs respectively determine the existing total order.
+
+Only the opaque cursor envelope is specified here. Token encoding, authenticated
+binding, snapshot identity, expiry and access-epoch sources still require the dedicated
+cursor contract before runtime. No fixture with an arbitrary token proves pagination
+security or freshness. Likewise, JSON Schema checks structure, not NFC, declared-field
+validation, hash correctness, foreign-key visibility, byte ceilings or transactional
+invariants. Test-only pure oracles cover selected semantic vectors; no application
+validator, database migration, index or command handler is introduced by this bundle.

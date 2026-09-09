@@ -14,9 +14,12 @@ authentication and adds no implicit expected-ID field to mutation requests.
 
 Proposed facet-schema, archetype-facet-binding and item-facet commands are cataloged
 in [archetype-facets.md](archetype-facets.md). They are specification reservations only,
-not additions to the implemented-command list or trusted web allowlist. Publication
-requires machine schemas, identity/error vectors, bounded resolvers, migration and
-work-freshness tests. No existing schedule request accepts new facet fields by implication.
+not additions to the implemented-command list or trusted web allowlist. The draft
+machine registry and schemas are at
+`contracts/archetype-facet-contract-registry.v1.json`, with structural fixtures and
+pure identity/type vectors. Runtime advertisement still requires bounded resolvers,
+cursor semantics, migration/index proof and work-freshness tests. No existing schedule
+request accepts new facet fields by implication.
 
 This document defines the first agent-operable Spine command contract. It lets local agents create, inspect, update, cancel, archive, relate, and prepare reminders for Spine items through stable request and response handlers without ad hoc SQL or embedded ledger calls in prompts.
 

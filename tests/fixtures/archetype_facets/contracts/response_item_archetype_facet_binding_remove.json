@@ -1,0 +1,14 @@
+{
+  "ok": true,
+  "command": "item_archetype.facet_binding.remove",
+  "response_contract": "spine.archetype-facet-bindings.v1",
+  "command_id": "fixture-item_archetype.facet_binding.remove",
+  "command_receipt_id": "command_receipt_9820eb0ed0e71420a81a36f02db4ff05ac9049d36993573fea6505e851c0f3f3",
+  "effect": "facet_binding_removed",
+  "changed": true,
+  "audit_id": "audit_ab6799c451ad11c668e34e676278af926248691531f151479b64bca77179d22f",
+  "item_archetype_id": "archetype-flight",
+  "facet_key": "flight_details",
+  "prior_binding_id": "archetype_facet_binding_db3fa09d817a7b76f9a2ec442900d7051d04b284a771ef7d998ff001774a305f",
+  "facet_binding_id": "archetype_facet_binding_db3fa09d817a7b76f9a2ec442900d7051d04b284a771ef7d998ff001774a305f"
+}

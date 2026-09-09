@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cortext.local/spine/contracts/schemas/archetype-facet-failure.schema.json",
+  "title": "Spine facet handler failures (draft v1)",
+  "$comment": "Draft, not implemented or advertised. Normative source: specs/archetype-facets.md.",
+  "type": "object",
+  "required": [
+    "ok",
+    "command",
+    "error"
+  ],
+  "properties": {
+    "ok": {
+      "const": false
+    },
+    "command": {
+      "enum": [
+        "facet_schema.create",
+        "facet_schema.publish",
+        "facet_schema.retire",
+        "facet_schema.show",
+        "facet_schema.list",
+        "item_archetype.facet_binding.set",
+        "item_archetype.facet_binding.remove",
+        "item_archetype.facet_binding.list",
+        "item.facets.update",
+        "item.facets.show",
+        "item.facets.query"
+      ]
+    },
+    "error": {
+      "type": "object",
+      "required": [
+        "code",
+        "message"
+      ],
+      "properties": {
+        "code": {
+          "enum": [
+            "facet_schema_invalid",
+            "facet_value_invalid",
+            "facet_binding_conflict",
+            "facet_archetype_conflict",
+            "facet_schema_retired",
+            "facet_reference_unavailable",
+            "invalid_request",
+            "unsupported_field",
+            "missing_required_field",
+            "invalid_timestamp",
+            "referenced_row_not_found",
+            "wrong_item_type",
+            "stale_version",
+            "stale_cursor",
+            "invalid_state_transition",
+            "semantic_conflict",
+            "environment_failure",
+            "runtime_failure"
+          ]
+        },
+        "message": {
+          "type": "string",
+          "minLength": 1
+        },
+        "field": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

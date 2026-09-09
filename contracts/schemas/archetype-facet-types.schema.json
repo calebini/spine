@@ -1,0 +1,570 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cortext.local/spine/contracts/schemas/archetype-facet-types.schema.json",
+  "title": "Spine archetype facet types (draft v1)",
+  "$comment": "Draft, not implemented or advertised. Normative source: specs/archetype-facets.md.",
+  "$defs": {
+    "id": {
+      "$ref": "notification-types.schema.json#/$defs/id"
+    },
+    "key": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]{0,63}(?![\\s\\S])"
+    },
+    "positiveDecimal": {
+      "type": "string",
+      "pattern": "^[1-9][0-9]*(?![\\s\\S])"
+    },
+    "signedInteger": {
+      "type": "string",
+      "pattern": "^(0|-?[1-9][0-9]*)(?![\\s\\S])",
+      "maxLength": 20,
+      "$comment": "Semantic validation enforces signed 64-bit range."
+    },
+    "limit": {
+      "type": "string",
+      "pattern": "^([1-9]|[1-9][0-9]|100)(?![\\s\\S])",
+      "default": "25"
+    },
+    "cursor": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 4096,
+      "$comment": "Opaque; no decoding, authenticity, snapshot, or expiry semantics are validated by this structural schema."
+    },
+    "owner": {
+      "$ref": "notification-profile-types.schema.json#/$defs/owner"
+    },
+    "text": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^[^\\u0000-\\u001f\\u007f-\\u009f]*(?![\\s\\S])"
+    },
+    "scalar": {
+      "type": [
+        "string",
+        "boolean"
+      ],
+      "$comment": "The pinned field declaration selects exactly one scalar type; booleans are not integers. Semantic validation checks dates, references, NFC and bounds."
+    },
+    "values": {
+      "type": "object",
+      "maxProperties": 32,
+      "propertyNames": {
+        "$ref": "archetype-facet-types.schema.json#/$defs/key"
+      },
+      "additionalProperties": {
+        "$ref": "archetype-facet-types.schema.json#/$defs/scalar"
+      }
+    },
+    "field": {
+      "oneOf": [
+        {
+          "type": "object",
+          "required": [
+            "key",
+            "required",
+            "type",
+            "max_length"
+          ],
+          "properties": {
+            "key": {
+              "$ref": "archetype-facet-types.schema.json#/$defs/key"
+            },
+            "required": {
+              "type": "boolean"
+            },
+            "type": {
+              "const": "text"
+            },
+            "queryable": {
+              "type": "boolean",
+              "default": false
+            },
+            "max_length": {
+              "type": "string",
+              "pattern": "^([1-9]|[1-9][0-9]{1,2}|10[01][0-9]|102[0-4])(?![\\s\\S])"
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": [
+            "key",
+            "required",
+            "type",
+            "choices"
+          ],
+          "properties": {
+            "key": {
+              "$ref": "archetype-facet-types.schema.json#/$defs/key"
+            },
+            "required": {
+              "type": "boolean"
+            },
+            "type": {
+              "const": "enum"
+            },
+            "queryable": {
+              "type": "boolean",
+              "default": false
+            },
+            "choices": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 128
+              },
+              "minItems": 1,
+              "maxItems": 64,
+              "uniqueItems": true
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": [
+            "key",
+            "required",
+            "type"
+          ],
+          "properties": {
+            "key": {
+              "$ref": "archetype-facet-types.schema.json#/$defs/key"
+            },
+            "required": {
+              "type": "boolean"
+            },
+            "type": {
+              "const": "boolean"
+            },
+            "queryable": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": [
+            "key",
+            "required",
+            "type",
+            "min",
+            "max"
+          ],
+          "properties": {
+            "key": {
+              "$ref": "archetype-facet-types.schema.json#/$defs/key"
+            },
+            "required": {
+              "type": "boolean"
+            },
+            "type": {
+              "const": "integer"
+            },
+            "queryable": {
+              "type": "boolean",
+              "default": false
+            },
+            "min": {
+              "$ref": "archetype-facet-types.schema.json#/$defs/signedInteger"
+            },
+            "max": {
+              "$ref": "archetype-facet-types.schema.json#/$defs/signedInteger"
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": [
+            "key",
+            "required",
+            "type"
+          ],
+          "properties": {
+            "key": {
+              "$ref": "archetype-facet-types.schema.json#/$defs/key"
+            },
+            "required": {
+              "type": "boolean"
+            },
+            "type": {
+              "const": "date"
+            },
+            "queryable": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": [
+            "key",
+            "required",
+            "type",
+            "target_kind"
+          ],
+          "properties": {
+            "key": {
+              "$ref": "archetype-facet-types.schema.json#/$defs/key"
+            },
+            "required": {
+              "type": "boolean"
+            },
+            "type": {
+              "const": "reference"
+            },
+            "queryable": {
+              "type": "boolean",
+              "default": false
+            },
+            "target_kind": {
+              "enum": [
+                "subject",
+                "location"
+              ]
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "definition": {
+      "type": "object",
+      "required": [
+        "display_name",
+        "description",
+        "compatible_item_types",
+        "fields"
+      ],
+      "properties": {
+        "display_name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2000
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "compatible_item_types": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "event",
+              "task"
+            ]
+          },
+          "minItems": 1,
+          "maxItems": 2,
+          "uniqueItems": true
+        },
+        "fields": {
+          "type": "array",
+          "items": {
+            "$ref": "archetype-facet-types.schema.json#/$defs/field"
+          },
+          "minItems": 1,
+          "maxItems": 32
+        }
+      },
+      "additionalProperties": false
+    },
+    "hash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}(?![\\s\\S])"
+    },
+    "root": {
+      "type": "object",
+      "required": [
+        "facet_schema_id",
+        "owner",
+        "schema_key",
+        "current_revision_id",
+        "status"
+      ],
+      "properties": {
+        "facet_schema_id": {
+          "$ref": "archetype-facet-types.schema.json#/$defs/id"
+        },
+        "owner": {
+          "$ref": "archetype-facet-types.schema.json#/$defs/owner"
+        },
+        "schema_key": {
+          "$ref": "archetype-facet-types.schema.json#/$defs/key"
+        },
+        "current_revision_id": {
+          "$ref": "archetype-facet-types.schema.json#/$defs/id"
+        },
+        "status": {
+          "enum": [
+            "active",
+            "retired"
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "revision": {
+      "type": "object",
+      "required": [
+        "facet_schema_id",
+        "facet_schema_revision_id",
+        "revision_number",
+        "definition",
+        "definition_hash"
+      ],
+      "properties": {
+        "facet_schema_id": {
+          "$ref": "archetype-facet-types.schema.json#/$defs/id"
+        },
+        "facet_schema_revision_id": {
+          "$ref": "archetype-facet-types.schema.json#/$defs/id"
+        },
+        "revision_number": {
+          "$ref": "archetype-facet-types.schema.json#/$defs/positiveDecimal"
+        },
+        "definition": {
+          "$ref": "#/$defs/normalizedDefinition"
+        },
+        "definition_hash": {
+          "$ref": "archetype-facet-types.schema.json#/$defs/hash"
+        }
+      },
+      "additionalProperties": false
+    },
+    "binding": {
+      "type": "object",
+      "required": [
+        "facet_binding_id",
+        "item_archetype_id",
+        "facet_key",
+        "facet_schema_revision_id",
+        "status"
+      ],
+      "properties": {
+        "facet_binding_id": {
+          "$ref": "archetype-facet-types.schema.json#/$defs/id"
+        },
+        "item_archetype_id": {
+          "$ref": "archetype-facet-types.schema.json#/$defs/id"
+        },
+        "facet_key": {
+          "$ref": "archetype-facet-types.schema.json#/$defs/key"
+        },
+        "facet_schema_revision_id": {
+          "$ref": "archetype-facet-types.schema.json#/$defs/id"
+        },
+        "status": {
+          "enum": [
+            "active",
+            "superseded",
+            "retired"
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "archetypeEvidence": {
+      "type": "object",
+      "required": [
+        "item_archetype_id",
+        "item_archetype_revision_id",
+        "selection_source"
+      ],
+      "properties": {
+        "item_archetype_id": {
+          "$ref": "archetype-facet-types.schema.json#/$defs/id"
+        },
+        "item_archetype_revision_id": {
+          "$ref": "archetype-facet-types.schema.json#/$defs/id"
+        },
+        "selection_source": {
+          "enum": [
+            "operator_explicit",
+            "agent_selected",
+            "imported"
+          ]
+        },
+        "source_ref": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "referenceState": {
+      "type": "object",
+      "required": [
+        "field",
+        "target_kind",
+        "target_id",
+        "status"
+      ],
+      "properties": {
+        "field": {
+          "$ref": "archetype-facet-types.schema.json#/$defs/key"
+        },
+        "target_kind": {
+          "enum": [
+            "subject",
+            "location"
+          ]
+        },
+        "target_id": {
+          "$ref": "archetype-facet-types.schema.json#/$defs/id"
+        },
+        "status": {
+          "enum": [
+            "active",
+            "inactive"
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "entry": {
+      "type": "object",
+      "required": [
+        "facet_key",
+        "facet_schema_revision_id",
+        "facet_binding_id",
+        "archetype",
+        "values",
+        "source_command_receipt_id",
+        "schema_revision",
+        "references"
+      ],
+      "properties": {
+        "facet_key": {
+          "$ref": "archetype-facet-types.schema.json#/$defs/key"
+        },
+        "facet_schema_revision_id": {
+          "$ref": "archetype-facet-types.schema.json#/$defs/id"
+        },
+        "facet_binding_id": {
+          "$ref": "archetype-facet-types.schema.json#/$defs/id"
+        },
+        "archetype": {
+          "$ref": "archetype-facet-types.schema.json#/$defs/archetypeEvidence"
+        },
+        "values": {
+          "$ref": "archetype-facet-types.schema.json#/$defs/values"
+        },
+        "source_command_receipt_id": {
+          "$ref": "archetype-facet-types.schema.json#/$defs/id"
+        },
+        "schema_revision": {
+          "$ref": "archetype-facet-types.schema.json#/$defs/revision"
+        },
+        "references": {
+          "type": "array",
+          "items": {
+            "$ref": "archetype-facet-types.schema.json#/$defs/referenceState"
+          },
+          "minItems": 0,
+          "maxItems": 32
+        }
+      },
+      "additionalProperties": false
+    },
+    "change": {
+      "oneOf": [
+        {
+          "type": "object",
+          "required": [
+            "op",
+            "facet_key",
+            "expected_binding_id",
+            "facet_schema_revision_id",
+            "values"
+          ],
+          "properties": {
+            "op": {
+              "const": "set"
+            },
+            "facet_key": {
+              "$ref": "archetype-facet-types.schema.json#/$defs/key"
+            },
+            "expected_binding_id": {
+              "$ref": "archetype-facet-types.schema.json#/$defs/id"
+            },
+            "facet_schema_revision_id": {
+              "$ref": "archetype-facet-types.schema.json#/$defs/id"
+            },
+            "values": {
+              "$ref": "archetype-facet-types.schema.json#/$defs/values"
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": [
+            "op",
+            "facet_key"
+          ],
+          "properties": {
+            "op": {
+              "const": "remove"
+            },
+            "facet_key": {
+              "$ref": "archetype-facet-types.schema.json#/$defs/key"
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "itemIdentity": {
+      "type": "object",
+      "required": [
+        "item_id",
+        "item_version"
+      ],
+      "properties": {
+        "item_id": {
+          "$ref": "archetype-facet-types.schema.json#/$defs/id"
+        },
+        "item_version": {
+          "$ref": "archetype-facet-types.schema.json#/$defs/positiveDecimal"
+        }
+      },
+      "additionalProperties": false
+    },
+    "normalizedDefinition": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/definition"
+        },
+        {
+          "properties": {
+            "fields": {
+              "items": {
+                "required": [
+                  "queryable"
+                ]
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

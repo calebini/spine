@@ -1,0 +1,5 @@
+{
+  "contract_version": "spine.archetype-facet-bindings.v1",
+  "item_archetype_id": "archetype-flight",
+  "limit": "25"
+}

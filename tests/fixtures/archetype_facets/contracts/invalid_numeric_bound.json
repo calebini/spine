@@ -1,0 +1,47 @@
+{
+  "contract_version": "spine.facet-schemas.v1",
+  "command_id": "fixture-facet_schema.create",
+  "actor_subject_id": "operator",
+  "action_timestamp_utc": "2026-09-09T10:00:00Z",
+  "owner": {
+    "owner_kind": "subject_group",
+    "owner_group_id": "travel-team"
+  },
+  "schema_key": "flight_details",
+  "definition": {
+    "display_name": "Flight details",
+    "description": "Descriptive flight identifiers and airport references.",
+    "compatible_item_types": [
+      "event"
+    ],
+    "fields": [
+      {
+        "key": "origin",
+        "required": true,
+        "type": "reference",
+        "target_kind": "location",
+        "queryable": true
+      },
+      {
+        "key": "flight_number",
+        "required": true,
+        "type": "text",
+        "max_length": 32,
+        "queryable": true
+      },
+      {
+        "key": "airline",
+        "required": false,
+        "type": "text",
+        "max_length": "128"
+      },
+      {
+        "key": "destination",
+        "required": true,
+        "type": "reference",
+        "target_kind": "location",
+        "queryable": true
+      }
+    ]
+  }
+}

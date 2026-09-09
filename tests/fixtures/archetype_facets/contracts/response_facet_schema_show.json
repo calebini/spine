@@ -1,0 +1,58 @@
+{
+  "ok": true,
+  "command": "facet_schema.show",
+  "response_contract": "spine.facet-schemas.v1",
+  "root": {
+    "facet_schema_id": "facet_schema_c0742a134b0891560b65c377fd3ef4936b12fb8aa1f6a3aba7087760479261c4",
+    "owner": {
+      "owner_kind": "subject_group",
+      "owner_group_id": "travel-team"
+    },
+    "schema_key": "flight_details",
+    "current_revision_id": "facet_schema_revision_fcbda5c8b6c18df146f519ce33d83e46ab7a59017b0912c41b0eda4b363af4a8",
+    "status": "active"
+  },
+  "revision": {
+    "facet_schema_id": "facet_schema_c0742a134b0891560b65c377fd3ef4936b12fb8aa1f6a3aba7087760479261c4",
+    "facet_schema_revision_id": "facet_schema_revision_fcbda5c8b6c18df146f519ce33d83e46ab7a59017b0912c41b0eda4b363af4a8",
+    "revision_number": "1",
+    "definition": {
+      "display_name": "Flight details",
+      "description": "Descriptive flight identifiers and airport references.",
+      "compatible_item_types": [
+        "event"
+      ],
+      "fields": [
+        {
+          "key": "airline",
+          "required": false,
+          "type": "text",
+          "max_length": "128",
+          "queryable": false
+        },
+        {
+          "key": "destination",
+          "required": true,
+          "type": "reference",
+          "target_kind": "location",
+          "queryable": true
+        },
+        {
+          "key": "flight_number",
+          "required": true,
+          "type": "text",
+          "max_length": "32",
+          "queryable": true
+        },
+        {
+          "key": "origin",
+          "required": true,
+          "type": "reference",
+          "target_kind": "location",
+          "queryable": true
+        }
+      ]
+    },
+    "definition_hash": "27ef8c40d4fa989f1d99830286b541d04d91c2ea3648c8f67172b5fc199aacdc"
+  }
+}

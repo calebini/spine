@@ -1,0 +1,9 @@
+{
+  "ok": false,
+  "command": "facet_schema.create",
+  "error": {
+    "code": "facet_schema_invalid",
+    "message": "Request cannot be applied.",
+    "field": "definition.fields"
+  }
+}

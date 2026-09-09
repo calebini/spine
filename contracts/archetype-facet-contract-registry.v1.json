@@ -1,0 +1,204 @@
+{
+  "schema_version": "spine.archetype-facet-contract-registry.v1",
+  "status": "draft_not_implemented",
+  "commands": {
+    "facet_schema.create": {
+      "contract_version": "spine.facet-schemas.v1",
+      "request_schema": "contracts/schemas/archetype-facet-commands.schema.json#/$defs/facet_schema.create",
+      "response_schema": "contracts/schemas/archetype-facet-responses.schema.json#/$defs/facet_schema.create",
+      "mutates": true
+    },
+    "facet_schema.publish": {
+      "contract_version": "spine.facet-schemas.v1",
+      "request_schema": "contracts/schemas/archetype-facet-commands.schema.json#/$defs/facet_schema.publish",
+      "response_schema": "contracts/schemas/archetype-facet-responses.schema.json#/$defs/facet_schema.publish",
+      "mutates": true
+    },
+    "facet_schema.retire": {
+      "contract_version": "spine.facet-schemas.v1",
+      "request_schema": "contracts/schemas/archetype-facet-commands.schema.json#/$defs/facet_schema.retire",
+      "response_schema": "contracts/schemas/archetype-facet-responses.schema.json#/$defs/facet_schema.retire",
+      "mutates": true
+    },
+    "facet_schema.show": {
+      "contract_version": "spine.facet-schemas.v1",
+      "request_schema": "contracts/schemas/archetype-facet-commands.schema.json#/$defs/facet_schema.show",
+      "response_schema": "contracts/schemas/archetype-facet-responses.schema.json#/$defs/facet_schema.show",
+      "mutates": false
+    },
+    "facet_schema.list": {
+      "contract_version": "spine.facet-schemas.v1",
+      "request_schema": "contracts/schemas/archetype-facet-commands.schema.json#/$defs/facet_schema.list",
+      "response_schema": "contracts/schemas/archetype-facet-responses.schema.json#/$defs/facet_schema.list",
+      "mutates": false
+    },
+    "item_archetype.facet_binding.set": {
+      "contract_version": "spine.archetype-facet-bindings.v1",
+      "request_schema": "contracts/schemas/archetype-facet-commands.schema.json#/$defs/item_archetype.facet_binding.set",
+      "response_schema": "contracts/schemas/archetype-facet-responses.schema.json#/$defs/item_archetype.facet_binding.set",
+      "mutates": true
+    },
+    "item_archetype.facet_binding.remove": {
+      "contract_version": "spine.archetype-facet-bindings.v1",
+      "request_schema": "contracts/schemas/archetype-facet-commands.schema.json#/$defs/item_archetype.facet_binding.remove",
+      "response_schema": "contracts/schemas/archetype-facet-responses.schema.json#/$defs/item_archetype.facet_binding.remove",
+      "mutates": true
+    },
+    "item_archetype.facet_binding.list": {
+      "contract_version": "spine.archetype-facet-bindings.v1",
+      "request_schema": "contracts/schemas/archetype-facet-commands.schema.json#/$defs/item_archetype.facet_binding.list",
+      "response_schema": "contracts/schemas/archetype-facet-responses.schema.json#/$defs/item_archetype.facet_binding.list",
+      "mutates": false
+    },
+    "item.facets.update": {
+      "contract_version": "spine.item-facets.v1",
+      "request_schema": "contracts/schemas/archetype-facet-commands.schema.json#/$defs/item.facets.update",
+      "response_schema": "contracts/schemas/archetype-facet-responses.schema.json#/$defs/item.facets.update",
+      "mutates": true
+    },
+    "item.facets.show": {
+      "contract_version": "spine.item-facets.v1",
+      "request_schema": "contracts/schemas/archetype-facet-commands.schema.json#/$defs/item.facets.show",
+      "response_schema": "contracts/schemas/archetype-facet-responses.schema.json#/$defs/item.facets.show",
+      "mutates": false
+    },
+    "item.facets.query": {
+      "contract_version": "spine.item-facet-query.v1",
+      "request_schema": "contracts/schemas/archetype-facet-commands.schema.json#/$defs/item.facets.query",
+      "response_schema": "contracts/schemas/archetype-facet-responses.schema.json#/$defs/item.facets.query",
+      "mutates": false
+    }
+  },
+  "handler_error_exit_codes": {
+    "facet_schema_invalid": 2,
+    "facet_value_invalid": 2,
+    "facet_binding_conflict": 6,
+    "facet_archetype_conflict": 6,
+    "facet_schema_retired": 2,
+    "facet_reference_unavailable": 4,
+    "invalid_request": 2,
+    "unsupported_field": 2,
+    "missing_required_field": 2,
+    "invalid_timestamp": 2,
+    "referenced_row_not_found": 4,
+    "wrong_item_type": 2,
+    "stale_version": 5,
+    "stale_cursor": 6,
+    "invalid_state_transition": 2,
+    "semantic_conflict": 6,
+    "environment_failure": 7,
+    "runtime_failure": 1
+  },
+  "limits": {
+    "definition_bytes": 32768,
+    "values_bytes": 16384,
+    "snapshot_values_bytes": 65536,
+    "max_entries": 8,
+    "max_fields": 32,
+    "max_page": 100
+  },
+  "open_implementation_gates": [
+    "notification_work_freshness_and_reconciliation",
+    "cursor_payload_authenticity_snapshot_and_expiry",
+    "permission_resolver_and_adapter_error_mapping",
+    "migration_indexes_and_query_plan_proof"
+  ],
+  "identity_registry": [
+    {
+      "command": "facet_schema.create",
+      "row_role": "facet_schema",
+      "prefix": "facet_schema",
+      "request_path": "/facet_schema"
+    },
+    {
+      "command": "facet_schema.create",
+      "row_role": "facet_schema_revision",
+      "prefix": "facet_schema_revision",
+      "request_path": "/facet_schema/revision"
+    },
+    {
+      "command": "facet_schema.publish",
+      "row_role": "facet_schema_revision",
+      "prefix": "facet_schema_revision",
+      "request_path": "/facet_schema/revision"
+    },
+    {
+      "command": "item_archetype.facet_binding.set",
+      "row_role": "archetype_facet_binding",
+      "prefix": "archetype_facet_binding",
+      "request_path": "/facet_binding"
+    },
+    {
+      "command": "facet_schema.create",
+      "row_role": "audit",
+      "prefix": "audit",
+      "request_path": "/audit"
+    },
+    {
+      "command": "facet_schema.create",
+      "row_role": "command_receipt",
+      "prefix": "command_receipt",
+      "request_path": "/"
+    },
+    {
+      "command": "facet_schema.publish",
+      "row_role": "audit",
+      "prefix": "audit",
+      "request_path": "/audit"
+    },
+    {
+      "command": "facet_schema.publish",
+      "row_role": "command_receipt",
+      "prefix": "command_receipt",
+      "request_path": "/"
+    },
+    {
+      "command": "facet_schema.retire",
+      "row_role": "audit",
+      "prefix": "audit",
+      "request_path": "/audit"
+    },
+    {
+      "command": "facet_schema.retire",
+      "row_role": "command_receipt",
+      "prefix": "command_receipt",
+      "request_path": "/"
+    },
+    {
+      "command": "item_archetype.facet_binding.set",
+      "row_role": "audit",
+      "prefix": "audit",
+      "request_path": "/audit"
+    },
+    {
+      "command": "item_archetype.facet_binding.set",
+      "row_role": "command_receipt",
+      "prefix": "command_receipt",
+      "request_path": "/"
+    },
+    {
+      "command": "item_archetype.facet_binding.remove",
+      "row_role": "audit",
+      "prefix": "audit",
+      "request_path": "/audit"
+    },
+    {
+      "command": "item_archetype.facet_binding.remove",
+      "row_role": "command_receipt",
+      "prefix": "command_receipt",
+      "request_path": "/"
+    },
+    {
+      "command": "item.facets.update",
+      "row_role": "audit",
+      "prefix": "audit",
+      "request_path": "/audit"
+    },
+    {
+      "command": "item.facets.update",
+      "row_role": "command_receipt",
+      "prefix": "command_receipt",
+      "request_path": "/"
+    }
+  ]
+}

@@ -1,0 +1,990 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cortext.local/spine/contracts/schemas/archetype-facet-responses.schema.json",
+  "title": "Spine facet successes (draft v1)",
+  "$comment": "Draft, not implemented or advertised. Normative source: specs/archetype-facets.md.",
+  "$defs": {
+    "facet_schema.create": {
+      "oneOf": [
+        {
+          "type": "object",
+          "required": [
+            "ok",
+            "command",
+            "response_contract",
+            "command_id",
+            "command_receipt_id",
+            "effect",
+            "changed",
+            "audit_id",
+            "facet_schema_id",
+            "prior_revision_id",
+            "facet_schema_revision_id",
+            "revision_number"
+          ],
+          "properties": {
+            "ok": {
+              "const": true
+            },
+            "command": {
+              "const": "facet_schema.create"
+            },
+            "response_contract": {
+              "const": "spine.facet-schemas.v1"
+            },
+            "command_id": {
+              "$ref": "archetype-facet-types.schema.json#/$defs/id"
+            },
+            "command_receipt_id": {
+              "$ref": "archetype-facet-types.schema.json#/$defs/id"
+            },
+            "effect": {
+              "const": "facet_schema_created"
+            },
+            "changed": {
+              "const": true
+            },
+            "audit_id": {
+              "$ref": "archetype-facet-types.schema.json#/$defs/id"
+            },
+            "facet_schema_id": {
+              "$ref": "archetype-facet-types.schema.json#/$defs/id"
+            },
+            "prior_revision_id": {
+              "type": "null"
+            },
+            "facet_schema_revision_id": {
+              "$ref": "archetype-facet-types.schema.json#/$defs/id"
+            },
+            "revision_number": {
+              "const": "1"
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "facet_schema.publish": {
+      "oneOf": [
+        {
+          "type": "object",
+          "required": [
+            "ok",
+            "command",
+            "response_contract",
+            "command_id",
+            "command_receipt_id",
+            "effect",
+            "changed",
+            "audit_id",
+            "facet_schema_id",
+            "prior_revision_id",
+            "facet_schema_revision_id",
+            "revision_number"
+          ],
+          "properties": {
+            "ok": {
+              "const": true
+            },
+            "command": {
+              "const": "facet_schema.publish"
+            },
+            "response_contract": {
+              "const": "spine.facet-schemas.v1"
+            },
+            "command_id": {
+              "$ref": "archetype-facet-types.schema.json#/$defs/id"
+            },
+            "command_receipt_id": {
+              "$ref": "archetype-facet-types.schema.json#/$defs/id"
+            },
+            "effect": {
+              "const": "facet_schema_published"
+            },
+            "changed": {
+              "const": true
+            },
+            "audit_id": {
+              "$ref": "archetype-facet-types.schema.json#/$defs/id"
+            },
+            "facet_schema_id": {
+              "$ref": "archetype-facet-types.schema.json#/$defs/id"
+            },
+            "prior_revision_id": {
+              "$ref": "archetype-facet-types.schema.json#/$defs/id"
+            },
+            "facet_schema_revision_id": {
+              "$ref": "archetype-facet-types.schema.json#/$defs/id"
+            },
+            "revision_number": {
+              "$ref": "archetype-facet-types.schema.json#/$defs/positiveDecimal"
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": [
+            "ok",
+            "command",
+            "response_contract",
+            "command_id",
+            "command_receipt_id",
+            "effect",
+            "changed",
+            "facet_schema_id",
+            "prior_revision_id",
+            "facet_schema_revision_id",
+            "revision_number"
+          ],
+          "properties": {
+            "ok": {
+              "const": true
+            },
+            "command": {
+              "const": "facet_schema.publish"
+            },
+            "response_contract": {
+              "const": "spine.facet-schemas.v1"
+            },
+            "command_id": {
+              "$ref": "archetype-facet-types.schema.json#/$defs/id"
+            },
+            "command_receipt_id": {
+              "$ref": "archetype-facet-types.schema.json#/$defs/id"
+            },
+            "effect": {
+              "const": "facet_schema_publish_noop"
+            },
+            "changed": {
+              "const": false
+            },
+            "facet_schema_id": {
+              "$ref": "archetype-facet-types.schema.json#/$defs/id"
+            },
+            "prior_revision_id": {
+              "$ref": "archetype-facet-types.schema.json#/$defs/id"
+            },
+            "facet_schema_revision_id": {
+              "$ref": "archetype-facet-types.schema.json#/$defs/id"
+            },
+            "revision_number": {
+              "$ref": "archetype-facet-types.schema.json#/$defs/positiveDecimal"
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "facet_schema.retire": {
+      "oneOf": [
+        {
+          "type": "object",
+          "required": [
+            "ok",
+            "command",
+            "response_contract",
+            "command_id",
+            "command_receipt_id",
+            "effect",
+            "changed",
+            "audit_id",
+            "facet_schema_id",
+            "prior_revision_id",
+            "facet_schema_revision_id",
+            "revision_number"
+          ],
+          "properties": {
+            "ok": {
+              "const": true
+            },
+            "command": {
+              "const": "facet_schema.retire"
+            },
+            "response_contract": {
+              "const": "spine.facet-schemas.v1"
+            },
+            "command_id": {
+              "$ref": "archetype-facet-types.schema.json#/$defs/id"
+            },
+            "command_receipt_id": {
+              "$ref": "archetype-facet-types.schema.json#/$defs/id"
+            },
+            "effect": {
+              "const": "facet_schema_retired"
+            },
+            "changed": {
+              "const": true
+            },
+            "audit_id": {
+              "$ref": "archetype-facet-types.schema.json#/$defs/id"
+            },
+            "facet_schema_id": {
+              "$ref": "archetype-facet-types.schema.json#/$defs/id"
+            },
+            "prior_revision_id": {
+              "$ref": "archetype-facet-types.schema.json#/$defs/id"
+            },
+            "facet_schema_revision_id": {
+              "$ref": "archetype-facet-types.schema.json#/$defs/id"
+            },
+            "revision_number": {
+              "$ref": "archetype-facet-types.schema.json#/$defs/positiveDecimal"
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": [
+            "ok",
+            "command",
+            "response_contract",
+            "command_id",
+            "command_receipt_id",
+            "effect",
+            "changed",
+            "facet_schema_id",
+            "prior_revision_id",
+            "facet_schema_revision_id",
+            "revision_number"
+          ],
+          "properties": {
+            "ok": {
+              "const": true
+            },
+            "command": {
+              "const": "facet_schema.retire"
+            },
+            "response_contract": {
+              "const": "spine.facet-schemas.v1"
+            },
+            "command_id": {
+              "$ref": "archetype-facet-types.schema.json#/$defs/id"
+            },
+            "command_receipt_id": {
+              "$ref": "archetype-facet-types.schema.json#/$defs/id"
+            },
+            "effect": {
+              "const": "facet_schema_retire_noop"
+            },
+            "changed": {
+              "const": false
+            },
+            "facet_schema_id": {
+              "$ref": "archetype-facet-types.schema.json#/$defs/id"
+            },
+            "prior_revision_id": {
+              "$ref": "archetype-facet-types.schema.json#/$defs/id"
+            },
+            "facet_schema_revision_id": {
+              "$ref": "archetype-facet-types.schema.json#/$defs/id"
+            },
+            "revision_number": {
+              "$ref": "archetype-facet-types.schema.json#/$defs/positiveDecimal"
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "item_archetype.facet_binding.set": {
+      "oneOf": [
+        {
+          "type": "object",
+          "required": [
+            "ok",
+            "command",
+            "response_contract",
+            "command_id",
+            "command_receipt_id",
+            "effect",
+            "changed",
+            "audit_id",
+            "item_archetype_id",
+            "facet_key",
+            "prior_binding_id",
+            "facet_binding_id",
+            "facet_schema_revision_id"
+          ],
+          "properties": {
+            "ok": {
+              "const": true
+            },
+            "command": {
+              "const": "item_archetype.facet_binding.set"
+            },
+            "response_contract": {
+              "const": "spine.archetype-facet-bindings.v1"
+            },
+            "command_id": {
+              "$ref": "archetype-facet-types.schema.json#/$defs/id"
+            },
+            "command_receipt_id": {
+              "$ref": "archetype-facet-types.schema.json#/$defs/id"
+            },
+            "effect": {
+              "const": "facet_binding_set"
+            },
+            "changed": {
+              "const": true
+            },
+            "audit_id": {
+              "$ref": "archetype-facet-types.schema.json#/$defs/id"
+            },
+            "item_archetype_id": {
+              "$ref": "archetype-facet-types.schema.json#/$defs/id"
+            },
+            "facet_key": {
+              "$ref": "archetype-facet-types.schema.json#/$defs/key"
+            },
+            "prior_binding_id": {
+              "anyOf": [
+                {
+                  "$ref": "archetype-facet-types.schema.json#/$defs/id"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "facet_binding_id": {
+              "$ref": "archetype-facet-types.schema.json#/$defs/id"
+            },
+            "facet_schema_revision_id": {
+              "$ref": "archetype-facet-types.schema.json#/$defs/id"
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": [
+            "ok",
+            "command",
+            "response_contract",
+            "command_id",
+            "command_receipt_id",
+            "effect",
+            "changed",
+            "item_archetype_id",
+            "facet_key",
+            "prior_binding_id",
+            "facet_binding_id",
+            "facet_schema_revision_id"
+          ],
+          "properties": {
+            "ok": {
+              "const": true
+            },
+            "command": {
+              "const": "item_archetype.facet_binding.set"
+            },
+            "response_contract": {
+              "const": "spine.archetype-facet-bindings.v1"
+            },
+            "command_id": {
+              "$ref": "archetype-facet-types.schema.json#/$defs/id"
+            },
+            "command_receipt_id": {
+              "$ref": "archetype-facet-types.schema.json#/$defs/id"
+            },
+            "effect": {
+              "const": "facet_binding_set_noop"
+            },
+            "changed": {
+              "const": false
+            },
+            "item_archetype_id": {
+              "$ref": "archetype-facet-types.schema.json#/$defs/id"
+            },
+            "facet_key": {
+              "$ref": "archetype-facet-types.schema.json#/$defs/key"
+            },
+            "prior_binding_id": {
+              "anyOf": [
+                {
+                  "$ref": "archetype-facet-types.schema.json#/$defs/id"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "facet_binding_id": {
+              "$ref": "archetype-facet-types.schema.json#/$defs/id"
+            },
+            "facet_schema_revision_id": {
+              "$ref": "archetype-facet-types.schema.json#/$defs/id"
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "item_archetype.facet_binding.remove": {
+      "oneOf": [
+        {
+          "type": "object",
+          "required": [
+            "ok",
+            "command",
+            "response_contract",
+            "command_id",
+            "command_receipt_id",
+            "effect",
+            "changed",
+            "audit_id",
+            "item_archetype_id",
+            "facet_key",
+            "prior_binding_id",
+            "facet_binding_id"
+          ],
+          "properties": {
+            "ok": {
+              "const": true
+            },
+            "command": {
+              "const": "item_archetype.facet_binding.remove"
+            },
+            "response_contract": {
+              "const": "spine.archetype-facet-bindings.v1"
+            },
+            "command_id": {
+              "$ref": "archetype-facet-types.schema.json#/$defs/id"
+            },
+            "command_receipt_id": {
+              "$ref": "archetype-facet-types.schema.json#/$defs/id"
+            },
+            "effect": {
+              "const": "facet_binding_removed"
+            },
+            "changed": {
+              "const": true
+            },
+            "audit_id": {
+              "$ref": "archetype-facet-types.schema.json#/$defs/id"
+            },
+            "item_archetype_id": {
+              "$ref": "archetype-facet-types.schema.json#/$defs/id"
+            },
+            "facet_key": {
+              "$ref": "archetype-facet-types.schema.json#/$defs/key"
+            },
+            "prior_binding_id": {
+              "$ref": "archetype-facet-types.schema.json#/$defs/id"
+            },
+            "facet_binding_id": {
+              "$ref": "archetype-facet-types.schema.json#/$defs/id"
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": [
+            "ok",
+            "command",
+            "response_contract",
+            "command_id",
+            "command_receipt_id",
+            "effect",
+            "changed",
+            "item_archetype_id",
+            "facet_key",
+            "prior_binding_id",
+            "facet_binding_id"
+          ],
+          "properties": {
+            "ok": {
+              "const": true
+            },
+            "command": {
+              "const": "item_archetype.facet_binding.remove"
+            },
+            "response_contract": {
+              "const": "spine.archetype-facet-bindings.v1"
+            },
+            "command_id": {
+              "$ref": "archetype-facet-types.schema.json#/$defs/id"
+            },
+            "command_receipt_id": {
+              "$ref": "archetype-facet-types.schema.json#/$defs/id"
+            },
+            "effect": {
+              "const": "facet_binding_remove_noop"
+            },
+            "changed": {
+              "const": false
+            },
+            "item_archetype_id": {
+              "$ref": "archetype-facet-types.schema.json#/$defs/id"
+            },
+            "facet_key": {
+              "$ref": "archetype-facet-types.schema.json#/$defs/key"
+            },
+            "prior_binding_id": {
+              "type": "null"
+            },
+            "facet_binding_id": {
+              "type": "null"
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "item.facets.update": {
+      "oneOf": [
+        {
+          "type": "object",
+          "required": [
+            "ok",
+            "command",
+            "response_contract",
+            "command_id",
+            "command_receipt_id",
+            "effect",
+            "changed",
+            "audit_id",
+            "item_id",
+            "prior_item_version",
+            "item_version",
+            "changed_facet_keys",
+            "reconciliation_performed"
+          ],
+          "properties": {
+            "ok": {
+              "const": true
+            },
+            "command": {
+              "const": "item.facets.update"
+            },
+            "response_contract": {
+              "const": "spine.item-facets.v1"
+            },
+            "command_id": {
+              "$ref": "archetype-facet-types.schema.json#/$defs/id"
+            },
+            "command_receipt_id": {
+              "$ref": "archetype-facet-types.schema.json#/$defs/id"
+            },
+            "effect": {
+              "const": "item_facets_updated"
+            },
+            "changed": {
+              "const": true
+            },
+            "audit_id": {
+              "$ref": "archetype-facet-types.schema.json#/$defs/id"
+            },
+            "item_id": {
+              "$ref": "archetype-facet-types.schema.json#/$defs/id"
+            },
+            "prior_item_version": {
+              "$ref": "archetype-facet-types.schema.json#/$defs/positiveDecimal"
+            },
+            "item_version": {
+              "$ref": "archetype-facet-types.schema.json#/$defs/positiveDecimal"
+            },
+            "changed_facet_keys": {
+              "type": "array",
+              "items": {
+                "$ref": "archetype-facet-types.schema.json#/$defs/key"
+              },
+              "minItems": 1,
+              "maxItems": 8,
+              "uniqueItems": true
+            },
+            "reconciliation_performed": {
+              "type": "boolean",
+              "$comment": "Not a safety guarantee; exact work outcomes remain a buildability gate."
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": [
+            "ok",
+            "command",
+            "response_contract",
+            "command_id",
+            "command_receipt_id",
+            "effect",
+            "changed",
+            "item_id",
+            "prior_item_version",
+            "item_version",
+            "changed_facet_keys",
+            "reconciliation_performed"
+          ],
+          "properties": {
+            "ok": {
+              "const": true
+            },
+            "command": {
+              "const": "item.facets.update"
+            },
+            "response_contract": {
+              "const": "spine.item-facets.v1"
+            },
+            "command_id": {
+              "$ref": "archetype-facet-types.schema.json#/$defs/id"
+            },
+            "command_receipt_id": {
+              "$ref": "archetype-facet-types.schema.json#/$defs/id"
+            },
+            "effect": {
+              "const": "item_facets_update_noop"
+            },
+            "changed": {
+              "const": false
+            },
+            "item_id": {
+              "$ref": "archetype-facet-types.schema.json#/$defs/id"
+            },
+            "prior_item_version": {
+              "$ref": "archetype-facet-types.schema.json#/$defs/positiveDecimal"
+            },
+            "item_version": {
+              "$ref": "archetype-facet-types.schema.json#/$defs/positiveDecimal"
+            },
+            "changed_facet_keys": {
+              "type": "array",
+              "items": {
+                "$ref": "archetype-facet-types.schema.json#/$defs/key"
+              },
+              "minItems": 0,
+              "maxItems": 0,
+              "uniqueItems": true
+            },
+            "reconciliation_performed": {
+              "const": false
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "facet_schema.show": {
+      "type": "object",
+      "required": [
+        "ok",
+        "command",
+        "response_contract",
+        "root",
+        "revision"
+      ],
+      "properties": {
+        "ok": {
+          "const": true
+        },
+        "command": {
+          "const": "facet_schema.show"
+        },
+        "response_contract": {
+          "const": "spine.facet-schemas.v1"
+        },
+        "root": {
+          "$ref": "archetype-facet-types.schema.json#/$defs/root"
+        },
+        "revision": {
+          "$ref": "archetype-facet-types.schema.json#/$defs/revision"
+        }
+      },
+      "additionalProperties": false
+    },
+    "item.facets.show": {
+      "type": "object",
+      "required": [
+        "ok",
+        "command",
+        "response_contract",
+        "item_id",
+        "item_version",
+        "entries"
+      ],
+      "properties": {
+        "ok": {
+          "const": true
+        },
+        "command": {
+          "const": "item.facets.show"
+        },
+        "response_contract": {
+          "const": "spine.item-facets.v1"
+        },
+        "item_id": {
+          "$ref": "archetype-facet-types.schema.json#/$defs/id"
+        },
+        "item_version": {
+          "$ref": "archetype-facet-types.schema.json#/$defs/positiveDecimal"
+        },
+        "entries": {
+          "type": "array",
+          "items": {
+            "$ref": "archetype-facet-types.schema.json#/$defs/entry"
+          },
+          "minItems": 0,
+          "maxItems": 8
+        }
+      },
+      "additionalProperties": false
+    },
+    "facet_schema.list": {
+      "type": "object",
+      "required": [
+        "ok",
+        "command",
+        "response_contract",
+        "owner",
+        "schemas",
+        "limit",
+        "has_more",
+        "next_cursor"
+      ],
+      "properties": {
+        "ok": {
+          "const": true
+        },
+        "command": {
+          "const": "facet_schema.list"
+        },
+        "response_contract": {
+          "const": "spine.facet-schemas.v1"
+        },
+        "owner": {
+          "$ref": "archetype-facet-types.schema.json#/$defs/owner"
+        },
+        "schemas": {
+          "type": "array",
+          "items": {
+            "$ref": "archetype-facet-types.schema.json#/$defs/root"
+          },
+          "minItems": 0,
+          "maxItems": 100
+        },
+        "limit": {
+          "$ref": "archetype-facet-types.schema.json#/$defs/limit"
+        },
+        "has_more": {
+          "type": "boolean"
+        },
+        "next_cursor": {
+          "anyOf": [
+            {
+              "$ref": "archetype-facet-types.schema.json#/$defs/cursor"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "has_more": {
+                "const": true
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "next_cursor": {
+                "$ref": "archetype-facet-types.schema.json#/$defs/cursor"
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "next_cursor": {
+                "type": "null"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "item_archetype.facet_binding.list": {
+      "type": "object",
+      "required": [
+        "ok",
+        "command",
+        "response_contract",
+        "item_archetype_id",
+        "bindings",
+        "limit",
+        "has_more",
+        "next_cursor"
+      ],
+      "properties": {
+        "ok": {
+          "const": true
+        },
+        "command": {
+          "const": "item_archetype.facet_binding.list"
+        },
+        "response_contract": {
+          "const": "spine.archetype-facet-bindings.v1"
+        },
+        "item_archetype_id": {
+          "$ref": "archetype-facet-types.schema.json#/$defs/id"
+        },
+        "bindings": {
+          "type": "array",
+          "items": {
+            "allOf": [
+              {
+                "$ref": "archetype-facet-types.schema.json#/$defs/binding"
+              },
+              {
+                "properties": {
+                  "status": {
+                    "const": "active"
+                  }
+                }
+              }
+            ]
+          },
+          "minItems": 0,
+          "maxItems": 100
+        },
+        "limit": {
+          "$ref": "archetype-facet-types.schema.json#/$defs/limit"
+        },
+        "has_more": {
+          "type": "boolean"
+        },
+        "next_cursor": {
+          "anyOf": [
+            {
+              "$ref": "archetype-facet-types.schema.json#/$defs/cursor"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "has_more": {
+                "const": true
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "next_cursor": {
+                "$ref": "archetype-facet-types.schema.json#/$defs/cursor"
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "next_cursor": {
+                "type": "null"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "item.facets.query": {
+      "type": "object",
+      "required": [
+        "ok",
+        "command",
+        "response_contract",
+        "owner",
+        "facet_schema_revision_id",
+        "field",
+        "value",
+        "items",
+        "limit",
+        "has_more",
+        "next_cursor"
+      ],
+      "properties": {
+        "ok": {
+          "const": true
+        },
+        "command": {
+          "const": "item.facets.query"
+        },
+        "response_contract": {
+          "const": "spine.item-facet-query.v1"
+        },
+        "owner": {
+          "$ref": "archetype-facet-types.schema.json#/$defs/owner"
+        },
+        "facet_schema_revision_id": {
+          "$ref": "archetype-facet-types.schema.json#/$defs/id"
+        },
+        "field": {
+          "$ref": "archetype-facet-types.schema.json#/$defs/key"
+        },
+        "value": {
+          "$ref": "archetype-facet-types.schema.json#/$defs/scalar"
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "archetype-facet-types.schema.json#/$defs/itemIdentity"
+          },
+          "minItems": 0,
+          "maxItems": 100
+        },
+        "limit": {
+          "$ref": "archetype-facet-types.schema.json#/$defs/limit"
+        },
+        "has_more": {
+          "type": "boolean"
+        },
+        "next_cursor": {
+          "anyOf": [
+            {
+              "$ref": "archetype-facet-types.schema.json#/$defs/cursor"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "has_more": {
+                "const": true
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "next_cursor": {
+                "$ref": "archetype-facet-types.schema.json#/$defs/cursor"
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "next_cursor": {
+                "type": "null"
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

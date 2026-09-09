@@ -1,0 +1,11 @@
+{
+  "contract_version": "spine.item-facet-query.v1",
+  "owner": {
+    "owner_kind": "subject_group",
+    "owner_group_id": "travel-team"
+  },
+  "facet_schema_revision_id": "facet_schema_revision_fcbda5c8b6c18df146f519ce33d83e46ab7a59017b0912c41b0eda4b363af4a8",
+  "field": "flight_number",
+  "value": "AX123",
+  "limit": "25"
+}

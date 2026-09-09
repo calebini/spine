@@ -1,0 +1,9 @@
+{
+  "ok": false,
+  "command": "item.facets.update",
+  "error": {
+    "code": "stale_version",
+    "message": "Request cannot be applied.",
+    "field": "expected_item_version"
+  }
+}

@@ -330,10 +330,13 @@ substitute because it would fragment Spine's canonical authority.
 
 Specification work started 2026-09-07: `specs/decisions/0004-versioned-item-facets.md`
 and `specs/archetype-facets.md` now define the proposed first facet slice. They remain
-unaudited drafts, not implementation authorization. Next gates are bounded review,
-machine contracts/fixtures, a migration/index plan, and exact notification-work
-freshness behavior on facet-only item edits. Workflow recipes and external observations
-remain separate future work; current pack and web registries are unchanged.
+drafts, not implementation authorization. The v0.2 bounded recheck passed; draft
+machine schemas, structural fixtures and pure identity/type vectors were added on
+2026-09-09. This codification still needs review. Remaining gates are a migration/index
+plan, permission resolver mappings, cursor semantics and exact notification-work
+freshness behavior on facet-only item edits. Static fixtures do not prove runtime
+behavior. Workflow recipes and external observations remain separate future work;
+current pack and web registries are unchanged.
 
 Spine's current archetypes are intentionally thin, owner-scoped semantic identities.
 Their future value should grow primarily through separately versioned capabilities

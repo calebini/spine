@@ -1,0 +1,83 @@
+{
+  "ok": true,
+  "command": "item.facets.show",
+  "response_contract": "spine.item-facets.v1",
+  "item_id": "item-flight",
+  "item_version": "2",
+  "entries": [
+    {
+      "facet_key": "flight_details",
+      "facet_schema_revision_id": "facet_schema_revision_fcbda5c8b6c18df146f519ce33d83e46ab7a59017b0912c41b0eda4b363af4a8",
+      "facet_binding_id": "archetype_facet_binding_db3fa09d817a7b76f9a2ec442900d7051d04b284a771ef7d998ff001774a305f",
+      "archetype": {
+        "item_archetype_id": "archetype-flight",
+        "item_archetype_revision_id": "archetype-flight-revision",
+        "selection_source": "operator_explicit"
+      },
+      "values": {
+        "airline": "Air Example",
+        "flight_number": "AX123",
+        "origin": "airport-origin",
+        "destination": "airport-destination"
+      },
+      "source_command_receipt_id": "command_receipt_0f556adac774b3f99f564c1661023374f796eb1e9fbc705d7ce9d3849fd29fcb",
+      "schema_revision": {
+        "facet_schema_id": "facet_schema_c0742a134b0891560b65c377fd3ef4936b12fb8aa1f6a3aba7087760479261c4",
+        "facet_schema_revision_id": "facet_schema_revision_fcbda5c8b6c18df146f519ce33d83e46ab7a59017b0912c41b0eda4b363af4a8",
+        "revision_number": "1",
+        "definition": {
+          "display_name": "Flight details",
+          "description": "Descriptive flight identifiers and airport references.",
+          "compatible_item_types": [
+            "event"
+          ],
+          "fields": [
+            {
+              "key": "airline",
+              "required": false,
+              "type": "text",
+              "max_length": "128",
+              "queryable": false
+            },
+            {
+              "key": "destination",
+              "required": true,
+              "type": "reference",
+              "target_kind": "location",
+              "queryable": true
+            },
+            {
+              "key": "flight_number",
+              "required": true,
+              "type": "text",
+              "max_length": "32",
+              "queryable": true
+            },
+            {
+              "key": "origin",
+              "required": true,
+              "type": "reference",
+              "target_kind": "location",
+              "queryable": true
+            }
+          ]
+        },
+        "definition_hash": "27ef8c40d4fa989f1d99830286b541d04d91c2ea3648c8f67172b5fc199aacdc"
+      },
+      "references": [
+        {
+          "field": "destination",
+          "target_kind": "location",
+          "target_id": "airport-destination",
+          "status": "active"
+        },
+        {
+          "field": "origin",
+          "target_kind": "location",
+          "target_id": "airport-origin",
+          "status": "inactive"
+        }
+      ]
+    }
+  ]
+}

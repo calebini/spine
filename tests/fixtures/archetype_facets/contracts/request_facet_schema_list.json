@@ -1,0 +1,7 @@
+{
+  "contract_version": "spine.facet-schemas.v1",
+  "owner": {
+    "owner_kind": "subject_group",
+    "owner_group_id": "travel-team"
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "contract_version": "spine.item-facets.v1",
+  "command_id": "fixture-item.facets.update",
+  "actor_subject_id": "operator",
+  "action_timestamp_utc": "2026-09-09T10:00:00Z",
+  "item_id": "item-flight",
+  "expected_item_version": "1",
+  "changes": [
+    {
+      "op": "set",
+      "facet_key": "flight_details",
+      "expected_binding_id": "archetype_facet_binding_db3fa09d817a7b76f9a2ec442900d7051d04b284a771ef7d998ff001774a305f",
+      "facet_schema_revision_id": "facet_schema_revision_fcbda5c8b6c18df146f519ce33d83e46ab7a59017b0912c41b0eda4b363af4a8",
+      "values": {
+        "airline": "Air Example",
+        "flight_number": "AX123",
+        "origin": "airport-origin",
+        "destination": "airport-destination"
+      }
+    }
+  ]
+}

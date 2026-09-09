@@ -1,0 +1,9 @@
+{
+  "ok": false,
+  "command": "item.facets.update",
+  "error": {
+    "code": "facet_value_invalid",
+    "message": "Request cannot be applied.",
+    "field": "changes.0.values.flight_number"
+  }
+}

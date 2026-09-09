@@ -1,0 +1,9 @@
+{
+  "ok": false,
+  "command": "item_archetype.facet_binding.set",
+  "error": {
+    "code": "facet_binding_conflict",
+    "message": "Request cannot be applied.",
+    "field": "expected_binding_id"
+  }
+}

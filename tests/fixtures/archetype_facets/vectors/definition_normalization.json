@@ -1,0 +1,153 @@
+{
+  "input": {
+    "display_name": "Flight details",
+    "description": "Descriptive flight identifiers and airport references.",
+    "compatible_item_types": [
+      "event"
+    ],
+    "fields": [
+      {
+        "key": "origin",
+        "required": true,
+        "type": "reference",
+        "target_kind": "location",
+        "queryable": true
+      },
+      {
+        "key": "flight_number",
+        "required": true,
+        "type": "text",
+        "max_length": "32",
+        "queryable": true
+      },
+      {
+        "key": "airline",
+        "required": false,
+        "type": "text",
+        "max_length": "128"
+      },
+      {
+        "key": "destination",
+        "required": true,
+        "type": "reference",
+        "target_kind": "location",
+        "queryable": true
+      }
+    ]
+  },
+  "equivalent_input": {
+    "display_name": "Flight details",
+    "description": "Descriptive flight identifiers and airport references.",
+    "compatible_item_types": [
+      "event"
+    ],
+    "fields": [
+      {
+        "key": "destination",
+        "required": true,
+        "type": "reference",
+        "target_kind": "location",
+        "queryable": true
+      },
+      {
+        "key": "airline",
+        "required": false,
+        "type": "text",
+        "max_length": "128"
+      },
+      {
+        "key": "flight_number",
+        "required": true,
+        "type": "text",
+        "max_length": "32",
+        "queryable": true
+      },
+      {
+        "key": "origin",
+        "required": true,
+        "type": "reference",
+        "target_kind": "location",
+        "queryable": true
+      }
+    ]
+  },
+  "normalized_definition": {
+    "display_name": "Flight details",
+    "description": "Descriptive flight identifiers and airport references.",
+    "compatible_item_types": [
+      "event"
+    ],
+    "fields": [
+      {
+        "key": "airline",
+        "required": false,
+        "type": "text",
+        "max_length": "128",
+        "queryable": false
+      },
+      {
+        "key": "destination",
+        "required": true,
+        "type": "reference",
+        "target_kind": "location",
+        "queryable": true
+      },
+      {
+        "key": "flight_number",
+        "required": true,
+        "type": "text",
+        "max_length": "32",
+        "queryable": true
+      },
+      {
+        "key": "origin",
+        "required": true,
+        "type": "reference",
+        "target_kind": "location",
+        "queryable": true
+      }
+    ]
+  },
+  "preimage": {
+    "derivation_version": "spine.facet-definition.v1",
+    "definition": {
+      "display_name": "Flight details",
+      "description": "Descriptive flight identifiers and airport references.",
+      "compatible_item_types": [
+        "event"
+      ],
+      "fields": [
+        {
+          "key": "airline",
+          "required": false,
+          "type": "text",
+          "max_length": "128",
+          "queryable": false
+        },
+        {
+          "key": "destination",
+          "required": true,
+          "type": "reference",
+          "target_kind": "location",
+          "queryable": true
+        },
+        {
+          "key": "flight_number",
+          "required": true,
+          "type": "text",
+          "max_length": "32",
+          "queryable": true
+        },
+        {
+          "key": "origin",
+          "required": true,
+          "type": "reference",
+          "target_kind": "location",
+          "queryable": true
+        }
+      ]
+    }
+  },
+  "canonical_preimage": "{\"definition\":{\"compatible_item_types\":[\"event\"],\"description\":\"Descriptive flight identifiers and airport references.\",\"display_name\":\"Flight details\",\"fields\":[{\"key\":\"airline\",\"max_length\":\"128\",\"queryable\":false,\"required\":false,\"type\":\"text\"},{\"key\":\"destination\",\"queryable\":true,\"required\":true,\"target_kind\":\"location\",\"type\":\"reference\"},{\"key\":\"flight_number\",\"max_length\":\"32\",\"queryable\":true,\"required\":true,\"type\":\"text\"},{\"key\":\"origin\",\"queryable\":true,\"required\":true,\"target_kind\":\"location\",\"type\":\"reference\"}]},\"derivation_version\":\"spine.facet-definition.v1\"}",
+  "sha256": "27ef8c40d4fa989f1d99830286b541d04d91c2ea3648c8f67172b5fc199aacdc"
+}

@@ -1,0 +1,13 @@
+{
+  "ok": true,
+  "command": "item_archetype.facet_binding.remove",
+  "response_contract": "spine.archetype-facet-bindings.v1",
+  "command_id": "fixture-item_archetype.facet_binding.remove",
+  "command_receipt_id": "command_receipt_9820eb0ed0e71420a81a36f02db4ff05ac9049d36993573fea6505e851c0f3f3",
+  "effect": "facet_binding_remove_noop",
+  "changed": false,
+  "item_archetype_id": "archetype-flight",
+  "facet_key": "flight_details",
+  "prior_binding_id": null,
+  "facet_binding_id": null
+}

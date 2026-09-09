@@ -1,0 +1,9 @@
+{
+  "ok": false,
+  "command": "item.facets.query",
+  "error": {
+    "code": "stale_cursor",
+    "message": "Request cannot be applied.",
+    "field": "cursor"
+  }
+}

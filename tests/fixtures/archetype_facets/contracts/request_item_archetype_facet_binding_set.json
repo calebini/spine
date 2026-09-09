@@ -1,0 +1,10 @@
+{
+  "contract_version": "spine.archetype-facet-bindings.v1",
+  "command_id": "fixture-item_archetype.facet_binding.set",
+  "actor_subject_id": "operator",
+  "action_timestamp_utc": "2026-09-09T10:00:00Z",
+  "item_archetype_id": "archetype-flight",
+  "facet_key": "flight_details",
+  "facet_schema_revision_id": "facet_schema_revision_fcbda5c8b6c18df146f519ce33d83e46ab7a59017b0912c41b0eda4b363af4a8",
+  "expected_binding_id": null
+}

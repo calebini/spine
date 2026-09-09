@@ -1,0 +1,261 @@
+{
+  "canonical_json_version": "spine.canonical-json.v1",
+  "vectors": [
+    {
+      "command": "facet_schema.create",
+      "row_role": "facet_schema",
+      "prefix": "facet_schema",
+      "request_path": "/facet_schema",
+      "preimage": {
+        "derivation_version": "spine.command-id.v1",
+        "command": "facet_schema.create",
+        "command_id": "fixture-facet_schema.create",
+        "row_role": "facet_schema",
+        "request_path": "/facet_schema"
+      },
+      "canonical_preimage": "{\"command\":\"facet_schema.create\",\"command_id\":\"fixture-facet_schema.create\",\"derivation_version\":\"spine.command-id.v1\",\"request_path\":\"/facet_schema\",\"row_role\":\"facet_schema\"}",
+      "sha256": "c0742a134b0891560b65c377fd3ef4936b12fb8aa1f6a3aba7087760479261c4",
+      "expected_id": "facet_schema_c0742a134b0891560b65c377fd3ef4936b12fb8aa1f6a3aba7087760479261c4"
+    },
+    {
+      "command": "facet_schema.create",
+      "row_role": "facet_schema_revision",
+      "prefix": "facet_schema_revision",
+      "request_path": "/facet_schema/revision",
+      "preimage": {
+        "derivation_version": "spine.command-id.v1",
+        "command": "facet_schema.create",
+        "command_id": "fixture-facet_schema.create",
+        "row_role": "facet_schema_revision",
+        "request_path": "/facet_schema/revision"
+      },
+      "canonical_preimage": "{\"command\":\"facet_schema.create\",\"command_id\":\"fixture-facet_schema.create\",\"derivation_version\":\"spine.command-id.v1\",\"request_path\":\"/facet_schema/revision\",\"row_role\":\"facet_schema_revision\"}",
+      "sha256": "fcbda5c8b6c18df146f519ce33d83e46ab7a59017b0912c41b0eda4b363af4a8",
+      "expected_id": "facet_schema_revision_fcbda5c8b6c18df146f519ce33d83e46ab7a59017b0912c41b0eda4b363af4a8"
+    },
+    {
+      "command": "facet_schema.publish",
+      "row_role": "facet_schema_revision",
+      "prefix": "facet_schema_revision",
+      "request_path": "/facet_schema/revision",
+      "preimage": {
+        "derivation_version": "spine.command-id.v1",
+        "command": "facet_schema.publish",
+        "command_id": "fixture-facet_schema.publish",
+        "row_role": "facet_schema_revision",
+        "request_path": "/facet_schema/revision"
+      },
+      "canonical_preimage": "{\"command\":\"facet_schema.publish\",\"command_id\":\"fixture-facet_schema.publish\",\"derivation_version\":\"spine.command-id.v1\",\"request_path\":\"/facet_schema/revision\",\"row_role\":\"facet_schema_revision\"}",
+      "sha256": "1726cea8399ecbb54963f4054eaee4344eb21bd64bac0539cb84ac89a0a48372",
+      "expected_id": "facet_schema_revision_1726cea8399ecbb54963f4054eaee4344eb21bd64bac0539cb84ac89a0a48372"
+    },
+    {
+      "command": "item_archetype.facet_binding.set",
+      "row_role": "archetype_facet_binding",
+      "prefix": "archetype_facet_binding",
+      "request_path": "/facet_binding",
+      "preimage": {
+        "derivation_version": "spine.command-id.v1",
+        "command": "item_archetype.facet_binding.set",
+        "command_id": "fixture-item_archetype.facet_binding.set",
+        "row_role": "archetype_facet_binding",
+        "request_path": "/facet_binding"
+      },
+      "canonical_preimage": "{\"command\":\"item_archetype.facet_binding.set\",\"command_id\":\"fixture-item_archetype.facet_binding.set\",\"derivation_version\":\"spine.command-id.v1\",\"request_path\":\"/facet_binding\",\"row_role\":\"archetype_facet_binding\"}",
+      "sha256": "db3fa09d817a7b76f9a2ec442900d7051d04b284a771ef7d998ff001774a305f",
+      "expected_id": "archetype_facet_binding_db3fa09d817a7b76f9a2ec442900d7051d04b284a771ef7d998ff001774a305f"
+    },
+    {
+      "command": "facet_schema.create",
+      "row_role": "audit",
+      "prefix": "audit",
+      "request_path": "/audit",
+      "preimage": {
+        "derivation_version": "spine.command-id.v1",
+        "command": "facet_schema.create",
+        "command_id": "fixture-facet_schema.create",
+        "row_role": "audit",
+        "request_path": "/audit"
+      },
+      "canonical_preimage": "{\"command\":\"facet_schema.create\",\"command_id\":\"fixture-facet_schema.create\",\"derivation_version\":\"spine.command-id.v1\",\"request_path\":\"/audit\",\"row_role\":\"audit\"}",
+      "sha256": "bee5bab0fb7802517627e79802080fcf1a9a53d6a08a9eeb70289314999640b4",
+      "expected_id": "audit_bee5bab0fb7802517627e79802080fcf1a9a53d6a08a9eeb70289314999640b4"
+    },
+    {
+      "command": "facet_schema.create",
+      "row_role": "command_receipt",
+      "prefix": "command_receipt",
+      "request_path": "/",
+      "preimage": {
+        "derivation_version": "spine.command-id.v1",
+        "command": "facet_schema.create",
+        "command_id": "fixture-facet_schema.create",
+        "row_role": "command_receipt",
+        "request_path": "/"
+      },
+      "canonical_preimage": "{\"command\":\"facet_schema.create\",\"command_id\":\"fixture-facet_schema.create\",\"derivation_version\":\"spine.command-id.v1\",\"request_path\":\"/\",\"row_role\":\"command_receipt\"}",
+      "sha256": "f56a6df1a40911c984227d9140b10edf8717255b01fc4246629b4222816e2cf3",
+      "expected_id": "command_receipt_f56a6df1a40911c984227d9140b10edf8717255b01fc4246629b4222816e2cf3"
+    },
+    {
+      "command": "facet_schema.publish",
+      "row_role": "audit",
+      "prefix": "audit",
+      "request_path": "/audit",
+      "preimage": {
+        "derivation_version": "spine.command-id.v1",
+        "command": "facet_schema.publish",
+        "command_id": "fixture-facet_schema.publish",
+        "row_role": "audit",
+        "request_path": "/audit"
+      },
+      "canonical_preimage": "{\"command\":\"facet_schema.publish\",\"command_id\":\"fixture-facet_schema.publish\",\"derivation_version\":\"spine.command-id.v1\",\"request_path\":\"/audit\",\"row_role\":\"audit\"}",
+      "sha256": "3966e681ca708e88f61508bb38dc45d10a120256d13eaa4f0c78aa9700f5494c",
+      "expected_id": "audit_3966e681ca708e88f61508bb38dc45d10a120256d13eaa4f0c78aa9700f5494c"
+    },
+    {
+      "command": "facet_schema.publish",
+      "row_role": "command_receipt",
+      "prefix": "command_receipt",
+      "request_path": "/",
+      "preimage": {
+        "derivation_version": "spine.command-id.v1",
+        "command": "facet_schema.publish",
+        "command_id": "fixture-facet_schema.publish",
+        "row_role": "command_receipt",
+        "request_path": "/"
+      },
+      "canonical_preimage": "{\"command\":\"facet_schema.publish\",\"command_id\":\"fixture-facet_schema.publish\",\"derivation_version\":\"spine.command-id.v1\",\"request_path\":\"/\",\"row_role\":\"command_receipt\"}",
+      "sha256": "535c76fe7f398e86b615b7e75880bd42d3de0ed9c45ae8811416215741c8da53",
+      "expected_id": "command_receipt_535c76fe7f398e86b615b7e75880bd42d3de0ed9c45ae8811416215741c8da53"
+    },
+    {
+      "command": "facet_schema.retire",
+      "row_role": "audit",
+      "prefix": "audit",
+      "request_path": "/audit",
+      "preimage": {
+        "derivation_version": "spine.command-id.v1",
+        "command": "facet_schema.retire",
+        "command_id": "fixture-facet_schema.retire",
+        "row_role": "audit",
+        "request_path": "/audit"
+      },
+      "canonical_preimage": "{\"command\":\"facet_schema.retire\",\"command_id\":\"fixture-facet_schema.retire\",\"derivation_version\":\"spine.command-id.v1\",\"request_path\":\"/audit\",\"row_role\":\"audit\"}",
+      "sha256": "2936d90b1827aeb5af81b78c4f95772ce0b3ec71c79c51ab64ff8f4d9d0e51e1",
+      "expected_id": "audit_2936d90b1827aeb5af81b78c4f95772ce0b3ec71c79c51ab64ff8f4d9d0e51e1"
+    },
+    {
+      "command": "facet_schema.retire",
+      "row_role": "command_receipt",
+      "prefix": "command_receipt",
+      "request_path": "/",
+      "preimage": {
+        "derivation_version": "spine.command-id.v1",
+        "command": "facet_schema.retire",
+        "command_id": "fixture-facet_schema.retire",
+        "row_role": "command_receipt",
+        "request_path": "/"
+      },
+      "canonical_preimage": "{\"command\":\"facet_schema.retire\",\"command_id\":\"fixture-facet_schema.retire\",\"derivation_version\":\"spine.command-id.v1\",\"request_path\":\"/\",\"row_role\":\"command_receipt\"}",
+      "sha256": "c64d457d24cc1e1707c658052ac250937638090048bc9c4ae732191231d075e5",
+      "expected_id": "command_receipt_c64d457d24cc1e1707c658052ac250937638090048bc9c4ae732191231d075e5"
+    },
+    {
+      "command": "item_archetype.facet_binding.set",
+      "row_role": "audit",
+      "prefix": "audit",
+      "request_path": "/audit",
+      "preimage": {
+        "derivation_version": "spine.command-id.v1",
+        "command": "item_archetype.facet_binding.set",
+        "command_id": "fixture-item_archetype.facet_binding.set",
+        "row_role": "audit",
+        "request_path": "/audit"
+      },
+      "canonical_preimage": "{\"command\":\"item_archetype.facet_binding.set\",\"command_id\":\"fixture-item_archetype.facet_binding.set\",\"derivation_version\":\"spine.command-id.v1\",\"request_path\":\"/audit\",\"row_role\":\"audit\"}",
+      "sha256": "c317d75dc51ea6267b3357de77439879f26001f2ed87606e968e7c91c6ea03c5",
+      "expected_id": "audit_c317d75dc51ea6267b3357de77439879f26001f2ed87606e968e7c91c6ea03c5"
+    },
+    {
+      "command": "item_archetype.facet_binding.set",
+      "row_role": "command_receipt",
+      "prefix": "command_receipt",
+      "request_path": "/",
+      "preimage": {
+        "derivation_version": "spine.command-id.v1",
+        "command": "item_archetype.facet_binding.set",
+        "command_id": "fixture-item_archetype.facet_binding.set",
+        "row_role": "command_receipt",
+        "request_path": "/"
+      },
+      "canonical_preimage": "{\"command\":\"item_archetype.facet_binding.set\",\"command_id\":\"fixture-item_archetype.facet_binding.set\",\"derivation_version\":\"spine.command-id.v1\",\"request_path\":\"/\",\"row_role\":\"command_receipt\"}",
+      "sha256": "9c58a4461b76231d30ba00cf235cdc20452b416b40b4229d1e10fbe30875be02",
+      "expected_id": "command_receipt_9c58a4461b76231d30ba00cf235cdc20452b416b40b4229d1e10fbe30875be02"
+    },
+    {
+      "command": "item_archetype.facet_binding.remove",
+      "row_role": "audit",
+      "prefix": "audit",
+      "request_path": "/audit",
+      "preimage": {
+        "derivation_version": "spine.command-id.v1",
+        "command": "item_archetype.facet_binding.remove",
+        "command_id": "fixture-item_archetype.facet_binding.remove",
+        "row_role": "audit",
+        "request_path": "/audit"
+      },
+      "canonical_preimage": "{\"command\":\"item_archetype.facet_binding.remove\",\"command_id\":\"fixture-item_archetype.facet_binding.remove\",\"derivation_version\":\"spine.command-id.v1\",\"request_path\":\"/audit\",\"row_role\":\"audit\"}",
+      "sha256": "ab6799c451ad11c668e34e676278af926248691531f151479b64bca77179d22f",
+      "expected_id": "audit_ab6799c451ad11c668e34e676278af926248691531f151479b64bca77179d22f"
+    },
+    {
+      "command": "item_archetype.facet_binding.remove",
+      "row_role": "command_receipt",
+      "prefix": "command_receipt",
+      "request_path": "/",
+      "preimage": {
+        "derivation_version": "spine.command-id.v1",
+        "command": "item_archetype.facet_binding.remove",
+        "command_id": "fixture-item_archetype.facet_binding.remove",
+        "row_role": "command_receipt",
+        "request_path": "/"
+      },
+      "canonical_preimage": "{\"command\":\"item_archetype.facet_binding.remove\",\"command_id\":\"fixture-item_archetype.facet_binding.remove\",\"derivation_version\":\"spine.command-id.v1\",\"request_path\":\"/\",\"row_role\":\"command_receipt\"}",
+      "sha256": "9820eb0ed0e71420a81a36f02db4ff05ac9049d36993573fea6505e851c0f3f3",
+      "expected_id": "command_receipt_9820eb0ed0e71420a81a36f02db4ff05ac9049d36993573fea6505e851c0f3f3"
+    },
+    {
+      "command": "item.facets.update",
+      "row_role": "audit",
+      "prefix": "audit",
+      "request_path": "/audit",
+      "preimage": {
+        "derivation_version": "spine.command-id.v1",
+        "command": "item.facets.update",
+        "command_id": "fixture-item.facets.update",
+        "row_role": "audit",
+        "request_path": "/audit"
+      },
+      "canonical_preimage": "{\"command\":\"item.facets.update\",\"command_id\":\"fixture-item.facets.update\",\"derivation_version\":\"spine.command-id.v1\",\"request_path\":\"/audit\",\"row_role\":\"audit\"}",
+      "sha256": "dfa8e202daeb9c339986f2c230001929a0337514838469e640ec309fd3792d32",
+      "expected_id": "audit_dfa8e202daeb9c339986f2c230001929a0337514838469e640ec309fd3792d32"
+    },
+    {
+      "command": "item.facets.update",
+      "row_role": "command_receipt",
+      "prefix": "command_receipt",
+      "request_path": "/",
+      "preimage": {
+        "derivation_version": "spine.command-id.v1",
+        "command": "item.facets.update",
+        "command_id": "fixture-item.facets.update",
+        "row_role": "command_receipt",
+        "request_path": "/"
+      },
+      "canonical_preimage": "{\"command\":\"item.facets.update\",\"command_id\":\"fixture-item.facets.update\",\"derivation_version\":\"spine.command-id.v1\",\"request_path\":\"/\",\"row_role\":\"command_receipt\"}",
+      "sha256": "0f556adac774b3f99f564c1661023374f796eb1e9fbc705d7ce9d3849fd29fcb",
+      "expected_id": "command_receipt_0f556adac774b3f99f564c1661023374f796eb1e9fbc705d7ce9d3849fd29fcb"
+    }
+  ]
+}

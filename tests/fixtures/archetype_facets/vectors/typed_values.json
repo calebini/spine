@@ -1,0 +1,360 @@
+{
+  "reference_context": {
+    "airport-origin": {
+      "target_kind": "location",
+      "active": true,
+      "readable": true
+    },
+    "airport-inactive": {
+      "target_kind": "location",
+      "active": false,
+      "readable": true
+    },
+    "airport-hidden": {
+      "target_kind": "location",
+      "active": true,
+      "readable": false
+    }
+  },
+  "cases": [
+    {
+      "case_id": "nfc_text",
+      "field": {
+        "key": "value",
+        "required": true,
+        "type": "text",
+        "max_length": "4"
+      },
+      "input": "café",
+      "valid": true,
+      "expected": "café"
+    },
+    {
+      "case_id": "preserved_whitespace",
+      "field": {
+        "key": "value",
+        "required": true,
+        "type": "text",
+        "max_length": "4"
+      },
+      "input": " A ",
+      "valid": true,
+      "expected": " A "
+    },
+    {
+      "case_id": "text_codepoints",
+      "field": {
+        "key": "value",
+        "required": true,
+        "type": "text",
+        "max_length": "1"
+      },
+      "input": "🛫",
+      "valid": true,
+      "expected": "🛫"
+    },
+    {
+      "case_id": "text_over_bound",
+      "field": {
+        "key": "value",
+        "required": true,
+        "type": "text",
+        "max_length": "2"
+      },
+      "input": "abc",
+      "valid": false
+    },
+    {
+      "case_id": "text_control",
+      "field": {
+        "key": "value",
+        "required": true,
+        "type": "text",
+        "max_length": "8"
+      },
+      "input": "hi\n",
+      "valid": false
+    },
+    {
+      "case_id": "text_null",
+      "field": {
+        "key": "value",
+        "required": true,
+        "type": "text",
+        "max_length": "8"
+      },
+      "input": null,
+      "valid": false
+    },
+    {
+      "case_id": "text_nested",
+      "field": {
+        "key": "value",
+        "required": true,
+        "type": "text",
+        "max_length": "8"
+      },
+      "input": {
+        "value": "text"
+      },
+      "valid": false
+    },
+    {
+      "case_id": "enum_nfc",
+      "field": {
+        "key": "value",
+        "required": true,
+        "type": "enum",
+        "choices": [
+          "café"
+        ]
+      },
+      "input": "café",
+      "valid": true,
+      "expected": "café"
+    },
+    {
+      "case_id": "enum_case",
+      "field": {
+        "key": "value",
+        "required": true,
+        "type": "enum",
+        "choices": [
+          "Gate"
+        ]
+      },
+      "input": "gate",
+      "valid": false
+    },
+    {
+      "case_id": "boolean_true",
+      "field": {
+        "key": "value",
+        "required": true,
+        "type": "boolean"
+      },
+      "input": true,
+      "valid": true,
+      "expected": true
+    },
+    {
+      "case_id": "boolean_number",
+      "field": {
+        "key": "value",
+        "required": true,
+        "type": "boolean"
+      },
+      "input": 1,
+      "valid": false
+    },
+    {
+      "case_id": "integer_max",
+      "field": {
+        "key": "value",
+        "required": true,
+        "type": "integer",
+        "min": "-9223372036854775808",
+        "max": "9223372036854775807"
+      },
+      "input": "9223372036854775807",
+      "valid": true,
+      "expected": "9223372036854775807"
+    },
+    {
+      "case_id": "integer_min",
+      "field": {
+        "key": "value",
+        "required": true,
+        "type": "integer",
+        "min": "-9223372036854775808",
+        "max": "9223372036854775807"
+      },
+      "input": "-9223372036854775808",
+      "valid": true,
+      "expected": "-9223372036854775808"
+    },
+    {
+      "case_id": "integer_invalid_0",
+      "field": {
+        "key": "value",
+        "required": true,
+        "type": "integer",
+        "min": "-9223372036854775808",
+        "max": "9223372036854775807"
+      },
+      "input": "-0",
+      "valid": false
+    },
+    {
+      "case_id": "integer_invalid_1",
+      "field": {
+        "key": "value",
+        "required": true,
+        "type": "integer",
+        "min": "-9223372036854775808",
+        "max": "9223372036854775807"
+      },
+      "input": "+1",
+      "valid": false
+    },
+    {
+      "case_id": "integer_invalid_2",
+      "field": {
+        "key": "value",
+        "required": true,
+        "type": "integer",
+        "min": "-9223372036854775808",
+        "max": "9223372036854775807"
+      },
+      "input": "01",
+      "valid": false
+    },
+    {
+      "case_id": "integer_invalid_3",
+      "field": {
+        "key": "value",
+        "required": true,
+        "type": "integer",
+        "min": "-9223372036854775808",
+        "max": "9223372036854775807"
+      },
+      "input": "1.0",
+      "valid": false
+    },
+    {
+      "case_id": "integer_invalid_4",
+      "field": {
+        "key": "value",
+        "required": true,
+        "type": "integer",
+        "min": "-9223372036854775808",
+        "max": "9223372036854775807"
+      },
+      "input": "9223372036854775808",
+      "valid": false
+    },
+    {
+      "case_id": "integer_invalid_5",
+      "field": {
+        "key": "value",
+        "required": true,
+        "type": "integer",
+        "min": "-9223372036854775808",
+        "max": "9223372036854775807"
+      },
+      "input": "-9223372036854775809",
+      "valid": false
+    },
+    {
+      "case_id": "integer_json_number",
+      "field": {
+        "key": "value",
+        "required": true,
+        "type": "integer",
+        "min": "0",
+        "max": "10"
+      },
+      "input": 1,
+      "valid": false
+    },
+    {
+      "case_id": "integer_declared_bound",
+      "field": {
+        "key": "value",
+        "required": true,
+        "type": "integer",
+        "min": "0",
+        "max": "10"
+      },
+      "input": "11",
+      "valid": false
+    },
+    {
+      "case_id": "leap_date",
+      "field": {
+        "key": "value",
+        "required": true,
+        "type": "date"
+      },
+      "input": "2028-02-29",
+      "valid": true,
+      "expected": "2028-02-29"
+    },
+    {
+      "case_id": "nonleap_date",
+      "field": {
+        "key": "value",
+        "required": true,
+        "type": "date"
+      },
+      "input": "2027-02-29",
+      "valid": false
+    },
+    {
+      "case_id": "year_zero",
+      "field": {
+        "key": "value",
+        "required": true,
+        "type": "date"
+      },
+      "input": "0000-01-01",
+      "valid": false
+    },
+    {
+      "case_id": "reference_active",
+      "field": {
+        "key": "value",
+        "required": true,
+        "type": "reference",
+        "target_kind": "location"
+      },
+      "input": "airport-origin",
+      "valid": true,
+      "expected": "airport-origin"
+    },
+    {
+      "case_id": "reference_wrong_kind",
+      "field": {
+        "key": "value",
+        "required": true,
+        "type": "reference",
+        "target_kind": "subject"
+      },
+      "input": "airport-origin",
+      "valid": false
+    },
+    {
+      "case_id": "reference_missing",
+      "field": {
+        "key": "value",
+        "required": true,
+        "type": "reference",
+        "target_kind": "location"
+      },
+      "input": "airport-unknown",
+      "valid": false
+    },
+    {
+      "case_id": "reference_inactive",
+      "field": {
+        "key": "value",
+        "required": true,
+        "type": "reference",
+        "target_kind": "location"
+      },
+      "input": "airport-inactive",
+      "valid": false
+    },
+    {
+      "case_id": "reference_hidden",
+      "field": {
+        "key": "value",
+        "required": true,
+        "type": "reference",
+        "target_kind": "location"
+      },
+      "input": "airport-hidden",
+      "valid": false
+    }
+  ]
+}
