@@ -1,8 +1,9 @@
 # Spine Scheduled Contextual Advisories
 
-Status: Draft v0.1.0; cross-system design target; not implemented
+Status: Draft v0.2.0; selective manual synthesis; cross-system design target; not implemented
 Scope: One scheduled Spine trigger causing one governed, bounded, read-only agent run and at most one ordinary derivative notification
 Created: 2026-08-18
+Updated: 2026-09-12
 
 ## 1. Purpose
 
@@ -126,6 +127,12 @@ Version 1 excludes:
 - agent-authored recurrence or notification schedules; and
 - more than one derivative notification per advisory opportunity.
 
+Version 1 authoring and submission validation MUST enforce the event-only scope and
+required canonical primary location above. Generic item or snapshot types MUST NOT
+implicitly admit tasks or waive that location prerequisite. If required location facts
+cannot be disclosed under the context scope, the request fails closed rather than
+silently weakening the experimental profile.
+
 ## 5. Role Boundaries
 
 ### 5.1 Spine: coordination and scheduling authority
@@ -145,6 +152,14 @@ Spine owns:
 Spine MUST NOT evaluate governance policy, plan the investigation, invoke an LLM,
 select tools for the agent, accept its own execution evidence on behalf of another
 authority, or let the agent bypass normal notification delivery.
+
+Spine alone persists changes to its advisory policy, opportunity, work, and derivative
+notification facts through validated Spine-owned operations. External roles produce
+the authoritative native decisions, authorizations, and execution evidence that may
+cause those changes; they do not acquire direct ledger-mutation authority. Any later
+transition table MUST distinguish the producer of the causal evidence from the sole
+Spine persistence authority. A governance adapter translates and verifies references;
+it is not an additional authority over either system's native lifecycle.
 
 ### 5.2 `scheduler_runtime`: cadence authority
 
@@ -236,6 +251,13 @@ The logical work binds at least:
 
 An eligible opportunity alone MUST NOT invoke the model or tools.
 
+Discovery MUST resolve existing work for the same source opportunity and immutable
+policy version before creating fresh work. Re-observing unchanged source facts MUST
+return the existing identities, including after work has reached a terminal state.
+Snapshot construction time and stochastic output MUST NOT create a new source-work
+identity. Exact lookup keys, first-creation rules, uniqueness enforcement, and identity
+preimages remain machine-contract prerequisites, not closed by this logical rule.
+
 ### 6.3 Context snapshot
 
 The context snapshot is a minimized, versioned input envelope. Version 1 may include:
@@ -251,6 +273,14 @@ It MUST exclude delivery credentials, unrelated personal data, hidden adapter st
 and mutable references whose resolved contents cannot later be identified. A context
 scope permits disclosure; it does not grant tool or mutation authority.
 
+Snapshot capture time is observation evidence, not a source-freshness input. Once
+submitted, the exact snapshot contents and their integrity hash MUST be retained or
+immutably resolvable for replay. The future hash preimage MUST explicitly exclude the
+hash field itself and declare its canonicalization version; it may include the original
+capture time, but a later capture time MUST NOT invalidate unchanged source facts.
+A closed snapshot schema alone does not settle minimization or sensitive-data policy;
+the disclosure and redaction decisions in Section 15 remain required.
+
 ## 7. Cross-System Envelope Family
 
 The initial boundary uses role-neutral Spine envelopes and semantic requirements for
@@ -263,6 +293,12 @@ alternate canonical intent, dispatch, receipt, or evidence types. When the confi
 governance authority already has a native versioned artifact for one of these facts,
 the adapter MUST preserve that artifact's identity and return a verifiable reference;
 it MUST NOT synthesize a competing hash, lifecycle, or acceptance status in Spine.
+
+Spine-facing projections may normalize their own declared fields, but MUST preserve
+native artifact identities and native canonical bytes, hashes, and verification rules.
+Normalizing a projection MUST NOT rewrite native evidence or become an alternate
+acceptance decision. The future mapping and fixtures MUST show which fields are
+Spine-owned projections and which remain opaque native authority facts.
 
 ### 7.1 `spine.contextual-advisory-submission.v1`
 
@@ -280,6 +316,13 @@ Spine submits one immutable request containing:
 
 It MUST NOT contain model-provider credentials, tool credentials, delivery credentials,
 or a concrete governance implementation name.
+
+Before crossing this boundary, Spine MUST atomically persist or resolve the submission
+identity, idempotency key, exact canonical request bytes, and their declared protocol
+and canonicalization versions for the advisory work. Repeated submission MUST reuse
+those persisted facts rather than rebuild the request with a new snapshot time. A
+same-key request with different canonical bytes is a reason-coded replay mismatch:
+it leaves the original submission unchanged and MUST NOT cross the governance boundary.
 
 ### 7.2 `spine.contextual-advisory-governance-binding.v1`
 
@@ -300,6 +343,17 @@ the native decision, make evidence policy-visible, or authorize dispatch by itse
 Version 1 may implement only preauthorized `allowed` and terminal `blocked`; it MUST
 fail closed rather than pretending to support a native approval lifecycle.
 
+An accepted grant MUST be no broader than the submitted request: permitted model and
+tool references and allowed outcome kinds are subsets of those requested; numeric
+ceilings may only decrease; expiry may only shorten; and the cost currency or
+accounting unit MUST remain identical. Accepted expiry MUST NOT exceed submission
+expiry or the usefulness deadline. Exact reference equality, numeric encoding, and
+set normalization belong in the machine contracts and their fixtures before
+implementation. The binding MUST expose the effective constraints and allowed outcome
+set, directly or through verifiable native references. Spine MUST reject a missing,
+unverifiable, or widened grant for dispatch; that validation does not make Spine the
+governance policy evaluator.
+
 ### 7.3 Governed invocation requirements
 
 The governance authority's native authorized invocation presented to the agent runtime
@@ -312,6 +366,9 @@ must bind:
 - hard budgets and deadline;
 - required output contract; and
 - correlation facts for tool and model attempts.
+
+The required output contract MUST bind the effective allowed outcome set from the
+submitted request and accepted grant. Prompt text alone cannot change that set.
 
 The invocation does not disclose approval internals or grant capabilities by textual
 instruction alone. Its canonical schema, hash, idempotency, attempt, and retry rules
@@ -329,6 +386,16 @@ The runtime submits produced evidence with exactly one terminal outcome:
 Every outcome also contains run and authorization identities, terminal status, model
 and tool attempt references, actual usage, start/end times, and output-contract version.
 Failure and timeout are execution terminal states, not `no_action` outcomes.
+
+A successful outcome is admissible only when its kind is a member of the submitted
+allowed outcome set and any narrower accepted grant/output contract. The governance
+authority MUST reject evidence that violates this constraint, even if the kind is a
+valid member of the overall three-value enum. A rejection preserves the relevant
+native evidence and reason rather than relabeling the result as `no_action`. Failure
+evidence MUST distinguish timeout, tool/model failure, invalid output, and authority
+violations and bind the actual attempt/usage facts, including failures before any
+model or tool call. Actual over-budget usage, if observed, remains recorded evidence
+of a violation; it MUST NOT be clamped or discarded to make a run appear conforming.
 
 The outcome MUST NOT contain a command to mutate Spine or an instruction to a delivery
 adapter. It MUST NOT require chain-of-thought. Citations or provider references must
@@ -358,6 +425,15 @@ not itself proof of Spine freshness or delivery. The projected classification MU
 verifiable against the native acceptance artifact and MUST NOT become a second
 evidence lifecycle maintained by Spine.
 
+Before consuming an accepted reference, Spine MUST verify its binding to the stored
+submission, native authorization, run, evidence, and outcome; verify that the outcome
+is successful and belongs to the effective allowed set; and apply its own freshness
+gate. A missing, unverifiable, or contradictory binding, including an out-of-set
+outcome marked accepted by the producer, MUST create no derivative notification.
+Spine records a reason-coded local consumption failure without changing the native
+acceptance decision or inventing a second evidence-acceptance lifecycle. This failure
+and its evidence references MUST be visible in operator readback.
+
 ## 8. Lifecycle
 
 One successful advisory follows this sequence:
@@ -386,6 +462,16 @@ Authoring, opportunity expansion, advisory-work materialization, governance deci
 agent execution, outcome acceptance, derivative-work materialization, delivery
 attempt, and delivery outcome remain separately observable facts.
 
+If derivative notification validation or persistence fails after governance acceptance,
+Spine MUST retain the acceptance reference and a reason-coded local materialization
+failure, with no partially committed derivative intent/work bundle and no delivery
+attempt or delivery claim caused by that failed materialization. Reconciliation MUST
+first distinguish an absent bundle from an already committed bundle, returning the
+existing identities in the latter case. Neither case authorizes rerunning intelligence.
+Retry scheduling and recovery transitions remain explicit decisions in Section 15;
+this failure-reporting requirement does not silently make failure terminal forever or
+authorize automatic retries.
+
 ## 9. Freshness, Cancellation, and Time
 
 The context snapshot is fresh only while all bound source facts remain current and the
@@ -399,6 +485,12 @@ usefulness deadline has not passed. At minimum, freshness compares:
 - canonical location version when location entered the snapshot; and
 - context-snapshot hash and protocol version.
 
+The hash comparison verifies the persisted snapshot against its stored submission,
+not against a newly constructed snapshot with a later observation time. Freshness
+also compares current values of all bound source facts, including versions of any
+disclosed related-item facts. A change in capture time alone is not staleness; a
+changed bound source fact cannot be excused by reusing the stored integrity hash.
+
 If freshness fails before dispatch, Spine cancels or supersedes the advisory work and
 does not submit it. If source truth changes during execution, the run and its evidence
 remain auditable, but Spine rejects the outcome for derivative materialization with a
@@ -408,6 +500,13 @@ created, ordinary notification reconciliation and attempt-start freshness apply.
 No component may claim that an in-flight model call was undone. Already completed tool
 or model attempts remain historical evidence, while stale results lose authority to
 produce new delivery work.
+
+The dispatch gate applies even if a submission has already been persisted or sent.
+The native dispatch path MUST obtain a current Spine freshness result before starting
+execution; an earlier submission check alone is insufficient. If execution has already
+started when a change is detected, the historical run remains evidence and the
+outcome/derivative freshness gates prevent stale materialization. The exact native
+handoff and race-handling fixtures remain prerequisites under Section 15.
 
 ## 10. Idempotency and Attempt Accounting
 
@@ -434,14 +533,18 @@ The first contract family must distinguish at least:
 - source stale before submission;
 - submission replay mismatch;
 - governance blocked;
+- governance approval required but unsupported by the selected implementation;
 - governance decision unavailable or expired;
 - unauthorized capability or tool request;
 - agent invocation timeout;
 - tool unavailable or tool evidence invalid;
 - model failure or invalid output;
+- outcome outside the submitted or narrowed allowed set;
+- unverifiable or contradictory governance/evidence references;
 - successful `no_action`;
 - successful `request_clarification`;
 - accepted advisory stale before derivative materialization;
+- accepted advisory or clarification unable to materialize derivative work;
 - usefulness deadline exceeded;
 - derivative notification already materialized; and
 - later notification delivery failure.
@@ -464,8 +567,27 @@ A canonical operator read must expose, without raw SQL:
 - derivative notification policy/work identity when present; and
 - delivery attempt/outcome separately.
 
+Readback MUST also expose local acceptance-consumption failures and derivative
+materialization failures, retaining any native acceptance reference. Every failed or
+terminal advisory-work path MUST expose its latest relevant reason, transition time,
+Spine persistence actor, causal evidence-producing role, and evidence/replay references
+when present. Absence of a submission, run, or attempt MUST be represented as absence,
+not fabricated success or execution evidence.
+
 Compact output may summarize these facts but cannot collapse `accepted`,
 `notification_materialized`, `delivery_attempted`, and `delivered` into one status.
+
+The same separation applies to acceptance-consumption and materialization failures.
+Compact readback may omit large evidence bodies but MUST retain stable correlation
+IDs, current advisory-work state, freshness, the relevant failure reason, and derivative
+work and latest delivery-attempt facts when present.
+
+The implementation-ready command family MUST provide logical policy authoring and
+canonical policy/work readback through Spine-owned operations, not raw SQL. Authoring
+must bind actor, command identity, target version, normalized requested policy, and
+replay facts; readback must accept stable item/policy/work selectors. Exact public
+names, request/response fields, bounded selection, and permission rules remain open
+under Section 15; these logical requirements do not declare runtime commands.
 
 ## 13. Proof Strategy
 
@@ -494,6 +616,27 @@ Fake clock, governance, agent, tool, and delivery adapters prove:
 
 Passing these tests proves protocol composition and safety behavior. It does not prove
 that autonomous advice is useful.
+
+The machine-contract fixture set MUST additionally prove:
+
+- an enum-valid but disallowed outcome is rejected, including when a native reference
+  incorrectly claims acceptance, without derivative work or a second acceptance ledger;
+- a widened tool/model/outcome grant, raised budget, extended expiry, or changed cost
+  unit cannot authorize dispatch;
+- external decision/evidence producers cannot directly mutate Spine work state;
+- unchanged source facts observed at a later time retain identities and freshness,
+  while changed bound item, occurrence, location, or related-item facts fail freshness;
+- same-key changed submission bytes never cross the governance boundary;
+- a source change after submission but before execution is checked at dispatch;
+- materialization failure preserves acceptance evidence without partial derivative work,
+  and retry/replay after an already committed bundle returns its existing identities;
+- failed attempts and over-budget usage remain observable without becoming `no_action`;
+- projections preserve native artifact identities and verification bytes; and
+- required location disclosure and event-only scope cannot be bypassed by generic types.
+
+Canonical preimage, encoding, uniqueness, and concurrent replay vectors MUST be added
+when those machine contracts are authored; this list is a proof obligation, not a
+claim that executable fixtures already exist.
 
 ### 13.2 Real product experiment
 
@@ -539,7 +682,8 @@ That decision follows the real product experiment.
 
 ## 15. Open Decisions Before Machine Contracts
 
-The following decisions remain intentionally open for the first audit:
+The following decisions remain intentionally open before machine contracts and
+implementation; selective clarification does not close them by implication:
 
 1. whether the advisory trigger is a new policy family or a typed extension of current
    notification policy authoring;
@@ -551,8 +695,21 @@ The following decisions remain intentionally open for the first audit:
 5. the exact context-snapshot minimization and sensitive-data rules;
 6. the initial budgets and usefulness-deadline defaults;
 7. whether `request_clarification` is rendered through the same delivery policy as an
-   advisory; and
-8. the exact commands and readback projection used by operators.
+   advisory;
+8. the exact commands and readback projection used by operators;
+9. unsupported-approval terminal/retry behavior for the selected Version 1 profile;
+10. derivative-materialization recovery, retry scheduling, and legal recovery transitions;
+11. exact identity preimages, first-creation and concurrent lookup rules, snapshot hash
+    preimages, encodings, and projection-to-native verification rules; and
+12. the dispatch freshness handoff and race-handling contract with the native authority.
+
+For the three operator policy choices, the current proposals (not ratified defaults)
+are: use the same derivative delivery target/profile for clarification and advisory;
+stop unsupported approval requests without dispatch or automatic retry; and require
+explicit operator recovery after derivative-materialization failure. A recovery choice
+must define a usable command and legal transitions before implementation, not merely
+name a terminal state. Pending decisions do not grant authority to dispatch, deliver,
+or retry by inference.
 
 The primary-location prerequisite is satisfied by the implemented and audited
 `spine.schedule-primary-location.v1` family; it is no longer an open advisory decision.

@@ -16,12 +16,28 @@ document deliberately fails its selected structural schema. A `failure_*.json`
 document is a valid example of an unsuccessful handler response, not an invalid
 schema fixture or proof that a handler executed.
 
-Each example is independent. Changed and no-op receipts illustrate alternative
+Each fresh example is independent. Changed and no-op receipts illustrate alternative
 states; their shared illustrative command IDs do not authorize replaying different
 requests against one ledger. A changed item receipt here assumes no notification
 policies or work, and makes no queued-work retention claim. The readback example
 includes an inactive but readable historical location reference; new authoring
 requires active, readable references.
+
+Every write response requires `replayed`. Fresh responses use false; the corresponding
+`*_replay.json` fixtures use true with changed=false and the exact same stored receipt,
+effect, audit evidence (when present) and result identities. Item replay clears the
+current-invocation changed-key list and reports no reconciliation; it does not erase
+historical audit evidence or pretend the stored result version is the current ledger
+version. Replay of no-op receipts is covered too. These are response-projection
+oracles, not proof of runtime receipt lookup, authorization or transaction behavior.
+
+The fixture test loads exactly five facet schemas plus the two referenced notification
+type schemas; it does not scan the repository-wide schema directory or web registry.
+The existing canonical-JSON helper is still imported to check portable golden vectors.
+Runtime/package/web non-advertisement assertions are preserved separately in
+`tests/test_implemented_contract_declarations.py`. That integration test's dependencies
+must be explicitly included if a future audit seeks to qualify those assertions; it
+is not claimed as self-contained evidence within this fixture bundle.
 
 Golden vectors contain explicit preimages, canonical text, SHA-256 digests and
 generated IDs. Scalar vectors cover all six declared types. The test-only semantic

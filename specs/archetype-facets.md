@@ -1,8 +1,8 @@
 # Spine Archetype Facets
 
-Status: Draft v0.3 — machine contracts and static fixtures added after a clean v0.2 bounded recheck; new codification not yet audited; not implemented
+Status: Draft v0.4 — machine-contract audit findings manually patched; focused recheck pending; not implemented
 Date: 2026-09-07
-Updated: 2026-09-09
+Updated: 2026-09-12
 Scope: Registered typed item facts, immutable schema revisions, archetype bindings,
 bounded authoring/readback, and a flight-details proof
 
@@ -187,7 +187,8 @@ are conflicts, not implicit overwrite or revival.
 
 Success receipts include command/receipt IDs, effect, changed, affected root/revision
 or item IDs, prior/resulting versions, and sorted changed facet keys. Compatible
-same-command replay returns the recorded outcome rather than producing new rows.
+same-command replay returns recorded stable identities with `replayed=true` and
+`changed=false`, rather than producing new rows (Section 10.2).
 Common replay semantics apply before fresh version checks, but never bypass current
 disclosure authorization in a permission-enforced adapter. Same ID/different normalized
 semantic request fails `semantic_conflict`. Failed validation changes no state.
@@ -386,20 +387,35 @@ not authorization to bypass the exact pinned field type and declaration constrai
 
 ### 10.2 Success, failure and readback
 
-Successes contain `response_contract` equal to the command's owning family. All fresh
-writes include `command_id`, `command_receipt_id`, the closed effect, and `changed`.
-Changed writes include `audit_id`; no-ops forbid it. Compatible replay returns that
-recorded outcome, including its original changed/audit facts, without creating rows.
-It is not a newly performed change and must not be interpreted as another delivery.
+Successes contain `response_contract` equal to the command's owning family. Every
+write response includes `command_id`, `command_receipt_id`, the closed `effect`,
+`changed` and `replayed`. Fresh outcomes use `replayed=false`: changed writes include
+`audit_id`, while fresh no-ops forbid it. Compatible replay uses `replayed=true` and
+`changed=false`, creates no rows, and returns the stored receipt ID, effect and stable
+result identities. An original changed effect requires its stored `audit_id`; an
+original no-op effect forbids that field. On replay this is historical audit evidence,
+never evidence of a newly performed write. The effect names the stored receipt's
+outcome; it does not override the current invocation's changed=false result.
+
+These replay branches apply to all six writes, including create, retire and remove,
+and replay of both changed and no-op outcomes. Prior/resulting version and binding
+facts stay exactly as recorded, even if the target has since advanced; replay is not
+a current-state read. For `item.facets.update`, replay returns
+`changed_facet_keys=[]` and `reconciliation_performed=false`, regardless of the
+original values of those two invocation-activity fields. It neither reconciles work
+nor advances a version. `replayed` and the activity-field substitutions are response
+projection facts only: they do not rewrite the receipt, semantic hash, stored effect,
+or command-derived identities. Section 4's current disclosure checks still apply.
 
 Catalog receipts report `prior_revision_id`, `facet_schema_revision_id` and
 `revision_number`; create has prior=null and number=1. Publish increments only on
 change; retire and no-op preserve the revision. Binding set reports prior/resulting
 IDs and schema revision. Remove reports the same retired binding ID as prior/result;
 the absent-remove no-op reports both IDs as null. Item receipts report prior/resulting
-item versions and sorted `changed_facet_keys` (empty on no-op). Changed versions advance
-by one. `reconciliation_performed` reports whether work reconciliation actually ran;
-no-op requires false. The sample changed receipt is for an item with no policies or
+item versions and sorted `changed_facet_keys` (empty on no-op or replay). Fresh changed
+versions advance by one; replay preserves the original version pair.
+`reconciliation_performed` reports whether work reconciliation ran on this invocation;
+no-op and replay require false. The sample changed receipt is for an item with no policies or
 work and uses false. This boolean does not resolve or claim safety for queued, leased
 or attempted work. Section 5 remains a blocking integration gate.
 

@@ -4,12 +4,13 @@
   "response_contract": "spine.item-facets.v1",
   "command_id": "fixture-item.facets.update",
   "command_receipt_id": "command_receipt_0f556adac774b3f99f564c1661023374f796eb1e9fbc705d7ce9d3849fd29fcb",
-  "effect": "item_facets_update_noop",
+  "effect": "item_facets_updated",
   "changed": false,
+  "audit_id": "audit_dfa8e202daeb9c339986f2c230001929a0337514838469e640ec309fd3792d32",
   "item_id": "item-flight",
   "prior_item_version": "1",
-  "item_version": "1",
+  "item_version": "2",
   "changed_facet_keys": [],
   "reconciliation_performed": false,
-  "replayed": false
+  "replayed": true
 }

@@ -5,11 +5,11 @@
   "command_id": "fixture-facet_schema.create",
   "command_receipt_id": "command_receipt_f56a6df1a40911c984227d9140b10edf8717255b01fc4246629b4222816e2cf3",
   "effect": "facet_schema_created",
-  "changed": true,
+  "changed": false,
   "audit_id": "audit_bee5bab0fb7802517627e79802080fcf1a9a53d6a08a9eeb70289314999640b4",
   "facet_schema_id": "facet_schema_c0742a134b0891560b65c377fd3ef4936b12fb8aa1f6a3aba7087760479261c4",
   "prior_revision_id": null,
   "facet_schema_revision_id": "facet_schema_revision_fcbda5c8b6c18df146f519ce33d83e46ab7a59017b0912c41b0eda4b363af4a8",
   "revision_number": "1",
-  "replayed": false
+  "replayed": true
 }

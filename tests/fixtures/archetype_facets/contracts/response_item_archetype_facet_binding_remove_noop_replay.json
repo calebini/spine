@@ -10,5 +10,5 @@
   "facet_key": "flight_details",
   "prior_binding_id": null,
   "facet_binding_id": null,
-  "replayed": false
+  "replayed": true
 }

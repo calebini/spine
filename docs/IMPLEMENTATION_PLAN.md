@@ -332,7 +332,9 @@ Specification work started 2026-09-07: `specs/decisions/0004-versioned-item-face
 and `specs/archetype-facets.md` now define the proposed first facet slice. They remain
 drafts, not implementation authorization. The v0.2 bounded recheck passed; draft
 machine schemas, structural fixtures and pure identity/type vectors were added on
-2026-09-09. This codification still needs review. Remaining gates are a migration/index
+2026-09-09. The first machine-contract audit identified replay-response alignment
+and test-dependency scope issues; both were manually patched on 2026-09-12, with a
+focused recheck pending. Remaining gates are a migration/index
 plan, permission resolver mappings, cursor semantics and exact notification-work
 freshness behavior on facet-only item edits. Static fixtures do not prove runtime
 behavior. Workflow recipes and external observations remain separate future work;

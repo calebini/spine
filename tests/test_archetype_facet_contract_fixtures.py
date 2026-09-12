@@ -19,14 +19,21 @@ from pathlib import Path
 from jsonschema import Draft202012Validator
 from referencing import Registry, Resource
 
-from spine import IMPLEMENTED_CONTRACT_VERSIONS
-from spine.commands.registry import COMMAND_RUNTIME_CONTRACT_REGISTRY
 from spine.core.canonical_json import canonical_json_bytes, canonical_json_text
 
 ROOT = Path(__file__).parents[1]
 FIXTURES = ROOT / "tests/fixtures/archetype_facets"
 SCHEMAS = ROOT / "contracts/schemas"
 PREFIX = "https://cortext.local/spine/contracts/schemas/"
+SCHEMA_FILES = (
+    "archetype-facet-commands.schema.json",
+    "archetype-facet-failure.schema.json",
+    "archetype-facet-fixture-manifest.schema.json",
+    "archetype-facet-responses.schema.json",
+    "archetype-facet-types.schema.json",
+    "notification-profile-types.schema.json",
+    "notification-types.schema.json",
+)
 
 
 def load(path):
@@ -57,7 +64,9 @@ def integer(value):
 class ArchetypeFacetContractFixtureTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.schemas = {p.name: load(p) for p in SCHEMAS.glob("*.schema.json")}
+        # Exact facet schema bundle plus its two transitive reference dependencies.
+        # Runtime/web non-advertisement is checked separately in the declaration tests.
+        cls.schemas = {name: load(SCHEMAS / name) for name in SCHEMA_FILES}
         cls.resources = Registry().with_resources((s["$id"], Resource.from_contents(s)) for s in cls.schemas.values())
         cls.manifest = load(ROOT / "contracts/archetype-facet-fixture-manifest.json")
         cls.contract = load(ROOT / "contracts/archetype-facet-contract-registry.v1.json")
@@ -155,7 +164,32 @@ class ArchetypeFacetContractFixtureTests(unittest.TestCase):
             {str(p.relative_to(ROOT)) for p in (FIXTURES / "vectors").glob("*.json")},
         )
 
-    def test_command_coverage_and_no_runtime_advertisement(self):
+    def test_schema_resources_have_explicit_dependency_closure(self):
+        self.assertEqual(len(SCHEMA_FILES), 7)
+        self.assertEqual(set(self.schemas), set(SCHEMA_FILES))
+        references = set()
+
+        def visit(value):
+            if isinstance(value, dict):
+                reference = value.get("$ref", "").split("#")[0]
+                if reference:
+                    self.assertNotIn("://", reference)
+                    references.add(reference)
+                for child in value.values():
+                    visit(child)
+            elif isinstance(value, list):
+                for child in value:
+                    visit(child)
+
+        for schema in self.schemas.values():
+            visit(schema)
+        self.assertTrue(references <= set(SCHEMA_FILES))
+        self.assertEqual(
+            {name for name in references if not name.startswith("archetype-facet-")},
+            {"notification-profile-types.schema.json", "notification-types.schema.json"},
+        )
+
+    def test_command_coverage_and_draft_status(self):
         expected = {
             "facet_schema.create",
             "facet_schema.publish",
@@ -170,9 +204,6 @@ class ArchetypeFacetContractFixtureTests(unittest.TestCase):
             "item.facets.query",
         }
         self.assertEqual(set(self.contract["commands"]), expected)
-        self.assertTrue(expected.isdisjoint(COMMAND_RUNTIME_CONTRACT_REGISTRY))
-        web_commands = load(ROOT / "contracts/spine.trusted-web-command-registry.v1.json")["commands"]
-        self.assertTrue(expected.isdisjoint(row["command"] for row in web_commands))
         self.assertEqual(self.contract["status"], "draft_not_implemented")
         for kind in ("commands", "responses"):
             schema = self.schemas[f"archetype-facet-{kind}.schema.json"]
@@ -187,7 +218,6 @@ class ArchetypeFacetContractFixtureTests(unittest.TestCase):
                     )
                 )
         for command, entry in self.contract["commands"].items():
-            self.assertNotIn(entry["contract_version"], IMPLEMENTED_CONTRACT_VERSIONS)
             for kind in ("request", "response"):
                 path, fragment = entry[kind + "_schema"].split("#/$defs/")
                 self.assertEqual(fragment, command)
@@ -340,10 +370,12 @@ class ArchetypeFacetContractFixtureTests(unittest.TestCase):
             if "changed" not in response:
                 continue
             command = response["command"]
-            self.assertEqual("audit_id" in response, response["changed"])
+            original_changed = not response["effect"].endswith("_noop")
+            self.assertEqual("audit_id" in response, original_changed)
+            self.assertEqual(response["changed"], original_changed and not response["replayed"])
             if command == "item.facets.update":
                 prior = int(response["prior_item_version"])
-                self.assertEqual(int(response["item_version"]), prior + int(response["changed"]))
+                self.assertEqual(int(response["item_version"]), prior + int(original_changed))
                 self.assertEqual(response["changed_facet_keys"], sorted(set(response["changed_facet_keys"])))
                 if not response["changed"]:
                     self.assertEqual(response["changed_facet_keys"], [])
@@ -371,6 +403,42 @@ class ArchetypeFacetContractFixtureTests(unittest.TestCase):
                 self.assertEqual(ref["target_kind"], expected_refs[ref["field"]]["target_kind"])
                 self.assertEqual(ref["target_id"], entry["values"][ref["field"]])
         self.assertWire("archetype-facet-responses.schema.json", "item.facets.show", {**response, "entries": []})
+
+    def test_replay_pairs_preserve_identity_without_reporting_new_activity(self):
+        covered = set()
+        for row in self.manifest["fixtures"]:
+            if not row["fixture_id"].endswith("_replay"):
+                continue
+            replay = load(ROOT / row["fixture"])
+            original_path = Path(row["fixture"].removesuffix("_replay.json") + ".json")
+            original = load(ROOT / original_path)
+            command = original["command"]
+            covered.add((command, original["effect"]))
+            expected = {**original, "changed": False, "replayed": True}
+            if command == "item.facets.update":
+                expected.update(changed_facet_keys=[], reconciliation_performed=False)
+            self.assertEqual(replay, expected)
+            self.assertFalse(original["replayed"])
+            for malformed in ({**replay, "changed": True}, {k: v for k, v in replay.items() if k != "replayed"}):
+                self.assertWire("archetype-facet-responses.schema.json", command, malformed, False)
+            wrong_audit = dict(replay)
+            if "audit_id" in original:
+                del wrong_audit["audit_id"]
+            else:
+                wrong_audit["audit_id"] = "invented-audit"
+            self.assertWire("archetype-facet-responses.schema.json", command, wrong_audit, False)
+            if command == "item.facets.update":
+                self.assertWire("archetype-facet-responses.schema.json", command, {**replay, "reconciliation_performed": True}, False)
+                self.assertWire(
+                    "archetype-facet-responses.schema.json", command, {**replay, "changed_facet_keys": ["flight_details"]}, False
+                )
+        expected = {
+            (command, branch["properties"]["effect"]["const"])
+            for command, schema in self.schemas["archetype-facet-responses.schema.json"]["$defs"].items()
+            for branch in schema.get("oneOf", [])
+        }
+        self.assertEqual(covered, expected)
+        self.assertEqual(len(covered), 11)
 
     def test_pagination_envelope_and_bounds(self):
         for command, collection, sort_key in (

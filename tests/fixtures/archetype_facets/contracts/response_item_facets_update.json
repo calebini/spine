@@ -13,5 +13,6 @@
   "changed_facet_keys": [
     "flight_details"
   ],
-  "reconciliation_performed": false
+  "reconciliation_performed": false,
+  "replayed": false
 }

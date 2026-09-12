@@ -273,6 +273,83 @@
       "schema": "contracts/schemas/archetype-facet-commands.schema.json",
       "schema_ref": "#/$defs/item.facets.query",
       "valid": false
+    },
+    {
+      "fixture_id": "response_facet_schema_create_replay",
+      "fixture": "tests/fixtures/archetype_facets/contracts/response_facet_schema_create_replay.json",
+      "schema": "contracts/schemas/archetype-facet-responses.schema.json",
+      "schema_ref": "#/$defs/facet_schema.create",
+      "valid": true
+    },
+    {
+      "fixture_id": "response_facet_schema_publish_replay",
+      "fixture": "tests/fixtures/archetype_facets/contracts/response_facet_schema_publish_replay.json",
+      "schema": "contracts/schemas/archetype-facet-responses.schema.json",
+      "schema_ref": "#/$defs/facet_schema.publish",
+      "valid": true
+    },
+    {
+      "fixture_id": "response_facet_schema_publish_noop_replay",
+      "fixture": "tests/fixtures/archetype_facets/contracts/response_facet_schema_publish_noop_replay.json",
+      "schema": "contracts/schemas/archetype-facet-responses.schema.json",
+      "schema_ref": "#/$defs/facet_schema.publish",
+      "valid": true
+    },
+    {
+      "fixture_id": "response_facet_schema_retire_replay",
+      "fixture": "tests/fixtures/archetype_facets/contracts/response_facet_schema_retire_replay.json",
+      "schema": "contracts/schemas/archetype-facet-responses.schema.json",
+      "schema_ref": "#/$defs/facet_schema.retire",
+      "valid": true
+    },
+    {
+      "fixture_id": "response_facet_schema_retire_noop_replay",
+      "fixture": "tests/fixtures/archetype_facets/contracts/response_facet_schema_retire_noop_replay.json",
+      "schema": "contracts/schemas/archetype-facet-responses.schema.json",
+      "schema_ref": "#/$defs/facet_schema.retire",
+      "valid": true
+    },
+    {
+      "fixture_id": "response_item_archetype_facet_binding_set_replay",
+      "fixture": "tests/fixtures/archetype_facets/contracts/response_item_archetype_facet_binding_set_replay.json",
+      "schema": "contracts/schemas/archetype-facet-responses.schema.json",
+      "schema_ref": "#/$defs/item_archetype.facet_binding.set",
+      "valid": true
+    },
+    {
+      "fixture_id": "response_item_archetype_facet_binding_set_noop_replay",
+      "fixture": "tests/fixtures/archetype_facets/contracts/response_item_archetype_facet_binding_set_noop_replay.json",
+      "schema": "contracts/schemas/archetype-facet-responses.schema.json",
+      "schema_ref": "#/$defs/item_archetype.facet_binding.set",
+      "valid": true
+    },
+    {
+      "fixture_id": "response_item_archetype_facet_binding_remove_replay",
+      "fixture": "tests/fixtures/archetype_facets/contracts/response_item_archetype_facet_binding_remove_replay.json",
+      "schema": "contracts/schemas/archetype-facet-responses.schema.json",
+      "schema_ref": "#/$defs/item_archetype.facet_binding.remove",
+      "valid": true
+    },
+    {
+      "fixture_id": "response_item_archetype_facet_binding_remove_noop_replay",
+      "fixture": "tests/fixtures/archetype_facets/contracts/response_item_archetype_facet_binding_remove_noop_replay.json",
+      "schema": "contracts/schemas/archetype-facet-responses.schema.json",
+      "schema_ref": "#/$defs/item_archetype.facet_binding.remove",
+      "valid": true
+    },
+    {
+      "fixture_id": "response_item_facets_update_replay",
+      "fixture": "tests/fixtures/archetype_facets/contracts/response_item_facets_update_replay.json",
+      "schema": "contracts/schemas/archetype-facet-responses.schema.json",
+      "schema_ref": "#/$defs/item.facets.update",
+      "valid": true
+    },
+    {
+      "fixture_id": "response_item_facets_update_noop_replay",
+      "fixture": "tests/fixtures/archetype_facets/contracts/response_item_facets_update_noop_replay.json",
+      "schema": "contracts/schemas/archetype-facet-responses.schema.json",
+      "schema_ref": "#/$defs/item.facets.update",
+      "valid": true
     }
   ],
   "vectors": [

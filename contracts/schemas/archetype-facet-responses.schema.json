@@ -20,7 +20,8 @@
             "facet_schema_id",
             "prior_revision_id",
             "facet_schema_revision_id",
-            "revision_number"
+            "revision_number",
+            "replayed"
           ],
           "properties": {
             "ok": {
@@ -42,7 +43,7 @@
               "const": "facet_schema_created"
             },
             "changed": {
-              "const": true
+              "type": "boolean"
             },
             "audit_id": {
               "$ref": "archetype-facet-types.schema.json#/$defs/id"
@@ -58,9 +59,37 @@
             },
             "revision_number": {
               "const": "1"
+            },
+            "replayed": {
+              "type": "boolean"
             }
           },
-          "additionalProperties": false
+          "additionalProperties": false,
+          "allOf": [
+            {
+              "if": {
+                "properties": {
+                  "replayed": {
+                    "const": true
+                  }
+                }
+              },
+              "then": {
+                "properties": {
+                  "changed": {
+                    "const": false
+                  }
+                }
+              },
+              "else": {
+                "properties": {
+                  "changed": {
+                    "const": true
+                  }
+                }
+              }
+            }
+          ]
         }
       ]
     },
@@ -80,7 +109,8 @@
             "facet_schema_id",
             "prior_revision_id",
             "facet_schema_revision_id",
-            "revision_number"
+            "revision_number",
+            "replayed"
           ],
           "properties": {
             "ok": {
@@ -102,7 +132,7 @@
               "const": "facet_schema_published"
             },
             "changed": {
-              "const": true
+              "type": "boolean"
             },
             "audit_id": {
               "$ref": "archetype-facet-types.schema.json#/$defs/id"
@@ -118,9 +148,37 @@
             },
             "revision_number": {
               "$ref": "archetype-facet-types.schema.json#/$defs/positiveDecimal"
+            },
+            "replayed": {
+              "type": "boolean"
             }
           },
-          "additionalProperties": false
+          "additionalProperties": false,
+          "allOf": [
+            {
+              "if": {
+                "properties": {
+                  "replayed": {
+                    "const": true
+                  }
+                }
+              },
+              "then": {
+                "properties": {
+                  "changed": {
+                    "const": false
+                  }
+                }
+              },
+              "else": {
+                "properties": {
+                  "changed": {
+                    "const": true
+                  }
+                }
+              }
+            }
+          ]
         },
         {
           "type": "object",
@@ -135,7 +193,8 @@
             "facet_schema_id",
             "prior_revision_id",
             "facet_schema_revision_id",
-            "revision_number"
+            "revision_number",
+            "replayed"
           ],
           "properties": {
             "ok": {
@@ -157,7 +216,7 @@
               "const": "facet_schema_publish_noop"
             },
             "changed": {
-              "const": false
+              "type": "boolean"
             },
             "facet_schema_id": {
               "$ref": "archetype-facet-types.schema.json#/$defs/id"
@@ -170,9 +229,37 @@
             },
             "revision_number": {
               "$ref": "archetype-facet-types.schema.json#/$defs/positiveDecimal"
+            },
+            "replayed": {
+              "type": "boolean"
             }
           },
-          "additionalProperties": false
+          "additionalProperties": false,
+          "allOf": [
+            {
+              "if": {
+                "properties": {
+                  "replayed": {
+                    "const": true
+                  }
+                }
+              },
+              "then": {
+                "properties": {
+                  "changed": {
+                    "const": false
+                  }
+                }
+              },
+              "else": {
+                "properties": {
+                  "changed": {
+                    "const": false
+                  }
+                }
+              }
+            }
+          ]
         }
       ]
     },
@@ -192,7 +279,8 @@
             "facet_schema_id",
             "prior_revision_id",
             "facet_schema_revision_id",
-            "revision_number"
+            "revision_number",
+            "replayed"
           ],
           "properties": {
             "ok": {
@@ -214,7 +302,7 @@
               "const": "facet_schema_retired"
             },
             "changed": {
-              "const": true
+              "type": "boolean"
             },
             "audit_id": {
               "$ref": "archetype-facet-types.schema.json#/$defs/id"
@@ -230,9 +318,37 @@
             },
             "revision_number": {
               "$ref": "archetype-facet-types.schema.json#/$defs/positiveDecimal"
+            },
+            "replayed": {
+              "type": "boolean"
             }
           },
-          "additionalProperties": false
+          "additionalProperties": false,
+          "allOf": [
+            {
+              "if": {
+                "properties": {
+                  "replayed": {
+                    "const": true
+                  }
+                }
+              },
+              "then": {
+                "properties": {
+                  "changed": {
+                    "const": false
+                  }
+                }
+              },
+              "else": {
+                "properties": {
+                  "changed": {
+                    "const": true
+                  }
+                }
+              }
+            }
+          ]
         },
         {
           "type": "object",
@@ -247,7 +363,8 @@
             "facet_schema_id",
             "prior_revision_id",
             "facet_schema_revision_id",
-            "revision_number"
+            "revision_number",
+            "replayed"
           ],
           "properties": {
             "ok": {
@@ -269,7 +386,7 @@
               "const": "facet_schema_retire_noop"
             },
             "changed": {
-              "const": false
+              "type": "boolean"
             },
             "facet_schema_id": {
               "$ref": "archetype-facet-types.schema.json#/$defs/id"
@@ -282,9 +399,37 @@
             },
             "revision_number": {
               "$ref": "archetype-facet-types.schema.json#/$defs/positiveDecimal"
+            },
+            "replayed": {
+              "type": "boolean"
             }
           },
-          "additionalProperties": false
+          "additionalProperties": false,
+          "allOf": [
+            {
+              "if": {
+                "properties": {
+                  "replayed": {
+                    "const": true
+                  }
+                }
+              },
+              "then": {
+                "properties": {
+                  "changed": {
+                    "const": false
+                  }
+                }
+              },
+              "else": {
+                "properties": {
+                  "changed": {
+                    "const": false
+                  }
+                }
+              }
+            }
+          ]
         }
       ]
     },
@@ -305,7 +450,8 @@
             "facet_key",
             "prior_binding_id",
             "facet_binding_id",
-            "facet_schema_revision_id"
+            "facet_schema_revision_id",
+            "replayed"
           ],
           "properties": {
             "ok": {
@@ -327,7 +473,7 @@
               "const": "facet_binding_set"
             },
             "changed": {
-              "const": true
+              "type": "boolean"
             },
             "audit_id": {
               "$ref": "archetype-facet-types.schema.json#/$defs/id"
@@ -353,9 +499,37 @@
             },
             "facet_schema_revision_id": {
               "$ref": "archetype-facet-types.schema.json#/$defs/id"
+            },
+            "replayed": {
+              "type": "boolean"
             }
           },
-          "additionalProperties": false
+          "additionalProperties": false,
+          "allOf": [
+            {
+              "if": {
+                "properties": {
+                  "replayed": {
+                    "const": true
+                  }
+                }
+              },
+              "then": {
+                "properties": {
+                  "changed": {
+                    "const": false
+                  }
+                }
+              },
+              "else": {
+                "properties": {
+                  "changed": {
+                    "const": true
+                  }
+                }
+              }
+            }
+          ]
         },
         {
           "type": "object",
@@ -371,7 +545,8 @@
             "facet_key",
             "prior_binding_id",
             "facet_binding_id",
-            "facet_schema_revision_id"
+            "facet_schema_revision_id",
+            "replayed"
           ],
           "properties": {
             "ok": {
@@ -393,7 +568,7 @@
               "const": "facet_binding_set_noop"
             },
             "changed": {
-              "const": false
+              "type": "boolean"
             },
             "item_archetype_id": {
               "$ref": "archetype-facet-types.schema.json#/$defs/id"
@@ -416,9 +591,37 @@
             },
             "facet_schema_revision_id": {
               "$ref": "archetype-facet-types.schema.json#/$defs/id"
+            },
+            "replayed": {
+              "type": "boolean"
             }
           },
-          "additionalProperties": false
+          "additionalProperties": false,
+          "allOf": [
+            {
+              "if": {
+                "properties": {
+                  "replayed": {
+                    "const": true
+                  }
+                }
+              },
+              "then": {
+                "properties": {
+                  "changed": {
+                    "const": false
+                  }
+                }
+              },
+              "else": {
+                "properties": {
+                  "changed": {
+                    "const": false
+                  }
+                }
+              }
+            }
+          ]
         }
       ]
     },
@@ -438,7 +641,8 @@
             "item_archetype_id",
             "facet_key",
             "prior_binding_id",
-            "facet_binding_id"
+            "facet_binding_id",
+            "replayed"
           ],
           "properties": {
             "ok": {
@@ -460,7 +664,7 @@
               "const": "facet_binding_removed"
             },
             "changed": {
-              "const": true
+              "type": "boolean"
             },
             "audit_id": {
               "$ref": "archetype-facet-types.schema.json#/$defs/id"
@@ -476,9 +680,37 @@
             },
             "facet_binding_id": {
               "$ref": "archetype-facet-types.schema.json#/$defs/id"
+            },
+            "replayed": {
+              "type": "boolean"
             }
           },
-          "additionalProperties": false
+          "additionalProperties": false,
+          "allOf": [
+            {
+              "if": {
+                "properties": {
+                  "replayed": {
+                    "const": true
+                  }
+                }
+              },
+              "then": {
+                "properties": {
+                  "changed": {
+                    "const": false
+                  }
+                }
+              },
+              "else": {
+                "properties": {
+                  "changed": {
+                    "const": true
+                  }
+                }
+              }
+            }
+          ]
         },
         {
           "type": "object",
@@ -493,7 +725,8 @@
             "item_archetype_id",
             "facet_key",
             "prior_binding_id",
-            "facet_binding_id"
+            "facet_binding_id",
+            "replayed"
           ],
           "properties": {
             "ok": {
@@ -515,7 +748,7 @@
               "const": "facet_binding_remove_noop"
             },
             "changed": {
-              "const": false
+              "type": "boolean"
             },
             "item_archetype_id": {
               "$ref": "archetype-facet-types.schema.json#/$defs/id"
@@ -528,9 +761,37 @@
             },
             "facet_binding_id": {
               "type": "null"
+            },
+            "replayed": {
+              "type": "boolean"
             }
           },
-          "additionalProperties": false
+          "additionalProperties": false,
+          "allOf": [
+            {
+              "if": {
+                "properties": {
+                  "replayed": {
+                    "const": true
+                  }
+                }
+              },
+              "then": {
+                "properties": {
+                  "changed": {
+                    "const": false
+                  }
+                }
+              },
+              "else": {
+                "properties": {
+                  "changed": {
+                    "const": false
+                  }
+                }
+              }
+            }
+          ]
         }
       ]
     },
@@ -551,7 +812,8 @@
             "prior_item_version",
             "item_version",
             "changed_facet_keys",
-            "reconciliation_performed"
+            "reconciliation_performed",
+            "replayed"
           ],
           "properties": {
             "ok": {
@@ -573,7 +835,7 @@
               "const": "item_facets_updated"
             },
             "changed": {
-              "const": true
+              "type": "boolean"
             },
             "audit_id": {
               "$ref": "archetype-facet-types.schema.json#/$defs/id"
@@ -592,16 +854,54 @@
               "items": {
                 "$ref": "archetype-facet-types.schema.json#/$defs/key"
               },
-              "minItems": 1,
+              "minItems": 0,
               "maxItems": 8,
               "uniqueItems": true
             },
             "reconciliation_performed": {
               "type": "boolean",
               "$comment": "Not a safety guarantee; exact work outcomes remain a buildability gate."
+            },
+            "replayed": {
+              "type": "boolean"
             }
           },
-          "additionalProperties": false
+          "additionalProperties": false,
+          "allOf": [
+            {
+              "if": {
+                "properties": {
+                  "replayed": {
+                    "const": true
+                  }
+                }
+              },
+              "then": {
+                "properties": {
+                  "changed": {
+                    "const": false
+                  },
+                  "changed_facet_keys": {
+                    "maxItems": 0
+                  },
+                  "reconciliation_performed": {
+                    "const": false
+                  }
+                }
+              },
+              "else": {
+                "properties": {
+                  "changed": {
+                    "const": true
+                  },
+                  "changed_facet_keys": {
+                    "minItems": 1,
+                    "maxItems": 8
+                  }
+                }
+              }
+            }
+          ]
         },
         {
           "type": "object",
@@ -617,7 +917,8 @@
             "prior_item_version",
             "item_version",
             "changed_facet_keys",
-            "reconciliation_performed"
+            "reconciliation_performed",
+            "replayed"
           ],
           "properties": {
             "ok": {
@@ -639,7 +940,7 @@
               "const": "item_facets_update_noop"
             },
             "changed": {
-              "const": false
+              "type": "boolean"
             },
             "item_id": {
               "$ref": "archetype-facet-types.schema.json#/$defs/id"
@@ -661,9 +962,47 @@
             },
             "reconciliation_performed": {
               "const": false
+            },
+            "replayed": {
+              "type": "boolean"
             }
           },
-          "additionalProperties": false
+          "additionalProperties": false,
+          "allOf": [
+            {
+              "if": {
+                "properties": {
+                  "replayed": {
+                    "const": true
+                  }
+                }
+              },
+              "then": {
+                "properties": {
+                  "changed": {
+                    "const": false
+                  },
+                  "changed_facet_keys": {
+                    "maxItems": 0
+                  },
+                  "reconciliation_performed": {
+                    "const": false
+                  }
+                }
+              },
+              "else": {
+                "properties": {
+                  "changed": {
+                    "const": false
+                  },
+                  "changed_facet_keys": {
+                    "minItems": 0,
+                    "maxItems": 0
+                  }
+                }
+              }
+            }
+          ]
         }
       ]
     },
