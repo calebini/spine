@@ -1,7 +1,7 @@
 # Spine Scheduled Contextual Advisories
 
-Status: Draft v0.2.0; selective manual synthesis; cross-system design target; not implemented
-Scope: One scheduled Spine trigger causing one governed, bounded, read-only agent run and at most one ordinary derivative notification
+Status: Draft v0.3.0; notification activation and fallback decisions recorded; not implemented
+Scope: One notification-template activation requesting at most one governed, bounded, read-only agent run, with one notification delivery path for accepted enrichment or ordinary fallback
 Created: 2026-08-18
 Updated: 2026-09-12
 
@@ -75,8 +75,10 @@ binding is operational metadata rather than canonical coordination truth.
 9. **The agent cannot mutate Spine.** A read-only run may return an advisory,
    `no_action`, or a clarification request. Any future canonical mutation is a
    separately governed candidate action outside Version 1.
-10. **Silence is valid.** A successful run may return `no_action`; scheduled autonomy
-    does not imply mandatory notification.
+10. **Silence requires explicit permission.** A successful run may return `no_action`.
+    By default that means no advisory enrichment, not cancellation of the underlying
+    reminder. Suppressing the reminder additionally requires explicit, snapshot-bound
+    operator permission for silence and an accepted, fresh `no_action` outcome.
 11. **No hidden reasoning contract.** The system persists structured inputs, tool-call
     evidence, concise findings, decisions, and outcomes. It MUST NOT require or treat
     private chain-of-thought as evidence.
@@ -95,12 +97,14 @@ Version 1 supports exactly one narrow profile:
 - one active event with a resolvable `local_instant` start;
 - optionally one selected actionable occurrence of a recurring event;
 - one canonical primary location suitable for an approved information lookup;
-- one target-relative advisory trigger before the event;
+- one target-relative notification template before the event, explicitly referencing
+  one immutable advisory definition;
 - one plain-language objective supplied by the user or operator;
 - an allowlisted set of read-only tools;
 - bounded model calls, tool calls, elapsed runtime, and usefulness deadline;
 - terminal outcomes `advisory`, `no_action`, and `request_clarification`;
-- zero or one derivative notification work instance; and
+- a single notification delivery path selecting accepted enrichment, ordinary fallback,
+  or explicitly permitted silence; and
 - existing Spine delivery-target and attempt-ledger behavior.
 
 The default conformance scenario uses this objective:
@@ -131,7 +135,34 @@ Version 1 authoring and submission validation MUST enforce the event-only scope 
 required canonical primary location above. Generic item or snapshot types MUST NOT
 implicitly admit tasks or waive that location prerequisite. If required location facts
 cannot be disclosed under the context scope, the request fails closed rather than
-silently weakening the experimental profile.
+silently weakening the experimental profile. Rejection of activation authoring does
+not itself cancel an existing ordinary reminder.
+
+### 4.1 Notification-template activation
+
+The notification template owns timing and optionally references a separate immutable,
+versioned advisory definition. The definition owns the bounded objective, context scope,
+requested capability profile, budgets, allowed outcomes, usefulness deadline rules,
+and explicit silence permission. A template does not contain executable agent logic,
+credentials, a provider-specific plan, or an independent advisory schedule. A template
+without an advisory reference retains its ordinary reminder behavior.
+
+Applying a profile MUST snapshot the template, advisory-definition revision, fallback
+behavior, and silence permission into the item-bound policy. Later edits to reusable
+definitions or profiles MUST NOT silently change that snapshot. The item-bound advisory
+policy in Section 6 expresses this activation binding, not a competing schedule.
+
+One activated notification opportunity has one logical delivery identity shared by
+the accepted-advisory/clarification branch and the ordinary-reminder fallback branch.
+References to derivative notification work below describe the accepted-content branch;
+they do not authorize an additional notification alongside the base reminder. Advisory
+work, acceptance evidence, selected content, notification work, and delivery attempts
+remain separately observable facts. Other templates retain their own opportunities;
+this rule does not collapse an event's independent reminders into one.
+
+This is a draft extension, not a change to currently implemented notification/profile
+request shapes or published pack contracts. Exact activation schemas and snapshot
+mapping MUST be defined and audited before runtime support or compatibility is claimed.
 
 ## 5. Role Boundaries
 
@@ -140,7 +171,8 @@ silently weakening the experimental profile.
 Spine owns:
 
 - the event, item version, temporal anchor, recurrence occurrence, and location facts;
-- the contextual-advisory policy and its trigger;
+- the item-bound contextual-advisory activation policy, immutable definition reference,
+  and notification-owned trigger;
 - deterministic opportunity expansion and durable advisory work;
 - the exact context snapshot or immutable references needed to reproduce it;
 - source and deadline freshness;
@@ -221,7 +253,8 @@ A version-scoped policy minimally records:
 
 - stable advisory intent identity and immutable policy-row identity;
 - source item and item version;
-- trigger schedule or notification-opportunity binding;
+- exact notification policy/intent, template, and notification-opportunity binding;
+- immutable advisory-definition identity and revision, plus profile revision when used;
 - plain-language objective;
 - requested capability profile;
 - allowed outcome kinds;
@@ -229,23 +262,30 @@ A version-scoped policy minimally records:
 - usefulness deadline;
 - context-scope declaration;
 - derivative delivery target and rendering profile;
+- ordinary-reminder fallback behavior and explicit silence permission (default false);
 - status and lineage; and
 - authoring command, timestamp, and normalization version.
 
 This policy expresses requested behavior. It is not an authorization grant.
+Its requested behavior is snapshot-bound; the delivery target is inherited from the
+activated notification, and the agent cannot select or substitute it.
 
 ### 6.2 Advisory opportunity and work
 
-Deterministic expansion produces an advisory opportunity for an exact source anchor or
-occurrence and trigger instant. Materialization produces durable advisory work before
-any governance request or model invocation.
+Deterministic notification expansion supplies the exact source anchor or occurrence
+and trigger instant for the bound advisory opportunity. Materialization produces
+durable advisory work before any governance request or model invocation; it does not
+create a second independently scheduled reminder.
 
 The logical work binds at least:
 
 - advisory opportunity and policy version;
+- activated notification opportunity, template, advisory-definition revision, and
+  shared logical delivery identity;
 - source item, item version, anchor, and optional occurrence provenance;
 - context-snapshot hash;
 - eligibility instant, usefulness deadline, and expiry instant;
+- bounded content-selection cutoff and the bound fallback/silence policy;
 - requested capability profile and limits; and
 - current submission, `acceptance_reference`, and derivative-work references when present.
 
@@ -306,6 +346,7 @@ Spine submits one immutable request containing:
 
 - `submission_id` and idempotency key;
 - advisory work, opportunity, and policy identities;
+- activated notification opportunity and advisory-definition revision identities;
 - source item/version and optional occurrence-provenance identities;
 - context snapshot or immutable snapshot reference plus hash;
 - objective and requested capability profile;
@@ -340,8 +381,15 @@ receipt containing:
 
 The projected classification is readback and routing information. It MUST NOT replace
 the native decision, make evidence policy-visible, or authorize dispatch by itself.
-Version 1 may implement only preauthorized `allowed` and terminal `blocked`; it MUST
-fail closed rather than pretending to support a native approval lifecycle.
+Version 1 implements only preauthorized `allowed` and terminal `blocked`; interactive
+approval is outside Version 1. A returned `approval_required` MUST stop the logical
+advisory work without dispatch, model/tool invocation, or automatic retry. Spine MUST
+preserve that native classification and expose a reason-coded, terminal unsupported-
+approval result distinct from `blocked`. Later native approval MUST NOT silently resume
+that stopped Version 1 work. Supporting such resumption requires a separately specified
+approval lifecycle; this contract does not implement one.
+This stops enrichment, not an independently eligible ordinary reminder. The ordinary
+fallback follows Section 8.1 without treating the governance result as acceptance.
 
 An accepted grant MUST be no broader than the submitted request: permitted model and
 tool references and allowed outcome kinds are subsets of those requested; numeric
@@ -419,7 +467,7 @@ The governance adapter returns a Spine-facing `acceptance_reference` containing:
 - acceptance time; and
 - native acceptance-registry, evaluator, and protocol versions.
 
-Spine may materialize derivative notification work only from an accepted outcome whose
+Spine may select accepted advisory or clarification content only from an accepted outcome whose
 submission and source facts are still fresh. Governance acceptance is necessary but is
 not itself proof of Spine freshness or delivery. The projected classification MUST be
 verifiable against the native acceptance artifact and MUST NOT become a second
@@ -429,17 +477,21 @@ Before consuming an accepted reference, Spine MUST verify its binding to the sto
 submission, native authorization, run, evidence, and outcome; verify that the outcome
 is successful and belongs to the effective allowed set; and apply its own freshness
 gate. A missing, unverifiable, or contradictory binding, including an out-of-set
-outcome marked accepted by the producer, MUST create no derivative notification.
+outcome marked accepted by the producer, MUST create no advisory-derived notification.
 Spine records a reason-coded local consumption failure without changing the native
 acceptance decision or inventing a second evidence-acceptance lifecycle. This failure
 and its evidence references MUST be visible in operator readback.
+Ordinary fallback may still be selected under Section 8.1 from its own valid reminder
+policy. It MUST NOT inherit invalid advisory evidence or be labeled accepted advice.
 
 ## 8. Lifecycle
 
 One successful advisory follows this sequence:
 
-1. An operator authors an advisory policy bound to an exact Spine item and trigger.
-2. Spine deterministically expands and materializes one advisory work item.
+1. An operator activates an immutable advisory definition on a notification template,
+   snapshot-bound to the exact item, notification policy, and trigger.
+2. Spine deterministically expands the notification opportunity and materializes its
+   bound advisory work without invoking a model.
 3. The scheduler runtime selects eligible work.
 4. Spine verifies source, policy, occurrence, deadline, and context freshness.
 5. The submission is recorded before it crosses the governance boundary.
@@ -452,9 +504,14 @@ One successful advisory follows this sequence:
 9. The governance authority accepts or rejects that evidence through its native
    lifecycle and returns a verifiable `acceptance_reference`.
 10. Spine rechecks source and deadline freshness.
-11. An accepted `advisory` or `request_clarification` atomically creates at most one
-    ordinary derivative notification intent/work bundle with provenance back to the
-    accepted outcome. `no_action` creates none.
+11. Spine atomically selects at most one delivery branch under Section 8.1. Accepted
+    `advisory` or `request_clarification` content binds the notification work to the
+    accepted outcome, never to a second competing delivery identity. Both kinds use
+    the advisory policy's derivative delivery target and rendering profile, with the
+    same freshness and attempt gates. Clarification
+    content is the accepted question rather than the advisory headline/body/findings;
+    it cannot select a new recipient or bypass acceptance. `no_action` creates no
+    advisory content; it selects ordinary fallback unless silence is explicitly allowed.
 12. The existing notification processor separately attempts delivery and records the
     result in `side_effect_attempts`.
 
@@ -462,15 +519,96 @@ Authoring, opportunity expansion, advisory-work materialization, governance deci
 agent execution, outcome acceptance, derivative-work materialization, delivery
 attempt, and delivery outcome remain separately observable facts.
 
+### 8.1 Content selection and ordinary fallback
+
+Spine MUST resolve one content-selection decision for the activated notification
+opportunity. Selection is conditional on current ordinary reminder eligibility;
+neither accepted advice nor fallback can override source freshness, cancellation,
+route validity, late handling, or runtime safety gates.
+
+| Enrichment result before the bounded selection cutoff | Notification behavior |
+|---|---|
+| Accepted, fresh `advisory` | Select accepted advisory content. |
+| Accepted, fresh `request_clarification` | Select the accepted question through the same policy-bound delivery target/profile. |
+| Accepted, fresh `no_action`, silence not explicitly allowed | Select the ordinary reminder. |
+| Accepted, fresh `no_action`, silence explicitly allowed in the bound policy and compatible with the accepted grant | Record intentional suppression; authorize no delivery. |
+| Denial, unsupported approval, timeout, unavailable runtime/tool, invalid/rejected evidence, stale enrichment, or no usable result by cutoff | Select the ordinary reminder if it remains eligible. |
+| Ordinary reminder no longer eligible | Do not deliver either branch; preserve the reasons and ordinary reconciliation behavior. |
+
+Fallback uses the existing deterministic ordinary-reminder renderer and attempt path.
+It does not require governance acceptance of an advisory, invoke an LLM, copy rejected
+content, or convert an enrichment failure into successful `no_action`. Lack of explicit
+silence permission means false. Permission alone cannot suppress a reminder: suppression
+requires a valid accepted `no_action` before content selection is committed.
+
+Content selection MUST be persisted and concurrency-safe before any delivery attempt
+starts. Only the selected branch may authorize work for the shared delivery identity;
+materialization MUST reuse existing identities and cannot leave two competing eligible
+work rows. Committed fallback or suppression cannot be replaced by late enrichment.
+Selected accepted content MUST pass advisory-freshness checks again at attempt start.
+If that content becomes unusable before any delivery attempt has started, Spine MUST
+select ordinary fallback on the same logical delivery identity when the ordinary
+reminder is still eligible. This is a one-way, reason-coded change from accepted content
+to fallback, not permission to create another reminder or retry failed materialization.
+It MUST be serialized against attempt start and preserve the earlier selection evidence.
+If notification materialization previously failed, the explicit recovery gate in
+Section 8.2 still applies before any work is made deliverable.
+
+Once any delivery attempt starts, the selected branch is frozen: neither late enrichment
+nor later staleness can authorize an alternate-branch send, including after a failed or
+uncertain attempt. Late evidence remains auditable but cannot reverse suppression,
+reopen completed work, or create a follow-up advisory notification. Lost responses,
+retries, and concurrent fallback/outcome processing MUST resolve the persisted branch
+and existing attempt evidence.
+
+This prevents a second notification caused by competing branches; it does not claim
+exactly-once external transport delivery. Ordinary delivery retries and uncertain-send
+handling remain governed by the existing attempt ledger.
+
+Activation timing MUST leave a bounded opportunity for research near delivery and a
+deterministic selection cutoff. No fallback may be sent before the original reminder
+is eligible or after its late-handling window closes. Enrichment MUST NOT wait
+indefinitely or extend that window. Exact timing fields, cutoff derivation, tie rules,
+storage transaction boundaries, and race fixtures remain required machine-contract
+work in Section 15; none may permit an alternate branch after delivery attempt start.
+
+### 8.2 Materialization failure and explicit recovery
+
 If derivative notification validation or persistence fails after governance acceptance,
 Spine MUST retain the acceptance reference and a reason-coded local materialization
 failure, with no partially committed derivative intent/work bundle and no delivery
 attempt or delivery claim caused by that failed materialization. Reconciliation MUST
 first distinguish an absent bundle from an already committed bundle, returning the
 existing identities in the latter case. Neither case authorizes rerunning intelligence.
-Retry scheduling and recovery transitions remain explicit decisions in Section 15;
-this failure-reporting requirement does not silently make failure terminal forever or
-authorize automatic retries.
+Version 1 MUST NOT automatically retry failed notification materialization for a
+committed selection. Recovery requires an explicit authorized operator command and
+reuses the same selected content and logical advisory work, retaining the accepted
+outcome when the selected branch used it; it MUST NOT rerun the LLM/tools, request
+fresh dispatch, or
+create a new advisory opportunity to evade idempotency. Before creating missing work,
+recovery MUST repeat current source and applicable deadline/late-handling checks and,
+for accepted content, the acceptance-consumption and advisory-freshness checks. If
+accepted content has become unusable and no attempt has started, the explicit recovery
+operation may select only independently eligible ordinary fallback under Section 8.1;
+it may not dispatch new research or revive stale advisory content.
+Recovery cannot extend a deadline or override stale evidence.
+If derivative work already exists, recovery returns its existing identities rather
+than creating or resending a notification. Delivery retries remain governed by the
+ordinary notification work/attempt lifecycle, not this recovery path.
+
+Enrichment failure selecting ordinary fallback is a normal first content-selection
+path, not a materialization retry. Conversely, failure to persist notification work
+after selecting accepted content MUST NOT trigger an automatic fallback switch.
+If even the selection/transaction outcome is uncertain, reconcile durable evidence
+before recovery; uncertainty does not authorize a parallel fallback send. The accepted
+advice remains evidence even if it is no longer eligible for recovery.
+
+The exact recovery command, request/receipt contract, concurrency rules, and legal
+transitions remain implementation prerequisites under Section 15. The lifecycle must
+permit that explicit recovery while preventing scheduler-driven retries; merely naming
+materialization failure terminal forever would not satisfy this decision.
+Failure to materialize selected fallback likewise requires explicit operator recovery
+and reason-coded readback; no advisory acceptance reference is fabricated for fallback.
 
 ## 9. Freshness, Cancellation, and Time
 
@@ -480,6 +618,8 @@ usefulness deadline has not passed. At minimum, freshness compares:
 - item identity and current version;
 - item lifecycle state;
 - advisory policy identity and active status;
+- notification policy, template snapshot, advisory-definition revision, and committed
+  selection when present;
 - temporal-anchor identity and resolved instant;
 - recurrence revision, occurrence selector/key, and active provenance when applicable;
 - canonical location version when location entered the snapshot; and
@@ -508,6 +648,11 @@ started when a change is detected, the historical run remains evidence and the
 outcome/derivative freshness gates prevent stale materialization. The exact native
 handoff and race-handling fixtures remain prerequisites under Section 15.
 
+Stale enrichment does not itself make the ordinary reminder stale. Fallback MUST be
+evaluated independently against the ordinary reminder's current canonical source and
+late-handling rules. It cannot resurrect an obsolete item version or cancelled
+notification opportunity; ordinary reconciliation handles replacement work.
+
 ## 10. Idempotency and Attempt Accounting
 
 - One source opportunity and policy version produce one logical advisory work identity.
@@ -518,6 +663,8 @@ handoff and race-handling fixtures remain prerequisites under Section 15.
 - Tool and model executions are attempts of that run and require correlation and
   replay evidence; retries do not create a new source opportunity.
 - One accepted outcome produces at most one derivative notification intent/work bundle.
+- Accepted content and fallback compete for the same notification opportunity and
+  logical delivery identity, not separate idempotency namespaces.
 - Repeated outcome reconciliation returns the existing derivative identities.
 - Delivery retries remain attempts for the same notification work and use Spine's
   existing `side_effect_attempts` rules.
@@ -550,20 +697,25 @@ The first contract family must distinguish at least:
 - later notification delivery failure.
 
 An execution failure MUST NOT be reported as `no_action`. An accepted advisory MUST NOT
-be reported as delivered until a delivery attempt succeeds. The experiment has no
-static fallback reminder unless a later specification explicitly defines one.
+be reported as delivered until a delivery attempt succeeds. Version 1 preserves the
+ordinary-reminder fallback under Section 8.1. Delivered fallback is an ordinary reminder
+delivery, not successful advisory generation. A successful `no_action` normally falls
+back too; only explicitly authorized intentional silence suppresses the base reminder.
 
 ## 12. Readback
 
 A canonical operator read must expose, without raw SQL:
 
 - advisory policy and trigger;
+- notification template/snapshot and immutable advisory-definition revision;
 - source item/version/occurrence and snapshot hash;
 - advisory work lifecycle;
 - submission identity;
 - governance decision and `acceptance_reference` facts with reason codes;
 - agent run status, outcome kind, usage summary, and evidence references;
 - freshness classification;
+- selected content branch or intentional suppression, selection time and reason,
+  fallback eligibility, and any late outcome excluded from delivery;
 - derivative notification policy/work identity when present; and
 - delivery attempt/outcome separately.
 
@@ -573,6 +725,12 @@ terminal advisory-work path MUST expose its latest relevant reason, transition t
 Spine persistence actor, causal evidence-producing role, and evidence/replay references
 when present. Absence of a submission, run, or attempt MUST be represented as absence,
 not fabricated success or execution evidence.
+
+Readback MUST distinguish unsupported approval with no Version 1 resumption path from
+materialization failure requiring explicit operator recovery. Any recovery request and
+result MUST remain separately auditable and correlated to the original advisory work,
+persisted selection, accepted outcome when present, and existing or newly materialized
+notification work when present.
 
 Compact output may summarize these facts but cannot collapse `accepted`,
 `notification_materialized`, `delivery_attempted`, and `delivered` into one status.
@@ -603,13 +761,16 @@ Fake clock, governance, agent, tool, and delivery adapters prove:
 
 - duplicate scheduler discovery creates one advisory work item;
 - duplicate submission and dispatch do not create duplicate logical runs;
-- an accepted advisory creates exactly one derivative notification work item;
-- `no_action` creates none;
+- accepted advisory content and ordinary fallback cannot create competing notification
+  work for the same opportunity;
+- `no_action` produces ordinary fallback by default; only accepted, fresh `no_action`
+  with explicit silence permission authorizes suppression;
 - `request_clarification` creates at most one;
 - a source move before execution stales or cancels the work;
 - a source move during execution prevents derivative materialization;
 - a forbidden write, contact, or send capability is denied;
-- timeout and failure remain evidence but create no advisory notification;
+- timeout and failure remain evidence and produce no advisory content, while selecting
+  ordinary fallback only if the base reminder remains eligible;
 - the agent runtime cannot invoke the delivery adapter directly;
 - accepted outcomes replay without rerunning the model or tools; and
 - delivery remains separately attempt-gated.
@@ -620,7 +781,8 @@ that autonomous advice is useful.
 The machine-contract fixture set MUST additionally prove:
 
 - an enum-valid but disallowed outcome is rejected, including when a native reference
-  incorrectly claims acceptance, without derivative work or a second acceptance ledger;
+  incorrectly claims acceptance, without advisory-derived work or a second acceptance
+  ledger; independently eligible ordinary fallback remains available;
 - a widened tool/model/outcome grant, raised budget, extended expiry, or changed cost
   unit cannot authorize dispatch;
 - external decision/evidence producers cannot directly mutate Spine work state;
@@ -630,6 +792,27 @@ The machine-contract fixture set MUST additionally prove:
 - a source change after submission but before execution is checked at dispatch;
 - materialization failure preserves acceptance evidence without partial derivative work,
   and retry/replay after an already committed bundle returns its existing identities;
+- accepted clarification uses the same policy-bound target/profile and attempt gate as
+  an advisory, with the accepted question as content and no recipient override;
+- unsupported approval stops without dispatch or automatic retry, including upon
+  repeated scheduler discovery or a later native approval observation;
+- materialization failure is not automatically retried; explicit recovery rechecks
+  acceptance/freshness, never reruns the model/tools, and cannot extend the deadline;
+- explicit recovery cannot duplicate a committed notification bundle or resend work,
+  including after lost responses or concurrent recovery requests;
+- fallback and a concurrent or late accepted outcome cannot create two selected
+  deliverable branches or deliveries; a committed fallback choice never becomes late advice;
+- accepted content becoming stale before first attempt falls back on the same delivery
+  identity when independently eligible, while any started/failed/uncertain attempt
+  prevents alternate-branch sending; failed materialization still requires explicit recovery;
+- intentional silence cannot be inferred from failure, timeout, missing results, or
+  silence permission alone, and late `no_action` cannot reverse committed fallback;
+- fallback respects cancellation, source freshness, routes, late handling, and runtime
+  safety, and does not send before ordinary eligibility or extend its delivery window;
+- materialization failure after accepted-content selection does not automatically
+  switch to fallback or rerun intelligence;
+- other templates retain independent reminders and templates without activation retain
+  ordinary behavior;
 - failed attempts and over-budget usage remain observable without becoming `no_action`;
 - projections preserve native artifact identities and verification bytes; and
 - required location disclosure and event-only scope cannot be bypassed by generic types.
@@ -685,8 +868,8 @@ That decision follows the real product experiment.
 The following decisions remain intentionally open before machine contracts and
 implementation; selective clarification does not close them by implication:
 
-1. whether the advisory trigger is a new policy family or a typed extension of current
-   notification policy authoring;
+1. exact schemas and authoring/application mapping for immutable advisory definitions,
+   notification-template activation references, and item-bound policy snapshots;
 2. whether advisory execution uses a new `work_kind` or a candidate-action artifact;
 3. which component is authoritative for model/tool attempt records and their retention;
 4. the exact adapter mapping from Spine submission/binding/`acceptance_reference` views
@@ -694,22 +877,32 @@ implementation; selective clarification does not close them by implication:
    contracts;
 5. the exact context-snapshot minimization and sensitive-data rules;
 6. the initial budgets and usefulness-deadline defaults;
-7. whether `request_clarification` is rendered through the same delivery policy as an
-   advisory;
-8. the exact commands and readback projection used by operators;
-9. unsupported-approval terminal/retry behavior for the selected Version 1 profile;
-10. derivative-materialization recovery, retry scheduling, and legal recovery transitions;
-11. exact identity preimages, first-creation and concurrent lookup rules, snapshot hash
-    preimages, encodings, and projection-to-native verification rules; and
-12. the dispatch freshness handoff and race-handling contract with the native authority.
+7. the exact commands and readback projection used by operators;
+8. the explicit derivative-materialization recovery command, request/receipt contract,
+   concurrency rules, and legal transitions implementing Section 8;
+9. exact identity preimages, first-creation and concurrent lookup rules, snapshot hash
+   preimages, encodings, and projection-to-native verification rules; and
+10. the dispatch freshness handoff and race-handling contract with the native authority;
+11. bounded research timing, selection cutoff derivation and tie rules, and the
+    transaction/uniqueness rules that serialize fallback, accepted content, suppression,
+    materialization recovery, and delivery attempts for one notification identity; and
+12. exact immutable silence-permission fields, content-selection readback, and accepted-
+    content rendering contracts that remain separate from the ordinary renderer.
 
-For the three operator policy choices, the current proposals (not ratified defaults)
-are: use the same derivative delivery target/profile for clarification and advisory;
-stop unsupported approval requests without dispatch or automatic retry; and require
-explicit operator recovery after derivative-materialization failure. A recovery choice
-must define a usable command and legal transitions before implementation, not merely
-name a terminal state. Pending decisions do not grant authority to dispatch, deliver,
-or retry by inference.
+The operator ratified three Version 1 policy decisions on 2026-09-12: clarification
+uses the advisory's derivative delivery target/profile; unsupported approval stops
+without dispatch or automatic retry; and materialization failure requires explicit
+operator recovery using accepted advice rather than rerunning intelligence. These
+decisions are normative in Sections 7.2 and 8. They settle product behavior, not the
+remaining machine contracts or implementation readiness. Pending technical decisions
+do not grant additional authority to dispatch, deliver, or retry by inference.
+
+The operator also ratified notification-template activation and ordinary-reminder
+fallback on 2026-09-12. This replaces the standalone-trigger/no-fallback experimental
+posture: enrichment failure preserves the base reminder when independently eligible;
+accepted `no_action` suppresses it only with explicit permission; all branches share
+one logical delivery identity. The selected product direction is no longer an open
+policy-family choice, but its exact schemas and runtime integration remain open above.
 
 The primary-location prerequisite is satisfied by the implemented and audited
 `spine.schedule-primary-location.v1` family; it is no longer an open advisory decision.

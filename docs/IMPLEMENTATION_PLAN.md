@@ -390,8 +390,8 @@ Spine contracts, migrations, commands, readback, and compatibility declarations 
 ### Future Horizon: Notification-Activated Contextual Advisories
 
 The first contextual-advisory product path should enrich an explicitly selected
-notification rather than create an independent, hidden scheduling system. The current
-design hypothesis is that a notification template is the right activation locus, while
+notification rather than create an independent, hidden scheduling system. The operator
+selected notification-template activation and ordinary fallback on 2026-09-12, while
 the advisory definition, governance decision, model/tool execution, and accepted
 evidence remain separate versioned artifacts with distinct owners. This horizon does
 not authorize implementation and does not expand the current notification-profile
@@ -414,6 +414,11 @@ The intended boundary is:
 - Ordinary deterministic reminder rendering remains the reliable default. Advisory
   outage, timeout, denial, invalid evidence, or stale evidence normally falls back to
   the base reminder and must never be misreported as a successful no_action outcome.
+- Accepted no_action also falls back by default; suppression requires explicit bound
+  silence permission. Accepted content, fallback, and suppression share one persisted
+  selection for one notification delivery identity. Late enrichment cannot create a
+  second notification. Materialization failure after selection requires explicit
+  recovery, not an automatic branch switch or another model run.
 - Context is acquired near delivery under explicit freshness bounds. Temporal
   expansion remains model-free, and recurrence produces separately bound advisory work
   for each applicable occurrence.
@@ -428,9 +433,9 @@ The delivery sequence should be:
 
 1. Publish and operationally prove the Version 1 pack format using only archetypes,
    notification profiles, and owner-scoped default bindings.
-2. Reconcile specs/contextual-advisories.md with the notification-template activation
-   decision and accept the remaining policy-family, work-kind, evidence-ownership,
-   context-minimization, budget, and operator-surface decisions.
+2. Audit the reconciled notification-template activation/fallback direction in
+   specs/contextual-advisories.md and settle the remaining definition/activation schema,
+   work-kind, evidence-ownership, context-minimization, budget, and operator-surface details.
 3. Specify immutable advisory definitions, notification-template references,
    deterministic fallback and silence semantics, per-occurrence identity, freshness,
    replay, reconciliation, and complete readback.
@@ -446,9 +451,9 @@ The delivery sequence should be:
 
 The companion non-normative exploration is
 docs/design-notes/scheduled-agent-autonomy.md. The existing
-specs/contextual-advisories.md draft remains the starting point for normative work;
-this horizon records the newer design direction that its open trigger decision must
-resolve.
+specs/contextual-advisories.md draft now records this selected direction. Machine
+contracts, timing/selection race fixtures, native mapping, and implementation remain
+future work; the prior selective-synthesis audit did not cover this subsequent change.
 
 ## Next Delivery: Trusted Multi-Operator Web API
 

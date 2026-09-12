@@ -370,9 +370,14 @@ but that is a separate work family and authority chain defined by
 
 An advisory outage, timeout, rejection, or stale result MUST NOT cause an ordinary
 reminder to become model-dependent. Where a product flow requests both, this profile
-is the reliable fallback body unless a separately accepted advisory outcome has
-already produced authorized derivative notification work. Generated advisory prose
-must never be smuggled into this renderer's inputs.
+is the reliable fallback body. The draft activation contract in
+`specs/contextual-advisories.md` owns selection between accepted content, ordinary
+fallback, and explicitly permitted silence for one logical notification delivery
+identity. Merely accepting or materializing advisory content is not proof of delivery;
+the activation contract defines freshness rechecks and branch freezing at attempt
+start. Generated advisory prose must never be smuggled into this renderer's inputs.
+This relationship does not implement activation or alter current ordinary-renderer
+request shapes, eligibility gates, or attempt evidence.
 
 ## 13. Non-Goals
 

@@ -25,7 +25,7 @@ Current spec surface:
 - `schedule-operator-tools.md`: implemented relative-event countdown request building and compact schedule operator projections
 - `schedule-operations.md`: implemented cross-item agenda, atomic whole-schedule update, terminal cancellation, and mandatory notification-work reconciliation
 - `relative-temporal-bindings.md`: implemented schema-8 cross-item temporal bindings, bounded discovery/reconciliation, and atomic related-task creation
-- `contextual-advisories.md`: draft role-based cross-system contract for one scheduled, governed, read-only agent advisory and at most one derivative notification
+- `contextual-advisories.md`: draft role-based contract for notification-template activation, governed read-only enrichment, ordinary-reminder fallback, explicit silence permission, and one logical delivery path
 - `schedule-primary-location.md`: implemented primary-location authoring, mutation, readback, builder pass-through, and operator projections on scheduled events and tasks
 - `notification-rendering.md`: implemented schema-9 deterministic ordinary-reminder prose and immutable per-attempt rendering evidence
 - `notification-profiles.md`: implemented dynamic item-archetype catalog, reusable versioned notification profiles, deterministic scoped defaults, and snapshot application
