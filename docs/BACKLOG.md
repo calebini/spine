@@ -118,6 +118,10 @@ planning outcome; each needs decomposition before executable work is selected.
 
 ### SPINE-011 — Prepare notification-activated contextual advisories
 
+The narrow protection-amendment drafting task is completed separately as SPINE-017.
+Its proposed decision and manual checklist do not close this horizon's remaining
+native mapping, machine-contract, or implementation decisions.
+
 **Status:** Needs decision. **Dependencies:** Confirm the roadmap's Version 1 pack
 publication/proof prerequisite with its owning component before the advisory delivery
 slice. The deferred resilience campaign is not a blanket prerequisite; the advisory
@@ -247,6 +251,32 @@ never authorizes deletion of canonical evidence.
 **Source:** [Storage lifecycle horizon](IMPLEMENTATION_PLAN.md#future-horizon-bounded-ledger-storage-lifecycle).
 
 ## Completed
+
+### SPINE-017 — Draft the advisory architectural protection amendment
+
+**Status:** Done (2026-09-13, Codex; specification drafting only, selected by the operator).
+**Dependencies:** Existing advisory draft and the completed three-case extensibility
+analysis; no outstanding product decision blocked this narrow amendment.
+
+**Outcome:** Added proposed [Decision 0005](../specs/decisions/0005-profile-scoped-advisory-execution.md),
+additive advisory/architecture/ontology clarifications, and the baseline-bound
+[preservation checklist](design-notes/advisory-protection-preservation-checklist.md).
+The amendment separates advisory-specific requirements from future execution scope,
+dependencies, native run/evidence, and result-consumption boundaries. It adds no
+general automation support and leaves the broader SPINE-011 horizon unselected.
+
+**Preservation evidence:** Against baseline `706b499665add9e15a041f2c26dd20c2446f5139`,
+all original body lines of the three amended specs remain verbatim and in order;
+only the advisory status line changes. P-01–P-20 record manual obligation correspondence
+and E-01–E-06 identify future review objectives. No runtime, machine schema, migration,
+fixture, package version, registry, native governance spec, or deferred initiative was
+changed. Local link and diff-hygiene checks passed. Relevant unittest suites passed:
+agent documentation (7), implemented contract declarations (2), and notification
+rendering fixtures (3). HEAD and index stayed unchanged.
+
+**Limit:** Manual comparison and tests are not independent semantic preservation proof.
+Decision ratification and a later approved bounded reviewer audit remain separate;
+no audit was run and no advisory implementation-readiness claim is made.
 
 ### SPINE-000 — Establish work tracking and reconcile orientation
 

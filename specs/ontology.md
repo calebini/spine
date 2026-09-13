@@ -812,6 +812,19 @@ Structured-policy constraints:
 
 ## 9. Work, Candidate Actions, and Attempts
 
+Profile boundary clarification (proposed [Decision 0005](decisions/0005-profile-scoped-advisory-execution.md)):
+the item/version-bound records below describe existing coordination work and action
+pressure. Their parent reference is not automatically the permission scope, complete
+source-dependency set, or root of every future external process. A scope-wide or
+multi-source operation needs an explicit ownership/context/freshness contract; this
+clarification neither chooses such a record nor relaxes current foreign keys.
+
+All current required item/version bindings, closed enums, version and attempt guards,
+and origin-linkage rules remain unchanged. Implementations MUST NOT use dummy events,
+notification rows, reserved fields, or unvalidated payloads to bypass those contracts.
+Advisory definitions, external workflow checkpoints, and native governance attempts
+are not newly supported facts in these tables merely because this distinction is made.
+
 ### 9.1 work_instances
 
 Owns generated domain work eligible for tickerd processing.

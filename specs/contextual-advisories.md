@@ -1,6 +1,6 @@
 # Spine Scheduled Contextual Advisories
 
-Status: Draft v0.3.1; activation, fallback, privacy defaults, and configurable limits recorded; not implemented
+Status: Draft v0.3.2; profile-boundary protection amendment drafted; not implemented
 Scope: One notification-template activation requesting at most one governed, bounded, read-only agent run, with one notification delivery path for accepted enrichment or ordinary fallback
 Created: 2026-08-18
 Updated: 2026-09-13
@@ -88,6 +88,21 @@ binding is operational metadata rather than canonical coordination truth.
     coordinative intent, not a second governed-intent, policy, dispatch, approval, or
     evidence-acceptance authority. Cross-system adapters bind Spine facts to the
     governance authority's native versioned artifacts and return verifiable references.
+
+### 3.1 Profile boundary and preservation
+
+[Decision 0005](decisions/0005-profile-scoped-advisory-execution.md) defines the proposed
+architectural protection boundary for this draft. The requirements in this document
+remain binding for `read_only_contextual_advisory.v1`; no generic interface may bypass
+its event, location, notification, outcome, privacy, authority, or lifecycle checks.
+Their scope is this capability, not an implicit universal execution model.
+
+Activation, coordination ownership/scope/source dependencies, execution requests,
+native runs/evidence, and result consumption are distinct responsibilities even when
+bound to one event. Future task research, multi-item planning, and approval-bearing
+workflows require separate versioned contracts; they are not additional modes of this
+profile. Existing required fields do not become optional, and this amendment adds no
+new supported input, output, status, or command.
 
 ## 4. Version 1 Experimental Profile
 
@@ -363,6 +378,14 @@ Section 15 remain required before implementation; no automatic classifier or res
 archetype taxonomy is introduced by this privacy default.
 
 ## 7. Cross-System Envelope Family
+
+The envelopes below are advisory-specific views. Their required event/notification
+correlation must remain exact, but MUST NOT be promoted into mandatory fabricated
+source facts for unrelated future native executions. Reuse native contracts through
+an explicit mapping rather than a second generalized governance schema in Spine.
+The mapping must keep submission, logical run, execution attempt, accepted evidence,
+and notification-consumption identities distinct; notification retry or explicit
+materialization recovery cannot become permission to redispatch intelligence.
 
 The initial boundary uses role-neutral Spine envelopes and semantic requirements for
 the other roles. Machine-readable schemas, fixtures, and a mapping to the selected
@@ -912,6 +935,14 @@ No new repository or long-running service is justified merely by writing this sp
 That decision follows the real product experiment.
 
 ## 15. Open Decisions Before Machine Contracts
+
+Decision 0005 adds a preservation constraint on how these open details are resolved;
+it does not close them. Before finalizing this profile's machine contracts, record
+the advisory-specific versus native field mapping, run/attempt/retry and budget
+ownership, and source-freshness handoff. Keep every required advisory binding and
+the Section 8 selection/recovery rules intact. Exact interfaces for future triggers,
+scope-wide work, new result consumers, and durable workflows remain outside this slice;
+they are not prerequisites to implement the first bounded advisory.
 
 The following decisions remain intentionally open before machine contracts and
 implementation; selective clarification does not close them by implication:

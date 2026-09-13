@@ -244,6 +244,23 @@ Cross-system contracts name these roles rather than their implementing component
 
 `specs/schedule-primary-location.md` defines the prerequisite public activation of the existing first-class location model on schedule create, update, readback, builder, agenda, and compact surfaces. It creates no location authority outside `locations` and `item_locations`, never lets location timezone alter schedule time, and does not make current notification work location-sensitive.
 
+### 9.1 Advisory-specific versus reusable execution boundaries
+
+The proposed [Decision 0005](decisions/0005-profile-scoped-advisory-execution.md)
+separates advisory-profile bindings from reusable external execution responsibilities.
+Activation, permitted coordination scope and exact source dependencies, execution
+request, native run/evidence, and result consumption MUST remain distinguishable.
+For advisory v1 they retain the event/location/notification requirements in Section 9;
+the distinction permits no generic bypass or new supported execution mode.
+
+An external workflow's future waiting and step mechanics must not be encoded in
+reminder work status, delivery retries, or advisory expiry. Scope-wide work and new
+result consumers need their own contracts. Existing item-bound work and candidate
+actions are not an implicit universal process model. Native governance and evidence
+semantics remain owned outside Spine, while canonical item transitions and the
+existing side-effect attempt gate remain Spine-owned. Exact native attempt/retry
+mapping precedes advisory implementation; general workflow support does not.
+
 ## 10. Suggested Future Package Boundaries
 
 Implementation directories should be added when behavior exists:

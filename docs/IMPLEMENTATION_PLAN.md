@@ -462,6 +462,19 @@ The intended boundary is:
 
 The delivery sequence should be:
 
+Before the advisory machine-contract step, apply the narrowly scoped architectural
+protection amendment in [Decision 0005](../specs/decisions/0005-profile-scoped-advisory-execution.md)
+and compare it against the [preservation checklist](design-notes/advisory-protection-preservation-checklist.md).
+This is the selected specification-only task SPINE-017, not selection of the broader
+SPINE-011 horizon or general workflow implementation. Native field correlation,
+run/attempt/retry and budget ownership, and freshness handoff must be settled before
+the advisory contracts are finalized. Future people/responsibility or facet context
+uses its own authoritative contracts when consumed; those implementations and general
+workflow support do not become blanket prerequisites for basic event enrichment.
+A later bounded audit should examine explicit preservation objectives and the three
+extension cases without claiming implementation readiness or restarting deferred
+resilience/storage campaigns. Current status and completion evidence live in the backlog.
+
 1. Publish and operationally prove the Version 1 pack format using only archetypes,
    notification profiles, and owner-scoped default bindings.
 2. Audit the reconciled notification-template activation/fallback direction in
