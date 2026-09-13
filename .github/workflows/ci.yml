@@ -24,6 +24,9 @@ jobs:
       - name: Lint
         run: ruff check src/spine/core src/spine/ledger
 
+      - name: Check packaged web contracts
+        run: python scripts/sync_web_contracts.py --check
+
       - name: Type check core and ledger
         run: mypy --strict src/spine/core src/spine/ledger
 

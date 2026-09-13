@@ -52,8 +52,10 @@ allowed to quietly become canonical.
 ## What Works Today
 
 Spine `0.5.0` is an implemented alpha; its scheduling core is exercised in a staging
-agent environment. The current SQLite ledger schema is version `14`. The new optional
-trusted multi-operator backend is locally verified and awaits staging deployment.
+agent environment. The current SQLite ledger schema is version `14`. The trusted multi-operator backend is also running in staging on `cortext1`, with
+operator testing through the connected [Kinflow frontend](../kinflow-web-ui/README.md).
+Concrete operator-reported work is tracked in the [backlog](docs/BACKLOG.md);
+this checkout version is not a deployment claim.
 
 ### Trusted multi-operator web backend
 
@@ -64,8 +66,9 @@ revisioned grants, atomic attribution, signed cursors, and bounded requests keep
 interface deliberate without introducing an identity provider.
 
 This is **trusted identification, not authentication**. Restrict network access to
-trusted devices. The browser GUI and verified sign-in are separate follow-ons;
-existing local CLI and worker privileges are unchanged.
+trusted devices. The existing Kinflow frontend provides connected read-only views;
+verified sign-in and browser write controls remain separate work. Existing local CLI
+and worker privileges are unchanged.
 [Provision and operate the backend](docs/TRUSTED_WEB_OPERATIONS.md).
 
 ### Atomic scheduling
@@ -307,11 +310,14 @@ design and compatibility promises live in `specs/`.
 
 Spine is substantial, but it is not finished.
 
-Implemented today: the schema-11 coordination ledger, command contracts, recurrence,
+Implemented today: the schema-14 coordination ledger, command contracts, recurrence,
 notifications, atomic scheduling, operational lifecycle, readback, locations, temporal
 bindings, deterministic notification rendering, dynamic item archetypes, reusable
 notification profiles, durable attempt processing, Tickerd integration, and the first
-storage-containment controls.
+storage-containment controls, trusted multi-operator web backend, and immutable ledger
+instance identity. Kinflow supplies the existing connected read-only frontend under
+operator testing. The backlog tracks concrete requested work; general staging and
+frontend reviews SPINE-001–003 were withdrawn.
 
 Still deliberately separate or in design:
 
@@ -346,13 +352,21 @@ Start with the document that matches the job:
 - **Review the first trusted web API slice:**
   [`specs/trusted-multi-operator-web-api.md`](specs/trusted-multi-operator-web-api.md) —
   honest identity selection, scheduling, provisioning and permission-aware readback;
-  restricted trusted deployment, not verified authentication; draft only.
+  backend implemented and used by Kinflow in staging; concrete requested work is
+  tracked in the backlog.
+  Identity selection is not verified authentication.
+- **Review independent activity reads with unavailable linked resources:**
+  [`specs/independent-activity-reads.md`](specs/independent-activity-reads.md) — proposed
+  read authorization, temporal availability, and related-context disclosure rules;
+  specification only, tracked as SPINE-015.
 - **Review the immediate account/onboarding proposal:**
   [`specs/accounts-and-chat-attribution.md`](specs/accounts-and-chat-attribution.md) —
-  distinct accounts, trusted web selection and lower-assurance chat attribution; not implemented.
+  accounts and trusted web selection implemented for the backend subset;
+  broader chat attribution and protected onboarding remain deferred.
 - **Review the proposed resource permission model:**
   [`specs/permissions.md`](specs/permissions.md) — multi-user roles and grants,
-  independent identity/access modes and the trusted-local CLI exception; not implemented.
+  independent identity/access modes and the trusted-local CLI exception; the trusted
+  web subset is implemented, with broader protected enforcement deferred.
 - **Review the proposed enforcement and web-admission contract:**
   [`specs/permission-enforcement-and-web-admission.md`](specs/permission-enforcement-and-web-admission.md)
   — trusted multi-operator identification first; verified sessions, recovery and
@@ -372,8 +386,10 @@ Start with the document that matches the job:
 - **Inspect the public command contract:**
   [`specs/agent-command-contract.md`](specs/agent-command-contract.md)
 - **Inspect machine-readable agreements:** [`contracts/`](contracts/)
-- **Review implementation sequencing:**
-  [`docs/IMPLEMENTATION_PLAN.md`](docs/IMPLEMENTATION_PLAN.md)
+- **Choose and track the next work task:**
+  [`docs/BACKLOG.md`](docs/BACKLOG.md) — ordered work, dependencies, and acceptance criteria.
+- **Review roadmap rationale and delivery history:**
+  [`docs/IMPLEMENTATION_PLAN.md`](docs/IMPLEMENTATION_PLAN.md) — larger initiatives and sequencing context.
 - **Deploy the OpenClaw worker path:**
   [`docs/OPENCLAW_DEPLOYMENT_RUNBOOK.md`](docs/OPENCLAW_DEPLOYMENT_RUNBOOK.md)
 

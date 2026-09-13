@@ -128,6 +128,24 @@ class NotificationRenderingTests(unittest.TestCase):
         with self.assertRaisesRegex(SpineValidationError, "notification_rendering_output_too_large"):
             render_notification(self._utc_source(3600, title="x" * 1024))
 
+    def test_unresolved_sources_raise_validation_errors(self) -> None:
+        source = self._utc_source(3600)
+        cases = (
+            None,
+            [],
+            {},
+            {**source, "unexpected": "field"},
+            {**source, "attempt_id": None},
+            {**source, "rendered_item_version": "01"},
+            {**source, "attempted_at_utc": 123},
+            {**source, "attempted_at_utc": "not-an-instant"},
+            {**source, "target_scheduled_fact": "not-an-instant"},
+            {**source, "primary_location": {}},
+        )
+        for value in cases:
+            with self.subTest(source=value), self.assertRaisesRegex(SpineValidationError, "notification_rendering_source_unresolved"):
+                render_notification(value)
+
     def _source(
         self,
         *,

@@ -4,14 +4,16 @@ This directory contains Spine's normative design and compatibility promises.
 
 Current spec surface:
 
+- `independent-activity-reads.md`: proposed independent authorized web activity/occurrence reads, related-context completeness, disclosure-safe availability, compatibility migration, and test matrix; specification only, not implemented (SPINE-015)
+
 - `ledger-instance-identity.md`: implemented schema-14 immutable ledger identity, deterministic migration, bounded validation, system.info v3 and restore semantics
 
 - `archetype-facets.md`: draft registered typed item facts, immutable schema revisions, archetype bindings, permission-aware bounded readback/query, and flight proof; not implemented
 - `decisions/0004-versioned-item-facets.md`: proposed core-versus-domain-data boundary and pack/schema ownership
 
-- `trusted-multi-operator-web-api.md`: first trusted web API slice; identity selection, local provisioning, scheduling routes, bounded permission-filtered reads, replay and deployment gates; not implemented
+- `trusted-multi-operator-web-api.md`: implemented trusted web backend; identity selection, local provisioning, scheduling routes, bounded permission-filtered reads and replay; Kinflow is connected to staging; concrete requested work is tracked in the backlog
 - `permission-enforcement-and-web-admission.md`: trusted multi-operator identification first; preserves deferred verified web/session, command/effect and delivery-enforcement contracts; no runtime declaration
-- `permissions.md`: draft ownership, roles and grants; independent access and identity modes, with trusted-local CLI exception
+- `permissions.md`: trusted web ownership/role/grant subset implemented; broader protected authentication and administration remain draft, with trusted-local CLI exception
 
 - `accounts-and-chat-attribution.md`: immediate trusted web identification and observed chat attribution for distinct accounts/subjects; verified web login/recovery preserved but deferred
 - `overview.md`: purpose, doctrine, ontology, and non-goals

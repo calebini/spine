@@ -5,8 +5,8 @@ from __future__ import annotations
 import re
 import unicodedata
 from dataclasses import dataclass
-from datetime import UTC, date, datetime
-from typing import Any
+from datetime import UTC, date, datetime, tzinfo
+from typing import Any, NoReturn
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from spine.core.canonical_json import canonical_json_text
@@ -298,7 +298,7 @@ def _render(source: dict[str, Any]) -> tuple[str, dict[str, str], str]:
 
     attempted = _parse_utc(str(source["attempted_at_utc"]))
     if basis == "local_date":
-        zone = _display_zone(str(source["display_timezone"]), str(source["timezone_database_version"]))
+        zone: tzinfo = _display_zone(str(source["display_timezone"]), str(source["timezone_database_version"]))
         reference_date = attempted.astimezone(zone).date()
         target_date = _parse_local_date(str(source["target_scheduled_fact"]))
         label = _calendar_label(reference_date, target_date)
@@ -491,7 +491,7 @@ def _positive_decimal(value: object, field: str) -> str:
     return value
 
 
-def _source_error(message: str) -> None:
+def _source_error(message: str) -> NoReturn:
     raise SpineValidationError("notification_rendering_source_unresolved", message)
 
 

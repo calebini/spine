@@ -5,6 +5,8 @@ from __future__ import annotations
 import sqlite3
 from collections.abc import Iterator
 from contextlib import contextmanager
+from types import TracebackType
+from typing import Literal
 
 
 class LedgerConnection(sqlite3.Connection):
@@ -12,7 +14,9 @@ class LedgerConnection(sqlite3.Connection):
 
     _command_transaction: bool = False
 
-    def __exit__(self, exc_type: object, exc: object, traceback: object) -> bool:
+    def __exit__(
+        self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: TracebackType | None,
+    ) -> Literal[False]:
         if self._command_transaction:
             return False
         return super().__exit__(exc_type, exc, traceback)

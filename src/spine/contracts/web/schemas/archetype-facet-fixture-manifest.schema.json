@@ -1,0 +1,91 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cortext.local/spine/contracts/schemas/archetype-facet-fixture-manifest.schema.json",
+  "title": "Spine archetype facet fixture manifest (draft v1)",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "status",
+    "registry",
+    "fixtures",
+    "vectors",
+    "coverage_note"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "spine.archetype-facet-contract-fixtures.v1"
+    },
+    "status": {
+      "const": "draft_not_implemented"
+    },
+    "registry": {
+      "type": "string",
+      "minLength": 1
+    },
+    "fixtures": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "fixture_id",
+          "fixture",
+          "schema",
+          "valid"
+        ],
+        "properties": {
+          "fixture_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "fixture": {
+            "type": "string",
+            "minLength": 1
+          },
+          "schema": {
+            "type": "string",
+            "minLength": 1
+          },
+          "schema_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "valid": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "vectors": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "kind",
+          "path"
+        ],
+        "properties": {
+          "kind": {
+            "enum": [
+              "identity",
+              "definition_normalization",
+              "typed_values"
+            ]
+          },
+          "path": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "coverage_note": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "additionalProperties": false
+}

@@ -4,6 +4,11 @@ Status: Implemented v0.1.0 on Spine runtime 0.2.0
 Scope: Exact cross-repository runtime admission and generic safety-stop mapping
 Authority: Normative Spine consumer requirements for supported Tickerd installations
 
+Separate proposed web-consumer change:
+[independent activity read compatibility](independent-activity-reads.md#9-compatibility-and-migration-assessment)
+assesses new read schemas, registry/versioning, v1 complete-or-deny preservation, and
+Kinflow migration. It declares no current runtime support and changes no Tickerd pin.
+
 ## 1. Purpose
 
 Spine owns coordination truth, work eligibility, storage-pressure policy, and domain

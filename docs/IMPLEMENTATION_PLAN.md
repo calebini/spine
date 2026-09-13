@@ -1,9 +1,37 @@
 # Spine Implementation Plan
 
-Status: Trusted web backend implemented and locally verified; staging deployment and browser GUI remain next
-Last updated: 2026-09-06 (web API delivery sequence; historical delivery sections retained)
+Role: Roadmap rationale and delivery history; current task status lives in [BACKLOG.md](BACKLOG.md)
+Last updated: 2026-09-13 (explicit backlog introduced; historical delivery sections retained)
 
 This is a non-normative delivery plan. The specifications and machine-readable contracts remain authoritative.
+
+Use [the backlog](BACKLOG.md) to select work, record dependencies, and track completion.
+The status labels, audit reports, and checklists below are retained delivery snapshots;
+they are not a second live task queue. Update this document when initiative scope or
+sequencing rationale changes, and update the backlog for task progress. Future horizons
+stay coarse until promoted into bounded work with acceptance criteria.
+
+The backlog retains deferred resilience work in SPINE-004–007, facets in SPINE-008–009,
+and later horizons in SPINE-010–014. SPINE-010 storage lifecycle is also deferred.
+These are not automatically selected work.
+The broad web/staging review tasks SPINE-001–003 were withdrawn at the operator's
+request; no general gap analysis is scheduled.
+SPINE-015 separately tracks independent authorized activity reads when linked resources
+are unavailable, including the proposed versioned read projection and Kinflow migration.
+
+Current context correction (2026-09-13): the operator is already testing the connected
+[Kinflow frontend](../../kinflow-web-ui/README.md) against staged Spine on `cortext1`.
+Kinflow records browser/API staging checks in its
+[integration guide](../../kinflow-web-ui/docs/staging-integration.md). Statements below
+about a forthcoming GUI or first staging deployment describe the earlier delivery
+plan. SPINE-001–003 are closed as withdrawn. Focus on concrete operator-supplied
+backlog items; only perform a gap analysis when explicitly requested.
+
+Resilience priority correction (2026-09-13): the operator is satisfied with containment
+and resilience following the event-emission fixes and has deferred SPINE-004–007 and
+SPINE-010. The historical resilience-first sequencing below no longer schedules work
+or makes those initiatives blanket prerequisites for facets or advisories. Preserve
+their feature-specific contract and verification requirements.
 
 ## Delivered Sustaining Slice: Canonical Owner-Scope Discovery
 
@@ -259,6 +287,9 @@ The fat slice is ready for one environment patch only when all of the following 
 - Release freeze-manifest promotion.
 
 ## Next Initiative: Operational Resilience and Boundedness
+
+Historical initiative, now deferred by operator direction (2026-09-13). The heading
+is retained for existing links; consult the backlog for current scheduling.
 
 `specs/operational-resilience.md` is the draft authority for the next sustaining
 initiative. It converts the storage-growth incident and the broader runtime sweep into

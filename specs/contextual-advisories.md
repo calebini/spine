@@ -1,9 +1,9 @@
 # Spine Scheduled Contextual Advisories
 
-Status: Draft v0.3.0; notification activation and fallback decisions recorded; not implemented
+Status: Draft v0.3.1; activation, fallback, privacy defaults, and configurable limits recorded; not implemented
 Scope: One notification-template activation requesting at most one governed, bounded, read-only agent run, with one notification delivery path for accepted enrichment or ordinary fallback
 Created: 2026-08-18
-Updated: 2026-09-12
+Updated: 2026-09-13
 
 ## 1. Purpose
 
@@ -164,6 +164,31 @@ This is a draft extension, not a change to currently implemented notification/pr
 request shapes or published pack contracts. Exact activation schemas and snapshot
 mapping MUST be defined and audited before runtime support or compatibility is claimed.
 
+### 4.2 Configurable investigation limits
+
+Version 1 starts with a small, bounded investigation, not one universal budget for
+every enrichment activity. Authorized operators MUST be able to configure model-call,
+tool-call, elapsed-runtime, and cost ceilings, plus research timing and a firm
+content-selection deadline, per immutable advisory-definition revision. Different
+definitions may carry different limits within the supported capability profile.
+Configurability does not permit unlimited execution, new capabilities, or extension
+of the ordinary reminder's late-handling window.
+
+Any supplied defaults MUST resolve to concrete, finite limits when the definition is
+authored. Profile application snapshots those resolved limits into the item-bound
+policy; subsequent configuration edits cannot silently change existing bindings,
+submissions, or replay behavior. The governance authority may narrow requested limits
+under Section 7.2; an operator-configured budget is not a grant to spend it, and the
+agent cannot increase its limits during execution.
+
+Research cannot hold delivery open past the bound selection cutoff. If no usable
+accepted result exists by that cutoff, Section 8.1 selects the ordinary reminder when
+independently eligible, subject to the existing materialization-recovery gate. Neither
+the cutoff nor a longer configured runtime may override ordinary eligibility, late
+handling, or a previously committed branch. Initial numeric defaults, permitted
+ranges, and exact cutoff derivation remain machine-contract design work, not values
+implicitly ratified by choosing a small configurable starting policy.
+
 ## 5. Role Boundaries
 
 ### 5.1 Spine: coordination and scheduling authority
@@ -300,7 +325,11 @@ preimages remain machine-contract prerequisites, not closed by this logical rule
 
 ### 6.3 Context snapshot
 
-The context snapshot is a minimized, versioned input envelope. Version 1 may include:
+The context snapshot is a minimized, versioned input envelope. Its default disclosure
+scope is limited to the relevant event's title, time, canonical primary location, and
+the minimum identity, lifecycle, occurrence, and provenance facts needed to bind and
+verify that event. Free-text details are not included by default; only explicitly
+permitted relevant details may be disclosed. The supported envelope may include:
 
 - item identity, type, title, details, and current lifecycle state;
 - exact local time, UTC instant, timezone, and timezone-database version;
@@ -308,6 +337,16 @@ The context snapshot is a minimized, versioned input envelope. Version 1 may inc
 - canonical primary location facts;
 - explicitly permitted related-item summaries; and
 - exact snapshot time and content hash.
+
+Unrelated events, household history, and sensitive notes MUST NOT enter the default
+snapshot. Related-item summaries and additional details require explicit scoped
+permission; a relationship or shared owner alone does not grant disclosure. Medical
+appointments require explicit operator opt-in to external enrichment before any
+event context crosses the enrichment boundary. Ordinary scheduling, an archetype
+assignment, or an ordinary notification-profile binding alone is not that opt-in.
+Opt-in still permits only the declared minimized context; it does not automatically
+release all notes or related records. Without it, enrichment is unavailable and the
+independently eligible ordinary reminder remains governed by Section 8.1.
 
 It MUST exclude delivery credentials, unrelated personal data, hidden adapter state,
 and mutable references whose resolved contents cannot later be identified. A context
@@ -318,8 +357,10 @@ submitted, the exact snapshot contents and their integrity hash MUST be retained
 immutably resolvable for replay. The future hash preimage MUST explicitly exclude the
 hash field itself and declare its canonicalization version; it may include the original
 capture time, but a later capture time MUST NOT invalidate unchanged source facts.
-A closed snapshot schema alone does not settle minimization or sensitive-data policy;
-the disclosure and redaction decisions in Section 15 remain required.
+A closed snapshot schema alone does not enforce this policy. Exact permission facts,
+medical-sensitivity designation, field selection, redaction, and enforcement rules in
+Section 15 remain required before implementation; no automatic classifier or reserved
+archetype taxonomy is introduced by this privacy default.
 
 ## 7. Cross-System Envelope Family
 
@@ -780,6 +821,13 @@ that autonomous advice is useful.
 
 The machine-contract fixture set MUST additionally prove:
 
+- default snapshots exclude unpermitted details, unrelated events, household history,
+  and sensitive notes; medical enrichment without explicit opt-in discloses no event
+  context externally and does not cancel an independently eligible ordinary reminder;
+- distinct advisory definitions can have distinct finite budgets; resolved defaults
+  and limits remain unchanged in existing bindings and replays after configuration
+  edits, and neither the agent nor a longer runtime may extend the selection cutoff
+  or ordinary delivery window;
 - an enum-valid but disallowed outcome is rejected, including when a native reference
   incorrectly claims acceptance, without advisory-derived work or a second acceptance
   ledger; independently eligible ordinary fallback remains available;
@@ -875,8 +923,10 @@ implementation; selective clarification does not close them by implication:
 4. the exact adapter mapping from Spine submission/binding/`acceptance_reference` views
    to the selected governance authority's native intent, dispatch, receipt, and evidence
    contracts;
-5. the exact context-snapshot minimization and sensitive-data rules;
-6. the initial budgets and usefulness-deadline defaults;
+5. the exact context-permission, medical-sensitivity designation, field-selection,
+   redaction, and enforcement contracts implementing the Section 6.3 privacy defaults;
+6. initial numeric budgets, supported configuration ranges, accounting units, and
+   usefulness-deadline defaults implementing the per-definition limits in Section 4.2;
 7. the exact commands and readback projection used by operators;
 8. the explicit derivative-materialization recovery command, request/receipt contract,
    concurrency rules, and legal transitions implementing Section 8;
@@ -903,6 +953,15 @@ posture: enrichment failure preserves the base reminder when independently eligi
 accepted `no_action` suppresses it only with explicit permission; all branches share
 one logical delivery identity. The selected product direction is no longer an open
 policy-family choice, but its exact schemas and runtime integration remain open above.
+
+On 2026-09-13 the operator ratified minimized event-only disclosure by default, explicit
+permission for additional details, no default unrelated-event/household-history/
+sensitive-note disclosure, and explicit opt-in for medical-appointment enrichment.
+The operator also ratified small bounded investigations with configurable limits per
+enrichment activity and a firm deadline that preserves independently eligible ordinary
+fallback. These product policies are captured in Sections 4.2 and 6.3; they do not
+select numeric budgets, create a sensitivity taxonomy, or close the remaining machine
+contracts and enforcement details.
 
 The primary-location prerequisite is satisfied by the implemented and audited
 `spine.schedule-primary-location.v1` family; it is no longer an open advisory decision.

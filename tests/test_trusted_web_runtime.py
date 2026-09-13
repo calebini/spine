@@ -7,8 +7,6 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-import test_schedule_create_command as schedule_helpers
-
 from spine.commands import CommandContext, handle
 from spine.ledger import connect, initialize_schema
 from spine.web.contracts import API, validate
@@ -16,6 +14,7 @@ from spine.web.errors import WebError
 from spine.web.http import create_app
 from spine.web.provisioning import apply, plan
 from spine.web.service import WebConfig, WebService
+from tests import test_schedule_create_command as schedule_helpers
 
 AT = "2026-09-01T09:00:00Z"
 

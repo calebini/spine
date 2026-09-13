@@ -4,6 +4,11 @@ Status: v0.1.2; trusted-identity backend implemented in Spine 0.4.0 / schema 13;
 Created: 2026-09-06
 Proposed capability: `spine.trusted-web-api.v1`
 
+Related proposal: [independent-activity-reads.md](independent-activity-reads.md)
+defines a separate future web read projection for authorized activities with unavailable
+linked resources. It does not amend this implemented v1 surface's complete-or-deny
+responses, binding admission, or write authorization. Track its status in SPINE-015.
+
 ## 1. Outcome and Authority
 
 Provide a useful first web backend for several trusted operators, initially two:

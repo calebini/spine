@@ -4,13 +4,34 @@ Spine follows the Cortext1 component scaffold standard.
 
 ## Current Maturity
 
-Spine is in seed-spec phase. Prefer concept, schema, and boundary clarification before runtime code.
+Spine is an implemented alpha with a staged backend on `cortext1`. The sibling
+`kinflow-web-ui` repository provides a connected read-only frontend under operator
+testing. Do not assume the frontend or staging deployment is missing or requires
+a general qualification review. Draft features still require concept, schema, and boundary clarification
+before runtime code.
 
-Create implementation directories only when there is executable behavior to place there. The initial authoritative surface is:
+Create implementation directories only when there is executable behavior to place there. The authoritative surface is:
 
 - `README.md` for orientation
 - `specs/` for normative design and compatibility promises
 - `specs/decisions/` for accepted architecture decisions
+- `contracts/` for machine-readable public agreements
+
+## Work Tracking
+
+Use `docs/BACKLOG.md` for ordered work, dependencies, task status, and completion
+evidence. Use `docs/IMPLEMENTATION_PLAN.md` for roadmap rationale and delivery history.
+Update the backlog when taking, blocking, completing, or withdrawing a tracked task.
+Focus on concrete items the operator brings. Do not prescribe or start gap analyses,
+general evidence reviews, or qualification campaigns unless explicitly requested.
+Retained roadmap candidates are not selected work or automatic priorities. Appropriate
+verification remains part of a selected concrete change. Backlog entries do not override
+specifications or turn draft features into accepted runtime contracts.
+
+Resilience, containment, recovery/scalability qualification, and the related storage
+lifecycle backlog items SPINE-004–007 and SPINE-010 are deferred by operator direction.
+Do not restart them or impose them as blanket prerequisites for other work without
+an explicit request. Preserve implemented safeguards and task-specific verification.
 
 ## Doctrine
 
