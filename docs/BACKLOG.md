@@ -1,6 +1,6 @@
 # Spine Backlog
 
-Last updated: 2026-09-13
+Last updated: 2026-09-15
 
 This is the single work queue for Spine development. The
 [implementation plan](IMPLEMENTATION_PLAN.md) explains roadmap direction and delivery
@@ -251,6 +251,39 @@ never authorizes deletion of canonical evidence.
 **Source:** [Storage lifecycle horizon](IMPLEMENTATION_PLAN.md#future-horizon-bounded-ledger-storage-lifecycle).
 
 ## Completed
+
+### SPINE-018 — Bounded review of the advisory protection amendment
+
+**Status:** Done — reviewer-only audit completed on 2026-09-14 (Codex); the operator-
+authorized minor wording clarification was applied on 2026-09-15.
+**Dependencies:** SPINE-017 draft and explicit approval of the eleven-file inventory.
+
+**Outcome:** `pass_with_minor_clarification`: zero blockers, zero majors, one minor,
+zero nits. Finding `fb_0001` identifies the ambiguous architecture §9.1 phrase
+“general workflow support does not.” Recommendation: explicitly say that general
+workflow support remains outside this slice and is not a prerequisite for advisory v1.
+No source specs were patched during the audit; no Editor, convergence, or
+implementation run occurred.
+
+**Manual follow-up:** Addressed `fb_0001` in architecture §9.1 using the recommended
+wording, consistent with Decision 0005 and contextual advisories §15. This is a
+specification-only clarification, not new workflow capability. The original audit
+artifacts remain unchanged and describe the pre-patch inputs; no re-audit is claimed.
+Verification: all seven agent-documentation tests and `git diff --check` passed;
+README links still point to the authoritative spec index and architecture document.
+
+**Evidence:** Local ignored run `whetstone_runs/advisory-protection-contract-audit-001/`:
+`change_audit/change_audit_feedback.json`, `change_audit/change_audit_report.json`,
+and `input-verification.md`. All eleven inputs retained their pre-run hashes and
+match the manifest; all three baseline copies match git objects at `706b499`.
+Feedback and report bind to the generated audit brief hash. The approved review
+compared the baseline with candidate `6077bf3`, using P-01–P-20 and E-01–E-06.
+
+**Limit:** Whetstone reports `boundary_preserved=true`, derived from severity counts,
+not independent objective assessments. The report does not establish complete
+checklist coverage, semantic equivalence, convergence, decision ratification, or
+advisory implementation readiness. Its objective-assessment enhancement remains
+unimplemented. Further manual changes or review runs require operator authorization.
 
 ### SPINE-017 — Draft the advisory architectural protection amendment
 

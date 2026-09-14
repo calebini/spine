@@ -259,7 +259,8 @@ result consumers need their own contracts. Existing item-bound work and candidat
 actions are not an implicit universal process model. Native governance and evidence
 semantics remain owned outside Spine, while canonical item transitions and the
 existing side-effect attempt gate remain Spine-owned. Exact native attempt/retry
-mapping precedes advisory implementation; general workflow support does not.
+mapping precedes advisory implementation; general workflow support remains outside
+this slice and is not a prerequisite for advisory v1.
 
 ## 10. Suggested Future Package Boundaries
 
