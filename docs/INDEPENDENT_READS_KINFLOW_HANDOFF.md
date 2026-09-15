@@ -1,6 +1,7 @@
 # Kinflow Handoff: Independent Activity Reads
 
 Status: Proposed integration contract; not available in the current Spine runtime
+Updated: 2026-09-15; aligned with independent-read Draft v0.2
 Tracking: [SPINE-015](BACKLOG.md#spine-015--read-authorized-activities-independently-of-unavailable-linked-resources)
 Authority: [Independent authorized activity reads](../specs/independent-activity-reads.md)
 
@@ -31,13 +32,26 @@ capability is actually advertised. No staging repair or deployment is part of th
    `authorized_only` section means no visible results, not proof that no linked tasks
    exist. Never say a task is hidden, unowned, assigned to someone, or withheld based
    on this result. Spine does not return those facts to explain omissions.
-5. Key views/cursors by identity, selection, query, access epoch, item version and
-   recurrence revision. Discard old selections and late query generations. On
+5. Key all views/cursors by identity, selected account-subject binding revision,
+   selection, query and access epoch. Direct item views additionally bind their
+   item/recurrence versions and may submit `expected_item_version` and
+   `expected_recurrence_revision_id`. Agenda uses its authorized candidate snapshot
+   and opaque cursor, not a single item version or per-item guard map; do not submit
+   either singular guard to agenda, even when selecting one item. All new read routes
+   may supply `expected_access_epoch`. The v2 identity-binding field
+   `account_subject_binding_revision` is distinct from `temporal_binding_revision_id`;
+   do not interpret cursor payloads or substitute a temporal revision for identity.
+   Discard old selections and late query generations. On
    `access_changed` or `version_changed`, invalidate affected cached views/pages and
    restart with fresh context. On generic denial, do not continue displaying cached
    content as currently authorized. Do not mix old pages with new source snapshots.
 6. Treat item-level edit hints as advisory. Submit writes with their existing version,
    epoch and command-ID rules; read success does not authorize connected-item effects.
+7. Request `authoring_receipt` only through the new schedule-view include contract.
+   It is an authorized-only summary of persisted creation evidence, not a new v1
+   include option. Not requested is distinct from available null; null does not
+   prove that no creation receipt exists. Never expect full receipt payloads or
+   interpret missing receipt evidence as failed item creation.
 
 Kinflow owns family-facing copy. Safe concepts include “additional details could not
 be loaded” for a disclosed unavailable section and “time unavailable” for an authorized

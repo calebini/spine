@@ -1,7 +1,8 @@
 # Independent Authorized Activity Reads
 
-Status: Draft v0.1; specification only, not implemented or advertised
+Status: Draft v0.2; bounded audit findings manually clarified; not implemented or advertised
 Created: 2026-09-13
+Updated: 2026-09-15
 Tracking: [SPINE-015](../docs/BACKLOG.md#spine-015--read-authorized-activities-independently-of-unavailable-linked-resources)
 
 ## 1. Outcome, scope, and authority
@@ -173,6 +174,20 @@ discovery reports supported section names independently of per-item hidden state
 Agenda optional summaries follow the same rules; their exact section mapping must
 be codified before release.
 
+`authoring_receipt` is a new v2 singleton projection, requested explicitly through
+the new schedule-view `include` list; otherwise its section is `not_requested`.
+It does not inherit or add a v1 `schedule.show` include option. Its producer is
+Spine's v2 projection over persisted item-creation command receipt evidence, not
+a copied canonical response or a new receipt generated during a read. Eligible
+source commands are `schedule.create`, `schedule.related_task.create`, `event.create`,
+and `task.create`, bound to the requested item's creation. Select only an authorized
+summary under the section's closed field-to-authority mapping; do not release raw
+request/response payloads or embedded related-resource facts. No eligible disclosed
+receipt yields an available null value, whether the receipt is absent or cannot be
+disclosed. Hidden receipt evidence alone cannot make the section unavailable.
+The mapping must codify source lookup, unique creation-receipt selection, every
+released field's authority and authorized-only summary semantics before release.
+
 Every section has `availability=available|not_requested|unavailable` and
 `scope=authorized_only`. An available collection contains authorized entries,
 `has_more`, and `next_cursor`. It has `coverage=complete` for its authorized query
@@ -265,12 +280,25 @@ All released core, time, sections, and occurrences MUST come from one bounded co
 read snapshot. Item/current source versions and recurrence revisions are explicit for
 authorized facts. An exact required item or recurrence version mismatch produces a
 generic structured version conflict; never mix a new detail view with an old occurrence
-page. The new read request contracts include optional `expected_access_epoch`,
-`expected_item_version`, and, where recurrence applies, `expected_recurrence_revision_id`.
-The latter two mismatches return 409 `version_changed`, with no current hidden values.
-Malformed versions are `invalid_request`; root admission precedes version comparison.
+page. Version guards are route-specific:
 
-Before release, revalidate selected account/subject/binding revisions and access epoch
+| Proposed route | Optional request guards |
+|---|---|
+| `/api/v2/commands/schedule.show` | `expected_access_epoch`, `expected_item_version`, and `expected_recurrence_revision_id` for the requested item's recurrence |
+| `/api/v2/commands/item.occurrences` | `expected_access_epoch`, `expected_item_version`, and `expected_recurrence_revision_id` for the requested recurrence root |
+| `/api/v2/agenda` | `expected_access_epoch` only; source versions are fenced through the authorized candidate snapshot and cursor |
+
+For direct item-bound reads, a supplied item/recurrence guard that does not match
+the admitted current fact returns 409 `version_changed`, without current hidden
+values; a supplied recurrence revision when the item has no recurrence also mismatches.
+Malformed guards are `invalid_request`; root admission precedes version comparison.
+Agenda MUST reject either singular item/recurrence guard as `invalid_request`, even
+when explicit item selection contains only one ID. No per-item guard map is introduced.
+Agenda entries still expose their authorized canonical versions; those are result
+facts, not a single expected version for the whole query.
+
+Before release, revalidate selected account/subject revisions, the selected
+`account_subject_binding_revision`, and access epoch
 in a fresh authorization snapshot, including expiry of grants/memberships without an
 epoch write. Recheck authorizations actually used for disclosed facts and time sources.
 Loss or gain of query-visible authorization during assembly invalidates the result;
@@ -281,13 +309,22 @@ Future activation as well as expiry needs coverage in the authorization snapshot
 This is an implementation gate, not a claim that v1 already proves every such race.
 
 Before release also fence versions of the authorized facts used for time and sections;
-changed relevant item/recurrence/binding facts require retry (`version_changed` for
-direct reads, `access_changed` for stale cursor context). A new result is current at
+changed relevant item/recurrence/temporal-binding facts require retry (`version_changed`
+for direct initial reads, `access_changed` for agenda snapshot changes or stale cursor
+context). The agenda source fence applies on the first page as well as continuation;
+no singular request guard is needed to detect those changes. A new result is current at
 that release fence; later changes cannot retract bytes already released. Binding
 source checks are limited to necessary temporal dependencies, not downstream followers.
 
+In v2 cursor and release-fence terminology, `account_subject_binding_revision` is
+the revision of the selected account-to-subject identity binding (the existing v1
+field is named `binding_revision`). It is not a temporal dependency. Canonical
+`temporal_binding_revision_id` identifies a relative temporal binding revision and
+belongs only to authorized temporal-source/section evidence and its source fence.
+This naming clarification does not rename persisted artifacts or any v1 field.
+
 Integrity-protected opaque cursors bind the read contract, ledger/realm, account/subject
-and selected binding revision, selection ID, access epoch, normalized query/includes/
+and `account_subject_binding_revision`, selection ID, access epoch, normalized query/includes/
 limits, authorized source snapshot, section or stream kind, last ordering key, and
 original expiry. Preserve the existing 15-minute maximum and never renew on pagination.
 Each next-page request rechecks source versions and current authorization; changed
@@ -355,7 +392,8 @@ schemas and explicit outer version. Unknown versions deny; no silent downgrade.
 
 Codification must add separate schema definitions for core field projections,
 time/section unions, occurrence overlays, agenda entry/unplaced variants, summaries,
-generic errors, expected-version guards, cursor preimages, and capability discovery.
+generic errors, route-specific expected-version guards from Section 7, cursor preimages,
+and capability discovery. Do not add singular item-version guards to agenda schemas.
 Publish an exhaustive field-to-authority mapping, particularly for source fields,
 subject roles, location snapshots, stored rendered text, and authoring receipts.
 Pin exact transitive canonical dependencies without mutating old pins merely to pass
@@ -397,10 +435,10 @@ content to compare literally.
 | IR-08 | Resolved empty recurrence range, truly unscheduled task, and unresolved time | Three distinct states per Section 4; unresolved is never reported as complete-empty or not_scheduled |
 | IR-09 | Moves/exclusions/overrides, terminal instance, all-day/local/UTC windows, DST | New reads match canonical dates, start/end, effective lifecycle/actionability and occurrence identities without Kinflow expansion |
 | IR-10 | Access revoked or granted during assembly; membership expires or activates without epoch write | Release fence invalidates the whole affected read; no mixed authorization snapshot or optional-section downgrade |
-| IR-11 | Item/recurrence/source/binding changes during assembly or pagination | Expected-version guards and source fences reject stale results; unrelated hidden follower changes alone do not invalidate independent event facts |
-| IR-12 | Multiple pages of occurrences, agenda and related sections; unplaced items | Deterministic ordering, combined limit, no duplicates/skips, valid authorized snapshots, fixed expiry; replay across account/selection/query/section/epoch denies |
+| IR-11 | Item/recurrence/source/binding changes during assembly or pagination | Direct-read guards reject mismatches; agenda rejects singular item/recurrence guards even for one explicit ID and fences candidate versions on first/next pages; unrelated hidden follower changes alone do not invalidate independent event facts |
+| IR-12 | Multiple pages of occurrences, agenda and related sections; unplaced items | Deterministic ordering, combined limit, no duplicates/skips, valid authorized snapshots, fixed expiry; replay across account/selection/query/section/epoch denies; account_subject_binding_revision and temporal_binding_revision_id are distinct facts and invalidate only under their respective authority/source rules |
 | IR-13 | Read succeeds, then attempt update/cancel/complete with unavailable bound item | Existing edit/owner/reference restrictions still deny; no partial effects or authorization from read success; replay unchanged |
-| IR-14 | Hidden graph grows or nested rendered/receipt/history content contains protected references | No hidden-dependent counts/cursors/diagnostics, serialization leak, or event traversal-capacity denial; indivisible protected evidence omitted safely |
+| IR-14 | Hidden graph grows or nested rendered/receipt/history content contains protected references | No hidden-dependent counts/cursors/diagnostics, serialization leak, or event traversal-capacity denial; v2 authoring_receipt is explicitly requested, authorized-only and null for absent/undisclosable evidence; no v1 include addition or receipt creation; indivisible protected evidence omitted safely |
 | IR-15 | Old client/server, new client/server, unknown capability, rollback | Exact v1 contracts and failures preserved; v2 never mislabeled as canonical complete response; unknown/lost capability clears caches and stays explicitly unsupported |
 | IR-16 | Kinflow identity switch, late response, unavailable optional details, unplaced task | Public contract suffices to render event occurrences and safe limitations; no parsing error messages, recurrence computation, hidden-task explanation, or stale deadline |
 

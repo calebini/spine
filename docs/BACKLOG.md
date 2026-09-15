@@ -37,9 +37,12 @@ status labels in the same change. Routine task updates do not change spec author
 
 ### SPINE-015 — Read authorized activities independently of unavailable linked resources
 
-**Status:** Needs decision — supporting draft, compatibility assessment, proposed
-test matrix, and Kinflow handoff prepared on 2026-09-13; contract ratification and
-subsequent implementation remain pending. **Dependencies:** Existing trusted web
+**Status:** In progress — selected by the operator on 2026-09-15. The supporting
+draft, compatibility assessment, proposed test matrix and Kinflow handoff exist;
+the approved ten-file bounded audit's one major and two minor findings have been
+manually patched in Draft v0.2 and the Kinflow handoff; focused recheck is pending.
+Contract ratification, machine contracts and runtime delivery remain pending.
+**Dependencies:** Existing trusted web
 permissions, canonical recurrence/agenda and temporal-binding contracts; acceptance
 of the new versioned read projection and disclosure rules before machine-contract
 codification or runtime work. This concrete item is independent of the withdrawn
@@ -79,6 +82,41 @@ defines read boundaries, completeness, availability, consistency, compatibility,
 and proposed contract tests. [Kinflow handoff](INDEPENDENT_READS_KINFLOW_HANDOFF.md)
 defines consumer migration and rendering behavior. Local Markdown link and consistency
 checks cover this specification delivery; no staging verification is claimed.
+
+**Audit evidence and next step:**
+`whetstone_runs/independent-activity-reads-contract-audit-001/audit-notes.md` lists
+the ten-file reviewer inventory and focused consistency questions. The approved review
+returned `needs_revision` on 2026-09-15 (0 blockers, 1 major, 2 minors, 0 nits).
+Findings: scope singular expected-version guards to direct reads versus multi-item
+agenda; distinguish selected account-subject identity binding revisions from temporal
+binding revisions; clarify the v2 authoring-receipt projection's source/include semantics
+without silently adding a v1 include option. Cited passages were checked locally.
+Recommended manual choices: direct-read singular guards, agenda snapshot/cursor fencing;
+explicit identity-binding terminology; independently specified v2 receipt evidence.
+The operator-approved manual patch was completed on 2026-09-15 in Draft v0.2 and the
+Kinflow handoff. Direct reads accept singular expected item/recurrence guards; agenda
+rejects them and uses candidate-snapshot/cursor fences. V2 explicitly distinguishes
+`account_subject_binding_revision` from `temporal_binding_revision_id`. The requested
+v2 authoring-receipt singleton projects authorized creation evidence; absent and
+undisclosable evidence both yield null, without adding v1 includes or creating receipts.
+IR-11/12/14 now include matching future behavioral oracles. Seven documentation and
+two implemented-declaration tests passed; `git diff --check` passed. No v1 schema,
+runtime, canonical spec, or other-repository edits. The patch has not been re-audited;
+it does not ratify the complete contract or authorize runtime work.
+
+Report, feedback, brief and manifest are retained under that root's `change_audit/`.
+Invocation/manifest pin Sol, bundled CLI `0.154.0-alpha.6.2`, consistency and launcher
+medium reasoning. Returned model-authored reviewer metadata says `gpt-5`, inconsistent
+with the invocation/manifest; it is not independent model attestation. All ten raw
+input hashes remained unchanged and all normalized manifest hashes matched.
+`boundary_preserved=false` is the findings-based major verdict, not independent proof
+of a runtime leak; no staging verification or convergence claim. No source specs,
+runtime, shared defaults, commits or pushes changed during this audit.
+
+Follow review with targeted clarification/ratification, then machine schemas,
+registry/cursor and field-authority mappings plus IR-01–IR-16 fixtures before runtime.
+Local pickup inspection reconfirmed the read-side `bound_items` calls and existing
+connected-item checks; no runtime or source-spec change was made for preparation.
 
 ## Roadmap candidates — not selected work
 
@@ -251,6 +289,30 @@ never authorizes deletion of canonical evidence.
 **Source:** [Storage lifecycle horizon](IMPLEMENTATION_PLAN.md#future-horizon-bounded-ledger-storage-lifecycle).
 
 ## Completed
+
+### SPINE-024 — Seed the Impetus HLD from the shared architecture
+
+**Status:** Done (2026-09-15; proposed HLD drafting, not audited or implemented).
+**Dependencies:** Shared checkpoint `082dc7f`, SPINE-019–023.
+**Outcome:** Wrote `../impetus/specs/architecture.md`, `0.1.0-draft.1`, directly
+in the operator-selected repository. It references shared architecture
+`cortext.cross-system-execution` at exact Spine commit
+`082dc7fbed4895d93314d0d331ea3874c74dc640`. It defines execution/controller/backend/
+capability boundaries, native evidence and governance ownership, limits and uncertain
+call recovery, source-freshness and advisory preservation, and future-profile boundaries.
+Provider/backend, transport, native mappings, storage and numeric budgets remain open.
+
+**Handoff:** Updated Impetus overview and README and added the HLD to its existing
+scaffold verifier's required files. Preserved the otherwise uncommitted seed scaffold;
+no runtime folders or machine-contract placeholders were created. The Impetus project
+thread can refine/review the HLD and select the bounded first-slice choices before
+machine contracts. No automatic adoption or runtime compatibility is claimed.
+
+**Verification:** Impetus `python3 scripts/verify_repo.py` passed (structure/local
+links/template checks only). New/edited Impetus files have no trailing whitespace;
+all five pinned Spine source paths exist at the stated local commit. Remote availability
+was not tested or implied. Spine `git diff --check` passed. No nested audit, external
+execution, deployment, commit or push; Spine source specifications were unchanged.
 
 ### SPINE-023 — Focused re-audit of advisory authority/freshness clarifications
 
