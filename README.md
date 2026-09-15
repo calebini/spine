@@ -349,6 +349,10 @@ Start with the document that matches the job:
 - **Understand the product:** [`specs/overview.md`](specs/overview.md)
 - **Understand ownership and boundaries:**
   [`specs/architecture.md`](specs/architecture.md)
+- **Review the proposed shared execution architecture:**
+  [`specs/cross-system-execution.md`](specs/cross-system-execution.md) — versioned
+  coordination, governance, execution and result-consumption boundaries; draft,
+  not an implemented cross-system capability.
 - **Review the first trusted web API slice:**
   [`specs/trusted-multi-operator-web-api.md`](specs/trusted-multi-operator-web-api.md) —
   honest identity selection, scheduling, provisioning and permission-aware readback;

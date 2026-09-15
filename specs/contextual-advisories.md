@@ -1,9 +1,9 @@
 # Spine Scheduled Contextual Advisories
 
-Status: Draft v0.3.2; profile-boundary protection amendment drafted; not implemented
+Status: Draft v0.3.4; consumption authority and staged freshness clarified; not implemented
 Scope: One notification-template activation requesting at most one governed, bounded, read-only agent run, with one notification delivery path for accepted enrichment or ordinary fallback
 Created: 2026-08-18
-Updated: 2026-09-13
+Updated: 2026-09-15
 
 ## 1. Purpose
 
@@ -34,6 +34,13 @@ and proof obligations needed to run that experiment. It does not define a genera
 agent platform.
 
 ## 2. Naming and Authority Invariant
+
+The proposed [Cross-System Execution Architecture](cross-system-execution.md)
+(`cortext.cross-system-execution`, `0.1.0-draft.1`) describes the reusable role
+boundaries. This is a design reference, not adoption or implementation compatibility;
+all advisory requirements in this document remain binding for this profile.
+Use the shared document's exact-source reference rules when checkpointing downstream
+designs. General execution extensibility does not admit additional advisory modes.
 
 Normative cross-system contracts MUST name roles and protocols, not repositories,
 packages, deployments, or product brands.
@@ -67,7 +74,9 @@ binding is operational metadata rather than canonical coordination truth.
    occurrence, policy-version, context-snapshot, capability-request, and usefulness-
    deadline facts.
 7. **Freshness is checked more than once.** Current source truth is checked before
-   dispatch and again before accepting an outcome or materializing derivative work.
+   submission, at dispatch, and again before consuming a governance-accepted outcome
+   or materializing derivative work. Governance alone accepts or rejects evidence;
+   Spine's freshness checks determine local consumption eligibility, not native acceptance.
    Delivery continues to use ordinary attempt-start freshness.
 8. **The agent cannot send.** An advisory or clarification becomes normal Spine
    notification work. Only the existing attempt-gated delivery path may contact a
@@ -562,7 +571,8 @@ One successful advisory follows this sequence:
 6. The governance authority binds the submission to its native governed intent and
    returns a replayable decision reference.
 7. If allowed, it creates native dispatch authorization and dispatches one bounded
-   invocation to the agent runtime.
+   invocation to the agent runtime only after the current Spine freshness recheck
+   in Section 9 succeeds; the check before submission is not sufficient.
 8. The runtime may call only granted read-only tools and submits one terminal result as
    produced evidence.
 9. The governance authority accepts or rejects that evidence through its native
@@ -695,11 +705,24 @@ also compares current values of all bound source facts, including versions of an
 disclosed related-item facts. A change in capture time alone is not staleness; a
 changed bound source fact cannot be excused by reusing the stored integrity hash.
 
-If freshness fails before dispatch, Spine cancels or supersedes the advisory work and
-does not submit it. If source truth changes during execution, the run and its evidence
-remain auditable, but Spine rejects the outcome for derivative materialization with a
-reason-coded stale classification. If source truth changes after derivative work is
-created, ordinary notification reconciliation and attempt-start freshness apply.
+If the initial freshness check fails before submission is recorded or sent, Spine
+cancels or supersedes the advisory work with a reason-coded stale classification and
+MUST NOT create or send that submission.
+
+If the dispatch freshness recheck fails after submission persistence or transmission
+but before execution starts, Spine records the stale classification and cancels or
+supersedes the advisory work. The immutable submission and any native references MUST
+remain auditable; the native dispatch path MUST prevent execution on that stale
+submission. It MUST NOT rewrite the snapshot or erase the submission to simulate
+non-submission. Replay resolves the same submission and recorded stale/dispatch-blocked
+disposition (or the pending native disposition if the handoff is incomplete); it MUST
+NOT launch execution, refresh the snapshot, or acquire a new run through replay.
+
+If source truth changes during execution, the run and its evidence remain auditable,
+but Spine refuses consumption/materialization with a reason-coded stale classification.
+This local refusal MUST NOT change governance's native evidence-acceptance decision.
+If source truth changes after derivative work is created, ordinary notification
+reconciliation and attempt-start freshness apply.
 
 No component may claim that an in-flight model call was undone. Already completed tool
 or model attempts remain historical evidence, while stale results lose authority to
@@ -742,6 +765,8 @@ decision. There MUST NOT be two competing authorities for the same attempt fact.
 The first contract family must distinguish at least:
 
 - source stale before submission;
+- source stale after submission but before dispatch, with the preserved submission
+  and native dispatch-blocking disposition separately observable;
 - submission replay mismatch;
 - governance blocked;
 - governance approval required but unsupported by the selected implementation;
@@ -860,7 +885,12 @@ The machine-contract fixture set MUST additionally prove:
 - unchanged source facts observed at a later time retain identities and freshness,
   while changed bound item, occurrence, location, or related-item facts fail freshness;
 - same-key changed submission bytes never cross the governance boundary;
-- a source change after submission but before execution is checked at dispatch;
+- initial freshness failure records stale work without creating or sending a submission;
+- a source change after submission persistence or transmission but before execution
+  blocks dispatch, preserves immutable submission/native references, and replays without
+  model/tool execution, snapshot replacement or a new run, including an incomplete handoff;
+- a source change during execution causes a reason-coded local consumption refusal
+  without rewriting native evidence or its governance acceptance decision;
 - materialization failure preserves acceptance evidence without partial derivative work,
   and retry/replay after an already committed bundle returns its existing identities;
 - accepted clarification uses the same policy-bound target/profile and attempt gate as

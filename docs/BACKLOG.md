@@ -252,6 +252,124 @@ never authorizes deletion of canonical evidence.
 
 ## Completed
 
+### SPINE-023 — Focused re-audit of advisory authority/freshness clarifications
+
+**Status:** Done (2026-09-15, reviewer-only focused recheck).
+**Dependencies:** SPINE-021 findings and SPINE-022 manual patch.
+**Outcome:** `cross-system-execution-contract-audit-003` returned `pass`, zero
+blocker/major/minor/nit findings, `boundary_preserved=true`, next action `none`.
+The two prior findings were not raised again; the manual patch addresses their
+specific passages. Empty feedback supplies no per-finding closure explanation or
+exhaustive coverage proof. This is bounded consistency evidence, not convergence,
+cross-repo adoption or runtime-readiness certification.
+
+**Evidence:** Local ignored artifacts under
+`whetstone_runs/cross-system-execution-contract-audit-003/change_audit/` include
+the report, feedback, manifest and brief. Explicit invocation and manifest pin
+`gpt-5.6-sol`, bundled CLI `0.154.0-alpha.6.2`, profile `consistency`; launcher
+reasoning remains `medium`. Returned model metadata also identifies Sol this time.
+All four raw hashes remained unchanged and all four normalized manifest hashes
+matched; `git diff --check` passed. No source spec edits, Editor, additional model
+calls, shared-default changes, commit or push were performed.
+
+### SPINE-022 — Clarify advisory consumption and staged freshness checks
+
+**Status:** Done (2026-09-15, manual specification patch; subsequent re-audit passed in SPINE-023).
+**Dependencies:** Operator-approved findings from SPINE-021 retry 002.
+**Outcome:** [Contextual advisories](../specs/contextual-advisories.md) Draft v0.3.4
+reserves native evidence acceptance for governance; Spine refuses local consumption
+when stale. Initial stale work creates/sends no submission; a later failed dispatch
+recheck preserves the immutable submission/native references and blocks execution.
+Replay resolves that preserved state without new execution or snapshot replacement,
+including an incomplete native handoff. Lifecycle, failure distinctions and future
+fixture obligations align with those rules; exact native mappings remain deferred.
+
+**Verification:** 7 agent-documentation tests and 2 implemented-contract-declaration
+tests passed; `git diff --check` passed. Acceptance-reference §7.5, fallback/branch
+selection §8.1, explicit recovery §8.2 and idempotency/attempt accounting §10 remained
+byte-identical to their pre-patch contents. README still routes to the authoritative
+spec index. Only the advisory source spec and this tracker were edited for this task;
+earlier uncommitted work was preserved. No runtime, machine-contract, other-repository,
+editor workflow, nested audit, commit or push changes.
+
+### SPINE-021 — Bounded audit of the shared execution architecture
+
+**Status:** Done (2026-09-15, reviewer-only audit; findings patched in SPINE-022 and rechecked in SPINE-023).
+**Dependencies:** SPINE-020 draft; no downstream adoption or runtime implementation implied.
+
+**Outcome:** Retry 002 completed with `needs_revision`: 0 blockers, 2 majors,
+0 minors, 0 nits. Both findings are in `specs/contextual-advisories.md`:
+`fb_acceptance_consumption_terms` separates governance evidence acceptance from
+Spine consumption/freshness checks (§3 invariant 7 and §9);
+`fb_freshness_submission_sequence` separates initial pre-submission refusal from
+post-submission dispatch prevention, preserving immutable submission/replay evidence (§§8–9).
+The cited passages were checked locally. No source-spec patch was made.
+
+**Evidence:** `whetstone_runs/cross-system-execution-contract-audit-002/change_audit/`
+contains the report, feedback, brief and manifest (local ignored artifacts).
+Invocation and manifest pin `gpt-5.6-sol`, bundled CLI `0.154.0-alpha.6.2`,
+consistency profile and launcher reasoning `medium`. The feedback's model-authored
+reviewer metadata incorrectly says `gpt-5`; it is inconsistent with the explicit
+invocation/manifest and is not independent model attestation.
+
+**Verification and limits:** All ten raw input hashes remained unchanged and all ten
+normalized manifest hashes matched. `git diff --check` passed. Report
+`boundary_preserved=false` follows the major-finding verdict; this is not an
+independent preservation/coverage test or a convergence claim. No Editor, native
+repository source expansion, shared default change, commit or push occurred.
+Attempt 001 is retained separately as `audit_failed`: CLI `0.142.0` was rejected
+before semantic review. No installation upgrade was needed for retry 002.
+
+### SPINE-020 — Draft the versioned shared execution architecture
+
+**Status:** Done (2026-09-15, Codex; proposed specification drafting only).
+**Dependencies:** SPINE-017–019 protection and native-handoff findings.
+
+**Outcome:** Added [Cross-System Execution Architecture](../specs/cross-system-execution.md),
+ID `cortext.cross-system-execution`, document version `0.1.0-draft.1`. It separates
+coordination, governance, execution, capabilities and result consumption, with explicit
+budget/evidence/freshness and retry boundaries. Downstream exact references identify
+the version, source repository/path and containing Git commit; design reference,
+adoption and runtime conformance remain distinct. Checkpointed revisions are immutable;
+further drafts increment the draft revision. No freeze manifest or hash gate was added.
+
+**Preservation:** Added links in orientation, architecture and advisory specs and
+recorded the Impetus handoff sequence in the roadmap. Original architecture/advisory
+body lines remain verbatim and in order; only declared status/date headers changed.
+The full advisory profile remains authoritative for its required behavior. No other
+repository, runtime, machine schema, registry, package version or migration changed.
+The separate native-handoff report from SPINE-019 is included in the same checkpoint.
+
+**Verification:** Seven agent-documentation tests and two implemented-contract
+declaration tests passed; 87 local links resolved, whitespace and diff checks passed.
+These checks do not establish semantic preservation or cross-system conformance.
+At drafting completion the shared document was not yet audited; see SPINE-021–023
+for the subsequent audit, patch and passing focused recheck. It remains proposed,
+not ratified. Other components have not
+adopted it; exact downstream checkpoint references can be made after its commit exists.
+The Impetus HLD, native contracts, backend selection and runtime work remain separate.
+
+### SPINE-019 — Investigate native advisory execution handoff
+
+**Status:** Done (2026-09-15, Codex; operator-selected investigation).
+**Dependencies:** Protection amendment and bounded review, SPINE-017–018.
+
+**Outcome:** The [native handoff investigation](design-notes/advisory-native-handoff-investigation.md)
+maps Spine's first advisory profile to native drafts, actual code and focused tests.
+Intent admission, pinned policy, evidence persistence, approvals and replay are real;
+the current dispatch path records local success without research execution. Native
+scoped authorization, a bounded runner, advisory evidence validation and Spine freshness
+handoff still need contract/runtime work. A field-only adapter cannot close that gap.
+The note recommends a bounded native execution extension paired with the Spine bridge,
+not completion of a general workflow platform. Runner and transport choices remain open.
+
+**Evidence:** Spine base `560ecc4`, native base `8afa61f`; 55 focused native tests
+passed using temporary databases, covering runtime API, evidence, replay, arbitration
+and intake. All 19 report links and diff hygiene passed. Native pre-existing dirty
+files remained untouched. No normative specifications, runtime code, deployments,
+provider calls, or audits changed. This is not native full-spec or live integration
+qualification; see the report's evidence boundary and declared Tickerd-version mismatch.
+
 ### SPINE-018 — Bounded review of the advisory protection amendment
 
 **Status:** Done — reviewer-only audit completed on 2026-09-14 (Codex); the operator-

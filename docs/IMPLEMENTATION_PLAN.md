@@ -462,6 +462,13 @@ The intended boundary is:
 
 The delivery sequence should be:
 
+Shared architecture drafting (SPINE-020) follows the protection and native-handoff
+investigation. [Cross-System Execution Architecture](../specs/cross-system-execution.md)
+is the proposed versioned source for the Impetus HLD and later component mappings.
+Component specs reference an exact document version and committed source, without
+copying authority or claiming automatic adoption. The initial draft does not select
+a runner backend or close the native execution and advisory machine-contract gaps.
+
 Before the advisory machine-contract step, apply the narrowly scoped architectural
 protection amendment in [Decision 0005](../specs/decisions/0005-profile-scoped-advisory-execution.md)
 and compare it against the [preservation checklist](design-notes/advisory-protection-preservation-checklist.md).

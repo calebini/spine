@@ -1,6 +1,6 @@
 # Spine Architecture
 
-Status: Draft v0.2.3
+Status: Draft v0.2.4
 Scope: Component boundaries, module posture, and runtime relationships
 
 ## 1. Architectural Doctrine
@@ -237,6 +237,12 @@ One fresh success is one database transaction containing the complete new item b
 An explicit or named context-default delivery target resolves only to an existing canonical route. Transport context cannot approve, create, update, or send through that route. The governance authority retains approval authority, and adapters remain inaccessible until later durable work processing passes the ordinary side-effect-attempt gate.
 
 ## 9. Scheduled Contextual-Advisory Boundary
+
+[Cross-System Execution Architecture](cross-system-execution.md), architecture
+`cortext.cross-system-execution` at `0.1.0-draft.1`, is the proposed shared design
+reference for coordination, governance, execution and consumption. This is a design
+link, not cross-repo adoption or runtime conformance. The advisory profile below
+retains its complete requirements; the shared draft does not supersede them.
 
 `specs/contextual-advisories.md` defines the draft cross-system boundary for one notification-template activation to request at most one governed, bounded, read-only agent run. Accepted enrichment and ordinary-reminder fallback share one logical delivery identity; a failed or unavailable enrichment preserves the ordinary reminder only while it remains independently eligible. Accepted `no_action` means ordinary fallback unless intentional silence was explicitly permitted. Persisted content selection prevents late advice from creating a second notification. Spine remains the coordination and schedule authority; the governance authority owns authorization and evidence acceptance; the agent runtime owns bounded reasoning and allowed tool use; the existing delivery path owns contact with a destination. Activation schemas and runtime support are not yet implemented.
 
