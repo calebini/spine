@@ -1,0 +1,37 @@
+{
+  "contract_version": "spine.trusted-web-read-schema-pins.v1",
+  "status": "contract_only",
+  "schema_roots": [
+    "trusted-web-read-agenda-request.schema.json",
+    "trusted-web-read-agenda-response.schema.json",
+    "trusted-web-read-capabilities.schema.json",
+    "trusted-web-read-cursor.schema.json",
+    "trusted-web-read-error.schema.json",
+    "trusted-web-read-occurrences-request.schema.json",
+    "trusted-web-read-occurrences-response.schema.json",
+    "trusted-web-read-registry.schema.json",
+    "trusted-web-read-schedule-request.schema.json",
+    "trusted-web-read-schedule-response.schema.json"
+  ],
+  "schemas": {
+    "trusted-web-read-agenda-request.schema.json": "d868f94742d7c9ea5348c6a08f88652f7692676840c27fdbca51fb65dd0b68f0",
+    "trusted-web-read-agenda-response.schema.json": "5aa58d2a53415c94d2c4d142217a2ef497ede3d4c5440da4bf050289b83f121a",
+    "trusted-web-read-capabilities.schema.json": "61506605fbf91f4e2335403aa646bc1b864ceec1cd81353b22f65a59d779b489",
+    "trusted-web-read-cursor.schema.json": "9ffa5c9e1e8157aac8fcf6f9ceb735d81d72a79a24e1ed989b296ff53d57b31b",
+    "trusted-web-read-error.schema.json": "586af8b8d541ad1fa9f2803f6df5f8842e3b068c9f40d127db065527b7c90dac",
+    "trusted-web-read-occurrences-request.schema.json": "32c3121cbdb0bf3a0e82db23cdb9268934beed12529e43173bfa27f9c92fd93a",
+    "trusted-web-read-occurrences-response.schema.json": "1977c0ce84e9274bec64d1500860d022ea0d8041f32e2fc077b0dbbb9954f3f4",
+    "trusted-web-read-registry.schema.json": "fe8db071969cd8ab08cfff81bfc2a9a90ea30af2d5510d86f24d0d1a1adf3700",
+    "trusted-web-read-schedule-request.schema.json": "93c5153f86ac948970a70c7c338e0aed4380689f8cb5a7048acdc79817992235",
+    "trusted-web-read-schedule-response.schema.json": "63f36991ca7121ac28509df99a0fa537b694aee744b9374be0c32297479fe055",
+    "trusted-web-read-types.schema.json": "932dde0da60a816c0c4b950c4bd1004e999c402518cf97c7d5b739ac0e8e17d4"
+  },
+  "artifacts": {
+    "spine.trusted-web-read-registry.v1.json": "64963bd7a55ebbc7f14c7dc37d604e83e39ad6e276d0e8aaa39e486bdfa948be",
+    "trusted-web-read-cursor-vectors.v2.json": "ad1693ffaf2bbe0d85151af72c1204af9a185f46d033156a6562194ba242fc66",
+    "trusted-web-read-cursor.v2.json": "99e481d5fa6b74b23a5eeca12eff7889da6f32b8cf8624c6ef3f41dea3d1c4d8",
+    "trusted-web-read-normalization-vectors.v1.json": "edc20f4d87fc25fef321d1eef0b01fa9676010b0ef1d466beb42c7c4d8faa7ef",
+    "trusted-web-read-normalization.v1.json": "d473805d9831a000da04c0058a369a217a3ad0a79cc8c22bb640c5153da65d79",
+    "trusted-web-read-projection.v1.json": "0da77b9800c12d4acdbbee9b581d3ca84dfd5837240d411bef8632067bb31342"
+  }
+}

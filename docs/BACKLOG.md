@@ -1,6 +1,6 @@
 # Spine Backlog
 
-Last updated: 2026-09-15
+Last updated: 2026-09-16
 
 This is the single work queue for Spine development. The
 [implementation plan](IMPLEMENTATION_PLAN.md) explains roadmap direction and delivery
@@ -40,12 +40,14 @@ status labels in the same change. Routine task updates do not change spec author
 **Status:** In progress — selected by the operator on 2026-09-15. The supporting
 draft, compatibility assessment, proposed test matrix and Kinflow handoff exist;
 the approved ten-file bounded audit's one major and two minor findings have been
-manually patched in Draft v0.2 and the Kinflow handoff; focused recheck is pending.
-Contract ratification, machine contracts and runtime delivery remain pending.
+manually patched in Draft v0.2 and the Kinflow handoff, checkpointed at `354ed7e`.
+Focused recheck 002 passed on 2026-09-16 against checkpoint `354ed7e`, with no findings.
+The operator ratified the read design and authorized machine-contract codification
+on 2026-09-16. That contract-only step is complete; implementation remains pending.
 **Dependencies:** Existing trusted web
-permissions, canonical recurrence/agenda and temporal-binding contracts; acceptance
-of the new versioned read projection and disclosure rules before machine-contract
-codification or runtime work. This concrete item is independent of the withdrawn
+permissions, canonical recurrence/agenda and temporal-binding contracts. Read-design
+ratification is complete; review the codified machine contract before runtime work.
+This concrete item is independent of the withdrawn
 SPINE-001–003 review tasks.
 
 **Observed failure (operator report, not reproduced against staging):** A recurring
@@ -73,7 +75,7 @@ authorized events with unowned or inaccessible followers; normally visible autho
 relations; disclosure-safe empty/incomplete context; generic direct denial; unavailable
 task time without a fabricated deadline; epoch/version/pagination races; unchanged
 cross-resource write protection; and Kinflow rendering from public canonical facts.
-Before runtime delivery, ratify the draft, codify exact schemas/registry/version and
+Before runtime delivery, review the codified schemas/registry/version and
 consumer migration changes, and implement these behavioral oracles. Documentation
 alone does not close the feature.
 
@@ -101,8 +103,8 @@ v2 authoring-receipt singleton projects authorized creation evidence; absent and
 undisclosable evidence both yield null, without adding v1 includes or creating receipts.
 IR-11/12/14 now include matching future behavioral oracles. Seven documentation and
 two implemented-declaration tests passed; `git diff --check` passed. No v1 schema,
-runtime, canonical spec, or other-repository edits. The patch has not been re-audited;
-it does not ratify the complete contract or authorize runtime work.
+runtime, canonical spec, or other-repository edits. The subsequent focused re-audit
+passed; it does not ratify the complete contract or authorize runtime work.
 
 Report, feedback, brief and manifest are retained under that root's `change_audit/`.
 Invocation/manifest pin Sol, bundled CLI `0.154.0-alpha.6.2`, consistency and launcher
@@ -115,8 +117,37 @@ runtime, shared defaults, commits or pushes changed during this audit.
 
 Follow review with targeted clarification/ratification, then machine schemas,
 registry/cursor and field-authority mappings plus IR-01–IR-16 fixtures before runtime.
+The focused recheck inventory and questions are in
+`whetstone_runs/independent-activity-reads-contract-audit-002/audit-notes.md`.
+It used Sol and bundled CLI `0.154.0-alpha.6.2`, consistency profile and launcher
+medium reasoning. Report: `pass`, zero blocker/major/minor/nit findings,
+`boundary_preserved=true`, next action `none`. The three prior findings were not
+raised again; empty feedback provides no per-finding explanation or exhaustive
+coverage proof. All seven raw input hashes remained unchanged and normalized
+manifest hashes matched; source specs matched checkpoint `354ed7e` before review.
+Report, feedback, manifest and brief are under that root's `change_audit/`.
+No source edits, Editor, runtime changes, commit or push occurred during recheck.
+Nine documentation/declaration checks passed before checkpointing. Next selected
+step remains contract ratification/codification, not a claim of runtime conformance.
 Local pickup inspection reconfirmed the read-side `bound_items` calls and existing
 connected-item checks; no runtime or source-spec change was made for preparation.
+
+**Machine-contract delivery (2026-09-16):** Read design ratified as v1. The
+[companion](../specs/independent-activity-read-contracts.md) and separate
+`spine.trusted-web-read-registry.v1` codify two v2 command projections, agenda,
+capability discovery, explicit temporal/section unions, field-authority mappings,
+route-specific guards, authorized-only summaries and creation-receipt selection.
+Eleven JSON schemas, independent schema/artifact pins, fixed-expiry cursor protocol,
+five computed normalization vectors, one MAC vector and 53 schema fixtures are
+provided. The IR-01–IR-16 behavioral matrix remains explicitly `runtime_pending`.
+Offline semantic tests do not certify privacy, domain expansion, races or deployment.
+No v1 contract/pin, runtime module, installed registry or packaged capability changed.
+Verification: 73 tests and 202 subtests passed across the new offline contracts,
+existing trusted-web contracts/runtime, implemented declarations, agent documentation,
+and recurrence/schedule-operation/temporal-binding fixtures. Ruff, Markdown file-target
+checks and `git diff --check` passed. These are local checks, not staging or a new audit.
+Next step: bounded machine-contract audit, then separately authorized implementation
+and Kinflow migration. No audit, commit or push was performed in this delivery.
 
 ## Roadmap candidates — not selected work
 

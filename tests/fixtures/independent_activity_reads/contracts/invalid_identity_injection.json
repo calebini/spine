@@ -1,0 +1,7 @@
+{
+  "contract_version": "spine.trusted-web-api.v2",
+  "request": {
+    "item_id": "event-science"
+  },
+  "actor_subject_id": "injected"
+}

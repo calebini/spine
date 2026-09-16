@@ -1,0 +1,75 @@
+{
+  "contract_version": "spine.trusted-web-api.v2",
+  "ok": true,
+  "identity_basis": "self_selected",
+  "account_id": "account-operator",
+  "subject_id": "subject-operator",
+  "selection_id": "selection-1",
+  "account_revision": "1",
+  "subject_revision": "1",
+  "account_subject_binding_revision": "1",
+  "access_epoch": "4",
+  "result_contract": "spine.trusted-web-occurrences.v1",
+  "result": {
+    "activity": {
+      "item_id": "task-drive",
+      "item_type": "task",
+      "current_version": "2",
+      "title": "Drive to class",
+      "status": "active",
+      "detail_status": "open",
+      "time": {
+        "availability": "unavailable",
+        "reason_code": "temporal_facts_unavailable"
+      },
+      "recurrence": {
+        "recurrence_set_id": "recurrence-science",
+        "recurrence_revision_id": "revision-science-2",
+        "source_item_version": "3"
+      }
+    },
+    "range": {
+      "range_basis": "expressed_time",
+      "range_start": "2026-09-21T00:00:00",
+      "range_end": "2026-09-22T00:00:00"
+    },
+    "coverage": "incomplete",
+    "occurrences": [
+      {
+        "item_id": "event-science",
+        "item_type": "event",
+        "current_version": "3",
+        "source_item_version": "3",
+        "title": "Science class",
+        "occurrence_id": "occurrence-canonical-example",
+        "occurrence_key": "occurrence-key-canonical-example",
+        "recurrence_set_id": "recurrence-science",
+        "recurrence_revision_id": "revision-science-2",
+        "original_scheduled_fact": "2026-09-21T09:00:00",
+        "expressed_scheduled_fact": "2026-09-21T09:00:00",
+        "lifecycle": "active",
+        "actionable": true,
+        "time": {
+          "availability": "available",
+          "anchors": [
+            {
+              "anchor_role": "event_start",
+              "anchor_kind": "local_instant",
+              "local_date": "2026-09-21",
+              "local_time": "09:00:00",
+              "utc_instant": "2026-09-21T07:00:00Z",
+              "timezone": "Europe/Paris",
+              "timezone_database_version": "2026c",
+              "resolution_kind": "unambiguous"
+            }
+          ]
+        },
+        "expressed_schedule_key": "expressed-key-example",
+        "range_basis": "expressed_time"
+      }
+    ],
+    "limit": "50",
+    "has_more": false,
+    "next_cursor": null
+  }
+}

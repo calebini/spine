@@ -1,0 +1,119 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cortext.local/spine/contracts/schemas/trusted-web-read-capabilities.schema.json",
+  "type": "object",
+  "properties": {
+    "contract_version": {
+      "const": "spine.trusted-web-api.v2"
+    },
+    "ok": {
+      "const": true
+    },
+    "identity_basis": {
+      "const": "self_selected"
+    },
+    "account_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256,
+      "pattern": "^[^\\u0000-\\u001f\\u007f]+$"
+    },
+    "subject_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256,
+      "pattern": "^[^\\u0000-\\u001f\\u007f]+$"
+    },
+    "selection_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256,
+      "pattern": "^[^\\u0000-\\u001f\\u007f]+$"
+    },
+    "account_revision": {
+      "$ref": "trusted-web-read-types.schema.json#/$defs/version"
+    },
+    "subject_revision": {
+      "$ref": "trusted-web-read-types.schema.json#/$defs/version"
+    },
+    "account_subject_binding_revision": {
+      "$ref": "trusted-web-read-types.schema.json#/$defs/version"
+    },
+    "access_epoch": {
+      "$ref": "trusted-web-read-types.schema.json#/$defs/version"
+    },
+    "result_contract": {
+      "const": "spine.trusted-web-read-registry.v1"
+    },
+    "result": {
+      "const": {
+        "registry_contract": "spine.trusted-web-read-registry.v1",
+        "cursor_contract": "spine.trusted-web-cursor.v2",
+        "commands": [
+          {
+            "command": "item.occurrences",
+            "path": "/api/v2/commands/item.occurrences",
+            "result_contract": "spine.trusted-web-occurrences.v1",
+            "optional_guards": [
+              "expected_access_epoch",
+              "expected_item_version",
+              "expected_recurrence_revision_id"
+            ],
+            "sections": []
+          },
+          {
+            "command": "schedule.show",
+            "path": "/api/v2/commands/schedule.show",
+            "result_contract": "spine.trusted-web-schedule-view.v1",
+            "optional_guards": [
+              "expected_access_epoch",
+              "expected_item_version",
+              "expected_recurrence_revision_id"
+            ],
+            "sections": [
+              "attempts",
+              "authoring_receipt",
+              "delivery_targets",
+              "notification_profiles",
+              "policies",
+              "primary_location",
+              "related_items",
+              "relations",
+              "subject_roles",
+              "temporal_bindings",
+              "work"
+            ]
+          }
+        ],
+        "agenda": {
+          "path": "/api/v2/agenda",
+          "result_contract": "spine.trusted-web-agenda.v2",
+          "optional_guards": [
+            "expected_access_epoch"
+          ],
+          "sections": [
+            "attempts",
+            "policies",
+            "primary_location",
+            "work"
+          ]
+        }
+      }
+    }
+  },
+  "required": [
+    "contract_version",
+    "ok",
+    "identity_basis",
+    "account_id",
+    "subject_id",
+    "selection_id",
+    "account_revision",
+    "subject_revision",
+    "account_subject_binding_revision",
+    "access_epoch",
+    "result_contract",
+    "result"
+  ],
+  "additionalProperties": false
+}

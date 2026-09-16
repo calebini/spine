@@ -360,9 +360,10 @@ Start with the document that matches the job:
   tracked in the backlog.
   Identity selection is not verified authentication.
 - **Review independent activity reads with unavailable linked resources:**
-  [`specs/independent-activity-reads.md`](specs/independent-activity-reads.md) — proposed
+  [`specs/independent-activity-reads.md`](specs/independent-activity-reads.md) — ratified
   read authorization, temporal availability, and related-context disclosure rules;
-  specification only, tracked as SPINE-015.
+  [machine contracts and fixtures](specs/independent-activity-read-contracts.md)
+  codified; runtime still pending, tracked as SPINE-015.
 - **Review the immediate account/onboarding proposal:**
   [`specs/accounts-and-chat-attribution.md`](specs/accounts-and-chat-attribution.md) —
   accounts and trusted web selection implemented for the backend subset;

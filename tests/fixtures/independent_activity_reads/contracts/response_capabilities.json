@@ -1,0 +1,66 @@
+{
+  "contract_version": "spine.trusted-web-api.v2",
+  "ok": true,
+  "identity_basis": "self_selected",
+  "account_id": "account-operator",
+  "subject_id": "subject-operator",
+  "selection_id": "selection-1",
+  "account_revision": "1",
+  "subject_revision": "1",
+  "account_subject_binding_revision": "1",
+  "access_epoch": "4",
+  "result_contract": "spine.trusted-web-read-registry.v1",
+  "result": {
+    "registry_contract": "spine.trusted-web-read-registry.v1",
+    "cursor_contract": "spine.trusted-web-cursor.v2",
+    "commands": [
+      {
+        "command": "item.occurrences",
+        "path": "/api/v2/commands/item.occurrences",
+        "result_contract": "spine.trusted-web-occurrences.v1",
+        "optional_guards": [
+          "expected_access_epoch",
+          "expected_item_version",
+          "expected_recurrence_revision_id"
+        ],
+        "sections": []
+      },
+      {
+        "command": "schedule.show",
+        "path": "/api/v2/commands/schedule.show",
+        "result_contract": "spine.trusted-web-schedule-view.v1",
+        "optional_guards": [
+          "expected_access_epoch",
+          "expected_item_version",
+          "expected_recurrence_revision_id"
+        ],
+        "sections": [
+          "attempts",
+          "authoring_receipt",
+          "delivery_targets",
+          "notification_profiles",
+          "policies",
+          "primary_location",
+          "related_items",
+          "relations",
+          "subject_roles",
+          "temporal_bindings",
+          "work"
+        ]
+      }
+    ],
+    "agenda": {
+      "path": "/api/v2/agenda",
+      "result_contract": "spine.trusted-web-agenda.v2",
+      "optional_guards": [
+        "expected_access_epoch"
+      ],
+      "sections": [
+        "attempts",
+        "policies",
+        "primary_location",
+        "work"
+      ]
+    }
+  }
+}

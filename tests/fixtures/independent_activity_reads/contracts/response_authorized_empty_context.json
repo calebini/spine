@@ -1,0 +1,95 @@
+{
+  "contract_version": "spine.trusted-web-api.v2",
+  "ok": true,
+  "identity_basis": "self_selected",
+  "account_id": "account-operator",
+  "subject_id": "subject-operator",
+  "selection_id": "selection-1",
+  "account_revision": "1",
+  "subject_revision": "1",
+  "account_subject_binding_revision": "1",
+  "access_epoch": "4",
+  "result_contract": "spine.trusted-web-schedule-view.v1",
+  "result": {
+    "activity": {
+      "item_id": "event-science",
+      "item_type": "event",
+      "current_version": "3",
+      "title": "Science class",
+      "status": "active",
+      "detail_status": "scheduled",
+      "time": {
+        "availability": "available",
+        "anchors": [
+          {
+            "anchor_role": "event_start",
+            "anchor_kind": "local_instant",
+            "local_date": "2026-09-21",
+            "local_time": "09:00:00",
+            "utc_instant": "2026-09-21T07:00:00Z",
+            "timezone": "Europe/Paris",
+            "timezone_database_version": "2026c",
+            "resolution_kind": "unambiguous"
+          }
+        ]
+      },
+      "recurrence": {
+        "recurrence_set_id": "recurrence-science",
+        "recurrence_revision_id": "revision-science-2",
+        "source_item_version": "3"
+      }
+    },
+    "sections": {
+      "related_items": {
+        "availability": "available",
+        "scope": "authorized_only",
+        "coverage": "complete",
+        "entries": [],
+        "has_more": false,
+        "next_cursor": null
+      },
+      "relations": {
+        "availability": "not_requested",
+        "scope": "authorized_only"
+      },
+      "temporal_bindings": {
+        "availability": "not_requested",
+        "scope": "authorized_only"
+      },
+      "primary_location": {
+        "availability": "not_requested",
+        "scope": "authorized_only"
+      },
+      "notification_profiles": {
+        "availability": "not_requested",
+        "scope": "authorized_only"
+      },
+      "policies": {
+        "availability": "not_requested",
+        "scope": "authorized_only"
+      },
+      "work": {
+        "availability": "not_requested",
+        "scope": "authorized_only"
+      },
+      "attempts": {
+        "availability": "not_requested",
+        "scope": "authorized_only"
+      },
+      "delivery_targets": {
+        "availability": "not_requested",
+        "scope": "authorized_only"
+      },
+      "subject_roles": {
+        "availability": "not_requested",
+        "scope": "authorized_only"
+      },
+      "authoring_receipt": {
+        "availability": "available",
+        "scope": "authorized_only",
+        "coverage": "complete",
+        "value": null
+      }
+    }
+  }
+}

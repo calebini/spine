@@ -1,0 +1,65 @@
+{
+  "contract_version": "spine.trusted-web-cursor.v2",
+  "status": "contract_only",
+  "payload_schema": "contracts/schemas/trusted-web-read-cursor.schema.json",
+  "wire_format": "v2.<unpadded-base64url(canonical-JSON-UTF8-payload)>.<unpadded-base64url(HMAC-SHA256)>",
+  "mac_preimage": "ASCII spine.trusted-web-cursor.v2 followed by one NUL byte followed by the exact payload bytes",
+  "key": "Deployment-local random secret of at least 32 bytes, never client/model controlled or emitted; separate from public fixture key. Rotation invalidates old cursors.",
+  "encryption": false,
+  "decode": "Reject token over 8192 ASCII bytes, padding, non-base64url alphabet, noncanonical base64url, noncanonical payload bytes, duplicate JSON keys, unknown fields, invalid payload schema, wrong version, and non-constant-time MAC verification failure. Verify MAC before parsing trusted fields. Do not release payload or parse details in errors.",
+  "expiry": "issued_at <= now < expires_at <= issued_at + 900 seconds; all child pages preserve original issued_at/expires_at; now must also precede non-null authorization_valid_until_utc. No future-issued cursor.",
+  "error_rules": {
+    "invalid_encoding_signature_query_route_section_or_root": "invalid_request",
+    "expired_identity_epoch_grant_or_source_snapshot_changed": "access_changed",
+    "invalid_selection": "identity_unavailable"
+  },
+  "snapshot": "Private revalidation proof covers required temporal sources and all authorized candidates/sections used, including gained visibility and timed grant transitions. Public digest uses only authorized facts; no hidden object identifiers even hashed.",
+  "agenda_order": [
+    "view_local_date",
+    "all_day:0_before_timed:1",
+    "sort_at_utc",
+    "anchor_role:event_start_before_task_due",
+    "item_id",
+    "occurrence_key_or_empty"
+  ],
+  "stream_order": [
+    "resolved",
+    "unplaced"
+  ],
+  "occurrence_order": [
+    "original_schedule: original_scheduled_fact, occurrence_key, occurrence_id",
+    "expressed_time: expressed_scheduled_fact, expressed_schedule_key, occurrence_key, occurrence_id"
+  ],
+  "section_order": {
+    "related_items": [
+      "item_id"
+    ],
+    "relations": [
+      "relation_id"
+    ],
+    "temporal_bindings": [
+      "temporal_binding_id"
+    ],
+    "notification_profiles": [
+      "notification_profile_id",
+      "revision_id"
+    ],
+    "policies": [
+      "notification_policy_id"
+    ],
+    "work": [
+      "work_instance_id"
+    ],
+    "attempts": [
+      "attempt_id"
+    ],
+    "delivery_targets": [
+      "delivery_target_id"
+    ],
+    "subject_roles": [
+      "subject_id",
+      "role"
+    ]
+  },
+  "no_durable_state": "No cursor/session expansion cache in the ledger, command receipts, provenance or reconciliation writes."
+}

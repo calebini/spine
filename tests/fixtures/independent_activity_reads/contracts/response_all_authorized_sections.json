@@ -1,0 +1,211 @@
+{
+  "contract_version": "spine.trusted-web-api.v2",
+  "ok": true,
+  "identity_basis": "self_selected",
+  "account_id": "account-operator",
+  "subject_id": "subject-operator",
+  "selection_id": "selection-1",
+  "account_revision": "1",
+  "subject_revision": "1",
+  "account_subject_binding_revision": "1",
+  "access_epoch": "4",
+  "result_contract": "spine.trusted-web-schedule-view.v1",
+  "result": {
+    "activity": {
+      "item_id": "event-science",
+      "item_type": "event",
+      "current_version": "3",
+      "title": "Science class",
+      "status": "active",
+      "detail_status": "scheduled",
+      "time": {
+        "availability": "available",
+        "anchors": [
+          {
+            "anchor_role": "event_start",
+            "anchor_kind": "local_instant",
+            "local_date": "2026-09-21",
+            "local_time": "09:00:00",
+            "utc_instant": "2026-09-21T07:00:00Z",
+            "timezone": "Europe/Paris",
+            "timezone_database_version": "2026c",
+            "resolution_kind": "unambiguous"
+          }
+        ]
+      },
+      "recurrence": {
+        "recurrence_set_id": "recurrence-science",
+        "recurrence_revision_id": "revision-science-2",
+        "source_item_version": "3"
+      }
+    },
+    "sections": {
+      "related_items": {
+        "availability": "available",
+        "scope": "authorized_only",
+        "coverage": "complete",
+        "entries": [
+          {
+            "item_id": "task-drive",
+            "item_type": "task",
+            "current_version": "2",
+            "title": "Drive to class",
+            "status": "active",
+            "detail_status": "open",
+            "time": {
+              "availability": "unavailable",
+              "reason_code": "temporal_facts_unavailable"
+            },
+            "recurrence": null
+          }
+        ],
+        "has_more": false,
+        "next_cursor": null
+      },
+      "relations": {
+        "availability": "available",
+        "scope": "authorized_only",
+        "coverage": "complete",
+        "entries": [
+          {
+            "relation_id": "relation-drive",
+            "source_item_id": "task-drive",
+            "target_item_id": "event-science",
+            "relation_type": "part_of",
+            "relation_status": "active"
+          }
+        ],
+        "has_more": false,
+        "next_cursor": null
+      },
+      "temporal_bindings": {
+        "availability": "available",
+        "scope": "authorized_only",
+        "coverage": "complete",
+        "entries": [
+          {
+            "temporal_binding_id": "binding-drive",
+            "temporal_binding_revision_id": "binding-revision-2",
+            "source_item_id": "event-science",
+            "target_item_id": "task-drive",
+            "relationship_id": "relation-drive",
+            "binding_mode": "follow_source",
+            "binding_status": "active"
+          }
+        ],
+        "has_more": false,
+        "next_cursor": null
+      },
+      "primary_location": {
+        "availability": "available",
+        "scope": "authorized_only",
+        "coverage": "complete",
+        "value": {
+          "location_id": "location-school",
+          "item_location_id": "edge-school",
+          "role": "primary",
+          "label": "School",
+          "kind": "place"
+        }
+      },
+      "notification_profiles": {
+        "availability": "available",
+        "scope": "authorized_only",
+        "coverage": "complete",
+        "entries": [
+          {
+            "notification_profile_id": "profile-lesson",
+            "revision_id": "profile-revision-1",
+            "display_name": "Lesson standard"
+          }
+        ],
+        "has_more": false,
+        "next_cursor": null
+      },
+      "policies": {
+        "availability": "available",
+        "scope": "authorized_only",
+        "coverage": "complete",
+        "entries": [
+          {
+            "notification_policy_id": "policy-1",
+            "notification_intent_id": "intent-1",
+            "item_version": "3",
+            "status": "active"
+          }
+        ],
+        "has_more": false,
+        "next_cursor": null
+      },
+      "work": {
+        "availability": "available",
+        "scope": "authorized_only",
+        "coverage": "complete",
+        "entries": [
+          {
+            "work_instance_id": "work-1",
+            "notification_policy_id": "policy-1",
+            "status": "eligible",
+            "eligible_at_utc": "2026-09-21T06:00:00Z"
+          }
+        ],
+        "has_more": false,
+        "next_cursor": null
+      },
+      "attempts": {
+        "availability": "available",
+        "scope": "authorized_only",
+        "coverage": "complete",
+        "entries": [
+          {
+            "attempt_id": "attempt-1",
+            "work_instance_id": "work-old",
+            "attempt_status": "succeeded",
+            "attempted_at_utc": "2026-09-14T06:00:00Z",
+            "completed_at_utc": "2026-09-14T06:00:01Z"
+          }
+        ],
+        "has_more": false,
+        "next_cursor": null
+      },
+      "delivery_targets": {
+        "availability": "available",
+        "scope": "authorized_only",
+        "coverage": "complete",
+        "entries": [
+          {
+            "delivery_target_id": "target-1",
+            "channel": "test",
+            "target_ref": "test:authorized-destination"
+          }
+        ],
+        "has_more": false,
+        "next_cursor": null
+      },
+      "subject_roles": {
+        "availability": "available",
+        "scope": "authorized_only",
+        "coverage": "complete",
+        "entries": [
+          {
+            "subject_id": "subject-operator",
+            "role": "assignee"
+          }
+        ],
+        "has_more": false,
+        "next_cursor": null
+      },
+      "authoring_receipt": {
+        "availability": "available",
+        "scope": "authorized_only",
+        "coverage": "complete",
+        "value": {
+          "command_receipt_id": "receipt-creation",
+          "command": "schedule.create",
+          "effect": "schedule_created",
+          "created_at_utc": "2026-09-10T09:00:00Z"
+        }
+      }
+    }
+  }
+}

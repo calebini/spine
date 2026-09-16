@@ -1,0 +1,84 @@
+{
+  "contract_version": "spine.trusted-web-read-registry.v1",
+  "status": "ratified_contract_runtime_pending",
+  "api_contract": "spine.trusted-web-api.v2",
+  "cursor_contract": "spine.trusted-web-cursor.v2",
+  "commands": [
+    {
+      "command": "item.occurrences",
+      "method": "POST",
+      "path": "/api/v2/commands/item.occurrences",
+      "access_mode": "read",
+      "resolver": "requested_item_and_required_temporal_sources",
+      "projection": "authorized_occurrences",
+      "request_schema": "trusted-web-read-occurrences-request.schema.json",
+      "response_schema": "trusted-web-read-occurrences-response.schema.json",
+      "result_contract": "spine.trusted-web-occurrences.v1",
+      "optional_guards": [
+        "expected_access_epoch",
+        "expected_item_version",
+        "expected_recurrence_revision_id"
+      ],
+      "sections": []
+    },
+    {
+      "command": "schedule.show",
+      "method": "POST",
+      "path": "/api/v2/commands/schedule.show",
+      "access_mode": "read",
+      "resolver": "requested_item_and_required_temporal_sources",
+      "projection": "authorized_activity_sections",
+      "request_schema": "trusted-web-read-schedule-request.schema.json",
+      "response_schema": "trusted-web-read-schedule-response.schema.json",
+      "result_contract": "spine.trusted-web-schedule-view.v1",
+      "optional_guards": [
+        "expected_access_epoch",
+        "expected_item_version",
+        "expected_recurrence_revision_id"
+      ],
+      "sections": [
+        "attempts",
+        "authoring_receipt",
+        "delivery_targets",
+        "notification_profiles",
+        "policies",
+        "primary_location",
+        "related_items",
+        "relations",
+        "subject_roles",
+        "temporal_bindings",
+        "work"
+      ]
+    }
+  ],
+  "agenda": {
+    "method": "POST",
+    "path": "/api/v2/agenda",
+    "access_mode": "read",
+    "resolver": "authorized_candidates_before_expansion",
+    "projection": "authorized_resolved_then_unplaced",
+    "request_schema": "trusted-web-read-agenda-request.schema.json",
+    "response_schema": "trusted-web-read-agenda-response.schema.json",
+    "result_contract": "spine.trusted-web-agenda.v2",
+    "optional_guards": [
+      "expected_access_epoch"
+    ],
+    "sections": [
+      "attempts",
+      "policies",
+      "primary_location",
+      "work"
+    ]
+  },
+  "discovery": {
+    "method": "GET",
+    "path": "/api/v2/read-capabilities",
+    "requires_selected_identity": true,
+    "response_schema": "trusted-web-read-capabilities.schema.json"
+  },
+  "error_schema": "trusted-web-read-error.schema.json",
+  "cursor_schema": "trusted-web-read-cursor.schema.json",
+  "implementation_gate": "Exact schema pins, registry and all IR behavioral tests; do not advertise or package as implemented before runtime delivery.",
+  "v1_policy": "unchanged_complete_or_deny",
+  "writes": "v1_only_unchanged"
+}

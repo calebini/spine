@@ -1,0 +1,2643 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cortext.local/spine/contracts/schemas/trusted-web-read-types.schema.json",
+  "$defs": {
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256,
+      "pattern": "^[^\\u0000-\\u001f\\u007f]+$"
+    },
+    "text": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^[1-9][0-9]*$"
+    },
+    "decimal": {
+      "type": "string",
+      "pattern": "^(0|[1-9][0-9]*)$"
+    },
+    "hash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "utc": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$"
+    },
+    "date": {
+      "type": "string",
+      "format": "date"
+    },
+    "local_time": {
+      "type": "string",
+      "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$"
+    },
+    "local_datetime": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T([01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$"
+    },
+    "cursor": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 8192
+    },
+    "limit": {
+      "type": "string",
+      "pattern": "^([1-9]|[1-9][0-9]|100)$"
+    },
+    "scheduled_fact": {
+      "oneOf": [
+        {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/date"
+        },
+        {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/local_datetime"
+        },
+        {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/utc"
+        }
+      ]
+    },
+    "anchor_role": {
+      "enum": [
+        "event_start",
+        "event_end",
+        "task_due",
+        "task_defer_until"
+      ]
+    },
+    "anchor": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "anchor_role": {
+              "$ref": "trusted-web-read-types.schema.json#/$defs/anchor_role"
+            },
+            "anchor_kind": {
+              "const": "instant_utc"
+            },
+            "utc_instant": {
+              "$ref": "trusted-web-read-types.schema.json#/$defs/utc"
+            }
+          },
+          "required": [
+            "anchor_role",
+            "anchor_kind",
+            "utc_instant"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "anchor_role": {
+              "$ref": "trusted-web-read-types.schema.json#/$defs/anchor_role"
+            },
+            "anchor_kind": {
+              "const": "local_date"
+            },
+            "local_date": {
+              "$ref": "trusted-web-read-types.schema.json#/$defs/date"
+            },
+            "timezone": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512
+            },
+            "timezone_database_version": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512
+            }
+          },
+          "required": [
+            "anchor_role",
+            "anchor_kind",
+            "local_date",
+            "timezone",
+            "timezone_database_version"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "anchor_role": {
+              "$ref": "trusted-web-read-types.schema.json#/$defs/anchor_role"
+            },
+            "anchor_kind": {
+              "const": "local_instant"
+            },
+            "local_date": {
+              "$ref": "trusted-web-read-types.schema.json#/$defs/date"
+            },
+            "local_time": {
+              "$ref": "trusted-web-read-types.schema.json#/$defs/local_time"
+            },
+            "utc_instant": {
+              "$ref": "trusted-web-read-types.schema.json#/$defs/utc"
+            },
+            "timezone": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512
+            },
+            "timezone_database_version": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512
+            },
+            "resolution_kind": {
+              "enum": [
+                "unambiguous",
+                "ambiguous_earliest_instant"
+              ]
+            }
+          },
+          "required": [
+            "anchor_role",
+            "anchor_kind",
+            "local_date",
+            "local_time",
+            "utc_instant",
+            "timezone",
+            "timezone_database_version",
+            "resolution_kind"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "anchor_role": {
+              "$ref": "trusted-web-read-types.schema.json#/$defs/anchor_role"
+            },
+            "anchor_kind": {
+              "const": "utc_window"
+            },
+            "window_start_utc": {
+              "$ref": "trusted-web-read-types.schema.json#/$defs/utc"
+            },
+            "window_end_utc": {
+              "$ref": "trusted-web-read-types.schema.json#/$defs/utc"
+            }
+          },
+          "required": [
+            "anchor_role",
+            "anchor_kind",
+            "window_start_utc",
+            "window_end_utc"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "anchor_role": {
+              "$ref": "trusted-web-read-types.schema.json#/$defs/anchor_role"
+            },
+            "anchor_kind": {
+              "const": "local_window"
+            },
+            "window_start_utc": {
+              "$ref": "trusted-web-read-types.schema.json#/$defs/utc"
+            },
+            "window_end_utc": {
+              "$ref": "trusted-web-read-types.schema.json#/$defs/utc"
+            },
+            "timezone": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512
+            },
+            "timezone_database_version": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512
+            }
+          },
+          "required": [
+            "anchor_role",
+            "anchor_kind",
+            "window_start_utc",
+            "window_end_utc",
+            "timezone",
+            "timezone_database_version"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "time": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "availability": {
+              "const": "available"
+            },
+            "anchors": {
+              "type": "array",
+              "items": {
+                "$ref": "trusted-web-read-types.schema.json#/$defs/anchor"
+              },
+              "maxItems": 4,
+              "minItems": 1
+            }
+          },
+          "required": [
+            "availability",
+            "anchors"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "availability": {
+              "const": "not_scheduled"
+            }
+          },
+          "required": [
+            "availability"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "availability": {
+              "const": "unavailable"
+            },
+            "reason_code": {
+              "const": "temporal_facts_unavailable"
+            }
+          },
+          "required": [
+            "availability",
+            "reason_code"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "recurrence": {
+      "type": "object",
+      "properties": {
+        "recurrence_set_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^[^\\u0000-\\u001f\\u007f]+$"
+        },
+        "recurrence_revision_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^[^\\u0000-\\u001f\\u007f]+$"
+        },
+        "source_item_version": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/version"
+        }
+      },
+      "required": [
+        "recurrence_set_id",
+        "recurrence_revision_id",
+        "source_item_version"
+      ],
+      "additionalProperties": false
+    },
+    "core": {
+      "type": "object",
+      "properties": {
+        "item_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^[^\\u0000-\\u001f\\u007f]+$"
+        },
+        "item_type": {
+          "enum": [
+            "event",
+            "task"
+          ]
+        },
+        "current_version": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/version"
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        },
+        "status": {
+          "enum": [
+            "active",
+            "archived"
+          ]
+        },
+        "detail_status": {
+          "enum": [
+            "scheduled",
+            "cancelled",
+            "open",
+            "done"
+          ]
+        },
+        "time": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/time"
+        },
+        "recurrence": {
+          "oneOf": [
+            {
+              "$ref": "trusted-web-read-types.schema.json#/$defs/recurrence"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "item_id",
+        "item_type",
+        "current_version",
+        "title",
+        "status",
+        "detail_status",
+        "time",
+        "recurrence"
+      ],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "item_type": {
+                "const": "event"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "detail_status": {
+                "enum": [
+                  "scheduled",
+                  "cancelled"
+                ]
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "detail_status": {
+                "enum": [
+                  "open",
+                  "done",
+                  "cancelled"
+                ]
+              }
+            }
+          }
+        }
+      ]
+    },
+    "occurrence": {
+      "type": "object",
+      "properties": {
+        "item_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^[^\\u0000-\\u001f\\u007f]+$"
+        },
+        "item_type": {
+          "enum": [
+            "event",
+            "task"
+          ]
+        },
+        "current_version": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/version"
+        },
+        "source_item_version": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/version"
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        },
+        "occurrence_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^[^\\u0000-\\u001f\\u007f]+$"
+        },
+        "occurrence_key": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^[^\\u0000-\\u001f\\u007f]+$"
+        },
+        "recurrence_set_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^[^\\u0000-\\u001f\\u007f]+$"
+        },
+        "recurrence_revision_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^[^\\u0000-\\u001f\\u007f]+$"
+        },
+        "original_scheduled_fact": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/scheduled_fact"
+        },
+        "expressed_scheduled_fact": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/scheduled_fact"
+        },
+        "lifecycle": {
+          "enum": [
+            "active",
+            "cancelled",
+            "completed"
+          ]
+        },
+        "actionable": {
+          "type": "boolean"
+        },
+        "time": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/time"
+        },
+        "expressed_schedule_key": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^[^\\u0000-\\u001f\\u007f]+$"
+        },
+        "range_basis": {
+          "enum": [
+            "original_schedule",
+            "expressed_time"
+          ]
+        }
+      },
+      "required": [
+        "item_id",
+        "item_type",
+        "current_version",
+        "source_item_version",
+        "title",
+        "occurrence_id",
+        "occurrence_key",
+        "recurrence_set_id",
+        "recurrence_revision_id",
+        "original_scheduled_fact",
+        "expressed_scheduled_fact",
+        "lifecycle",
+        "actionable",
+        "time",
+        "expressed_schedule_key",
+        "range_basis"
+      ],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "properties": {
+            "time": {
+              "properties": {
+                "availability": {
+                  "const": "available"
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "lifecycle": {
+                "enum": [
+                  "cancelled",
+                  "completed"
+                ]
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "actionable": {
+                "const": false
+              }
+            }
+          }
+        }
+      ]
+    },
+    "related_item": {
+      "$ref": "trusted-web-read-types.schema.json#/$defs/core"
+    },
+    "relation": {
+      "type": "object",
+      "properties": {
+        "relation_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^[^\\u0000-\\u001f\\u007f]+$"
+        },
+        "source_item_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^[^\\u0000-\\u001f\\u007f]+$"
+        },
+        "target_item_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^[^\\u0000-\\u001f\\u007f]+$"
+        },
+        "relation_type": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "relation_status": {
+          "enum": [
+            "active",
+            "inactive"
+          ]
+        }
+      },
+      "required": [
+        "relation_id",
+        "source_item_id",
+        "target_item_id",
+        "relation_type",
+        "relation_status"
+      ],
+      "additionalProperties": false
+    },
+    "temporal_binding": {
+      "type": "object",
+      "properties": {
+        "temporal_binding_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^[^\\u0000-\\u001f\\u007f]+$"
+        },
+        "temporal_binding_revision_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^[^\\u0000-\\u001f\\u007f]+$"
+        },
+        "source_item_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^[^\\u0000-\\u001f\\u007f]+$"
+        },
+        "target_item_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^[^\\u0000-\\u001f\\u007f]+$"
+        },
+        "relationship_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^[^\\u0000-\\u001f\\u007f]+$"
+        },
+        "binding_mode": {
+          "enum": [
+            "snapshot",
+            "follow_source"
+          ]
+        },
+        "binding_status": {
+          "enum": [
+            "active",
+            "retired"
+          ]
+        }
+      },
+      "required": [
+        "temporal_binding_id",
+        "temporal_binding_revision_id",
+        "source_item_id",
+        "target_item_id",
+        "relationship_id",
+        "binding_mode",
+        "binding_status"
+      ],
+      "additionalProperties": false
+    },
+    "primary_location": {
+      "type": "object",
+      "properties": {
+        "location_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^[^\\u0000-\\u001f\\u007f]+$"
+        },
+        "item_location_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^[^\\u0000-\\u001f\\u007f]+$"
+        },
+        "role": {
+          "const": "primary"
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "kind": {
+          "enum": [
+            "address",
+            "place",
+            "virtual",
+            "relative",
+            "unknown"
+          ]
+        },
+        "address_text": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        }
+      },
+      "required": [
+        "location_id",
+        "item_location_id",
+        "role",
+        "label",
+        "kind"
+      ],
+      "additionalProperties": false
+    },
+    "notification_profile": {
+      "type": "object",
+      "properties": {
+        "notification_profile_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^[^\\u0000-\\u001f\\u007f]+$"
+        },
+        "revision_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^[^\\u0000-\\u001f\\u007f]+$"
+        },
+        "display_name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        }
+      },
+      "required": [
+        "notification_profile_id",
+        "revision_id",
+        "display_name"
+      ],
+      "additionalProperties": false
+    },
+    "policy": {
+      "type": "object",
+      "properties": {
+        "notification_policy_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^[^\\u0000-\\u001f\\u007f]+$"
+        },
+        "notification_intent_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^[^\\u0000-\\u001f\\u007f]+$"
+        },
+        "item_version": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/version"
+        },
+        "status": {
+          "enum": [
+            "active",
+            "disabled"
+          ]
+        }
+      },
+      "required": [
+        "notification_policy_id",
+        "notification_intent_id",
+        "item_version",
+        "status"
+      ],
+      "additionalProperties": false
+    },
+    "work": {
+      "type": "object",
+      "properties": {
+        "work_instance_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^[^\\u0000-\\u001f\\u007f]+$"
+        },
+        "notification_policy_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^[^\\u0000-\\u001f\\u007f]+$"
+        },
+        "status": {
+          "enum": [
+            "eligible",
+            "in_progress",
+            "succeeded",
+            "failed",
+            "cancelled"
+          ]
+        },
+        "eligible_at_utc": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/utc"
+        }
+      },
+      "required": [
+        "work_instance_id",
+        "notification_policy_id",
+        "status",
+        "eligible_at_utc"
+      ],
+      "additionalProperties": false
+    },
+    "attempt": {
+      "type": "object",
+      "properties": {
+        "attempt_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^[^\\u0000-\\u001f\\u007f]+$"
+        },
+        "work_instance_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^[^\\u0000-\\u001f\\u007f]+$"
+        },
+        "attempt_status": {
+          "enum": [
+            "started",
+            "succeeded",
+            "failed",
+            "rejected"
+          ]
+        },
+        "attempted_at_utc": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/utc"
+        },
+        "completed_at_utc": {
+          "oneOf": [
+            {
+              "$ref": "trusted-web-read-types.schema.json#/$defs/utc"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "attempt_id",
+        "work_instance_id",
+        "attempt_status",
+        "attempted_at_utc",
+        "completed_at_utc"
+      ],
+      "additionalProperties": false
+    },
+    "delivery_target": {
+      "type": "object",
+      "properties": {
+        "delivery_target_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^[^\\u0000-\\u001f\\u007f]+$"
+        },
+        "channel": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "target_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        }
+      },
+      "required": [
+        "delivery_target_id",
+        "channel",
+        "target_ref"
+      ],
+      "additionalProperties": false
+    },
+    "subject_role": {
+      "type": "object",
+      "properties": {
+        "subject_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^[^\\u0000-\\u001f\\u007f]+$"
+        },
+        "role": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        }
+      },
+      "required": [
+        "subject_id",
+        "role"
+      ],
+      "additionalProperties": false
+    },
+    "authoring_receipt": {
+      "type": "object",
+      "properties": {
+        "command_receipt_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^[^\\u0000-\\u001f\\u007f]+$"
+        },
+        "command": {
+          "enum": [
+            "schedule.create",
+            "schedule.related_task.create",
+            "event.create",
+            "task.create"
+          ]
+        },
+        "effect": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "created_at_utc": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/utc"
+        }
+      },
+      "required": [
+        "command_receipt_id",
+        "command",
+        "effect",
+        "created_at_utc"
+      ],
+      "additionalProperties": false
+    },
+    "related_items_section": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "availability": {
+              "const": "available"
+            },
+            "scope": {
+              "const": "authorized_only"
+            },
+            "coverage": {
+              "const": "complete"
+            },
+            "entries": {
+              "type": "array",
+              "items": {
+                "$ref": "trusted-web-read-types.schema.json#/$defs/related_item"
+              },
+              "maxItems": 100
+            },
+            "has_more": {
+              "type": "boolean"
+            },
+            "next_cursor": {
+              "oneOf": [
+                {
+                  "$ref": "trusted-web-read-types.schema.json#/$defs/cursor"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "availability",
+            "scope",
+            "coverage",
+            "entries",
+            "has_more",
+            "next_cursor"
+          ],
+          "additionalProperties": false,
+          "allOf": [
+            {
+              "if": {
+                "properties": {
+                  "has_more": {
+                    "const": true
+                  }
+                },
+                "required": [
+                  "has_more"
+                ]
+              },
+              "then": {
+                "properties": {
+                  "next_cursor": {
+                    "$ref": "trusted-web-read-types.schema.json#/$defs/cursor"
+                  }
+                }
+              },
+              "else": {
+                "properties": {
+                  "next_cursor": {
+                    "type": "null"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "availability": {
+              "const": "not_requested"
+            },
+            "scope": {
+              "const": "authorized_only"
+            }
+          },
+          "required": [
+            "availability",
+            "scope"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "availability": {
+              "const": "unavailable"
+            },
+            "scope": {
+              "const": "authorized_only"
+            },
+            "coverage": {
+              "const": "incomplete"
+            },
+            "reason_code": {
+              "const": "context_unavailable"
+            }
+          },
+          "required": [
+            "availability",
+            "scope",
+            "coverage",
+            "reason_code"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "relations_section": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "availability": {
+              "const": "available"
+            },
+            "scope": {
+              "const": "authorized_only"
+            },
+            "coverage": {
+              "const": "complete"
+            },
+            "entries": {
+              "type": "array",
+              "items": {
+                "$ref": "trusted-web-read-types.schema.json#/$defs/relation"
+              },
+              "maxItems": 100
+            },
+            "has_more": {
+              "type": "boolean"
+            },
+            "next_cursor": {
+              "oneOf": [
+                {
+                  "$ref": "trusted-web-read-types.schema.json#/$defs/cursor"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "availability",
+            "scope",
+            "coverage",
+            "entries",
+            "has_more",
+            "next_cursor"
+          ],
+          "additionalProperties": false,
+          "allOf": [
+            {
+              "if": {
+                "properties": {
+                  "has_more": {
+                    "const": true
+                  }
+                },
+                "required": [
+                  "has_more"
+                ]
+              },
+              "then": {
+                "properties": {
+                  "next_cursor": {
+                    "$ref": "trusted-web-read-types.schema.json#/$defs/cursor"
+                  }
+                }
+              },
+              "else": {
+                "properties": {
+                  "next_cursor": {
+                    "type": "null"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "availability": {
+              "const": "not_requested"
+            },
+            "scope": {
+              "const": "authorized_only"
+            }
+          },
+          "required": [
+            "availability",
+            "scope"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "availability": {
+              "const": "unavailable"
+            },
+            "scope": {
+              "const": "authorized_only"
+            },
+            "coverage": {
+              "const": "incomplete"
+            },
+            "reason_code": {
+              "const": "context_unavailable"
+            }
+          },
+          "required": [
+            "availability",
+            "scope",
+            "coverage",
+            "reason_code"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "temporal_bindings_section": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "availability": {
+              "const": "available"
+            },
+            "scope": {
+              "const": "authorized_only"
+            },
+            "coverage": {
+              "const": "complete"
+            },
+            "entries": {
+              "type": "array",
+              "items": {
+                "$ref": "trusted-web-read-types.schema.json#/$defs/temporal_binding"
+              },
+              "maxItems": 100
+            },
+            "has_more": {
+              "type": "boolean"
+            },
+            "next_cursor": {
+              "oneOf": [
+                {
+                  "$ref": "trusted-web-read-types.schema.json#/$defs/cursor"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "availability",
+            "scope",
+            "coverage",
+            "entries",
+            "has_more",
+            "next_cursor"
+          ],
+          "additionalProperties": false,
+          "allOf": [
+            {
+              "if": {
+                "properties": {
+                  "has_more": {
+                    "const": true
+                  }
+                },
+                "required": [
+                  "has_more"
+                ]
+              },
+              "then": {
+                "properties": {
+                  "next_cursor": {
+                    "$ref": "trusted-web-read-types.schema.json#/$defs/cursor"
+                  }
+                }
+              },
+              "else": {
+                "properties": {
+                  "next_cursor": {
+                    "type": "null"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "availability": {
+              "const": "not_requested"
+            },
+            "scope": {
+              "const": "authorized_only"
+            }
+          },
+          "required": [
+            "availability",
+            "scope"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "availability": {
+              "const": "unavailable"
+            },
+            "scope": {
+              "const": "authorized_only"
+            },
+            "coverage": {
+              "const": "incomplete"
+            },
+            "reason_code": {
+              "const": "context_unavailable"
+            }
+          },
+          "required": [
+            "availability",
+            "scope",
+            "coverage",
+            "reason_code"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "primary_location_section": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "availability": {
+              "const": "available"
+            },
+            "scope": {
+              "const": "authorized_only"
+            },
+            "coverage": {
+              "const": "complete"
+            },
+            "value": {
+              "oneOf": [
+                {
+                  "$ref": "trusted-web-read-types.schema.json#/$defs/primary_location"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "availability",
+            "scope",
+            "coverage",
+            "value"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "availability": {
+              "const": "not_requested"
+            },
+            "scope": {
+              "const": "authorized_only"
+            }
+          },
+          "required": [
+            "availability",
+            "scope"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "availability": {
+              "const": "unavailable"
+            },
+            "scope": {
+              "const": "authorized_only"
+            },
+            "coverage": {
+              "const": "incomplete"
+            },
+            "reason_code": {
+              "const": "context_unavailable"
+            }
+          },
+          "required": [
+            "availability",
+            "scope",
+            "coverage",
+            "reason_code"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "notification_profiles_section": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "availability": {
+              "const": "available"
+            },
+            "scope": {
+              "const": "authorized_only"
+            },
+            "coverage": {
+              "const": "complete"
+            },
+            "entries": {
+              "type": "array",
+              "items": {
+                "$ref": "trusted-web-read-types.schema.json#/$defs/notification_profile"
+              },
+              "maxItems": 100
+            },
+            "has_more": {
+              "type": "boolean"
+            },
+            "next_cursor": {
+              "oneOf": [
+                {
+                  "$ref": "trusted-web-read-types.schema.json#/$defs/cursor"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "availability",
+            "scope",
+            "coverage",
+            "entries",
+            "has_more",
+            "next_cursor"
+          ],
+          "additionalProperties": false,
+          "allOf": [
+            {
+              "if": {
+                "properties": {
+                  "has_more": {
+                    "const": true
+                  }
+                },
+                "required": [
+                  "has_more"
+                ]
+              },
+              "then": {
+                "properties": {
+                  "next_cursor": {
+                    "$ref": "trusted-web-read-types.schema.json#/$defs/cursor"
+                  }
+                }
+              },
+              "else": {
+                "properties": {
+                  "next_cursor": {
+                    "type": "null"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "availability": {
+              "const": "not_requested"
+            },
+            "scope": {
+              "const": "authorized_only"
+            }
+          },
+          "required": [
+            "availability",
+            "scope"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "availability": {
+              "const": "unavailable"
+            },
+            "scope": {
+              "const": "authorized_only"
+            },
+            "coverage": {
+              "const": "incomplete"
+            },
+            "reason_code": {
+              "const": "context_unavailable"
+            }
+          },
+          "required": [
+            "availability",
+            "scope",
+            "coverage",
+            "reason_code"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "policies_section": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "availability": {
+              "const": "available"
+            },
+            "scope": {
+              "const": "authorized_only"
+            },
+            "coverage": {
+              "const": "complete"
+            },
+            "entries": {
+              "type": "array",
+              "items": {
+                "$ref": "trusted-web-read-types.schema.json#/$defs/policy"
+              },
+              "maxItems": 100
+            },
+            "has_more": {
+              "type": "boolean"
+            },
+            "next_cursor": {
+              "oneOf": [
+                {
+                  "$ref": "trusted-web-read-types.schema.json#/$defs/cursor"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "availability",
+            "scope",
+            "coverage",
+            "entries",
+            "has_more",
+            "next_cursor"
+          ],
+          "additionalProperties": false,
+          "allOf": [
+            {
+              "if": {
+                "properties": {
+                  "has_more": {
+                    "const": true
+                  }
+                },
+                "required": [
+                  "has_more"
+                ]
+              },
+              "then": {
+                "properties": {
+                  "next_cursor": {
+                    "$ref": "trusted-web-read-types.schema.json#/$defs/cursor"
+                  }
+                }
+              },
+              "else": {
+                "properties": {
+                  "next_cursor": {
+                    "type": "null"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "availability": {
+              "const": "not_requested"
+            },
+            "scope": {
+              "const": "authorized_only"
+            }
+          },
+          "required": [
+            "availability",
+            "scope"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "availability": {
+              "const": "unavailable"
+            },
+            "scope": {
+              "const": "authorized_only"
+            },
+            "coverage": {
+              "const": "incomplete"
+            },
+            "reason_code": {
+              "const": "context_unavailable"
+            }
+          },
+          "required": [
+            "availability",
+            "scope",
+            "coverage",
+            "reason_code"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "work_section": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "availability": {
+              "const": "available"
+            },
+            "scope": {
+              "const": "authorized_only"
+            },
+            "coverage": {
+              "const": "complete"
+            },
+            "entries": {
+              "type": "array",
+              "items": {
+                "$ref": "trusted-web-read-types.schema.json#/$defs/work"
+              },
+              "maxItems": 100
+            },
+            "has_more": {
+              "type": "boolean"
+            },
+            "next_cursor": {
+              "oneOf": [
+                {
+                  "$ref": "trusted-web-read-types.schema.json#/$defs/cursor"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "availability",
+            "scope",
+            "coverage",
+            "entries",
+            "has_more",
+            "next_cursor"
+          ],
+          "additionalProperties": false,
+          "allOf": [
+            {
+              "if": {
+                "properties": {
+                  "has_more": {
+                    "const": true
+                  }
+                },
+                "required": [
+                  "has_more"
+                ]
+              },
+              "then": {
+                "properties": {
+                  "next_cursor": {
+                    "$ref": "trusted-web-read-types.schema.json#/$defs/cursor"
+                  }
+                }
+              },
+              "else": {
+                "properties": {
+                  "next_cursor": {
+                    "type": "null"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "availability": {
+              "const": "not_requested"
+            },
+            "scope": {
+              "const": "authorized_only"
+            }
+          },
+          "required": [
+            "availability",
+            "scope"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "availability": {
+              "const": "unavailable"
+            },
+            "scope": {
+              "const": "authorized_only"
+            },
+            "coverage": {
+              "const": "incomplete"
+            },
+            "reason_code": {
+              "const": "context_unavailable"
+            }
+          },
+          "required": [
+            "availability",
+            "scope",
+            "coverage",
+            "reason_code"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "attempts_section": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "availability": {
+              "const": "available"
+            },
+            "scope": {
+              "const": "authorized_only"
+            },
+            "coverage": {
+              "const": "complete"
+            },
+            "entries": {
+              "type": "array",
+              "items": {
+                "$ref": "trusted-web-read-types.schema.json#/$defs/attempt"
+              },
+              "maxItems": 100
+            },
+            "has_more": {
+              "type": "boolean"
+            },
+            "next_cursor": {
+              "oneOf": [
+                {
+                  "$ref": "trusted-web-read-types.schema.json#/$defs/cursor"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "availability",
+            "scope",
+            "coverage",
+            "entries",
+            "has_more",
+            "next_cursor"
+          ],
+          "additionalProperties": false,
+          "allOf": [
+            {
+              "if": {
+                "properties": {
+                  "has_more": {
+                    "const": true
+                  }
+                },
+                "required": [
+                  "has_more"
+                ]
+              },
+              "then": {
+                "properties": {
+                  "next_cursor": {
+                    "$ref": "trusted-web-read-types.schema.json#/$defs/cursor"
+                  }
+                }
+              },
+              "else": {
+                "properties": {
+                  "next_cursor": {
+                    "type": "null"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "availability": {
+              "const": "not_requested"
+            },
+            "scope": {
+              "const": "authorized_only"
+            }
+          },
+          "required": [
+            "availability",
+            "scope"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "availability": {
+              "const": "unavailable"
+            },
+            "scope": {
+              "const": "authorized_only"
+            },
+            "coverage": {
+              "const": "incomplete"
+            },
+            "reason_code": {
+              "const": "context_unavailable"
+            }
+          },
+          "required": [
+            "availability",
+            "scope",
+            "coverage",
+            "reason_code"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "delivery_targets_section": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "availability": {
+              "const": "available"
+            },
+            "scope": {
+              "const": "authorized_only"
+            },
+            "coverage": {
+              "const": "complete"
+            },
+            "entries": {
+              "type": "array",
+              "items": {
+                "$ref": "trusted-web-read-types.schema.json#/$defs/delivery_target"
+              },
+              "maxItems": 100
+            },
+            "has_more": {
+              "type": "boolean"
+            },
+            "next_cursor": {
+              "oneOf": [
+                {
+                  "$ref": "trusted-web-read-types.schema.json#/$defs/cursor"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "availability",
+            "scope",
+            "coverage",
+            "entries",
+            "has_more",
+            "next_cursor"
+          ],
+          "additionalProperties": false,
+          "allOf": [
+            {
+              "if": {
+                "properties": {
+                  "has_more": {
+                    "const": true
+                  }
+                },
+                "required": [
+                  "has_more"
+                ]
+              },
+              "then": {
+                "properties": {
+                  "next_cursor": {
+                    "$ref": "trusted-web-read-types.schema.json#/$defs/cursor"
+                  }
+                }
+              },
+              "else": {
+                "properties": {
+                  "next_cursor": {
+                    "type": "null"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "availability": {
+              "const": "not_requested"
+            },
+            "scope": {
+              "const": "authorized_only"
+            }
+          },
+          "required": [
+            "availability",
+            "scope"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "availability": {
+              "const": "unavailable"
+            },
+            "scope": {
+              "const": "authorized_only"
+            },
+            "coverage": {
+              "const": "incomplete"
+            },
+            "reason_code": {
+              "const": "context_unavailable"
+            }
+          },
+          "required": [
+            "availability",
+            "scope",
+            "coverage",
+            "reason_code"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "subject_roles_section": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "availability": {
+              "const": "available"
+            },
+            "scope": {
+              "const": "authorized_only"
+            },
+            "coverage": {
+              "const": "complete"
+            },
+            "entries": {
+              "type": "array",
+              "items": {
+                "$ref": "trusted-web-read-types.schema.json#/$defs/subject_role"
+              },
+              "maxItems": 100
+            },
+            "has_more": {
+              "type": "boolean"
+            },
+            "next_cursor": {
+              "oneOf": [
+                {
+                  "$ref": "trusted-web-read-types.schema.json#/$defs/cursor"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "availability",
+            "scope",
+            "coverage",
+            "entries",
+            "has_more",
+            "next_cursor"
+          ],
+          "additionalProperties": false,
+          "allOf": [
+            {
+              "if": {
+                "properties": {
+                  "has_more": {
+                    "const": true
+                  }
+                },
+                "required": [
+                  "has_more"
+                ]
+              },
+              "then": {
+                "properties": {
+                  "next_cursor": {
+                    "$ref": "trusted-web-read-types.schema.json#/$defs/cursor"
+                  }
+                }
+              },
+              "else": {
+                "properties": {
+                  "next_cursor": {
+                    "type": "null"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "availability": {
+              "const": "not_requested"
+            },
+            "scope": {
+              "const": "authorized_only"
+            }
+          },
+          "required": [
+            "availability",
+            "scope"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "availability": {
+              "const": "unavailable"
+            },
+            "scope": {
+              "const": "authorized_only"
+            },
+            "coverage": {
+              "const": "incomplete"
+            },
+            "reason_code": {
+              "const": "context_unavailable"
+            }
+          },
+          "required": [
+            "availability",
+            "scope",
+            "coverage",
+            "reason_code"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "authoring_receipt_section": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "availability": {
+              "const": "available"
+            },
+            "scope": {
+              "const": "authorized_only"
+            },
+            "coverage": {
+              "const": "complete"
+            },
+            "value": {
+              "oneOf": [
+                {
+                  "$ref": "trusted-web-read-types.schema.json#/$defs/authoring_receipt"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "availability",
+            "scope",
+            "coverage",
+            "value"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "availability": {
+              "const": "not_requested"
+            },
+            "scope": {
+              "const": "authorized_only"
+            }
+          },
+          "required": [
+            "availability",
+            "scope"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "availability": {
+              "const": "unavailable"
+            },
+            "scope": {
+              "const": "authorized_only"
+            },
+            "coverage": {
+              "const": "incomplete"
+            },
+            "reason_code": {
+              "const": "context_unavailable"
+            }
+          },
+          "required": [
+            "availability",
+            "scope",
+            "coverage",
+            "reason_code"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "sections": {
+      "type": "object",
+      "properties": {
+        "related_items": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/related_items_section"
+        },
+        "relations": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/relations_section"
+        },
+        "temporal_bindings": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/temporal_bindings_section"
+        },
+        "primary_location": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/primary_location_section"
+        },
+        "notification_profiles": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/notification_profiles_section"
+        },
+        "policies": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/policies_section"
+        },
+        "work": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/work_section"
+        },
+        "attempts": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/attempts_section"
+        },
+        "delivery_targets": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/delivery_targets_section"
+        },
+        "subject_roles": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/subject_roles_section"
+        },
+        "authoring_receipt": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/authoring_receipt_section"
+        }
+      },
+      "required": [
+        "related_items",
+        "relations",
+        "temporal_bindings",
+        "primary_location",
+        "notification_profiles",
+        "policies",
+        "work",
+        "attempts",
+        "delivery_targets",
+        "subject_roles",
+        "authoring_receipt"
+      ],
+      "additionalProperties": false
+    },
+    "policies_summary_section": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "availability": {
+              "const": "available"
+            },
+            "scope": {
+              "const": "authorized_only"
+            },
+            "coverage": {
+              "const": "complete"
+            },
+            "value": {
+              "oneOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "count": {
+                      "$ref": "trusted-web-read-types.schema.json#/$defs/decimal"
+                    },
+                    "status_counts": {
+                      "type": "object",
+                      "properties": {
+                        "active": {
+                          "$ref": "trusted-web-read-types.schema.json#/$defs/decimal"
+                        },
+                        "disabled": {
+                          "$ref": "trusted-web-read-types.schema.json#/$defs/decimal"
+                        }
+                      },
+                      "required": [
+                        "active",
+                        "disabled"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "count",
+                    "status_counts"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "availability",
+            "scope",
+            "coverage",
+            "value"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "availability": {
+              "const": "not_requested"
+            },
+            "scope": {
+              "const": "authorized_only"
+            }
+          },
+          "required": [
+            "availability",
+            "scope"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "availability": {
+              "const": "unavailable"
+            },
+            "scope": {
+              "const": "authorized_only"
+            },
+            "coverage": {
+              "const": "incomplete"
+            },
+            "reason_code": {
+              "const": "context_unavailable"
+            }
+          },
+          "required": [
+            "availability",
+            "scope",
+            "coverage",
+            "reason_code"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "work_summary_section": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "availability": {
+              "const": "available"
+            },
+            "scope": {
+              "const": "authorized_only"
+            },
+            "coverage": {
+              "const": "complete"
+            },
+            "value": {
+              "oneOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "count": {
+                      "$ref": "trusted-web-read-types.schema.json#/$defs/decimal"
+                    },
+                    "status_counts": {
+                      "type": "object",
+                      "properties": {
+                        "eligible": {
+                          "$ref": "trusted-web-read-types.schema.json#/$defs/decimal"
+                        },
+                        "in_progress": {
+                          "$ref": "trusted-web-read-types.schema.json#/$defs/decimal"
+                        },
+                        "succeeded": {
+                          "$ref": "trusted-web-read-types.schema.json#/$defs/decimal"
+                        },
+                        "failed": {
+                          "$ref": "trusted-web-read-types.schema.json#/$defs/decimal"
+                        },
+                        "cancelled": {
+                          "$ref": "trusted-web-read-types.schema.json#/$defs/decimal"
+                        }
+                      },
+                      "required": [
+                        "eligible",
+                        "in_progress",
+                        "succeeded",
+                        "failed",
+                        "cancelled"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "count",
+                    "status_counts"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "availability",
+            "scope",
+            "coverage",
+            "value"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "availability": {
+              "const": "not_requested"
+            },
+            "scope": {
+              "const": "authorized_only"
+            }
+          },
+          "required": [
+            "availability",
+            "scope"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "availability": {
+              "const": "unavailable"
+            },
+            "scope": {
+              "const": "authorized_only"
+            },
+            "coverage": {
+              "const": "incomplete"
+            },
+            "reason_code": {
+              "const": "context_unavailable"
+            }
+          },
+          "required": [
+            "availability",
+            "scope",
+            "coverage",
+            "reason_code"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "attempts_summary_section": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "availability": {
+              "const": "available"
+            },
+            "scope": {
+              "const": "authorized_only"
+            },
+            "coverage": {
+              "const": "complete"
+            },
+            "value": {
+              "oneOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "count": {
+                      "$ref": "trusted-web-read-types.schema.json#/$defs/decimal"
+                    },
+                    "status_counts": {
+                      "type": "object",
+                      "properties": {
+                        "started": {
+                          "$ref": "trusted-web-read-types.schema.json#/$defs/decimal"
+                        },
+                        "succeeded": {
+                          "$ref": "trusted-web-read-types.schema.json#/$defs/decimal"
+                        },
+                        "failed": {
+                          "$ref": "trusted-web-read-types.schema.json#/$defs/decimal"
+                        },
+                        "rejected": {
+                          "$ref": "trusted-web-read-types.schema.json#/$defs/decimal"
+                        }
+                      },
+                      "required": [
+                        "started",
+                        "succeeded",
+                        "failed",
+                        "rejected"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "count",
+                    "status_counts"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "availability",
+            "scope",
+            "coverage",
+            "value"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "availability": {
+              "const": "not_requested"
+            },
+            "scope": {
+              "const": "authorized_only"
+            }
+          },
+          "required": [
+            "availability",
+            "scope"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "availability": {
+              "const": "unavailable"
+            },
+            "scope": {
+              "const": "authorized_only"
+            },
+            "coverage": {
+              "const": "incomplete"
+            },
+            "reason_code": {
+              "const": "context_unavailable"
+            }
+          },
+          "required": [
+            "availability",
+            "scope",
+            "coverage",
+            "reason_code"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "agenda_sections": {
+      "type": "object",
+      "properties": {
+        "primary_location": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/primary_location_section"
+        },
+        "policies": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/policies_summary_section"
+        },
+        "work": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/work_summary_section"
+        },
+        "attempts": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/attempts_summary_section"
+        }
+      },
+      "required": [
+        "primary_location",
+        "policies",
+        "work",
+        "attempts"
+      ],
+      "additionalProperties": false
+    },
+    "agenda_entry": {
+      "type": "object",
+      "properties": {
+        "activity": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/core"
+        },
+        "occurrence": {
+          "oneOf": [
+            {
+              "$ref": "trusted-web-read-types.schema.json#/$defs/occurrence"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "anchor_role": {
+          "enum": [
+            "event_start",
+            "task_due"
+          ]
+        },
+        "view_local_date": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/date"
+        },
+        "view_local_time": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/local_time"
+        },
+        "all_day": {
+          "type": "boolean"
+        },
+        "sort_at_utc": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/utc"
+        },
+        "start_at_utc": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/utc"
+        },
+        "end_at_utc": {
+          "oneOf": [
+            {
+              "$ref": "trusted-web-read-types.schema.json#/$defs/utc"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "sections": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/agenda_sections"
+        }
+      },
+      "required": [
+        "activity",
+        "occurrence",
+        "anchor_role",
+        "view_local_date",
+        "view_local_time",
+        "all_day",
+        "sort_at_utc",
+        "start_at_utc",
+        "end_at_utc",
+        "sections"
+      ],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "properties": {
+            "activity": {
+              "properties": {
+                "time": {
+                  "properties": {
+                    "availability": {
+                      "const": "available"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "unplaced_item": {
+      "type": "object",
+      "properties": {
+        "activity": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/core"
+        },
+        "sections": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/agenda_sections"
+        }
+      },
+      "required": [
+        "activity",
+        "sections"
+      ],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "properties": {
+            "activity": {
+              "properties": {
+                "time": {
+                  "properties": {
+                    "availability": {
+                      "const": "unavailable"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "range": {
+      "type": "object",
+      "properties": {
+        "range_basis": {
+          "enum": [
+            "original_schedule",
+            "expressed_time"
+          ]
+        },
+        "range_start": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/scheduled_fact"
+        },
+        "range_end": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/scheduled_fact"
+        }
+      },
+      "required": [
+        "range_basis",
+        "range_start",
+        "range_end"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

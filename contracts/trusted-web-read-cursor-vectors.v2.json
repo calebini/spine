@@ -1,0 +1,35 @@
+{
+  "contract_version": "spine.trusted-web-cursor.v2",
+  "public_test_key": "public-fixture-key-never-use-in-production-32",
+  "payload": {
+    "contract_version": "spine.trusted-web-cursor.v2",
+    "ledger_id": "ledger-example",
+    "realm_id": "realm-example",
+    "recovery_epoch": "1",
+    "account_id": "account-operator",
+    "account_revision": "1",
+    "subject_id": "subject-operator",
+    "subject_revision": "1",
+    "account_subject_binding_revision": "1",
+    "selection_id": "selection-1",
+    "access_epoch": "4",
+    "query_hash": "30a40d32f02c15561aeb8973d7926e18d79d313005c844cd6d249175ae01f06e",
+    "source_snapshot_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "issued_at_utc": "2026-09-20T08:00:00Z",
+    "expires_at_utc": "2026-09-20T08:15:00Z",
+    "authorization_evaluated_at_utc": "2026-09-20T08:00:00Z",
+    "authorization_valid_until_utc": "2026-09-20T08:10:00Z",
+    "route": "agenda",
+    "stream": "resolved",
+    "last_key": [
+      "2026-09-21",
+      "1",
+      "2026-09-21T07:00:00Z",
+      "event_start",
+      "event-science",
+      "occurrence-key-canonical-example"
+    ]
+  },
+  "canonical_json": "{\"access_epoch\":\"4\",\"account_id\":\"account-operator\",\"account_revision\":\"1\",\"account_subject_binding_revision\":\"1\",\"authorization_evaluated_at_utc\":\"2026-09-20T08:00:00Z\",\"authorization_valid_until_utc\":\"2026-09-20T08:10:00Z\",\"contract_version\":\"spine.trusted-web-cursor.v2\",\"expires_at_utc\":\"2026-09-20T08:15:00Z\",\"issued_at_utc\":\"2026-09-20T08:00:00Z\",\"last_key\":[\"2026-09-21\",\"1\",\"2026-09-21T07:00:00Z\",\"event_start\",\"event-science\",\"occurrence-key-canonical-example\"],\"ledger_id\":\"ledger-example\",\"query_hash\":\"30a40d32f02c15561aeb8973d7926e18d79d313005c844cd6d249175ae01f06e\",\"realm_id\":\"realm-example\",\"recovery_epoch\":\"1\",\"route\":\"agenda\",\"selection_id\":\"selection-1\",\"source_snapshot_hash\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"stream\":\"resolved\",\"subject_id\":\"subject-operator\",\"subject_revision\":\"1\"}",
+  "wire": "v2.eyJhY2Nlc3NfZXBvY2giOiI0IiwiYWNjb3VudF9pZCI6ImFjY291bnQtb3BlcmF0b3IiLCJhY2NvdW50X3JldmlzaW9uIjoiMSIsImFjY291bnRfc3ViamVjdF9iaW5kaW5nX3JldmlzaW9uIjoiMSIsImF1dGhvcml6YXRpb25fZXZhbHVhdGVkX2F0X3V0YyI6IjIwMjYtMDktMjBUMDg6MDA6MDBaIiwiYXV0aG9yaXphdGlvbl92YWxpZF91bnRpbF91dGMiOiIyMDI2LTA5LTIwVDA4OjEwOjAwWiIsImNvbnRyYWN0X3ZlcnNpb24iOiJzcGluZS50cnVzdGVkLXdlYi1jdXJzb3IudjIiLCJleHBpcmVzX2F0X3V0YyI6IjIwMjYtMDktMjBUMDg6MTU6MDBaIiwiaXNzdWVkX2F0X3V0YyI6IjIwMjYtMDktMjBUMDg6MDA6MDBaIiwibGFzdF9rZXkiOlsiMjAyNi0wOS0yMSIsIjEiLCIyMDI2LTA5LTIxVDA3OjAwOjAwWiIsImV2ZW50X3N0YXJ0IiwiZXZlbnQtc2NpZW5jZSIsIm9jY3VycmVuY2Uta2V5LWNhbm9uaWNhbC1leGFtcGxlIl0sImxlZGdlcl9pZCI6ImxlZGdlci1leGFtcGxlIiwicXVlcnlfaGFzaCI6IjMwYTQwZDMyZjAyYzE1NTYxYWViODk3M2Q3OTI2ZTE4ZDc5ZDMxMzAwNWM4NDRjZDZkMjQ5MTc1YWUwMWYwNmUiLCJyZWFsbV9pZCI6InJlYWxtLWV4YW1wbGUiLCJyZWNvdmVyeV9lcG9jaCI6IjEiLCJyb3V0ZSI6ImFnZW5kYSIsInNlbGVjdGlvbl9pZCI6InNlbGVjdGlvbi0xIiwic291cmNlX3NuYXBzaG90X2hhc2giOiJhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhIiwic3RyZWFtIjoicmVzb2x2ZWQiLCJzdWJqZWN0X2lkIjoic3ViamVjdC1vcGVyYXRvciIsInN1YmplY3RfcmV2aXNpb24iOiIxIn0.4arWr_5MUkS5s0f5XWaYU_lY1tcw_P2YyWb3QvfIjk4"
+}

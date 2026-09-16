@@ -1,0 +1,191 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cortext.local/spine/contracts/schemas/trusted-web-read-agenda-response.schema.json",
+  "type": "object",
+  "properties": {
+    "contract_version": {
+      "const": "spine.trusted-web-api.v2"
+    },
+    "ok": {
+      "const": true
+    },
+    "identity_basis": {
+      "const": "self_selected"
+    },
+    "account_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256,
+      "pattern": "^[^\\u0000-\\u001f\\u007f]+$"
+    },
+    "subject_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256,
+      "pattern": "^[^\\u0000-\\u001f\\u007f]+$"
+    },
+    "selection_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256,
+      "pattern": "^[^\\u0000-\\u001f\\u007f]+$"
+    },
+    "account_revision": {
+      "$ref": "trusted-web-read-types.schema.json#/$defs/version"
+    },
+    "subject_revision": {
+      "$ref": "trusted-web-read-types.schema.json#/$defs/version"
+    },
+    "account_subject_binding_revision": {
+      "$ref": "trusted-web-read-types.schema.json#/$defs/version"
+    },
+    "access_epoch": {
+      "$ref": "trusted-web-read-types.schema.json#/$defs/version"
+    },
+    "result_contract": {
+      "const": "spine.trusted-web-agenda.v2"
+    },
+    "result": {
+      "type": "object",
+      "properties": {
+        "range": {
+          "type": "object",
+          "properties": {
+            "evaluated_at_utc": {
+              "$ref": "trusted-web-read-types.schema.json#/$defs/utc"
+            },
+            "range_start_local": {
+              "$ref": "trusted-web-read-types.schema.json#/$defs/local_datetime"
+            },
+            "range_end_local": {
+              "$ref": "trusted-web-read-types.schema.json#/$defs/local_datetime"
+            },
+            "timezone": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512
+            },
+            "timezone_database_version": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512
+            }
+          },
+          "required": [
+            "evaluated_at_utc",
+            "range_start_local",
+            "range_end_local",
+            "timezone",
+            "timezone_database_version"
+          ],
+          "additionalProperties": false
+        },
+        "coverage": {
+          "enum": [
+            "complete",
+            "incomplete"
+          ]
+        },
+        "entries": {
+          "type": "array",
+          "items": {
+            "$ref": "trusted-web-read-types.schema.json#/$defs/agenda_entry"
+          },
+          "maxItems": 100
+        },
+        "unplaced_items": {
+          "type": "array",
+          "items": {
+            "$ref": "trusted-web-read-types.schema.json#/$defs/unplaced_item"
+          },
+          "maxItems": 100
+        },
+        "limit": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/limit"
+        },
+        "has_more": {
+          "type": "boolean"
+        },
+        "next_cursor": {
+          "oneOf": [
+            {
+              "$ref": "trusted-web-read-types.schema.json#/$defs/cursor"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "range",
+        "coverage",
+        "entries",
+        "unplaced_items",
+        "limit",
+        "has_more",
+        "next_cursor"
+      ],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "has_more": {
+                "const": true
+              }
+            },
+            "required": [
+              "has_more"
+            ]
+          },
+          "then": {
+            "properties": {
+              "next_cursor": {
+                "$ref": "trusted-web-read-types.schema.json#/$defs/cursor"
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "next_cursor": {
+                "type": "null"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "unplaced_items": {
+                "minItems": 1
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "coverage": {
+                "const": "incomplete"
+              }
+            }
+          }
+        }
+      ]
+    }
+  },
+  "required": [
+    "contract_version",
+    "ok",
+    "identity_basis",
+    "account_id",
+    "subject_id",
+    "selection_id",
+    "account_revision",
+    "subject_revision",
+    "account_subject_binding_revision",
+    "access_epoch",
+    "result_contract",
+    "result"
+  ],
+  "additionalProperties": false
+}

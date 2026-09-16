@@ -17,7 +17,12 @@ These are not automatically selected work.
 The broad web/staging review tasks SPINE-001–003 were withdrawn at the operator's
 request; no general gap analysis is scheduled.
 SPINE-015 separately tracks independent authorized activity reads when linked resources
-are unavailable, including the proposed versioned read projection and Kinflow migration.
+are unavailable, including the ratified versioned read projection and Kinflow migration.
+On 2026-09-16 the operator accepted the read design after its clean focused recheck
+and selected machine-contract codification. The v2 registry, schemas, cursor rules
+and initial fixtures are separate from unchanged v1 runtime assets. Behavioral
+implementation and Kinflow migration remain later delivery steps; static contract
+checks do not establish access-control or concurrent-read correctness.
 
 Current context correction (2026-09-13): the operator is already testing the connected
 [Kinflow frontend](../../kinflow-web-ui/README.md) against staged Spine on `cortext1`.

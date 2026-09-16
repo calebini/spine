@@ -1,0 +1,510 @@
+{
+  "contract_version": "spine.independent-activity-read-fixtures.v1",
+  "status": "contract_only",
+  "runtime_acceptance": "not_implemented",
+  "authority": "specs/independent-activity-reads.md",
+  "registry": "contracts/spine.trusted-web-read-registry.v1.json",
+  "schema_pins": "contracts/trusted-web-read-schema-pins.v1.json",
+  "normalization_vectors": "contracts/trusted-web-read-normalization-vectors.v1.json",
+  "cursor_vectors": "contracts/trusted-web-read-cursor-vectors.v2.json",
+  "fixture_limitations": "Shape fixtures use synthetic IDs. Only normalization and MAC vectors pin computed bytes. Runtime, privacy, race, expansion and GUI oracles remain pending.",
+  "fixtures": [
+    {
+      "fixture_id": "request_schedule_minimal",
+      "fixture": "tests/fixtures/independent_activity_reads/contracts/request_schedule_minimal.json",
+      "schema": "contracts/schemas/trusted-web-read-schedule-request.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "request_schedule_guards_and_receipt",
+      "fixture": "tests/fixtures/independent_activity_reads/contracts/request_schedule_guards_and_receipt.json",
+      "schema": "contracts/schemas/trusted-web-read-schedule-request.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "request_occurrences",
+      "fixture": "tests/fixtures/independent_activity_reads/contracts/request_occurrences.json",
+      "schema": "contracts/schemas/trusted-web-read-occurrences-request.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "request_agenda",
+      "fixture": "tests/fixtures/independent_activity_reads/contracts/request_agenda.json",
+      "schema": "contracts/schemas/trusted-web-read-agenda-request.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "response_schedule_no_context",
+      "fixture": "tests/fixtures/independent_activity_reads/contracts/response_schedule_no_context.json",
+      "schema": "contracts/schemas/trusted-web-read-schedule-response.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "response_schedule_unavailable_time",
+      "fixture": "tests/fixtures/independent_activity_reads/contracts/response_schedule_unavailable_time.json",
+      "schema": "contracts/schemas/trusted-web-read-schedule-response.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "response_schedule_unscheduled",
+      "fixture": "tests/fixtures/independent_activity_reads/contracts/response_schedule_unscheduled.json",
+      "schema": "contracts/schemas/trusted-web-read-schedule-response.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "response_authorized_empty_context",
+      "fixture": "tests/fixtures/independent_activity_reads/contracts/response_authorized_empty_context.json",
+      "schema": "contracts/schemas/trusted-web-read-schedule-response.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "response_related_task_unknown_time",
+      "fixture": "tests/fixtures/independent_activity_reads/contracts/response_related_task_unknown_time.json",
+      "schema": "contracts/schemas/trusted-web-read-schedule-response.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "response_optional_budget_unavailable",
+      "fixture": "tests/fixtures/independent_activity_reads/contracts/response_optional_budget_unavailable.json",
+      "schema": "contracts/schemas/trusted-web-read-schedule-response.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "response_authoring_receipt",
+      "fixture": "tests/fixtures/independent_activity_reads/contracts/response_authoring_receipt.json",
+      "schema": "contracts/schemas/trusted-web-read-schedule-response.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "response_occurrences",
+      "fixture": "tests/fixtures/independent_activity_reads/contracts/response_occurrences.json",
+      "schema": "contracts/schemas/trusted-web-read-occurrences-response.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "response_occurrences_resolved_empty",
+      "fixture": "tests/fixtures/independent_activity_reads/contracts/response_occurrences_resolved_empty.json",
+      "schema": "contracts/schemas/trusted-web-read-occurrences-response.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "response_occurrences_unavailable",
+      "fixture": "tests/fixtures/independent_activity_reads/contracts/response_occurrences_unavailable.json",
+      "schema": "contracts/schemas/trusted-web-read-occurrences-response.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "response_occurrence_cancelled",
+      "fixture": "tests/fixtures/independent_activity_reads/contracts/response_occurrence_cancelled.json",
+      "schema": "contracts/schemas/trusted-web-read-occurrences-response.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "response_occurrence_moved",
+      "fixture": "tests/fixtures/independent_activity_reads/contracts/response_occurrence_moved.json",
+      "schema": "contracts/schemas/trusted-web-read-occurrences-response.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "response_agenda_resolved_and_unplaced",
+      "fixture": "tests/fixtures/independent_activity_reads/contracts/response_agenda_resolved_and_unplaced.json",
+      "schema": "contracts/schemas/trusted-web-read-agenda-response.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "response_agenda_first_page_incomplete_coverage",
+      "fixture": "tests/fixtures/independent_activity_reads/contracts/response_agenda_first_page_incomplete_coverage.json",
+      "schema": "contracts/schemas/trusted-web-read-agenda-response.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "response_agenda_unplaced_last_page",
+      "fixture": "tests/fixtures/independent_activity_reads/contracts/response_agenda_unplaced_last_page.json",
+      "schema": "contracts/schemas/trusted-web-read-agenda-response.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "response_agenda_authorized_work_summary",
+      "fixture": "tests/fixtures/independent_activity_reads/contracts/response_agenda_authorized_work_summary.json",
+      "schema": "contracts/schemas/trusted-web-read-agenda-response.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "response_capabilities",
+      "fixture": "tests/fixtures/independent_activity_reads/contracts/response_capabilities.json",
+      "schema": "contracts/schemas/trusted-web-read-capabilities.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "response_schedule_all_day",
+      "fixture": "tests/fixtures/independent_activity_reads/contracts/response_schedule_all_day.json",
+      "schema": "contracts/schemas/trusted-web-read-schedule-response.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "response_schedule_utc",
+      "fixture": "tests/fixtures/independent_activity_reads/contracts/response_schedule_utc.json",
+      "schema": "contracts/schemas/trusted-web-read-schedule-response.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "response_schedule_utc_window",
+      "fixture": "tests/fixtures/independent_activity_reads/contracts/response_schedule_utc_window.json",
+      "schema": "contracts/schemas/trusted-web-read-schedule-response.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "response_schedule_local_window",
+      "fixture": "tests/fixtures/independent_activity_reads/contracts/response_schedule_local_window.json",
+      "schema": "contracts/schemas/trusted-web-read-schedule-response.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "failure_invalid_request",
+      "fixture": "tests/fixtures/independent_activity_reads/contracts/failure_invalid_request.json",
+      "schema": "contracts/schemas/trusted-web-read-error.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "failure_identity_unavailable",
+      "fixture": "tests/fixtures/independent_activity_reads/contracts/failure_identity_unavailable.json",
+      "schema": "contracts/schemas/trusted-web-read-error.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "failure_resource_unavailable",
+      "fixture": "tests/fixtures/independent_activity_reads/contracts/failure_resource_unavailable.json",
+      "schema": "contracts/schemas/trusted-web-read-error.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "failure_access_changed",
+      "fixture": "tests/fixtures/independent_activity_reads/contracts/failure_access_changed.json",
+      "schema": "contracts/schemas/trusted-web-read-error.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "failure_version_changed",
+      "fixture": "tests/fixtures/independent_activity_reads/contracts/failure_version_changed.json",
+      "schema": "contracts/schemas/trusted-web-read-error.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "failure_capacity_exceeded",
+      "fixture": "tests/fixtures/independent_activity_reads/contracts/failure_capacity_exceeded.json",
+      "schema": "contracts/schemas/trusted-web-read-error.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "failure_admission_unavailable",
+      "fixture": "tests/fixtures/independent_activity_reads/contracts/failure_admission_unavailable.json",
+      "schema": "contracts/schemas/trusted-web-read-error.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "failure_domain_failure",
+      "fixture": "tests/fixtures/independent_activity_reads/contracts/failure_domain_failure.json",
+      "schema": "contracts/schemas/trusted-web-read-error.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "failure_operation_unavailable",
+      "fixture": "tests/fixtures/independent_activity_reads/contracts/failure_operation_unavailable.json",
+      "schema": "contracts/schemas/trusted-web-read-error.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "invalid_agenda_item_guard",
+      "fixture": "tests/fixtures/independent_activity_reads/contracts/invalid_agenda_item_guard.json",
+      "schema": "contracts/schemas/trusted-web-read-agenda-request.schema.json",
+      "valid": false
+    },
+    {
+      "fixture_id": "invalid_agenda_single_id_recurrence_guard",
+      "fixture": "tests/fixtures/independent_activity_reads/contracts/invalid_agenda_single_id_recurrence_guard.json",
+      "schema": "contracts/schemas/trusted-web-read-agenda-request.schema.json",
+      "valid": false
+    },
+    {
+      "fixture_id": "invalid_identity_injection",
+      "fixture": "tests/fixtures/independent_activity_reads/contracts/invalid_identity_injection.json",
+      "schema": "contracts/schemas/trusted-web-read-schedule-request.schema.json",
+      "valid": false
+    },
+    {
+      "fixture_id": "invalid_include",
+      "fixture": "tests/fixtures/independent_activity_reads/contracts/invalid_include.json",
+      "schema": "contracts/schemas/trusted-web-read-schedule-request.schema.json",
+      "valid": false
+    },
+    {
+      "fixture_id": "invalid_unavailable_time_source_leak",
+      "fixture": "tests/fixtures/independent_activity_reads/contracts/invalid_unavailable_time_source_leak.json",
+      "schema": "contracts/schemas/trusted-web-read-schedule-response.schema.json",
+      "valid": false
+    },
+    {
+      "fixture_id": "invalid_hidden_count",
+      "fixture": "tests/fixtures/independent_activity_reads/contracts/invalid_hidden_count.json",
+      "schema": "contracts/schemas/trusted-web-read-schedule-response.schema.json",
+      "valid": false
+    },
+    {
+      "fixture_id": "invalid_raw_receipt_payload",
+      "fixture": "tests/fixtures/independent_activity_reads/contracts/invalid_raw_receipt_payload.json",
+      "schema": "contracts/schemas/trusted-web-read-schedule-response.schema.json",
+      "valid": false
+    },
+    {
+      "fixture_id": "invalid_pagination_pair",
+      "fixture": "tests/fixtures/independent_activity_reads/contracts/invalid_pagination_pair.json",
+      "schema": "contracts/schemas/trusted-web-read-occurrences-response.schema.json",
+      "valid": false
+    },
+    {
+      "fixture_id": "invalid_unavailable_with_occurrence",
+      "fixture": "tests/fixtures/independent_activity_reads/contracts/invalid_unavailable_with_occurrence.json",
+      "schema": "contracts/schemas/trusted-web-read-occurrences-response.schema.json",
+      "valid": false
+    },
+    {
+      "fixture_id": "invalid_complete_with_unplaced",
+      "fixture": "tests/fixtures/independent_activity_reads/contracts/invalid_complete_with_unplaced.json",
+      "schema": "contracts/schemas/trusted-web-read-agenda-response.schema.json",
+      "valid": false
+    },
+    {
+      "fixture_id": "invalid_not_requested_payload",
+      "fixture": "tests/fixtures/independent_activity_reads/contracts/invalid_not_requested_payload.json",
+      "schema": "contracts/schemas/trusted-web-read-schedule-response.schema.json",
+      "valid": false
+    },
+    {
+      "fixture_id": "invalid_v1_envelope",
+      "fixture": "tests/fixtures/independent_activity_reads/contracts/invalid_v1_envelope.json",
+      "schema": "contracts/schemas/trusted-web-read-schedule-request.schema.json",
+      "valid": false
+    },
+    {
+      "fixture_id": "response_all_authorized_sections",
+      "fixture": "tests/fixtures/independent_activity_reads/contracts/response_all_authorized_sections.json",
+      "schema": "contracts/schemas/trusted-web-read-schedule-response.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "cursor_agenda_resolved",
+      "fixture": "tests/fixtures/independent_activity_reads/contracts/cursor_agenda_resolved.json",
+      "schema": "contracts/schemas/trusted-web-read-cursor.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "cursor_agenda_unplaced",
+      "fixture": "tests/fixtures/independent_activity_reads/contracts/cursor_agenda_unplaced.json",
+      "schema": "contracts/schemas/trusted-web-read-cursor.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "cursor_related_items",
+      "fixture": "tests/fixtures/independent_activity_reads/contracts/cursor_related_items.json",
+      "schema": "contracts/schemas/trusted-web-read-cursor.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "cursor_occurrences",
+      "fixture": "tests/fixtures/independent_activity_reads/contracts/cursor_occurrences.json",
+      "schema": "contracts/schemas/trusted-web-read-cursor.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "invalid_cursor_temporal_identity_field",
+      "fixture": "tests/fixtures/independent_activity_reads/contracts/invalid_cursor_temporal_identity_field.json",
+      "schema": "contracts/schemas/trusted-web-read-cursor.schema.json",
+      "valid": false
+    },
+    {
+      "fixture_id": "invalid_cursor_cross_stream_shape",
+      "fixture": "tests/fixtures/independent_activity_reads/contracts/invalid_cursor_cross_stream_shape.json",
+      "schema": "contracts/schemas/trusted-web-read-cursor.schema.json",
+      "valid": false
+    }
+  ],
+  "behavioral_cases": [
+    {
+      "id": "IR-01",
+      "status": "runtime_pending",
+      "setup": "Authorized recurring event with unowned follower",
+      "action": "Read root through all three v2 routes",
+      "oracle": "Core and occurrences equal an independent root; no ownership mutation",
+      "fixture_ids": [
+        "response_schedule_no_context",
+        "response_occurrences"
+      ]
+    },
+    {
+      "id": "IR-02",
+      "status": "runtime_pending",
+      "setup": "Same root with inaccessible follower",
+      "action": "Repeat reads after hidden follower mutation",
+      "oracle": "Same disclosed projection, section coverage, cursors and diagnostics",
+      "fixture_ids": [
+        "response_authorized_empty_context"
+      ]
+    },
+    {
+      "id": "IR-03",
+      "status": "runtime_pending",
+      "setup": "Both endpoints and relationship readable, including different owner scopes",
+      "action": "Request related_items/relations/temporal_bindings",
+      "oracle": "Return authorized relationship; preserve source freshness checks; no new write permission",
+      "fixture_ids": [
+        "response_all_authorized_sections"
+      ]
+    },
+    {
+      "id": "IR-04",
+      "status": "runtime_pending",
+      "setup": "No children versus only hidden/unowned children",
+      "action": "Request context with identical authorized subset",
+      "oracle": "Byte-equivalent projection and continuation facts at fixed authorization snapshot",
+      "fixture_ids": [
+        "response_authorized_empty_context"
+      ]
+    },
+    {
+      "id": "IR-05",
+      "status": "runtime_pending",
+      "setup": "Public section outage or authorized optional budget exhaustion",
+      "action": "Read core with requested optional work",
+      "oracle": "Core succeeds with unavailable optional context; hidden growth alone cannot cause this",
+      "fixture_ids": [
+        "response_optional_budget_unavailable"
+      ]
+    },
+    {
+      "id": "IR-06",
+      "status": "runtime_pending",
+      "setup": "Absent/unowned/denied explicit root",
+      "action": "Read root and explicit agenda item IDs",
+      "oracle": "Same generic 404 and no item or hidden source details",
+      "fixture_ids": [
+        "failure_resource_unavailable"
+      ]
+    },
+    {
+      "id": "IR-07",
+      "status": "runtime_pending",
+      "setup": "Readable follow_source task with denied/stale/ambiguous source",
+      "action": "Read task and agenda",
+      "oracle": "Unavailable time without stored anchors; agenda unplaced without range-membership assertion",
+      "fixture_ids": [
+        "response_schedule_unavailable_time",
+        "response_agenda_resolved_and_unplaced"
+      ]
+    },
+    {
+      "id": "IR-08",
+      "status": "runtime_pending",
+      "setup": "Resolved series with no range matches, unscheduled root, unresolved series",
+      "action": "Read temporal facts",
+      "oracle": "Distinct complete-empty, not_scheduled and unavailable results",
+      "fixture_ids": [
+        "response_occurrences_resolved_empty",
+        "response_schedule_unscheduled",
+        "response_occurrences_unavailable"
+      ]
+    },
+    {
+      "id": "IR-09",
+      "status": "runtime_pending",
+      "setup": "Canonical moves/exdates/lifecycle overlays, all-day/window/UTC, DST folds and gaps",
+      "action": "Compare projected outputs with domain expansion oracles",
+      "oracle": "Exact canonical IDs/time/order; no client expansion or invented ends",
+      "fixture_ids": [
+        "response_occurrence_moved",
+        "response_occurrence_cancelled",
+        "response_schedule_all_day",
+        "response_schedule_utc_window"
+      ]
+    },
+    {
+      "id": "IR-10",
+      "status": "runtime_pending",
+      "setup": "Identity/grant revoke or scheduled activation/expiry during assembly without epoch write",
+      "action": "Inject transition before release and before next page",
+      "oracle": "Discard result; admission denial or access_changed; no partial release",
+      "fixture_ids": [
+        "failure_access_changed"
+      ]
+    },
+    {
+      "id": "IR-11",
+      "status": "runtime_pending",
+      "setup": "Direct version mismatch, agenda singular guards, first-page and continuation source mutation",
+      "action": "Read with guards then mutate authorized and hidden facts separately",
+      "oracle": "Direct version_changed; agenda rejects singular guards; visible snapshot changes invalidate; hidden-only changes do not",
+      "fixture_ids": [
+        "invalid_agenda_item_guard",
+        "invalid_agenda_single_id_recurrence_guard",
+        "failure_version_changed"
+      ]
+    },
+    {
+      "id": "IR-12",
+      "status": "runtime_pending",
+      "setup": "Two-stream agenda and independent section cursors at fixed snapshot",
+      "action": "Traverse all pages, alter limits/context, cross-route replay and expire tokens",
+      "oracle": "No duplicate/skip; fixed original expiry; reject crossed context; identity revision distinct from binding revision",
+      "fixture_ids": [
+        "cursor_agenda_resolved",
+        "cursor_agenda_unplaced",
+        "cursor_related_items",
+        "cursor_occurrences",
+        "invalid_cursor_temporal_identity_field"
+      ]
+    },
+    {
+      "id": "IR-13",
+      "status": "runtime_pending",
+      "setup": "Root readable via v2 but connected resource cannot be edited",
+      "action": "Attempt unchanged v1 update/cancel/complete and replay",
+      "oracle": "Read success never expands write authority; existing replay/graph checks remain",
+      "fixture_ids": [
+        "response_schedule_no_context"
+      ]
+    },
+    {
+      "id": "IR-14",
+      "status": "runtime_pending",
+      "setup": "Hidden rows, receipt content and large hidden graph; authorized creation evidence",
+      "action": "Compare v2 includes and ledger counts before/after reads",
+      "oracle": "No hidden count/hash/text leakage; explicit receipt only; absent and hidden yield null; no durable reads",
+      "fixture_ids": [
+        "invalid_hidden_count",
+        "invalid_raw_receipt_payload",
+        "response_authoring_receipt"
+      ]
+    },
+    {
+      "id": "IR-15",
+      "status": "runtime_pending",
+      "setup": "Old client and v1 pins, partial/new deployment and rollback",
+      "action": "Negotiate exact capabilities; retain v1 calls",
+      "oracle": "No v1 schema/registry/runtime drift; unsupported v2 not empty; invalidate rolled-back cursors",
+      "fixture_ids": [
+        "response_capabilities",
+        "invalid_v1_envelope"
+      ]
+    },
+    {
+      "id": "IR-16",
+      "status": "runtime_pending",
+      "setup": "GUI identity switch and out-of-order responses; unavailable time/context",
+      "action": "Render response generations and discard superseded selection",
+      "oracle": "Never infer last-known dates or hidden task existence; preserve incomplete-calendar messaging",
+      "fixture_ids": [
+        "response_related_task_unknown_time",
+        "response_agenda_unplaced_last_page"
+      ]
+    }
+  ]
+}

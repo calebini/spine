@@ -1,8 +1,8 @@
 # Independent Authorized Activity Reads
 
-Status: Draft v0.2; bounded audit findings manually clarified; not implemented or advertised
+Status: Ratified v1 read design; machine contracts codified; not implemented or advertised
 Created: 2026-09-13
-Updated: 2026-09-15
+Updated: 2026-09-16
 Tracking: [SPINE-015](../docs/BACKLOG.md#spine-015--read-authorized-activities-independently-of-unavailable-linked-resources)
 
 ## 1. Outcome, scope, and authority
@@ -11,17 +11,20 @@ An authorized event MUST remain readable when an inaccessible task follows it. S
 supplies canonical dates, times, effective lifecycle, and occurrence identity;
 consumers do not reconstruct missing facts or expand recurrence themselves.
 
-This draft proposes a separately versioned web read projection. It does not change
+This ratified design defines a separately versioned web read projection. It does not change
 the implemented complete-or-deny v1 web surface, local CLI responses, recurrence
-identity, ownership, or write authorization. MUST/SHOULD below describe the proposed
-contract after acceptance, not current runtime behavior.
+identity, ownership, or write authorization. MUST/SHOULD below describe the accepted
+contract, not current runtime behavior. The operator ratified the read design on
+2026-09-16 after bounded recheck 002 passed. The
+[machine-contract companion](independent-activity-read-contracts.md) specifies exact
+schemas, registry, cursor rules and initial fixtures; runtime delivery remains pending.
 
 [Resource permissions](permissions.md) owns authorization;
 [the trusted web spec](trusted-multi-operator-web-api.md) owns selected-account admission;
 [recurrence](recurrence.md), [schedule readback](schedule-show.md),
 [schedule operations](schedule-operations.md), and
 [temporal bindings](relative-temporal-bindings.md) own canonical facts and lifecycle.
-This draft owns only read selection, safe projection, and availability semantics.
+This specification owns only read selection, safe projection, and availability semantics.
 
 Non-goals include implementation, deployment, staging changes, ownership repair,
 authentication changes, authorization from task assignment, recurrence in Kinflow,
@@ -225,7 +228,7 @@ section budget. It says nothing about hidden membership. Do not downgrade an
 authorization change or an uncertain root read into optional-context unavailability.
 
 No initial policy grants disclosure of the existence of inaccessible related items.
-Therefore this draft does not return a hidden-membership-specific `withheld` state,
+Therefore this contract does not return a hidden-membership-specific `withheld` state,
 even to someone who can read the parent or is a group admin. A later contract could
 distinguish globally complete-empty from withheld only with independently established,
 versioned authority to know relationship membership, checked at release time. Do not
@@ -369,10 +372,10 @@ This is a behavioral and schema change, not a patch to generic error prose. A pa
 projection cannot carry `spine.schedule-show.v1` or claim its complete counts/evidence.
 Likewise, new time unions and unplaced agenda items do not fit the closed v1 schemas.
 
-Proposed names below are reserved by this draft only; no route or capability exists
-until machine contracts and behavioral tests ship together:
+The following names are ratified and codified separately; no route or capability exists
+until runtime implementation and behavioral tests ship together:
 
-| Surface | Proposed compatibility choice |
+| Surface | Accepted compatibility choice |
 |---|---|
 | Read transport | Separate `/api/v2/commands/schedule.show`, `/api/v2/commands/item.occurrences`, and `/api/v2/agenda`; selected identity admission retained; no v2 write routes |
 | Outer envelope | `spine.trusted-web-api.v2`, explicitly closed read-only request/response variants with current identity, selection, epoch, and exact result tag |

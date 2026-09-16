@@ -1,0 +1,97 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cortext.local/spine/contracts/schemas/trusted-web-read-agenda-request.schema.json",
+  "type": "object",
+  "properties": {
+    "contract_version": {
+      "const": "spine.trusted-web-api.v2"
+    },
+    "request": {
+      "type": "object",
+      "properties": {
+        "evaluated_at_utc": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/utc"
+        },
+        "range_start_local": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/local_datetime"
+        },
+        "range_end_local": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/local_datetime"
+        },
+        "timezone": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "timezone_database_version": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512,
+          "not": { "const": "system_current" }
+        },
+        "item_types": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "event",
+              "task"
+            ]
+          },
+          "maxItems": 2,
+          "uniqueItems": true,
+          "minItems": 1
+        },
+        "item_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256,
+            "pattern": "^[^\\u0000-\\u001f\\u007f]+$"
+          },
+          "maxItems": 100,
+          "uniqueItems": true,
+          "minItems": 1
+        },
+        "include_terminal": {
+          "type": "boolean"
+        },
+        "include": {
+          "type": "array",
+          "uniqueItems": true,
+          "maxItems": 4,
+          "items": {
+            "enum": [
+              "primary_location",
+              "policies",
+              "work",
+              "attempts"
+            ]
+          }
+        },
+        "limit": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/limit"
+        },
+        "cursor": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/cursor"
+        }
+      },
+      "required": [
+        "evaluated_at_utc",
+        "range_start_local",
+        "range_end_local",
+        "timezone",
+        "timezone_database_version"
+      ],
+      "additionalProperties": false
+    },
+    "expected_access_epoch": {
+      "$ref": "trusted-web-read-types.schema.json#/$defs/version"
+    }
+  },
+  "required": [
+    "contract_version",
+    "request"
+  ],
+  "additionalProperties": false
+}

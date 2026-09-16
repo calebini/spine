@@ -1,0 +1,10 @@
+{
+  "contract_version": "spine.trusted-web-api.v2",
+  "ok": false,
+  "error": {
+    "code": "operation_unavailable",
+    "message": "Read unavailable."
+  },
+  "correlation_id": "opaque-correlation",
+  "selection_id": null
+}

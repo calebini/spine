@@ -1,0 +1,66 @@
+{
+  "contract_version": "spine.trusted-web-read-normalization.v1",
+  "canonical_json": "spine.canonical-json.v1",
+  "status": "contract_only",
+  "query_preimage_fields": [
+    "contract_version",
+    "route",
+    "request",
+    "expected_access_epoch",
+    "expected_item_version",
+    "expected_recurrence_revision_id"
+  ],
+  "query_preimage_contract": "spine.trusted-web-read-normalization.v1",
+  "strip_request_fields": [
+    "cursor",
+    "section_cursors"
+  ],
+  "null_guard_defaults": [
+    "expected_access_epoch",
+    "expected_item_version",
+    "expected_recurrence_revision_id"
+  ],
+  "request_defaults": {
+    "schedule.show": {
+      "include": [],
+      "section_limit": "50"
+    },
+    "item.occurrences": {
+      "limit": "50"
+    },
+    "agenda": {
+      "item_types": [
+        "event",
+        "task"
+      ],
+      "include_terminal": false,
+      "include": [],
+      "limit": "50"
+    }
+  },
+  "set_arrays": [
+    "include",
+    "item_ids",
+    "item_types"
+  ],
+  "sort": "Unicode codepoint; reject duplicates rather than collapse",
+  "timezone": "Concrete pinned version required for v2 agenda; system_current and omission are invalid. No re-resolution on pagination.",
+  "section_cursor_constraint": "only included collection names; every supplied cursor shares the original authorized snapshot/issued_at/expiry",
+  "hash": "SHA-256 of UTF-8 canonical JSON; lowercase hex; no arbitrary Unicode normalization",
+  "bounds": {
+    "request_bytes": "1048576",
+    "response_bytes": "4194304",
+    "core_reserved_bytes": "2097152",
+    "optional_total_bytes": "1048576",
+    "section_bytes": "65536",
+    "row_limit_max": "100",
+    "agenda_days_max": "31",
+    "occurrence_days_max": "3660",
+    "request_milliseconds": "5000",
+    "core_sql_vm_steps": "75000",
+    "optional_sql_vm_steps": "25000",
+    "optional_authorized_rows_per_section": "1000",
+    "cursor_seconds_max": "900"
+  },
+  "semantics": "Optional budgets cannot consume core reserve. Hard outer runtime limits still apply. Only authorized candidates contribute to section budgets; a hidden-offset scan is not conforming."
+}

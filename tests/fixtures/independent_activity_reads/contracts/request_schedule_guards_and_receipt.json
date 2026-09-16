@@ -1,0 +1,14 @@
+{
+  "contract_version": "spine.trusted-web-api.v2",
+  "request": {
+    "item_id": "event-science",
+    "include": [
+      "authoring_receipt",
+      "related_items"
+    ],
+    "section_limit": "10"
+  },
+  "expected_access_epoch": "4",
+  "expected_item_version": "3",
+  "expected_recurrence_revision_id": "revision-science-2"
+}

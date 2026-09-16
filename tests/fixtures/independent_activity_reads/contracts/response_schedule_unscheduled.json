@@ -1,0 +1,73 @@
+{
+  "contract_version": "spine.trusted-web-api.v2",
+  "ok": true,
+  "identity_basis": "self_selected",
+  "account_id": "account-operator",
+  "subject_id": "subject-operator",
+  "selection_id": "selection-1",
+  "account_revision": "1",
+  "subject_revision": "1",
+  "account_subject_binding_revision": "1",
+  "access_epoch": "4",
+  "result_contract": "spine.trusted-web-schedule-view.v1",
+  "result": {
+    "activity": {
+      "item_id": "event-science",
+      "item_type": "event",
+      "current_version": "3",
+      "title": "Science class",
+      "status": "active",
+      "detail_status": "scheduled",
+      "time": {
+        "availability": "not_scheduled"
+      },
+      "recurrence": null
+    },
+    "sections": {
+      "related_items": {
+        "availability": "not_requested",
+        "scope": "authorized_only"
+      },
+      "relations": {
+        "availability": "not_requested",
+        "scope": "authorized_only"
+      },
+      "temporal_bindings": {
+        "availability": "not_requested",
+        "scope": "authorized_only"
+      },
+      "primary_location": {
+        "availability": "not_requested",
+        "scope": "authorized_only"
+      },
+      "notification_profiles": {
+        "availability": "not_requested",
+        "scope": "authorized_only"
+      },
+      "policies": {
+        "availability": "not_requested",
+        "scope": "authorized_only"
+      },
+      "work": {
+        "availability": "not_requested",
+        "scope": "authorized_only"
+      },
+      "attempts": {
+        "availability": "not_requested",
+        "scope": "authorized_only"
+      },
+      "delivery_targets": {
+        "availability": "not_requested",
+        "scope": "authorized_only"
+      },
+      "subject_roles": {
+        "availability": "not_requested",
+        "scope": "authorized_only"
+      },
+      "authoring_receipt": {
+        "availability": "not_requested",
+        "scope": "authorized_only"
+      }
+    }
+  }
+}

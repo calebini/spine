@@ -1,0 +1,1440 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cortext.local/spine/contracts/schemas/trusted-web-read-cursor.schema.json",
+  "oneOf": [
+    {
+      "type": "object",
+      "properties": {
+        "contract_version": {
+          "const": "spine.trusted-web-cursor.v2"
+        },
+        "ledger_id": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/id"
+        },
+        "realm_id": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/id"
+        },
+        "recovery_epoch": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/version"
+        },
+        "account_id": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/id"
+        },
+        "account_revision": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/version"
+        },
+        "subject_id": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/id"
+        },
+        "subject_revision": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/version"
+        },
+        "account_subject_binding_revision": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/version"
+        },
+        "selection_id": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/id"
+        },
+        "access_epoch": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/version"
+        },
+        "query_hash": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/hash"
+        },
+        "source_snapshot_hash": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/hash"
+        },
+        "issued_at_utc": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/utc"
+        },
+        "expires_at_utc": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/utc"
+        },
+        "authorization_evaluated_at_utc": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/utc"
+        },
+        "authorization_valid_until_utc": {
+          "oneOf": [
+            {
+              "$ref": "trusted-web-read-types.schema.json#/$defs/utc"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "route": {
+          "const": "schedule.show"
+        },
+        "stream": {
+          "const": "related_items"
+        },
+        "item_id": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/id"
+        },
+        "last_key": {
+          "type": "array",
+          "prefixItems": [
+            {
+              "$ref": "trusted-web-read-types.schema.json#/$defs/id"
+            }
+          ],
+          "items": false,
+          "minItems": 1,
+          "maxItems": 1
+        }
+      },
+      "required": [
+        "contract_version",
+        "ledger_id",
+        "realm_id",
+        "recovery_epoch",
+        "account_id",
+        "account_revision",
+        "subject_id",
+        "subject_revision",
+        "account_subject_binding_revision",
+        "selection_id",
+        "access_epoch",
+        "query_hash",
+        "source_snapshot_hash",
+        "issued_at_utc",
+        "expires_at_utc",
+        "authorization_evaluated_at_utc",
+        "authorization_valid_until_utc",
+        "route",
+        "stream",
+        "item_id",
+        "last_key"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "contract_version": {
+          "const": "spine.trusted-web-cursor.v2"
+        },
+        "ledger_id": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/id"
+        },
+        "realm_id": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/id"
+        },
+        "recovery_epoch": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/version"
+        },
+        "account_id": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/id"
+        },
+        "account_revision": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/version"
+        },
+        "subject_id": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/id"
+        },
+        "subject_revision": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/version"
+        },
+        "account_subject_binding_revision": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/version"
+        },
+        "selection_id": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/id"
+        },
+        "access_epoch": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/version"
+        },
+        "query_hash": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/hash"
+        },
+        "source_snapshot_hash": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/hash"
+        },
+        "issued_at_utc": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/utc"
+        },
+        "expires_at_utc": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/utc"
+        },
+        "authorization_evaluated_at_utc": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/utc"
+        },
+        "authorization_valid_until_utc": {
+          "oneOf": [
+            {
+              "$ref": "trusted-web-read-types.schema.json#/$defs/utc"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "route": {
+          "const": "schedule.show"
+        },
+        "stream": {
+          "const": "relations"
+        },
+        "item_id": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/id"
+        },
+        "last_key": {
+          "type": "array",
+          "prefixItems": [
+            {
+              "$ref": "trusted-web-read-types.schema.json#/$defs/id"
+            }
+          ],
+          "items": false,
+          "minItems": 1,
+          "maxItems": 1
+        }
+      },
+      "required": [
+        "contract_version",
+        "ledger_id",
+        "realm_id",
+        "recovery_epoch",
+        "account_id",
+        "account_revision",
+        "subject_id",
+        "subject_revision",
+        "account_subject_binding_revision",
+        "selection_id",
+        "access_epoch",
+        "query_hash",
+        "source_snapshot_hash",
+        "issued_at_utc",
+        "expires_at_utc",
+        "authorization_evaluated_at_utc",
+        "authorization_valid_until_utc",
+        "route",
+        "stream",
+        "item_id",
+        "last_key"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "contract_version": {
+          "const": "spine.trusted-web-cursor.v2"
+        },
+        "ledger_id": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/id"
+        },
+        "realm_id": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/id"
+        },
+        "recovery_epoch": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/version"
+        },
+        "account_id": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/id"
+        },
+        "account_revision": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/version"
+        },
+        "subject_id": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/id"
+        },
+        "subject_revision": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/version"
+        },
+        "account_subject_binding_revision": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/version"
+        },
+        "selection_id": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/id"
+        },
+        "access_epoch": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/version"
+        },
+        "query_hash": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/hash"
+        },
+        "source_snapshot_hash": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/hash"
+        },
+        "issued_at_utc": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/utc"
+        },
+        "expires_at_utc": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/utc"
+        },
+        "authorization_evaluated_at_utc": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/utc"
+        },
+        "authorization_valid_until_utc": {
+          "oneOf": [
+            {
+              "$ref": "trusted-web-read-types.schema.json#/$defs/utc"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "route": {
+          "const": "schedule.show"
+        },
+        "stream": {
+          "const": "temporal_bindings"
+        },
+        "item_id": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/id"
+        },
+        "last_key": {
+          "type": "array",
+          "prefixItems": [
+            {
+              "$ref": "trusted-web-read-types.schema.json#/$defs/id"
+            }
+          ],
+          "items": false,
+          "minItems": 1,
+          "maxItems": 1
+        }
+      },
+      "required": [
+        "contract_version",
+        "ledger_id",
+        "realm_id",
+        "recovery_epoch",
+        "account_id",
+        "account_revision",
+        "subject_id",
+        "subject_revision",
+        "account_subject_binding_revision",
+        "selection_id",
+        "access_epoch",
+        "query_hash",
+        "source_snapshot_hash",
+        "issued_at_utc",
+        "expires_at_utc",
+        "authorization_evaluated_at_utc",
+        "authorization_valid_until_utc",
+        "route",
+        "stream",
+        "item_id",
+        "last_key"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "contract_version": {
+          "const": "spine.trusted-web-cursor.v2"
+        },
+        "ledger_id": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/id"
+        },
+        "realm_id": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/id"
+        },
+        "recovery_epoch": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/version"
+        },
+        "account_id": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/id"
+        },
+        "account_revision": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/version"
+        },
+        "subject_id": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/id"
+        },
+        "subject_revision": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/version"
+        },
+        "account_subject_binding_revision": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/version"
+        },
+        "selection_id": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/id"
+        },
+        "access_epoch": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/version"
+        },
+        "query_hash": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/hash"
+        },
+        "source_snapshot_hash": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/hash"
+        },
+        "issued_at_utc": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/utc"
+        },
+        "expires_at_utc": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/utc"
+        },
+        "authorization_evaluated_at_utc": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/utc"
+        },
+        "authorization_valid_until_utc": {
+          "oneOf": [
+            {
+              "$ref": "trusted-web-read-types.schema.json#/$defs/utc"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "route": {
+          "const": "schedule.show"
+        },
+        "stream": {
+          "const": "notification_profiles"
+        },
+        "item_id": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/id"
+        },
+        "last_key": {
+          "type": "array",
+          "prefixItems": [
+            {
+              "$ref": "trusted-web-read-types.schema.json#/$defs/id"
+            },
+            {
+              "$ref": "trusted-web-read-types.schema.json#/$defs/id"
+            }
+          ],
+          "items": false,
+          "minItems": 2,
+          "maxItems": 2
+        }
+      },
+      "required": [
+        "contract_version",
+        "ledger_id",
+        "realm_id",
+        "recovery_epoch",
+        "account_id",
+        "account_revision",
+        "subject_id",
+        "subject_revision",
+        "account_subject_binding_revision",
+        "selection_id",
+        "access_epoch",
+        "query_hash",
+        "source_snapshot_hash",
+        "issued_at_utc",
+        "expires_at_utc",
+        "authorization_evaluated_at_utc",
+        "authorization_valid_until_utc",
+        "route",
+        "stream",
+        "item_id",
+        "last_key"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "contract_version": {
+          "const": "spine.trusted-web-cursor.v2"
+        },
+        "ledger_id": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/id"
+        },
+        "realm_id": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/id"
+        },
+        "recovery_epoch": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/version"
+        },
+        "account_id": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/id"
+        },
+        "account_revision": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/version"
+        },
+        "subject_id": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/id"
+        },
+        "subject_revision": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/version"
+        },
+        "account_subject_binding_revision": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/version"
+        },
+        "selection_id": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/id"
+        },
+        "access_epoch": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/version"
+        },
+        "query_hash": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/hash"
+        },
+        "source_snapshot_hash": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/hash"
+        },
+        "issued_at_utc": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/utc"
+        },
+        "expires_at_utc": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/utc"
+        },
+        "authorization_evaluated_at_utc": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/utc"
+        },
+        "authorization_valid_until_utc": {
+          "oneOf": [
+            {
+              "$ref": "trusted-web-read-types.schema.json#/$defs/utc"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "route": {
+          "const": "schedule.show"
+        },
+        "stream": {
+          "const": "policies"
+        },
+        "item_id": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/id"
+        },
+        "last_key": {
+          "type": "array",
+          "prefixItems": [
+            {
+              "$ref": "trusted-web-read-types.schema.json#/$defs/id"
+            }
+          ],
+          "items": false,
+          "minItems": 1,
+          "maxItems": 1
+        }
+      },
+      "required": [
+        "contract_version",
+        "ledger_id",
+        "realm_id",
+        "recovery_epoch",
+        "account_id",
+        "account_revision",
+        "subject_id",
+        "subject_revision",
+        "account_subject_binding_revision",
+        "selection_id",
+        "access_epoch",
+        "query_hash",
+        "source_snapshot_hash",
+        "issued_at_utc",
+        "expires_at_utc",
+        "authorization_evaluated_at_utc",
+        "authorization_valid_until_utc",
+        "route",
+        "stream",
+        "item_id",
+        "last_key"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "contract_version": {
+          "const": "spine.trusted-web-cursor.v2"
+        },
+        "ledger_id": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/id"
+        },
+        "realm_id": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/id"
+        },
+        "recovery_epoch": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/version"
+        },
+        "account_id": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/id"
+        },
+        "account_revision": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/version"
+        },
+        "subject_id": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/id"
+        },
+        "subject_revision": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/version"
+        },
+        "account_subject_binding_revision": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/version"
+        },
+        "selection_id": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/id"
+        },
+        "access_epoch": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/version"
+        },
+        "query_hash": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/hash"
+        },
+        "source_snapshot_hash": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/hash"
+        },
+        "issued_at_utc": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/utc"
+        },
+        "expires_at_utc": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/utc"
+        },
+        "authorization_evaluated_at_utc": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/utc"
+        },
+        "authorization_valid_until_utc": {
+          "oneOf": [
+            {
+              "$ref": "trusted-web-read-types.schema.json#/$defs/utc"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "route": {
+          "const": "schedule.show"
+        },
+        "stream": {
+          "const": "work"
+        },
+        "item_id": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/id"
+        },
+        "last_key": {
+          "type": "array",
+          "prefixItems": [
+            {
+              "$ref": "trusted-web-read-types.schema.json#/$defs/id"
+            }
+          ],
+          "items": false,
+          "minItems": 1,
+          "maxItems": 1
+        }
+      },
+      "required": [
+        "contract_version",
+        "ledger_id",
+        "realm_id",
+        "recovery_epoch",
+        "account_id",
+        "account_revision",
+        "subject_id",
+        "subject_revision",
+        "account_subject_binding_revision",
+        "selection_id",
+        "access_epoch",
+        "query_hash",
+        "source_snapshot_hash",
+        "issued_at_utc",
+        "expires_at_utc",
+        "authorization_evaluated_at_utc",
+        "authorization_valid_until_utc",
+        "route",
+        "stream",
+        "item_id",
+        "last_key"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "contract_version": {
+          "const": "spine.trusted-web-cursor.v2"
+        },
+        "ledger_id": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/id"
+        },
+        "realm_id": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/id"
+        },
+        "recovery_epoch": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/version"
+        },
+        "account_id": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/id"
+        },
+        "account_revision": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/version"
+        },
+        "subject_id": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/id"
+        },
+        "subject_revision": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/version"
+        },
+        "account_subject_binding_revision": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/version"
+        },
+        "selection_id": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/id"
+        },
+        "access_epoch": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/version"
+        },
+        "query_hash": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/hash"
+        },
+        "source_snapshot_hash": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/hash"
+        },
+        "issued_at_utc": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/utc"
+        },
+        "expires_at_utc": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/utc"
+        },
+        "authorization_evaluated_at_utc": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/utc"
+        },
+        "authorization_valid_until_utc": {
+          "oneOf": [
+            {
+              "$ref": "trusted-web-read-types.schema.json#/$defs/utc"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "route": {
+          "const": "schedule.show"
+        },
+        "stream": {
+          "const": "attempts"
+        },
+        "item_id": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/id"
+        },
+        "last_key": {
+          "type": "array",
+          "prefixItems": [
+            {
+              "$ref": "trusted-web-read-types.schema.json#/$defs/id"
+            }
+          ],
+          "items": false,
+          "minItems": 1,
+          "maxItems": 1
+        }
+      },
+      "required": [
+        "contract_version",
+        "ledger_id",
+        "realm_id",
+        "recovery_epoch",
+        "account_id",
+        "account_revision",
+        "subject_id",
+        "subject_revision",
+        "account_subject_binding_revision",
+        "selection_id",
+        "access_epoch",
+        "query_hash",
+        "source_snapshot_hash",
+        "issued_at_utc",
+        "expires_at_utc",
+        "authorization_evaluated_at_utc",
+        "authorization_valid_until_utc",
+        "route",
+        "stream",
+        "item_id",
+        "last_key"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "contract_version": {
+          "const": "spine.trusted-web-cursor.v2"
+        },
+        "ledger_id": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/id"
+        },
+        "realm_id": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/id"
+        },
+        "recovery_epoch": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/version"
+        },
+        "account_id": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/id"
+        },
+        "account_revision": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/version"
+        },
+        "subject_id": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/id"
+        },
+        "subject_revision": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/version"
+        },
+        "account_subject_binding_revision": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/version"
+        },
+        "selection_id": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/id"
+        },
+        "access_epoch": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/version"
+        },
+        "query_hash": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/hash"
+        },
+        "source_snapshot_hash": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/hash"
+        },
+        "issued_at_utc": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/utc"
+        },
+        "expires_at_utc": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/utc"
+        },
+        "authorization_evaluated_at_utc": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/utc"
+        },
+        "authorization_valid_until_utc": {
+          "oneOf": [
+            {
+              "$ref": "trusted-web-read-types.schema.json#/$defs/utc"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "route": {
+          "const": "schedule.show"
+        },
+        "stream": {
+          "const": "delivery_targets"
+        },
+        "item_id": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/id"
+        },
+        "last_key": {
+          "type": "array",
+          "prefixItems": [
+            {
+              "$ref": "trusted-web-read-types.schema.json#/$defs/id"
+            }
+          ],
+          "items": false,
+          "minItems": 1,
+          "maxItems": 1
+        }
+      },
+      "required": [
+        "contract_version",
+        "ledger_id",
+        "realm_id",
+        "recovery_epoch",
+        "account_id",
+        "account_revision",
+        "subject_id",
+        "subject_revision",
+        "account_subject_binding_revision",
+        "selection_id",
+        "access_epoch",
+        "query_hash",
+        "source_snapshot_hash",
+        "issued_at_utc",
+        "expires_at_utc",
+        "authorization_evaluated_at_utc",
+        "authorization_valid_until_utc",
+        "route",
+        "stream",
+        "item_id",
+        "last_key"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "contract_version": {
+          "const": "spine.trusted-web-cursor.v2"
+        },
+        "ledger_id": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/id"
+        },
+        "realm_id": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/id"
+        },
+        "recovery_epoch": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/version"
+        },
+        "account_id": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/id"
+        },
+        "account_revision": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/version"
+        },
+        "subject_id": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/id"
+        },
+        "subject_revision": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/version"
+        },
+        "account_subject_binding_revision": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/version"
+        },
+        "selection_id": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/id"
+        },
+        "access_epoch": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/version"
+        },
+        "query_hash": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/hash"
+        },
+        "source_snapshot_hash": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/hash"
+        },
+        "issued_at_utc": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/utc"
+        },
+        "expires_at_utc": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/utc"
+        },
+        "authorization_evaluated_at_utc": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/utc"
+        },
+        "authorization_valid_until_utc": {
+          "oneOf": [
+            {
+              "$ref": "trusted-web-read-types.schema.json#/$defs/utc"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "route": {
+          "const": "schedule.show"
+        },
+        "stream": {
+          "const": "subject_roles"
+        },
+        "item_id": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/id"
+        },
+        "last_key": {
+          "type": "array",
+          "prefixItems": [
+            {
+              "$ref": "trusted-web-read-types.schema.json#/$defs/id"
+            },
+            {
+              "$ref": "trusted-web-read-types.schema.json#/$defs/id"
+            }
+          ],
+          "items": false,
+          "minItems": 2,
+          "maxItems": 2
+        }
+      },
+      "required": [
+        "contract_version",
+        "ledger_id",
+        "realm_id",
+        "recovery_epoch",
+        "account_id",
+        "account_revision",
+        "subject_id",
+        "subject_revision",
+        "account_subject_binding_revision",
+        "selection_id",
+        "access_epoch",
+        "query_hash",
+        "source_snapshot_hash",
+        "issued_at_utc",
+        "expires_at_utc",
+        "authorization_evaluated_at_utc",
+        "authorization_valid_until_utc",
+        "route",
+        "stream",
+        "item_id",
+        "last_key"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "contract_version": {
+          "const": "spine.trusted-web-cursor.v2"
+        },
+        "ledger_id": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/id"
+        },
+        "realm_id": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/id"
+        },
+        "recovery_epoch": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/version"
+        },
+        "account_id": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/id"
+        },
+        "account_revision": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/version"
+        },
+        "subject_id": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/id"
+        },
+        "subject_revision": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/version"
+        },
+        "account_subject_binding_revision": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/version"
+        },
+        "selection_id": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/id"
+        },
+        "access_epoch": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/version"
+        },
+        "query_hash": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/hash"
+        },
+        "source_snapshot_hash": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/hash"
+        },
+        "issued_at_utc": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/utc"
+        },
+        "expires_at_utc": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/utc"
+        },
+        "authorization_evaluated_at_utc": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/utc"
+        },
+        "authorization_valid_until_utc": {
+          "oneOf": [
+            {
+              "$ref": "trusted-web-read-types.schema.json#/$defs/utc"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "route": {
+          "const": "item.occurrences"
+        },
+        "stream": {
+          "const": "occurrences"
+        },
+        "item_id": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/id"
+        },
+        "last_key": {
+          "type": "array",
+          "prefixItems": [
+            {
+              "$ref": "trusted-web-read-types.schema.json#/$defs/scheduled_fact"
+            },
+            {
+              "$ref": "trusted-web-read-types.schema.json#/$defs/id"
+            },
+            {
+              "$ref": "trusted-web-read-types.schema.json#/$defs/id"
+            }
+          ],
+          "items": false,
+          "minItems": 3,
+          "maxItems": 3
+        },
+        "range_basis": {
+          "const": "original_schedule"
+        }
+      },
+      "required": [
+        "contract_version",
+        "ledger_id",
+        "realm_id",
+        "recovery_epoch",
+        "account_id",
+        "account_revision",
+        "subject_id",
+        "subject_revision",
+        "account_subject_binding_revision",
+        "selection_id",
+        "access_epoch",
+        "query_hash",
+        "source_snapshot_hash",
+        "issued_at_utc",
+        "expires_at_utc",
+        "authorization_evaluated_at_utc",
+        "authorization_valid_until_utc",
+        "route",
+        "stream",
+        "item_id",
+        "last_key",
+        "range_basis"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "contract_version": {
+          "const": "spine.trusted-web-cursor.v2"
+        },
+        "ledger_id": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/id"
+        },
+        "realm_id": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/id"
+        },
+        "recovery_epoch": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/version"
+        },
+        "account_id": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/id"
+        },
+        "account_revision": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/version"
+        },
+        "subject_id": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/id"
+        },
+        "subject_revision": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/version"
+        },
+        "account_subject_binding_revision": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/version"
+        },
+        "selection_id": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/id"
+        },
+        "access_epoch": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/version"
+        },
+        "query_hash": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/hash"
+        },
+        "source_snapshot_hash": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/hash"
+        },
+        "issued_at_utc": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/utc"
+        },
+        "expires_at_utc": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/utc"
+        },
+        "authorization_evaluated_at_utc": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/utc"
+        },
+        "authorization_valid_until_utc": {
+          "oneOf": [
+            {
+              "$ref": "trusted-web-read-types.schema.json#/$defs/utc"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "route": {
+          "const": "item.occurrences"
+        },
+        "stream": {
+          "const": "occurrences"
+        },
+        "item_id": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/id"
+        },
+        "last_key": {
+          "type": "array",
+          "prefixItems": [
+            {
+              "$ref": "trusted-web-read-types.schema.json#/$defs/scheduled_fact"
+            },
+            {
+              "$ref": "trusted-web-read-types.schema.json#/$defs/id"
+            },
+            {
+              "$ref": "trusted-web-read-types.schema.json#/$defs/id"
+            },
+            {
+              "$ref": "trusted-web-read-types.schema.json#/$defs/id"
+            }
+          ],
+          "items": false,
+          "minItems": 4,
+          "maxItems": 4
+        },
+        "range_basis": {
+          "const": "expressed_time"
+        }
+      },
+      "required": [
+        "contract_version",
+        "ledger_id",
+        "realm_id",
+        "recovery_epoch",
+        "account_id",
+        "account_revision",
+        "subject_id",
+        "subject_revision",
+        "account_subject_binding_revision",
+        "selection_id",
+        "access_epoch",
+        "query_hash",
+        "source_snapshot_hash",
+        "issued_at_utc",
+        "expires_at_utc",
+        "authorization_evaluated_at_utc",
+        "authorization_valid_until_utc",
+        "route",
+        "stream",
+        "item_id",
+        "last_key",
+        "range_basis"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "contract_version": {
+          "const": "spine.trusted-web-cursor.v2"
+        },
+        "ledger_id": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/id"
+        },
+        "realm_id": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/id"
+        },
+        "recovery_epoch": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/version"
+        },
+        "account_id": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/id"
+        },
+        "account_revision": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/version"
+        },
+        "subject_id": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/id"
+        },
+        "subject_revision": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/version"
+        },
+        "account_subject_binding_revision": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/version"
+        },
+        "selection_id": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/id"
+        },
+        "access_epoch": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/version"
+        },
+        "query_hash": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/hash"
+        },
+        "source_snapshot_hash": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/hash"
+        },
+        "issued_at_utc": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/utc"
+        },
+        "expires_at_utc": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/utc"
+        },
+        "authorization_evaluated_at_utc": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/utc"
+        },
+        "authorization_valid_until_utc": {
+          "oneOf": [
+            {
+              "$ref": "trusted-web-read-types.schema.json#/$defs/utc"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "route": {
+          "const": "agenda"
+        },
+        "stream": {
+          "const": "resolved"
+        },
+        "last_key": {
+          "type": "array",
+          "prefixItems": [
+            {
+              "$ref": "trusted-web-read-types.schema.json#/$defs/date"
+            },
+            {
+              "enum": [
+                "0",
+                "1"
+              ]
+            },
+            {
+              "$ref": "trusted-web-read-types.schema.json#/$defs/utc"
+            },
+            {
+              "enum": [
+                "event_start",
+                "task_due"
+              ]
+            },
+            {
+              "$ref": "trusted-web-read-types.schema.json#/$defs/id"
+            },
+            {
+              "type": "string",
+              "maxLength": 256
+            }
+          ],
+          "items": false,
+          "minItems": 6,
+          "maxItems": 6
+        }
+      },
+      "required": [
+        "contract_version",
+        "ledger_id",
+        "realm_id",
+        "recovery_epoch",
+        "account_id",
+        "account_revision",
+        "subject_id",
+        "subject_revision",
+        "account_subject_binding_revision",
+        "selection_id",
+        "access_epoch",
+        "query_hash",
+        "source_snapshot_hash",
+        "issued_at_utc",
+        "expires_at_utc",
+        "authorization_evaluated_at_utc",
+        "authorization_valid_until_utc",
+        "route",
+        "stream",
+        "last_key"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "contract_version": {
+          "const": "spine.trusted-web-cursor.v2"
+        },
+        "ledger_id": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/id"
+        },
+        "realm_id": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/id"
+        },
+        "recovery_epoch": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/version"
+        },
+        "account_id": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/id"
+        },
+        "account_revision": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/version"
+        },
+        "subject_id": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/id"
+        },
+        "subject_revision": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/version"
+        },
+        "account_subject_binding_revision": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/version"
+        },
+        "selection_id": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/id"
+        },
+        "access_epoch": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/version"
+        },
+        "query_hash": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/hash"
+        },
+        "source_snapshot_hash": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/hash"
+        },
+        "issued_at_utc": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/utc"
+        },
+        "expires_at_utc": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/utc"
+        },
+        "authorization_evaluated_at_utc": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/utc"
+        },
+        "authorization_valid_until_utc": {
+          "oneOf": [
+            {
+              "$ref": "trusted-web-read-types.schema.json#/$defs/utc"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "route": {
+          "const": "agenda"
+        },
+        "stream": {
+          "const": "unplaced"
+        },
+        "last_key": {
+          "type": "array",
+          "prefixItems": [
+            {
+              "$ref": "trusted-web-read-types.schema.json#/$defs/id"
+            }
+          ],
+          "items": false,
+          "minItems": 1,
+          "maxItems": 1
+        }
+      },
+      "required": [
+        "contract_version",
+        "ledger_id",
+        "realm_id",
+        "recovery_epoch",
+        "account_id",
+        "account_revision",
+        "subject_id",
+        "subject_revision",
+        "account_subject_binding_revision",
+        "selection_id",
+        "access_epoch",
+        "query_hash",
+        "source_snapshot_hash",
+        "issued_at_utc",
+        "expires_at_utc",
+        "authorization_evaluated_at_utc",
+        "authorization_valid_until_utc",
+        "route",
+        "stream",
+        "last_key"
+      ],
+      "additionalProperties": false
+    }
+  ]
+}

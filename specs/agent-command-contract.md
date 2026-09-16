@@ -11,6 +11,11 @@ The implemented [ledger-instance-identity.md](ledger-instance-identity.md) defin
 The web provisioning ledger_id remains a separate access namespace. Identity is not
 authentication and adds no implicit expected-ID field to mutation requests.
 
+The ratified [independent activity read contract](independent-activity-reads.md) and
+its [machine-contract companion](independent-activity-read-contracts.md) reserve
+separate v2 web projections for `schedule.show`, `item.occurrences`, and agenda.
+Their read registry and fixtures are codified, not implemented. They do not add CLI
+commands, alter canonical result tags, or change the current web/write allowlists.
 
 Proposed facet-schema, archetype-facet-binding and item-facet commands are cataloged
 in [archetype-facets.md](archetype-facets.md). They are specification reservations only,

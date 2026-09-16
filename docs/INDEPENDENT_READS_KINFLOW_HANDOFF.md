@@ -1,7 +1,7 @@
 # Kinflow Handoff: Independent Activity Reads
 
-Status: Proposed integration contract; not available in the current Spine runtime
-Updated: 2026-09-15; aligned with independent-read Draft v0.2
+Status: Ratified integration contract; machine contracts available; runtime pending
+Updated: 2026-09-16; aligned with independent-read v1
 Tracking: [SPINE-015](BACKLOG.md#spine-015--read-authorized-activities-independently-of-unavailable-linked-resources)
 Authority: [Independent authorized activity reads](../specs/independent-activity-reads.md)
 
@@ -13,10 +13,18 @@ unowned, and inaccessible resources deliberately share the generic denial. Keep
 Kinflow's current isolated failure and incomplete-calendar behavior until the new
 capability is actually advertised. No staging repair or deployment is part of this work.
 
-## Proposed consumer behavior
+Machine artifacts: [read registry](../contracts/spine.trusted-web-read-registry.v1.json),
+[contract companion](../specs/independent-activity-read-contracts.md), and
+[fixtures](../contracts/independent-activity-read-fixture-manifest.json).
+The v2 capability route will be `/api/v2/read-capabilities`; it is not implemented yet.
+Agenda exposes singleton `primary_location`, `policies`, `work`, and `attempts`
+sections; detail exposes all eleven sections. Examples are wire fixtures, not proof
+of canonical occurrence derivation or authorization behavior.
+
+## Consumer behavior after runtime delivery
 
 1. Negotiate the exact read capability and result versions in spec Section 9. The new
-   `/api/v2` read surface is proposed; do not call it based only on this document or
+   `/api/v2` read surface is not yet implemented; do not call it based only on this document or
    treat an unsupported version as an empty agenda. Writes continue through v1.
 2. Render the canonical agenda and occurrence results returned by Spine. Use the
    supplied item/version, occurrence ID/key, recurrence revision, effective status,

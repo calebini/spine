@@ -1,0 +1,233 @@
+{
+  "contract_version": "spine.trusted-web-read-projection.v1",
+  "status": "contract_only",
+  "source_spec": "specs/independent-activity-reads.md",
+  "types_schema": "contracts/schemas/trusted-web-read-types.schema.json",
+  "root": {
+    "definition": "core",
+    "predicate": "read(requested_item) AND admitted_selected_identity",
+    "fields": {
+      "item_id": "coordination_items.item_id",
+      "item_type": "coordination_items.item_type",
+      "current_version": "coordination_items.current_version",
+      "title": "current item version title",
+      "status": "coordination_items.status",
+      "detail_status": "current event_status or task_status",
+      "time": "canonical current anchors and required source proof; no follower traversal",
+      "recurrence": "current recurrence set/revision/source_item_version, or null"
+    },
+    "omitted_fields": [
+      "owner",
+      "subject_roles",
+      "source_ref",
+      "summary",
+      "rendered_text",
+      "full_recurrence",
+      "binding_state",
+      "global_lifecycle_counts"
+    ]
+  },
+  "sections": {
+    "related_items": {
+      "definition": "related_item",
+      "predicate": "read(each related item) AND disclose connecting relation AND every returned prerequisite; own unsafe time yields unavailable time, not omission of the readable core",
+      "shape": "collection",
+      "ordering": [
+        "item_id"
+      ],
+      "fields": [
+        "item_id",
+        "item_type",
+        "current_version",
+        "title",
+        "status",
+        "detail_status",
+        "time",
+        "recurrence"
+      ],
+      "source": "canonical current authorized evidence only"
+    },
+    "relations": {
+      "definition": "relation",
+      "predicate": "disclose relation AND read both endpoints",
+      "shape": "collection",
+      "ordering": [
+        "relation_id"
+      ],
+      "fields": [
+        "relation_id",
+        "source_item_id",
+        "target_item_id",
+        "relation_type",
+        "relation_status"
+      ],
+      "source": "canonical current authorized evidence only"
+    },
+    "temporal_bindings": {
+      "definition": "temporal_binding",
+      "predicate": "disclose binding AND relationship AND read source AND target; current revision",
+      "shape": "collection",
+      "ordering": [
+        "temporal_binding_id"
+      ],
+      "fields": [
+        "temporal_binding_id",
+        "temporal_binding_revision_id",
+        "source_item_id",
+        "target_item_id",
+        "relationship_id",
+        "binding_mode",
+        "binding_status"
+      ],
+      "source": "canonical current authorized evidence only"
+    },
+    "primary_location": {
+      "definition": "primary_location",
+      "predicate": "disclose item-location edge AND referenced location; canonical primary selection",
+      "shape": "singleton",
+      "ordering": [],
+      "fields": [
+        "location_id",
+        "item_location_id",
+        "role",
+        "label",
+        "kind",
+        "address_text"
+      ],
+      "source": "canonical current authorized evidence only"
+    },
+    "notification_profiles": {
+      "definition": "notification_profile",
+      "predicate": "read applied profile and pinned revision AND disclose application",
+      "shape": "collection",
+      "ordering": [
+        "notification_profile_id",
+        "revision_id"
+      ],
+      "fields": [
+        "notification_profile_id",
+        "revision_id",
+        "display_name"
+      ],
+      "source": "canonical current authorized evidence only"
+    },
+    "policies": {
+      "definition": "policy",
+      "predicate": "disclose current item-version policy AND intent AND every separately governed target/recipient/catalog reference needed for that evidence",
+      "shape": "collection",
+      "ordering": [
+        "notification_policy_id"
+      ],
+      "fields": [
+        "notification_policy_id",
+        "notification_intent_id",
+        "item_version",
+        "status"
+      ],
+      "source": "canonical current authorized evidence only"
+    },
+    "work": {
+      "definition": "work",
+      "predicate": "disclose notification work AND its policy/intent/target evidence; item-linked work only",
+      "shape": "collection",
+      "ordering": [
+        "work_instance_id"
+      ],
+      "fields": [
+        "work_instance_id",
+        "notification_policy_id",
+        "status",
+        "eligible_at_utc"
+      ],
+      "source": "canonical current authorized evidence only"
+    },
+    "attempts": {
+      "definition": "attempt",
+      "predicate": "disclose attempt AND work AND referenced policy/intent/target evidence",
+      "shape": "collection",
+      "ordering": [
+        "attempt_id"
+      ],
+      "fields": [
+        "attempt_id",
+        "work_instance_id",
+        "attempt_status",
+        "attempted_at_utc",
+        "completed_at_utc"
+      ],
+      "source": "canonical current authorized evidence only"
+    },
+    "delivery_targets": {
+      "definition": "delivery_target",
+      "predicate": "disclose current approved target snapshot including target_ref; item-referenced targets only",
+      "shape": "collection",
+      "ordering": [
+        "delivery_target_id"
+      ],
+      "fields": [
+        "delivery_target_id",
+        "channel",
+        "target_ref"
+      ],
+      "source": "canonical current authorized evidence only"
+    },
+    "subject_roles": {
+      "definition": "subject_role",
+      "predicate": "disclose current role row AND referenced subject; assignment does not grant access",
+      "shape": "collection",
+      "ordering": [
+        "subject_id",
+        "role"
+      ],
+      "fields": [
+        "subject_id",
+        "role"
+      ],
+      "source": "canonical current authorized evidence only"
+    },
+    "authoring_receipt": {
+      "definition": "authoring_receipt",
+      "predicate": "disclose creation receipt AND every resource/identity whose facts are committed by its receipt identity; never release a digest as redaction",
+      "shape": "singleton",
+      "ordering": [],
+      "fields": [
+        "command_receipt_id",
+        "command",
+        "effect",
+        "created_at_utc"
+      ],
+      "source": "canonical current authorized evidence only"
+    }
+  },
+  "agenda": {
+    "sections": {
+      "primary_location": "same singleton as schedule view",
+      "policies": "singleton count/status_counts over fully authorized current-version policies",
+      "work": "singleton count/status_counts over fully authorized item-linked notification work",
+      "attempts": "singleton count/status_counts over fully authorized item-linked attempts"
+    },
+    "counts": "Sum status buckets equals count. Not opportunity expansion or delivery-success proof. Empty authorized subset yields zeros, not null. Overflow of a bounded authorized computation yields context_unavailable.",
+    "recurring_summary_scope": "item-root evidence, repeated per occurrence; never claim occurrence-specific counts"
+  },
+  "receipt_selection": {
+    "commands": [
+      "schedule.create",
+      "schedule.related_task.create",
+      "event.create",
+      "task.create"
+    ],
+    "predicate": "successful persisted receipt whose canonical created-item result identifies this item and creation version; exclude updates, no-op replays and receipts merely mentioning it",
+    "selection": "authorize candidates first, then earliest created_at_utc and lexicographic command_receipt_id; duplicate matching summaries collapse by receipt ID",
+    "absent_or_undisclosable": "available null",
+    "excluded_fields": [
+      "command_id",
+      "semantic_facts_hash",
+      "request",
+      "response",
+      "actor_subject_id",
+      "destination",
+      "work_ids",
+      "audit_id"
+    ]
+  }
+}
