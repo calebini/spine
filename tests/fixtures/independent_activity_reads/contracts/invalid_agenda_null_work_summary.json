@@ -1,0 +1,136 @@
+{
+  "contract_version": "spine.trusted-web-api.v2",
+  "ok": true,
+  "identity_basis": "self_selected",
+  "account_id": "account-operator",
+  "subject_id": "subject-operator",
+  "selection_id": "selection-1",
+  "account_revision": "1",
+  "subject_revision": "1",
+  "account_subject_binding_revision": "1",
+  "access_epoch": "4",
+  "result_contract": "spine.trusted-web-agenda.v2",
+  "result": {
+    "range": {
+      "evaluated_at_utc": "2026-09-20T08:00:00Z",
+      "range_start_local": "2026-09-21T00:00:00",
+      "range_end_local": "2026-09-22T00:00:00",
+      "timezone": "Europe/Paris",
+      "timezone_database_version": "2026c"
+    },
+    "coverage": "complete",
+    "entries": [
+      {
+        "activity": {
+          "item_id": "event-science",
+          "item_type": "event",
+          "current_version": "3",
+          "title": "Science class",
+          "status": "active",
+          "detail_status": "scheduled",
+          "time": {
+            "availability": "available",
+            "anchors": [
+              {
+                "anchor_role": "event_start",
+                "anchor_kind": "local_instant",
+                "local_date": "2026-09-21",
+                "local_time": "09:00:00",
+                "utc_instant": "2026-09-21T07:00:00Z",
+                "timezone": "Europe/Paris",
+                "timezone_database_version": "2026c",
+                "resolution_kind": "unambiguous"
+              }
+            ]
+          },
+          "recurrence": {
+            "recurrence_set_id": "recurrence-science",
+            "recurrence_revision_id": "revision-science-2",
+            "source_item_version": "3"
+          }
+        },
+        "occurrence": {
+          "item_id": "event-science",
+          "item_type": "event",
+          "current_version": "3",
+          "source_item_version": "3",
+          "title": "Science class",
+          "occurrence_id": "occurrence-canonical-example",
+          "occurrence_key": "occurrence-key-canonical-example",
+          "recurrence_set_id": "recurrence-science",
+          "recurrence_revision_id": "revision-science-2",
+          "original_scheduled_fact": "2026-09-21T09:00:00",
+          "expressed_scheduled_fact": "2026-09-21T09:00:00",
+          "lifecycle": "active",
+          "actionable": true,
+          "time": {
+            "availability": "available",
+            "anchors": [
+              {
+                "anchor_role": "event_start",
+                "anchor_kind": "local_instant",
+                "local_date": "2026-09-21",
+                "local_time": "09:00:00",
+                "utc_instant": "2026-09-21T07:00:00Z",
+                "timezone": "Europe/Paris",
+                "timezone_database_version": "2026c",
+                "resolution_kind": "unambiguous"
+              }
+            ]
+          },
+          "expressed_schedule_key": "expressed-key-example",
+          "range_basis": "expressed_time"
+        },
+        "anchor_role": "event_start",
+        "view_local_date": "2026-09-21",
+        "view_local_time": "09:00:00",
+        "all_day": false,
+        "sort_at_utc": "2026-09-21T07:00:00Z",
+        "start_at_utc": "2026-09-21T07:00:00Z",
+        "end_at_utc": null,
+        "sections": {
+          "primary_location": {
+            "availability": "not_requested",
+            "scope": "authorized_only"
+          },
+          "policies": {
+            "availability": "available",
+            "scope": "authorized_only",
+            "coverage": "complete",
+            "value": {
+              "count": "0",
+              "status_counts": {
+                "active": "0",
+                "disabled": "0"
+              }
+            }
+          },
+          "work": {
+            "availability": "available",
+            "scope": "authorized_only",
+            "coverage": "complete",
+            "value": null
+          },
+          "attempts": {
+            "availability": "available",
+            "scope": "authorized_only",
+            "coverage": "complete",
+            "value": {
+              "count": "0",
+              "status_counts": {
+                "started": "0",
+                "succeeded": "0",
+                "failed": "0",
+                "rejected": "0"
+              }
+            }
+          }
+        }
+      }
+    ],
+    "unplaced_items": [],
+    "limit": "50",
+    "has_more": false,
+    "next_cursor": null
+  }
+}

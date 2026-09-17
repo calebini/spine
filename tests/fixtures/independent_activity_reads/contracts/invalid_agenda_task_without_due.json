@@ -1,0 +1,92 @@
+{
+  "contract_version": "spine.trusted-web-api.v2",
+  "ok": true,
+  "identity_basis": "self_selected",
+  "account_id": "account-operator",
+  "subject_id": "subject-operator",
+  "selection_id": "selection-1",
+  "account_revision": "1",
+  "subject_revision": "1",
+  "account_subject_binding_revision": "1",
+  "access_epoch": "4",
+  "result_contract": "spine.trusted-web-agenda.v2",
+  "result": {
+    "range": {
+      "evaluated_at_utc": "2026-09-20T08:00:00Z",
+      "range_start_local": "2026-09-21T00:00:00",
+      "range_end_local": "2026-09-22T00:00:00",
+      "timezone": "Europe/Paris",
+      "timezone_database_version": "2026c"
+    },
+    "coverage": "complete",
+    "entries": [
+      {
+        "activity": {
+          "item_id": "event-science",
+          "item_type": "task",
+          "current_version": "3",
+          "title": "Science class",
+          "status": "active",
+          "detail_status": "open",
+          "time": {
+            "availability": "available",
+            "anchors": [
+              {
+                "anchor_role": "task_defer_until",
+                "anchor_kind": "local_instant",
+                "local_date": "2026-09-21",
+                "local_time": "09:00:00",
+                "utc_instant": "2026-09-21T07:00:00Z",
+                "timezone": "Europe/Paris",
+                "timezone_database_version": "2026c",
+                "resolution_kind": "unambiguous"
+              }
+            ]
+          },
+          "recurrence": null
+        },
+        "occurrence": null,
+        "anchor_role": "task_due",
+        "view_local_date": "2026-09-21",
+        "view_local_time": "09:00:00",
+        "all_day": false,
+        "sort_at_utc": "2026-09-21T07:00:00Z",
+        "start_at_utc": "2026-09-21T07:00:00Z",
+        "end_at_utc": null,
+        "sections": {
+          "primary_location": {
+            "availability": "not_requested",
+            "scope": "authorized_only"
+          },
+          "policies": {
+            "availability": "not_requested",
+            "scope": "authorized_only"
+          },
+          "work": {
+            "availability": "available",
+            "scope": "authorized_only",
+            "coverage": "complete",
+            "value": {
+              "count": "1",
+              "status_counts": {
+                "eligible": "1",
+                "in_progress": "0",
+                "succeeded": "0",
+                "failed": "0",
+                "cancelled": "0"
+              }
+            }
+          },
+          "attempts": {
+            "availability": "not_requested",
+            "scope": "authorized_only"
+          }
+        }
+      }
+    ],
+    "unplaced_items": [],
+    "limit": "50",
+    "has_more": false,
+    "next_cursor": null
+  }
+}

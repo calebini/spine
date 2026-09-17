@@ -24,7 +24,7 @@
     "trusted-web-read-registry.schema.json": "fe8db071969cd8ab08cfff81bfc2a9a90ea30af2d5510d86f24d0d1a1adf3700",
     "trusted-web-read-schedule-request.schema.json": "93c5153f86ac948970a70c7c338e0aed4380689f8cb5a7048acdc79817992235",
     "trusted-web-read-schedule-response.schema.json": "63f36991ca7121ac28509df99a0fa537b694aee744b9374be0c32297479fe055",
-    "trusted-web-read-types.schema.json": "932dde0da60a816c0c4b950c4bd1004e999c402518cf97c7d5b739ac0e8e17d4"
+    "trusted-web-read-types.schema.json": "b5326d06260486e0e12d62e725b8b2858d97eb8ac74b45daefecd79b115d146d"
   },
   "artifacts": {
     "spine.trusted-web-read-registry.v1.json": "64963bd7a55ebbc7f14c7dc37d604e83e39ad6e276d0e8aaa39e486bdfa948be",

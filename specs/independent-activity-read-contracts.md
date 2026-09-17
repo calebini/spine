@@ -65,6 +65,17 @@ local instants also carry resolved UTC and canonical ambiguity resolution. UTC
 anchors omit zone facts. Window bounds are canonical resolved UTC bounds, with
 the pinned zone also present for local windows. Bounds must be strictly increasing.
 Local dates/date-times require real Gregorian dates, not merely matching a regex.
+V2 validation MUST assert the schema's `date`, `date-time`, and
+`spine-local-date-time` formats, including through nested and union references.
+`spine-local-date-time` means exactly `YYYY-MM-DDTHH:MM:SS`, a real proleptic-Gregorian
+date in years 0001–9999, and a 00–23/00–59/00–59 clock, with no offset, suffix,
+fraction, rollover or timezone inference. Leap years follow the Gregorian rule
+(divisible by 4, except centuries not divisible by 400). A validator that ignores
+formats or does not recognize this format is not a conforming v2 validator and
+MUST NOT admit the contract as supported. The static test checker is the executable
+reference oracle; runtime integration of that mandatory assertion remains pending.
+The rule covers request/result range endpoints, original/expressed scheduled facts
+and cursor ordering facts wherever they reference the shared type, not just anchors.
 No offset, stored-source ID or last-known due time escapes unavailable time.
 
 An occurrence always has available time. Its item/type/current version and recurrence

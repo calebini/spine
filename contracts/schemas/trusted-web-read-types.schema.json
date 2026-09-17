@@ -40,7 +40,9 @@
     },
     "local_datetime": {
       "type": "string",
-      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T([01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$"
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T([01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$",
+      "format": "spine-local-date-time",
+      "$comment": "Mandatory format assertion: exact second-precision local date-time with a real proleptic-Gregorian date (years 0001-9999). See independent-activity-read-contracts.md Section 2; unknown/ignored format support is not conforming."
     },
     "cursor": {
       "type": "string",
@@ -406,6 +408,9 @@
               }
             }
           }
+        },
+        {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/available_event_time_rule"
         }
       ]
     },
@@ -540,6 +545,9 @@
               }
             }
           }
+        },
+        {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/available_event_time_rule"
         }
       ]
     },
@@ -2169,40 +2177,33 @@
               "const": "complete"
             },
             "value": {
-              "oneOf": [
-                {
+              "type": "object",
+              "properties": {
+                "count": {
+                  "$ref": "trusted-web-read-types.schema.json#/$defs/decimal"
+                },
+                "status_counts": {
                   "type": "object",
                   "properties": {
-                    "count": {
+                    "active": {
                       "$ref": "trusted-web-read-types.schema.json#/$defs/decimal"
                     },
-                    "status_counts": {
-                      "type": "object",
-                      "properties": {
-                        "active": {
-                          "$ref": "trusted-web-read-types.schema.json#/$defs/decimal"
-                        },
-                        "disabled": {
-                          "$ref": "trusted-web-read-types.schema.json#/$defs/decimal"
-                        }
-                      },
-                      "required": [
-                        "active",
-                        "disabled"
-                      ],
-                      "additionalProperties": false
+                    "disabled": {
+                      "$ref": "trusted-web-read-types.schema.json#/$defs/decimal"
                     }
                   },
                   "required": [
-                    "count",
-                    "status_counts"
+                    "active",
+                    "disabled"
                   ],
                   "additionalProperties": false
-                },
-                {
-                  "type": "null"
                 }
-              ]
+              },
+              "required": [
+                "count",
+                "status_counts"
+              ],
+              "additionalProperties": false
             }
           },
           "required": [
@@ -2270,52 +2271,45 @@
               "const": "complete"
             },
             "value": {
-              "oneOf": [
-                {
+              "type": "object",
+              "properties": {
+                "count": {
+                  "$ref": "trusted-web-read-types.schema.json#/$defs/decimal"
+                },
+                "status_counts": {
                   "type": "object",
                   "properties": {
-                    "count": {
+                    "eligible": {
                       "$ref": "trusted-web-read-types.schema.json#/$defs/decimal"
                     },
-                    "status_counts": {
-                      "type": "object",
-                      "properties": {
-                        "eligible": {
-                          "$ref": "trusted-web-read-types.schema.json#/$defs/decimal"
-                        },
-                        "in_progress": {
-                          "$ref": "trusted-web-read-types.schema.json#/$defs/decimal"
-                        },
-                        "succeeded": {
-                          "$ref": "trusted-web-read-types.schema.json#/$defs/decimal"
-                        },
-                        "failed": {
-                          "$ref": "trusted-web-read-types.schema.json#/$defs/decimal"
-                        },
-                        "cancelled": {
-                          "$ref": "trusted-web-read-types.schema.json#/$defs/decimal"
-                        }
-                      },
-                      "required": [
-                        "eligible",
-                        "in_progress",
-                        "succeeded",
-                        "failed",
-                        "cancelled"
-                      ],
-                      "additionalProperties": false
+                    "in_progress": {
+                      "$ref": "trusted-web-read-types.schema.json#/$defs/decimal"
+                    },
+                    "succeeded": {
+                      "$ref": "trusted-web-read-types.schema.json#/$defs/decimal"
+                    },
+                    "failed": {
+                      "$ref": "trusted-web-read-types.schema.json#/$defs/decimal"
+                    },
+                    "cancelled": {
+                      "$ref": "trusted-web-read-types.schema.json#/$defs/decimal"
                     }
                   },
                   "required": [
-                    "count",
-                    "status_counts"
+                    "eligible",
+                    "in_progress",
+                    "succeeded",
+                    "failed",
+                    "cancelled"
                   ],
                   "additionalProperties": false
-                },
-                {
-                  "type": "null"
                 }
-              ]
+              },
+              "required": [
+                "count",
+                "status_counts"
+              ],
+              "additionalProperties": false
             }
           },
           "required": [
@@ -2383,48 +2377,41 @@
               "const": "complete"
             },
             "value": {
-              "oneOf": [
-                {
+              "type": "object",
+              "properties": {
+                "count": {
+                  "$ref": "trusted-web-read-types.schema.json#/$defs/decimal"
+                },
+                "status_counts": {
                   "type": "object",
                   "properties": {
-                    "count": {
+                    "started": {
                       "$ref": "trusted-web-read-types.schema.json#/$defs/decimal"
                     },
-                    "status_counts": {
-                      "type": "object",
-                      "properties": {
-                        "started": {
-                          "$ref": "trusted-web-read-types.schema.json#/$defs/decimal"
-                        },
-                        "succeeded": {
-                          "$ref": "trusted-web-read-types.schema.json#/$defs/decimal"
-                        },
-                        "failed": {
-                          "$ref": "trusted-web-read-types.schema.json#/$defs/decimal"
-                        },
-                        "rejected": {
-                          "$ref": "trusted-web-read-types.schema.json#/$defs/decimal"
-                        }
-                      },
-                      "required": [
-                        "started",
-                        "succeeded",
-                        "failed",
-                        "rejected"
-                      ],
-                      "additionalProperties": false
+                    "succeeded": {
+                      "$ref": "trusted-web-read-types.schema.json#/$defs/decimal"
+                    },
+                    "failed": {
+                      "$ref": "trusted-web-read-types.schema.json#/$defs/decimal"
+                    },
+                    "rejected": {
+                      "$ref": "trusted-web-read-types.schema.json#/$defs/decimal"
                     }
                   },
                   "required": [
-                    "count",
-                    "status_counts"
+                    "started",
+                    "succeeded",
+                    "failed",
+                    "rejected"
                   ],
                   "additionalProperties": false
-                },
-                {
-                  "type": "null"
                 }
-              ]
+              },
+              "required": [
+                "count",
+                "status_counts"
+              ],
+              "additionalProperties": false
             }
           },
           "required": [
@@ -2580,6 +2567,100 @@
               }
             }
           }
+        },
+        {
+          "if": {
+            "properties": {
+              "activity": {
+                "properties": {
+                  "item_type": {
+                    "const": "event"
+                  }
+                },
+                "required": [
+                  "item_type"
+                ]
+              }
+            },
+            "required": [
+              "activity"
+            ]
+          },
+          "then": {
+            "properties": {
+              "anchor_role": {
+                "const": "event_start"
+              },
+              "activity": {
+                "properties": {
+                  "time": {
+                    "properties": {
+                      "anchors": {
+                        "contains": {
+                          "type": "object",
+                          "properties": {
+                            "anchor_role": {
+                              "const": "event_start"
+                            }
+                          },
+                          "required": [
+                            "anchor_role"
+                          ]
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "activity": {
+                "properties": {
+                  "item_type": {
+                    "const": "task"
+                  }
+                },
+                "required": [
+                  "item_type"
+                ]
+              }
+            },
+            "required": [
+              "activity"
+            ]
+          },
+          "then": {
+            "properties": {
+              "anchor_role": {
+                "const": "task_due"
+              },
+              "activity": {
+                "properties": {
+                  "time": {
+                    "properties": {
+                      "anchors": {
+                        "contains": {
+                          "type": "object",
+                          "properties": {
+                            "anchor_role": {
+                              "const": "task_due"
+                            }
+                          },
+                          "required": [
+                            "anchor_role"
+                          ]
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
         }
       ]
     },
@@ -2638,6 +2719,50 @@
         "range_end"
       ],
       "additionalProperties": false
+    },
+    "available_event_time_rule": {
+      "if": {
+        "properties": {
+          "item_type": {
+            "const": "event"
+          },
+          "time": {
+            "properties": {
+              "availability": {
+                "const": "available"
+              }
+            },
+            "required": [
+              "availability"
+            ]
+          }
+        },
+        "required": [
+          "item_type",
+          "time"
+        ]
+      },
+      "then": {
+        "properties": {
+          "time": {
+            "properties": {
+              "anchors": {
+                "contains": {
+                  "type": "object",
+                  "properties": {
+                    "anchor_role": {
+                      "const": "event_start"
+                    }
+                  },
+                  "required": [
+                    "anchor_role"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
     }
   }
 }

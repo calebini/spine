@@ -1,0 +1,29 @@
+{
+  "contract_version": "spine.trusted-web-cursor.v2",
+  "ledger_id": "ledger-example",
+  "realm_id": "realm-example",
+  "recovery_epoch": "1",
+  "account_id": "account-operator",
+  "account_revision": "1",
+  "subject_id": "subject-operator",
+  "subject_revision": "1",
+  "account_subject_binding_revision": "1",
+  "selection_id": "selection-1",
+  "access_epoch": "4",
+  "query_hash": "30a40d32f02c15561aeb8973d7926e18d79d313005c844cd6d249175ae01f06e",
+  "source_snapshot_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "issued_at_utc": "2026-09-20T08:00:00Z",
+  "expires_at_utc": "2026-09-20T08:15:00Z",
+  "authorization_evaluated_at_utc": "2026-09-20T08:00:00Z",
+  "authorization_valid_until_utc": "2026-09-20T08:10:00Z",
+  "route": "item.occurrences",
+  "stream": "occurrences",
+  "last_key": [
+    "2026-02-31T09:00:00",
+    "expressed-key-example",
+    "occurrence-key-canonical-example",
+    "occurrence-canonical-example"
+  ],
+  "item_id": "event-science",
+  "range_basis": "expressed_time"
+}

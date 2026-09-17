@@ -7,6 +7,7 @@ import copy
 import hashlib
 import hmac
 import json
+import re
 import unittest
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -22,6 +23,26 @@ ROOT = Path(__file__).parents[1]
 CONTRACTS = ROOT / "contracts"
 SCHEMAS = CONTRACTS / "schemas"
 FIXTURES = ROOT / "tests/fixtures/independent_activity_reads/contracts"
+FORMAT_CHECKER = FormatChecker()
+
+
+@FORMAT_CHECKER.checks("spine-local-date-time", raises=ValueError)
+def calendar_local_datetime(value: object) -> bool:
+    """Required v2 format assertion; no timezone conversion or rollover repair."""
+    if not isinstance(value, str):
+        return True  # JSON Schema's type keyword handles non-strings.
+    if re.fullmatch(r"[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}", value) is None:
+        return False
+    datetime.fromisoformat(value)  # Rejects impossible dates, year zero and invalid clocks.
+    return True
+
+
+@FORMAT_CHECKER.checks("date-time", raises=ValueError)
+def calendar_utc_datetime(value: object) -> bool:
+    """Assert Spine's restricted UTC type without optional RFC3339 dependencies."""
+    if not isinstance(value, str):
+        return True
+    return value.endswith("Z") and calendar_local_datetime(value[:-1])
 
 
 def load(path: Path) -> dict:
@@ -76,6 +97,12 @@ def semantic_oracle(response: dict) -> None:
             anchors = value["time"].get("anchors", [])
             prefix = "event_" if value["item_type"] == "event" else "task_"
             assert all(a["anchor_role"].startswith(prefix) for a in anchors), "wrong item role"
+            if value["item_type"] == "event" and value["time"]["availability"] == "available":
+                assert any(a["anchor_role"] == "event_start" for a in anchors), "available event missing start"
+        for name in ("policies", "work", "attempts"):
+            section = value.get(name)
+            if isinstance(section, dict) and section.get("availability") == "available" and "value" in section:
+                assert isinstance(section["value"], dict), "available summary cannot be null"
         for child in value.values():
             walk(child)
 
@@ -116,6 +143,9 @@ def semantic_oracle(response: dict) -> None:
             if row["occurrence"] is not None:
                 assert row["activity"]["time"] == row["occurrence"]["time"]
             assert row["anchor_role"] == ("event_start" if row["activity"]["item_type"] == "event" else "task_due")
+            assert any(
+                a["anchor_role"] == row["anchor_role"] for a in row["activity"]["time"]["anchors"]
+            ), "agenda entry missing primary anchor"
 
 
 class IndependentActivityReadContractTests(unittest.TestCase):
@@ -129,7 +159,31 @@ class IndependentActivityReadContractTests(unittest.TestCase):
         cls.registry = load(CONTRACTS / "spine.trusted-web-read-registry.v1.json")
 
     def validator(self, name: str) -> Draft202012Validator:
-        return Draft202012Validator(self.schemas[name], registry=self.references, format_checker=FormatChecker())
+        return Draft202012Validator(self.schemas[name], registry=self.references, format_checker=FORMAT_CHECKER)
+
+    def test_required_formats_are_registered_and_calendar_valid(self) -> None:
+        def formats(value: object) -> set[str]:
+            if isinstance(value, dict):
+                own = {value["format"]} if "format" in value else set()
+                return own.union(*(formats(child) for child in value.values()))
+            if isinstance(value, list):
+                return set().union(*(formats(child) for child in value))
+            return set()
+        required = formats(self.schemas["trusted-web-read-types.schema.json"])
+        self.assertIn("spine-local-date-time", required)
+        self.assertTrue(required <= FORMAT_CHECKER.checkers.keys())
+        local = self.schemas["trusted-web-read-types.schema.json"]["$defs"]["local_datetime"]
+        validator = Draft202012Validator(local, format_checker=FORMAT_CHECKER)
+        for value in ("2000-02-29T00:00:00", "2024-02-29T23:59:59", "0001-01-01T00:00:00", "9999-12-31T23:59:59"):
+            with self.subTest(valid=value):
+                self.assertTrue(validator.is_valid(value))
+        for value in (
+            "2026-02-31T09:00:00", "2026-02-29T09:00:00", "1900-02-29T09:00:00",
+            "2026-04-31T09:00:00", "0000-01-01T00:00:00", "2026-09-21T24:00:00",
+            "2026-09-21T09:00:60", "2026-09-21T09:00:00Z", "2026-09-21T09:00:00.1",
+        ):
+            with self.subTest(invalid=value):
+                self.assertFalse(validator.is_valid(value))
 
     def test_schema_and_fixture_inventory(self) -> None:
         for name, schema in self.schemas.items():
@@ -194,6 +248,48 @@ class IndependentActivityReadContractTests(unittest.TestCase):
             if entry["valid"] and entry["fixture_id"].startswith("response_"):
                 with self.subTest(fixture=entry["fixture_id"]):
                     semantic_oracle(load(ROOT / entry["fixture"]))
+
+    def test_audit_summary_and_primary_anchor_failures_reach_semantic_oracle(self) -> None:
+        for name in (
+            "invalid_agenda_null_policies_summary", "invalid_agenda_null_work_summary",
+            "invalid_agenda_null_attempts_summary", "invalid_available_event_missing_start",
+            "invalid_occurrence_event_missing_start", "invalid_agenda_task_without_due",
+        ):
+            with self.subTest(fixture=name), self.assertRaises(AssertionError):
+                semantic_oracle(load(FIXTURES / f"{name}.json"))
+
+    def test_absent_location_and_receipt_singletons_remain_nullable(self) -> None:
+        response = load(FIXTURES / "response_schedule_no_context.json")
+        for name in ("primary_location", "authoring_receipt"):
+            response["result"]["sections"][name] = {
+                "availability": "available", "scope": "authorized_only", "coverage": "complete", "value": None,
+            }
+        self.validator("trusted-web-read-schedule-response.schema.json").validate(response)
+        semantic_oracle(response)
+
+    def test_calendar_assertions_follow_request_response_and_cursor_references(self) -> None:
+        cases = [
+            ("request_agenda", "agenda-request", ("request", field))
+            for field in ("range_start_local", "range_end_local")
+        ] + [
+            ("request_occurrences", "occurrences-request", ("request", field))
+            for field in ("range_start", "range_end")
+        ] + [
+            ("response_occurrences", "occurrences-response", ("result", "range", field))
+            for field in ("range_start", "range_end")
+        ] + [
+            ("response_occurrences", "occurrences-response", ("result", "occurrences", 0, field))
+            for field in ("original_scheduled_fact", "expressed_scheduled_fact")
+        ] + [("cursor_occurrences", "cursor", ("last_key", 0))]
+        for fixture, schema, path in cases:
+            for invalid in ("2026-02-31T09:00:00", "2026-02-31", "2026-02-31T09:00:00Z"):
+                with self.subTest(fixture=fixture, path=path, invalid=invalid):
+                    value = load(FIXTURES / f"{fixture}.json")
+                    parent = value
+                    for part in path[:-1]:
+                        parent = parent[part]
+                    parent[path[-1]] = invalid
+                    self.assertFalse(self.validator(f"trusted-web-read-{schema}.schema.json").is_valid(value))
 
     def test_cross_field_failures_not_expressible_in_schema(self) -> None:
         summary = load(FIXTURES / "response_agenda_authorized_work_summary.json")

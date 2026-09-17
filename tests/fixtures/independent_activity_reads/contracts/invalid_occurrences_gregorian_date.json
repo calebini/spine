@@ -1,0 +1,9 @@
+{
+  "contract_version": "spine.trusted-web-api.v2",
+  "request": {
+    "item_id": "event-science",
+    "range_basis": "expressed_time",
+    "range_start": "2026-02-31T09:00:00",
+    "range_end": "2026-09-22T00:00:00"
+  }
+}

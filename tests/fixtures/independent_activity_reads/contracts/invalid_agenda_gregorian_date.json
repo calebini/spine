@@ -1,0 +1,10 @@
+{
+  "contract_version": "spine.trusted-web-api.v2",
+  "request": {
+    "evaluated_at_utc": "2026-09-20T08:00:00Z",
+    "range_start_local": "2026-02-31T09:00:00",
+    "range_end_local": "2026-09-22T00:00:00",
+    "timezone": "Europe/Paris",
+    "timezone_database_version": "2026c"
+  }
+}

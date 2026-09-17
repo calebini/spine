@@ -149,6 +149,81 @@ checks and `git diff --check` passed. These are local checks, not staging or a n
 Next step: bounded machine-contract audit, then separately authorized implementation
 and Kinflow migration. No audit, commit or push was performed in this delivery.
 
+**Checkpoint and audit preparation (2026-09-16):** Committed the contract-only
+codification as `f9a301b` (`Codify independent activity read contracts`); pre-commit
+verification again passed 73 tests and 202 subtests. Staged reviewer-only bounded
+`audit-change` at `whetstone_runs/independent-activity-read-machine-contract-audit-001/`.
+Its `audit-notes.md` enumerates the exact 39-file approval inventory (including notes),
+review boundaries and goals. `preparation.json` records the source checkpoint/hashes
+and supported invocation: Sol, consistency profile, bundled CLI, 900-second timeout.
+The included 14 fixture files are a declared representative subset, not all 53.
+Five existing authority documents are supplied as one verbatim excerpt artifact
+with checkpoint, line-range and hash provenance, rather than sending their unrelated
+sections. All eleven new schemas and new rule/vector/pin artifacts remain in scope.
+Source files matched the committed checkpoint. Preparation did not invoke a reviewer,
+Editor, source rewrite, convergence workflow or push.
+
+**Machine-contract audit 001 (2026-09-16):** The operator approved the exact 39-file
+inventory, built-in consistency profile and generated copies. Reviewer-only
+`audit-change` completed with Sol, bundled CLI `0.154.0-alpha.6.2`, 900-second timeout.
+Verdict `needs_revision`: 0 blockers, 3 majors, 0 minors/nits; all findings in scope.
+`boundary_preserved=false` is the report's contract-gap assessment, not a finding
+of an implemented runtime leak. Findings: available agenda summaries incorrectly
+allow null instead of zero buckets; impossible local Gregorian date-times pass
+machine validation; end-only available events and defer-only agenda tasks pass
+required-primary-anchor validation. Read-only counterexamples reproduced each gap
+against the checked-in schemas/static oracles. Sources were not patched.
+All 38 raw source hashes stayed unchanged; all 39 normalized input hashes matched
+the manifest, including notes. The manifest confirms the exact approved inventory,
+Sol and consistency; no convergence or exhaustive coverage is claimed. Report and
+feedback are under the run root's `change_audit/`. Next step: targeted manual schema/
+semantic-oracle fixes with negative fixtures, updated new-contract pins, then focused
+recheck. Runtime implementation remains pending. No Editor, commit or push was run.
+
+**Manual audit patch (2026-09-16):** Addressed all three audit-001 findings without
+runtime or v1 changes. Available agenda summary values are now non-null objects;
+location and creation-receipt singletons retain valid null absence. Shared local
+date-times use mandatory `spine-local-date-time` format assertion, with a specified
+Gregorian/leap-year/clock domain and an executable offline checker. The test checker
+also explicitly asserts the existing UTC `date-time` format without relying on an
+optional validator dependency. Calendar checks cover requests, response range and
+occurrence facts, and cursor ordering facts. Available event cores/occurrences require
+`event_start`; agenda requires its matching primary anchor, including `task_due` for
+tasks. Defer-only task detail and unavailable/unscheduled states remain valid.
+Added 15 positive/negative fixtures (68 total) and semantic regression checks; refreshed
+only the new v2 shared-schema pin. This is a manual contract patch, not a clean audit
+verdict or runtime conformance result. Focused re-audit remains pending.
+Verification: 77 tests and 266 subtests passed across new contract checks and the
+existing web/runtime/domain fixture suites. Ruff, companion Markdown links and
+`git diff --check` passed. No new audit, commit or push was performed.
+
+**Focused machine-contract recheck staged (2026-09-17):** At operator request,
+prepared `whetstone_runs/independent-activity-read-machine-contract-audit-002/` for
+reviewer-only Sol/consistency verification of the three audit-001 fixes and directly
+introduced regressions. Notes enumerate 32 exact outgoing inputs, including prior
+feedback, affected schemas, parent/companion authority, test/pin/manifest evidence,
+all 15 new fixtures and one unchanged baseline response. The approved manual patch
+remains uncommitted; preparation records its actual source hashes against base
+`f9a301b`, not a clean-checkpoint claim. Local preflight: 15 focused tests and 144
+subtests passed; diff hygiene passed; bundled CLI `0.154.0-alpha.6.2` verified.
+At preparation, outgoing approval was pending; no nested reviewer, source patch,
+commit or push was run during preparation.
+
+**Focused machine-contract recheck completed (2026-09-17):** After explicit
+approval of the exact inventory, ran reviewer-only `audit-change` with
+`gpt-5.6-sol`, built-in consistency profile and bundled CLI `0.155.0-alpha.2.6`.
+Audit-002 returned `pass`, `boundary_preserved=true`, with zero blockers, majors,
+minors or nits. The three prior findings were not raised again; no further action
+was recommended within the focused scope. Report:
+`whetstone_runs/independent-activity-read-machine-contract-audit-002/change_audit/change_audit_report.json`.
+All 31 source files remained byte-identical to preparation, and all 32 manifest
+input hashes matched, including the approved notes. Local focused verification
+again passed 15 tests and 144 subtests. Review assessed the supplied contract,
+schemas and oracle evidence, not runtime implementation or unsupplied fixtures;
+it is not a convergence or deployment claim. No Editor, source patch, commit or
+push was performed. The manual fixes remain ready to checkpoint before runtime
+implementation.
+
 ## Roadmap candidates — not selected work
 
 These retained entries require operator selection. They do not schedule a gap analysis.

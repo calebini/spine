@@ -326,6 +326,96 @@
       "fixture": "tests/fixtures/independent_activity_reads/contracts/invalid_cursor_cross_stream_shape.json",
       "schema": "contracts/schemas/trusted-web-read-cursor.schema.json",
       "valid": false
+    },
+    {
+      "fixture_id": "response_agenda_zero_summaries",
+      "fixture": "tests/fixtures/independent_activity_reads/contracts/response_agenda_zero_summaries.json",
+      "schema": "contracts/schemas/trusted-web-read-agenda-response.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "invalid_agenda_null_policies_summary",
+      "fixture": "tests/fixtures/independent_activity_reads/contracts/invalid_agenda_null_policies_summary.json",
+      "schema": "contracts/schemas/trusted-web-read-agenda-response.schema.json",
+      "valid": false
+    },
+    {
+      "fixture_id": "invalid_agenda_null_work_summary",
+      "fixture": "tests/fixtures/independent_activity_reads/contracts/invalid_agenda_null_work_summary.json",
+      "schema": "contracts/schemas/trusted-web-read-agenda-response.schema.json",
+      "valid": false
+    },
+    {
+      "fixture_id": "invalid_agenda_null_attempts_summary",
+      "fixture": "tests/fixtures/independent_activity_reads/contracts/invalid_agenda_null_attempts_summary.json",
+      "schema": "contracts/schemas/trusted-web-read-agenda-response.schema.json",
+      "valid": false
+    },
+    {
+      "fixture_id": "invalid_agenda_gregorian_date",
+      "fixture": "tests/fixtures/independent_activity_reads/contracts/invalid_agenda_gregorian_date.json",
+      "schema": "contracts/schemas/trusted-web-read-agenda-request.schema.json",
+      "valid": false
+    },
+    {
+      "fixture_id": "invalid_occurrences_gregorian_date",
+      "fixture": "tests/fixtures/independent_activity_reads/contracts/invalid_occurrences_gregorian_date.json",
+      "schema": "contracts/schemas/trusted-web-read-occurrences-request.schema.json",
+      "valid": false
+    },
+    {
+      "fixture_id": "invalid_occurrence_original_scheduled_fact",
+      "fixture": "tests/fixtures/independent_activity_reads/contracts/invalid_occurrence_original_scheduled_fact.json",
+      "schema": "contracts/schemas/trusted-web-read-occurrences-response.schema.json",
+      "valid": false
+    },
+    {
+      "fixture_id": "invalid_occurrence_expressed_scheduled_fact",
+      "fixture": "tests/fixtures/independent_activity_reads/contracts/invalid_occurrence_expressed_scheduled_fact.json",
+      "schema": "contracts/schemas/trusted-web-read-occurrences-response.schema.json",
+      "valid": false
+    },
+    {
+      "fixture_id": "invalid_cursor_gregorian_date",
+      "fixture": "tests/fixtures/independent_activity_reads/contracts/invalid_cursor_gregorian_date.json",
+      "schema": "contracts/schemas/trusted-web-read-cursor.schema.json",
+      "valid": false
+    },
+    {
+      "fixture_id": "invalid_available_event_missing_start",
+      "fixture": "tests/fixtures/independent_activity_reads/contracts/invalid_available_event_missing_start.json",
+      "schema": "contracts/schemas/trusted-web-read-schedule-response.schema.json",
+      "valid": false
+    },
+    {
+      "fixture_id": "invalid_occurrence_event_missing_start",
+      "fixture": "tests/fixtures/independent_activity_reads/contracts/invalid_occurrence_event_missing_start.json",
+      "schema": "contracts/schemas/trusted-web-read-occurrences-response.schema.json",
+      "valid": false
+    },
+    {
+      "fixture_id": "response_agenda_task_due",
+      "fixture": "tests/fixtures/independent_activity_reads/contracts/response_agenda_task_due.json",
+      "schema": "contracts/schemas/trusted-web-read-agenda-response.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "invalid_agenda_task_without_due",
+      "fixture": "tests/fixtures/independent_activity_reads/contracts/invalid_agenda_task_without_due.json",
+      "schema": "contracts/schemas/trusted-web-read-agenda-response.schema.json",
+      "valid": false
+    },
+    {
+      "fixture_id": "response_schedule_defer_only_task",
+      "fixture": "tests/fixtures/independent_activity_reads/contracts/response_schedule_defer_only_task.json",
+      "schema": "contracts/schemas/trusted-web-read-schedule-response.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "request_agenda_leap_day",
+      "fixture": "tests/fixtures/independent_activity_reads/contracts/request_agenda_leap_day.json",
+      "schema": "contracts/schemas/trusted-web-read-agenda-request.schema.json",
+      "valid": true
     }
   ],
   "behavioral_cases": [
