@@ -2,6 +2,9 @@ from __future__ import annotations
 
 import base64
 import json
+import subprocess
+import sys
+import textwrap
 import unittest
 from pathlib import Path
 
@@ -279,6 +282,59 @@ class RelativeTemporalBindingCommandTests(unittest.TestCase):
             (revision["source_occurrence_provenance_id"],),
         ).fetchone()
         self.assertEqual(tuple(provenance), ("temporal_binding", "schedule.related_task.create", "active"))
+
+        # Exercise the late occurrence/hydration path in a fresh interpreter,
+        # where an already imported command package cannot mask the dependency.
+        script = textwrap.dedent("""
+            import importlib.abc
+            import json
+            import sys
+
+            class RejectCommands(importlib.abc.MetaPathFinder):
+                def find_spec(self, fullname, path, target=None):
+                    if fullname == "spine.commands" or fullname.startswith("spine.commands."):
+                        raise AssertionError("ledger imported the command layer: " + fullname)
+                    return None
+
+            sys.meta_path.insert(0, RejectCommands())
+            sys.path.insert(0, sys.argv[2])
+            from spine.ledger import connect
+            from spine.ledger.notification_profiles import command_derived_id
+            from spine.ledger.temporal_bindings import binding_state, load_temporal_binding
+
+            connection = connect()
+            # iterdump orders tables by name, not by foreign-key dependencies.
+            connection.execute("PRAGMA foreign_keys = OFF")
+            connection.executescript(sys.stdin.read())
+            connection.execute("PRAGMA foreign_keys = ON")
+            assert not connection.execute("PRAGMA foreign_key_check").fetchall()
+            connection.execute("PRAGMA query_only = ON")
+            before = connection.total_changes
+            binding = load_temporal_binding(connection, sys.argv[1])
+            state, source = binding_state(connection, binding)
+            assert connection.total_changes == before
+            assert not any(name.startswith("spine.commands") for name in sys.modules)
+            print(json.dumps({"state": state, "source": source}))
+            connection.close()
+        """)
+        result = subprocess.run(
+            [
+                sys.executable, "-c", script, created["temporal_binding"]["temporal_binding_id"],
+                str(Path(__file__).resolve().parents[1] / "src"),
+            ],
+            input="\n".join(self.connection.iterdump()),
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        self.assertEqual(result.returncode, 0, result.stderr)
+        resolved = json.loads(result.stdout)
+        self.assertEqual(resolved["state"], "current")
+        for field in (
+            "source_scheduled_fact", "resolved_source_utc", "source_occurrence_key",
+            "source_recurrence_revision_id", "source_occurrence_provenance_id",
+        ):
+            self.assertEqual(resolved["source"][field], revision[field], field)
 
     def test_source_only_change_refreshes_binding_without_versioning_task(self) -> None:
         created = handle("schedule.related_task.create", self._related_request("follow_source"), self.context)

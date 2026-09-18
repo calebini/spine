@@ -3,6 +3,7 @@ import unittest
 
 from spine.core.hashing import (
     audit_log_payload_hash,
+    command_derived_id,
     coordination_item_version_intent_hash,
     coordination_item_version_normalized_fields_hash,
     hash_canonical_json,
@@ -13,6 +14,25 @@ from spine.core.hashing import (
 
 
 class HashingTests(unittest.TestCase):
+    def test_command_identity_keeps_its_canonical_preimage_and_public_exports(self) -> None:
+        from spine.commands import command_derived_id as public_id
+        from spine.commands.receipts import command_derived_id as receipt_id
+
+        self.assertIs(public_id, command_derived_id)
+        self.assertIs(receipt_id, command_derived_id)
+        expected = hashlib.sha256(
+            b'{"command":"schedule.create","command_id":"command-1",'
+            b'"derivation_version":"spine.command-id.v1",'
+            b'"request_path":"/item","row_role":"item"}'
+        ).hexdigest()
+        self.assertEqual(
+            command_derived_id(
+                prefix="item", command="schedule.create", command_id="command-1",
+                row_role="item", request_path="/item",
+            ),
+            f"item_{expected}",
+        )
+
     def test_hash_is_sha256_over_canonical_json_bytes(self) -> None:
         value = {"b": "two", "a": "one"}
         expected = hashlib.sha256(b'{"a":"one","b":"two"}').hexdigest()

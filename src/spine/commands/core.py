@@ -27,7 +27,7 @@ from spine.commands.responses import (
     item_show_response,
     task_update_response,
 )
-from spine.core import SpineValidationError
+from spine.core import SpineValidationError, occurrence_details
 from spine.core.canonical_json import canonical_json_bytes
 from spine.core.hashing import audit_log_payload_hash, hash_canonical_json
 from spine.core.notifications import (
@@ -55,6 +55,7 @@ from spine.core.schedule import (
     resolve_local_instant,
     system_timezone_database_version,
 )
+from spine.ledger import item_reads
 from spine.ledger.common import TemporalAnchorInput, copy_id, insert_temporal_anchor, require_utc_z
 from spine.ledger.item_drafts import _UNSET
 from spine.ledger.items import (
@@ -93,12 +94,20 @@ from spine.ledger.recurrence import (
 from spine.ledger.relations import create_item_relation
 from spine.ledger.supporting import (
     ItemSubjectRoleInput,
-    current_locations,
-    current_notification_policies,
-    current_subject_roles,
     insert_item_location,
 )
 from spine.ledger.work import assert_work_instance_not_stale, cancel_work_instance, create_work_instance
+
+# Preserve command helper imports while core and ledger own the shared implementation.
+_decorate_occurrence = occurrence_details.decorate_occurrence
+_value_anchor_from_scheduled_fact = occurrence_details.value_anchor_from_scheduled_fact
+_shift_value_anchor = occurrence_details.shift_value_anchor
+_scheduled_fact_from_anchor = occurrence_details.scheduled_fact_from_anchor
+_format_scheduled_fact = occurrence_details.format_scheduled_fact
+_next_scheduled_fact = occurrence_details.next_scheduled_fact
+_hydrated_item_at_version = item_reads.hydrated_item_at_version
+_detail_at_version = item_reads.detail_at_version
+_anchor_row = item_reads.anchor_row
 
 
 def handle(command: str, request: Mapping[str, Any], context: CommandContext) -> dict[str, Any]:
@@ -8149,141 +8158,6 @@ def _anchor_semantic_facts(anchor: Any) -> dict[str, Any] | None:
     }
 
 
-def _decorate_occurrence(
-    item: Mapping[str, Any],
-    recurrence: Mapping[str, Any],
-    occurrence: dict[str, Any],
-    *,
-    include_internal: bool = False,
-) -> dict[str, Any]:
-    detail = item["detail"]
-    time_basis = str(recurrence["time_basis"])
-    expressed = str(occurrence["expressed_scheduled_fact"])
-    lifecycle = str(occurrence["lifecycle"])
-    scheduled_anchor = _value_anchor_from_scheduled_fact(
-        expressed,
-        time_basis=time_basis,
-        timezone=recurrence.get("timezone"),
-    )
-    event_patch = occurrence.pop("event_detail_patch", None)
-    task_patch = occurrence.pop("task_detail_patch", None)
-    occurrence.pop("common_detail_patch", None)
-    if not include_internal:
-        occurrence.pop("target_occurrence_selector", None)
-    if item["item_type"] == "event":
-        event_status = "cancelled" if detail["event_status"] == "cancelled" or lifecycle == "cancelled" else "scheduled"
-        all_day = bool(detail["all_day"])
-        if isinstance(event_patch, Mapping) and "all_day" in event_patch:
-            all_day = bool(event_patch["all_day"])
-        result_detail: dict[str, Any] = {
-            "event_status": event_status,
-            "all_day": all_day,
-            "start_anchor": scheduled_anchor,
-        }
-        if isinstance(event_patch, Mapping) and "end_scheduled_fact" in event_patch:
-            if event_patch["end_scheduled_fact"] is not None:
-                result_detail["end_anchor"] = _value_anchor_from_scheduled_fact(
-                    str(event_patch["end_scheduled_fact"]),
-                    time_basis=time_basis,
-                    timezone=recurrence.get("timezone"),
-                )
-        elif detail.get("end_anchor") is not None:
-            result_detail["end_anchor"] = _shift_value_anchor(
-                detail["end_anchor"],
-                seed_anchor=detail["start_anchor"],
-                new_seed_fact=expressed,
-                time_basis=time_basis,
-            )
-        occurrence["occurrence_event_detail"] = result_detail
-        actionable = item["status"] == "active" and detail["event_status"] == "scheduled" and lifecycle != "cancelled"
-    else:
-        if detail["task_status"] in {"done", "cancelled"}:
-            task_status = detail["task_status"]
-        elif lifecycle == "completed":
-            task_status = "done"
-        elif lifecycle == "cancelled":
-            task_status = "cancelled"
-        else:
-            task_status = "open"
-        result_detail = {"task_status": task_status, "due_anchor": scheduled_anchor}
-        if isinstance(task_patch, Mapping) and "priority" in task_patch:
-            result_detail["priority"] = task_patch["priority"]
-        elif "priority" in detail:
-            result_detail["priority"] = detail["priority"]
-        if isinstance(task_patch, Mapping) and "defer_until_scheduled_fact" in task_patch:
-            if task_patch["defer_until_scheduled_fact"] is not None:
-                result_detail["defer_until_anchor"] = _value_anchor_from_scheduled_fact(
-                    str(task_patch["defer_until_scheduled_fact"]),
-                    time_basis=time_basis,
-                    timezone=recurrence.get("timezone"),
-                )
-        elif detail.get("defer_until_anchor") is not None:
-            result_detail["defer_until_anchor"] = _shift_value_anchor(
-                detail["defer_until_anchor"],
-                seed_anchor=detail["due_anchor"],
-                new_seed_fact=expressed,
-                time_basis=time_basis,
-            )
-        occurrence["occurrence_task_detail"] = result_detail
-        actionable = item["status"] == "active" and detail["task_status"] == "open" and lifecycle == "active"
-    occurrence["actionable"] = actionable
-    return occurrence
-
-
-def _value_anchor_from_scheduled_fact(value: str, *, time_basis: str, timezone: object) -> dict[str, Any]:
-    parse_scheduled_fact(value, time_basis=time_basis, field="scheduled_fact")
-    if time_basis == "local_date":
-        return {"anchor_kind": "local_date", "local_date": value, "timezone": timezone}
-    if time_basis == "local_instant":
-        local_date, local_time = value.split("T", 1)
-        return {
-            "anchor_kind": "local_instant",
-            "local_date": local_date,
-            "local_time": local_time,
-            "timezone": timezone,
-        }
-    return {"anchor_kind": "instant_utc", "utc_instant": value}
-
-
-def _shift_value_anchor(
-    anchor: Mapping[str, Any],
-    *,
-    seed_anchor: Mapping[str, Any],
-    new_seed_fact: str,
-    time_basis: str,
-) -> dict[str, Any]:
-    anchor_fact = _scheduled_fact_from_anchor(anchor, time_basis=time_basis)
-    seed_fact = _scheduled_fact_from_anchor(seed_anchor, time_basis=time_basis)
-    parsed_anchor = parse_scheduled_fact(anchor_fact, time_basis=time_basis, field="anchor")
-    parsed_seed = parse_scheduled_fact(seed_fact, time_basis=time_basis, field="seed_anchor")
-    parsed_new = parse_scheduled_fact(new_seed_fact, time_basis=time_basis, field="new_seed")
-    shifted = parsed_new + (parsed_anchor - parsed_seed)
-    shifted_fact = _format_scheduled_fact(shifted, time_basis=time_basis)
-    return _value_anchor_from_scheduled_fact(
-        shifted_fact,
-        time_basis=time_basis,
-        timezone=anchor.get("timezone"),
-    )
-
-
-def _scheduled_fact_from_anchor(anchor: Mapping[str, Any], *, time_basis: str) -> str:
-    if time_basis == "local_date":
-        return str(anchor["local_date"])
-    if time_basis == "local_instant":
-        return f"{anchor['local_date']}T{anchor['local_time']}"
-    return str(anchor["utc_instant"])
-
-
-def _format_scheduled_fact(value: date | datetime, *, time_basis: str) -> str:
-    if time_basis == "local_date":
-        assert isinstance(value, date) and not isinstance(value, datetime)
-        return value.isoformat()
-    assert isinstance(value, datetime)
-    if time_basis == "local_instant":
-        return value.isoformat(timespec="seconds")
-    return value.astimezone(UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
-
-
 def _recurrence_cursor_facts(
     *,
     item: Mapping[str, Any],
@@ -8788,107 +8662,6 @@ def _receipt_item(connection: sqlite3.Connection, receipt: Mapping[str, Any]) ->
     return _hydrated_item_at_version(connection, str(facts["item_id"]), int(facts["version"]))
 
 
-def _hydrated_item_at_version(connection: sqlite3.Connection, item_id: str, version: int) -> dict[str, Any]:
-    row = connection.execute(
-        """
-        SELECT
-          i.item_id, i.item_type, i.status, i.created_at_utc, i.archived_at_utc,
-          v.title, v.summary, v.intent_hash, v.normalized_fields_hash, v.source_ref,
-          v.created_at_utc AS version_created_at_utc,
-          v.created_by_subject_id
-        FROM coordination_items AS i
-        JOIN coordination_item_versions AS v
-          ON v.item_id = i.item_id
-         AND v.version = ?
-        WHERE i.item_id = ?
-        """,
-        (version, item_id),
-    ).fetchone()
-    if row is None:
-        raise SpineValidationError("item_not_found", f"coordination item version not found: {item_id} v{version}")
-    detail = _detail_at_version(connection, item_id=item_id, item_type=row["item_type"], version=version)
-    for key in ("start_anchor_id", "end_anchor_id", "due_anchor_id", "defer_until_anchor_id"):
-        if detail.get(key) is not None:
-            detail[key.removesuffix("_id")] = _anchor_row(connection, str(detail[key]), field=key)
-    return {
-        "item_id": row["item_id"],
-        "item_type": row["item_type"],
-        "current_version": version,
-        "status": row["status"],
-        "created_at_utc": row["created_at_utc"],
-        "updated_at_utc": row["version_created_at_utc"],
-        "archived_at_utc": row["archived_at_utc"],
-        "version": {
-            "version": str(version),
-            "title": row["title"],
-            "summary": row["summary"],
-            "intent_hash": row["intent_hash"],
-            "normalized_fields_hash": row["normalized_fields_hash"],
-            "source_ref": row["source_ref"],
-            "created_at_utc": row["version_created_at_utc"],
-            "created_by_subject_id": row["created_by_subject_id"],
-        },
-        "detail": detail,
-        "locations": current_locations(connection, item_id=item_id, version=version),
-        "subject_roles": current_subject_roles(connection, item_id=item_id, version=version),
-        "notification_policies": current_notification_policies(connection, item_id=item_id, version=version),
-    }
-
-
-def _detail_at_version(connection: sqlite3.Connection, *, item_id: str, item_type: str, version: int) -> dict[str, Any]:
-    if item_type == "event":
-        row = connection.execute(
-            """
-            SELECT event_status, all_day, start_anchor_id, end_anchor_id, visibility,
-                   attendance_policy_ref
-            FROM event_details
-            WHERE item_id = ? AND version = ?
-            """,
-            (item_id, version),
-        ).fetchone()
-    elif item_type == "task":
-        row = connection.execute(
-            """
-            SELECT task_status, completion_state, priority, due_anchor_id, defer_until_anchor_id,
-                   completed_at_utc, completed_by_subject_id
-            FROM task_details
-            WHERE item_id = ? AND version = ?
-            """,
-            (item_id, version),
-        ).fetchone()
-    else:
-        return {}
-    if row is None:
-        raise SpineValidationError("item_not_found", f"coordination item detail not found: {item_id} v{version}")
-    return dict(row)
-
-
-def _anchor_row(connection: sqlite3.Connection, anchor_id: str, *, field: str) -> dict[str, Any]:
-    row = connection.execute("SELECT * FROM temporal_anchors WHERE anchor_id = ?", (anchor_id,)).fetchone()
-    if row is None:
-        raise SpineValidationError(f"anchor_not_found:{field}", f"anchor not found: {anchor_id}")
-    result = {"anchor_id": row["anchor_id"], "anchor_kind": row["anchor_kind"], "created_at_utc": row["created_at_utc"]}
-    for key in (
-        "local_date",
-        "local_time",
-        "timezone",
-        "timezone_database_version",
-        "utc_instant",
-        "window_start_utc",
-        "window_end_utc",
-        "source",
-    ):
-        if row[key] is not None:
-            result[key] = row[key]
-    recurrence = connection.execute(
-        "SELECT recurrence_set_id FROM recurrence_sets WHERE seed_anchor_id = ?",
-        (anchor_id,),
-    ).fetchone()
-    if recurrence is not None:
-        result["recurrence_set_id"] = recurrence["recurrence_set_id"]
-    return result
-
-
 def _require_item_for_write(
     connection: sqlite3.Connection,
     command: str,
@@ -9369,16 +9142,6 @@ def _resolve_current_occurrence(recurrence: Mapping[str, object] | None, occurre
             "selected occurrence selector is stale",
         )
     return dict(matches[0])
-
-
-def _next_scheduled_fact(value: str, *, time_basis: str) -> str:
-    parsed = parse_scheduled_fact(value, time_basis=time_basis, field="scheduled_fact")
-    if time_basis == "local_date":
-        assert isinstance(parsed, date) and not isinstance(parsed, datetime)
-        return (parsed + timedelta(days=1)).isoformat()
-    assert isinstance(parsed, datetime)
-    advanced = parsed + timedelta(seconds=1)
-    return _format_scheduled_fact(advanced, time_basis=time_basis)
 
 
 def _select_recurrence_segment(

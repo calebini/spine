@@ -29,6 +29,7 @@ from spine.ledger import (
     initialize_schema,
     mutation_audit_payload,
 )
+from spine.ledger.item_reads import anchor_row, detail_at_version, hydrated_item_at_version
 
 NOW = "2026-06-06T10:00:00Z"
 SUBJECT_ID = "subject-1"
@@ -42,6 +43,51 @@ class LedgerItemWorkflowTests(unittest.TestCase):
 
     def tearDown(self) -> None:
         self.connection.close()
+
+    def test_historical_hydration_preserves_version_and_anchor_without_writes(self) -> None:
+        create_task_v1(
+            self.connection, item_id="historical-task", audit_id="historical-create",
+            created_at_utc=NOW, created_by_subject_id=SUBJECT_ID, title="Original",
+            due_anchor=TemporalAnchorInput(
+                anchor_id="historical-due", anchor_kind="instant_utc",
+                utc_instant="2026-06-06T14:00:00Z",
+            ),
+        )
+        create_next_item_version(
+            self.connection, item_id="historical-task", target_version=1,
+            audit_id="historical-update", created_at_utc="2026-06-06T11:00:00Z",
+            created_by_subject_id=SUBJECT_ID, title="Current",
+        )
+        before = self.connection.total_changes
+        self.connection.execute("PRAGMA query_only = ON")
+        historical = hydrated_item_at_version(self.connection, "historical-task", 1)
+        current = hydrated_item_at_version(self.connection, "historical-task", 2)
+        self.assertEqual(historical["current_version"], 1)
+        self.assertEqual(historical["version"]["version"], "1")
+        self.assertEqual(historical["version"]["title"], "Original")
+        self.assertEqual(historical["updated_at_utc"], NOW)
+        self.assertEqual(current["version"]["title"], "Current")
+        self.assertEqual(historical["detail"]["due_anchor"], {
+            "anchor_id": "historical-due", "anchor_kind": "instant_utc",
+            "created_at_utc": NOW, "utc_instant": "2026-06-06T14:00:00Z",
+        })
+        for key in ("locations", "subject_roles", "notification_policies"):
+            self.assertEqual(historical[key], [])
+        self.assertEqual(self.connection.total_changes, before)
+
+    def test_historical_hydration_keeps_validation_errors(self) -> None:
+        with self.assertRaises(SpineValidationError) as item_error:
+            hydrated_item_at_version(self.connection, "missing", 2)
+        self.assertEqual(item_error.exception.code, "item_not_found")
+        self.assertEqual(item_error.exception.message, "coordination item version not found: missing v2")
+        with self.assertRaises(SpineValidationError) as detail_error:
+            detail_at_version(self.connection, item_id="missing", item_type="event", version=2)
+        self.assertEqual(detail_error.exception.code, "item_not_found")
+        self.assertEqual(detail_error.exception.message, "coordination item detail not found: missing v2")
+        with self.assertRaises(SpineValidationError) as anchor_error:
+            anchor_row(self.connection, "missing", field="start_anchor_id")
+        self.assertEqual(anchor_error.exception.code, "anchor_not_found:start_anchor_id")
+        self.assertEqual(anchor_error.exception.message, "anchor not found: missing")
 
     def test_create_event_v1_with_instant_utc_start(self) -> None:
         created = create_event_v1(

@@ -7,9 +7,9 @@ import sqlite3
 from collections.abc import Mapping, Sequence
 from typing import Any
 
-from spine.commands.receipts import command_derived_id
 from spine.core import SpineValidationError
 from spine.core.canonical_json import canonical_json_text
+from spine.core.hashing import command_derived_id
 from spine.ledger.common import copy_id
 
 

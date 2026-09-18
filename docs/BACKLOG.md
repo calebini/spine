@@ -825,3 +825,113 @@ remains the documented and CI validation path. CI's Python 3.12 job was not run 
 The final preservation check confirms HEAD/index unchanged, all ten other pre-existing
 modified/untracked files byte-for-byte intact, and the entire prior backlog preserved
 before this separately appended entry. No out-of-scope work was performed.
+
+## SPINE-015 cloud validation repair
+
+### SPINE-025 — Reconcile deferred packaging and source-only strict typing
+
+**Status:** Done locally (2026-09-19). Synchronization repair preserved; bounded
+shared-helper dependency repair passes source-only and editable-install strict
+checking with both tested mypy versions, plus the full regression suites.
+**Dependencies:** Existing SPINE-015 package-activation boundary; no new spec decision
+or v2 activation. A fresh Python 3.12 cloud rerun remains external confirmation;
+this completion records local source-only reproduction and verification.
+
+**Confirmed baseline:** Clean checkout `f575af5c059c6a9cdeed4de7319a713ea7a17760`.
+The synchronization gate expected 17 deferred read-family mirrors. Both mypy 1.20.2
+and 2.3.0 pass in the editable-install environment but fail with 308 diagnostics in
+seven transitive modules when using an interpreter without an installed Spine package
+for import discovery (the cloud reported 307 with its installed dependencies). The
+ledger imports the command layer through both a pure ID helper and late temporal
+binding/occurrence helpers. Moving only the ID helper did not resolve the gate; that
+experiment was fully reverted before the handoff. The earlier core renderer repair
+is separate from the service renderer errors in this report.
+
+**Completed synchronization repair:** Exclude the source-only `trusted-web-read-*`
+family until the already-planned HTTP/package/capability activation checkpoint;
+retain the existing v1 registry and current schema synchronization. The checker still
+rejects missing, changed, unexpected and prematurely packaged assets. Four focused
+regressions include future non-read schemas, read-only check behavior and deferred
+registry/schema rejection. No canonical or packaged JSON, runtime declarations,
+dependency versions, or strict typing settings changed.
+
+**Synchronization-stage verification (2026-09-18):** Python 3.14.6;
+`python -m unittest discover -s tests` passed **556 tests in 29.217s**; `pytest -o addopts='' -q` passed **556 tests and 572 subtests
+in 29.63s**. All test invocations used the existing `.venv` and disabled repository
+bytecode writes. `ruff check .`, `python scripts/sync_web_contracts.py --check`, and
+`git diff --check` passed. `python -m compileall -q src tests examples` passed with
+bytecode redirected to a cleaned temporary directory; existing repository bytecode
+was unchanged. At that checkpoint, these passes did not supersede the unresolved
+source-only mypy failure; the completed typing repair follows below.
+
+**Typing repair (2026-09-19):** Reproduced the source-only failure before editing
+with the handoff's mypy 1.20.2 command: **308 errors in seven transitive modules,
+35 explicitly checked files**. Moved the unchanged command-ID derivation to
+`core/hashing.py`, six pure occurrence-detail/scheduled-fact helpers to
+`core/occurrence_details.py`, and historical item/detail/anchor hydration to
+`ledger/item_reads.py`. Notification profiles and temporal bindings now depend on
+these shared lower-layer implementations rather than importing the command package.
+The command module retains aliases for all nine moved private helpers, and both
+public command-ID import paths remain available. An AST comparison against HEAD
+confirmed that all ten extracted helper bodies are identical apart from renamed
+shared-helper references. Canonical identities, SQL, validation errors, recurrence
+and binding behavior are unchanged. No mypy configuration, tool pin, ignore,
+import-skipping rule, contract, schema version, or activation declaration changed.
+This repairs the strict core/ledger dependency boundary; it does not claim full
+strict typing of the command/service/web modules outside that target.
+
+Regression coverage adds a fixed command-ID preimage/public-export check, historical
+hydration and stable-error checks, and extends the selected-occurrence binding test
+with a fresh subprocess that rejects command-layer imports. The subprocess restores
+only a synthetic fixture, checks foreign keys, resolves the binding under SQLite
+query-only mode, compares canonical source/provenance evidence, and verifies no writes.
+The pre-existing synchronization repair, its four tests, and the
+[historical handoff](SPINE_015_CLOUD_TYPING_HANDOFF.md) remain byte-for-byte intact.
+
+**Strict verification:** Python **3.14.6**, configured mypy target **3.12**;
+mypy **1.20.2** and **2.3.0**. The alternate discovery interpreter
+`/opt/homebrew/bin/python3` was verified to have no installed `spine-ledger`
+distribution. All four commands below exited 0 with **“Success: no issues found
+in 37 source files”**; incremental caching was disabled in every run:
+
+```sh
+PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=/private/tmp/spine-mypy-1.20.2-validation-20260918 .venv/bin/python -m mypy --strict --no-incremental --python-executable /opt/homebrew/bin/python3 --cache-dir /tmp/spine-typing-repair-120-source src/spine/core src/spine/ledger
+PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=/private/tmp/spine-mypy-1.20.2-validation-20260918 .venv/bin/python -m mypy --strict --no-incremental --cache-dir /tmp/spine-typing-repair-120-editable src/spine/core src/spine/ledger
+PYTHONDONTWRITEBYTECODE=1 .venv/bin/mypy --strict --no-incremental --python-executable /opt/homebrew/bin/python3 --cache-dir /tmp/spine-typing-repair-230-source src/spine/core src/spine/ledger
+PYTHONDONTWRITEBYTECODE=1 .venv/bin/mypy --strict --no-incremental --cache-dir /tmp/spine-typing-repair-230-editable src/spine/core src/spine/ledger
+```
+
+**Regression verification:** pytest **9.1.1**, Ruff **0.16.2**. All test commands
+used `PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:../tickerd/src` with the existing
+local environment; no Tickerd installation or qualification was performed.
+
+```sh
+.venv/bin/python -m pytest -o addopts='' -q tests/test_hashing.py tests/test_ledger_item_workflows.py tests/test_relative_temporal_bindings_command.py tests/test_recurrence_commands.py tests/test_agent_command_contract_mvp.py tests/test_command_response_fixtures.py tests/test_independent_activity_read_assembly.py tests/test_independent_activity_read_foundation.py tests/test_web_contract_sync.py
+```
+
+The focused selection passed **135 tests and 150 subtests in 10.22s**. After making
+the child process explicitly select checkout source, the temporal-binding file
+was rerun: `.venv/bin/python -m pytest -o addopts='' -q tests/test_relative_temporal_bindings_command.py`
+passed **10 tests in 0.62s**.
+
+Final full checks (all exited 0, no tests skipped):
+
+- `.venv/bin/python -m unittest discover -s tests`: **559 tests in 30.141s, OK**.
+- `.venv/bin/python -m pytest -o addopts='' -q`: **559 passed, 572 subtests passed
+  in 30.65s**.
+- `.venv/bin/ruff check .`: **All checks passed**.
+- `PYTHONDONTWRITEBYTECODE=1 .venv/bin/python scripts/sync_web_contracts.py --check`:
+  **passed**; deferred read-family packaging remains excluded.
+- `PYTHONPYCACHEPREFIX=/tmp/spine-025-compile-cache .venv/bin/python -m compileall -q src tests examples`:
+  **passed**, bytecode directed outside the repository.
+- `git diff --check`: **passed**.
+
+Final preservation checks confirmed the pre-existing sync script, sync tests and
+handoff hashes unchanged, and all backlog content preceding SPINE-025 unchanged.
+HEAD remains `f575af5c059c6a9cdeed4de7319a713ea7a17760`; the index remains empty.
+There are no local validation blockers. This is not a fresh Linux/Python 3.12 cloud
+run or completed SPINE-015 HTTP/Kinflow acceptance. Release fences, cursor integration
+and HTTP/package/capability activation remain subsequent SPINE-015 work.
+
+No commits, pushes, runtime internet enablement, deployment, real-ledger access,
+Tickerd work or subsequent SPINE-015 feature implementation occurred.

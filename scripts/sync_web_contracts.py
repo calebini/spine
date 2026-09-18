@@ -15,6 +15,10 @@ def main() -> int:
     target = root / "src/spine/contracts/web"
     files = sorted(source.glob("trusted-web-*.json")) + [source / "spine.trusted-web-command-registry.v1.json"]
     files += sorted((source / "schemas").glob("*.schema.json"))
+    # SPINE-015 keeps this family source-only until HTTP/package/capability
+    # activation (specs/independent-activity-reads.md, section 9). Remove this
+    # exclusion and add its separate registry together at that checkpoint.
+    files = [p for p in files if not p.name.startswith("trusted-web-read-")]
     expected = {target / p.relative_to(source): p.read_bytes() for p in files}
     if args.check:
         mismatched = [str(p.relative_to(root)) for p, value in expected.items() if not p.exists() or p.read_bytes() != value]

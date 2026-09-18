@@ -8,8 +8,10 @@ from datetime import UTC, datetime
 from zoneinfo import ZoneInfo
 
 from spine.core.errors import SpineValidationError
+from spine.core.occurrence_details import decorate_occurrence, next_scheduled_fact
 from spine.core.occurrences import expand_recurrence_set
 from spine.core.schedule import resolve_local_instant, system_timezone_database_version
+from spine.ledger.item_reads import hydrated_item_at_version
 from spine.ledger.recurrence import load_current_recurrence_set, load_target_occurrence_selector
 
 BINDING_STATES = (
@@ -266,18 +268,16 @@ def resolve_binding_source(
     scheduled = selector.get("scheduled_fact")
     if not isinstance(scheduled, str):
         return None
-    from spine.commands.core import _decorate_occurrence, _next_scheduled_fact
-
     expansion = expand_recurrence_set(
         recurrence,
         range_basis="original_schedule",
         range_start=scheduled,
-        range_end=_next_scheduled_fact(scheduled, time_basis=str(recurrence["time_basis"])),
+        range_end=next_scheduled_fact(scheduled, time_basis=str(recurrence["time_basis"])),
     )
     item = _source_item_for_occurrence(connection, source_item_id, version)
     matches = []
     for raw in expansion.occurrences:
-        value = _decorate_occurrence(item, recurrence, dict(raw), include_internal=True)
+        value = decorate_occurrence(item, recurrence, dict(raw), include_internal=True)
         if value.get("target_occurrence_selector") == selector and value.get("actionable") is True:
             matches.append(value)
     if len(matches) != 1:
@@ -456,9 +456,7 @@ def _current_version(connection: sqlite3.Connection, item_id: str) -> int:
 
 
 def _source_item_for_occurrence(connection: sqlite3.Connection, item_id: str, version: int) -> dict[str, object]:
-    from spine.commands.core import _hydrated_item_at_version
-
-    return _hydrated_item_at_version(connection, item_id, version)
+    return hydrated_item_at_version(connection, item_id, version)
 
 
 def _mapping(value: object, field: str) -> Mapping[str, object]:

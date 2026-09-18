@@ -91,3 +91,25 @@ def side_effect_response_hash(
 
 def _omit_absent(payload: dict[str, object | None]) -> dict[str, object]:
     return {key: value for key, value in payload.items() if value is not None}
+
+
+def command_derived_id(
+    *,
+    prefix: str,
+    command: str,
+    command_id: str,
+    row_role: str,
+    request_path: str,
+) -> str:
+    """Return the MVP command-derived row identity."""
+
+    digest = hash_canonical_json(
+        {
+            "command": command,
+            "command_id": command_id,
+            "derivation_version": "spine.command-id.v1",
+            "request_path": request_path,
+            "row_role": row_role,
+        }
+    )
+    return f"{prefix}_{digest}"
