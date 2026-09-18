@@ -447,10 +447,7 @@
           "pattern": "^[^\\u0000-\\u001f\\u007f]+$"
         },
         "occurrence_key": {
-          "type": "string",
-          "minLength": 1,
-          "maxLength": 256,
-          "pattern": "^[^\\u0000-\\u001f\\u007f]+$"
+          "$ref": "trusted-web-read-types.schema.json#/$defs/canonical_occurrence_key"
         },
         "recurrence_set_id": {
           "type": "string",
@@ -484,10 +481,7 @@
           "$ref": "trusted-web-read-types.schema.json#/$defs/time"
         },
         "expressed_schedule_key": {
-          "type": "string",
-          "minLength": 1,
-          "maxLength": 256,
-          "pattern": "^[^\\u0000-\\u001f\\u007f]+$"
+          "$ref": "trusted-web-read-types.schema.json#/$defs/canonical_occurrence_key"
         },
         "range_basis": {
           "enum": [
@@ -2763,6 +2757,12 @@
           }
         }
       }
+    },
+    "canonical_occurrence_key": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^[^\\u0000-\\u001f\\u007f]+$",
+      "$comment": "Opaque canonical engine key, not a 256-character resource ID. Overall response/cursor byte budgets still apply."
     }
   }
 }

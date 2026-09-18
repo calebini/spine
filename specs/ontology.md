@@ -20,6 +20,13 @@ backfill and restore semantics are defined in
 permission fact is inferred from the ledger instance identifier.
 
 
+Schema 15 adds only access-path indexes for independent internal reads: relation
+endpoint pairs, temporal-binding endpoint pairs, work by authorized policy/item/target,
+and creation receipts by item/command/actor. It changes no domain rows, authority,
+identity algorithm, or lifecycle. The DDL is
+`src/spine/ledger/migrations/0015_independent_read_indexes.sql`; schema-manifest
+verification and migration tests cover both fresh and upgraded ledgers.
+
 The proposed [archetype-facets.md](archetype-facets.md) adds owner-scoped schema roots,
 immutable schema revisions, archetype bindings and item-version facet snapshots.
 Facets remain optional, inherit item access, and cannot redefine time, location,

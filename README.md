@@ -310,7 +310,7 @@ design and compatibility promises live in `specs/`.
 
 Spine is substantial, but it is not finished.
 
-Implemented today: the schema-14 coordination ledger, command contracts, recurrence,
+Implemented today: the schema-15 coordination ledger, command contracts, recurrence,
 notifications, atomic scheduling, operational lifecycle, readback, locations, temporal
 bindings, deterministic notification rendering, dynamic item archetypes, reusable
 notification profiles, durable attempt processing, Tickerd integration, and the first

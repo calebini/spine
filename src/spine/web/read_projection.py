@@ -31,18 +31,22 @@ def candidate_ids(snapshot: ReadSnapshot, request: dict[str, Any]) -> list[str]:
     else:
         groups = sorted(p.groups)
         marks = ",".join("?" for _ in groups) or "NULL"
-        identities = [row[0] for row in db.execute(
-            f"""SELECT item_id FROM item_access_owners WHERE owner_subject_id=?
-            UNION SELECT item_id FROM item_access_owners WHERE owner_group_id IN ({marks})
-            UNION SELECT g.resource_id FROM access_grants g
+        grant_tail = """
             JOIN item_access_owners a ON a.item_id=g.resource_id AND a.current_revision=g.resource_owner_revision
             WHERE g.resource_kind='item' AND g.status='active' AND g.starts_at_utc<=?
               AND (g.ends_at_utc IS NULL OR g.ends_at_utc>?)
-              AND (g.grantee_subject_id=? OR g.grantee_group_id IN ({marks}))
               AND EXISTS (SELECT 1 FROM access_grant_operations o
                 WHERE o.grant_id=g.grant_id AND o.revision=g.current_revision AND o.operation IN ('item.read','item.edit'))
+        """
+        identities = [row[0] for row in db.execute(
+            f"""SELECT item_id FROM item_access_owners WHERE owner_subject_id=?
+            UNION SELECT item_id FROM item_access_owners WHERE owner_group_id IN ({marks})
+            UNION SELECT g.resource_id FROM access_grants g INDEXED BY access_grants_subject
+              {grant_tail} AND g.grantee_subject_id=?
+            UNION SELECT g.resource_id FROM access_grants g INDEXED BY access_grants_group
+              {grant_tail} AND g.grantee_group_id IN ({marks})
             ORDER BY item_id""",
-            (p.subject, *groups, p.now, p.now, p.subject, *groups),
+            (p.subject, *groups, p.now, p.now, p.subject, p.now, p.now, *groups),
         )]
     selected = []
     for identity in identities:

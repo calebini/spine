@@ -49,7 +49,12 @@ Core `detail_status` is current event/task detail lifecycle. The root title is t
 current item-version title. Occurrence title is the effective authorized title after
 canonical overlays (base title when no title overlay applies). Occurrence IDs, keys,
 expressed schedule key, versions, lifecycle and actionability are copied from the
-canonical expansion, not re-derived by this projection. The `range_basis` in each
+canonical expansion, not re-derived by this projection. Canonical occurrence and
+expressed-schedule keys are opaque engine encodings, not resource IDs: they are not
+subject to the generic 256-character ID limit. Their shared schema type and cursor
+ordering slots retain the exact engine bytes, bounded by the overall response/cursor
+byte ceilings. This unadvertised schema correction was established with real ledger
+expansion during the 2026-09-18 internal assembly slice. The `range_basis` in each
 occurrence must equal the request/result basis. Recurrence identity is null only
 when the readable item has no recurrence; unknown required source time does not
 erase an otherwise readable root's recurrence identity.

@@ -7,7 +7,11 @@ Authority: Normative Spine consumer requirements for supported Tickerd installat
 Separate proposed web-consumer change:
 [independent activity read compatibility](independent-activity-reads.md#9-compatibility-and-migration-assessment)
 assesses new read schemas, registry/versioning, v1 complete-or-deny preservation, and
-Kinflow migration. It declares no current runtime support and changes no Tickerd pin.
+Kinflow migration. It declares no public v2 runtime support and changes no Tickerd pin. Internal assembly
+now uses schema 15's index-only migration. Upgrade ledgers through the normal migration
+command before using this checkout; schema 14 and 15 runtimes retain exact schema
+admission. No v2 endpoint, packaged read bundle, or capability is enabled by the
+migration. Existing v1 response contracts and authorization semantics are unchanged.
 
 ## 1. Purpose
 

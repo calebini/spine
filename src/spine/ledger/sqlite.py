@@ -43,7 +43,7 @@ def initialize_schema(connection: sqlite3.Connection) -> None:
         version = connection.execute(
             "SELECT MAX(schema_version) FROM ledger_schema"
         ).fetchone()[0]
-        if version == 14:
+        if version == 15:
             read_ledger_instance_id(connection)
             return
         raise SpineValidationError(
@@ -81,6 +81,10 @@ def initialize_schema(connection: sqlite3.Connection) -> None:
         connection.execute("PRAGMA foreign_keys = ON")
 
     install_identity(connection, fresh=True, applied_at_utc="1970-01-01T00:00:00Z")
+    migration = resources.files("spine.ledger.migrations").joinpath("0015_independent_read_indexes.sql").read_text(encoding="utf-8")
+    connection.executescript(migration)
+    connection.execute("INSERT INTO ledger_schema VALUES (15, '1970-01-01T00:00:00Z')")
+    connection.commit()
 
 
 def _is_file_backed_database(database: str) -> bool:

@@ -1048,7 +1048,7 @@
               "$ref": "trusted-web-read-types.schema.json#/$defs/scheduled_fact"
             },
             {
-              "$ref": "trusted-web-read-types.schema.json#/$defs/id"
+              "$ref": "trusted-web-read-types.schema.json#/$defs/canonical_occurrence_key"
             },
             {
               "$ref": "trusted-web-read-types.schema.json#/$defs/id"
@@ -1165,10 +1165,10 @@
               "$ref": "trusted-web-read-types.schema.json#/$defs/scheduled_fact"
             },
             {
-              "$ref": "trusted-web-read-types.schema.json#/$defs/id"
+              "$ref": "trusted-web-read-types.schema.json#/$defs/canonical_occurrence_key"
             },
             {
-              "$ref": "trusted-web-read-types.schema.json#/$defs/id"
+              "$ref": "trusted-web-read-types.schema.json#/$defs/canonical_occurrence_key"
             },
             {
               "$ref": "trusted-web-read-types.schema.json#/$defs/id"
@@ -1300,8 +1300,14 @@
               "$ref": "trusted-web-read-types.schema.json#/$defs/id"
             },
             {
-              "type": "string",
-              "maxLength": 256
+              "oneOf": [
+                {
+                  "const": ""
+                },
+                {
+                  "$ref": "trusted-web-read-types.schema.json#/$defs/canonical_occurrence_key"
+                }
+              ]
             }
           ],
           "items": false,

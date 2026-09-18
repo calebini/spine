@@ -1,7 +1,7 @@
 {
   "manifest_version": "spine.sqlite-schema-object-manifest.v1",
   "schemas": {
-    "14": {
+    "15": {
       "objects": [
         {
           "object_type": "index",
@@ -102,6 +102,26 @@
           "object_type": "index",
           "name": "external_projections_status_updated_idx",
           "definition_sha256": "ba3be79b75e83ffb5ba0071d23da42218b8589954150ef2ce1a795a3b83bd757"
+        },
+        {
+          "object_type": "index",
+          "name": "independent_read_binding_endpoints_idx",
+          "definition_sha256": "f827bed4c5b3d4abda7191fa91ea5149b2570ac52b6d3ec2c950d8216d2df103"
+        },
+        {
+          "object_type": "index",
+          "name": "independent_read_creation_receipt_idx",
+          "definition_sha256": "567cf210388072ea64fc6d5b40e1a83c8f17b188d5f344762e070816165d462c"
+        },
+        {
+          "object_type": "index",
+          "name": "independent_read_relation_endpoints_idx",
+          "definition_sha256": "d200b31491446504677e0b62cde72bd83ce898173b9f6c92872c3e2fbf0027b9"
+        },
+        {
+          "object_type": "index",
+          "name": "independent_read_work_policy_idx",
+          "definition_sha256": "aaad2cffbfa6c62caa6ace64c888b229f9986de8689e699c13d61809242be322"
         },
         {
           "object_type": "index",

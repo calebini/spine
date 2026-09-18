@@ -48,14 +48,26 @@ six environment deployments. Live task status and completion evidence remain in
 [SPINE-015](BACKLOG.md#spine-015--read-authorized-activities-independently-of-unavailable-linked-resources).
 This planning update does not begin implementation or authorize staging changes.
 
-Delivery checkpoint (2026-09-18, subsequent operator authorization): the first internal
-foundation now implements pinned validation/normalization, read-only bounded assembly
-contexts, authorized candidate selection and core/time projection. The shared canonical
-recurrence-header query is rooted in indexed item history, with no schema migration for
-this step. These are private assembly primitives, not released API results: sections,
-occurrence/agenda assembly, fresh release fences, cursors and HTTP/capability activation
-remain to be completed. See SPINE-015 for verification evidence; no deployment or
-Kinflow migration is claimed.
+Delivery checkpoint (2026-09-18, subsequent operator authorization): internal
+foundation and the next assembly slice are implemented. Pinned validation,
+normalization, read-only bounded contexts, authorized candidates/core/time, all eleven
+detail sections, all four agenda summaries, and canonical occurrence/resolved/unplaced
+agenda assembly are locally tested. Collection assembly prepares the full bounded
+authorized set; public pagination is still pending. Separate optional permissions and
+budgets preserve root admission and distinguish null/empty from unavailable context.
+
+Actual query plans justified schema 15's index-only migration for endpoint-pair
+relations/bindings, policy-rooted work and creation receipts. Fresh initialization,
+manifest and upgrade tests are included; candidate grant discovery now explicitly
+uses existing grantee indexes. Real canonical occurrence keys also exposed and fixed
+the unadvertised projection/cursor schema's incorrect 256-character key limit, without
+changing any canonical identity or v1 pin. See SPINE-015 for exact test evidence.
+
+These remain private assembly primitives. Fresh release/source fences, authorized
+snapshot hashing, cursor integration, HTTP/package/capability activation and Kinflow
+acceptance remain to be completed, in that order. The operator authorized a local
+commit of this completed slice; no deployment, staging migration, push or consumer
+acceptance is claimed.
 
 ### Authority and delivery boundary
 

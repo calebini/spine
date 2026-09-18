@@ -6,12 +6,13 @@ fresh authorization/source fence before serializing a public response.
 
 from __future__ import annotations
 
+import copy
 import sqlite3
 import sys
 import time
 from collections.abc import Callable, Iterator
 from contextlib import contextmanager
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from math import gcd
 from pathlib import Path
 from typing import Any
@@ -135,6 +136,44 @@ class ReadSnapshot:
     contracts: ReadContracts
     budget: ReadBudget
     evaluated_at_utc: str
+
+
+class _OptionalPermissions(Permissions):
+    """Reuse v1 predicates, with capacity failures confined to optional evidence."""
+
+    def touch(self, kind: str, resource: str, operation: str) -> None:
+        try:
+            super().touch(kind, resource, operation)
+        except WebError as exc:
+            if exc.code == "capacity_exceeded":
+                raise OptionalReadUnavailable from exc
+            raise
+
+    def grant(self, kind: str, resource: str, revision: int, operation: str) -> bool:
+        try:
+            return super().grant(kind, resource, revision, operation)
+        except WebError as exc:
+            if exc.code == "capacity_exceeded":
+                raise OptionalReadUnavailable from exc
+            raise
+
+
+@contextmanager
+def optional_snapshot(snapshot: ReadSnapshot) -> Iterator[ReadSnapshot]:
+    # Reuse the frozen admitted identity, but optional permission traversal cannot
+    # spend the root's resource reserve. Retain all successful checks for the later
+    # release service; do not treat this merge as a release authorization fence.
+    permissions = object.__new__(_OptionalPermissions)
+    permissions.__dict__ = copy.copy(snapshot.permissions.__dict__)
+    permissions.visited, permissions.checked, permissions.matched_grants = set(), set(), set()
+    permissions.release_scopes = {}
+    try:
+        with snapshot.budget.optional():
+            yield replace(snapshot, permissions=permissions)
+    finally:
+        snapshot.permissions.checked.update(permissions.checked)
+        snapshot.permissions.matched_grants.update(permissions.matched_grants)
+        snapshot.permissions.release_scopes.update(permissions.release_scopes)
 
 
 @contextmanager

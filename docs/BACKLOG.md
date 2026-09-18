@@ -43,9 +43,11 @@ the manual machine-contract fixes and preceding checkpoints are pushed through
 `4d16670`. Runtime delivery planning completed on 2026-09-18; the operator then
 authorized the first implementation slice. Shared read-contract validation,
 normalization, bounded read-only context, authorized selection and core/time
-assembly are implemented and locally tested. Public routes, release fences,
-sections, occurrence/agenda assembly, pagination and consumer adoption remain
-later steps; no implemented v2 capability is advertised.
+assembly are implemented and locally tested. The subsequent internal slice adds all
+eleven detail-section projections, four agenda summaries, canonical occurrence and
+resolved/unplaced agenda assembly, plus an index-only schema-15 migration. Public
+routes, release fences, pagination and consumer adoption remain later steps; no
+implemented v2 capability is advertised.
 **Dependencies:** Existing trusted web permissions, canonical recurrence/agenda and
 temporal-binding engines, and the accepted read/machine contracts. No further broad
 specification pass is scheduled. Query/index migration assessment and behavioral
@@ -288,10 +290,73 @@ implemented-version declarations; no new packaged contract advertisement. Tests 
 the checked-in source bundle explicitly. No live data repair, deployment, commit or
 push. Existing uncommitted planning updates are preserved.
 
-**Next implementation:** Build section projections plus canonical occurrence/agenda
-assembly on this foundation, then add source/authorization release fences and the
-v2 cursor path before complete HTTP activation. Reuse the new real-ledger regressions,
-but do not count private assembly tests as completed IR-01–IR-16 HTTP/consumer proof.
+**Second internal assembly slice (2026-09-18):** Added `read_sections.py` and
+`read_assembly.py`. All eleven fixed detail states and all four agenda singleton
+states now assemble authorized rows before sorting/counting. Available null/empty,
+not-requested, and generic incomplete optional failures remain distinct. Collection
+assembly retains the whole bounded authorized set for later pagination; it does not
+issue cursors or pretend a truncated set is exhausted. Agenda summaries retain their
+underlying authorized rows for subsequent source hashing. Optional permission traversal
+uses a separate resource reserve and does not consume root admission capacity.
+
+Relations probe authorized endpoint pairs, including mixed owners with explicit read
+grants; opaque relation metadata is fail-closed. Bindings expose current revision
+headers only after both endpoints and the relation are disclosable. Profiles require
+catalog/pinned-revision/application authority. Policies, historical work and attempts
+share recipient/route/catalog predicates; only attempt evidence counts toward attempt
+status. Approved current targets, self subject roles, proven item-local inline places
+(including replacements), and authorized creation receipts use closed allowlists.
+Undefined shared-place/foreign-subject authority and unknown protected receipt
+references yield null/empty authorized subsets, not inventories of hidden resources.
+No provider, rendering, raw receipt, source provenance or owner payload is returned.
+
+Canonical occurrence expansion and overlays reuse the existing engine and decorator;
+IDs/keys remain byte-for-byte canonical. Agenda reuses canonical recurrence ranges,
+anchor resolution and ordering, without the v1 helper's binding hydration. It prepares
+resolved entries first and separately ordered unplaced cores with whole-candidate
+coverage; no last-known deadline is used. Non-temporal filters precede expansion.
+Read-only ledger snapshots remain the only execution context; reads create no receipts,
+work, provenance, repairs or other durable effects.
+
+**Query/index evidence:** Actual `EXPLAIN QUERY PLAN` showed an all-status relation
+scan and broader target/route probes for bindings/work. Schema 15 adds four indexes:
+`independent_read_relation_endpoints_idx`, `independent_read_binding_endpoints_idx`,
+`independent_read_work_policy_idx`, and `independent_read_creation_receipt_idx`.
+Fresh initialization, normal migration, version declaration and the generated DDL
+manifest are updated. A schema-14 upgrade test preserves every domain/evidence row
+and ledger identity. Actual optional and agenda/recurrence SQL plans are regression
+checked. Agenda inspection also exposed SQLite selecting the resource-kind grant
+index; candidate discovery now uses explicit subject/group grantee probes through
+existing indexes. Canonical recurrence child reads remain revision-indexed.
+
+**Unadvertised contract correction:** Real engine occurrence keys exceed the generic
+256-character resource-ID limit. Added a dedicated opaque key type to the projection
+and matching cursor ordering slots, and updated only the v2 schema pins. Canonical
+identities are neither shortened nor re-derived; response/cursor byte ceilings remain.
+V1 pins, registry, HTTP routes, CLI/write authorization, replay and delivery semantics
+are unchanged. This checkout requires schema 15 locally; no staging database was
+migrated, and no push, deployment or public capability activation was performed.
+The operator subsequently authorized a local commit of this completed internal slice.
+
+**Next implementation:** Add fresh source/authorization release fences and authorized
+snapshot hashing, then integrate the v2 cursor protocol and combined stream/section
+pagination. Full HTTP/package/capability activation and IR-01–IR-16 HTTP/Kinflow
+acceptance remain subsequent work. Internal assembly tests do not close those gates.
+
+**Second-slice verification:** The new assembly suite adds 26 real-ledger tests for
+mixed ownership, hidden graph growth, the recurring-event/unowned selected-occurrence
+follower, protected catalog/route/receipt evidence, all section states, independent
+optional failures/budgets, stale/denied source time, resolved/unplaced candidates,
+recurrence exceptions, canonical identities, DST, date/windows, terminal/archive
+lifecycle, read-only behavior, actual query plans, and index-only migration. Combined
+assembly/foundation/contracts/migration/identity command:
+`PYTHONPATH=src:../tickerd/src .venv/bin/python -m pytest -o addopts='' -q tests/test_independent_activity_read_assembly.py tests/test_independent_activity_read_foundation.py tests/test_independent_activity_read_contracts.py tests/test_ledger_migrations.py tests/test_ledger_identity.py`
+passed **80 tests and 158 subtests**. The final full command
+`PYTHONPATH=src:../tickerd/src .venv/bin/python -m pytest -o addopts='' -q` passed
+**552 tests and 567 subtests**. `.venv/bin/ruff check .`, `git diff --check`, and
+changed-document local-link checks passed. No implementation blocker remains for
+this internal slice; public release authorization and HTTP/Kinflow acceptance are
+explicitly not claimed.
 
 **Foundation verification:** `tests/test_independent_activity_read_foundation.py`
 adds 19 tests covering exact vectors and calendar rejection, pin failure, budget
