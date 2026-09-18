@@ -243,24 +243,38 @@ def insert_recurrence_lineage(connection: sqlite3.Connection, *, lineage: list[d
         )
 
 
+def current_recurrence_header_sql(item_type: str) -> str:
+    """Resolve seeds through only this item's indexed detail history.
+
+    Seeds remain attached to historical detail rows after schedule edits. The old
+    source-item join could scan every recurrence set (source_item_id is unindexed).
+    These joins preserve its revision precedence without unrelated ledger scans.
+    """
+    if item_type not in {"event", "task"}:
+        raise SpineValidationError("unsupported_recurrence_item", "recurrence requires an event or task")
+    table, column = ("event_details", "start_anchor_id") if item_type == "event" else ("task_details", "due_anchor_id")
+    return f"""SELECT DISTINCT rs.*,rr.recurrence_revision_id,rr.revision_number,
+        rr.source_item_version,rr.normalized_recurrence_set_hash
+        FROM {table} d CROSS JOIN recurrence_sets rs ON rs.seed_anchor_id=d.{column}
+        CROSS JOIN recurrence_revisions rr ON rr.recurrence_set_id=rs.recurrence_set_id
+        WHERE d.item_id=? AND rs.source_item_id=d.item_id AND rr.source_item_version<=?
+        ORDER BY rr.source_item_version DESC,rr.revision_number DESC LIMIT 1"""
+
+
+def load_current_recurrence_header(connection: sqlite3.Connection, *, item_id: str) -> dict[str, Any] | None:
+    item = connection.execute(
+        "SELECT item_type,current_version FROM coordination_items WHERE item_id=?", (item_id,),
+    ).fetchone()
+    if item is None or item["item_type"] not in {"event", "task"}:
+        return None
+    row = connection.execute(current_recurrence_header_sql(item["item_type"]), (item_id, item["current_version"])).fetchone()
+    return None if row is None else dict(row)
+
+
 def load_current_recurrence_set(connection: sqlite3.Connection, *, item_id: str) -> dict[str, object] | None:
     """Load the one recurrence revision bound to the current item version."""
 
-    header = connection.execute(
-        """
-        SELECT rs.*, rr.recurrence_revision_id, rr.revision_number,
-               rr.source_item_version, rr.normalized_recurrence_set_hash
-        FROM coordination_items AS item
-        JOIN recurrence_sets AS rs ON rs.source_item_id = item.item_id
-        JOIN recurrence_revisions AS rr
-          ON rr.recurrence_set_id = rs.recurrence_set_id
-         AND rr.source_item_version <= item.current_version
-        WHERE item.item_id = ?
-        ORDER BY rr.source_item_version DESC, rr.revision_number DESC
-        LIMIT 1
-        """,
-        (item_id,),
-    ).fetchone()
+    header = load_current_recurrence_header(connection, item_id=item_id)
     if header is None:
         return None
     revision_id = header["recurrence_revision_id"]

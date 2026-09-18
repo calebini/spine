@@ -1,7 +1,7 @@
 # Spine Implementation Plan
 
 Role: Roadmap rationale and delivery history; current task status lives in [BACKLOG.md](BACKLOG.md)
-Last updated: 2026-09-13 (explicit backlog introduced; historical delivery sections retained)
+Last updated: 2026-09-18 (independent activity read runtime delivery plan)
 
 This is a non-normative delivery plan. The specifications and machine-readable contracts remain authoritative.
 
@@ -18,11 +18,13 @@ The broad web/staging review tasks SPINE-001–003 were withdrawn at the operato
 request; no general gap analysis is scheduled.
 SPINE-015 separately tracks independent authorized activity reads when linked resources
 are unavailable, including the ratified versioned read projection and Kinflow migration.
-On 2026-09-16 the operator accepted the read design after its clean focused recheck
-and selected machine-contract codification. The v2 registry, schemas, cursor rules
-and initial fixtures are separate from unchanged v1 runtime assets. Behavioral
-implementation and Kinflow migration remain later delivery steps; static contract
-checks do not establish access-control or concurrent-read correctness.
+The operator accepted the read design on 2026-09-16. Machine-contract codification
+and its manual validation fixes are checkpointed and pushed through `4d16670`;
+focused machine-contract audit 002 passed with no findings on 2026-09-17. The v2
+registry, schemas, cursor rules and fixtures remain separate from unchanged v1
+runtime assets. The next delivery is planned below; runtime implementation and
+Kinflow adoption are not yet complete. Static contract checks do not establish
+access-control or concurrent-read correctness.
 
 Current context correction (2026-09-13): the operator is already testing the connected
 [Kinflow frontend](../../kinflow-web-ui/README.md) against staged Spine on `cortext1`.
@@ -37,6 +39,145 @@ and resilience following the event-emission fixes and has deferred SPINE-004–0
 SPINE-010. The historical resilience-first sequencing below no longer schedules work
 or makes those initiatives blanket prerequisites for facets or advisories. Preserve
 their feature-specific contract and verification requirements.
+
+## Planned Fat Slice: Independent Authorized Activity Reads (SPINE-015)
+
+This is one cohesive Spine backend delivery, followed by a separately coordinated
+deployment and Kinflow adoption. The steps below are an implementation order, not
+six environment deployments. Live task status and completion evidence remain in
+[SPINE-015](BACKLOG.md#spine-015--read-authorized-activities-independently-of-unavailable-linked-resources).
+This planning update does not begin implementation or authorize staging changes.
+
+Delivery checkpoint (2026-09-18, subsequent operator authorization): the first internal
+foundation now implements pinned validation/normalization, read-only bounded assembly
+contexts, authorized candidate selection and core/time projection. The shared canonical
+recurrence-header query is rooted in indexed item history, with no schema migration for
+this step. These are private assembly primitives, not released API results: sections,
+occurrence/agenda assembly, fresh release fences, cursors and HTTP/capability activation
+remain to be completed. See SPINE-015 for verification evidence; no deployment or
+Kinflow migration is claimed.
+
+### Authority and delivery boundary
+
+Build against [independent activity reads](../specs/independent-activity-reads.md),
+its [machine-contract companion](../specs/independent-activity-read-contracts.md),
+the [read registry](../contracts/spine.trusted-web-read-registry.v1.json),
+[projection rules](../contracts/trusted-web-read-projection.v1.json),
+[normalization and budgets](../contracts/trusted-web-read-normalization.v1.json),
+[cursor protocol](../contracts/trusted-web-read-cursor.v2.json),
+[schema pins](../contracts/trusted-web-read-schema-pins.v1.json), and
+[fixture manifest](../contracts/independent-activity-read-fixture-manifest.json).
+These artifacts, not this plan, define wire behavior and exact limits.
+
+The deliverable is the complete initial read registry: two POST command routes for
+`schedule.show` and `item.occurrences`, `POST /api/v2/agenda`, and selected-identity
+`GET /api/v2/read-capabilities`. An accessible event must remain readable when an
+unowned or inaccessible downstream task follows it. An accessible follow-source
+task still requires its own authorized, current temporal-source proof; otherwise
+its time is unavailable, not guessed from a stored deadline.
+
+Preserve v1 API/registry/pins and complete-or-deny behavior, direct CLI behavior,
+all write authorization/replay rules, canonical recurrence identity, workers and
+delivery semantics. No v2 writes, identity/authentication redesign, ownership repair,
+task-creation ownership provisioning, facets, advisory execution, or deferred
+resilience campaign belongs in this slice. No new service is needed: extend the
+existing `spine.web` backend. No canonical data migration is assumed.
+
+### Implementation order
+
+1. **Establish bounded selection and shared read infrastructure.** Use the existing
+   `src/spine/web/service.py`, `permissions.py`, `contracts.py`, and `http.py` as
+   integration seams, keeping new projected reads separate from v1 graph admission.
+   Inspect query/index support for authorized candidates, temporal dependencies,
+   section evidence and indexed creation-receipt selection. Record either a supported
+   no-migration conclusion or the concrete required query/index migration with its
+   normal manifest and migration tests; do not assume a full hidden-graph scan is
+   acceptable. Implement exact normalization, mandatory calendar-format validation,
+   shared read context, consistent source snapshots, and separate core/optional
+   budgets from the machine artifacts. Reuse canonical engines without invoking
+   receipt-bearing mutation commands or introducing read-time repair.
+2. **Implement authorized core and temporal projections.** Build root admission and
+   closed field allowlists shared by all three reads. Reuse canonical recurrence
+   expansion, overlays, timezone resolution and temporal-binding freshness rules;
+   do not re-derive occurrence IDs. Traverse only required authorized time sources,
+   not downstream followers. Implement available/not_scheduled/unavailable time,
+   event-start/task-due placement rules and generic direct denial. Cover the reported
+   Science-class/following-task case with real local domain fixtures immediately.
+3. **Complete sections and agenda assembly.** Implement all eleven detail sections
+   and the four agenda section states using their field-to-authority predicates.
+   Authorize before selection, counting and pagination. Keep absent and undisclosable
+   singleton evidence equally null; empty authorized summary buckets remain non-null.
+   Do not release raw receipt/rendering/provider payloads. Add canonical resolved
+   agenda entries followed by unplaced authorized cores under the combined limit;
+   temporal coverage and pagination remain distinct. Optional context failures may
+   degrade only that context, never mask failed root admission or release checks.
+4. **Finish freshness fences and continuation before enabling routes.** Revalidate
+   identity selection, account-subject binding revision, authorization epochs and
+   timed grant/membership activation or expiry in a fresh release snapshot. Fence
+   relevant source versions on first and later pages. Implement the separate v2
+   HMAC cursor codec and computed vectors, fixed original expiry, section/stream
+   binding, query normalization and authorized source hashes. Hidden follower
+   mutations alone must not invalidate independent event facts. Use deterministic
+   clock and assembly hooks to test races; do not rely on timing sleeps. Keep these
+   fences in the shared read path so no route can omit them.
+5. **Integrate HTTP, package and activate the complete contract family.** Retain
+   selected-identity admission, Origin/CSRF protection, request bounds, no-store
+   responses and generic errors. Wire all four routes, validate responses, package
+   the exact new registry/transitive schemas/artifacts and add runtime declarations
+   with pin parity checks. Missing/mismatched required assets must fail closed.
+   Advertise v2 only when the complete initial registry and behavioral gates pass;
+   no partial-capability advertisement or silent fallback. Keep the v1 codec and
+   command registry unchanged and do not expose these projections as CLI v1 output.
+6. **Verify, document and hand off one releasable backend.** Run the acceptance
+   gates below. Update affected contract/spec implementation-status declarations,
+   host-neutral operator/API documentation, README orientation and the existing
+   [Kinflow handoff](INDEPENDENT_READS_KINFLOW_HANDOFF.md) to match actual behavior.
+   Provide exact supported versions, example public responses, failure/cache rules,
+   migration assessment and deployment/rollback instructions. Do not mark Kinflow
+   adoption or staging verification complete based on backend tests.
+
+### Runtime acceptance and evidence
+
+- Map IR-01–IR-15 to executable backend/HTTP tests with real canonical item,
+  recurrence, ownership, permission and binding fixtures; IR-16 is the consumer
+  integration gate, supported by backend fixtures but verified in Kinflow.
+- Exercise independent event/occurrence/agenda success, legitimate visible related
+  items, generic direct denial, and indistinguishable missing versus hidden context.
+  Include hidden-graph growth, protected nested evidence and cursor/hash inspection;
+  no hidden-dependent count, capacity result or existence explanation may leak.
+- Prove stale/unavailable own-source time never releases an old due date; cover
+  resolved-empty recurrence, unscheduled tasks, unplaced cores, DST/all-day/UTC,
+  overrides/exclusions and terminal lifecycle against canonical engine output.
+- Exercise first-page and continuation races, grants appearing/disappearing through
+  time without epoch writes, version guards, identity switches, cursor tampering,
+  cross-route/section replay, fixed expiry and combined agenda limits. Hidden-only
+  follower changes must leave independent snapshots valid absent a global epoch change.
+- Trace/read-check success and failure paths to prove no durable domain writes,
+  receipts, provenance regeneration, work creation or sends. Test budget boundaries
+  and optional degradation without consuming core reserve. Preserve existing v1,
+  CLI and cross-resource write denials, including writes attempted after a v2 read.
+- Extend `tests/test_independent_activity_read_contracts.py` and add dedicated
+  runtime/HTTP tests without replacing existing expectations in
+  `tests/test_trusted_web_runtime.py` and `tests/test_trusted_web_contracts.py`.
+  Run focused tests first, then the full project suite with its required local
+  dependencies, lint/diff hygiene and installed-package contract checks. Record exact
+  commands/results and any genuine environment limitations in SPINE-015.
+
+### Release and consumer sequence
+
+Backend completion means implemented contracts, passing runtime gates, packaged pins,
+and an actionable handoff—not a deployed capability. On separately approved deployment,
+preserve the ledger and existing worker, follow any demonstrated migration requirement,
+and verify service health plus v1 and v2 canaries. Use controlled mixed-access fixtures;
+do not repair ownership or send real reminders as a test shortcut.
+
+Kinflow then adopts the exact advertised capability, canonical occurrences and
+structured time/section states. Verify IR-16 late-response/identity-switch handling
+and IR-15 mixed-client/rollback behavior in that repository. Capability loss clears
+v2 caches/cursors and retains explicit unsupported/legacy failure behavior; it must
+not turn into a fabricated empty calendar. Record backend delivery, staging validation
+and consumer adoption as separate evidence so SPINE-015 closes only when its agreed
+end-to-end acceptance is met.
 
 ## Delivered Sustaining Slice: Canonical Owner-Scope Discovery
 

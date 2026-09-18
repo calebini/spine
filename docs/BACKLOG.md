@@ -1,6 +1,6 @@
 # Spine Backlog
 
-Last updated: 2026-09-16
+Last updated: 2026-09-18
 
 This is the single work queue for Spine development. The
 [implementation plan](IMPLEMENTATION_PLAN.md) explains roadmap direction and delivery
@@ -37,18 +37,21 @@ status labels in the same change. Routine task updates do not change spec author
 
 ### SPINE-015 — Read authorized activities independently of unavailable linked resources
 
-**Status:** In progress — selected by the operator on 2026-09-15. The supporting
-draft, compatibility assessment, proposed test matrix and Kinflow handoff exist;
-the approved ten-file bounded audit's one major and two minor findings have been
-manually patched in Draft v0.2 and the Kinflow handoff, checkpointed at `354ed7e`.
-Focused recheck 002 passed on 2026-09-16 against checkpoint `354ed7e`, with no findings.
-The operator ratified the read design and authorized machine-contract codification
-on 2026-09-16. That contract-only step is complete; implementation remains pending.
-**Dependencies:** Existing trusted web
-permissions, canonical recurrence/agenda and temporal-binding contracts. Read-design
-ratification is complete; review the codified machine contract before runtime work.
-This concrete item is independent of the withdrawn
-SPINE-001–003 review tasks.
+**Status:** In progress — initiative selected on 2026-09-15; specification and
+machine-contract phases complete. Both focused rechecks passed without findings;
+the manual machine-contract fixes and preceding checkpoints are pushed through
+`4d16670`. Runtime delivery planning completed on 2026-09-18; the operator then
+authorized the first implementation slice. Shared read-contract validation,
+normalization, bounded read-only context, authorized selection and core/time
+assembly are implemented and locally tested. Public routes, release fences,
+sections, occurrence/agenda assembly, pagination and consumer adoption remain
+later steps; no implemented v2 capability is advertised.
+**Dependencies:** Existing trusted web permissions, canonical recurrence/agenda and
+temporal-binding engines, and the accepted read/machine contracts. No further broad
+specification pass is scheduled. Query/index migration assessment and behavioral
+verification are implementation tasks, not already satisfied by static fixtures.
+This concrete item is independent of the withdrawn SPINE-001–003 review tasks and
+the deferred resilience initiatives.
 
 **Observed failure (operator report, not reproduced against staging):** A recurring
 Science class has web ownership under `stage-whatsapp-group`. “Drive Callan to Science
@@ -64,20 +67,43 @@ independently of inaccessible followers. Related reads remain separately authori
 public structured availability distinguishes usable activity facts from optional
 context without revealing hidden resources or guessing temporal facts.
 
-**Non-goals:** Runtime implementation, deployment, staging data changes, repairing
-ownership, granting access from assignment, weakening cross-resource writes, client
-recurrence calculation, or family-facing copy in Spine. Atomic provisioning of
-intended ownership at task creation is a separate companion requirement; this item
-must also handle legitimate access differences after correct creation.
+**Runtime delivery scope:** One cohesive backend slice implementing the complete
+independent-read registry: v2 schedule detail, occurrences, agenda and capability
+discovery. Shared authorized projection, own-time freshness, bounded queries,
+source/release fences, cursor codec, packaged contract admission, runtime tests and
+operator/consumer documentation ship together. See the
+[delivery sequence](IMPLEMENTATION_PLAN.md#planned-fat-slice-independent-authorized-activity-reads-spine-015).
+Deployment and Kinflow adoption follow separately with explicit evidence and approval;
+this planning change performs neither.
 
-**Acceptance:** The proposed IR-01–IR-16 matrix in the supporting spec covers:
+**Non-goals:** Repairing ownership, granting access from assignment, weakening
+cross-resource writes, changing v1/CLI semantics, v2 writes, client recurrence
+calculation, family-facing copy in Spine, new authentication, facets, advisory
+execution or reopening deferred resilience work. Atomic provisioning of intended
+ownership at task creation is a separate companion requirement; this item must
+also handle legitimate access differences after correct creation.
+
+**Acceptance:** The accepted IR-01–IR-16 matrix in the supporting spec covers:
 authorized events with unowned or inaccessible followers; normally visible authorized
 relations; disclosure-safe empty/incomplete context; generic direct denial; unavailable
 task time without a fabricated deadline; epoch/version/pagination races; unchanged
 cross-resource write protection; and Kinflow rendering from public canonical facts.
-Before runtime delivery, review the codified schemas/registry/version and
-consumer migration changes, and implement these behavioral oracles. Documentation
-alone does not close the feature.
+The machine-contract review is complete; implement the behavioral oracles before
+advertising v2. Backend acceptance requires IR-01–IR-15 runtime/HTTP evidence,
+exact packaged pins and registry, query/index migration assessment, unchanged v1/CLI
+and write regression tests, and no durable read effects. IR-16 and the consumer side
+of IR-15 require separate Kinflow integration evidence. Documentation alone does
+not close the feature.
+
+**Remaining delivery checkpoints (in order):**
+
+1. Shared bounded authorized selection, projection and own-time resolution.
+2. All detail sections and resolved/unplaced agenda assembly.
+3. First/next-page authorization/source fences and v2 cursor behavior.
+4. Complete HTTP/packaging/capability integration and behavioral regression suite.
+5. Host-neutral operator documentation and precise Kinflow release handoff.
+6. Separately approved deployment/canaries, then Kinflow adoption and end-to-end
+   acceptance. Do not report backend completion as consumer completion.
 
 **Specification evidence:** [Independent activity reads](../specs/independent-activity-reads.md)
 defines read boundaries, completeness, availability, consistency, compatibility,
@@ -223,6 +249,59 @@ schemas and oracle evidence, not runtime implementation or unsupplied fixtures;
 it is not a convergence or deployment claim. No Editor, source patch, commit or
 push was performed. The manual fixes remain ready to checkpoint before runtime
 implementation.
+
+**Runtime planning checkpoint (2026-09-18):** Updated this live task and the existing
+implementation plan against the ratified read spec, machine companion, registry,
+projection/normalization/cursor/pin artifacts, IR matrix and Kinflow handoff. The plan
+keeps one backend delivery, with explicit verification and later deployment/consumer
+gates; it does not add a new normative contract. No runtime, schema or fixture changes,
+staging action, commit or push were performed by this planning update.
+Verification: agent-documentation and independent-read contract suites passed
+22 tests and 223 subtests; both planning documents' local links/heading anchors
+and `git diff --check` passed. README still points to the authoritative read spec
+and companion and correctly labels runtime implementation as pending.
+
+**First runtime foundation slice (2026-09-18):** Added internal
+`src/spine/web/read_contracts.py`, `read_context.py` and `read_projection.py`.
+They load an explicitly supplied offline pinned bundle, assert Gregorian formats,
+match normalization vectors, open dedicated read-only SQLite assembly snapshots,
+enforce separate core/optional budgets, select owner/grant-authorized candidates,
+and assemble closed current core/time projections. Source time is authorized before
+follow-binding resolution; stale or denied source facts expose only unavailable time.
+Snapshot-mode tasks retain independently readable time. This is not a public response
+boundary: fresh release authorization/source fences are intentionally still required.
+
+**Query/index assessment for this slice:** Existing owner/grantee indexes support
+candidate admission; detail primary keys, unique seed-anchor lookup and the recurrence
+revision index support rooted recurrence-header selection. Factored the canonical
+recurrence header loader to traverse only the requested item's indexed detail history
+instead of scanning all recurrence sets. Canonical revision precedence is unchanged,
+including after item-version edits; both new projection and existing canonical loads
+use that shared reader. `EXPLAIN QUERY PLAN` and old/new selection comparisons cover
+the lookup. No DDL, schema version or migration is needed for these primitives.
+Optional-section and complete agenda/source-fence query paths still need their own
+task-local query assessment as they are implemented; this is not a whole-slice
+no-migration claim.
+
+**Boundary:** No v1 permission, route, registry or schema-pin changes; no v2 routes or
+implemented-version declarations; no new packaged contract advertisement. Tests use
+the checked-in source bundle explicitly. No live data repair, deployment, commit or
+push. Existing uncommitted planning updates are preserved.
+
+**Next implementation:** Build section projections plus canonical occurrence/agenda
+assembly on this foundation, then add source/authorization release fences and the
+v2 cursor path before complete HTTP activation. Reuse the new real-ledger regressions,
+but do not count private assembly tests as completed IR-01–IR-16 HTTP/consumer proof.
+
+**Foundation verification:** `tests/test_independent_activity_read_foundation.py`
+adds 19 tests covering exact vectors and calendar rejection, pin failure, budget
+separation, read-only snapshots, root-first guards, the unowned-follower regression,
+stale/denied source time, snapshot independence, unscheduled/defer-only tasks, grant
+time boundaries, canonical recurrence lookup parity/query plans, DST/window projection,
+v2 error mapping and non-advertisement. Full command
+`PYTHONPATH=src:../tickerd/src .venv/bin/python -m pytest -o addopts='' -q` passed
+526 tests and 567 subtests. `.venv/bin/ruff check .`, `git diff --check`, and planning
+document link/heading checks passed. No new Whetstone run or staging claim.
 
 ## Roadmap candidates — not selected work
 
