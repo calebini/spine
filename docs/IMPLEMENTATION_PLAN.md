@@ -1,7 +1,7 @@
 # Spine Implementation Plan
 
 Role: Roadmap rationale and delivery history; current task status lives in [BACKLOG.md](BACKLOG.md)
-Last updated: 2026-09-18 (independent activity read runtime delivery plan)
+Last updated: 2026-09-19 (independent activity read HTTP/package activation)
 
 This is a non-normative delivery plan. The specifications and machine-readable contracts remain authoritative.
 
@@ -22,9 +22,10 @@ The operator accepted the read design on 2026-09-16. Machine-contract codificati
 and its manual validation fixes are checkpointed and pushed through `4d16670`;
 focused machine-contract audit 002 passed with no findings on 2026-09-17. The v2
 registry, schemas, cursor rules and fixtures remain separate from unchanged v1
-runtime assets. The next delivery is planned below; runtime implementation and
-Kinflow adoption are not yet complete. Static contract checks do not establish
-access-control or concurrent-read correctness.
+runtime assets. Spine 0.6.0 now implements the complete v2 backend registry with
+HTTP/package admission and behavioral tests. Kinflow adoption and deployment remain
+separate gates. Static contract checks alone do not establish access-control or
+concurrent-read correctness; concrete backend evidence is recorded in SPINE-015.
 
 Current context correction (2026-09-13): the operator is already testing the connected
 [Kinflow frontend](../../kinflow-web-ui/README.md) against staged Spine on `cortext1`.
@@ -125,11 +126,43 @@ synchronization, 71 local documentation links and diff hygiene pass. A fresh off
 wheel attempt on a temporary source copy still cannot import `setuptools.build_meta`;
 no wheel/installed-wheel or cloud acceptance is claimed for this slice.
 
-Remaining order: HTTP integration, package admission, complete capability activation
+Remaining order at that checkpoint: HTTP integration, package admission, complete capability activation
 and backend behavioral gates; final operator/Kinflow handoff and separate consumer
 acceptance/deployment. All paging remains internal; no public v2 route, packaged
 asset or capability declaration was activated, and no commit/push/deployment is
 included in this slice.
+
+Delivery checkpoint (2026-09-19, subsequent operator authorization): completed
+HTTP/package/capability integration from clean `141d995`. Runtime **0.6.0** implements
+all four v2 routes in the existing backend. The new read service admits the exact
+packaged manifest, complete transitive pins, runtime declarations and route registry.
+Selected capability discovery has its own fresh identity fence. All read routes use
+the authorized pager; actual HTTP serialization and byte limits run before fresh
+release checks. V1 pins, routes, command semantics and writes remain unchanged.
+Schema **15** is unchanged; actual discovery identity query plans use existing
+primary-key indexes, with no new item traversal or migration.
+
+The fixture manifest now maps IR-01–IR-15 backend evidence to executable tests.
+All eleven sections, canonical occurrence and resolved/unplaced agenda facts,
+transport boundaries, cursor/source/access races and no durable read effects have
+local backend coverage. IR-16 and the consumer portion of IR-15 remain pending.
+Operator documentation and the Kinflow handoff now describe supported versions,
+public examples, failure/cache behavior and deployment/rollback boundaries.
+
+Verification: combined focused suite **190 tests / 269 subtests**; full unittest
+**650 tests**; full pytest **650 tests / 652 subtests**, no skips. Mypy 1.20.2 and
+2.3.0 each pass all 37 core/ledger files in source-only and editable-install strict
+checks. Ruff, synchronization, compilation, 125 local file links and diff hygiene
+pass. Temporary build tooling resolved the prior environment blocker: a fresh
+0.6.0 wheel contains 97 byte-matching web JSON assets; its isolated installation
+passes all 26 HTTP tests, synthetic schema-15 initialization/deep verification and
+system-info checks. SPINE-015 records commands, versions, wheel digest and exact
+results. This is local package/HTTP evidence, not a cloud or deployment result.
+
+Next steps: commit/push and clean-room validation of the exact version, then
+separately authorized deployment/canaries and Kinflow integration acceptance.
+The checkout now activates v2; no commit, push, deployment, staging change or
+consumer implementation is included in this slice.
 
 ### Authority and delivery boundary
 

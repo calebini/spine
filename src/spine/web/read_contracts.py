@@ -1,8 +1,4 @@
-"""Internal v2 read contract primitives; not a capability advertisement.
-
-Assets are supplied explicitly until the complete read family is packaged/activated.
-No request can choose this directory. V1 validators and pins are intentionally untouched.
-"""
+"""Offline, pinned contracts for independent authorized v2 reads."""
 
 from __future__ import annotations
 
@@ -11,12 +7,15 @@ import hashlib
 import json
 import re
 from datetime import date, datetime
+from importlib import resources
+from importlib.resources.abc import Traversable
 from pathlib import Path
 from typing import Any
 
 from jsonschema import Draft202012Validator, FormatChecker
 from referencing import Registry, Resource
 
+from spine import IMPLEMENTED_CONTRACT_VERSIONS
 from spine.core.canonical_json import canonical_json_bytes
 from spine.core.errors import SpineValidationError
 from spine.core.hashing import hash_canonical_json
@@ -24,6 +23,12 @@ from spine.web.errors import WebError
 
 READ_API = "spine.trusted-web-api.v2"
 NORMALIZATION = "spine.trusted-web-read-normalization.v1"
+# Exact package admission root; changes require matching source/package pin tests.
+READ_PIN_MANIFEST_SHA256 = "f5dfa13d510cf227bb480c829f8c4d2b6b03cbc2d63f163dbbe0a884db733f10"
+READ_RUNTIME_CONTRACTS = frozenset({
+    READ_API, "spine.trusted-web-read-registry.v1", "spine.trusted-web-cursor.v2",
+    "spine.trusted-web-schedule-view.v1", "spine.trusted-web-occurrences.v1", "spine.trusted-web-agenda.v2",
+})
 REQUEST_SCHEMAS = {
     "schedule.show": "trusted-web-read-schedule-request.schema.json",
     "item.occurrences": "trusted-web-read-occurrences-request.schema.json",
@@ -65,7 +70,7 @@ def read_error(code: str) -> WebError:
 class ReadContracts:
     """An explicitly loaded, offline, pinned set of independent-read assets."""
 
-    def __init__(self, directory: Path) -> None:
+    def __init__(self, directory: Traversable) -> None:
         try:
             pins = json.loads((directory / "trusted-web-read-schema-pins.v1.json").read_bytes())
             self.schemas = self._load(directory / "schemas", pins["schemas"])
@@ -80,11 +85,30 @@ class ReadContracts:
             if self.normalization["contract_version"] != NORMALIZATION:
                 raise ValueError("normalization contract mismatch")
             self.bounds = {k: int(v) for k, v in self.normalization["bounds"].items()}
-        except (OSError, ValueError, KeyError) as exc:
+        except (OSError, ValueError, KeyError, TypeError) as exc:
+            raise read_error("admission_unavailable") from exc
+
+    @classmethod
+    def packaged(cls) -> ReadContracts:
+        """Fail closed at startup; a request cannot select or repair package assets."""
+        try:
+            root = resources.files("spine.contracts").joinpath("web")
+            raw = root.joinpath("trusted-web-read-schema-pins.v1.json").read_bytes()
+            if hashlib.sha256(raw).hexdigest() != READ_PIN_MANIFEST_SHA256:
+                raise ValueError("pin manifest mismatch")
+            if not READ_RUNTIME_CONTRACTS <= IMPLEMENTED_CONTRACT_VERSIONS:
+                raise ValueError("incomplete runtime declarations")
+            result = cls(root)
+            registry = result.artifacts["spine.trusted-web-read-registry.v1.json"]
+            result.validate("trusted-web-read-registry.schema.json", registry, output=True)
+            if registry["status"] != "implemented":
+                raise ValueError("read registry not implemented")
+            return result
+        except (OSError, ValueError, KeyError, TypeError) as exc:
             raise read_error("admission_unavailable") from exc
 
     @staticmethod
-    def _load(directory: Path, pins: dict[str, str]) -> dict[str, Any]:
+    def _load(directory: Traversable, pins: dict[str, str]) -> dict[str, Any]:
         result = {}
         for name, digest in pins.items():
             if Path(name).name != name:

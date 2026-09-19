@@ -51,8 +51,8 @@ allowed to quietly become canonical.
 
 ## What Works Today
 
-Spine `0.5.0` is an implemented alpha; its scheduling core is exercised in a staging
-agent environment. The current SQLite ledger schema is version `14`. The trusted multi-operator backend is also running in staging on `cortext1`, with
+Spine `0.6.0` is an implemented alpha; its scheduling core is exercised in a staging
+agent environment. The current SQLite ledger schema is version `15`. The trusted multi-operator backend is also running in staging on `cortext1`, with
 operator testing through the connected [Kinflow frontend](../kinflow-web-ui/README.md).
 Concrete operator-reported work is tracked in the [backlog](docs/BACKLOG.md);
 this checkout version is not a deployment claim.
@@ -70,6 +70,15 @@ trusted devices. The existing Kinflow frontend provides connected read-only view
 verified sign-in and browser write controls remain separate work. Existing local CLI
 and worker privileges are unchanged.
 [Provision and operate the backend](docs/TRUSTED_WEB_OPERATIONS.md).
+
+Spine 0.6.0 adds independent authorized v2 schedule, occurrence and agenda reads,
+with selected-identity capability discovery, explicit optional-context/time
+availability, and freshly fenced pagination. An unavailable follower no longer
+prevents reading an independently scheduled event through v2. V1 reads and writes
+retain their existing complete-or-deny rules. The complete v2 contract family is
+packaged and admitted together; staging rollout and Kinflow adoption remain separate.
+See the [read contract](specs/independent-activity-reads.md) and
+[Kinflow handoff](docs/INDEPENDENT_READS_KINFLOW_HANDOFF.md).
 
 ### Atomic scheduling
 

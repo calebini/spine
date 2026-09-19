@@ -7,6 +7,7 @@ import ipaddress
 import logging
 import secrets
 import threading
+import time
 from urllib.parse import urlsplit
 
 from flask import Flask, jsonify, request
@@ -14,18 +15,33 @@ from werkzeug.exceptions import HTTPException
 
 from spine.web.contracts import API, json_object, validate
 from spine.web.errors import WebError
+from spine.web.read_contracts import READ_API, read_error
+from spine.web.read_service import ReadService
 from spine.web.service import WebConfig, WebService, _id
 
 
 def create_app(config: WebConfig, *, cursor_key: str | None = None) -> Flask:
     service = WebService(config, cursor_key=cursor_key)
+    reads = ReadService(config)
     app = Flask(__name__)
     app.config.update(MAX_CONTENT_LENGTH=1048576, PROPAGATE_EXCEPTIONS=False)
     app.extensions["spine_service"] = service
+    app.extensions["spine_read_service"] = reads
     slots = threading.BoundedSemaphore(4)
 
     def failure(error: WebError):
         selection = request.headers.get("X-Spine-Selection-ID")
+        if request.path.startswith("/api/v2/"):
+            codes = reads.contracts.schemas["trusted-web-read-error.schema.json"]["properties"]["error"]["properties"]["code"]["enum"]
+            code = error.code if error.code in codes else "admission_unavailable"
+            value = {
+                "contract_version": READ_API, "ok": False,
+                "error": {"code": code, "message": "Read unavailable."},
+                "correlation_id": secrets.token_hex(16), "selection_id": selection if _id(selection) else None,
+            }
+            reads.contracts.validate("trusted-web-read-error.schema.json", value, output=True)
+            status = error.status if code == "invalid_request" and error.status in {403, 413} else read_error(code).status
+            return jsonify(value), status
         return jsonify(
             {
                 "contract_version": API,
@@ -59,6 +75,13 @@ def create_app(config: WebConfig, *, cursor_key: str | None = None) -> Flask:
             )
         if request.query_string:
             raise WebError("invalid_request")
+        if request.path == "/api/v2/read-capabilities":
+            if (any("," in request.headers.get(k, "") for k in ("X-Spine-Account-ID", "X-Spine-Selection-ID"))
+                    or not all(_id(request.headers.get(k)) for k in ("X-Spine-Account-ID", "X-Spine-Selection-ID"))
+                    or request.get_data(cache=False)):
+                raise WebError("invalid_request")
+            if request.headers.get("Origin") not in (None, config.origin):
+                raise WebError("invalid_request", status=403)
 
     @app.after_request
     def no_store(response):
@@ -126,6 +149,49 @@ def create_app(config: WebConfig, *, cursor_key: str | None = None) -> Flask:
     def command(command):
         return selected(command)
 
+    def selection():
+        return request.headers.get("X-Spine-Account-ID"), request.headers.get("X-Spine-Selection-ID")
+
+    def encode_read(value):
+        return (app.json.dumps(value) + "\n").encode("utf-8")
+
+    def run_read(operation):
+        if not slots.acquire(blocking=False):
+            raise read_error("capacity_exceeded")
+        try:
+            started = time.monotonic()
+            encoded = operation()
+            if time.monotonic() - started >= min(config.request_seconds, reads.contracts.bounds["request_milliseconds"] / 1000):
+                raise read_error("capacity_exceeded")
+            return app.response_class(encoded, mimetype="application/json")
+        finally:
+            slots.release()
+
+    @app.get("/api/v2/read-capabilities")
+    def read_capabilities():
+        return run_read(lambda: reads.capabilities(selection=selection, encode=encode_read))
+
+    def selected_read(route):
+        return run_read(lambda: reads.execute(route, json_object(request.get_data(cache=False)), selection=selection, encode=encode_read))
+
+    @app.post("/api/v2/commands/schedule.show")
+    def read_schedule():
+        return selected_read("schedule.show")
+
+    @app.post("/api/v2/commands/item.occurrences")
+    def read_occurrences():
+        return selected_read("item.occurrences")
+
+    @app.post("/api/v2/agenda")
+    def read_agenda():
+        return selected_read("agenda")
+
+    registry = reads.contracts.artifacts["spine.trusted-web-read-registry.v1.json"]
+    expected = {(e["path"], e["method"]) for e in [*registry["commands"], registry["agenda"], registry["discovery"]]}
+    actual = {(rule.rule, method) for rule in app.url_map.iter_rules() if rule.rule.startswith("/api/v2/")
+              for method in rule.methods - {"HEAD", "OPTIONS"}}
+    if actual != expected:
+        raise read_error("admission_unavailable")
     return app
 
 

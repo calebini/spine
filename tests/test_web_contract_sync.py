@@ -1,4 +1,4 @@
-"""The offline package tracks current assets without activating deferred reads."""
+"""Offline package parity includes the complete activated independent-read family."""
 
 from __future__ import annotations
 
@@ -24,21 +24,20 @@ class WebContractSyncTests(unittest.TestCase):
         self.source = self.root / "contracts"
         self.target = self.root / "src/spine/contracts/web"
         (self.source / "schemas").mkdir(parents=True)
-        # Include a future schema to ensure the deferred-family exception does
-        # not turn synchronization into a frozen inventory of today's files.
+        # Future schemas must remain synchronized alongside both web families.
         self.current = (
             "trusted-web-schema-pins.v1.json",
             "spine.trusted-web-command-registry.v1.json",
             "schemas/archetype-facet-types.schema.json",
             "schemas/future-current.schema.json",
         )
-        self.deferred = (
+        self.read_assets = (
             "trusted-web-read-cursor.v2.json",
             "trusted-web-read-projection.v1.json",
             "spine.trusted-web-read-registry.v1.json",
             "schemas/trusted-web-read-types.schema.json",
         )
-        for name in (*self.current, *self.deferred):
+        for name in (*self.current, *self.read_assets):
             (self.source / name).write_text('{"fixture": "' + name + '"}\n')
 
     def run_sync(self, *args: str) -> subprocess.CompletedProcess[str]:
@@ -48,11 +47,11 @@ class WebContractSyncTests(unittest.TestCase):
         result = subprocess.run([sys.executable, str(SCRIPT), "--check"], capture_output=True, text=True, check=False)
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
 
-    def test_generation_preserves_deferred_activation_boundary(self) -> None:
+    def test_generation_includes_complete_read_family_and_existing_assets(self) -> None:
         result = self.run_sync()
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
-        self.assertEqual({str(path.relative_to(self.target)) for path in self.target.rglob("*.json")}, set(self.current))
-        for name in self.current:
+        self.assertEqual({str(path.relative_to(self.target)) for path in self.target.rglob("*.json")}, set(self.current + self.read_assets))
+        for name in self.current + self.read_assets:
             self.assertEqual((self.target / name).read_bytes(), (self.source / name).read_bytes())
         self.assertEqual(self.run_sync("--check").returncode, 0)
 
@@ -60,7 +59,7 @@ class WebContractSyncTests(unittest.TestCase):
         missing = self.run_sync("--check")
         self.assertEqual(missing.returncode, 1)
         self.assertIn("schemas/future-current.schema.json", missing.stdout)
-        self.assertNotIn("trusted-web-read-", missing.stdout)
+        self.assertIn("trusted-web-read-", missing.stdout)
         self.assertFalse(self.target.exists())
         self.assertEqual(self.run_sync().returncode, 0)
         changed = self.target / self.current[0]
@@ -70,9 +69,9 @@ class WebContractSyncTests(unittest.TestCase):
         self.assertIn(self.current[0], result.stdout)
         self.assertEqual(changed.read_text(), "stale\n")
 
-    def test_check_rejects_unexpected_and_prematurely_packaged_assets(self) -> None:
+    def test_check_rejects_unexpected_assets(self) -> None:
         self.assertEqual(self.run_sync().returncode, 0)
-        for name in ("unexpected.json", *self.deferred):
+        for name in ("unexpected.json", "schemas/unexpected-read.schema.json"):
             with self.subTest(asset=name):
                 extra = self.target / name
                 extra.write_text("{}\n")

@@ -1,13 +1,13 @@
 {
   "contract_version": "spine.independent-activity-read-fixtures.v1",
-  "status": "contract_only",
-  "runtime_acceptance": "not_implemented",
+  "status": "backend_implemented_consumer_pending",
+  "runtime_acceptance": "backend_verified_consumer_pending",
   "authority": "specs/independent-activity-reads.md",
   "registry": "contracts/spine.trusted-web-read-registry.v1.json",
   "schema_pins": "contracts/trusted-web-read-schema-pins.v1.json",
   "normalization_vectors": "contracts/trusted-web-read-normalization-vectors.v1.json",
   "cursor_vectors": "contracts/trusted-web-read-cursor-vectors.v2.json",
-  "fixture_limitations": "Shape fixtures use synthetic IDs. Only normalization and MAC vectors pin computed bytes. Runtime, privacy, race, expansion and GUI oracles remain pending.",
+  "fixture_limitations": "Shape fixtures use synthetic IDs. Computed normalization/cursor vectors and the referenced real-ledger backend/HTTP tests cover backend IR-01 through IR-15. Kinflow IR-16 and consumer portions of IR-15 remain pending; no deployment acceptance is claimed.",
   "fixtures": [
     {
       "fixture_id": "request_schedule_minimal",
@@ -421,79 +421,104 @@
   "behavioral_cases": [
     {
       "id": "IR-01",
-      "status": "runtime_pending",
+      "status": "backend_verified",
       "setup": "Authorized recurring event with unowned follower",
       "action": "Read root through all three v2 routes",
       "oracle": "Core and occurrences equal an independent root; no ownership mutation",
       "fixture_ids": [
         "response_schedule_no_context",
         "response_occurrences"
+      ],
+      "backend_tests": [
+        "tests.test_independent_activity_read_http.IndependentReadHTTPTests.test_science_series_read_independent_of_unowned_and_hidden_follower"
       ]
     },
     {
       "id": "IR-02",
-      "status": "runtime_pending",
+      "status": "backend_verified",
       "setup": "Same root with inaccessible follower",
       "action": "Repeat reads after hidden follower mutation",
       "oracle": "Same disclosed projection, section coverage, cursors and diagnostics",
       "fixture_ids": [
         "response_authorized_empty_context"
+      ],
+      "backend_tests": [
+        "tests.test_independent_activity_read_http.IndependentReadHTTPTests.test_science_series_read_independent_of_unowned_and_hidden_follower",
+        "tests.test_independent_activity_read_http.IndependentReadHTTPTests.test_http_hidden_follower_cursor_stability"
       ]
     },
     {
       "id": "IR-03",
-      "status": "runtime_pending",
+      "status": "backend_verified",
       "setup": "Both endpoints and relationship readable, including different owner scopes",
       "action": "Request related_items/relations/temporal_bindings",
       "oracle": "Return authorized relationship; preserve source freshness checks; no new write permission",
       "fixture_ids": [
         "response_all_authorized_sections"
+      ],
+      "backend_tests": [
+        "tests.test_independent_activity_read_http.IndependentReadHTTPTests.test_visible_cross_owner_related_row_requires_its_own_time_authority"
       ]
     },
     {
       "id": "IR-04",
-      "status": "runtime_pending",
+      "status": "backend_verified",
       "setup": "No children versus only hidden/unowned children",
       "action": "Request context with identical authorized subset",
       "oracle": "Byte-equivalent projection and continuation facts at fixed authorization snapshot",
       "fixture_ids": [
         "response_authorized_empty_context"
+      ],
+      "backend_tests": [
+        "tests.test_independent_activity_read_http.IndependentReadHTTPTests.test_requested_receipt_is_closed_and_hidden_growth_does_not_change_read",
+        "tests.test_independent_activity_read_pages.IndependentReadPageTests.test_empty_available_detail_and_unknown_time_have_no_cursor"
       ]
     },
     {
       "id": "IR-05",
-      "status": "runtime_pending",
+      "status": "backend_verified",
       "setup": "Public section outage or authorized optional budget exhaustion",
       "action": "Read core with requested optional work",
       "oracle": "Core succeeds with unavailable optional context; hidden growth alone cannot cause this",
       "fixture_ids": [
         "response_optional_budget_unavailable"
+      ],
+      "backend_tests": [
+        "tests.test_independent_activity_read_http.IndependentReadHTTPTests.test_optional_failure_and_root_denial_are_independent",
+        "tests.test_independent_activity_read_http.IndependentReadHTTPTests.test_capacity_status_and_response_limit_are_v2_specific"
       ]
     },
     {
       "id": "IR-06",
-      "status": "runtime_pending",
+      "status": "backend_verified",
       "setup": "Absent/unowned/denied explicit root",
       "action": "Read root and explicit agenda item IDs",
       "oracle": "Same generic 404 and no item or hidden source details",
       "fixture_ids": [
         "failure_resource_unavailable"
+      ],
+      "backend_tests": [
+        "tests.test_independent_activity_read_http.IndependentReadHTTPTests.test_absent_unowned_and_denied_roots_have_identical_errors"
       ]
     },
     {
       "id": "IR-07",
-      "status": "runtime_pending",
+      "status": "backend_verified",
       "setup": "Readable follow_source task with denied/stale/ambiguous source",
       "action": "Read task and agenda",
       "oracle": "Unavailable time without stored anchors; agenda unplaced without range-membership assertion",
       "fixture_ids": [
         "response_schedule_unavailable_time",
         "response_agenda_resolved_and_unplaced"
+      ],
+      "backend_tests": [
+        "tests.test_independent_activity_read_http.IndependentReadHTTPTests.test_http_stale_source_unplaced",
+        "tests.test_independent_activity_read_http.IndependentReadHTTPTests.test_visible_cross_owner_related_row_requires_its_own_time_authority"
       ]
     },
     {
       "id": "IR-08",
-      "status": "runtime_pending",
+      "status": "backend_verified",
       "setup": "Resolved series with no range matches, unscheduled root, unresolved series",
       "action": "Read temporal facts",
       "oracle": "Distinct complete-empty, not_scheduled and unavailable results",
@@ -501,11 +526,16 @@
         "response_occurrences_resolved_empty",
         "response_schedule_unscheduled",
         "response_occurrences_unavailable"
+      ],
+      "backend_tests": [
+        "tests.test_independent_activity_read_http.IndependentReadHTTPTests.test_http_terminal_and_resolved_empty",
+        "tests.test_independent_activity_read_assembly.IndependentReadAssemblyTests.test_denied_source_unplaced_snapshot_independent_and_unscheduled_omitted",
+        "tests.test_independent_activity_read_assembly.IndependentReadAssemblyTests.test_occurrences_canonical_identity_no_writes_and_empty_range"
       ]
     },
     {
       "id": "IR-09",
-      "status": "runtime_pending",
+      "status": "backend_verified",
       "setup": "Canonical moves/exdates/lifecycle overlays, all-day/window/UTC, DST folds and gaps",
       "action": "Compare projected outputs with domain expansion oracles",
       "oracle": "Exact canonical IDs/time/order; no client expansion or invented ends",
@@ -514,21 +544,31 @@
         "response_occurrence_cancelled",
         "response_schedule_all_day",
         "response_schedule_utc_window"
+      ],
+      "backend_tests": [
+        "tests.test_independent_activity_read_http.IndependentReadHTTPTests.test_http_dst_exclusions_overrides",
+        "tests.test_independent_activity_read_assembly.IndependentReadAssemblyTests.test_date_windows_point_end_and_defer_only_agenda",
+        "tests.test_independent_activity_read_assembly.IndependentReadAssemblyTests.test_moves_exclusions_effective_title_end_and_terminal_overlay"
       ]
     },
     {
       "id": "IR-10",
-      "status": "runtime_pending",
+      "status": "backend_verified",
       "setup": "Identity/grant revoke or scheduled activation/expiry during assembly without epoch write",
       "action": "Inject transition before release and before next page",
       "oracle": "Discard result; admission denial or access_changed; no partial release",
       "fixture_ids": [
         "failure_access_changed"
+      ],
+      "backend_tests": [
+        "tests.test_independent_activity_read_http.IndependentReadHTTPTests.test_http_time_triggered_revocation",
+        "tests.test_independent_activity_read_http.IndependentReadHTTPTests.test_http_future_activation",
+        "tests.test_independent_activity_read_http.IndependentReadHTTPTests.test_http_source_and_identity_fences"
       ]
     },
     {
       "id": "IR-11",
-      "status": "runtime_pending",
+      "status": "backend_verified",
       "setup": "Direct version mismatch, agenda singular guards, first-page and continuation source mutation",
       "action": "Read with guards then mutate authorized and hidden facts separately",
       "oracle": "Direct version_changed; agenda rejects singular guards; visible snapshot changes invalidate; hidden-only changes do not",
@@ -536,11 +576,16 @@
         "invalid_agenda_item_guard",
         "invalid_agenda_single_id_recurrence_guard",
         "failure_version_changed"
+      ],
+      "backend_tests": [
+        "tests.test_independent_activity_read_http.IndependentReadHTTPTests.test_http_source_and_identity_fences",
+        "tests.test_independent_activity_read_http.IndependentReadHTTPTests.test_version_guards_and_agenda_guard_rejection",
+        "tests.test_independent_activity_read_pages.IndependentReadPageTests.test_changed_off_page_candidate_invalidates_agenda_before_paging"
       ]
     },
     {
       "id": "IR-12",
-      "status": "runtime_pending",
+      "status": "backend_verified",
       "setup": "Two-stream agenda and independent section cursors at fixed snapshot",
       "action": "Traverse all pages, alter limits/context, cross-route replay and expire tokens",
       "oracle": "No duplicate/skip; fixed original expiry; reject crossed context; identity revision distinct from binding revision",
@@ -550,21 +595,31 @@
         "cursor_related_items",
         "cursor_occurrences",
         "invalid_cursor_temporal_identity_field"
+      ],
+      "backend_tests": [
+        "tests.test_independent_activity_read_http.IndependentReadHTTPTests.test_http_section_pages_no_writes",
+        "tests.test_independent_activity_read_http.IndependentReadHTTPTests.test_http_canonical_occurrence_pages",
+        "tests.test_independent_activity_read_http.IndependentReadHTTPTests.test_http_combined_stream_and_coverage",
+        "tests.test_independent_activity_read_http.IndependentReadHTTPTests.test_http_mixed_section_families",
+        "tests.test_independent_activity_read_http.IndependentReadHTTPTests.test_http_expiry_during_release"
       ]
     },
     {
       "id": "IR-13",
-      "status": "runtime_pending",
+      "status": "backend_verified",
       "setup": "Root readable via v2 but connected resource cannot be edited",
       "action": "Attempt unchanged v1 update/cancel/complete and replay",
       "oracle": "Read success never expands write authority; existing replay/graph checks remain",
       "fixture_ids": [
         "response_schedule_no_context"
+      ],
+      "backend_tests": [
+        "tests.test_independent_activity_read_http.IndependentReadHTTPTests.test_v2_has_no_write_routes_and_read_success_does_not_authorize_v1_write"
       ]
     },
     {
       "id": "IR-14",
-      "status": "runtime_pending",
+      "status": "backend_verified",
       "setup": "Hidden rows, receipt content and large hidden graph; authorized creation evidence",
       "action": "Compare v2 includes and ledger counts before/after reads",
       "oracle": "No hidden count/hash/text leakage; explicit receipt only; absent and hidden yield null; no durable reads",
@@ -572,29 +627,40 @@
         "invalid_hidden_count",
         "invalid_raw_receipt_payload",
         "response_authoring_receipt"
+      ],
+      "backend_tests": [
+        "tests.test_independent_activity_read_http.IndependentReadHTTPTests.test_requested_receipt_is_closed_and_hidden_growth_does_not_change_read",
+        "tests.test_independent_activity_read_assembly.IndependentReadAssemblyTests.test_hidden_graph_growth_does_not_change_projection_or_budget_classification",
+        "tests.test_independent_activity_read_assembly.IndependentReadAssemblyTests.test_receipt_absence_undisclosable_and_unknown_reference_are_null"
       ]
     },
     {
       "id": "IR-15",
-      "status": "runtime_pending",
+      "status": "backend_verified_consumer_pending",
       "setup": "Old client and v1 pins, partial/new deployment and rollback",
       "action": "Negotiate exact capabilities; retain v1 calls",
       "oracle": "No v1 schema/registry/runtime drift; unsupported v2 not empty; invalidate rolled-back cursors",
       "fixture_ids": [
         "response_capabilities",
         "invalid_v1_envelope"
+      ],
+      "backend_tests": [
+        "tests.test_independent_activity_read_http.IndependentReadHTTPTests.test_transport_and_generic_error_boundary",
+        "tests.test_independent_activity_read_http.IndependentReadHTTPTests.test_science_series_read_independent_of_unowned_and_hidden_follower",
+        "tests.test_independent_activity_read_http.IndependentReadHTTPTests.test_complete_registry_discovery_is_selected_and_independent_of_items"
       ]
     },
     {
       "id": "IR-16",
-      "status": "runtime_pending",
+      "status": "consumer_pending",
       "setup": "GUI identity switch and out-of-order responses; unavailable time/context",
       "action": "Render response generations and discard superseded selection",
       "oracle": "Never infer last-known dates or hidden task existence; preserve incomplete-calendar messaging",
       "fixture_ids": [
         "response_related_task_unknown_time",
         "response_agenda_unplaced_last_page"
-      ]
+      ],
+      "backend_tests": []
     }
   ]
 }

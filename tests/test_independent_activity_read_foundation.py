@@ -375,8 +375,8 @@ class ReadCoreFoundationTests(unittest.TestCase):
             project_anchor({"anchor_kind": "utc_window", "window_start_utc": "2026-09-01T10:00:00Z",
                             "window_end_utc": "2026-09-01T10:00:00Z"}, "task_due")
 
-    def test_no_public_v2_activation(self):
-        self.assertNotIn(READ_API, IMPLEMENTED_CONTRACT_VERSIONS)
+    def test_public_v2_requires_selected_identity(self):
+        self.assertIn(READ_API, IMPLEMENTED_CONTRACT_VERSIONS)
         client = create_app(self.service.config).test_client()
         for path in ("/api/v2/read-capabilities", "/api/v2/agenda", "/api/v2/commands/schedule.show", "/api/v2/commands/item.occurrences"):
             response = client.open(path, method="GET" if path.endswith("capabilities") else "POST", headers={"Host": "127.0.0.1:8090"})

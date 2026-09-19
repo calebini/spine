@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cortext.local/spine/contracts/schemas/trusted-web-read-schedule-response.schema.json",
+  "type": "object",
+  "properties": {
+    "contract_version": {
+      "const": "spine.trusted-web-api.v2"
+    },
+    "ok": {
+      "const": true
+    },
+    "identity_basis": {
+      "const": "self_selected"
+    },
+    "account_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256,
+      "pattern": "^[^\\u0000-\\u001f\\u007f]+$"
+    },
+    "subject_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256,
+      "pattern": "^[^\\u0000-\\u001f\\u007f]+$"
+    },
+    "selection_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256,
+      "pattern": "^[^\\u0000-\\u001f\\u007f]+$"
+    },
+    "account_revision": {
+      "$ref": "trusted-web-read-types.schema.json#/$defs/version"
+    },
+    "subject_revision": {
+      "$ref": "trusted-web-read-types.schema.json#/$defs/version"
+    },
+    "account_subject_binding_revision": {
+      "$ref": "trusted-web-read-types.schema.json#/$defs/version"
+    },
+    "access_epoch": {
+      "$ref": "trusted-web-read-types.schema.json#/$defs/version"
+    },
+    "result_contract": {
+      "const": "spine.trusted-web-schedule-view.v1"
+    },
+    "result": {
+      "type": "object",
+      "properties": {
+        "activity": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/core"
+        },
+        "sections": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/sections"
+        }
+      },
+      "required": [
+        "activity",
+        "sections"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "contract_version",
+    "ok",
+    "identity_basis",
+    "account_id",
+    "subject_id",
+    "selection_id",
+    "account_revision",
+    "subject_revision",
+    "account_subject_binding_revision",
+    "access_epoch",
+    "result_contract",
+    "result"
+  ],
+  "additionalProperties": false
+}

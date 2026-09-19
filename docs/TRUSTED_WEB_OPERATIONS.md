@@ -1,8 +1,9 @@
 # Trusted multi-operator backend
 
-Current runtime 0.5.0 requires schema 14 and returns system.info v3 with a separate
-ledger_instance_id. The web API below remains v1; its provisioned ledger_id is
-unchanged. Back up before migration: schema-13 identity backfill reads/sorts stored
+Current runtime 0.6.0 requires schema 15 and returns system.info v3 with a separate
+ledger_instance_id. The existing v1 API and its provisioned ledger_id are unchanged;
+0.6.0 adds the independent v2 reads documented below. Back up before migration:
+schema-13 identity backfill reads/sorts stored
 data and needs maintenance time and temporary-storage headroom. Record the instance
 ID after migration; ordinary subsequent backups/restores preserve it. See
 [ledger identity](../specs/ledger-instance-identity.md) for clone and rollback limits.
@@ -113,6 +114,69 @@ identity, query, snapshot, epochs, and a fixed fifteen-minute expiry. Restart or
 restore invalidates them; start a fresh query. They are not login credentials.
 
 ## Canary and interpretation
+
+### Independent authorized reads in Spine 0.6.0
+
+The same backend now implements the complete independent-read family:
+
+- `GET /api/v2/read-capabilities` (selected identity required).
+- `POST /api/v2/commands/schedule.show` — `spine.trusted-web-schedule-view.v1`.
+- `POST /api/v2/commands/item.occurrences` — `spine.trusted-web-occurrences.v1`.
+- `POST /api/v2/agenda` — `spine.trusted-web-agenda.v2`.
+
+All use `spine.trusted-web-api.v2`; discovery identifies
+`spine.trusted-web-read-registry.v1` and `spine.trusted-web-cursor.v2`. The v1 API,
+registry, complete-or-deny reads and all write authorization remain unchanged.
+There are no v2 writes or projected CLI commands. Read success grants no additional
+write authority. An independently timed event remains readable with an unavailable
+follower; an authorized follow-source task still needs its own current authorized
+source proof before any time can be returned.
+
+Send the existing `X-Spine-Account-ID` and `X-Spine-Selection-ID` headers on discovery
+as well as POSTs. GET discovery has no body or query parameters and does not traverse
+items. Exact Host and POST Origin/Content-Type checks still apply; a supplied Origin
+on discovery must also match. Every v2 response is `no-store`; failures have a closed
+generic envelope and never include source, parser, provider or SQL details.
+
+For example, post this to `/api/v2/commands/schedule.show` with those headers:
+
+```json
+{"contract_version":"spine.trusted-web-api.v2","request":{"item_id":"<authorized-item-id>","include":["related_items"]}}
+```
+
+Schema-valid public response examples (synthetic IDs) are the
+[schedule view](../tests/fixtures/independent_activity_reads/contracts/response_schedule_no_context.json),
+[occurrence page](../tests/fixtures/independent_activity_reads/contracts/response_occurrences.json),
+[resolved/unplaced agenda](../tests/fixtures/independent_activity_reads/contracts/response_agenda_resolved_and_unplaced.json),
+and [capabilities](../tests/fixtures/independent_activity_reads/contracts/response_capabilities.json).
+Use the pinned contracts and [Kinflow handoff](INDEPENDENT_READS_KINFLOW_HANDOFF.md)
+for request defaults, unavailable/null/empty distinctions and client cache rules.
+
+V2 cursors preserve original expiry (at most 15 minutes), selected identity, query,
+source snapshot and authorization transition deadline. They use a separate random
+process-local key and bounded volatile private proofs: at most 128 families / 8 MiB
+per service instance. Every continuation reassembles and freshly reauthorizes.
+Proof loss returns `access_changed`; restart/key rotation invalidates signatures
+(`invalid_request`). Start a fresh query in either case. Multi-process routing must
+keep a continuation on its originating instance; no shared durable cache or stateless
+fallback is provided. Full proof capacity returns 503 and does not evict live families.
+Treat `subject_revision` as an opaque decimal string, never an integer counter.
+
+Package admission checks the exact v2 manifest, all schema/artifact bytes, runtime
+declarations and complete route registration. Missing/mismatched assets fail closed
+at startup; do not repair installed files by hand or advertise a partial registry.
+The HTTP slice needs no new migration beyond schema 15. On separately authorized
+rollout, quiesce writers, take a consistent recoverable backup, use the normal
+migration/verification procedure if needed, then verify v1 and v2 with controlled
+mixed-access fixtures. Preserve worker/delivery mode and avoid real test sends.
+Rollback pairs compatible code and ledger backups if schema migration occurred;
+never overwrite later writes blindly. Capability loss requires discarding v2 caches
+and cursors and explicit legacy/unsupported behavior, not an empty calendar.
+
+Local backend tests do not claim deployment or Kinflow acceptance. Those remain
+separate SPINE-015 gates.
+
+### Existing v1 canary and interpretation
 
 Before enabling the listener for real operators, verify both an allowed device and
 a disallowed device at the network boundary. Exercise two account selections, a

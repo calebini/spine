@@ -1,10 +1,16 @@
 # Trusted Web Contract Bundle
 
-Status: implemented backend bundle, Spine 0.4.0 / schema 13. Local contract/runtime
+Status: implemented backend bundles, Spine 0.6.0 / schema 15. Local contract/runtime
 verification accompanies it; network deployment and browser GUI acceptance are separate.
 Authentication, executor tokens and protected chat admission remain deferred.
 
 The normative entry point is [the web API spec](../specs/trusted-multi-operator-web-api.md).
+Independent v2 reads are specified separately in
+[independent activity reads](../specs/independent-activity-reads.md). The original
+v1 registry and pin bytes remain unchanged. The v2 bundle has its own closed
+registry, transitive pins and runtime-pinned manifest digest; package synchronization
+now includes that complete family. Runtime declaration and route parity are checked
+before serving v2 capability discovery. Missing or mismatched assets fail startup.
 
 ## Artifacts and Verification
 

@@ -1,7 +1,7 @@
 # Independent Activity Read Machine Contracts
 
-Status: Contract codification v1; accepted read design; runtime implementation pending
-Updated: 2026-09-16
+Status: Implemented backend contracts; deployment and Kinflow acceptance separate
+Updated: 2026-09-19
 Authority: [Independent activity reads](independent-activity-reads.md)
 
 This companion closes the wire-level choices of the accepted read design. It does
@@ -33,7 +33,12 @@ the closed registry projection in its schema. It reads no item graph and gives t
 same capabilities for every admitted identity. It is independent of hidden content.
 An implementation must either support this complete initial registry or leave v2
 unadvertised. Registry and transitive schema bytes must match the new pins. Do not
-modify v1 pins to admit v2. Packaging/runtime declarations wait for implementation.
+modify v1 pins to admit v2. Spine 0.6.0 packages the complete family and checks its
+pin manifest against the runtime's exact admission digest at startup. Missing,
+changed or partially declared assets deny backend startup. Route registration is
+checked against the complete registry before the app is returned. Domain errors use
+the statuses below; inherited Host/Origin denials retain HTTP 403 and oversized
+HTTP bodies retain 413, both with the closed v2 generic error envelope.
 
 ## 2. Closed projection and temporal mapping
 
@@ -78,7 +83,7 @@ fraction, rollover or timezone inference. Leap years follow the Gregorian rule
 (divisible by 4, except centuries not divisible by 400). A validator that ignores
 formats or does not recognize this format is not a conforming v2 validator and
 MUST NOT admit the contract as supported. The static test checker is the executable
-reference oracle; runtime integration of that mandatory assertion remains pending.
+reference oracle; runtime validators enforce the same mandatory assertions.
 The rule covers request/result range endpoints, original/expressed scheduled facts
 and cursor ordering facts wherever they reference the shared type, not just anchors.
 No offset, stored-source ID or last-known due time escapes unavailable time.
@@ -258,14 +263,16 @@ is 400 for `invalid_request`, 404 for `resource_unavailable`/`operation_unavaila
 errors, hidden current versions, partial core, hashes or source IDs accompany failures.
 
 The [fixture manifest](../contracts/independent-activity-read-fixture-manifest.json)
-separates schema-valid examples, invalid shapes and the pending IR-01–IR-16 runtime
+separates schema-valid examples, invalid shapes and the IR-01–IR-16 behavioral
 matrix. Example occurrence IDs are placeholders for wire-shape checks, not claimed
 canonical identity derivation vectors. Computed normalization and MAC vectors pin
 bytes separately. Static semantic oracles cover cross-field constraints that JSON
 Schema cannot express; they are not authorization, concurrency or HTTP tests.
 
-Before runtime: review this codification, assess query/index migration requirements,
-implement snapshot/release checks and resolvers, then satisfy all behavioral oracles
-with real domain fixtures. Only then package/pin/advertise v2 and update Kinflow.
-No schema acceptance test substitutes for the unchanged-v1, non-disclosure, time
-freshness, write-isolation and no-durable-write behavioral tests.
+Spine 0.6.0 implements the backend gate: bounded authorized assembly, fresh release
+checks, pagination, complete package admission and all four HTTP routes. The fixture
+manifest maps IR-01–IR-15 to executable backend tests, including unchanged v1,
+non-disclosure, time freshness, write isolation and no durable read effects.
+Static schema acceptance does not substitute for those tests. Deployment and
+Kinflow integration remain separate gates; IR-16 and the consumer side of IR-15
+remain pending. Exact local verification is recorded in SPINE-015.

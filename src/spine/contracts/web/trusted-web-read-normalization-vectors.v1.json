@@ -1,0 +1,153 @@
+{
+  "contract_version": "spine.trusted-web-read-normalization.v1",
+  "vectors": [
+    {
+      "name": "show_default",
+      "route": "schedule.show",
+      "input": {
+        "contract_version": "spine.trusted-web-api.v2",
+        "request": {
+          "item_id": "event-science"
+        }
+      },
+      "preimage": {
+        "contract_version": "spine.trusted-web-read-normalization.v1",
+        "route": "schedule.show",
+        "request": {
+          "item_id": "event-science",
+          "include": [],
+          "section_limit": "50"
+        },
+        "expected_access_epoch": null,
+        "expected_item_version": null,
+        "expected_recurrence_revision_id": null
+      },
+      "canonical_json": "{\"contract_version\":\"spine.trusted-web-read-normalization.v1\",\"expected_access_epoch\":null,\"expected_item_version\":null,\"expected_recurrence_revision_id\":null,\"request\":{\"include\":[],\"item_id\":\"event-science\",\"section_limit\":\"50\"},\"route\":\"schedule.show\"}",
+      "sha256": "793f55e72d14a4af63d2bb6ca519acef5a696a1a5c805ed380c57141652fd0e5"
+    },
+    {
+      "name": "show_explicit_defaults",
+      "route": "schedule.show",
+      "input": {
+        "contract_version": "spine.trusted-web-api.v2",
+        "request": {
+          "item_id": "event-science",
+          "include": [],
+          "section_limit": "50",
+          "section_cursors": {}
+        }
+      },
+      "preimage": {
+        "contract_version": "spine.trusted-web-read-normalization.v1",
+        "route": "schedule.show",
+        "request": {
+          "item_id": "event-science",
+          "include": [],
+          "section_limit": "50"
+        },
+        "expected_access_epoch": null,
+        "expected_item_version": null,
+        "expected_recurrence_revision_id": null
+      },
+      "canonical_json": "{\"contract_version\":\"spine.trusted-web-read-normalization.v1\",\"expected_access_epoch\":null,\"expected_item_version\":null,\"expected_recurrence_revision_id\":null,\"request\":{\"include\":[],\"item_id\":\"event-science\",\"section_limit\":\"50\"},\"route\":\"schedule.show\"}",
+      "sha256": "793f55e72d14a4af63d2bb6ca519acef5a696a1a5c805ed380c57141652fd0e5"
+    },
+    {
+      "name": "show_sorted_includes",
+      "route": "schedule.show",
+      "input": {
+        "contract_version": "spine.trusted-web-api.v2",
+        "request": {
+          "item_id": "event-science",
+          "include": [
+            "work",
+            "authoring_receipt"
+          ]
+        }
+      },
+      "preimage": {
+        "contract_version": "spine.trusted-web-read-normalization.v1",
+        "route": "schedule.show",
+        "request": {
+          "item_id": "event-science",
+          "include": [
+            "authoring_receipt",
+            "work"
+          ],
+          "section_limit": "50"
+        },
+        "expected_access_epoch": null,
+        "expected_item_version": null,
+        "expected_recurrence_revision_id": null
+      },
+      "canonical_json": "{\"contract_version\":\"spine.trusted-web-read-normalization.v1\",\"expected_access_epoch\":null,\"expected_item_version\":null,\"expected_recurrence_revision_id\":null,\"request\":{\"include\":[\"authoring_receipt\",\"work\"],\"item_id\":\"event-science\",\"section_limit\":\"50\"},\"route\":\"schedule.show\"}",
+      "sha256": "537758143377c3c28c6999a28527f1ae8d0dea330b31f3cc0c27d75d79daaee3"
+    },
+    {
+      "name": "agenda_defaults",
+      "route": "agenda",
+      "input": {
+        "contract_version": "spine.trusted-web-api.v2",
+        "request": {
+          "evaluated_at_utc": "2026-09-20T08:00:00Z",
+          "range_start_local": "2026-09-21T00:00:00",
+          "range_end_local": "2026-09-22T00:00:00",
+          "timezone": "Europe/Paris",
+          "timezone_database_version": "2026c"
+        }
+      },
+      "preimage": {
+        "contract_version": "spine.trusted-web-read-normalization.v1",
+        "route": "agenda",
+        "request": {
+          "evaluated_at_utc": "2026-09-20T08:00:00Z",
+          "range_start_local": "2026-09-21T00:00:00",
+          "range_end_local": "2026-09-22T00:00:00",
+          "timezone": "Europe/Paris",
+          "timezone_database_version": "2026c",
+          "item_types": [
+            "event",
+            "task"
+          ],
+          "include_terminal": false,
+          "include": [],
+          "limit": "50"
+        },
+        "expected_access_epoch": null,
+        "expected_item_version": null,
+        "expected_recurrence_revision_id": null
+      },
+      "canonical_json": "{\"contract_version\":\"spine.trusted-web-read-normalization.v1\",\"expected_access_epoch\":null,\"expected_item_version\":null,\"expected_recurrence_revision_id\":null,\"request\":{\"evaluated_at_utc\":\"2026-09-20T08:00:00Z\",\"include\":[],\"include_terminal\":false,\"item_types\":[\"event\",\"task\"],\"limit\":\"50\",\"range_end_local\":\"2026-09-22T00:00:00\",\"range_start_local\":\"2026-09-21T00:00:00\",\"timezone\":\"Europe/Paris\",\"timezone_database_version\":\"2026c\"},\"route\":\"agenda\"}",
+      "sha256": "30a40d32f02c15561aeb8973d7926e18d79d313005c844cd6d249175ae01f06e"
+    },
+    {
+      "name": "occurrences_defaults",
+      "route": "item.occurrences",
+      "input": {
+        "contract_version": "spine.trusted-web-api.v2",
+        "request": {
+          "item_id": "event-science",
+          "range_basis": "expressed_time",
+          "range_start": "2026-09-21T00:00:00",
+          "range_end": "2026-09-22T00:00:00"
+        }
+      },
+      "preimage": {
+        "contract_version": "spine.trusted-web-read-normalization.v1",
+        "route": "item.occurrences",
+        "request": {
+          "item_id": "event-science",
+          "range_basis": "expressed_time",
+          "range_start": "2026-09-21T00:00:00",
+          "range_end": "2026-09-22T00:00:00",
+          "limit": "50"
+        },
+        "expected_access_epoch": null,
+        "expected_item_version": null,
+        "expected_recurrence_revision_id": null
+      },
+      "canonical_json": "{\"contract_version\":\"spine.trusted-web-read-normalization.v1\",\"expected_access_epoch\":null,\"expected_item_version\":null,\"expected_recurrence_revision_id\":null,\"request\":{\"item_id\":\"event-science\",\"limit\":\"50\",\"range_basis\":\"expressed_time\",\"range_end\":\"2026-09-22T00:00:00\",\"range_start\":\"2026-09-21T00:00:00\"},\"route\":\"item.occurrences\"}",
+      "sha256": "7e6f79038b9ce8ae6ce850ae3f35925c5f2c953628b5ef8f51d77d04f7495f08"
+    }
+  ]
+}

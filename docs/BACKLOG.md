@@ -37,6 +37,10 @@ status labels in the same change. Routine task updates do not change spec author
 
 ### SPINE-015 — Read authorized activities independently of unavailable linked resources
 
+**Current checkpoint:** HTTP/package/capability integration completed locally from
+clean `141d995` (cursor/pagination checkpoint), following operator authorization.
+Commit, push, deployment and Kinflow adoption remain separate actions.
+
 **Status:** In progress — initiative selected on 2026-09-15; specification and
 machine-contract phases complete. Both focused rechecks passed without findings;
 the manual machine-contract fixes and preceding checkpoints are pushed through
@@ -45,13 +49,13 @@ authorized the first implementation slice. Shared read-contract validation,
 normalization, bounded read-only context, authorized selection and core/time
 assembly are implemented and locally tested. The subsequent internal slice adds all
 eleven detail-section projections, four agenda summaries, canonical occurrence and
-resolved/unplaced agenda assembly, plus an index-only schema-15 migration. Public
-routes and consumer adoption remain later steps; no implemented v2 capability is
-advertised. The internal release-fence and authorized source-hashing slice is
-committed at `629c7a4`. The subsequent operator-selected internal cursor/identity
-encoding and pagination slice is implemented and locally verified below. Public
-HTTP/package activation, consumer acceptance, commit/push and deployment remain
-outside this subsequent slice.
+resolved/unplaced agenda assembly, plus an index-only schema-15 migration. The
+internal release-fence and authorized source-hashing slice is committed at
+`629c7a4`; cursor/identity encoding and pagination at `141d995`. The subsequent
+HTTP/package slice completes all four v2 routes, packaged admission and capability
+advertisement in runtime 0.6.0, with local backend verification below. Schema 15 and
+v1 behavior remain unchanged. SPINE-015 remains open for separately authorized
+deployment and Kinflow end-to-end acceptance; local backend tests do not close it.
 **Dependencies:** Existing trusted web permissions, canonical recurrence/agenda and
 temporal-binding engines, and the accepted read/machine contracts. No further broad
 specification pass is scheduled. Query/index migration assessment and behavioral
@@ -109,9 +113,11 @@ not close the feature.
    complete.
 3. Authorization/source fences, authorized source hashes, v2 cursor codec/identity
    encoding and actual first/next-page pagination — internal implementation complete,
-   including retained private-proof revalidation. Public HTTP integration is pending.
-4. Complete HTTP/packaging/capability integration and behavioral regression suite.
-5. Host-neutral operator documentation and precise Kinflow release handoff.
+   including retained private-proof revalidation.
+4. Complete HTTP/packaging/capability integration and behavioral regression suite —
+   implemented and locally verified in 0.6.0.
+5. Host-neutral operator documentation and precise Kinflow release handoff — updated
+   for 0.6.0, with consumer acceptance explicitly pending.
 6. Separately approved deployment/canaries, then Kinflow adoption and end-to-end
    acceptance. Do not report backend completion as consumer completion.
 
@@ -315,12 +321,128 @@ setuptools. Temporary build inputs were removed; no dependency installation or
 network access was attempted. This is an environment limitation, not fresh
 packaging or cloud acceptance for this slice.
 
-**Next implementation:** Complete the four-route HTTP integration, packaged contract
+**Next implementation at that checkpoint:** Complete the four-route HTTP integration, packaged contract
 admission and runtime capability declarations with the behavioral/compatibility
 gates. Then finalize operator documentation and Kinflow release handoff, followed
 by separately authorized deployment and consumer acceptance. Internal paged-read
 tests are not HTTP or Kinflow acceptance. No commit, push, deployment, staging
 change, v2 activation, real-ledger access or Whetstone audit occurred in this slice.
+
+**HTTP/package/capability checkpoint (2026-09-19):** Runtime **0.6.0**, schema
+**15**, completes the four-route independent-read registry in the existing backend.
+`web/read_service.py` loads the exact packaged v2 manifest and transitive assets;
+startup checks runtime declarations and complete route registration. Selected
+capability discovery uses read-only identity admission and a fresh release fence.
+All three read routes use the existing authorized pager/source fences. Actual HTTP
+JSON serialization and byte limits run before the fresh fence, under the shared
+budget. Existing Host/Origin/identity/body limits, bounded concurrency and no-store
+responses remain; v2 errors have closed generic envelopes without private details.
+V1 routes, command registry, pins, write authorization, CLI, replay, worker and
+delivery behavior are preserved.
+
+The complete v2 package family adds **18 assets** (11 schemas and seven registry/
+artifact files), with six implemented runtime contract declarations. Source and
+package status/pins match. The fixture manifest maps IR-01–IR-15 backend evidence
+to executable real-ledger tests; IR-16 and the consumer portion of IR-15 remain
+pending. Operator documentation and the Kinflow handoff cover exact versions,
+public response examples, temporal/section availability, generic failures, cache
+invalidation, process-local cursor continuity, migration and rollback boundaries.
+No staged deployment or frontend adoption is claimed.
+
+New HTTP tests exercise the reported recurring Science event with an inaccessible
+occurrence-bound follower; independent detail/occurrence/agenda reads; visible
+cross-owner grants; denied/stale temporal sources; optional-context isolation;
+generic root denials; all eleven sections; recurrence exceptions/DST and terminal
+series; resolved/unplaced pages; cursor/access/source races; actual-wire byte limits;
+closed receipt projections; hostile transport inputs; capacity rejection; unchanged
+write denials; and no durable effects. Package tests reject every missing/corrupt
+required asset and incomplete runtime declarations.
+
+**Query/migration assessment:** This integration reuses existing bounded read and
+pager queries. Actual `EXPLAIN QUERY PLAN` on a synthetic schema-15 ledger for the
+two selected-identity lookups used by discovery returns:
+
+```text
+SELECT * FROM subjects WHERE subject_id=?
+SEARCH subjects USING INDEX sqlite_autoindex_subjects_1 (subject_id=?)
+SELECT * FROM web_operators WHERE account_id=?
+SEARCH web_operators USING INDEX sqlite_autoindex_web_operators_1 (account_id=?)
+```
+
+Discovery does not traverse item graphs. No additional index or migration is needed;
+the earlier schema-15 migration and its existing migration tests remain authoritative.
+
+**Verification:** Focused tests ran before full regression. Python **3.14.6**,
+pytest **9.1.1**, Ruff **0.16.2**; synthetic ledgers only. With
+`PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:../tickerd/src`:
+
+```sh
+.venv/bin/python -m pytest -o addopts='' -q tests/test_trusted_web_runtime.py tests/test_trusted_web_contracts.py tests/test_independent_activity_read_pages.py tests/test_web_contract_sync.py --tb=short
+# Pre-edit baseline: 70 passed, 70 subtests passed (25.23s).
+.venv/bin/python -m pytest -o addopts='' -q tests/test_independent_activity_read_http.py tests/test_independent_activity_read_pages.py tests/test_independent_activity_read_release.py tests/test_independent_activity_read_foundation.py tests/test_independent_activity_read_assembly.py tests/test_independent_activity_read_contracts.py tests/test_trusted_web_runtime.py tests/test_trusted_web_contracts.py tests/test_web_contract_sync.py --tb=short
+# Completed focused suite: 190 passed, 269 subtests passed (59.39s).
+.venv/bin/python -m unittest discover -s tests
+# 650 tests, OK (68.250s).
+.venv/bin/python -m pytest -o addopts='' -q
+# 650 passed, 652 subtests passed (69.03s).
+```
+
+No skips; sibling Tickerd is available locally. Both mypy **2.3.0** and **1.20.2**
+pass all **37 files**, source-only and editable-install, with strict rules, Python
+3.12 target and incremental caching disabled:
+
+```sh
+PYTHONDONTWRITEBYTECODE=1 .venv/bin/mypy --strict --no-incremental --python-executable /opt/homebrew/bin/python3 --cache-dir /tmp/spine-read-http-mypy-source src/spine/core src/spine/ledger
+PYTHONDONTWRITEBYTECODE=1 .venv/bin/mypy --strict --no-incremental --cache-dir /tmp/spine-read-http-mypy-editable src/spine/core src/spine/ledger
+PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=/private/tmp/spine-mypy-1.20.2-validation-20260918 .venv/bin/python -m mypy --strict --no-incremental --python-executable /opt/homebrew/bin/python3 --cache-dir /tmp/spine-read-http-120-source src/spine/core src/spine/ledger
+PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=/private/tmp/spine-mypy-1.20.2-validation-20260918 .venv/bin/python -m mypy --strict --no-incremental --cache-dir /tmp/spine-read-http-120-editable src/spine/core src/spine/ledger
+```
+
+The source-only interpreter has neither a `spine-ledger` installed distribution nor
+an importable `spine` module. Ruff, synchronization, compilation and diff hygiene
+pass; all **125 local file links** in the eight changed Markdown files resolve:
+
+```sh
+.venv/bin/ruff check .
+PYTHONDONTWRITEBYTECODE=1 .venv/bin/python scripts/sync_web_contracts.py --check
+PYTHONPYCACHEPREFIX=/tmp/spine-read-http-compile .venv/bin/python -m compileall -q src tests examples
+git diff --check
+```
+
+**Fresh packaging evidence:** The previous missing-backend environment limitation
+was resolved for this check by downloading setuptools **84.0.0**, wheel **0.48.0**
+and packaging **26.3** to `/tmp/spine-http-build-tools`, then installing them only
+under `/tmp/spine-http-build-backend`. Existing environments and repository files
+were not changed by dependency installation. Network access was limited to obtaining
+these build tools; the build/install and runtime checks were offline.
+
+```sh
+.venv/bin/python -m pip download --disable-pip-version-check --no-cache-dir --index-url https://pypi.org/simple --only-binary=:all: --no-deps --dest /tmp/spine-http-build-tools setuptools wheel packaging
+.venv/bin/python -m pip install --disable-pip-version-check --no-index --find-links /tmp/spine-http-build-tools --target /tmp/spine-http-build-backend setuptools wheel packaging
+# Build a temporary copy of src, pyproject.toml, README.md and LICENSE:
+PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=/tmp/spine-http-build-backend .venv/bin/python -m pip wheel --disable-pip-version-check --no-cache-dir --no-deps --no-build-isolation --no-index <temporary-source> --wheel-dir <temporary-dist>
+.venv/bin/python -m pip install --disable-pip-version-check --no-cache-dir --no-index --no-deps --target <temporary-installed> <wheel>
+```
+
+Built `spine_ledger-0.6.0-py3-none-any.whl` (490827 bytes; SHA-256
+`0147974bb9881b50c6013ef578175440e041cc632c490c717b2abe47f7932676`).
+All **97 packaged web JSON files** match source bytes, including archetype-facet
+schemas and the complete new family. With isolated `python -I`, the temporary
+installation prepended to `sys.path`, and assertions that both imported code and
+package metadata identify that wheel as 0.6.0, all **26 HTTP tests** pass (19.076s).
+The repository supplies test fixtures, not the imported runtime. Installed migration
+CLI checks `--initialize-if-empty` and `--verify-only` on a temporary synthetic ledger
+pass at schema 15: integrity/invariants OK, zero foreign-key errors, 80 tables and
+70 indexes. Installed `system info` reports 0.6.0/schema 15, all six v2 declarations,
+compatible Tickerd 0.2.0 and timezone release 2026c-rearguard. Temporary build,
+installation and ledger directories were removed.
+
+**Remaining work:** No local implementation or validation blocker remains for this
+backend slice. Commit/push and clean-room validation of the exact committed version
+require subsequent action. Then separately authorize deployment/canaries and Kinflow
+adoption, including IR-16 and the consumer side of IR-15. This slice enables v2 in
+the checkout; it does not deploy it. No commit, push, staging change, real-ledger
+access, delivery or new Whetstone audit occurred.
 
 **Specification evidence:** [Independent activity reads](../specs/independent-activity-reads.md)
 defines read boundaries, completeness, availability, consistency, compatibility,

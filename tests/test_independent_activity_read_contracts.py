@@ -6,6 +6,7 @@ import base64
 import copy
 import hashlib
 import hmac
+import importlib
 import json
 import re
 import unittest
@@ -198,7 +199,7 @@ class IndependentActivityReadContractTests(unittest.TestCase):
                 self.assertEqual(not errors, entry["valid"], [error.message for error in errors])
         self.assertEqual({ROOT / e["fixture"] for e in self.manifest["fixtures"]}, set(FIXTURES.glob("*.json")))
 
-    def test_registry_and_discovery_are_closed_read_only_and_not_advertised(self) -> None:
+    def test_registry_and_discovery_are_closed_read_only_and_implemented(self) -> None:
         self.validator("trusted-web-read-registry.schema.json").validate(self.registry)
         self.assertEqual([e["command"] for e in self.registry["commands"]], ["item.occurrences", "schedule.show"])
         families = {self.registry["api_contract"], self.registry["cursor_contract"], self.registry["contract_version"]}
@@ -207,7 +208,7 @@ class IndependentActivityReadContractTests(unittest.TestCase):
             self.assertIn(entry["request_schema"], self.schemas)
             self.assertIn(entry["response_schema"], self.schemas)
             families.add(entry["result_contract"])
-        self.assertFalse(families & IMPLEMENTED_CONTRACT_VERSIONS)
+        self.assertTrue(families <= IMPLEMENTED_CONTRACT_VERSIONS)
         extra = copy.deepcopy(self.registry)
         extra["commands"].append({"command": "schedule.update"})
         self.assertFalse(self.validator("trusted-web-read-registry.schema.json").is_valid(extra))
@@ -371,14 +372,20 @@ class IndependentActivityReadContractTests(unittest.TestCase):
         for name, expected in pins["artifacts"].items():
             self.assertEqual(hashlib.sha256((CONTRACTS / name).read_bytes()).hexdigest(), expected)
 
-    def test_behavioral_matrix_is_explicitly_pending(self) -> None:
-        self.assertEqual(self.manifest["status"], "contract_only")
-        self.assertEqual(self.manifest["runtime_acceptance"], "not_implemented")
+    def test_behavioral_matrix_maps_backend_tests_and_keeps_consumer_pending(self) -> None:
+        self.assertEqual(self.manifest["status"], "backend_implemented_consumer_pending")
+        self.assertEqual(self.manifest["runtime_acceptance"], "backend_verified_consumer_pending")
         cases = self.manifest["behavioral_cases"]
         self.assertEqual([case["id"] for case in cases], [f"IR-{i:02d}" for i in range(1, 17)])
         fixture_ids = {entry["fixture_id"] for entry in self.manifest["fixtures"]}
         for case in cases:
-            self.assertEqual(case["status"], "runtime_pending")
+            expected = ("consumer_pending" if case["id"] == "IR-16" else
+                        "backend_verified_consumer_pending" if case["id"] == "IR-15" else "backend_verified")
+            self.assertEqual(case["status"], expected)
+            self.assertEqual(bool(case["backend_tests"]), case["id"] != "IR-16")
+            for test in case["backend_tests"]:
+                module, cls, method = test.rsplit(".", 2)
+                self.assertTrue(callable(getattr(getattr(importlib.import_module(module), cls), method)))
             self.assertTrue(case["setup"] and case["action"] and case["oracle"] and case["fixture_ids"])
             self.assertTrue(set(case["fixture_ids"]) <= fixture_ids)
 

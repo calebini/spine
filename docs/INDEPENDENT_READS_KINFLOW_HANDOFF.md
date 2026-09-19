@@ -1,13 +1,13 @@
 # Kinflow Handoff: Independent Activity Reads
 
-Status: Ratified integration contract; internal paging implemented; public runtime pending
+Status: Spine 0.6.0 backend implemented; deployment and Kinflow acceptance pending
 Updated: 2026-09-19; aligned with independent-read v1 and cursor v2
 Tracking: [SPINE-015](BACKLOG.md#spine-015--read-authorized-activities-independently-of-unavailable-linked-resources)
 Authority: [Independent authorized activity reads](../specs/independent-activity-reads.md)
 
 ## Current behavior
 
-The reported Science-class failure is consistent with Spine's current binding-graph
+The reported Science-class failure is consistent with Spine's v1 binding-graph
 read admission. `resource_unavailable` does not identify an ownership gap: absent,
 unowned, and inaccessible resources deliberately share the generic denial. Keep
 Kinflow's current isolated failure and incomplete-calendar behavior until the new
@@ -16,7 +16,9 @@ capability is actually advertised. No staging repair or deployment is part of th
 Machine artifacts: [read registry](../contracts/spine.trusted-web-read-registry.v1.json),
 [contract companion](../specs/independent-activity-read-contracts.md), and
 [fixtures](../contracts/independent-activity-read-fixture-manifest.json).
-The v2 capability route will be `/api/v2/read-capabilities`; it is not implemented yet.
+Spine 0.6.0 implements the selected-identity `GET /api/v2/read-capabilities` route.
+This checkout is not evidence that the staged backend has been upgraded. Negotiate
+the deployed capability before adoption; the v1 behavior remains unchanged.
 Agenda exposes singleton `primary_location`, `policies`, `work`, and `attempts`
 sections; detail exposes all eleven sections. Examples are wire fixtures, not proof
 of canonical occurrence derivation or authorization behavior.
@@ -24,8 +26,9 @@ of canonical occurrence derivation or authorization behavior.
 ## Consumer behavior after runtime delivery
 
 1. Negotiate the exact read capability and result versions in spec Section 9. The new
-   `/api/v2` read surface is not yet implemented; do not call it based only on this document or
-   treat an unsupported version as an empty agenda. Writes continue through v1.
+   `/api/v2` read surface is implemented in Spine 0.6.0; do not assume the deployed
+   server has it or treat an unsupported version as an empty agenda. Discovery needs
+   the same selected account and selection headers as the reads. Writes continue through v1.
 2. Render the canonical agenda and occurrence results returned by Spine. Use the
    supplied item/version, occurrence ID/key, recurrence revision, effective status,
    and dates/start/end. Do not expand recurrence, infer duration, use task dates to
@@ -58,6 +61,9 @@ of canonical occurrence derivation or authorization behavior.
    `access_changed` or `version_changed`, invalidate affected cached views/pages and
    restart with fresh context. On generic denial, do not continue displaying cached
    content as currently authorized. Do not mix old pages with new source snapshots.
+   Server restart/key rotation invalidates signatures; an `invalid_request` on
+   continuation also requires discarding that cursor before an explicit fresh query.
+   Do not retry an invalid cursor indefinitely or reinterpret failure as empty data.
 6. Treat item-level edit hints as advisory. Submit writes with their existing version,
    epoch and command-ID rules; read success does not authorize connected-item effects.
 7. Request `authoring_receipt` only through the new schedule-view include contract.
@@ -79,8 +85,9 @@ Prove that the class remains visible with an unowned or differently authorized
 following task, authorized tasks still appear, unresolved task time is never placed
 using a stale deadline, and identity switches cannot reveal late responses.
 
-Ship Spine's exact schemas, registry, capability declarations and behavior first;
-enable Kinflow only for supported versions. Preserve old-client behavior during
+Spine's exact schemas, registry, capability declarations and backend behavior are
+implemented and verified locally; cloud validation and deployment remain separate.
+Enable Kinflow only for supported deployed versions. Preserve old-client behavior during
 migration. On server rollback/loss of capability, discard new read caches and cursors
 and use explicit legacy failure handling. Ownership provisioning at task creation
 remains an independent companion change, not a prerequisite or substitute for these

@@ -102,7 +102,7 @@ class ReadPager:
             self._proofs[key] = (copy.deepcopy(proof), deadline, size)
             self._proof_bytes += size
 
-    def read(self, route, body, *, selection, now, clock=time.monotonic, before_release=None):
+    def read(self, route, body, *, selection, now, clock=time.monotonic, before_release=None, encode=None):
         budget = ReadBudget(self.contracts, clock=clock, sql_steps=self.config.sql_steps)
         budget.deadline = min(budget.deadline, clock() + self.config.request_seconds)
         normalized, query_hash = self.contracts.normalize(route, copy.deepcopy(body))
@@ -206,6 +206,12 @@ class ReadPager:
             }
             self.contracts.validate(schema, response, output=True)
             budget.check_response(response)
+            if encode is not None:
+                # Transport serialization is trusted, bounded work performed
+                # before the fresh fence, never after its expiry check.
+                response = encode(response)
+                if not isinstance(response, bytes) or len(response) > self.contracts.bounds["response_bytes"]:
+                    raise read_error("capacity_exceeded")
             return response
 
         def release_check(at):

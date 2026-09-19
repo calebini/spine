@@ -1,8 +1,8 @@
 # Independent Authorized Activity Reads
 
-Status: Ratified v1 read design; machine contracts codified; not implemented or advertised
+Status: Implemented Spine 0.6.0 backend; deployment and Kinflow acceptance separate
 Created: 2026-09-13
-Updated: 2026-09-16
+Updated: 2026-09-19
 Tracking: [SPINE-015](../docs/BACKLOG.md#spine-015--read-authorized-activities-independently-of-unavailable-linked-resources)
 
 ## 1. Outcome, scope, and authority
@@ -14,10 +14,12 @@ consumers do not reconstruct missing facts or expand recurrence themselves.
 This ratified design defines a separately versioned web read projection. It does not change
 the implemented complete-or-deny v1 web surface, local CLI responses, recurrence
 identity, ownership, or write authorization. MUST/SHOULD below describe the accepted
-contract, not current runtime behavior. The operator ratified the read design on
+contract, now implemented by the v2 backend. The operator ratified the read design on
 2026-09-16 after bounded recheck 002 passed. The
 [machine-contract companion](independent-activity-read-contracts.md) specifies exact
-schemas, registry, cursor rules and initial fixtures; runtime delivery remains pending.
+schemas, registry, cursor rules and fixtures. The backend implements the complete
+registry; the fixture manifest maps executable backend gates separately from
+pending Kinflow acceptance and deployment.
 
 [Resource permissions](permissions.md) owns authorization;
 [the trusted web spec](trusted-multi-operator-web-api.md) owns selected-account admission;
@@ -372,8 +374,7 @@ This is a behavioral and schema change, not a patch to generic error prose. A pa
 projection cannot carry `spine.schedule-show.v1` or claim its complete counts/evidence.
 Likewise, new time unions and unplaced agenda items do not fit the closed v1 schemas.
 
-The following names are ratified and codified separately; no route or capability exists
-until runtime implementation and behavioral tests ship together:
+The following names are ratified and implemented together in Spine 0.6.0:
 
 | Surface | Accepted compatibility choice |
 |---|---|
@@ -417,9 +418,12 @@ occurrences. Unknown contracts remain unsupported, never interpreted as empty re
 Mixed-client rollout and rollback must preserve old v1 semantics and invalidate v2
 caches/cursors on loss of capability. See [consumer handoff](../docs/INDEPENDENT_READS_KINFLOW_HANDOFF.md).
 
-## 10. Proposed contract-test matrix
+## 10. Contract-test matrix
 
-These are future executable oracles, not tests run or staging results. Use isolated
+These are backend acceptance oracles mapped to executable tests in the
+[fixture manifest](../contracts/independent-activity-read-fixture-manifest.json).
+IR-16 and consumer portions of IR-15 remain pending; backend evidence is not staging
+or Kinflow acceptance. Use isolated
 fixtures with distinct selected subjects, explicit ownership/grants, exact versions,
 and fake-only delivery. Compare released shapes and authorization effects, not just
 HTTP success codes. Paired privacy fixtures hold authorized facts and evaluation time
@@ -447,9 +451,8 @@ content to compare literally.
 
 ## 11. Remaining promotion gates
 
-Ratify the separate read surface, authorized-only disclosure model, unavailable-time
-union, and agenda unplaced stream. Then codify the complete field mappings, schemas,
-registry, cursor normalization and authorization-transition proof, query/index budgets,
-and executable matrix before runtime delivery. This draft and its handoff satisfy the
-specification deliverables; they do not prove implementation conformance or staging
-repair. Any later implementation or deployment is separate work.
+The separate read surface, authorized-only disclosure model, unavailable-time union,
+agenda unplaced stream, cursor/release proofs and packaged admission are implemented
+with backend tests. Complete clean-cloud verification and separately authorized
+deployment/canaries, then verify Kinflow adoption and the consumer portions of
+IR-15/IR-16 before closing SPINE-015. No local backend test claims staging repair.
