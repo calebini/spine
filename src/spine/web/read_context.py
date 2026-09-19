@@ -22,8 +22,9 @@ from spine.core.errors import SpineValidationError
 from spine.ledger.preflight import verify_runtime_schema
 from spine.ledger.transactions import LedgerConnection
 from spine.web.errors import WebError
-from spine.web.permissions import Permissions
+from spine.web.read_authorization import ReadPermissions
 from spine.web.read_contracts import ReadContracts, read_error, utc_datetime
+from spine.web.read_proof import SourceFacts
 from spine.web.service import WebConfig
 
 
@@ -132,13 +133,14 @@ class ReadBudget:
 @dataclass
 class ReadSnapshot:
     db: sqlite3.Connection
-    permissions: Permissions
+    permissions: ReadPermissions
     contracts: ReadContracts
     budget: ReadBudget
     evaluated_at_utc: str
+    proof: SourceFacts | None = None
 
 
-class _OptionalPermissions(Permissions):
+class _OptionalPermissions(ReadPermissions):
     """Reuse v1 predicates, with capacity failures confined to optional evidence."""
 
     def touch(self, kind: str, resource: str, operation: str) -> None:
@@ -167,19 +169,30 @@ def optional_snapshot(snapshot: ReadSnapshot) -> Iterator[ReadSnapshot]:
     permissions.__dict__ = copy.copy(snapshot.permissions.__dict__)
     permissions.visited, permissions.checked, permissions.matched_grants = set(), set(), set()
     permissions.release_scopes = {}
-    try:
-        with snapshot.budget.optional():
-            yield replace(snapshot, permissions=permissions)
-    finally:
-        snapshot.permissions.checked.update(permissions.checked)
-        snapshot.permissions.matched_grants.update(permissions.matched_grants)
-        snapshot.permissions.release_scopes.update(permissions.release_scopes)
+    permissions.probes = {}
+    permissions.core_probe_keys = set()
+    permissions.optional = True
+    proof = copy.deepcopy(snapshot.proof)
+    with snapshot.budget.optional():
+        yield replace(snapshot, permissions=permissions, proof=proof)
+    if snapshot.proof is not None and proof is not None:
+        snapshot.proof.values.update(proof.values)
+        snapshot.proof.cores.update(proof.cores)
+    # Discard checks/proof fragments for unavailable sections; they disclose no rows.
+    snapshot.permissions.checked.update(permissions.checked)
+    snapshot.permissions.matched_grants.update(permissions.matched_grants)
+    snapshot.permissions.release_scopes.update(permissions.release_scopes)
+    snapshot.permissions.probes.update(permissions.probes)
+    snapshot.permissions.discovery |= permissions.discovery
+    if permissions.discovered is not None:
+        snapshot.permissions.discovered = permissions.discovered
 
 
 @contextmanager
 def read_snapshot(
     config: WebConfig, contracts: ReadContracts, account_id: str, *, evaluated_at_utc: str,
     clock: Callable[[], float] = time.monotonic,
+    budget: ReadBudget | None = None, collect_proof: bool = False,
 ) -> Iterator[ReadSnapshot]:
     """Open a private assembly snapshot, never a public response/release boundary.
 
@@ -194,8 +207,9 @@ def read_snapshot(
     path = Path(config.database).resolve()
     if not path.is_file():
         raise read_error("admission_unavailable")
-    budget = ReadBudget(contracts, clock=clock, sql_steps=config.sql_steps)
-    budget.deadline = min(budget.deadline, clock() + config.request_seconds)
+    if budget is None:
+        budget = ReadBudget(contracts, clock=clock, sql_steps=config.sql_steps)
+        budget.deadline = min(budget.deadline, clock() + config.request_seconds)
     try:
         db = sqlite3.connect(path.as_uri() + "?mode=ro", uri=True, factory=LedgerConnection)
     except sqlite3.Error as exc:
@@ -211,8 +225,8 @@ def read_snapshot(
             if (state is None or state["ledger_id"] != config.ledger_id or state["realm_id"] != config.realm_id
                     or state["mode"] != "multi_user" or state["identity_mode"] != "trusted_identity"):
                 raise read_error("admission_unavailable")
-            permissions = Permissions(db, account_id, evaluated_at_utc)
-            yield ReadSnapshot(db, permissions, contracts, budget, evaluated_at_utc)
+            permissions = ReadPermissions(db, account_id, evaluated_at_utc)
+            yield ReadSnapshot(db, permissions, contracts, budget, evaluated_at_utc, SourceFacts() if collect_proof else None)
     except WebError as exc:
         # Reused v1 permission helpers must not leak v1's 429 capacity mapping or details.
         raise read_error(exc.code) from exc

@@ -63,11 +63,41 @@ uses existing grantee indexes. Real canonical occurrence keys also exposed and f
 the unadvertised projection/cursor schema's incorrect 256-character key limit, without
 changing any canonical identity or v1 pin. See SPINE-015 for exact test evidence.
 
-These remain private assembly primitives. Fresh release/source fences, authorized
-snapshot hashing, cursor integration, HTTP/package/capability activation and Kinflow
-acceptance remain to be completed, in that order. The operator authorized a local
-commit of this completed slice; no deployment, staging migration, push or consumer
-acceptance is claimed.
+The foundation and assembly checkpoints were subsequently pushed, and SPINE-025
+repaired their contract synchronization/source-only typing gates; the operator
+reported clean Python 3.12 cloud validation. That evidence does not activate v2.
+
+Delivery checkpoint (2026-09-19, subsequent operator authorization): internal fresh
+release fences and authorized source hashing are now implemented. The shared read
+path closes assembly before opening a fresh read-only snapshot, rechecks selected
+identity/authorization (including denied prerequisites and timed transitions), and
+reassembles relevant authorized source facts before releasing an internal result.
+One bounded request budget spans both transactions with separate optional reserves.
+Public hashes follow the exact authorized-only snapshot preimage; optional section
+summaries retain their projected row evidence. First-read and retained private-proof
+races use the specified generic access/version failures. No wire cursors or public
+HTTP responses are implemented by this checkpoint.
+
+Actual transition-query plans use existing grantee, membership, owner and operation
+indexes; no new migration was necessary. The selected-subject fence compares the
+full canonical subject row because subjects have no numeric revision column. The
+cursor's numeric `subject_revision` needs an explicit implementation at cursor
+integration; no synthetic value or public capability was introduced here.
+
+Verification: focused **95 tests/160 subtests**; full unittest **590 tests** and
+pytest **590 tests/572 subtests**, without skips. Both mypy 1.20.2 and 2.3.0 pass
+source-only and editable strict core/ledger runs (37 files, no incremental cache).
+Ruff, compileall, contract synchronization and diff hygiene pass. The additional
+local offline wheel attempt could not run because `setuptools.build_meta` is absent;
+no new installed-wheel or cloud acceptance is claimed. SPINE-015 records exact
+commands, durations, query-plan evidence and the environment limitation.
+
+Remaining order: cursor codec/identity encoding and actual section/combined-stream
+pagination; complete HTTP/package/capability integration and behavioral gates;
+operator/Kinflow handoff and separate consumer acceptance/deployment. All new objects
+remain internal and unpaged; v2 routes and capability advertisement remain inactive.
+The operator subsequently authorized a local commit of this release-fence slice;
+no push, deployment or staging change is included in that authorization.
 
 ### Authority and delivery boundary
 

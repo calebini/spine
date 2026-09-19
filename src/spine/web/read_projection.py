@@ -29,6 +29,8 @@ def candidate_ids(snapshot: ReadSnapshot, request: dict[str, Any]) -> list[str]:
         for identity in identities:
             p.item(identity)
     else:
+        p.discovery = True
+        p.core_discovery |= not p.optional
         groups = sorted(p.groups)
         marks = ",".join("?" for _ in groups) or "NULL"
         grant_tail = """
@@ -48,6 +50,7 @@ def candidate_ids(snapshot: ReadSnapshot, request: dict[str, Any]) -> list[str]:
             ORDER BY item_id""",
             (p.subject, *groups, p.now, p.now, p.subject, p.now, p.now, *groups),
         )]
+        p.discovered = tuple(identities)
     selected = []
     for identity in identities:
         snapshot.budget.check()
@@ -109,6 +112,8 @@ def core(snapshot: ReadSnapshot, item_id: str, *, guards: dict[str, Any] | None 
         "title": row["title"], "status": row["status"], "detail_status": detail[kind + "_status"],
         "time": _time(snapshot, item_id, kind, dict(detail)), "recurrence": recurrence_value,
     }
+    if snapshot.proof is not None:
+        snapshot.proof.capture(snapshot, value)
     snapshot.contracts.validate("trusted-web-read-types.schema.json", value, definition="core", output=True)
     snapshot.budget.charge(value)
     return value

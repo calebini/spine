@@ -46,8 +46,10 @@ normalization, bounded read-only context, authorized selection and core/time
 assembly are implemented and locally tested. The subsequent internal slice adds all
 eleven detail-section projections, four agenda summaries, canonical occurrence and
 resolved/unplaced agenda assembly, plus an index-only schema-15 migration. Public
-routes, release fences, pagination and consumer adoption remain later steps; no
-implemented v2 capability is advertised.
+routes, pagination and consumer adoption remain later steps; no implemented v2
+capability is advertised. The operator-selected 2026-09-19 internal release-fence
+and authorized source-hashing slice is implemented and locally verified. Public
+cursor integration is still pending.
 **Dependencies:** Existing trusted web permissions, canonical recurrence/agenda and
 temporal-binding engines, and the accepted read/machine contracts. No further broad
 specification pass is scheduled. Query/index migration assessment and behavioral
@@ -97,15 +99,115 @@ and write regression tests, and no durable read effects. IR-16 and the consumer 
 of IR-15 require separate Kinflow integration evidence. Documentation alone does
 not close the feature.
 
-**Remaining delivery checkpoints (in order):**
+**Delivery checkpoints (in order):**
 
-1. Shared bounded authorized selection, projection and own-time resolution.
-2. All detail sections and resolved/unplaced agenda assembly.
-3. First/next-page authorization/source fences and v2 cursor behavior.
+1. Shared bounded authorized selection, projection and own-time resolution — internal
+   implementation complete.
+2. All detail sections and resolved/unplaced agenda assembly — internal implementation
+   complete.
+3. Authorization/source fences and authorized source hashes — internal implementation
+   complete, including retained private-proof revalidation. Wire cursor codec and
+   actual first/next-page pagination remain pending.
 4. Complete HTTP/packaging/capability integration and behavioral regression suite.
 5. Host-neutral operator documentation and precise Kinflow release handoff.
 6. Separately approved deployment/canaries, then Kinflow adoption and end-to-end
    acceptance. Do not report backend completion as consumer completion.
+
+**Internal release-fence/source-hash checkpoint (2026-09-19):** Added
+`web/read_release.py`, `read_authorization.py`, and `read_proof.py`. The internal
+`read_authorized` path assembles in one read-only transaction, closes it, and opens
+a fresh read-only transaction for mandatory identity/authorization/source checks.
+A single outer clock/SQL/byte budget spans both; optional evidence and its rechecks
+retain the optional SQL reserve. Unavailable sections discard their partial proof
+and authorization fragments. Revalidation failure never silently downgrades an
+already assembled result. These are unpaged internal objects, not HTTP responses.
+
+Private checks include selected account/selection, account and account-subject
+binding revisions, operator/subject state, ledger/realm/recovery/access epochs,
+owner/catalog/route permissions, checked grants, active memberships, previously
+denied necessary sources, and discovered candidate membership. Prospective grant
+activation/expiry and membership activation bound validity without requiring an
+epoch write; the deadline is also checked after fresh proof work. Subjects have no
+numeric revision column: this slice fences the full canonical selected-subject row,
+without inventing or exposing a cursor `subject_revision`. Its numeric wire mapping
+must be implemented explicitly with cursor integration.
+
+Public source digests use the exact `spine.trusted-web-read-snapshot.v1` preimage,
+with unique `(kind,id)`-sorted records hashing closed authorized candidate cores,
+canonical recurrence sets, required authorized temporal source cores/binding
+revisions, and only requested projected section rows. Agenda summaries hash their
+underlying authorized rows, not only counts; off-range candidates remain covered.
+Unsupported/protected canonical proof references make time unavailable and never
+enter the public digest as a substitute for authorization. Independent hidden
+follower mutations leave the event proof unchanged. Canonical occurrence identities
+and all v1/write/replay/worker/delivery behavior are reused unchanged.
+
+Fresh direct source changes return `version_changed`; agenda or retained private
+proof changes return `access_changed`. Root admission still precedes version guards;
+invalid selected identity retains `identity_unavailable`. The internal retained-proof
+path preserves the original authorization evaluation time and deadline. It is not a
+wire cursor implementation and rejects cursor transport fields.
+
+**Query/index evidence:** Actual `EXPLAIN QUERY PLAN` inspection on SQLite **3.53.2**
+shows `SEARCH g USING INDEX access_grants_subject` for grantee/status/resource-kind
+candidate transition scans, and `SEARCH g USING INDEX access_grants_group` with the
+additional resource-ID equality for dependency probes. Correlated owner and operation
+checks use `sqlite_autoindex_item_access_owners_1` and covering
+`sqlite_autoindex_access_grant_operations_1`. Membership transition checks use
+`subject_memberships_subject_status_idx`, with primary/covering group and adoption
+lookups. The focused tests assert both grantee paths and the membership path. These
+added paths need no index or schema migration; schema 15 remains unchanged.
+
+**Verification:** Python **3.14.6**, pytest **9.1.1**, Ruff **0.16.2**. Test commands
+used `PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:../tickerd/src` and the existing local
+Tickerd checkout; no dependency installation or Tickerd qualification was performed.
+
+```sh
+.venv/bin/python -m pytest -o addopts='' -q tests/test_independent_activity_read_release.py tests/test_independent_activity_read_foundation.py tests/test_independent_activity_read_assembly.py tests/test_independent_activity_read_contracts.py tests/test_web_contract_sync.py --tb=short
+.venv/bin/python -m unittest discover -s tests
+.venv/bin/python -m pytest -o addopts='' -q
+```
+
+Results: focused **95 tests and 160 subtests passed in 13.33s**; full unittest
+**590 tests in 34.325s, OK**; full pytest **590 passed, 572 subtests passed in
+34.77s**, with no skips. The 31 new release tests cover real-ledger identity/source
+races, selected-occurrence proof hashes, timed grants/memberships, protected proof
+references, requested section evidence, first-read agenda/off-range candidates,
+retained-proof checks, optional-budget isolation, no durable read effects, and
+indexed query plans. Hooks and clocks are deterministic; no timing sleeps are used.
+
+All four strict commands passed **37 source files** with incremental caching disabled
+(configured target Python 3.12):
+
+```sh
+PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=/private/tmp/spine-mypy-1.20.2-validation-20260918 .venv/bin/python -m mypy --strict --no-incremental --python-executable /opt/homebrew/bin/python3 --cache-dir /tmp/spine-read-release-120-source src/spine/core src/spine/ledger
+PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=/private/tmp/spine-mypy-1.20.2-validation-20260918 .venv/bin/python -m mypy --strict --no-incremental --cache-dir /tmp/spine-read-release-120-editable src/spine/core src/spine/ledger
+PYTHONDONTWRITEBYTECODE=1 .venv/bin/mypy --strict --no-incremental --python-executable /opt/homebrew/bin/python3 --cache-dir /tmp/spine-read-release-230-source src/spine/core src/spine/ledger
+PYTHONDONTWRITEBYTECODE=1 .venv/bin/mypy --strict --no-incremental --cache-dir /tmp/spine-read-release-230-editable src/spine/core src/spine/ledger
+```
+
+The first pair uses mypy **1.20.2**, the second **2.3.0**; `--python-executable`
+selects discovery without an installed Spine distribution. `.venv/bin/ruff check .`,
+`git diff --check`, and
+`PYTHONDONTWRITEBYTECODE=1 .venv/bin/python scripts/sync_web_contracts.py --check`
+passed. `PYTHONPYCACHEPREFIX=/tmp/spine-read-release-compile-cache .venv/bin/python -m compileall -q src tests examples`
+passed with bytecode outside the repository.
+
+**Environment limitation:** An additional offline wheel smoke attempt used
+`.venv/bin/python -m pip wheel --no-deps --no-build-isolation --no-index <temporary-source> --wheel-dir <temporary-dist>`
+on a temporary copy. It exited **2**, `BackendUnavailable: Cannot import
+'setuptools.build_meta'`: the local environment lacks the build backend. No wheel was
+produced and the subsequent installed-wheel checks did not run. This is not a claim
+of fresh cloud/package acceptance for this slice; the synchronization gate remains
+passing with deferred v2 assets excluded.
+
+**Next implementation:** v2 cursor codec/computed vectors, identity encoding,
+fixed-expiry transport continuation, and section/combined-stream pagination using
+these fences. Then complete HTTP/package/capability activation and its behavioral
+gates, followed by separate Kinflow acceptance and deployment authorization. No v2
+route, packaged capability or runtime declaration was activated. The operator
+subsequently authorized a local commit of this slice; no push, staging migration,
+deployment, or real-ledger access is included in that authorization.
 
 **Specification evidence:** [Independent activity reads](../specs/independent-activity-reads.md)
 defines read boundaries, completeness, availability, consistency, compatibility,
@@ -830,12 +932,13 @@ before this separately appended entry. No out-of-scope work was performed.
 
 ### SPINE-025 — Reconcile deferred packaging and source-only strict typing
 
-**Status:** Done locally (2026-09-19). Synchronization repair preserved; bounded
+**Status:** Done (2026-09-19). Local verification and the subsequent operator-reported
+Python 3.12 cloud validation passed. Synchronization repair preserved; bounded
 shared-helper dependency repair passes source-only and editable-install strict
-checking with both tested mypy versions, plus the full regression suites.
+checking with both locally tested mypy versions, plus the full regression suites.
 **Dependencies:** Existing SPINE-015 package-activation boundary; no new spec decision
-or v2 activation. A fresh Python 3.12 cloud rerun remains external confirmation;
-this completion records local source-only reproduction and verification.
+or v2 activation. The operator subsequently supplied clean Python 3.12 cloud evidence;
+public v2 activation, HTTP/Kinflow acceptance and deployment remain separate.
 
 **Confirmed baseline:** Clean checkout `f575af5c059c6a9cdeed4de7319a713ea7a17760`.
 The synchronization gate expected 17 deferred read-family mirrors. Both mypy 1.20.2
@@ -935,3 +1038,15 @@ and HTTP/package/capability activation remain subsequent SPINE-015 work.
 
 No commits, pushes, runtime internet enablement, deployment, real-ledger access,
 Tickerd work or subsequent SPINE-015 feature implementation occurred.
+
+**Operator-reported cloud follow-up (2026-09-19):** Both SPINE-025 failures are
+resolved. Source-only mypy 1.20.2 passed all 37 files on Python 3.12 with Spine
+uninstalled and strict rules unchanged. Contract synchronization and wheel inspection
+passed, with deferred v2 assets excluded. The cloud run reported **526 passed + 33
+Tickerd skips = 559 tests**, plus **572 passing subtests**; packaging, installed-wheel,
+migration, lint, compilation and documentation checks passed and the checkout stayed
+unchanged. No actionable Spine failures were reported. Unavailable Tickerd coverage
+and inability to provision a second mypy version in cloud are environment limitations;
+both mypy versions were already verified locally. This is supplied operator evidence,
+not a cloud run performed by the implementation agent, and precedes the subsequent
+SPINE-015 release-fence slice recorded above.
