@@ -46,10 +46,12 @@ normalization, bounded read-only context, authorized selection and core/time
 assembly are implemented and locally tested. The subsequent internal slice adds all
 eleven detail-section projections, four agenda summaries, canonical occurrence and
 resolved/unplaced agenda assembly, plus an index-only schema-15 migration. Public
-routes, pagination and consumer adoption remain later steps; no implemented v2
-capability is advertised. The operator-selected 2026-09-19 internal release-fence
-and authorized source-hashing slice is implemented and locally verified. Public
-cursor integration is still pending.
+routes and consumer adoption remain later steps; no implemented v2 capability is
+advertised. The internal release-fence and authorized source-hashing slice is
+committed at `629c7a4`. The subsequent operator-selected internal cursor/identity
+encoding and pagination slice is implemented and locally verified below. Public
+HTTP/package activation, consumer acceptance, commit/push and deployment remain
+outside this subsequent slice.
 **Dependencies:** Existing trusted web permissions, canonical recurrence/agenda and
 temporal-binding engines, and the accepted read/machine contracts. No further broad
 specification pass is scheduled. Query/index migration assessment and behavioral
@@ -105,9 +107,9 @@ not close the feature.
    implementation complete.
 2. All detail sections and resolved/unplaced agenda assembly — internal implementation
    complete.
-3. Authorization/source fences and authorized source hashes — internal implementation
-   complete, including retained private-proof revalidation. Wire cursor codec and
-   actual first/next-page pagination remain pending.
+3. Authorization/source fences, authorized source hashes, v2 cursor codec/identity
+   encoding and actual first/next-page pagination — internal implementation complete,
+   including retained private-proof revalidation. Public HTTP integration is pending.
 4. Complete HTTP/packaging/capability integration and behavioral regression suite.
 5. Host-neutral operator documentation and precise Kinflow release handoff.
 6. Separately approved deployment/canaries, then Kinflow adoption and end-to-end
@@ -201,13 +203,124 @@ produced and the subsequent installed-wheel checks did not run. This is not a cl
 of fresh cloud/package acceptance for this slice; the synchronization gate remains
 passing with deferred v2 assets excluded.
 
-**Next implementation:** v2 cursor codec/computed vectors, identity encoding,
+**Next implementation at that checkpoint:** v2 cursor codec/computed vectors, identity encoding,
 fixed-expiry transport continuation, and section/combined-stream pagination using
 these fences. Then complete HTTP/package/capability activation and its behavioral
 gates, followed by separate Kinflow acceptance and deployment authorization. No v2
 route, packaged capability or runtime declaration was activated. The operator
 subsequently authorized a local commit of this slice; no push, staging migration,
 deployment, or real-ledger access is included in that authorization.
+
+**Internal cursor/pagination checkpoint (2026-09-19):** Implemented from clean
+`629c7a450e4f63d11edd1953b777cf51eb8f776f`. Added `web/read_cursor.py` and
+`web/read_pages.py`, with trusted paging callbacks inside the existing shared
+release path. Page projection, signing, schema validation and response-size checks
+precede the fresh release fence and share its original request deadline and SQL
+budget. Invalid selected identity is admitted before cursor decoding. Every page
+reassembles authorized data and rechecks retained private authority/source proof;
+there is no public route or cached-response shortcut.
+
+The independent HMAC-SHA256 codec computes the exact published wire vector. It
+rejects wrong versions/signatures, padding, noncanonical base64url/JSON, duplicate
+keys, unknown fields, invalid calendars, oversized tokens, wrong stream/root/query,
+and changed identity. MAC verification precedes JSON parsing. All child pages retain
+original issuance, expiry, authorization evaluation time and transition deadline.
+Expiry is checked again after fresh proof work, including at the exact boundary.
+
+`subject_revision` now has a pinned, tested positive-decimal content-fingerprint
+encoding for the selected subject's six canonical fields. It is an equality token,
+not a chronological counter. Private fences still compare the full subject row.
+The account-subject binding maps directly from persisted `binding_revision` and
+remains distinct from canonical temporal-binding revisions. The cursor artifact,
+computed vectors, schema pins, contract companion and consumer handoff document
+these rules; no v1 pin or runtime capability declaration changed.
+
+Private proofs remain only in service-local memory, bounded to at most **128
+families / 8 MiB serialized proof bytes** (configurable downward). They expire at
+the original deadline; continuation never renews retention. Missing proof returns
+`access_changed`, a full store returns `capacity_exceeded`, and an existing family
+cannot be overwritten with different private evidence. Only closed projected
+responses escape the pager; private checks, grant references and full assemblies
+never enter tokens. No ledger/session/cache tables or durable read effects exist.
+
+Detail collections page independently, with common-family enforcement across
+supplied section cursors and first-page behavior for other included collections.
+Occurrence pages retain the canonical engine's ordering and identities for both
+range bases. Agenda pages emit resolved entries followed by item-ID-ordered
+unplaced cores under one limit; whole-query temporal coverage is retained even
+on a resolved-only page. Empty/exhausted results have no continuation.
+
+**Query/index evidence:** Paging adds no SQL selection or OFFSET scans; it pages
+the existing bounded authorized assembly. Actual SQLite **3.53.2** plans for the
+selected-identity reads are `SEARCH subjects USING INDEX sqlite_autoindex_subjects_1
+(subject_id=?)` and `SEARCH web_operators USING INDEX sqlite_autoindex_web_operators_1
+(account_id=?)`. New tests assert those plans; prior grantee/membership/endpoint
+plan tests also pass. No migration is necessary; ledger schema remains **15**.
+
+**Verification:** New suite **31 tests / 36 subtests passed in 14.90s**. Combined
+focused suites **126 tests / 196 subtests passed in 28.20s**. Tests cover all 13
+closed cursor shapes, computed vectors, malformed signed payloads, fixed expiry,
+identity switches, real-ledger section/occurrence/agenda continuation, mixed section
+families, lost/bounded proofs, off-page source changes, timed grant and membership
+transitions without epoch changes, hidden followers, denied/stale temporal sources,
+DST exclusions/overrides, terminal lifecycle, optional failure, shared deadlines,
+and byte-identical ledger dumps before/after successful paging.
+
+Focused commands used `PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:../tickerd/src`:
+
+```sh
+.venv/bin/python -m pytest -o addopts='' -q tests/test_independent_activity_read_pages.py --tb=short
+.venv/bin/python -m pytest -o addopts='' -q tests/test_independent_activity_read_pages.py tests/test_independent_activity_read_release.py tests/test_independent_activity_read_foundation.py tests/test_independent_activity_read_assembly.py tests/test_independent_activity_read_contracts.py tests/test_web_contract_sync.py --tb=short
+```
+
+Full unittest **621 tests in 47.980s, OK**; full pytest **621 passed / 608 subtests
+passed in 48.48s**, without skips. Commands used the same bytecode/PYTHONPATH
+environment above and the existing sibling Tickerd checkout; no Tickerd installation
+or separate qualification was performed:
+
+```sh
+.venv/bin/python -m unittest discover -s tests
+.venv/bin/python -m pytest -o addopts='' -q
+```
+
+Python **3.14.6**, pytest **9.1.1**, Ruff **0.16.2**. All four strict checks passed
+**37 source files**, with target Python 3.12 and incremental caching disabled:
+
+```sh
+PYTHONDONTWRITEBYTECODE=1 .venv/bin/mypy --strict --no-incremental --python-executable /opt/homebrew/bin/python3 --cache-dir /tmp/spine-read-pages-mypy-source src/spine/core src/spine/ledger
+PYTHONDONTWRITEBYTECODE=1 .venv/bin/mypy --strict --no-incremental --cache-dir /tmp/spine-read-pages-mypy-editable src/spine/core src/spine/ledger
+PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=/private/tmp/spine-mypy-1.20.2-validation-20260918 .venv/bin/python -m mypy --strict --no-incremental --python-executable /opt/homebrew/bin/python3 --cache-dir /tmp/spine-read-pages-120-source src/spine/core src/spine/ledger
+PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=/private/tmp/spine-mypy-1.20.2-validation-20260918 .venv/bin/python -m mypy --strict --no-incremental --cache-dir /tmp/spine-read-pages-120-editable src/spine/core src/spine/ledger
+```
+
+The first pair uses mypy **2.3.0**, the second **1.20.2**. Metadata discovery under
+`/opt/homebrew/bin/python3` confirms Spine is absent for source-only checks. Ruff,
+contract synchronization, compilation and diff hygiene pass:
+
+```sh
+.venv/bin/ruff check .
+PYTHONDONTWRITEBYTECODE=1 .venv/bin/python scripts/sync_web_contracts.py --check
+PYTHONPYCACHEPREFIX=/tmp/spine-read-pages-compile .venv/bin/python -m compileall -q src tests examples
+git diff --check
+```
+
+All **71** local file links in the four changed documentation/specification files
+resolve. The synchronization gate still excludes deferred v2 assets. A fresh
+offline wheel attempt copied packaging inputs/source to a temporary directory and
+ran `.venv/bin/python -m pip wheel --no-deps --no-build-isolation --no-index
+<temporary-source> --wheel-dir <temporary-dist>`. Pip exited **2** with
+`BackendUnavailable: Cannot import 'setuptools.build_meta'`; no wheel was produced
+and installed-wheel checks could not run. Both local Python environments lack
+setuptools. Temporary build inputs were removed; no dependency installation or
+network access was attempted. This is an environment limitation, not fresh
+packaging or cloud acceptance for this slice.
+
+**Next implementation:** Complete the four-route HTTP integration, packaged contract
+admission and runtime capability declarations with the behavioral/compatibility
+gates. Then finalize operator documentation and Kinflow release handoff, followed
+by separately authorized deployment and consumer acceptance. Internal paged-read
+tests are not HTTP or Kinflow acceptance. No commit, push, deployment, staging
+change, v2 activation, real-ledger access or Whetstone audit occurred in this slice.
 
 **Specification evidence:** [Independent activity reads](../specs/independent-activity-reads.md)
 defines read boundaries, completeness, availability, consistency, compatibility,

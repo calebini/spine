@@ -61,5 +61,30 @@
       "role"
     ]
   },
-  "no_durable_state": "No cursor/session expansion cache in the ledger, command receipts, provenance or reconciliation writes."
+  "no_durable_state": "No cursor/session expansion cache in the ledger, command receipts, provenance or reconciliation writes.",
+  "identity_encoding": {
+    "account_subject_binding_revision": "Decimal encoding of the selected account_subject_bindings.revision; not a temporal-binding revision.",
+    "subject_revision": {
+      "kind": "opaque_content_revision",
+      "preimage_contract": "spine.trusted-web-subject-revision.v1",
+      "preimage": "{contract_version: preimage_contract, subject: selected subject closed canonical row}",
+      "subject_fields": [
+        "subject_id",
+        "subject_kind",
+        "display_name",
+        "status",
+        "created_at_utc",
+        "updated_at_utc"
+      ],
+      "encoding": "1 + unsigned big-endian integer value of SHA-256(Spine canonical JSON UTF-8 preimage), encoded as unpadded positive decimal.",
+      "semantics": "Equality token, not a monotonic counter or persisted subject revision. Only the selected subject participates; private release proofs additionally compare its full canonical row."
+    }
+  },
+  "private_continuation_proofs": {
+    "storage": "Service-local volatile memory only; no response assemblies or durable cursor/session cache. Reassemble and freshly reauthorize every page.",
+    "family_key": "SHA-256 of canonical cursor payload with stream and last_key omitted. Never overwrite a different private proof for the same family.",
+    "bounds": "At most 128 families and 8388608 serialized private-proof bytes per service instance; deployments may lower both. Prune at fixed expiry or earlier authorization deadline. Do not evict live families to admit new ones; exhaustion is capacity_exceeded.",
+    "loss": "Missing private proof is access_changed and requires a fresh query. Process restart loses proofs; key rotation invalidates signatures. No stateless continuation fallback.",
+    "child_pages": "Preserve the original family and private authorization evaluation time; do not renew retention or expiry."
+  }
 }

@@ -92,12 +92,44 @@ local offline wheel attempt could not run because `setuptools.build_meta` is abs
 no new installed-wheel or cloud acceptance is claimed. SPINE-015 records exact
 commands, durations, query-plan evidence and the environment limitation.
 
-Remaining order: cursor codec/identity encoding and actual section/combined-stream
+Remaining order at that checkpoint: cursor codec/identity encoding and actual section/combined-stream
 pagination; complete HTTP/package/capability integration and behavioral gates;
 operator/Kinflow handoff and separate consumer acceptance/deployment. All new objects
 remain internal and unpaged; v2 routes and capability advertisement remain inactive.
 The operator subsequently authorized a local commit of this release-fence slice;
 no push, deployment or staging change is included in that authorization.
+
+Delivery checkpoint (2026-09-19, subsequent operator authorization): implemented
+internal v2 cursor codec, selected-identity encoding and actual section, occurrence
+and combined resolved/unplaced agenda pagination from `629c7a4`. Tokens match the
+computed HMAC vector, use closed stream-specific keys, and preserve the original
+query/snapshot/issuance/expiry. Paging and response validation run before the fresh
+release fence under the shared request budget. Every continuation reassembles and
+reauthorizes; a bounded service-local volatile proof store retains only private
+evidence, never responses. Proof loss fails closed with `access_changed`; live
+families are neither evicted for admission nor renewed by child pages.
+
+The positive-decimal `subject_revision` is now a pinned content fingerprint of the
+selected subject's six canonical fields, supporting equality only. The full row
+remains in the private fence; persisted account-subject binding revision maps
+directly to its distinct v2 field. Contract/vector pins and the consumer handoff
+document this encoding and bounded proof retention. Actual identity lookup plans
+use existing primary-key indexes, and pagination adds no SQL scans or migrations;
+schema 15 is unchanged. See SPINE-015 for exact verification and environment limits.
+
+Verification: new paging suite **31 tests / 36 subtests**; combined focused suites
+**126 tests / 196 subtests**; full unittest **621 tests** and full pytest **621 tests /
+608 subtests**, without skips. Mypy 1.20.2 and 2.3.0 each pass source-only and
+editable-install strict core/ledger checks (37 files). Ruff, compilation, contract
+synchronization, 71 local documentation links and diff hygiene pass. A fresh offline
+wheel attempt on a temporary source copy still cannot import `setuptools.build_meta`;
+no wheel/installed-wheel or cloud acceptance is claimed for this slice.
+
+Remaining order: HTTP integration, package admission, complete capability activation
+and backend behavioral gates; final operator/Kinflow handoff and separate consumer
+acceptance/deployment. All paging remains internal; no public v2 route, packaged
+asset or capability declaration was activated, and no commit/push/deployment is
+included in this slice.
 
 ### Authority and delivery boundary
 

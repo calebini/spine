@@ -1,7 +1,7 @@
 # Kinflow Handoff: Independent Activity Reads
 
-Status: Ratified integration contract; machine contracts available; runtime pending
-Updated: 2026-09-16; aligned with independent-read v1
+Status: Ratified integration contract; internal paging implemented; public runtime pending
+Updated: 2026-09-19; aligned with independent-read v1 and cursor v2
 Tracking: [SPINE-015](BACKLOG.md#spine-015--read-authorized-activities-independently-of-unavailable-linked-resources)
 Authority: [Independent authorized activity reads](../specs/independent-activity-reads.md)
 
@@ -49,6 +49,11 @@ of canonical occurrence derivation or authorization behavior.
    may supply `expected_access_epoch`. The v2 identity-binding field
    `account_subject_binding_revision` is distinct from `temporal_binding_revision_id`;
    do not interpret cursor payloads or substitute a temporal revision for identity.
+   `subject_revision` is a positive-decimal content fingerprint, not a counter or
+   JavaScript number; compare its string value for equality only. Continuation has
+   a fixed original expiry. A server losing its volatile private proof also returns
+   `access_changed`; it must not be interpreted as evidence of a particular grant
+   change or hidden resource.
    Discard old selections and late query generations. On
    `access_changed` or `version_changed`, invalidate affected cached views/pages and
    restart with fresh context. On generic denial, do not continue displaying cached

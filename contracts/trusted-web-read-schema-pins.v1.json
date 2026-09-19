@@ -28,8 +28,8 @@
   },
   "artifacts": {
     "spine.trusted-web-read-registry.v1.json": "64963bd7a55ebbc7f14c7dc37d604e83e39ad6e276d0e8aaa39e486bdfa948be",
-    "trusted-web-read-cursor-vectors.v2.json": "ad1693ffaf2bbe0d85151af72c1204af9a185f46d033156a6562194ba242fc66",
-    "trusted-web-read-cursor.v2.json": "99e481d5fa6b74b23a5eeca12eff7889da6f32b8cf8624c6ef3f41dea3d1c4d8",
+    "trusted-web-read-cursor-vectors.v2.json": "af961ab023d7697798fa25c9a845f4bb4fa4694e7068c8e117b7267d0d0fb02b",
+    "trusted-web-read-cursor.v2.json": "2726f97594b8ac73f35e5ffe7ba689b6c89e670ef1b9e55440bb8072ff9c7335",
     "trusted-web-read-normalization-vectors.v1.json": "edc20f4d87fc25fef321d1eef0b01fa9676010b0ef1d466beb42c7c4d8faa7ef",
     "trusted-web-read-normalization.v1.json": "d473805d9831a000da04c0058a369a217a3ad0a79cc8c22bb640c5153da65d79",
     "trusted-web-read-projection.v1.json": "0da77b9800c12d4acdbbee9b581d3ca84dfd5837240d411bef8632067bb31342"

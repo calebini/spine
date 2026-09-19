@@ -180,6 +180,32 @@ uses standard HMAC-SHA256 over domain-separated canonical JSON bytes. This is
 integrity protection, **not encryption**: every payload field must be safe to disclose.
 The fixture key is public and must never be installed. V1's codec is unchanged.
 
+The cursor artifact also pins selected-identity encoding. The existing persisted
+account-subject binding revision maps directly to `account_subject_binding_revision`.
+Subjects have no persisted numeric revision. `subject_revision` is an opaque
+content revision: take SHA-256 of Spine canonical JSON
+`{contract_version: "spine.trusted-web-subject-revision.v1", subject}` with the
+selected subject's six fields (`subject_id`, `subject_kind`, `display_name`,
+`status`, `created_at_utc`, `updated_at_utc`), interpret the digest as an unsigned
+big-endian integer, add one, and encode as positive decimal. It supports equality
+only, not chronological ordering; it is neither a ledger counter nor a temporal
+binding revision. The selected subject is authorized identity evidence. No other
+subject or arbitrary metadata may enter this fingerprint. A computed vector pins
+the encoding; private fences additionally compare the complete canonical row.
+
+Continuation retains a bounded private proof in service-local volatile memory,
+never the assembled response or an authorization bypass. Every page reassembles
+authorized facts and runs the fresh release fence. The family key hashes the closed
+cursor payload without `stream` and `last_key`; all other fields remain bound.
+Keep at most 128 families and 8 MiB of serialized private proofs per service
+instance (deployments may lower these limits). Prune at original expiry or an
+earlier authorization deadline. Live families are not evicted to admit new ones;
+exhaustion fails with `capacity_exceeded`. Never replace a different private proof
+under the same public family. A missing proof, including process restart or a
+request reaching an instance without it, yields `access_changed` and requires a
+fresh query. There is no stateless fallback or durable cursor cache. Key rotation
+invalidates old signatures under the normal codec error rule.
+
 `query_hash` is SHA-256 over the exact normalized query preimage. For
 `source_snapshot_hash`, use Spine canonical JSON with this exact object:
 `{contract_version: "spine.trusted-web-read-snapshot.v1", route, query_hash, facts}`.

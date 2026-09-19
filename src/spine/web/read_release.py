@@ -42,6 +42,7 @@ class ReadProof:
 class FencedRead:
     assembly: Any
     proof: ReadProof
+    page: Any = None
 
 
 def _selected(selection):
@@ -107,6 +108,7 @@ def _fence(snapshot, previous, selection, route, query_hash):
 
 def read_authorized(
     config, contracts, route, body, *, selection, now, clock=time.monotonic, before_release=None, previous=None,
+    budget=None, continuation=None, project=None, release_check=None,
 ):
     """Assemble, close the transaction, and fence in a fresh read-only snapshot.
 
@@ -114,15 +116,20 @@ def read_authorized(
     retained private ReadProof, never a decoded or caller-supplied cursor payload.
     The deterministic hook is for internal tests and runs after assembly closes.
     One budget/deadline covers both transactions and all mandatory proof work.
+    Internal paging callbacks run after admission and before the fresh fence;
+    none is request-controlled. The transport adapter owns the optional budget.
     """
     normalized, query_hash = contracts.normalize(route, copy.deepcopy(body))
     if "cursor" in body["request"] or "section_cursors" in body["request"]:
         raise read_error("invalid_request")  # Wire continuation is a subsequent slice.
-    budget = ReadBudget(contracts, clock=clock, sql_steps=config.sql_steps)
-    budget.deadline = min(budget.deadline, clock() + config.request_seconds)
+    if budget is None:
+        budget = ReadBudget(contracts, clock=clock, sql_steps=config.sql_steps)
+        budget.deadline = min(budget.deadline, clock() + config.request_seconds)
     account, selected = _selected(selection)
     try:
         with read_snapshot(config, contracts, account, evaluated_at_utc=now(), budget=budget, collect_proof=True) as snapshot:
+            if continuation is not None:
+                previous = continuation(snapshot, selected)
             if previous is not None:
                 _fence(snapshot, previous, selected, route, query_hash)
             try:
@@ -149,6 +156,8 @@ def read_authorized(
                 authorization_evidence(snapshot, snapshot.permissions.probes, snapshot.permissions.core_probe_keys), assembly_hash,
                 snapshot.permissions.discovered,
             )
+            page = None if project is None else project(assembly, proof)
+            budget.check()
         if before_release is not None:
             before_release()
         fresh_account, fresh_selection = _selected(selection)
@@ -178,11 +187,13 @@ def read_authorized(
                 raise read_error("access_changed" if route == "agenda" or previous else "version_changed")
             budget.check()
             released_at = now()
+            if release_check is not None:
+                release_check(released_at)
             if (_selected(selection) != (fresh_account, fresh_selection)
                     or released_at < fresh.evaluated_at_utc
                     or (proof.authorization_valid_until_utc is not None and released_at >= proof.authorization_valid_until_utc)):
                 raise read_error("access_changed")
-        return FencedRead(assembly, proof)
+        return FencedRead(assembly, proof, page)
     except OptionalReadUnavailable as exc:
         # A mandatory release proof cannot degrade into an optional section.
         raise read_error("capacity_exceeded") from exc
