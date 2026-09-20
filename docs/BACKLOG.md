@@ -1,6 +1,6 @@
 # Spine Backlog
 
-Last updated: 2026-09-18
+Last updated: 2026-09-19
 
 This is the single work queue for Spine development. The
 [implementation plan](IMPLEMENTATION_PLAN.md) explains roadmap direction and delivery
@@ -37,9 +37,10 @@ status labels in the same change. Routine task updates do not change spec author
 
 ### SPINE-015 — Read authorized activities independently of unavailable linked resources
 
-**Current checkpoint:** HTTP/package/capability integration completed locally from
-clean `141d995` (cursor/pagination checkpoint), following operator authorization.
-Commit, push, deployment and Kinflow adoption remain separate actions.
+**Current checkpoint:** Spine 0.6.0 HTTP/package/capability integration is committed
+and pushed at `ad1db8e1a4c7aa9a525612324d08824802a86351`. That exact commit passed
+operator-reported clean-room backend validation. Deployment and Kinflow adoption
+remain separate actions.
 
 **Status:** In progress — initiative selected on 2026-09-15; specification and
 machine-contract phases complete. Both focused rechecks passed without findings;
@@ -53,9 +54,10 @@ resolved/unplaced agenda assembly, plus an index-only schema-15 migration. The
 internal release-fence and authorized source-hashing slice is committed at
 `629c7a4`; cursor/identity encoding and pagination at `141d995`. The subsequent
 HTTP/package slice completes all four v2 routes, packaged admission and capability
-advertisement in runtime 0.6.0, with local backend verification below. Schema 15 and
-v1 behavior remain unchanged. SPINE-015 remains open for separately authorized
-deployment and Kinflow end-to-end acceptance; local backend tests do not close it.
+advertisement in runtime 0.6.0. It is committed, pushed and clean-room validated as
+recorded below. Schema 15 and v1 behavior remain unchanged. SPINE-015 remains open
+for separately authorized deployment and Kinflow end-to-end acceptance; backend
+validation does not close it.
 **Dependencies:** Existing trusted web permissions, canonical recurrence/agenda and
 temporal-binding engines, and the accepted read/machine contracts. No further broad
 specification pass is scheduled. Query/index migration assessment and behavioral
@@ -98,12 +100,11 @@ authorized events with unowned or inaccessible followers; normally visible autho
 relations; disclosure-safe empty/incomplete context; generic direct denial; unavailable
 task time without a fabricated deadline; epoch/version/pagination races; unchanged
 cross-resource write protection; and Kinflow rendering from public canonical facts.
-The machine-contract review is complete; implement the behavioral oracles before
-advertising v2. Backend acceptance requires IR-01–IR-15 runtime/HTTP evidence,
-exact packaged pins and registry, query/index migration assessment, unchanged v1/CLI
-and write regression tests, and no durable read effects. IR-16 and the consumer side
-of IR-15 require separate Kinflow integration evidence. Documentation alone does
-not close the feature.
+The machine-contract review and IR-01–IR-15 backend behavioral gates are complete,
+including exact packaged pins and registry, query/index migration assessment,
+unchanged v1/CLI and write regression tests, and no durable read effects. IR-16 and
+the consumer side of IR-15 require separate Kinflow integration evidence.
+Documentation alone does not close the feature.
 
 **Delivery checkpoints (in order):**
 
@@ -437,12 +438,28 @@ pass at schema 15: integrity/invariants OK, zero foreign-key errors, 80 tables a
 compatible Tickerd 0.2.0 and timezone release 2026c-rearguard. Temporary build,
 installation and ledger directories were removed.
 
-**Remaining work:** No local implementation or validation blocker remains for this
-backend slice. Commit/push and clean-room validation of the exact committed version
-require subsequent action. Then separately authorize deployment/canaries and Kinflow
-adoption, including IR-16 and the consumer side of IR-15. This slice enables v2 in
-the checkout; it does not deploy it. No commit, push, staging change, real-ledger
-access, delivery or new Whetstone audit occurred.
+**Operator-reported clean-room validation (2026-09-19):** Exact commit
+`ad1db8e1a4c7aa9a525612324d08824802a86351` passed the available Python 3.12 cloud
+backend gates with an unchanged checkout. The focused suite passed **190 tests and
+269 subtests**; the isolated installed wheel passed all **26 HTTP tests**; all **97**
+packaged web JSON assets matched source bytes, including the **18** v2 assets; and
+synthetic schema-15 initialization and deep verification passed. Full discovery
+remained **650 tests**: **617 passed + 33 Tickerd-dependent skips**, with **652
+passing subtests**. Strict source-only and editable-install mypy 1.20.2, Ruff,
+compilation, synchronization, documentation construction, migration regressions
+and diff hygiene passed. The cloud-built 0.6.0 wheel had SHA-256
+`8baf2dd4c6dee857635218eef21d823ae6ff7925aa7aa79c3218c3eaa0f0f4ee`.
+
+Tickerd was unavailable in that environment, accounting for the 33 skips and
+preventing an unpatched successful `system.info`; mypy 2.3.0 could not be provisioned
+because the package proxy returned HTTP 403. These are environment limitations, not
+actionable Spine failures; both paths passed locally. No cloud deployment, real-ledger
+access, Kinflow acceptance or source modification occurred.
+
+**Remaining work:** No backend implementation or validation blocker remains for this
+release. Separately authorize and verify deployment/canaries, then Kinflow adoption,
+IR-16 and the consumer side of IR-15. SPINE-015 remains in progress until those
+end-to-end gates are complete.
 
 **Specification evidence:** [Independent activity reads](../specs/independent-activity-reads.md)
 defines read boundaries, completeness, availability, consistency, compatibility,

@@ -1,7 +1,7 @@
 # Spine Implementation Plan
 
 Role: Roadmap rationale and delivery history; current task status lives in [BACKLOG.md](BACKLOG.md)
-Last updated: 2026-09-19 (independent activity read HTTP/package activation)
+Last updated: 2026-09-19 (independent activity read clean-room validation)
 
 This is a non-normative delivery plan. The specifications and machine-readable contracts remain authoritative.
 
@@ -23,9 +23,11 @@ and its manual validation fixes are checkpointed and pushed through `4d16670`;
 focused machine-contract audit 002 passed with no findings on 2026-09-17. The v2
 registry, schemas, cursor rules and fixtures remain separate from unchanged v1
 runtime assets. Spine 0.6.0 now implements the complete v2 backend registry with
-HTTP/package admission and behavioral tests. Kinflow adoption and deployment remain
-separate gates. Static contract checks alone do not establish access-control or
-concurrent-read correctness; concrete backend evidence is recorded in SPINE-015.
+HTTP/package admission and behavioral tests. Exact release commit `ad1db8e` is pushed
+and has passed operator-reported clean-room backend validation. Kinflow adoption and
+deployment remain separate gates. Static contract checks alone do not establish
+access-control or concurrent-read correctness; concrete backend evidence is recorded
+in SPINE-015.
 
 Current context correction (2026-09-13): the operator is already testing the connected
 [Kinflow frontend](../../kinflow-web-ui/README.md) against staged Spine on `cortext1`.
@@ -159,10 +161,20 @@ passes all 26 HTTP tests, synthetic schema-15 initialization/deep verification a
 system-info checks. SPINE-015 records commands, versions, wheel digest and exact
 results. This is local package/HTTP evidence, not a cloud or deployment result.
 
-Next steps: commit/push and clean-room validation of the exact version, then
-separately authorized deployment/canaries and Kinflow integration acceptance.
-The checkout now activates v2; no commit, push, deployment, staging change or
-consumer implementation is included in this slice.
+The completed slice was committed and pushed as
+`ad1db8e1a4c7aa9a525612324d08824802a86351`. Operator-reported clean-room validation
+of that exact commit passed the complete focused suite (**190 tests / 269 subtests**),
+all **26** installed-wheel HTTP tests, package parity for all **97** web JSON assets,
+synthetic schema-15 migration/deep verification, strict source-only and
+editable-install mypy 1.20.2, Ruff, compilation, synchronization, documentation and
+diff checks. Full cloud discovery remained **650 tests**: **617 passed + 33
+Tickerd-dependent skips**, plus **652 passing subtests**. Tickerd absence also blocked
+an unpatched successful `system.info`, and the cloud proxy prevented provisioning
+mypy 2.3.0; both paths passed locally and no actionable Spine failure was found.
+
+Next steps are separately authorized deployment/canaries and Kinflow integration
+acceptance. Backend validation does not complete IR-16 or the consumer portion of
+IR-15, and no deployment, staging change or consumer implementation is claimed here.
 
 ### Authority and delivery boundary
 
