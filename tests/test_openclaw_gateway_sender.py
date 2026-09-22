@@ -14,6 +14,7 @@ from spine.adapters import (
     build_openclaw_gateway_command,
 )
 from spine.runtime.openclaw_smoke import main
+from tests.openclaw_helpers import IdempotentGatewayRunner
 
 try:
     import tickerd  # noqa: F401
@@ -24,6 +25,44 @@ except ImportError:
 
 
 class OpenClawGatewaySenderTests(unittest.TestCase):
+    def test_retry_after_delivered_but_timed_out_request_reuses_provider_key(self) -> None:
+        gateway = IdempotentGatewayRunner(timeout_after_first_delivery=True)
+        first = OpenClawGatewaySender(OpenClawGatewayConfig(), command_runner=gateway)(outbound_message())
+        # Reconstruct the sender and message; the gateway retains delivery receipts.
+        second = OpenClawGatewaySender(OpenClawGatewayConfig(), command_runner=gateway)(outbound_message(
+            attempt_id="attempt-2", dedupe_key="idem-2", created_at_utc="2026-06-07T10:05:00Z",
+            body_text="Reminder at retry time",
+        ))
+
+        self.assertEqual(first.reason_code, "openclaw_gateway_cli_timeout")
+        self.assertEqual(first.next_attempt_at_utc, "2026-06-07T10:05:00Z")
+        self.assertEqual(second.status, "delivered")
+        self.assertEqual(second.provider_ref, "wamid.delivery-1")
+        self.assertEqual([r["idempotencyKey"] for r in gateway.requests], ["openclaw-delivery:delivery-1"] * 2)
+        self.assertEqual(len(gateway.visible_deliveries), 1)
+        self.assertEqual(gateway.visible_deliveries[0]["message"], "Reminder")
+
+    def test_different_deliveries_get_different_provider_keys(self) -> None:
+        gateway = IdempotentGatewayRunner()
+        sender = OpenClawGatewaySender(OpenClawGatewayConfig(), command_runner=gateway)
+        first = sender(outbound_message())
+        second = sender(outbound_message(delivery_id="delivery-2", attempt_id="attempt-other", dedupe_key="idem-other"))
+        self.assertNotEqual(first.provider_ref, second.provider_ref)
+        self.assertEqual([r["idempotencyKey"] for r in gateway.requests],
+                         ["openclaw-delivery:delivery-1", "openclaw-delivery:delivery-2"])
+        self.assertEqual(len(gateway.visible_deliveries), 2)
+
+    def test_missing_delivery_identity_blocks_before_gateway_call(self) -> None:
+        gateway = IdempotentGatewayRunner()
+        for delivery_id in ("", " "):
+            with self.subTest(delivery_id=delivery_id):
+                result = OpenClawGatewaySender(OpenClawGatewayConfig(), command_runner=gateway)(
+                    outbound_message(delivery_id=delivery_id),
+                )
+                self.assertEqual(result.status, "blocked")
+                self.assertEqual(result.reason_code, "openclaw_idempotency_unresolved")
+        self.assertEqual(gateway.requests, [])
+
     def test_build_gateway_command_uses_gateway_call_send(self) -> None:
         config = OpenClawGatewayConfig(
             gateway_url="https://gateway.example",

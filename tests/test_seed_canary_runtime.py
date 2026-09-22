@@ -46,6 +46,8 @@ class SeedCanaryRuntimeTests(unittest.TestCase):
         self.assertEqual(preview["channel_hint"], "whatsapp")
         self.assertEqual(preview["body_text"], "Reminder: Spine canary is due in 1 hour")
         self.assertEqual(preview["dedupe_key"], f"openclaw:{result['work_instance_id']}:1")
+        self.assertEqual(preview["provider_idempotency_key"], f"openclaw-delivery:{result['work_instance_id']}")
+        self.assertEqual(preview["payload_version"], "spine.openclaw.outbound.v2")
         self.assertEqual(preview["attempt_id"], f"openclaw-attempt-{result['work_instance_id']}-1")
 
     def test_fake_openclaw_canary_uses_the_single_attempt_ledger(self) -> None:

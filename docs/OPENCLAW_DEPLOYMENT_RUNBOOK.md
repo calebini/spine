@@ -170,7 +170,10 @@ For real gateway canary preparation, seed a controlled reminder and inspect the 
   --if-absent
 ```
 
-The command returns `predicted_openclaw_envelope`, including `channel_hint`, `target_ref`, `body_text`, `dedupe_key`, and the expected first `attempt_id`.
+The command returns `predicted_openclaw_envelope`, including `channel_hint`, `target_ref`,
+`body_text`, `dedupe_key`, `provider_idempotency_key`, and the expected first `attempt_id`.
+In Spine 0.6.1, the outbound v2 envelope keeps `dedupe_key` unique per ledger attempt;
+`provider_idempotency_key` is stable for the work instance and is sent to the gateway.
 
 ## Fake OpenClaw Smoke
 
@@ -295,10 +298,17 @@ Bounded gateway smoke:
 
 Do not run gateway mode against production reminder work until the target work row, recipient, message body, and idempotency key have been inspected.
 
-If an operator confirms that OpenClaw delivered a message but Spine recorded the attempt as
-`openclaw_gateway_cli_timeout`, do not rerun the active worker against that same work item until
-the already-delivered attempt is reconciled or the staging DB is reset. The work may still be
-eligible for retry, and rerunning it can duplicate the external WhatsApp send.
+Starting in Spine 0.6.1, retries send the same provider key
+`openclaw-delivery:{work_instance_id}` while preserving distinct ledger attempts.
+A delivery followed by `openclaw_gateway_cli_timeout` can therefore reuse the
+provider receipt if the gateway honors this key. Verify the deployed gateway's
+retention, restart persistence and handling of changed retry prose separately;
+the local regression double does not qualify the real gateway.
+
+Older attempts used attempt-specific provider keys. The new key cannot retroactively
+deduplicate a delivery made under those keys. If a prior delivery is confirmed but
+its outcome is ambiguous in Spine, reconcile that incident before retrying it under
+the new sender. See [delivery compatibility](../specs/compatibility.md#11-openclaw-delivery-idempotency).
 
 ## Long-Running Runner
 

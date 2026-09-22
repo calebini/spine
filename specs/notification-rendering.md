@@ -308,6 +308,16 @@ new side-effect attempt and receives a fresh `attempted_at_utc`, freshness check
 rendering, and rendering identity; its natural time phrase may therefore differ from
 the prior attempt while retaining the same work and opportunity identities.
 
+OpenClaw retries retain a stable provider delivery key despite these distinct
+attempts and rendered bodies. From Spine 0.6.1, the
+`spine.openclaw.outbound.v2` envelope hashes both the per-attempt `dedupe_key` and
+the separate `provider_idempotency_key`, alongside the rendering evidence above.
+Only the latter is sent as gateway `idempotencyKey`; it is exactly
+`openclaw-delivery:{work_instance_id}`. A gateway receipt reused after an ambiguous
+timeout may therefore refer to the earlier delivered body. Each rendering remains
+evidence of its own attempted request, not proof of a second visible delivery.
+See [OpenClaw delivery compatibility](compatibility.md#11-openclaw-delivery-idempotency).
+
 ## 10. Processing Order and Fail-Closed Semantics
 
 For a runtime advertising this contract, ordinary notification processing is ordered:

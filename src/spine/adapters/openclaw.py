@@ -41,7 +41,7 @@ class OpenClawBindingError(SideEffectBindingError):
 
 @dataclass(frozen=True)
 class OpenClawOutboundMessage:
-    """Spine outbound message envelope for the OpenClaw replacement path."""
+    """Outbound request; dedupe_key retains its per-attempt ledger meaning."""
 
     delivery_id: str
     attempt_id: str
@@ -54,9 +54,14 @@ class OpenClawOutboundMessage:
     created_at_utc: str
     notification_rendering: NotificationRendering | None = None
 
+    @property
+    def provider_idempotency_key(self) -> str:
+        """One logical delivery across retries, independent of clock and rendering."""
+        return f"openclaw-delivery:{self.delivery_id}"
+
     def request_envelope(self) -> dict[str, str]:
         result = {
-            "payload_version": "spine.openclaw.outbound.v1",
+            "payload_version": "spine.openclaw.outbound.v2",
             "delivery_id": self.delivery_id,
             "attempt_id": self.attempt_id,
             "trace_id": self.trace_id,
@@ -65,6 +70,7 @@ class OpenClawOutboundMessage:
             "target_ref": self.target_ref,
             "body_text": self.body_text,
             "dedupe_key": self.dedupe_key,
+            "provider_idempotency_key": self.provider_idempotency_key,
             "created_at_utc": self.created_at_utc,
         }
         if self.notification_rendering is not None:
@@ -118,7 +124,7 @@ class OpenClawGatewaySender:
             "channel": message.channel_hint.strip().lower(),
             "to": message.target_ref.strip(),
             "message": message.body_text,
-            "idempotencyKey": message.dedupe_key.strip(),
+            "idempotencyKey": message.provider_idempotency_key,
         }
         cmd = build_openclaw_gateway_command(self.config, params)
         try:
@@ -269,7 +275,7 @@ def build_openclaw_side_effect_request(
         message=outbound,
         attempt_id=outbound.attempt_id,
         work_instance_id=outbound.delivery_id,
-        idempotency_key=outbound.dedupe_key,
+        idempotency_key=outbound.dedupe_key,  # Attempt-ledger identity, never the provider key.
         request_envelope=outbound.request_envelope(),
         attempted_at_utc=outbound.created_at_utc,
         notification_rendering=outbound.notification_rendering,
@@ -405,7 +411,7 @@ def _validate_gateway_message(
         return NormalizedOpenClawResult.blocked(reason_code="openclaw_channel_unresolved")
     if not message.target_ref.strip():
         return NormalizedOpenClawResult.blocked(reason_code="openclaw_destination_unresolved")
-    if not message.dedupe_key.strip():
+    if not message.delivery_id.strip() or not message.dedupe_key.strip():
         return NormalizedOpenClawResult.blocked(reason_code="openclaw_idempotency_unresolved")
     if config.gateway_url and not (config.gateway_token or config.gateway_password):
         return NormalizedOpenClawResult.blocked(reason_code="openclaw_gateway_auth_unresolved")

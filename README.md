@@ -51,7 +51,7 @@ allowed to quietly become canonical.
 
 ## What Works Today
 
-Spine `0.6.0` is an implemented alpha; its scheduling core is exercised in a staging
+Spine `0.6.1` is an implemented alpha; its scheduling core is exercised in a staging
 agent environment. The current SQLite ledger schema is version `15`. The trusted multi-operator backend is also running in staging on `cortext1`, with
 operator testing through the connected [Kinflow frontend](../kinflow-web-ui/README.md).
 Concrete operator-reported work is tracked in the [backlog](docs/BACKLOG.md);
@@ -168,6 +168,11 @@ fails.
 
 The included OpenClaw adapter supports a fake sender for end-to-end verification. Real
 gateway delivery requires explicit operator configuration and opt-in.
+
+Spine 0.6.1 keeps the gateway delivery idempotency key stable across retries of one
+notification work instance while recording each attempt separately. Suppression of
+duplicate delivery after an ambiguous timeout depends on the gateway honoring that
+key; see [delivery compatibility](specs/compatibility.md#11-openclaw-delivery-idempotency).
 
 ### Sustained-operation safeguards
 

@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cortext.local/spine/contracts/schemas/openclaw-outbound-v2.schema.json",
+  "title": "Spine OpenClaw outbound request v2",
+  "description": "Attempt evidence hashed before sending. dedupe_key is the ledger attempt key; provider_idempotency_key is openclaw-delivery: followed by the exact delivery_id (work instance ID), stable across retries.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["payload_version", "delivery_id", "attempt_id", "trace_id", "causation_id", "channel_hint", "target_ref", "body_text", "dedupe_key", "provider_idempotency_key", "created_at_utc"],
+  "properties": {
+    "payload_version": {"const": "spine.openclaw.outbound.v2"},
+    "delivery_id": {"type": "string", "minLength": 1},
+    "attempt_id": {"type": "string", "minLength": 1},
+    "trace_id": {"type": "string", "minLength": 1},
+    "causation_id": {"type": "string", "minLength": 1},
+    "channel_hint": {"type": "string", "minLength": 1},
+    "target_ref": {"type": "string", "minLength": 1},
+    "body_text": {"type": "string", "minLength": 1},
+    "dedupe_key": {"type": "string", "minLength": 1},
+    "provider_idempotency_key": {"type": "string", "pattern": "^openclaw-delivery:.+$"},
+    "created_at_utc": {"type": "string", "format": "date-time", "pattern": "Z$"},
+    "notification_rendering_id": {"type": "string", "minLength": 1},
+    "rendered_content_hash": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+  },
+  "dependentRequired": {
+    "notification_rendering_id": ["rendered_content_hash"],
+    "rendered_content_hash": ["notification_rendering_id"]
+  }
+}

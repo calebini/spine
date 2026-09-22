@@ -1,7 +1,7 @@
 # Spine Implementation Plan
 
 Role: Roadmap rationale and delivery history; current task status lives in [BACKLOG.md](BACKLOG.md)
-Last updated: 2026-09-19 (independent activity read clean-room validation)
+Last updated: 2026-09-22 (OpenClaw retry delivery idempotency repair)
 
 This is a non-normative delivery plan. The specifications and machine-readable contracts remain authoritative.
 
@@ -42,6 +42,23 @@ and resilience following the event-emission fixes and has deferred SPINE-004–0
 SPINE-010. The historical resilience-first sequencing below no longer schedules work
 or makes those initiatives blanket prerequisites for facets or advisories. Preserve
 their feature-specific contract and verification requirements.
+
+## Delivered Fix: OpenClaw Retry Delivery Idempotency (SPINE-026)
+
+The operator reported successful WhatsApp delivery followed by a CLI timeout and
+duplicate messages on subsequent retries. Spine 0.6.1 separates the existing
+per-attempt ledger key from a provider key derived solely from the work-instance ID.
+Distinct attempts and rendering evidence remain durable, while the gateway receives
+`openclaw-delivery:{work_instance_id}` on every retry. The outbound v2 envelope hashes
+both keys and the exact attempt-time rendering. Schema 15, ledger uniqueness,
+timeout values and retry timing are unchanged.
+
+Real-ledger tests model a delivered-but-timed-out call, reconstruct a retry from
+durable work in a fresh process, and prove two ledger attempts with one visible
+delivery through an idempotent gateway double. Old-envelope replay remains
+fail-closed. SPINE-026 records exact verification and limitations. The real gateway's
+key retention, restart persistence and handling of changed retry prose still require
+separate runtime evidence; no deployment or service restart is part of this repair.
 
 ## Planned Fat Slice: Independent Authorized Activity Reads (SPINE-015)
 

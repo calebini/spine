@@ -1,6 +1,6 @@
 # Spine Backlog
 
-Last updated: 2026-09-19
+Last updated: 2026-09-22
 
 This is the single work queue for Spine development. The
 [implementation plan](IMPLEMENTATION_PLAN.md) explains roadmap direction and delivery
@@ -893,6 +893,85 @@ never authorizes deletion of canonical evidence.
 **Source:** [Storage lifecycle horizon](IMPLEMENTATION_PLAN.md#future-horizon-bounded-ledger-storage-lifecycle).
 
 ## Completed
+
+### SPINE-026 — Keep OpenClaw delivery idempotency stable across retries
+
+**Status:** Done (2026-09-22, Codex; implementation and local verification only).
+Prepared runtime **0.6.1**, still schema **15**. No commit, push, deployment, service
+restart, real gateway call or real-ledger change was performed.
+
+**Root cause:** An OpenClaw send could reach WhatsApp before its CLI timed out.
+Spine then retried with a different attempt-scoped key because `dedupe_key` was used
+both for ledger uniqueness and gateway `idempotencyKey`. The timeout regression
+reproduced two distinct visible deliveries under the old implementation.
+
+**Repair:** Preserve attempt IDs and ledger keys (`openclaw:{work_instance_id}:N`).
+The immutable outbound model now derives a separate provider key,
+`openclaw-delivery:{work_instance_id}`, used only for gateway delivery idempotency.
+The outbound v2 envelope includes both keys in request-hash evidence. Its closed
+schema and generated package mirror are added. Existing attempt/rendering atomicity,
+same-attempt replay suppression, freshness and result handling remain intact. Old v1
+envelope replay fails closed without rewriting evidence or calling the gateway.
+No migration is needed: existing work IDs derive the key and the existing request
+hash covers it. The unique `(adapter_name, idempotency_key)` constraint, all ledger
+code, timeout values and retry timing are unchanged.
+
+**Regression evidence:** The gateway double remembers provider keys and returns the
+original receipt after an initial delivery followed by a simulated CLI timeout.
+The integration test records two attempts, two distinct ledger keys, and two valid
+renderings/request hashes while observing one visible delivery. It reopens a persisted
+synthetic ledger and reconstructs the second request in a fresh Python process.
+It also verifies same-attempt replay does not call transport, ledger uniqueness still
+rejects a duplicate attempt key, and the final work succeeds with attempt count two.
+Additional cases cover different work with the same target/body, missing delivery
+identity, old-envelope replay, and the canary's two-key preview.
+
+**Files:** `src/spine/adapters/openclaw.py`; `tests/test_openclaw_adapter.py`,
+`tests/test_openclaw_gateway_sender.py`, `tests/openclaw_helpers.py`,
+`tests/test_seed_canary_runtime.py`; `contracts/schemas/openclaw-outbound-v2.schema.json`
+and its `src/spine/contracts/web/schemas/` mirror; version declarations in
+`src/spine/__init__.py`, `pyproject.toml` and `tests/test_stage1_scaffold.py`; README,
+this backlog, implementation plan, OpenClaw deployment runbook, compatibility spec
+and notification-rendering spec.
+
+**Verification:** Python **3.14.6**, pytest **9.1.1**, mypy **2.3.0**, Ruff **0.16.2**.
+Test commands used `PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:../tickerd/src`:
+
+```sh
+.venv/bin/python -m pytest -o addopts='' -q tests/test_openclaw_adapter.py tests/test_openclaw_gateway_sender.py tests/test_side_effects_adapter.py tests/test_worker.py tests/test_notification_rendering.py --tb=short
+# Before repair: 42 passed, 23 subtests passed (1.02s).
+.venv/bin/python -m pytest -o addopts='' -q tests/test_openclaw_adapter.py tests/test_openclaw_gateway_sender.py tests/test_side_effects_adapter.py tests/test_worker.py tests/test_notification_rendering.py tests/test_notification_rendering_contract_fixtures.py tests/test_seed_canary_runtime.py tests/test_web_contract_sync.py tests/test_stage1_scaffold.py --tb=short
+# Completed focused verification: 65 passed, 27 subtests passed (2.01s).
+.venv/bin/python -m unittest discover -s tests
+# Final run: 656 tests, OK (70.488s).
+.venv/bin/python -m pytest -o addopts='' -q
+# 656 passed, 654 subtests passed (70.88s), no skips.
+```
+
+The first full unittest run had one failure in the pre-existing
+`StorageSafetyTests.test_critical_pressure_maps_to_bounded_tickerd_stop`: live free
+space was no longer under the test's one-byte threshold margin, returning `allow`.
+That test passed immediately alone (**1 passed**, 0.16s), and both subsequent full
+runs passed without changing the test or storage runtime. The initial failure is
+retained as evidence of sensitivity to live filesystem measurements.
+
+```sh
+PYTHONDONTWRITEBYTECODE=1 .venv/bin/mypy --strict --no-incremental --cache-dir /tmp/spine-openclaw-idempotency-mypy src/spine/core src/spine/ledger
+# Success: no issues found in 37 source files.
+.venv/bin/ruff check .
+PYTHONDONTWRITEBYTECODE=1 .venv/bin/python scripts/sync_web_contracts.py --check
+PYTHONPYCACHEPREFIX=/tmp/spine-openclaw-idempotency-compile .venv/bin/python -m compileall -q src tests examples
+git diff --check
+# All passed; 97 local links in six changed Markdown files also resolve.
+```
+
+**Remaining limitation:** The real OpenClaw build's key scope, retention across the
+entire retry horizon, restart persistence and treatment of changed retry prose need
+separate runtime verification. Spine sends each attempt's exact persisted body;
+the double models a gateway returning the earlier receipt for the repeated key.
+This is not provider exactly-once qualification. Already-ambiguous deliveries sent
+with pre-0.6.1 keys cannot be retroactively deduplicated by this change; deployment
+and incident reconciliation remain separate actions.
 
 ### SPINE-024 — Seed the Impetus HLD from the shared architecture
 

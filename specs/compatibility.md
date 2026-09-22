@@ -293,3 +293,41 @@ locally modified provider without a new reviewed compatibility contract.
    thresholds, domain reason facts, ledger behavior, and side-effect authorization.
 7. `system.info.v2` and worker admission advertise the compatibility contract only
    after exact validation succeeds.
+
+## 11. OpenClaw Delivery Idempotency
+
+Spine 0.6.1 separates notification delivery identity from attempt-ledger identity.
+The [outbound v2 schema](../contracts/schemas/openclaw-outbound-v2.schema.json)
+describes the request evidence hashed before transport. This envelope is adapter
+evidence, not a new web route or Tickerd capability.
+
+- `delivery_id` is the exact canonical `work_instance_id`.
+- `attempt_id` remains `openclaw-attempt-{work_instance_id}-{attempt_count}`.
+- `dedupe_key` retains its historical per-attempt ledger meaning:
+  `openclaw:{work_instance_id}:{attempt_count}`. Only this key is passed to
+  `prepare_work_attempt()` and `side_effect_attempts.idempotency_key`.
+- `provider_idempotency_key` is exactly `openclaw-delivery:{work_instance_id}`.
+  Only this key is passed to the gateway as `idempotencyKey`. It MUST NOT depend
+  on attempt count, trace, process state, clock, title or rendered prose.
+
+Different work IDs produce different provider keys even for identical bodies and
+targets. Reconstructed requests and genuine retries of the same work retain the
+same provider key. Attempt IDs, ledger keys, timestamps, rendering identities and
+request hashes remain per attempt. The unique `(adapter_name, idempotency_key)`
+constraint, rendering/attempt atomicity, replay suppression, timeout values and
+retry timing are unchanged. Schema 15 requires no migration for this fix.
+
+V1 envelope hashes and historical rows MUST NOT be rewritten. Replaying a prior
+v1 attempt using a v2 envelope fails the existing compatibility gate and authorizes
+no send. A newly numbered retry uses v2. Keys previously sent by older runtimes
+included attempt count, so this change cannot retroactively deduplicate those
+ambiguous deliveries; it also cannot guarantee deduplication across a rollback to
+the old sender.
+
+The actual OpenClaw gateway must separately verify that its idempotency-key scope,
+retention and persistence cover the retry interval and relevant restarts, and that
+repeating a key with changed attempt-time prose returns the prior receipt without
+a new visible delivery. Spine always sends the exact persisted body for each
+attempt. This fix does not qualify an OpenClaw build, assert provider exactly-once
+delivery, or change the transport's receipt requirements. The regression double
+models the required gateway behavior; it is not runtime provider evidence.
