@@ -341,7 +341,7 @@
           "const": "spine.item-facet-query.v1"
         },
         "owner": {
-          "$ref": "archetype-facet-types.schema.json#/$defs/owner"
+          "$ref": "archetype-facet-types.schema.json#/$defs/itemOwner"
         },
         "facet_schema_revision_id": {
           "$ref": "archetype-facet-types.schema.json#/$defs/id"

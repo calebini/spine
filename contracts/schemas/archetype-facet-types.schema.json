@@ -35,6 +35,13 @@
     "owner": {
       "$ref": "notification-profile-types.schema.json#/$defs/owner"
     },
+    "itemOwner": {
+      "allOf": [
+        { "$ref": "#/$defs/owner" },
+        { "properties": { "owner_kind": { "enum": ["subject", "subject_group"] } } }
+      ],
+      "$comment": "Item query ownership is independent of schema catalog ownership; system is not an item query scope."
+    },
     "text": {
       "type": "string",
       "minLength": 1,
@@ -437,7 +444,14 @@
           ]
         }
       },
-      "additionalProperties": false
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": { "properties": { "target_kind": { "const": "location" } }, "required": ["target_kind"] },
+          "then": { "properties": { "status": { "const": "active" } } }
+        }
+      ],
+      "$comment": "An existing readable location has active reference state without a location lifecycle flag; subjects may be inactive historically."
     },
     "entry": {
       "type": "object",

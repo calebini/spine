@@ -9,7 +9,9 @@ Current spec surface:
 - `ledger-instance-identity.md`: implemented schema-14 immutable ledger identity, deterministic migration, bounded validation, system.info v3 and restore semantics
 
 - `archetype-facets.md`: draft registered typed item facts, immutable schema revisions, archetype bindings, permission-aware bounded readback/query, and flight proof; not implemented
-- `decisions/0004-versioned-item-facets.md`: proposed core-versus-domain-data boundary and pack/schema ownership
+- [archetype-facet-storage.md](archetype-facet-storage.md): proposed physical facet storage, canonical JSON/relational hybrid, typed indexes, migration/rollback and verification gates; not implemented
+- [STORAGE_ATOMICITY_SPEC.md](STORAGE_ATOMICITY_SPEC.md): Spine-wide persistence/atomicity authority consolidation and feature-leaf delegation; draft, not a new storage runtime
+- `decisions/0004-versioned-item-facets.md`: accepted logical core-versus-domain-data boundary and pack/schema ownership; physical storage remains pending
 
 - `trusted-multi-operator-web-api.md`: implemented trusted web backend; identity selection, local provisioning, scheduling routes, bounded permission-filtered reads and replay; Kinflow is connected to staging; concrete requested work is tracked in the backlog
 - `permission-enforcement-and-web-admission.md`: trusted multi-operator identification first; preserves deferred verified web/session, command/effect and delivery-enforcement contracts; no runtime declaration

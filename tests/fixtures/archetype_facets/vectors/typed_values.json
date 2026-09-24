@@ -2,18 +2,21 @@
   "reference_context": {
     "airport-origin": {
       "target_kind": "location",
-      "active": true,
       "readable": true
     },
-    "airport-inactive": {
-      "target_kind": "location",
+    "subject-inactive": {
+      "target_kind": "subject",
       "active": false,
       "readable": true
     },
     "airport-hidden": {
       "target_kind": "location",
-      "active": true,
       "readable": false
+    },
+    "subject-active": {
+      "target_kind": "subject",
+      "active": true,
+      "readable": true
     }
   },
   "cases": [
@@ -301,7 +304,7 @@
       "valid": false
     },
     {
-      "case_id": "reference_active",
+      "case_id": "reference_location_existing_without_lifecycle",
       "field": {
         "key": "value",
         "required": true,
@@ -335,15 +338,27 @@
       "valid": false
     },
     {
-      "case_id": "reference_inactive",
+      "case_id": "reference_subject_inactive",
       "field": {
         "key": "value",
         "required": true,
         "type": "reference",
-        "target_kind": "location"
+        "target_kind": "subject"
       },
-      "input": "airport-inactive",
+      "input": "subject-inactive",
       "valid": false
+    },
+    {
+      "case_id": "reference_subject_active",
+      "field": {
+        "key": "value",
+        "required": true,
+        "type": "reference",
+        "target_kind": "subject"
+      },
+      "input": "subject-active",
+      "valid": true,
+      "expected": "subject-active"
     },
     {
       "case_id": "reference_hidden",

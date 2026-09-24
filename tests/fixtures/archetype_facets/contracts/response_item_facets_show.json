@@ -75,7 +75,7 @@
           "field": "origin",
           "target_kind": "location",
           "target_id": "airport-origin",
-          "status": "inactive"
+          "status": "active"
         }
       ]
     }

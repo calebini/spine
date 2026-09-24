@@ -125,7 +125,11 @@ class ArchetypeFacetContractFixtureTests(unittest.TestCase):
             date.fromisoformat(value)
         elif kind == "reference":
             target = references.get(value)
-            if not target or target != {"target_kind": field["target_kind"], "active": True, "readable": True}:
+            if (
+                not target or target.get("target_kind") != field["target_kind"]
+                or target.get("readable") is not True
+                or (field["target_kind"] == "subject" and target.get("active") is not True)
+            ):
                 raise ValueError("facet_reference_unavailable")
         else:
             raise ValueError("type")
@@ -163,6 +167,31 @@ class ArchetypeFacetContractFixtureTests(unittest.TestCase):
             {v["path"] for v in self.manifest["vectors"]},
             {str(p.relative_to(ROOT)) for p in (FIXTURES / "vectors").glob("*.json")},
         )
+
+    def test_query_item_owners_are_distinct_from_catalog_owners(self):
+        query = load(FIXTURES / "contracts/request_item_facets_query.json")
+        create = load(FIXTURES / "contracts/request_facet_schema_create.json")
+        listing = load(FIXTURES / "contracts/request_facet_schema_list.json")
+        for scope in (
+            {"owner_kind": "subject", "owner_subject_id": "person"},
+            {"owner_kind": "subject_group", "owner_group_id": "group"},
+            {"owner_kind": "system"},
+        ):
+            with self.subTest(scope=scope):
+                query["owner"] = scope
+                self.assertWire("archetype-facet-commands.schema.json", "item.facets.query", query,
+                                valid=scope["owner_kind"] != "system")
+                for command, request in (("facet_schema.create", create), ("facet_schema.list", listing)):
+                    request["owner"] = scope
+                    self.assertWire("archetype-facet-commands.schema.json", command, request)
+
+    def test_reference_readback_distinguishes_subject_lifecycle_from_locations(self):
+        for kind in ("subject", "location"):
+            for status in ("active", "inactive"):
+                with self.subTest(kind=kind, status=status):
+                    self.assertWire("archetype-facet-types.schema.json", "referenceState", {
+                        "field": "reference", "target_kind": kind, "target_id": "target", "status": status,
+                    }, valid=kind == "subject" or status == "active")
 
     def test_schema_resources_have_explicit_dependency_closure(self):
         self.assertEqual(len(SCHEMA_FILES), 7)
@@ -330,7 +359,7 @@ class ArchetypeFacetContractFixtureTests(unittest.TestCase):
         definition = self.definition(load(FIXTURES / "vectors/definition_normalization.json")["input"])
         request = load(FIXTURES / "contracts/request_item_facets_update.json")
         values = request["changes"][0]["values"]
-        references = {v: {"target_kind": "location", "active": True, "readable": True} for v in ("airport-origin", "airport-destination")}
+        references = {v: {"target_kind": "location", "readable": True} for v in ("airport-origin", "airport-destination")}
         self.assertEqual(self.values(definition, values, references), values)
         for bad in ({}, {**values, "unknown": "extra"}):
             with self.assertRaises(ValueError):

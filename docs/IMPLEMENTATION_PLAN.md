@@ -642,13 +642,16 @@ substitute because it would fragment Spine's canonical authority.
 ### Future Horizon: Archetype Facets and Workflow Recipes
 
 Specification work started 2026-09-07: `specs/decisions/0004-versioned-item-facets.md`
-and `specs/archetype-facets.md` now define the proposed first facet slice. They remain
-drafts, not implementation authorization. The v0.2 bounded recheck passed; draft
+and `specs/archetype-facets.md` define the proposed first facet slice. Decision 0004's
+logical architecture was ratified on 2026-09-24; the companion facet specification
+remains a draft and implementation is not authorized. The v0.2 bounded recheck passed; draft
 machine schemas, structural fixtures and pure identity/type vectors were added on
 2026-09-09. The first machine-contract audit identified replay-response alignment
 and test-dependency scope issues; both were manually patched on 2026-09-12, with a
-focused recheck pending. Remaining gates are a migration/index
-plan, permission resolver mappings, cursor semantics and exact notification-work
+focused recheck subsequently passing with preserved boundary. Its only clarification
+concerned wording in the recheck notes, not a source-contract mismatch. Remaining
+gates are a migration/index plan, permission resolver mappings, cursor semantics and
+exact notification-work
 freshness behavior on facet-only item edits. Static fixtures do not prove runtime
 behavior. Workflow recipes and external observations remain separate future work;
 current pack and web registries are unchanged.

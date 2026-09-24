@@ -1,8 +1,8 @@
 # Spine Archetype Facets
 
-Status: Draft v0.4 — machine-contract audit findings manually patched; focused recheck pending; not implemented
+Status: Draft v0.5 — initial scope confirmed; reference/query clarifications applied; not implemented
 Date: 2026-09-07
-Updated: 2026-09-12
+Updated: 2026-09-24
 Scope: Registered typed item facts, immutable schema revisions, archetype bindings,
 bounded authoring/readback, and a flight-details proof
 
@@ -17,6 +17,12 @@ depends on `ontology.md`, `notification-profiles.md`, `permissions.md`,
 `agent-command-contract.md`, `operational-resilience.md`, and the schedule contracts.
 Core time, location, relationships, lifecycle, ownership, notifications, and work
 remain authoritative. Facets cannot override or implicitly drive those mechanisms.
+
+This document remains the logical facet owner. Physical persistence, table/constraint
+inventories, typed indexes, migration/rollback and storage fixtures are delegated to
+[archetype-facet-storage.md](archetype-facet-storage.md), under the Spine-wide
+[storage and atomicity owner](STORAGE_ATOMICITY_SPEC.md). That leaf is a proposed
+physical design, not implementation or closure of the remaining gates in Section 9.
 
 Proposed families are `spine.facet-schemas.v1`, `spine.archetype-facet-bindings.v1`,
 `spine.item-facets.v1`, and `spine.item-facet-query.v1`. These names are reservations
@@ -231,7 +237,9 @@ Value read/edit follows the owning item's permission model. No field-level ACL o
 separate facet owner exists. Schema management and binding management require catalog
 administration under the existing owner/role rules; attaching values requires schema
 use permission as well as item edit. Possession of a schema ID grants neither.
-New references require existing active targets and applicable read permission. No new
+New subject references require existing active subjects and applicable read permission.
+New location references require existing locations and applicable read permission;
+locations have no active/inactive lifecycle in this slice. No new
 reference kinds or access grants arise from a field. The trusted-local CLI retains
 its existing full-scope posture; HTTP requires explicit registry/resolver additions.
 
@@ -241,8 +249,11 @@ must understand this as publication of that definition to readers of the item;
 definitions contain no credentials, private defaults or operational user values.
 Reference targets still require current visibility. An unreadable nested reference
 denies the whole facet readback, without substituting null or disclosing an ID.
-Inactive references are preserved historically and marked inactive when readable;
-they never silently disappear. Historical snapshots use current item access checks.
+Inactive subject references are preserved historically and marked inactive when readable;
+they never silently disappear. A readable existing location is represented with
+reference status `active`, meaning an existing usable reference, not a persisted
+location lifecycle flag. No location-retirement capability is introduced. Historical
+snapshots use current item access checks.
 
 Full readback contains item/version, archetype evidence, sorted entries, exact schema
 definitions and hashes, values, authoring receipts, and reference state. List/query
@@ -260,7 +271,10 @@ indexes updated in the same commit as the item version. Ordinary item edits must
 maintain these indexes too. Indexes are derived, never a second source of truth.
 
 V1 query supports one equality predicate against one declared queryable field of an
-exact schema revision, within one explicit owner scope. No cross-revision inference,
+exact schema revision, within one explicit **item** owner scope: subject or subject_group.
+The query owner does not select the schema's catalog owner. System-owned schema catalogs
+remain valid, but `owner_kind=system` is rejected on item.facets.query; it means neither
+unowned items nor an all-ledger search. No cross-revision inference,
 full-text, ranges, joins, arbitrary JSON paths or user SQL. Typed normalization equals
 authoring normalization; text/enum equality is case-sensitive. Query returns current
 items only, ordered by item ID. Catalog list order is root ID; binding list order is
@@ -311,6 +325,14 @@ now present (Section 10). They do not satisfy the persisted-state, permission, c
 work-freshness, concurrency or query-plan acceptance families below. Their tests must
 not be reported as proof of those runtime behaviors.
 
+The focused machine-contract recheck completed on 2026-09-12 with
+`boundary_preserved=true` and `pass_with_minor_clarification`. Its sole clarification
+corrected the recheck notes' coverage wording: schema creation has one changed replay
+branch, while the other five writes have changed and no-op replay branches. The
+reviewer found the source schemas, manifest, fixtures and focused assertions aligned;
+no source-contract patch was required. This closes the recheck gate without claiming
+runtime implementation or satisfying the remaining gates below.
+
 Required fixture families and observable oracles:
 
 1. Definition normalization: equivalent field order yields identical hashes; unknown
@@ -338,9 +360,11 @@ Required fixture families and observable oracles:
 10. Flight proof: register, bind, attach, inspect, query and replace through commands;
     location/time authority and existing notification behavior remain unchanged.
 
-Draft decisions requiring review are the deliberately scalar type subset, same-owner
-bindings, optional rather than mandatory facets, series-level values, and two-command
-initial authoring. These are proposed defaults, not previously ratified capabilities.
+The operator confirmed the initial scope on 2026-09-24: scalar-only fields, same-owner
+archetype/schema bindings, optional facets, item/series-level values rather than
+per-occurrence values, and two-command initial authoring. These product choices are
+settled for the initial slice. They do not ratify the physical storage draft, close
+the remaining engineering gates, or advertise implemented capabilities.
 
 ## 10. Machine-contract codification (draft)
 
@@ -427,13 +451,15 @@ are fully normalized, including explicit queryable=false. Item show returns sort
 present), values, `source_command_receipt_id`, and `references` sorted by field key.
 Reference state contains exactly one entry for every reference-valued field present.
 Its ID/kind must agree with the pinned definition and value. An unreadable reference
-denies the whole result; inactive but readable references are returned as inactive.
+denies the whole result; inactive but readable subject references are returned as
+inactive. Existing readable location references always return status=active under
+Section 6; no location-status column is required or inferred.
 An empty snapshot returns entries=[], not null or an omitted field.
 
 Handler failures use the existing ok/command/error envelope. The proposed facet
 domain reasons in Section 4 are carried as `error.code`; exact CLI exit mappings are
 in the draft registry. Definition/value errors use exit 2, binding/archetype conflicts
-6, retired-schema use 2, and missing/inactive/unreadable references uniformly 4 with
+6, retired-schema use 2, and missing/unreadable references or inactive subjects uniformly 4 with
 `facet_reference_unavailable`. Paths identify fields but never echo private values.
 Admission/permission and operational-capacity envelopes remain owned by their adapters;
 the facet handler schema does not replace or freeze them. Resolver mappings, admission

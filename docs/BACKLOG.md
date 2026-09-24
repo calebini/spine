@@ -33,16 +33,19 @@ dependencies, acceptance criteria, and required decisions. When finishing a task
 record evidence and move it to Completed. Update affected orientation and contract
 status labels in the same change. Routine task updates do not change spec authority.
 
-## Next work
+## Recently completed backend work
 
 ### SPINE-015 — Read authorized activities independently of unavailable linked resources
 
-**Current checkpoint:** Spine 0.6.0 HTTP/package/capability integration is committed
+**Completion checkpoint:** Spine 0.6.0 HTTP/package/capability integration is committed
 and pushed at `ad1db8e1a4c7aa9a525612324d08824802a86351`. That exact commit passed
-operator-reported clean-room backend validation. Deployment and Kinflow adoption
-remain separate actions.
+operator-reported clean-room backend validation. Kinflow has since added and exercised
+the opt-in v2 client and calendar integration against staging. Manual usability
+acceptance and promotion of that preview to the default connected view remain separate
+Kinflow work and do not keep this backend item open.
 
-**Status:** In progress — initiative selected on 2026-09-15; specification and
+**Status:** Done — backend delivery closed 2026-09-24. Initiative selected on
+2026-09-15; specification and
 machine-contract phases complete. Both focused rechecks passed without findings;
 the manual machine-contract fixes and preceding checkpoints are pushed through
 `4d16670`. Runtime delivery planning completed on 2026-09-18; the operator then
@@ -55,9 +58,9 @@ internal release-fence and authorized source-hashing slice is committed at
 `629c7a4`; cursor/identity encoding and pagination at `141d995`. The subsequent
 HTTP/package slice completes all four v2 routes, packaged admission and capability
 advertisement in runtime 0.6.0. It is committed, pushed and clean-room validated as
-recorded below. Schema 15 and v1 behavior remain unchanged. SPINE-015 remains open
-for separately authorized deployment and Kinflow end-to-end acceptance; backend
-validation does not close it.
+recorded below. Schema 15 and v1 behavior remain unchanged. The backend defect and
+delivery scope are closed. Any defect found during later Kinflow manual acceptance may
+create a new bounded backend item; it does not leave SPINE-015 provisionally open.
 **Dependencies:** Existing trusted web permissions, canonical recurrence/agenda and
 temporal-binding engines, and the accepted read/machine contracts. No further broad
 specification pass is scheduled. Query/index migration assessment and behavioral
@@ -119,8 +122,10 @@ Documentation alone does not close the feature.
    implemented and locally verified in 0.6.0.
 5. Host-neutral operator documentation and precise Kinflow release handoff — updated
    for 0.6.0, with consumer acceptance explicitly pending.
-6. Separately approved deployment/canaries, then Kinflow adoption and end-to-end
-   acceptance. Do not report backend completion as consumer completion.
+6. Kinflow adopted the contracts and exercised an opt-in v2 calendar against staging.
+   Manual usability acceptance, remaining migration cases and default-view promotion
+   are separately tracked consumer work. Backend completion does not claim consumer
+   migration completion.
 
 **Internal release-fence/source-hash checkpoint (2026-09-19):** Added
 `web/read_release.py`, `read_authorization.py`, and `read_proof.py`. The internal
@@ -728,7 +733,17 @@ These retained entries require operator selection. They do not schedule a gap an
 
 ### SPINE-008 — Close the focused facet machine-contract recheck
 
-**Status:** Ready. **Dependencies:** None for the focused contract review.
+**Status:** Done (2026-09-12; status records reconciled 2026-09-24).
+**Dependencies:** None for the focused contract review.
+
+**Outcome:** The focused reviewer-only recheck returned
+`pass_with_minor_clarification` with `boundary_preserved=true`, zero blockers or
+majors and one minor clarification confined to wording in the audit notes. Schema
+creation correctly has one changed replay branch; the other five writes have changed
+and no-op replay branches. The source schemas, fixture manifest, fixtures and focused
+assertions were aligned, so no source-contract patch or additional model call was
+required. This closes the recheck gate without claiming runtime conformance,
+implementation readiness or convergence.
 
 **Acceptance:** Recheck the manually patched replay-response alignment and
 test-dependency scope findings against the current facet bundle; retain the result and
@@ -741,17 +756,73 @@ additional broad audit campaign or authorize facet implementation.
 
 ### SPINE-009 — Settle facet implementation gates
 
-**Status:** Needs decision. **Dependencies:** SPINE-008 and the facet-specific
-contract gates below. The deferred resilience campaign is not a blanket prerequisite.
+**Status:** In progress — Decision 0004 logical architecture ratified 2026-09-24;
+physical storage draft authored 2026-09-24; review and remaining facet-specific
+contract gates are open. This specification work is explicitly selected; the roadmap
+heading does not authorize runtime work or the other retained candidates.
+**Dependencies:** SPINE-008 is complete. The deferred resilience campaign is not a
+blanket prerequisite.
 
-**Acceptance:** Resolve Decision 0004, migration/index design, permission resolver
-mappings, authenticated cursor semantics, and exact notification-work freshness on
-facet-only item edits. Add the required contracts and behavioral oracles, then create
+**Ratified boundary:** Spine owns a generic registry of immutable facet-schema
+revisions, explicit archetype bindings and canonical versioned item-facet values.
+Facets remain descriptive and cannot override core coordination semantics. This
+ratification does not select a SQL layout or authorize runtime implementation.
+
+**Acceptance:** Decision 0004 is resolved. Complete the migration/index design,
+permission resolver mappings, authenticated cursor semantics, and exact
+notification-work freshness on facet-only item edits. Add the required contracts and
+behavioral oracles, then create
 bounded implementation tasks for the flight-details proof. Keep workflow recipes and
 external observations separate; do not advertise runtime facets from draft schemas.
 
 **Sources:** [Facet gates](../specs/archetype-facets.md),
 [Decision 0004](../specs/decisions/0004-versioned-item-facets.md).
+
+**Physical-storage specification checkpoint (2026-09-24):** Added
+[archetype-facet-storage.md](../specs/archetype-facet-storage.md) as the draft physical
+leaf beneath the logical facet specification. Compared relational, JSON, EAV and
+hybrid layouts; selected canonical definition/value JSON with relational history and
+references plus current-only typed query rows. Defined table/constraint inventories,
+all-version snapshot markers/copy-forward, historical decoding, atomic audit/receipt
+and index maintenance, migration/rollback, bounded query plans, concurrency and FS-01–13
+future verification oracles. The previously absent
+[STORAGE_ATOMICITY_SPEC.md](../specs/STORAGE_ATOMICITY_SPEC.md) is a small Spine-wide
+authority/delegation consolidation, not a new transaction model or resilience campaign.
+
+**Initial decisions raised (resolved by the confirmation below):** Location reference activity lacks a current location-status
+model; system query-owner semantics do not map to current item-access ownership;
+logical Section 9's retained draft product-choice list needs explicit disposition.
+Permission resolvers, authenticated cursors, notification-work freshness, physical
+design review and executable migration/behavioral fixtures remain implementation gates.
+No runtime/schema/machine-contract change, Whetstone run, commit, push or deployment
+was performed. Existing SPINE-015 closure, facet recheck reconciliation and Decision
+0004 ratification edits were preserved.
+
+**Specification verification:** Focused facet structural/pure-vector and agent-documentation
+checks (`PYTHONPATH=src:../tickerd/src .venv/bin/python -m pytest -o addopts='' -q
+tests/test_archetype_facet_contract_fixtures.py tests/test_agent_documentation.py`)
+passed 25 tests and 170 subtests. Checked all 62 local Markdown links/anchors across
+the two new specifications and three amended documents; none were broken.
+`git diff --check` passed. These checks do not prove the future FS storage fixtures.
+The implementation-plan and Decision 0004 files remained byte-identical to their
+pre-task uncommitted contents; the SPINE-015 closure and recheck status edits remain.
+
+**Operator scope confirmation (2026-09-24):** Resolved all three questions above.
+Locations require existence and applicable read permission, not a new retirement
+lifecycle; active/inactive lifecycle checks remain specific to subject references.
+Item-facet query owner is subject/subject_group only, independently of schema catalog
+ownership (which still supports system). Confirmed scalar-only fields, same-owner
+bindings, optional item/series-level facets and separate item creation/attachment.
+Updated the logical/storage drafts and Decision 0004 consistently; physical storage
+remains draft and the engineering gates remain open. Aligned the draft query and
+reference-state schemas, example/vector expectations and structural tests, retaining
+offline packaged schema parity without adding handlers or advertised capabilities.
+No database-schema or runtime-code changes, Whetstone run, commit or push.
+
+**Confirmation verification:** Facet contract, agent documentation, trusted-web contract
+and implemented-declaration suites passed 42 tests and 207 subtests. Focused Ruff,
+offline contract-copy parity, local documentation links and diff hygiene passed.
+These are structural/consistency checks, not facet runtime or storage conformance proof.
 
 ## Later horizons
 

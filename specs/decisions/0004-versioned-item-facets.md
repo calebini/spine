@@ -1,7 +1,8 @@
 # Decision 0004: Versioned Item Facets
 
-Status: Proposed — specification only; not an implemented capability
+Status: Accepted — logical architecture ratified 2026-09-24; physical storage and runtime implementation remain pending
 Date: 2026-09-07
+Accepted: 2026-09-24
 
 ## Context
 
@@ -11,7 +12,7 @@ Encoding every domain in core tables couples Spine to particular applications.
 Unregistered JSON attribute bags, however, sacrifice validation, versioning, and
 reliable readback. Packs need a way to distribute structure without owning user data.
 
-## Proposed decision
+## Decision
 
 Spine will own a generic registry of immutable facet-schema revisions and canonical
 facet values attached to item versions, as specified in [archetype-facets.md](../archetype-facets.md).
@@ -48,8 +49,23 @@ an explicit future acceptance contract; background enrichment cannot overwrite f
 - Workflow recipes, live observations, occurrence-specific facets, and protected
   advisory execution remain separate initiatives.
 
-## Ratification gate
+## Ratification and implementation gates
 
-Review this decision with the companion specification. Ratification and machine
-contract/fixture publication precede runtime implementation. This draft changes no
-runtime version, schema version, or advertised command registry.
+The operator ratified this logical model on 2026-09-24 after reviewing its evolution,
+operational and usability trade-offs. Acceptance establishes the generic registry,
+immutable revision, explicit binding, versioned value and core-versus-facet boundaries
+above. It does not ratify a physical SQL representation.
+
+In a subsequent clarification on 2026-09-24, the operator also confirmed the logical
+specification's initial scope: scalar-only fields, same-owner archetype/schema bindings,
+optional facets, item/series-level values, and separate item creation then facet
+attachment. Location references require existence and applicable read permission,
+without introducing location retirement; subject lifecycle checks remain. Item facet
+queries use subject/group item ownership, independently of schema catalog ownership.
+These clarifications do not accept the draft physical layout or authorize runtime work.
+
+Before runtime implementation, specify and review the exact storage, migration and
+index design, permission resolver mappings, authenticated cursor behavior and
+notification-work freshness for facet-only item edits. Publish the remaining machine
+contracts and behavioral oracles required by those gates. This decision changes no
+runtime version, schema version or advertised command registry by itself.

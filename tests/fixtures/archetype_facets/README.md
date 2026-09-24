@@ -20,8 +20,12 @@ Each fresh example is independent. Changed and no-op receipts illustrate alterna
 states; their shared illustrative command IDs do not authorize replaying different
 requests against one ledger. A changed item receipt here assumes no notification
 policies or work, and makes no queued-work retention claim. The readback example
-includes an inactive but readable historical location reference; new authoring
-requires active, readable references.
+includes existing readable locations with active reference state, not a location
+lifecycle flag. New subject references require active readable subjects; new location
+references require existing readable locations. Pure vectors cover inactive-subject
+rejection and location validation without an activity flag. Structural assertions
+preserve inactive historical subject readback and reject inactive location readback.
+Query tests reject system item ownership while retaining system schema catalogs.
 
 Every write response requires `replayed`. Fresh responses use false; the corresponding
 `*_replay.json` fixtures use true with changed=false and the exact same stored receipt,
