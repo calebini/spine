@@ -170,6 +170,7 @@ class ArchetypeFacetContractFixtureTests(unittest.TestCase):
 
     def test_query_item_owners_are_distinct_from_catalog_owners(self):
         query = load(FIXTURES / "contracts/request_item_facets_query.json")
+        response = load(FIXTURES / "contracts/response_item_facets_query.json")
         create = load(FIXTURES / "contracts/request_facet_schema_create.json")
         listing = load(FIXTURES / "contracts/request_facet_schema_list.json")
         for scope in (
@@ -180,6 +181,9 @@ class ArchetypeFacetContractFixtureTests(unittest.TestCase):
             with self.subTest(scope=scope):
                 query["owner"] = scope
                 self.assertWire("archetype-facet-commands.schema.json", "item.facets.query", query,
+                                valid=scope["owner_kind"] != "system")
+                response["owner"] = scope
+                self.assertWire("archetype-facet-responses.schema.json", "item.facets.query", response,
                                 valid=scope["owner_kind"] != "system")
                 for command, request in (("facet_schema.create", create), ("facet_schema.list", listing)):
                     request["owner"] = scope

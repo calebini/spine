@@ -275,6 +275,13 @@
       "valid": false
     },
     {
+      "fixture_id": "invalid_query_response_system_owner",
+      "fixture": "tests/fixtures/archetype_facets/contracts/invalid_query_response_system_owner.json",
+      "schema": "contracts/schemas/archetype-facet-responses.schema.json",
+      "schema_ref": "#/$defs/item.facets.query",
+      "valid": false
+    },
+    {
       "fixture_id": "response_facet_schema_create_replay",
       "fixture": "tests/fixtures/archetype_facets/contracts/response_facet_schema_create_replay.json",
       "schema": "contracts/schemas/archetype-facet-responses.schema.json",

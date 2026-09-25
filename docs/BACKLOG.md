@@ -824,6 +824,41 @@ and implemented-declaration suites passed 42 tests and 207 subtests. Focused Ruf
 offline contract-copy parity, local documentation links and diff hygiene passed.
 These are structural/consistency checks, not facet runtime or storage conformance proof.
 
+**Storage audit preparation (2026-09-25):** Prepared
+[archetype-facet-storage-contract-audit-001](../whetstone_runs/archetype-facet-storage-contract-audit-001/audit-notes.md)
+as a single reviewer-only `audit-change` using the built-in buildability profile.
+The exact outgoing inventory is the notes plus twenty source/reference/evidence files.
+Objectives cover relational feasibility, immutable decoding/copy-forward, atomicity,
+migration/rollback, indexed bounded queries and preservation of confirmed scope.
+Awaiting explicit transmission approval; no reviewer call, source-spec change or
+implementation occurred during preparation. Existing deferred engineering gates remain.
+
+**Storage audit outcome (2026-09-25, supersedes preparation's pending approval):**
+The operator explicitly approved the notes, all twenty sources, built-in buildability
+profile and generated copies for `gpt-5.6-sol`. Completed one reviewer-only
+`audit-change` using Codex CLI `0.155.0-alpha.16.3`: `pass_with_minor_clarification`,
+`boundary_preserved=true`, zero blockers/majors and one minor. Finding
+`fb_query_response_owner_scope` is verified: item.facets.query requests use itemOwner,
+but responses still use broader owner and therefore admit impossible system-owner
+results. Recommended next action is a manual response-schema correction plus a
+negative contract fixture (and packaged-copy parity); it has not been applied.
+All twenty sources and the approved notes were unchanged after review; manifest
+input hashes match. No Editor, convergence claim, source patch, implementation,
+commit or push. Physical ratification and the other facet engineering gates remain open.
+Evidence: [report](../whetstone_runs/archetype-facet-storage-contract-audit-001/change_audit/change_audit_report.md)
+and [feedback](../whetstone_runs/archetype-facet-storage-contract-audit-001/change_audit/change_audit_feedback.json).
+
+**Storage audit minor manually patched (2026-09-25):** Corrected
+`fb_query_response_owner_scope`: the query response now uses itemOwner, matching its
+request and normative subject/group-only item ownership. Added the registered negative
+`invalid_query_response_system_owner.json` fixture and extended owner-scope assertions
+to cover both requests and responses while preserving system-owned schema catalogs.
+Synced the packaged response schema. Focused facet/web contract and implemented-version
+declaration checks passed 35 tests and 129 subtests; Ruff, package-copy parity and
+`git diff --check` passed. No runtime/database changes, new audit, commit or push.
+The original audit artifacts remain unchanged; local regression verification is not
+a new reviewer verdict or closure of the remaining facet engineering gates.
+
 ## Later horizons
 
 These entries preserve roadmap intent. Their acceptance criteria describe the next
