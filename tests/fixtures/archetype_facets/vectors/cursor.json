@@ -82,6 +82,16 @@
   "canonical_payload": "{\"access_hash\":\"3ef2aeb375817e67950714183fbb9cfc2fdb6832577e4def6cd21639b15ae51f\",\"authorization_valid_until_utc\":null,\"command\":\"item.facets.query\",\"context_hash\":\"373a6b6ef9db3b30f555df03fc07fd135429ef051b49eed25ad95700da330d63\",\"contract_version\":\"spine.facet-cursor.v1\",\"expires_at_utc\":\"2026-09-26T10:15:00Z\",\"issued_at_utc\":\"2026-09-26T10:00:00Z\",\"last_key\":\"flight-a\",\"query_hash\":\"e04aa52f8cc299bd2e5148bf65d5a8e9a3b262c97df8bd5279e484529aa22b0c\",\"source_snapshot_hash\":\"ae2cffd750934e19db341ec43fd13bc148d87296db7074800e775551520b2be0\"}",
   "token": "fc1.eyJhY2Nlc3NfaGFzaCI6IjNlZjJhZWIzNzU4MTdlNjc5NTA3MTQxODNmYmI5Y2ZjMmZkYjY4MzI1NzdlNGRlZjZjZDIxNjM5YjE1YWU1MWYiLCJhdXRob3JpemF0aW9uX3ZhbGlkX3VudGlsX3V0YyI6bnVsbCwiY29tbWFuZCI6Iml0ZW0uZmFjZXRzLnF1ZXJ5IiwiY29udGV4dF9oYXNoIjoiMzczYTZiNmVmOWRiM2IzMGY1NTVkZjAzZmMwN2ZkMTM1NDI5ZWYwNTFiNDllZWQyNWFkOTU3MDBkYTMzMGQ2MyIsImNvbnRyYWN0X3ZlcnNpb24iOiJzcGluZS5mYWNldC1jdXJzb3IudjEiLCJleHBpcmVzX2F0X3V0YyI6IjIwMjYtMDktMjZUMTA6MTU6MDBaIiwiaXNzdWVkX2F0X3V0YyI6IjIwMjYtMDktMjZUMTA6MDA6MDBaIiwibGFzdF9rZXkiOiJmbGlnaHQtYSIsInF1ZXJ5X2hhc2giOiJlMDRhYTUyZjhjYzI5OWJkMmU1MTQ4YmY2NWQ1YThlOWEzYjI2MmM5N2RmOGJkNTI3OWU0ODQ1MjlhYTIyYjBjIiwic291cmNlX3NuYXBzaG90X2hhc2giOiJhZTJjZmZkNzUwOTM0ZTE5ZGIzNDFlYzQzZmQxM2JjMTQ4ZDg3Mjk2ZGI3MDc0ODAwZTc3NTU1MTUyMGIyYmUwIn0.4cUqPnyFoU0ZzMGrXc3Trq0tQgtgrIsDjyC6JIoCRJ4",
   "valid_now": "2026-09-26T10:01:00Z",
+  "release_race_cases": [
+    {"id": "unchanged_first_page", "continuation": false, "authority": "allowed", "within_budget": true, "source_changed": false, "expected": "page"},
+    {"id": "first_page_source_race", "continuation": false, "authority": "allowed", "within_budget": true, "source_changed": true, "expected": "first_page_source_changed"},
+    {"id": "continuation_source_race", "continuation": true, "authority": "allowed", "within_budget": true, "source_changed": true, "expected": "stale_cursor"},
+    {"id": "first_page_access_transition", "continuation": false, "authority": "access_changed", "within_budget": true, "source_changed": true, "expected": "first_page_access_changed"},
+    {"id": "hidden_target_before_source_compare", "continuation": false, "authority": "resource_unavailable", "within_budget": true, "source_changed": true, "expected": "resource_unavailable"},
+    {"id": "identity_before_source_compare", "continuation": true, "authority": "identity_unavailable", "within_budget": true, "source_changed": true, "expected": "identity_unavailable"},
+    {"id": "budget_prevents_complete_revalidation", "continuation": false, "authority": "allowed", "within_budget": false, "source_changed": true, "expected": "capacity"},
+    {"id": "continuation_budget_not_stale_guess", "continuation": true, "authority": "allowed", "within_budget": false, "source_changed": true, "expected": "capacity"}
+  ],
   "invalidations": [
     "context_hash",
     "query_hash",

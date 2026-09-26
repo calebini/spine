@@ -1,6 +1,44 @@
 {
   "contract_version": "spine.facet-integration.v1",
   "coverage": "Pure resolver decisions, not persisted authorization or leakage proof.",
+  "item_type_cases": [
+    {"id": "legal_binding_event_only_schema_rejects_task", "operation": "set", "same_value": false, "item_type": "task", "archetype_types": ["event", "task"], "schema_types": ["event"], "expected": "wrong_item_type"},
+    {"id": "same_value_set_revalidates_type", "operation": "set", "same_value": true, "item_type": "task", "archetype_types": ["event", "task"], "schema_types": ["event"], "expected": "wrong_item_type"},
+    {"id": "archetype_excludes_concrete_type", "operation": "set", "same_value": false, "item_type": "task", "archetype_types": ["event"], "schema_types": ["event", "task"], "expected": "wrong_item_type"},
+    {"id": "both_include_type", "operation": "set", "same_value": false, "item_type": "event", "archetype_types": ["event", "task"], "schema_types": ["event"], "expected": "allowed"},
+    {"id": "remove_not_new_authoring", "operation": "remove", "same_value": false, "item_type": "task", "archetype_types": ["event", "task"], "schema_types": ["event"], "expected": "allowed"},
+    {"id": "historical_copy_not_new_authoring", "operation": "unchanged_copy_forward", "same_value": true, "item_type": "task", "archetype_types": ["event", "task"], "schema_types": ["event"], "expected": "allowed"},
+    {"id": "receipt_replay_not_new_authoring", "operation": "compatible_receipt_replay", "same_value": true, "item_type": "task", "archetype_types": ["event", "task"], "schema_types": ["event"], "expected": "allowed"}
+  ],
+  "replay_cases": [
+    {"command": "facet_schema.create", "read_authorities": ["receipt.schema.catalog_read"]},
+    {"command": "facet_schema.publish", "read_authorities": ["receipt.schema.catalog_read"]},
+    {"command": "facet_schema.retire", "read_authorities": ["receipt.schema.catalog_read"]},
+    {"command": "item_archetype.facet_binding.set", "read_authorities": ["receipt.archetype.catalog_read", "receipt.schema.catalog_read"]},
+    {"command": "item_archetype.facet_binding.remove", "read_authorities": ["receipt.archetype.catalog_read"]},
+    {"command": "item.facets.update", "read_authorities": ["receipt.item.read_current_authority"]}
+  ],
+  "replay_scenarios": [
+    {"id": "same_identity_read_retained_write_revoked", "same_account": true, "same_subject": true, "revoked_read": null, "semantic_match": true, "release_access": true, "expected": "replay"},
+    {"id": "required_read_revoked", "same_account": true, "same_subject": true, "revoked_read": "each_required_resolver", "semantic_match": true, "release_access": true, "expected": "resource_unavailable"},
+    {"id": "foreign_account_before_semantic_comparison", "same_account": false, "same_subject": true, "revoked_read": "each_required_resolver", "semantic_match": false, "release_access": true, "expected": "command_id_unavailable"},
+    {"id": "changed_bound_subject", "same_account": true, "same_subject": false, "revoked_read": null, "semantic_match": true, "release_access": true, "expected": "command_id_unavailable"},
+    {"id": "hidden_before_semantic_comparison", "same_account": true, "same_subject": true, "revoked_read": "each_required_resolver", "semantic_match": false, "release_access": true, "expected": "resource_unavailable"},
+    {"id": "authorized_semantic_conflict", "same_account": true, "same_subject": true, "revoked_read": null, "semantic_match": false, "release_access": true, "expected": "semantic_conflict"},
+    {"id": "access_revoked_at_release", "same_account": true, "same_subject": true, "revoked_read": null, "semantic_match": true, "release_access": false, "expected": "access_changed"}
+  ],
+  "replay_shared_facts": {
+    "fresh_write_permission": false,
+    "catalog_active": false,
+    "binding_active": false,
+    "original_request_reference_visible": false,
+    "current_snapshot_reference_visible": false,
+    "fresh_expected_version_matches": false,
+    "fresh_expected_access_epoch_matches": false,
+    "current_identity_eligible": true,
+    "operation_registered": true,
+    "original_outcomes": ["changed", "noop"]
+  },
   "catalog_admin_cases": [
     {
       "scope": "subject",

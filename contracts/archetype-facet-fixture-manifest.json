@@ -4,6 +4,12 @@
   "registry": "contracts/archetype-facet-contract-registry.v1.json",
   "fixtures": [
     {
+      "fixture_id": "failure_item_facets_update_incompatible_item_type",
+      "fixture": "tests/fixtures/archetype_facets/contracts/failure_item_facets_update_incompatible_item_type.json",
+      "schema": "contracts/schemas/archetype-facet-failure.schema.json",
+      "valid": true
+    },
+    {
       "fixture_id": "response_item_facets_update_retained_work",
       "fixture": "tests/fixtures/archetype_facets/contracts/response_item_facets_update_retained_work.json",
       "schema": "contracts/schemas/archetype-facet-responses.schema.json",

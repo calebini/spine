@@ -1,0 +1,9 @@
+{
+  "ok": false,
+  "command": "item.facets.update",
+  "error": {
+    "code": "wrong_item_type",
+    "message": "Request cannot be applied.",
+    "field": "item_id"
+  }
+}

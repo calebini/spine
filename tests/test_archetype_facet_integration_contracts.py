@@ -143,6 +143,104 @@ class FacetIntegrationContractTests(unittest.TestCase):
             other = {**payload, "command": command, "last_key": "flight_details"}
             self.assertTrue(Draft202012Validator(self.schema).is_valid(other))
 
+    def test_fresh_set_concrete_item_type_vectors(self):
+        rules = self.contract["item_set_compatibility"]
+        self.assertEqual(rules["required_membership"], [
+            "pinned_assigned_archetype_revision.compatible_item_types",
+            "pinned_facet_schema_revision.compatible_item_types",
+        ])
+        self.assertEqual(rules["applies_to"], "every_fresh_set_including_same_value_noop")
+        failure = load(ROOT / "tests/fixtures/archetype_facets/contracts/failure_item_facets_update_incompatible_item_type.json")
+        self.assertEqual(failure["error"]["code"], rules["failure"]["code"])
+        self.assertEqual(failure["error"]["field"], "item_id")
+        for case in load(VECTORS / "permissions.json")["item_type_cases"]:
+            with self.subTest(case=case["id"]):
+                # All bindings have a legal intersection; the concrete target still matters.
+                self.assertTrue(set(case["archetype_types"]) & set(case["schema_types"]))
+                compatible = all(case["item_type"] in case[key] for key in ("archetype_types", "schema_types"))
+                if case["operation"] == "set":
+                    result = "allowed" if compatible else "wrong_item_type"
+                else:
+                    self.assertIn(case["operation"], rules["skip_for"])
+                    result = "allowed"
+                self.assertEqual(result, case["expected"])
+
+    def test_closed_replay_authority_vectors(self):
+        vectors = load(VECTORS / "permissions.json")
+        registry = load(ROOT / "contracts/archetype-facet-contract-registry.v1.json")
+        writes = {name for name, entry in registry["commands"].items() if entry["mutates"]}
+        mapping = self.contract["replay_permission_resolvers"]
+        self.assertEqual(set(mapping), writes)
+        self.assertEqual({case["command"] for case in vectors["replay_cases"]}, writes)
+        rules = self.contract["replay"]
+        self.assertFalse(rules["fresh_write_permissions_required"])
+        self.assertFalse(rules["active_catalog_or_binding_required"])
+        self.assertFalse(rules["durable_writes"])
+        self.assertEqual(rules["permission_enforced_identity"], "same_initiating_account_and_subject")
+        self.assertEqual(rules["precedence"], [
+            "shape_bounds", "identity_operation_admission", "private_receipt_lookup",
+            "initiating_identity", "receipt_disclosure_authority", "semantic_compatibility",
+            "release_authority_recheck", "replay_projection",
+        ])
+        shared = vectors["replay_shared_facts"]
+        self.assertTrue(shared["current_identity_eligible"] and shared["operation_registered"])
+        for field in ("fresh_write_permission", "catalog_active", "binding_active",
+                      "original_request_reference_visible", "current_snapshot_reference_visible",
+                      "fresh_expected_version_matches", "fresh_expected_access_epoch_matches"):
+            self.assertFalse(shared[field])
+        for case in vectors["replay_cases"]:
+            required = mapping[case["command"]]
+            self.assertEqual(required, case["read_authorities"])
+            outcomes = ["changed"] if case["command"] == "facet_schema.create" else shared["original_outcomes"]
+            for outcome in outcomes:
+                for scenario in vectors["replay_scenarios"]:
+                    revoked = required if scenario["revoked_read"] else [None]
+                    for denied in revoked:
+                        with self.subTest(command=case["command"], outcome=outcome,
+                                          scenario=scenario["id"], denied=denied):
+                            # Receipt-only disclosure: fresh write/catalog/ref facts above
+                            # deliberately cannot authorize or defeat a compatible replay.
+                            authorities = {name: name != denied for name in required}
+                            if not (scenario["same_account"] and scenario["same_subject"]):
+                                result = "command_id_unavailable"
+                            elif not all(authorities.values()):
+                                result = "resource_unavailable"
+                            elif not scenario["semantic_match"]:
+                                result = "semantic_conflict"
+                            elif not scenario["release_access"]:
+                                result = "access_changed"
+                            else:
+                                result = "replay"
+                            self.assertEqual(result, scenario["expected"])
+
+    def test_bounded_page_release_race_vectors(self):
+        rules = self.contract["cursor"]["release_revalidation"]
+        self.assertEqual(rules["max_snapshot_constructions"], 1)
+        self.assertEqual(rules["automatic_retries"], 0)
+        self.assertFalse(rules["reset_budget"])
+        self.assertFalse(rules["failure_result_or_cursor"])
+        self.assertEqual(rules["precedence"], ["current_authority", "capacity", "source_comparison"])
+        for case in self.vector["release_race_cases"]:
+            with self.subTest(case=case["id"]):
+                if case["authority"] != "allowed":
+                    result = case["authority"]
+                    if result == "access_changed" and not case["continuation"]:
+                        result = rules["first_page_access_transition"]
+                elif not case["within_budget"]:
+                    result = "capacity"
+                elif case["source_changed"]:
+                    branch = "continuation_source_change" if case["continuation"] else "first_page_source_change"
+                    result = rules[branch]
+                else:
+                    result = "page"
+                self.assertEqual(result, case["expected"])
+        self.assertEqual(self.contract["adapter_errors"]["first_page_source_changed"], {
+            "cli": "environment_failure", "exit": 7, "web": "access_changed", "http": 409,
+        })
+        self.assertEqual(self.contract["adapter_errors"]["stale_cursor"], {
+            "cli": "stale_cursor", "exit": 6, "web": "access_changed", "http": 409,
+        })
+
     def test_cursor_rejects_authenticated_bad_encodings_and_payloads(self):
         payload = self.vector["payload"]
         raw = canonical_json_bytes(payload)

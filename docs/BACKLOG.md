@@ -913,6 +913,59 @@ contracts, implemented-version declarations and agent-documentation checks passe
 all 94 local Markdown links/anchors across the nine changed documents, and
 `git diff --check` passed. The 2026-09-25 uncommitted ratification edits were preserved.
 
+**Checkpoint and bounded-audit preparation (2026-09-26):** Committed the cohesive
+ratification/integration amendment as `28c7f1c` after repeating the 50-test/255-subtest
+verification, Ruff, packaged-schema parity and diff checks. No push. Prepared
+[archetype-facet-integration-contract-audit-001](../whetstone_runs/archetype-facet-integration-contract-audit-001/audit-notes.md)
+as one reviewer-only audit-change using the built-in buildability profile and proposed
+Codex model gpt-5.6-sol. The notes name thirty exact source inputs, focused reviewer
+questions and preservation boundaries. Awaiting explicit authorization for those inputs,
+the notes, built-in profile context and generated copies; no nested reviewer invoked.
+
+**Integration amendment bounded audit completed (2026-09-26):** The operator explicitly
+approved the thirty-file inventory, notes, built-in buildability profile and generated
+copies for gpt-5.6-sol. Ran one reviewer-only audit-change with that requested model
+(recorded in audit_manifest.json), Codex CLI 0.155.0-alpha.16.4, timeout 600 seconds.
+Result: needs_revision, boundary_preserved=false, zero blockers, two majors, one minor.
+Verified the findings against the supplied source: concrete item-type eligibility on
+fresh set is implicit rather than closed; replay authority is not mapped per write
+command; first-page source-change/release failure lacks an exact outcome. The authority
+finding accounts for the boundary flag; no physical-layout redesign was requested.
+
+Recommended next action is a targeted manual spec/companion/fixture patch, then focused
+recheck; no patch was applied by this audit. All thirty sources and notes remained
+byte-identical to the launch hashes; source files match commit 28c7f1c. Manifest input
+hashes and audit-brief hash were verified. Feedback's model self-label says gpt-5; the
+executed CLI selection and audit manifest record the approved gpt-5.6-sol. No Editor,
+convergence claim, runtime change, commit or push. Evidence:
+[report](../whetstone_runs/archetype-facet-integration-contract-audit-001/change_audit/change_audit_report.md)
+and [feedback](../whetstone_runs/archetype-facet-integration-contract-audit-001/change_audit/change_audit_feedback.json).
+
+**Targeted integration manual patch (2026-09-26):** Addressed all three verified
+findings in logical spec v0.7, the existing integration companion and pure vectors.
+`fb_item_type_compatibility` now requires concrete item type in both pinned revision
+sets for every fresh set, including same-value no-ops; incompatibility is wrong_item_type
+at item_id. Remove, retained copy-forward and compatible replay remain exempt.
+`fb_replay_authority_matrix` now maps all six writes to current receipt read authority,
+same initiating account/subject and explicit nested disclosure checks, without renewed
+write/admin/use rights. Original create has only changed replay; the other five cover
+changed and no-op receipts. Foreign identity, revoked read and release-time revocation
+have closed safe outcomes. `fb_first_page_release_race` now permits one snapshot build
+and no internal retry: source-only first-page races are environment_failure locally /
+access_changed on web; continuation races remain stale_cursor. Neither returns partial
+results/cursors or writes durable evidence; authority and capacity checks take precedence.
+
+Added the incompatible-item failure fixture and manifest entry, plus decision vectors
+and test-only oracles for all three closures. Focused facet, trusted-web, implemented
+declaration and agent-documentation checks passed **53 tests and 354 subtests**. These
+are machine-contract checks, not persisted authorization, concurrency or delivery proof.
+Ruff, packaged web-contract parity, **87** local Markdown file links and diff hygiene
+also passed.
+The ratified physical storage design, notification-continuity rules, runtime files,
+implemented registries and prior audit artifacts remain unchanged. The pre-existing
+backlog audit record is preserved. No runtime implementation, new Whetstone run,
+commit or push; the prior audit verdict remains historical, not upgraded to a pass.
+
 ## Later horizons
 
 These entries preserve roadmap intent. Their acceptance criteria describe the next

@@ -1,6 +1,6 @@
 # Spine Archetype Facets
 
-Status: Draft v0.6 — permission, cursor and work-freshness contracts specified; not implemented
+Status: Draft v0.7 — integration audit clarifications specified; not implemented
 Date: 2026-09-07
 Updated: 2026-09-26
 Scope: Registered typed item facts, immutable schema revisions, archetype bindings,
@@ -73,6 +73,16 @@ or binding changes do not rewrite it. Historical values remain decodable using t
 stored immutable schema revision. A value replacement requires the current active
 binding and active schema/archetype, including when upgrading an old revision.
 An unchanged retained entry need not requalify against current catalog status.
+
+Every fresh `set`, including a same-value no-op, MUST require the target item's
+concrete `item_type` in both the item's pinned assigned archetype revision's and
+the selected pinned facet-schema revision's `compatible_item_types`. The binding's
+nonempty intersection test alone is insufficient: an event/task archetype can bind
+an event-only schema, but a task cannot set that facet. After active binding/catalog
+eligibility and before value validation, incompatibility fails `wrong_item_type`,
+`field=item_id` (CLI exit 2; admitted web domain_failure, HTTP 422). Remove-only
+changes, unchanged copy-forward and compatible receipt replay do not re-run this
+fresh-set test; they do not author a new value against a new schema revision.
 
 Changing or clearing an item's archetype while retaining a nonempty facet snapshot
 fails `facet_archetype_conflict`; callers must explicitly clear facets first in this
@@ -200,9 +210,12 @@ Common replay semantics apply before fresh version checks, but never bypass curr
 disclosure authorization in a permission-enforced adapter. Same ID/different normalized
 semantic request fails `semantic_conflict`. Failed validation changes no state.
 
-Validation precedence: envelope/types/bounds; adapter admission; replay compatibility;
-target visibility/existence; expected versions; active binding/catalog eligibility;
-definition and value validation; reference access; final snapshot limits; transaction.
+Validation precedence: envelope/types/bounds; adapter admission; the private receipt
+lookup and authorized replay branch in Section 6.2; for a fresh command, target/nested
+authority and visibility/existence; expected versions; active binding/catalog eligibility
+and concrete item-type compatibility; definition and value validation; reference access;
+final snapshot limits; transaction. Reference authority is resolved before fresh domain
+checks; reference lifecycle/value validation remains in the reference-access phase.
 Inside the write transaction recheck versions and authority before committing.
 Public errors do not reveal foreign target existence. Proposed domain reasons include
 `facet_schema_invalid`, `facet_value_invalid`, `facet_binding_conflict`,
@@ -359,11 +372,9 @@ All resolution shares the storage leaf's 100-resource budget. Authorization is e
 in one read snapshot and rechecked before response release or write commit, including
 timed grants and identity eligibility. Loss denies the entire result/transaction.
 
-Adapter precedence is shape/bounds, identity and registered operation admission, target
-and nested authority, authorized replay lookup, then fresh version/domain checks.
-Same-command replay still checks current disclosure, but does not demand new catalog
-use for the stored item's historical result. A receipt belonging to another initiating
-identity is command_id_unavailable; never reveal whether its semantic hash matched.
+Adapter precedence is shape/bounds, identity and registered operation admission, then
+Section 6.2's authorized replay branch or Section 6.1's fresh target/nested authority.
+Fresh write authority is not a prerequisite to returning a currently readable receipt.
 For web, missing/hidden root or nested reference is resource_unavailable (404), missing
 operation mapping is operation_unavailable (404), lost admitted access is access_changed
 (409), invalid selection is identity_unavailable (403), capacity is capacity_exceeded
@@ -394,6 +405,51 @@ projections contain IDs and versions, not all facet values. The dedicated facets
 surface precedes opt-in successor schedule projections. Existing `schedule.show`,
 agenda, compact receipts and rendering remain unchanged until their contracts are
 explicitly extended. UI labels and field ordering are presentation, not authority.
+
+### 6.2 Closed write-replay authority
+
+All six writes use the following matrix for every successful original receipt:
+create has only a changed branch; the other five have changed and no-op branches.
+It implements the current-read replay rule in permission-enforcement-and-web-admission.md,
+not a second permission model. Resolver labels are mirrored in the integration companion.
+`receipt.schema.catalog_read` resolves the root owning the exact returned revision/root
+ID; `receipt.archetype.catalog_read` resolves the returned archetype. Binding IDs and
+audit/receipt/version evidence inherit the indicated resource's disclosure authority.
+
+| Command | Current receipt disclosure authority | Nested checks |
+| --- | --- | --- |
+| `facet_schema.create` | `receipt.schema.catalog_read` on the created root | None; no renewed owner catalog-admin check |
+| `facet_schema.publish` | `receipt.schema.catalog_read` | None; no catalog-admin/use or active-revision check |
+| `facet_schema.retire` | `receipt.schema.catalog_read` | None; retirement does not itself revoke read access |
+| `item_archetype.facet_binding.set` | `receipt.archetype.catalog_read` | `receipt.schema.catalog_read` for the returned pinned schema revision; do not follow its current replacement binding |
+| `item_archetype.facet_binding.remove` | `receipt.archetype.catalog_read` | None; the receipt returns binding evidence, not a schema revision/definition |
+| `item.facets.update` | `receipt.item.read_current_authority` on the returned item | None; the receipt returns item/version/change evidence, not facet values, definitions or nested reference IDs |
+
+For every row, permission-enforced replay requires the same initiating **account and
+subject** as the stored attribution and a currently eligible identity/registered operation.
+A changed session alone is allowed; a changed account-subject mapping is not. The adapter
+may privately look up the receipt and its attribution after shape/admission checks solely
+to select this branch. It MUST NOT disclose receipt existence, payload, semantic hash or
+result before checking initiating identity and all matrix authorities. A foreign or local
+receipt without protected attribution yields `command_id_unavailable` on the trusted-web
+adapter (the deferred protected adapter retains `request_id_unavailable`). Missing/hidden
+matrix resources yield `resource_unavailable` (404); authority lost between initial
+authorization and release yields `access_changed` (409), with no receipt/result.
+
+Only after those checks compare normalized command/envelope semantics: incompatibility
+is `semantic_conflict`; compatibility returns Section 10.2's replay projection before
+fresh version/epoch checks. A missing receipt takes the fresh Section 6.1 path and its
+write checks. Recheck current disclosure at release; no replay branch writes anything.
+Do not re-run fresh write/admin/use rights, status, item-type, binding eligibility or
+reference validation on compatible replay. In particular neither original request
+references nor the item's current or historical facet snapshot are dereferenced for an
+item-update receipt. A separate `item.facets.show` still enforces all readback checks.
+Catalog retirement, later binding removal and loss of edit/admin rights cannot alone
+invalidate a receipt replay when the matrix's current read rights remain.
+
+Trusted-local retains full scope and existing normalized-request/actor compatibility;
+it does not fabricate a web identity or impose a new OS-identity ownership rule on local
+receipts. This exception is not available to a permission-enforced adapter.
 
 ## 7. Bounded queries and persistence
 
@@ -455,7 +511,7 @@ No promised runtime family is advertised before those tests pass. Do not widen t
 slice to workflow recipes, live enrichment or a new reference-sharing model.
 
 The structural schemas, fixture manifest and pure normalization/identity vectors are
-now present (Section 10). Sections 5, 6.1 and 11 and the integration companion specify
+now present (Section 10). Sections 5, 6 and 11 and the integration companion specify
 the previously open work, resolver and cursor decisions. They do not satisfy persisted-state, permission, cursor,
 work-freshness, concurrency or query-plan acceptance families below. Their tests must
 not be reported as proof of those runtime behaviors.
@@ -473,7 +529,9 @@ Required fixture families and observable oracles:
 1. Definition normalization: equivalent field order yields identical hashes; unknown
    keywords, invalid bounds, oversized definitions and executable forms fail unchanged.
 2. Type validation: NFC, integer boundaries, leap dates, nulls, wrong reference types,
-   unknown fields and missing required fields have deterministic outcomes.
+   unknown fields and missing required fields have deterministic outcomes. A legal
+   archetype/schema intersection does not authorize an incompatible concrete item type;
+   same-value sets revalidate, whereas remove/copy-forward/replay do not reauthor values.
 3. Revision isolation: publish leaves old snapshots byte-identical; explicit upgrade
    succeeds only against the active binding and expected item version.
 4. Atomic mutation and identity: golden preimages/digests cover every generated row
@@ -485,11 +543,15 @@ Required fixture families and observable oracles:
 5. Lifecycle: retire prevents new attachment but permits retained reads/removal;
    archetype change with nonempty facets fails without loss.
 6. Access: foreign catalogs/references deny without leakage; catalog administrator
-   cannot read unrelated items; current permissions govern historical readback.
+   cannot read unrelated items; current permissions govern historical readback. Each
+   write's changed/no-op replay branches follow Section 6.2, including revoked read
+   authority, retained read with lost write rights, and foreign initiating identities.
 7. Scheduling: facet edit preserves time/policy meaning; queued, leased and attempted
    work outcomes follow the explicit freshness rule; no extra send occurs.
 8. Queries: indexed equality, pagination invalidation, access revocation and capacity
    limits behave identically at small and large unrelated-ledger sizes; no JSON scan.
+   First-page source races fail without retry/result/cursor; continuation races are
+   stale_cursor, with current-authority and capacity precedence as in Section 11.3.
 9. Concurrent writers: facet versus schedule edit has one winner and a stale conflict,
    not lost fields, half-updated indexes or premature nested transaction commits.
 10. Flight proof: register, bind, attach, inspect, query and replace through commands;
@@ -737,10 +799,23 @@ changing only last_key. Replaying a cursor against unchanged facts returns the s
 logical page; no durable read evidence is created. Concurrent source changes between
 snapshot evaluation and release cause revalidation failure, never a mixed page.
 
+Perform exactly one snapshot construction per request, with no automatic reconstruction
+retry or budget reset. Revalidate current identity/authority, then the complete source
+proof before release, within the same operation budget. If only source facts changed:
+a first page (no cursor) returns CLI `environment_failure`, exit 7, or web
+`access_changed`, HTTP 409 (`first_page_source_changed` in the companion); a continuation
+returns `stale_cursor`, mapped to web `access_changed`, HTTP 409. Neither returns a
+result, count or cursor, nor creates durable evidence. The caller may issue a new
+first-page request. Current identity/hidden-resource/lost-access errors take precedence
+over source comparison; if completing revalidation would exceed a deadline or resource
+budget, return capacity rather than guessing whether the source changed.
+
 Service time, not action_timestamp_utc, governs `issued_at <= now < expires_at` with
 `expires_at = issued_at + 900 seconds`; now must also precede the non-null authorization
-deadline. A non-null deadline must be later than issued_at (otherwise restart evaluation
-or fail access_changed without issuing a token). Malformed dates/future-issued payload
+deadline. A non-null deadline must be later than issued_at; crossing a relevant access
+transition before first-page release fails `access_changed` on web (CLI environment_failure,
+exit 7), with no token and no internal retry. A continuation crossing its bound deadline
+is stale_cursor, subject to current identity/hidden-resource errors first. Malformed dates/future-issued payload
 or mismatched query/command is invalid_request.
 Authentic but expired, changed context/access/source or missing last_key is stale_cursor.
 Web maps stale_cursor to access_changed; invalid selection/hidden targets take the

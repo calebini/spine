@@ -46,6 +46,40 @@
       "reference_predicate.read"
     ]
   },
+  "item_set_compatibility": {
+    "applies_to": "every_fresh_set_including_same_value_noop",
+    "required_membership": [
+      "pinned_assigned_archetype_revision.compatible_item_types",
+      "pinned_facet_schema_revision.compatible_item_types"
+    ],
+    "failure": {"code": "wrong_item_type", "field": "item_id", "exit": 2, "web": "domain_failure", "http": 422},
+    "skip_for": ["remove", "unchanged_copy_forward", "compatible_receipt_replay"]
+  },
+  "replay_permission_resolvers": {
+    "facet_schema.create": ["receipt.schema.catalog_read"],
+    "facet_schema.publish": ["receipt.schema.catalog_read"],
+    "facet_schema.retire": ["receipt.schema.catalog_read"],
+    "item_archetype.facet_binding.set": ["receipt.archetype.catalog_read", "receipt.schema.catalog_read"],
+    "item_archetype.facet_binding.remove": ["receipt.archetype.catalog_read"],
+    "item.facets.update": ["receipt.item.read_current_authority"]
+  },
+  "replay": {
+    "permission_enforced_identity": "same_initiating_account_and_subject",
+    "applies_to": ["changed_receipt", "noop_receipt"],
+    "create_outcomes": ["changed_receipt"],
+    "precedence": ["shape_bounds", "identity_operation_admission", "private_receipt_lookup", "initiating_identity", "receipt_disclosure_authority", "semantic_compatibility", "release_authority_recheck", "replay_projection"],
+    "receipt_absent": "fresh_permission_resolvers_then_domain_validation",
+    "foreign_receipt": "command_id_unavailable",
+    "deferred_protected_foreign_receipt": "request_id_unavailable",
+    "hidden_receipt_resource": "resource_unavailable",
+    "release_authority_lost": "access_changed",
+    "semantic_mismatch": "semantic_conflict",
+    "fresh_write_permissions_required": false,
+    "active_catalog_or_binding_required": false,
+    "item_update_reference_resolution": "none_receipt_has_no_facet_values_or_reference_ids",
+    "trusted_local": "full_scope_existing_normalized_request_and_actor_compatibility",
+    "durable_writes": false
+  },
   "reference_visibility": {
     "trusted_local": "existing; subject must be active on set",
     "permission_enforced": {
@@ -76,7 +110,17 @@
       "item_archetype.facet_binding.list": "facet_key",
       "item.facets.query": "item_id"
     },
-    "durable_read_writes": false
+    "durable_read_writes": false,
+    "release_revalidation": {
+      "max_snapshot_constructions": 1,
+      "automatic_retries": 0,
+      "reset_budget": false,
+      "precedence": ["current_authority", "capacity", "source_comparison"],
+      "first_page_source_change": "first_page_source_changed",
+      "continuation_source_change": "stale_cursor",
+      "first_page_access_transition": "first_page_access_changed",
+      "failure_result_or_cursor": false
+    }
   },
   "work": {
     "contract_version": "spine.facet-notification-continuity.v1",
@@ -125,6 +169,18 @@
     "stale_cursor": {
       "cli": "stale_cursor",
       "exit": 6,
+      "web": "access_changed",
+      "http": 409
+    },
+    "first_page_source_changed": {
+      "cli": "environment_failure",
+      "exit": 7,
+      "web": "access_changed",
+      "http": 409
+    },
+    "first_page_access_changed": {
+      "cli": "environment_failure",
+      "exit": 7,
       "web": "access_changed",
       "http": 409
     },
