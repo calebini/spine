@@ -67,6 +67,9 @@
         }
       },
       "additionalProperties": false
+    },
+    "dry_run": {
+      "const": true
     }
   },
   "additionalProperties": false

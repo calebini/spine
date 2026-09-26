@@ -3,6 +3,7 @@
 Status: Accepted v1.0 — physical design ratified; not implemented
 Date: 2026-09-24
 Ratified: 2026-09-25
+Updated: 2026-09-26 — activation-proof clarification; accepted physical layout unchanged
 Scope: SQLite persistence, migration, typed query indexes and storage proof for facets
 
 ## 1. Authority and boundaries
@@ -17,7 +18,8 @@ permission or work model.
 
 The existing [machine registry](../contracts/archetype-facet-contract-registry.v1.json),
 [type schema](../contracts/schemas/archetype-facet-types.schema.json) and
-[fixture manifest](../contracts/archetype-facet-fixture-manifest.json) remain unchanged.
+[fixture manifest](../contracts/archetype-facet-fixture-manifest.json) remain the
+machine-contract authorities, aligned with the logical owner.
 Storage columns are not new public response fields. No migration number, implemented
 family, pack capability, CLI command or web route is activated by this specification.
 
@@ -301,6 +303,48 @@ routine preflight checks schema objects only, and ordinary commands check touche
 or versions only. Failure is fail-closed; reads never fix rows or write diagnostics
 into the command ledger merely because an invariant failed.
 
+### 5.1 All-writer finalization and activation proof
+
+The marker's child-to-parent FK does **not** prove that every item version has a
+marker. Before this schema can be activated, SPINE-027 must produce a checked-in,
+machine-readable, closed inventory of actual item-version producers from its
+implementation base. Each entry identifies a stable producer key, public command or
+internal entrypoint, source allocation call sites, common finalizer, and executable
+coverage test IDs. The inventory records its own format version and target ledger
+schema version. It must include every item type and every creation/copy-forward path,
+including internal reconciliation and composite commands; the examples in Section 6
+are not the authoritative enumeration. Migration backfill is separately identified as
+maintenance, with its own parity proof, not an undocumented ordinary-writer exemption.
+
+Production version allocation and outer commit must share a transaction-owned
+registration/finalization boundary. The transaction records **all allocated versions**
+through the common allocation path, not a caller-supplied selection of versions to
+validate. Unregistered producers cannot allocate a version. Immediately before commit,
+the shared finalizer verifies Section 5's invariants for every touched version/root,
+including exactly one complete marker, canonical/field/reference parity and the
+current shell/index projection. A missing marker, omitted finalizer, omitted touched
+version, or projection mismatch prevents commit and rolls back the whole command,
+including tentative supporting rows, audit and receipt; surface the existing
+`environment_failure` boundary (CLI exit 7), never a durable success receipt.
+Helpers cannot commit early. A no-op/replay/read allocates no version and requires no
+invented marker; existing validation of any other touched facts is still mandatory.
+
+Release tests must reconcile the closed inventory against every production allocation
+call site and transaction entrypoint, reject bypass/direct version inserts outside
+the gateway, and exercise each producer on empty and applicable nonempty snapshots.
+Require an injected missing-marker/missing-finalizer failure, an unregistered producer,
+a multi-item transaction with one omitted snapshot, and stale current-index parity;
+each must leave zero durable command deltas. Tests must fail when a new producer is
+added without inventory and finalizer coverage. Manifest presence or pure decision
+fixtures alone do not prove reachability/enforcement. Real SQLite proofs are required.
+
+This is a **new-schema writer activation gate**, even while public facet commands
+remain disabled. A release without complete coverage must not activate/migrate to the
+facet schema. Routine readiness remains limited to compiled contracts and schema
+objects; it does not enumerate source code or scan ledger history. Finalization checks
+only the transaction's bounded touched set under existing operation budgets, never an
+all-ledger invariant scan. Deep migration verification remains explicit maintenance.
+
 ## 6. Versioning, transactions and evidence
 
 For a fresh changed item update, in the existing outer write transaction:
@@ -335,6 +379,11 @@ new rows. Conflicting replay, validation failure, lock timeout, disk full, inter
 statement or deferred-FK failure: roll back all tentative facts. After an uncertain client
 response, retry the same command_id; do not generate a new one. Use existing semantic
 facts/hashes and command-derived IDs; no storage-specific idempotency table.
+
+Dry-run follows logical Section 10.2.1: bounded simulation validates the same proposed
+facts but commits nothing, including no-op receipts. Any tentative transaction is
+rolled back; would-be identities are not durable evidence. Do not copy the full ledger
+to implement preview or bypass the shared finalization validations for changed previews.
 
 Item facet changes use existing audit_log with the logical audit_id. Catalog/binding
 changes use existing coordination_catalog_audit_log with that audit_id stored as
@@ -411,7 +460,9 @@ only at implementation; rebase on intervening migrations rather than reserve 16 
 5. Package the matching object manifest and update every item-version writer to create
    or copy facet markers, even when facet commands are not exposed. No mixed-version
    writer rollout: older runtimes must fail schema preflight. Verify contract/decoder
-   availability before advertising facet command families.
+   availability before advertising facet command families. Section 5.1's closed
+   inventory, shared precommit gate and executable coverage must be complete before
+   releasing this migration, not postponed to public-command activation.
 
 Backfill is deliberately ledger-size-dependent **maintenance**, not startup or command
 preflight. A large deployment may need a separately designed resumable migration; this
@@ -558,10 +609,10 @@ IDs name required future tests; a Markdown row is not runtime verification evide
 | FS-01 representation | Existing normalization/hash vectors yield identical stored bytes; reordered equivalent input no-ops; malformed JSON, duplicate keys, surrogates and unknown decoder selectors fail safely |
 | FS-02 relational identity | Cross-root revision pointer, cross-binding/revision entry, wrong reference kind, duplicate owner key (including system/retired), duplicate active binding and version gaps are rejected |
 | FS-03 immutable decoding | Publish/retire/replace binding leaves old entry/definition bytes and hashes unchanged; old item decodes using pinned revision despite different current definition |
-| FS-04 full snapshots | Unrelated item mutations copy all eight entries and original provenance; absent versus empty object differs; last removal yields explicit empty marker; omitted marker/projection parity fails |
+| FS-04 full snapshots | Every inventoried version producer copies complete applicable nonempty (including eight-entry) and empty snapshots and original provenance; absent versus empty object differs; last removal yields explicit empty marker; omitted marker/finalizer/touched version and projection mismatch roll back the entire transaction; unregistered producers cannot allocate |
 | FS-05 typed queries | Flight number/location matches, NFC/case behavior, date leap boundaries, boolean/integer separation, signed-64-bit endpoints, absent optionals and duplicate matching keys produce exact expected IDs/versions |
 | FS-06 references | Non-queryable historical references block hard delete; unreadable reference denies whole readback without ID leakage; inactive-readable subject retained but fresh attachment denied; existing readable location needs no lifecycle flag and reads as active |
-| FS-07 atomic/replay | Two-key failure changes nothing; each write effect creates the exact audit/receipt/domain counts; fresh no-op receipt only; replay zero rows; lost-response retry returns original identities |
+| FS-07 atomic/replay | Two-key failure changes nothing; each write effect creates the exact audit/receipt/domain counts; fresh no-op receipt only; replay zero rows; all six writes' applicable dry-run changed/no-op/replay/failure branches leave zero durable deltas, no sends, deterministic would-be IDs and reconciliation_performed=false for item updates; lost-response retry returns original identities |
 | FS-08 concurrent writers | Facet/schedule edit, publish/publish, binding replace/replace, subject inactivation/catalog retirement versus set use deterministic barriers and yield serial outcomes without stale-index windows |
 | FS-09 budgets/plans | 1 and 100000 unrelated-owner items plus deep unrelated history preserve candidate-rooted SEARCH plans; VM-step/deadline/byte/101st-resolution failures return no false-complete result or durable trace |
 | FS-10 migration | Predecessor fixture with all item types/history backfills exact empty markers, preserves all existing rows/identities, preserves rebuilt audit rows, and rejects old writers; interrupted migration rolls back |

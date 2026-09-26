@@ -80,6 +80,40 @@
     "trusted_local": "full_scope_existing_normalized_request_and_actor_compatibility",
     "durable_writes": false
   },
+  "dry_run": {
+    "context_field": "dry_run",
+    "request_field": false,
+    "handler_response_marker": true,
+    "normal_response_marker": "omitted",
+    "commands": ["facet_schema.create", "facet_schema.publish", "facet_schema.retire", "item_archetype.facet_binding.set", "item_archetype.facet_binding.remove", "item.facets.update"],
+    "fresh_ids": "deterministic_would_be",
+    "replay_ids": "stored",
+    "changed": "would_mutate",
+    "item_changed_facet_keys": "would_change_on_fresh_changed_else_empty",
+    "item_reconciliation_performed": false,
+    "equivalence_validation_required": true,
+    "durable_writes": false,
+    "external_calls": false,
+    "whole_ledger_copy_or_scan": false
+  },
+  "writer_activation": {
+    "normative_source": "specs/archetype-facet-storage.md#51-all-writer-finalization-and-activation-proof",
+    "gate": "before_new_schema_activation_even_without_public_facet_commands",
+    "inventory_produced_during": "SPINE-027",
+    "inventory_metadata": ["format_version", "target_ledger_schema_version"],
+    "inventory_entry_fields": ["producer_key", "entrypoint", "allocation_call_sites", "finalizer", "coverage_test_ids"],
+    "coverage": "all_production_item_version_allocation_and_transaction_entrypoints",
+    "maintenance_backfill": "separately_identified_with_parity_proof",
+    "unregistered_producer": "reject_before_allocation",
+    "touched_versions_source": "transaction_owned_common_allocator",
+    "finalization": "shared_precommit_all_touched_versions_and_roots",
+    "failure": "environment_failure",
+    "failure_exit": 7,
+    "failure_durable_command_deltas": false,
+    "runtime_history_scan": false,
+    "manifest_alone_proves_coverage": false,
+    "required_negative_proofs": ["unregistered_producer", "missing_marker", "missing_finalizer", "omitted_touched_version", "current_index_mismatch", "inventory_coverage_gap"]
+  },
   "reference_visibility": {
     "trusted_local": "existing; subject must be active on set",
     "permission_enforced": {
@@ -157,7 +191,7 @@
       "independently_stale": "leave_to_existing_stale_handling",
       "absent": "do_not_materialize"
     },
-    "reconciliation_performed": "fresh changed and (current policies exist or notification_reminder work exists); equivalence proof only"
+    "reconciliation_performed": "committed fresh changed and (current policies exist or notification_reminder work exists); equivalence proof only; false during dry-run"
   },
   "adapter_errors": {
     "invalid_request": {
@@ -208,6 +242,8 @@
     "authenticated_pagination_concurrent_revocation_and_source_change",
     "notification_multi_copy_attempt_start",
     "recurring_and_follow_source_continuity",
-    "migration_rollback_indexes_and_all_version_writers"
+    "migration_rollback_indexes_and_all_version_writers",
+    "all_six_write_dry_run_branches_no_persistence_and_subsequent_identity_equality",
+    "closed_writer_inventory_shared_finalizer_and_negative_bypass_proofs"
   ]
 }

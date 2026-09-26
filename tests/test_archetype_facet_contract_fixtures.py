@@ -418,6 +418,65 @@ class ArchetypeFacetContractFixtureTests(unittest.TestCase):
             corrupt = {**response, "effect": "invented"}
             self.assertWire("archetype-facet-responses.schema.json", command, corrupt, False)
 
+    def test_dry_run_golden_projection_and_reconciliation_reporting(self):
+        for row in self.manifest["fixtures"]:
+            if not row["fixture_id"].endswith("_preview") or not row["valid"]:
+                continue
+            with self.subTest(fixture=row["fixture_id"]):
+                preview = load(ROOT / row["fixture"])
+                original = load(ROOT / (row["fixture"].removesuffix("_preview.json") + ".json"))
+                expected = {**original, "dry_run": True}
+                if original["ok"] and original["command"] == "item.facets.update":
+                    expected["reconciliation_performed"] = False
+                self.assertEqual(preview, expected)
+                if "command_receipt_id" in original:
+                    self.assertEqual(preview["command_receipt_id"], original["command_receipt_id"])
+                if "audit_id" in original:
+                    self.assertEqual(preview["audit_id"], original["audit_id"])
+
+    def test_dry_run_covers_every_write_effect_and_replay_branch(self):
+        covered = set()
+        for row in self.manifest["fixtures"]:
+            if not row["valid"] or "responses" not in row["schema"]:
+                continue
+            original = load(ROOT / row["fixture"])
+            if "dry_run" in original:
+                continue
+            command = original["command"]
+            preview = {**original, "dry_run": True}
+            if command == "item.facets.update":
+                preview["reconciliation_performed"] = False
+            with self.subTest(command=command, fixture=row["fixture_id"]):
+                self.assertWire("archetype-facet-responses.schema.json", command, preview)
+                for invalid in (False, None, "true", 1):
+                    self.assertWire("archetype-facet-responses.schema.json", command, {**preview, "dry_run": invalid}, False)
+                if "changed" in original:
+                    covered.add((command, original["effect"], original["replayed"]))
+                    self.assertEqual(preview["changed"], original["changed"])
+                if command == "item.facets.update":
+                    self.assertWire("archetype-facet-responses.schema.json", command,
+                                    {**preview, "reconciliation_performed": True}, False)
+        expected = {
+            (command, branch["properties"]["effect"]["const"], replayed)
+            for command, schema in self.schemas["archetype-facet-responses.schema.json"]["$defs"].items()
+            for branch in schema.get("oneOf", [])
+            for replayed in (False, True)
+        }
+        self.assertEqual(covered, expected)
+        self.assertEqual(len(covered), 22)
+        writes = {command for command, _, _ in covered}
+        integration = load(ROOT / "contracts/archetype-facet-integration.v1.json")
+        self.assertEqual(writes, set(integration["dry_run"]["commands"]))
+        failure = load(FIXTURES / "contracts/failure_facet_value_invalid.json")
+        for command in writes:
+            with self.subTest(command=command):
+                request = load(FIXTURES / "contracts" / ("request_" + command.replace(".", "_") + ".json"))
+                # Invocation context must not leak into the command JSON contract.
+                self.assertWire("archetype-facet-commands.schema.json", command, {**request, "dry_run": True}, False)
+                preview = {**failure, "command": command, "dry_run": True}
+                self.assertWire("archetype-facet-failure.schema.json", None, preview)
+                self.assertWire("archetype-facet-failure.schema.json", None, {**preview, "dry_run": False}, False)
+
     def test_readback_pin_hash_and_reference_state(self):
         response = load(FIXTURES / "contracts/response_item_facets_show.json")
         entries = response["entries"]

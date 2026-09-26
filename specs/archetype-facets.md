@@ -1,6 +1,6 @@
 # Spine Archetype Facets
 
-Status: Draft v0.7 — integration audit clarifications specified; not implemented
+Status: Draft v0.8 — diagnostic dry-run and writer-activation amendment; not implemented
 Date: 2026-09-07
 Updated: 2026-09-26
 Scope: Registered typed item facts, immutable schema revisions, archetype bindings,
@@ -280,10 +280,11 @@ Missing/ambiguous current intent fails closed. Work IDs and immutable historical
 are not rebound to the current version to conceal stale evidence. Other work kinds
 retain their owning contracts; this rule covers ordinary notification_reminder only.
 
-`reconciliation_performed=true` on a fresh changed command exactly when current policies
+`reconciliation_performed=true` on a committed fresh changed command exactly when current policies
 exist or any notification_reminder work exists and the transaction completed the
 above equivalence check. This is reconciliation by verified retention, not cancellation
-or expansion. Otherwise it is false; no-op and replay always return false. Use a bounded
+or expansion. Otherwise it is false; no-op, replay and dry-run always return false.
+Dry-run still validates would-be equivalence as specified in Section 10.2.1. Use a bounded
 indexed existence probe for work, not a scan of all attempts or exhausted work history.
 No work IDs/counts are added to the facet receipt. Inability to establish equivalence
 within the operation budget fails atomically, never commits an unchecked version.
@@ -640,8 +641,8 @@ IDs and schema revision. Remove reports the same retired binding ID as prior/res
 the absent-remove no-op reports both IDs as null. Item receipts report prior/resulting
 item versions and sorted `changed_facet_keys` (empty on no-op or replay). Fresh changed
 versions advance by one; replay preserves the original version pair.
-`reconciliation_performed` reports whether work reconciliation ran on this invocation;
-no-op and replay require false. The sample changed receipt is for an item with no policies or
+`reconciliation_performed` reports whether committed work reconciliation ran on this invocation;
+no-op, replay and dry-run require false. The sample changed receipt is for an item with no policies or
 work and uses false. Section 5 defines verified retention and the exact true/false rule;
 the boolean is not evidence of delivery or a count of cancelled/created work.
 
@@ -667,6 +668,43 @@ Admission/permission and operational-capacity envelopes remain owned by their ad
 the facet handler schema does not replace or freeze them. Section 6.1 defines resolver
 mappings, admission ordering and capacity wrappers. Fixture error
 messages are illustrative safe prose, not byte-exact public message constants.
+
+### 10.2.1 Dry-run projection and evidence
+
+All six writes inherit [agent-command-contract.md Section 15](agent-command-contract.md#15-dry-run-and-external-send-boundary).
+`dry_run` is common invocation context (CLI `--dry-run`), not a facet request field,
+identity input or durable receipt field. Every handler-level response in this context,
+including failure or a read invoked with this context, adds exactly `dry_run=true`.
+Normal responses omit the field; `dry_run=false` is not a second wire encoding.
+Pre-handler admission/preflight failures retain their owning envelope rules.
+
+| Resolved write branch | Preview result |
+| --- | --- |
+| Fresh changed | Same effect, version pair and deterministic would-be domain/audit/receipt IDs; changed=true, replayed=false; no rows persisted |
+| Fresh no-op | Same no-op effect and unchanged result facts; changed=false, replayed=false; would-be receipt ID, no audit ID and no persisted receipt |
+| Compatible replay of changed or no-op receipt | Stored effect, identities and historical audit ID when present; changed=false, replayed=true; existing disclosure/compatibility checks, zero new rows |
+| Handler failure | Normal structured error plus dry_run=true; no success identities or new evidence rows |
+
+`facet_schema.create` has only fresh changed and compatible changed-receipt replay
+successes; collisions are still conflicts, not a new no-op branch. The other five
+writes retain both changed and no-op receipt branches.
+
+For `item.facets.update`, fresh changed preview returns the sorted **would-change**
+`changed_facet_keys` and would-be next version. No-op/replay returns an empty key list.
+`reconciliation_performed=false` in every preview, including when policies/work exist:
+it reports committed reconciliation, not simulated validation or delivery. This is the
+only facet success-field substitution beyond the common dry-run marker and normal
+replay projection. Preview must still prove the proposed snapshot and notification
+equivalence under the same bounded validations; a failed proof returns the normal
+failure, not an unchecked success. No work, lease, attempt, audit, receipt, catalog,
+snapshot or index changes survive preview, and no external system is invoked.
+
+The later non-preview invocation with identical request/context produces identical
+would-be IDs unless intervening state selects another specified branch. Preview is
+not a reservation or an exemption from stale-version checks. It must not copy or scan
+the whole ledger. Wire fixtures/oracles prove shape and projection only; runtime
+acceptance requires all six writes' branch/error previews, zero durable row deltas,
+no sends, bounded execution and subsequent-commit identity equality on disposable ledgers.
 
 ### 10.3 Pagination and validation limits
 

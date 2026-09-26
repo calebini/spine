@@ -462,6 +462,12 @@ Every handler-level dry-run response includes `dry_run=true` once a canonical co
 
 Dry run never creates audit rows or command receipts, but it still returns the would-be `audit_id` or `command_receipt_id` when the equivalent non-dry-run success would create that artifact. A later non-dry-run invocation with the same request and context must return the same deterministic identities unless intervening ledger state changes cause a specified stale-version, duplicate, replay, lifecycle, archived-item, or semantic-conflict branch.
 
+The draft facet family makes its invocation-activity projection explicit in
+[archetype-facets.md Section 10.2.1](archetype-facets.md#1021-dry-run-projection-and-evidence):
+`changed` and changed keys describe would-be changes, but `reconciliation_performed`
+is false during preview. This does not omit any required equivalence validation or
+alter other command families' dry-run response semantics.
+
 The draft operational-resilience extension requires dry-run memory and work to be
 bounded by the selected command facts and output budget. Copying the complete ledger to
 an in-memory database is not conforming final behavior. Until bounded simulation is

@@ -65,10 +65,15 @@ separate runtime evidence; no deployment or service restart is part of this repa
 
 The 2026-09-26 integration recheck passed with no findings and preserved boundaries.
 Its approved model was gpt-5.6-sol. The reviewed sources are checkpointed through
-`4060e89`; the physical storage design is accepted v1.0 and the logical integration
-draft is v0.7. This closes the focused contract review, not runtime verification or
+`4060e89`; the physical storage design is accepted v1.0 and the reviewed logical
+integration draft was v0.7. This closes that focused contract review, not runtime verification or
 a convergence declaration. The [backlog](BACKLOG.md#facet-delivery--planning-selected-runtime-not-started)
 owns live task status; this section defines implementation order and release fences.
+
+The subsequent operator-selected diagnostic found a dry-run wire-contract conflict
+and an all-writer activation-proof gap. The manual v0.8 amendment defines previews and
+the storage leaf's Section 5.1 gate without changing the accepted physical layout.
+Local contract checks are not a new Whetstone verdict or SQLite enforcement proof.
 
 Authoritative inputs are [the logical facet contract](../specs/archetype-facets.md),
 [its storage leaf](../specs/archetype-facet-storage.md),
@@ -101,8 +106,12 @@ can leave without facet markers. Public facet commands stay unregistered in this
    Stored definitions/values remain authority; typed rows are derived.
 4. Wire empty-marker creation and exact snapshot/reference copy-forward into **every**
    version producer: item/lifecycle, schedule, recurrence, notifications/profile
-   application and temporal-binding reconciliation. Inventory actual call sites and
-   prove coverage. Retain original authoring evidence; enforce archetype-change guards;
+   application and temporal-binding reconciliation. Publish the closed machine-readable
+   producer/call-site/finalizer/test inventory required by storage Section 5.1 and prove
+   coverage. Gate allocation and outer commit through the shared transaction-owned
+   touched-version finalizer, including negative bypass/missing-marker tests. Complete
+   this gate before releasing the migration, even with public facet commands disabled.
+   Retain original authoring evidence; enforce archetype-change guards;
    update only the changed item's current typed rows in the same outer transaction.
 5. Backfill explicit empty snapshots for every existing historical item version; leave
    existing items, audit, receipts, work and attempts semantically unchanged. Prove
@@ -127,6 +136,11 @@ handlers and the trusted-local CLI. Enforce exact request/response pins, produce
 identities, stale-version checks, one outer transaction, audit counts and same-ID
 replay. Fresh sets require the concrete item type in both pinned compatibility sets,
 even for same-value no-ops; retained/removal/replay paths keep their specified exemptions.
+
+Cover all six writes' applicable dry-run changed/no-op/replay/failure paths, including
+zero durable deltas, no sends, bounded previews, later-commit identity equality and
+`reconciliation_performed=false` in preview despite required equivalence validation.
+The invocation flag remains outside facet request JSON; see logical Section 10.2.1.
 
 Integrate facet-only edits with ordinary notification continuity before exposing
 `item.facets.update`. Resolve the current policy by stable item/intent, not a one-hop

@@ -370,6 +370,68 @@
       "schema": "contracts/schemas/archetype-facet-responses.schema.json",
       "schema_ref": "#/$defs/item.facets.update",
       "valid": true
+    },
+    {
+      "fixture_id": "response_facet_schema_create_preview",
+      "fixture": "tests/fixtures/archetype_facets/contracts/response_facet_schema_create_preview.json",
+      "schema": "contracts/schemas/archetype-facet-responses.schema.json",
+      "schema_ref": "#/$defs/facet_schema.create",
+      "valid": true
+    },
+    {
+      "fixture_id": "response_item_facets_update_retained_work_preview",
+      "fixture": "tests/fixtures/archetype_facets/contracts/response_item_facets_update_retained_work_preview.json",
+      "schema": "contracts/schemas/archetype-facet-responses.schema.json",
+      "schema_ref": "#/$defs/item.facets.update",
+      "valid": true
+    },
+    {
+      "fixture_id": "response_item_facets_update_noop_preview",
+      "fixture": "tests/fixtures/archetype_facets/contracts/response_item_facets_update_noop_preview.json",
+      "schema": "contracts/schemas/archetype-facet-responses.schema.json",
+      "schema_ref": "#/$defs/item.facets.update",
+      "valid": true
+    },
+    {
+      "fixture_id": "response_item_facets_update_replay_preview",
+      "fixture": "tests/fixtures/archetype_facets/contracts/response_item_facets_update_replay_preview.json",
+      "schema": "contracts/schemas/archetype-facet-responses.schema.json",
+      "schema_ref": "#/$defs/item.facets.update",
+      "valid": true
+    },
+    {
+      "fixture_id": "response_item_facets_update_noop_replay_preview",
+      "fixture": "tests/fixtures/archetype_facets/contracts/response_item_facets_update_noop_replay_preview.json",
+      "schema": "contracts/schemas/archetype-facet-responses.schema.json",
+      "schema_ref": "#/$defs/item.facets.update",
+      "valid": true
+    },
+    {
+      "fixture_id": "failure_item_facets_update_incompatible_item_type_preview",
+      "fixture": "tests/fixtures/archetype_facets/contracts/failure_item_facets_update_incompatible_item_type_preview.json",
+      "schema": "contracts/schemas/archetype-facet-failure.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "response_item_facets_show_preview",
+      "fixture": "tests/fixtures/archetype_facets/contracts/response_item_facets_show_preview.json",
+      "schema": "contracts/schemas/archetype-facet-responses.schema.json",
+      "schema_ref": "#/$defs/item.facets.show",
+      "valid": true
+    },
+    {
+      "fixture_id": "invalid_preview_false_marker",
+      "fixture": "tests/fixtures/archetype_facets/contracts/invalid_preview_false_marker.json",
+      "schema": "contracts/schemas/archetype-facet-responses.schema.json",
+      "schema_ref": "#/$defs/facet_schema.create",
+      "valid": false
+    },
+    {
+      "fixture_id": "invalid_preview_reconciliation_performed",
+      "fixture": "tests/fixtures/archetype_facets/contracts/invalid_preview_reconciliation_performed.json",
+      "schema": "contracts/schemas/archetype-facet-responses.schema.json",
+      "schema_ref": "#/$defs/item.facets.update",
+      "valid": false
     }
   ],
   "vectors": [
@@ -396,6 +458,10 @@
     {
       "kind": "typed_values",
       "path": "tests/fixtures/archetype_facets/vectors/typed_values.json"
+    },
+    {
+      "kind": "writer_activation",
+      "path": "tests/fixtures/archetype_facets/vectors/writer_activation.json"
     }
   ],
   "coverage_note": "Structural and test-only decision/cryptographic oracles. No persisted authorization, concurrency, worker, migration or query-plan proof."

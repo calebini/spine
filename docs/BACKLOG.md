@@ -736,10 +736,17 @@ remains below under SPINE-008–009; live delivery status belongs to these entri
 
 ### SPINE-027 — Implement facet persistence and all-writer foundation
 
-**Status:** Ready — planned next slice; awaiting operator instruction to implement.
+**Status:** Ready — the operator-requested diagnostic's dry-run contract conflict
+and all-writer activation-proof clarification have received a targeted manual
+spec/contract amendment and local verification. No post-amendment reviewer verdict
+is claimed. Implementation has not started or been authorized by this amendment.
 **Dependencies:** SPINE-008 review complete, Decision 0004 ratified, storage v1.0
 accepted, integration v0.7 focused recheck passed with zero findings. No unresolved
 product decision is currently identified for this internal persistence slice.
+The operator subsequently requested the feature-specific diagnostic sweep recorded
+below; its concrete findings are manually addressed in logical v0.8 and storage
+Section 5.1. This does not negate the
+completed focused recheck or reopen deferred system-wide reviews.
 
 **Scope:** Pure canonical validators/decoders; all eight accepted tables and exact
 constraints/indexes/triggers; fresh-schema and migration/object-manifest parity;
@@ -752,7 +759,10 @@ available schema number at implementation. No public facet command or web activa
 commands preserve seeded nonempty facets and original evidence; atomic failure leaves
 shell/support/index/audit/receipt facts coherent; immutable history remains decodable;
 candidate-rooted query plans and budgets hold with unrelated history. Routine preflight
-remains bounded. Record a per-FS test/remaining-gate map, not a blanket completion claim.
+remains bounded. Publish the closed producer/call-site/finalizer/test inventory and
+prove shared transaction-final enforcement, including negative bypass/missing-marker
+tests, before activating the new schema even with public facet commands disabled.
+Record a per-FS test/remaining-gate map, not a blanket completion claim.
 The migration and all-version-writer support must ship together; no live DB changes.
 
 ### SPINE-028 — Implement facet commands and notification continuity
@@ -819,8 +829,10 @@ additional broad audit campaign or authorize facet implementation.
 **Status:** In progress — Decision 0004 logical architecture ratified 2026-09-24;
 physical storage design accepted as v1.0 on 2026-09-25; permission/cursor/work contracts
 codified and focused-recheck passed 2026-09-26. Contract review is closed; remaining
-executable delivery gates are mapped to SPINE-027–029. This gate tracker stays open
-until those proofs land; it does not schedule another spec sweep or authorize runtime.
+executable delivery gates are mapped to SPINE-027–029. The subsequent operator-selected
+diagnostic reported one blocker and one major; the v0.8 manual amendment addresses
+both with local spec/contract verification, not a new reviewer verdict. This gate
+tracker stays open; it does not automatically schedule further review or authorize runtime.
 **Dependencies:** SPINE-008 is complete. The deferred resilience campaign is not a
 blanket prerequisite.
 
@@ -1065,6 +1077,62 @@ spec/contract/runtime changes, migration, reviewer run, commit or push in this u
 Planning verification: agent-documentation and implemented-declaration tests passed
 **9 tests and 79 subtests**; **117** local Markdown file/heading links and diff hygiene
 passed. These checks verify documentation alignment, not facet implementation.
+
+**Facet-family diagnostic sweep prepared (2026-09-26):** At explicit operator request,
+staged [archetype-facets-diagnostic-sweep-001](../whetstone_runs/archetype-facets-diagnostic-sweep-001/sweep-notes.md)
+against checkpoint ddbb96c. It will review structural integrity, determinism and
+operability once each using Codex gpt-5.6-sol on the same logical-spec seed plus
+accepted storage and explicit dependency/machine-contract references. This is a
+reviewer-only diagnostic, not another targeted recheck, Editor workflow or convergence
+run. Accepted product/architecture boundaries are fixed; concrete inconsistencies may
+be reported for manual consideration. Deferred resilience and other horizons stay out.
+
+Prepared an exact thirty-four-source inventory, five run-control/seed files, source
+hashes and supported configuration. Local validation passed: source checkpoint/seed
+parity, exact reference inventory, the three-profile scheduler, disabled convergence
+and a fail-closed unused Editor executable. Advisory configured context is about
+0.7 MB / 177000 estimated tokens per pass; not actual model usage. Awaiting explicit
+approval of the listed files, built-in reviewer/profile/rubric context and generated
+copies. No reviewer, runtime changes, source-spec edits, commit or push occurred.
+
+**Facet-family diagnostic completed (2026-09-26):** The operator explicitly approved
+the thirty-four sources, five controls/seed files, built-in reviewer/profile/rubric
+context and generated copies. Three reviewer-only passes completed with Codex
+gpt-5.6-sol: structural integrity zero findings; determinism one blocker
+fb_dry_run_response_contract; operability one major fb_operability_r3_001; no minors
+or nits. Aggregate advice is run_bounded_synthesis, not authorization for an Editor.
+
+Verified the dry-run conflict with the inherited command contract and local read-only
+schema probes: supplied success, replay and failure fixtures reject dry_run=true.
+The all-writer finding concerns a closed inventory and activation/precommit proof;
+the storage contract already requires checks on every writer and SPINE-027 already
+requires call-site inventory/coverage. Tighten that gate without a global readiness
+scan or a physical-layout redesign. Runtime enumeration remains implementation work.
+Recommended next step: targeted manual contract/fixture amendment and explicit writer
+activation acceptance, then focused verification. No source patch has been applied.
+
+All 39 approved inputs remained byte-identical, and each round used the same seed.
+No Editor, source mutation, implementation, commit or push. All three CLI headers and
+invocation telemetry record gpt-5.6-sol; structural/operability feedback self-label
+gpt-5, a retained metadata discrepancy. CLI-reported total usage: **411324 tokens**,
+without a cost or input/output/cache breakdown. This is neither convergence nor
+runtime proof. Evidence: [sweep report](../whetstone_runs/archetype-facets-diagnostic-sweep-001/rounds/profile_sweep_report.md)
+and [manual assessment](../whetstone_runs/archetype-facets-diagnostic-sweep-001/manual-assessment.md).
+
+**Facet diagnostic manual amendment (2026-09-26):** At operator direction, logical
+v0.8 now defines all six writes' dry-run branches, deterministic would-be identities,
+no durable writes/sends, handler-level response markers and item-update preview
+reconciliation=false with equivalence validation still required. Response/failure
+schemas, the integration companion, golden previews and negative fixtures agree.
+Storage Section 5.1 now requires a closed implementation-produced writer inventory,
+transaction-owned allocation/finalization and negative bypass/parity proofs before
+new-schema activation. The physical v1.0 layout is unchanged. Synthetic gate vectors
+are not the production inventory or proof of SQLite enforcement. SPINE-027/028 carry
+the corresponding real-ledger acceptance work. Verification: the focused facet,
+trusted-web, implemented-declaration and agent-documentation suite passed **57 tests
+and 416 subtests**; Ruff on both changed test modules, packaged-contract sync check,
+140 local Markdown links and `git diff --check` passed. No new audit, runtime code,
+schema migration, commit or push occurred. Pre-existing diagnostic tracking was preserved.
 
 ## Later horizons
 

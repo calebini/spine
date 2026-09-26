@@ -74,7 +74,8 @@
               "typed_values",
               "permission_resolution",
               "cursor",
-              "work_freshness"
+              "work_freshness",
+              "writer_activation"
             ]
           },
           "path": {

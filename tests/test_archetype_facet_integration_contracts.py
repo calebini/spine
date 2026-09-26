@@ -298,6 +298,47 @@ class FacetIntegrationContractTests(unittest.TestCase):
                 self.assertEqual(effect, case["expected"])
                 self.assertEqual(evaluated, case["evaluated"])
 
+    def test_writer_activation_and_touched_version_decision_vectors(self):
+        # Deliberately synthetic: these decisions do not prove production call-site
+        # coverage, a commit hook, rollback, or any SQLite invariant enforcement.
+        vectors = load(VECTORS / "writer_activation.json")
+        rule = self.contract["writer_activation"]
+        self.assertFalse(rule["manifest_alone_proves_coverage"])
+        self.assertFalse(rule["runtime_history_scan"])
+        self.assertFalse(rule["failure_durable_command_deltas"])
+        self.assertEqual(rule["gate"], "before_new_schema_activation_even_without_public_facet_commands")
+        self.assertEqual(rule["touched_versions_source"], "transaction_owned_common_allocator")
+        self.assertEqual(rule["failure_exit"], 7)
+        self.assertTrue(set(rule["required_negative_proofs"]) <= {c["id"] for c in vectors["cases"]})
+        for case in vectors["cases"]:
+            with self.subTest(case=case["id"]):
+                state = {**vectors["baseline"], **case["override"]}
+                versions = state["allocated_versions"]
+                registered = set(state["registered_producers"])
+                if set(state["actual_producers"]) != set(state["inventoried_producers"]) or registered != set(state["actual_producers"]):
+                    result = "activation_blocked"
+                elif (
+                    any(v["producer"] not in registered for v in versions)
+                    or (versions and (not state["finalizer_ran"] or not state["current_index_parity"]))
+                    or {v["key"] for v in versions} != set(state["validated_versions"])
+                    or any(v["marker_count"] != 1 or not v["complete"] for v in versions)
+                ):
+                    result = rule["failure"]
+                else:
+                    result = "commit_allowed"
+                self.assertEqual(result, case["expected"])
+
+    def test_dry_run_companion_keeps_preview_separate_from_commit(self):
+        rule = self.contract["dry_run"]
+        for field in ("request_field", "item_reconciliation_performed", "durable_writes", "external_calls", "whole_ledger_copy_or_scan"):
+            self.assertFalse(rule[field])
+        self.assertTrue(rule["equivalence_validation_required"])
+        self.assertTrue(rule["handler_response_marker"])
+        self.assertEqual(rule["fresh_ids"], "deterministic_would_be")
+        self.assertEqual(rule["replay_ids"], "stored")
+        self.assertEqual(rule["normal_response_marker"], "omitted")
+        self.assertEqual(rule["changed"], "would_mutate")
+
     def test_existing_binding_version_boundary_is_not_weakened(self):
         vectors = load(VECTORS / "work_freshness.json")
         for case in vectors["binding_cases"]:

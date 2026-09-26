@@ -1,0 +1,29 @@
+{
+  "coverage_note": "Synthetic decision vectors only, not the implementation producer inventory or proof of SQLite enforcement.",
+  "baseline": {
+    "actual_producers": ["producer-a", "producer-b"],
+    "inventoried_producers": ["producer-a", "producer-b"],
+    "registered_producers": ["producer-a", "producer-b"],
+    "allocated_versions": [
+      {"producer": "producer-a", "key": "item-a:2", "marker_count": 1, "complete": true},
+      {"producer": "producer-b", "key": "item-b:1", "marker_count": 1, "complete": true}
+    ],
+    "validated_versions": ["item-a:2", "item-b:1"],
+    "finalizer_ran": true,
+    "current_index_parity": true
+  },
+  "cases": [
+    {"id": "complete_multi_item", "override": {}, "expected": "commit_allowed"},
+    {"id": "inventory_coverage_gap", "override": {"actual_producers": ["producer-a", "producer-b", "producer-c"]}, "expected": "activation_blocked"},
+    {"id": "registration_coverage_gap", "override": {"registered_producers": ["producer-a"]}, "expected": "activation_blocked"},
+    {"id": "unregistered_producer", "override": {"allocated_versions": [{"producer": "producer-c", "key": "item-c:1", "marker_count": 1, "complete": true}]}, "expected": "environment_failure"},
+    {"id": "missing_marker", "override": {"validated_versions": ["item-a:2"], "allocated_versions": [{"producer": "producer-a", "key": "item-a:2", "marker_count": 0, "complete": true}]}, "expected": "environment_failure"},
+    {"id": "duplicate_marker", "override": {"validated_versions": ["item-a:2"], "allocated_versions": [{"producer": "producer-a", "key": "item-a:2", "marker_count": 2, "complete": true}]}, "expected": "environment_failure"},
+    {"id": "missing_finalizer", "override": {"finalizer_ran": false}, "expected": "environment_failure"},
+    {"id": "omitted_touched_version", "override": {"validated_versions": ["item-a:2"]}, "expected": "environment_failure"},
+    {"id": "multi_item_missing_snapshot", "override": {"allocated_versions": [{"producer": "producer-a", "key": "item-a:2", "marker_count": 1, "complete": true}, {"producer": "producer-b", "key": "item-b:1", "marker_count": 0, "complete": false}]}, "expected": "environment_failure"},
+    {"id": "incomplete_projection", "override": {"validated_versions": ["item-a:2"], "allocated_versions": [{"producer": "producer-a", "key": "item-a:2", "marker_count": 1, "complete": false}]}, "expected": "environment_failure"},
+    {"id": "current_index_mismatch", "override": {"current_index_parity": false}, "expected": "environment_failure"},
+    {"id": "no_version_no_marker_needed", "override": {"allocated_versions": [], "validated_versions": [], "finalizer_ran": false}, "expected": "commit_allowed"}
+  ]
+}
