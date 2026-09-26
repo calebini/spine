@@ -621,10 +621,12 @@ original no-op effect forbids that field. On replay this is historical audit evi
 never evidence of a newly performed write. The effect names the stored receipt's
 outcome; it does not override the current invocation's changed=false result.
 
-These replay branches apply to all six writes, including create, retire and remove,
-and replay of both changed and no-op outcomes. Prior/resulting version and binding
-facts stay exactly as recorded, even if the target has since advanced; replay is not
-a current-state read. For `item.facets.update`, replay returns
+All six writes support compatible replay. `facet_schema.create` replays only its
+changed receipt; create collisions remain conflicts and there is no create no-op
+receipt. Publish, retire, binding set, binding remove and item facet update may replay
+their changed or no-op receipts. Prior/resulting version and binding facts stay exactly
+as recorded, even if the target has since advanced; replay is not a current-state read.
+For `item.facets.update`, replay returns
 `changed_facet_keys=[]` and `reconciliation_performed=false`, regardless of the
 original values of those two invocation-activity fields. It neither reconciles work
 nor advances a version. `replayed` and the activity-field substitutions are response
