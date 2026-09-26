@@ -244,6 +244,16 @@ A schedule edit, target reschedule, target recurrence revision, selected-occurre
 
 An unchanged policy copy-forward with the same `notification_intent_id`, schedule hash, target facts, and routing MAY retain existing eligible work by opportunity identity even though the version-scoped `notification_policy_id` changed. A changed semantic fact MUST NOT retain the work merely because its `eligible_at_utc` is equal.
 
+Conditional facet integration (not yet implemented): a runtime advertising
+`spine.item-facets.v1` MUST apply [archetype-facets.md](archetype-facets.md) Section 5's
+verified-retention rule to facet-only updates. Ordinary reminder work and its historical
+policy/version FKs stay unchanged; current-policy resolution uses the stable
+`(item_id, notification_intent_id)` across any number of copy-forwards, followed by
+all existing semantic/target/route/provenance checks. A facet schema publication alone
+does not revise items or work. The facet command does not materialize, cancel, retry,
+or send, nor bless work already stale for an independent reason. Its atomic continuity
+check does not replace attempt-start freshness or extend retention to advisory work.
+
 Disabling a policy prevents all future opportunity actionability and all unstarted work for that intent. Cancelling or archiving an item, cancelling an event, or completing/cancelling a task does the same. Re-enabling a disabled intent is not defined in v1; create a new intent or use a future explicit command.
 
 ## 11. Delivery and Retry Boundary

@@ -71,7 +71,10 @@
             "enum": [
               "identity",
               "definition_normalization",
-              "typed_values"
+              "typed_values",
+              "permission_resolution",
+              "cursor",
+              "work_freshness"
             ]
           },
           "path": {

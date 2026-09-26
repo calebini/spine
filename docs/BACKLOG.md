@@ -757,25 +757,34 @@ additional broad audit campaign or authorize facet implementation.
 ### SPINE-009 — Settle facet implementation gates
 
 **Status:** In progress — Decision 0004 logical architecture ratified 2026-09-24;
-physical storage draft authored 2026-09-24; review and remaining facet-specific
-contract gates are open. This specification work is explicitly selected; the roadmap
+physical storage design accepted as v1.0 on 2026-09-25; permission/cursor/work contracts
+codified 2026-09-26, pending review and executable implementation proofs. This specification work is explicitly selected; the roadmap
 heading does not authorize runtime work or the other retained candidates.
 **Dependencies:** SPINE-008 is complete. The deferred resilience campaign is not a
 blanket prerequisite.
 
+**Selected contract-closure pass (2026-09-26):** Completed specification/codification: specify the remaining
+permission resolver, authenticated cursor and facet-only notification-work contracts;
+align machine artifacts and test-only oracles. Preserve the uncommitted physical
+ratification, accepted storage layout and current runtime/route advertisements. No
+runtime implementation, new audit, commit or push is selected by this pass.
+
 **Ratified boundary:** Spine owns a generic registry of immutable facet-schema
 revisions, explicit archetype bindings and canonical versioned item-facet values.
-Facets remain descriptive and cannot override core coordination semantics. This
-ratification does not select a SQL layout or authorize runtime implementation.
+Facets remain descriptive and cannot override core coordination semantics. The accepted
+physical layout combines relational identity/history and references, canonical JSON
+definitions/values and derived current-only typed indexes. Neither ratification
+authorizes runtime implementation.
 
-**Acceptance:** Decision 0004 is resolved. Complete the migration/index design,
-permission resolver mappings, authenticated cursor semantics, and exact
-notification-work freshness on facet-only item edits. Add the required contracts and
-behavioral oracles, then create
+**Acceptance:** Decision 0004 and the physical storage design are resolved. Review the
+2026-09-26 permission/cursor/work-continuity amendment and its machine oracles; codify
+exact DDL/object manifests/migration fixtures and prove persisted authorization,
+cursor concurrency and attempt-start continuity. Then create
 bounded implementation tasks for the flight-details proof. Keep workflow recipes and
 external observations separate; do not advertise runtime facets from draft schemas.
 
 **Sources:** [Facet gates](../specs/archetype-facets.md),
+[Accepted physical storage](../specs/archetype-facet-storage.md),
 [Decision 0004](../specs/decisions/0004-versioned-item-facets.md).
 
 **Physical-storage specification checkpoint (2026-09-24):** Added
@@ -858,6 +867,51 @@ declaration checks passed 35 tests and 129 subtests; Ruff, package-copy parity a
 `git diff --check` passed. No runtime/database changes, new audit, commit or push.
 The original audit artifacts remain unchanged; local regression verification is not
 a new reviewer verdict or closure of the remaining facet engineering gates.
+
+**Physical design ratified (2026-09-25):** The operator accepted the hybrid storage
+leaf as v1.0 after the bounded buildability audit and manual minor patch. Aligned the
+logical owner's delegation, Decision 0004, specification index and implementation
+roadmap. The original dated checkpoints above retain their historical status. The
+Spine-wide persistence parent remains a draft authority consolidation; this acceptance
+does not ratify it wholesale. Exact DDL/manifests/migration oracles, permission resolver
+mappings, authenticated cursor/source-snapshot rules, facet-only work freshness and
+all item-version writer proofs remain engineering gates. No runtime, schema-version,
+advertised capability, new audit, commit or push is included in this ratification.
+
+Ratification verification: focused facet/web contracts, implemented-version declarations
+and agent-documentation tests passed (42 tests, 208 subtests). All 81 local Markdown
+links/anchors across the six edited files resolved; `git diff --check` passed. These
+are specification/structural checks, not proof of the unimplemented storage runtime.
+
+**Integration contracts codified (2026-09-26):** Logical spec v0.6 closes the three
+remaining contract definitions without changing accepted physical layout or advertising
+runtime capabilities. Added `archetype-facet-integration.v1.json`, a closed cursor
+payload schema, permission/cryptographic/work decision vectors and a retained-work
+receipt fixture. Updated registry, fixture manifest, packaged schema copies and the
+permission/notification/command owners. Cursor reads use bounded complete snapshots,
+separately provisioned per-ledger signing configuration and no durable cache/receipts.
+Schema publication does not migrate item values or work. Facet-only item edits verify
+notification semantic continuity transactionally, preserving work and attempt evidence.
+
+Implementation findings captured, not patched in runtime: current attempt-start policy
+lookup uses only one copy-forward hop; it must resolve stable intent across successive
+facet edits and retain all semantic checks. Existing follow_source source-version
+invalidation is preserved: editing a source event can stale dependent bindings until
+their ordinary reconciliation. No recursive task mutation is added. Existing-location
+sharing authority is not defined for the permission-enforced web subset, so that path
+remains fail-closed; reference-rich flight authoring is available to the trusted-local
+slice. Broader reference sharing is separate product scope, not an invented permission.
+
+Next: bounded review of this amendment, then executable migration/manifests and the
+implementation plan/test matrix. Static oracles are not persisted behavior evidence;
+SPINE-009 remains in progress until the remaining delivery gates are handled. No runtime
+implementation, Whetstone run, commit or push was performed in this pass.
+
+Contract-closure verification: focused facet integration/wire fixtures, trusted-web
+contracts, implemented-version declarations and agent-documentation checks passed
+50 tests and 255 subtests. Ruff on both facet test modules, packaged-schema parity,
+all 94 local Markdown links/anchors across the nine changed documents, and
+`git diff --check` passed. The 2026-09-25 uncommitted ratification edits were preserved.
 
 ## Later horizons
 

@@ -229,6 +229,17 @@ attachments. Stored definition snapshots remain interpretable by item readers, w
 nested references retain current disclosure checks. Same-owner archetype/schema
 bindings are the proposed first slice. No current web route is expanded by this draft.
 
+Facet resolver closure is specified in archetype-facets.md Section 6.1 and
+`contracts/archetype-facet-integration.v1.json`. It maps every reserved command to
+item read/edit or catalog read/use/administration and preserves fail-closed handling
+of shared references without an owning-family visibility contract. In the permission-enforced
+subset, subject references are self-only and existing location references remain
+unavailable; trusted-local reference-rich authoring remains valid. This does not
+make owner discovery a permission grant. Implementing facet catalog grants requires
+adding resource kind `facet_schema` to the existing grant contract/storage validation,
+using catalog.read/catalog.use and immutable root owner revision 1, not a new ACL model.
+No runtime route or permission resolver is enabled by this specification amendment.
+
 ## 9. Mode Changes and Adoption
 
 The immediate target is trusted multi-operator use with a declared supported-operation

@@ -30,7 +30,7 @@
       "type": "string",
       "minLength": 1,
       "maxLength": 4096,
-      "$comment": "Opaque; no decoding, authenticity, snapshot, or expiry semantics are validated by this structural schema."
+      "$comment": "Opaque spine.facet-cursor.v1 token. Section 11 of specs/archetype-facets.md owns MAC, context, snapshot and expiry semantics; structural string validation alone proves none of them."
     },
     "owner": {
       "$ref": "notification-profile-types.schema.json#/$defs/owner"

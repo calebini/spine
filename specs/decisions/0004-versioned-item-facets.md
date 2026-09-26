@@ -1,6 +1,6 @@
 # Decision 0004: Versioned Item Facets
 
-Status: Accepted — logical architecture ratified 2026-09-24; physical storage and runtime implementation remain pending
+Status: Accepted — logical architecture ratified 2026-09-24; physical storage design accepted 2026-09-25; runtime implementation pending
 Date: 2026-09-07
 Accepted: 2026-09-24
 
@@ -54,7 +54,7 @@ an explicit future acceptance contract; background enrichment cannot overwrite f
 The operator ratified this logical model on 2026-09-24 after reviewing its evolution,
 operational and usability trade-offs. Acceptance establishes the generic registry,
 immutable revision, explicit binding, versioned value and core-versus-facet boundaries
-above. It does not ratify a physical SQL representation.
+above. That initial ratification did not select a physical SQL representation.
 
 In a subsequent clarification on 2026-09-24, the operator also confirmed the logical
 specification's initial scope: scalar-only fields, same-owner archetype/schema bindings,
@@ -62,10 +62,17 @@ optional facets, item/series-level values, and separate item creation then facet
 attachment. Location references require existence and applicable read permission,
 without introducing location retirement; subject lifecycle checks remain. Item facet
 queries use subject/group item ownership, independently of schema catalog ownership.
-These clarifications do not accept the draft physical layout or authorize runtime work.
+Those clarifications did not themselves accept the physical layout or authorize runtime work.
 
-Before runtime implementation, specify and review the exact storage, migration and
-index design, permission resolver mappings, authenticated cursor behavior and
-notification-work freshness for facet-only item edits. Publish the remaining machine
-contracts and behavioral oracles required by those gates. This decision changes no
+On 2026-09-25, the operator separately accepted the hybrid physical layout in
+[archetype-facet-storage.md](../archetype-facet-storage.md), v1.0: relational
+identity/history and references, canonical JSON definitions/values, and derived
+current-only typed indexes. This ratification does not authorize runtime work.
+
+Before runtime implementation, codify the accepted storage design's exact DDL,
+object manifest and migration fixtures. The logical specification's 2026-09-26
+amendment supplies permission resolver mappings, authenticated cursor behavior and
+notification-work freshness contracts with test-only machine oracles. Review those
+additions and prove their persisted/concurrent runtime behavior during implementation;
+static decisions do not satisfy those tests. This decision changes no
 runtime version, schema version or advertised command registry by itself.

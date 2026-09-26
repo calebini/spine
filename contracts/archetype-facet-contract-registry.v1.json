@@ -1,6 +1,7 @@
 {
   "schema_version": "spine.archetype-facet-contract-registry.v1",
   "status": "draft_not_implemented",
+  "integration_contract": "contracts/archetype-facet-integration.v1.json",
   "commands": {
     "facet_schema.create": {
       "contract_version": "spine.facet-schemas.v1",
@@ -98,9 +99,9 @@
     "max_page": 100
   },
   "open_implementation_gates": [
-    "notification_work_freshness_and_reconciliation",
-    "cursor_payload_authenticity_snapshot_and_expiry",
-    "permission_resolver_and_adapter_error_mapping",
+    "notification_continuity_runtime_proof",
+    "authenticated_cursor_runtime_proof",
+    "permission_resolver_runtime_proof",
     "migration_indexes_and_query_plan_proof"
   ],
   "identity_registry": [

@@ -1,0 +1,196 @@
+{
+  "contract_version": "spine.facet-notification-continuity.v1",
+  "coverage": "Pure contract decisions only; runtime lease, copy-forward, provenance and transaction tests remain required.",
+  "before_policy": {
+    "notification_intent_id": "intent-flight",
+    "intent_created_item_version": "1",
+    "intent_created_by_command_id": "create-flight",
+    "status": "active",
+    "recipient_kind": "subject",
+    "recipient_subject_id": "caleb",
+    "channel": "whatsapp",
+    "delivery_target_id": "route-caleb",
+    "target": {
+      "anchor_role": "event_start",
+      "application_scope": "item"
+    },
+    "normalized_notification_schedule_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "late_handling": {
+      "kind": "deliver_within",
+      "grace_seconds": "900"
+    },
+    "notification_policy_id": "policy-v1",
+    "item_version": "1"
+  },
+  "after_policy": {
+    "notification_intent_id": "intent-flight",
+    "intent_created_item_version": "1",
+    "intent_created_by_command_id": "create-flight",
+    "status": "active",
+    "recipient_kind": "subject",
+    "recipient_subject_id": "caleb",
+    "channel": "whatsapp",
+    "delivery_target_id": "route-caleb",
+    "target": {
+      "anchor_role": "event_start",
+      "application_scope": "item"
+    },
+    "normalized_notification_schedule_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "late_handling": {
+      "kind": "deliver_within",
+      "grace_seconds": "900"
+    },
+    "notification_policy_id": "policy-v4",
+    "item_version": "4",
+    "source_notification_policy_id": "policy-v3"
+  },
+  "binding_cases": [
+    {"id": "source_event_facet_edit", "bound_source_version": "3", "current_source_version": "4", "target_due_unchanged": true, "expected": "stale"},
+    {"id": "target_task_facet_edit", "bound_source_version": "3", "current_source_version": "3", "target_due_unchanged": true, "expected": "current"}
+  ],
+  "cases": [
+    {
+      "id": "eligible_unattempted",
+      "state": "eligible_unattempted",
+      "changed": true,
+      "replayed": false,
+      "has_policy": true,
+      "has_work": true,
+      "semantic_change": null,
+      "expected": "retain",
+      "evaluated": true
+    },
+    {
+      "id": "leased_or_in_progress",
+      "state": "leased_or_in_progress",
+      "changed": true,
+      "replayed": false,
+      "has_policy": true,
+      "has_work": true,
+      "semantic_change": null,
+      "expected": "preserve_lease_and_recheck_before_attempt",
+      "evaluated": true
+    },
+    {
+      "id": "eligible_retry",
+      "state": "eligible_retry",
+      "changed": true,
+      "replayed": false,
+      "has_policy": true,
+      "has_work": true,
+      "semantic_change": null,
+      "expected": "preserve_retry_and_recheck",
+      "evaluated": true
+    },
+    {
+      "id": "terminal",
+      "state": "terminal",
+      "changed": true,
+      "replayed": false,
+      "has_policy": true,
+      "has_work": true,
+      "semantic_change": null,
+      "expected": "preserve_history",
+      "evaluated": true
+    },
+    {
+      "id": "independently_stale",
+      "state": "independently_stale",
+      "changed": true,
+      "replayed": false,
+      "has_policy": true,
+      "has_work": true,
+      "semantic_change": null,
+      "expected": "leave_to_existing_stale_handling",
+      "evaluated": true
+    },
+    {
+      "id": "absent",
+      "state": "absent",
+      "changed": true,
+      "replayed": false,
+      "has_policy": true,
+      "has_work": false,
+      "semantic_change": null,
+      "expected": "do_not_materialize",
+      "evaluated": true
+    },
+    {
+      "id": "fresh_noop",
+      "state": "eligible_unattempted",
+      "changed": false,
+      "replayed": false,
+      "has_policy": true,
+      "has_work": true,
+      "semantic_change": null,
+      "expected": "no_reconciliation",
+      "evaluated": false
+    },
+    {
+      "id": "replay",
+      "state": "eligible_unattempted",
+      "changed": false,
+      "replayed": true,
+      "has_policy": true,
+      "has_work": true,
+      "semantic_change": null,
+      "expected": "no_reconciliation",
+      "evaluated": false
+    },
+    {
+      "id": "empty_item",
+      "state": "absent",
+      "changed": true,
+      "replayed": false,
+      "has_policy": false,
+      "has_work": false,
+      "semantic_change": null,
+      "expected": "do_not_materialize",
+      "evaluated": false
+    },
+    {
+      "id": "reject_normalized_notification_schedule_hash",
+      "state": "eligible_unattempted",
+      "changed": true,
+      "replayed": false,
+      "has_policy": true,
+      "has_work": true,
+      "semantic_change": "normalized_notification_schedule_hash",
+      "expected": "environment_failure",
+      "evaluated": false
+    },
+    {
+      "id": "reject_delivery_target_id",
+      "state": "eligible_unattempted",
+      "changed": true,
+      "replayed": false,
+      "has_policy": true,
+      "has_work": true,
+      "semantic_change": "delivery_target_id",
+      "expected": "environment_failure",
+      "evaluated": false
+    },
+    {
+      "id": "reject_notification_intent_id",
+      "state": "eligible_unattempted",
+      "changed": true,
+      "replayed": false,
+      "has_policy": true,
+      "has_work": true,
+      "semantic_change": "notification_intent_id",
+      "expected": "environment_failure",
+      "evaluated": false
+    },
+    {
+      "id": "reject_status",
+      "state": "eligible_unattempted",
+      "changed": true,
+      "replayed": false,
+      "has_policy": true,
+      "has_work": true,
+      "semantic_change": "status",
+      "expected": "environment_failure",
+      "evaluated": false
+    }
+  ]
+}

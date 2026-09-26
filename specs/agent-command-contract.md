@@ -22,8 +22,10 @@ in [archetype-facets.md](archetype-facets.md). They are specification reservatio
 not additions to the implemented-command list or trusted web allowlist. The draft
 machine registry and schemas are at
 `contracts/archetype-facet-contract-registry.v1.json`, with structural fixtures and
-pure identity/type vectors. Runtime advertisement still requires bounded resolvers,
-cursor semantics, migration/index proof and work-freshness tests. No existing schedule
+pure identity/type vectors. `contracts/archetype-facet-integration.v1.json` and the
+logical facet spec define resolver mappings, authenticated cursors and notification
+continuity. Runtime advertisement still requires their executable resolver/cursor/work
+proofs and migration/index tests. No existing schedule
 request accepts new facet fields by implication.
 
 This document defines the first agent-operable Spine command contract. It lets local agents create, inspect, update, cancel, archive, relate, and prepare reminders for Spine items through stable request and response handlers without ad hoc SQL or embedded ledger calls in prompts.

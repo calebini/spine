@@ -1,8 +1,8 @@
 # Spine Archetype Facets
 
-Status: Draft v0.5 — initial scope confirmed; reference/query clarifications applied; not implemented
+Status: Draft v0.6 — permission, cursor and work-freshness contracts specified; not implemented
 Date: 2026-09-07
-Updated: 2026-09-24
+Updated: 2026-09-26
 Scope: Registered typed item facts, immutable schema revisions, archetype bindings,
 bounded authoring/readback, and a flight-details proof
 
@@ -21,8 +21,9 @@ remain authoritative. Facets cannot override or implicitly drive those mechanism
 This document remains the logical facet owner. Physical persistence, table/constraint
 inventories, typed indexes, migration/rollback and storage fixtures are delegated to
 [archetype-facet-storage.md](archetype-facet-storage.md), under the Spine-wide
-[storage and atomicity owner](STORAGE_ATOMICITY_SPEC.md). That leaf is a proposed
-physical design, not implementation or closure of the remaining gates in Section 9.
+[storage and atomicity owner](STORAGE_ATOMICITY_SPEC.md). That leaf's physical design
+was accepted as v1.0 on 2026-09-25; acceptance is not implementation or closure of the
+remaining gates in Section 9.
 
 Proposed families are `spine.facet-schemas.v1`, `spine.archetype-facet-bindings.v1`,
 `spine.item-facets.v1`, and `spine.item-facet-query.v1`. These names are reservations
@@ -218,12 +219,69 @@ canonical item version, so they MUST use the common item-version carry-forward p
 for recurrence, notification/profile, location and binding facts. They must not leave
 policies attached only to an obsolete version or orphan queued work.
 
-Before runtime implementation, fixtures MUST prove the exact existing freshness and
-reconciliation behavior for queued, leased and attempted work when only facets change.
-The command must report whether reconciliation was performed; it cannot claim queued
-work was retained safely merely because no scheduling field changed. Any required
-reconciliation follows existing notification rules and shares the command transaction.
-This integration is a buildability gate, not an additional notification engine.
+### 5.1 Exact facet-only work rule
+
+Publishing/retiring a schema or changing a catalog binding does not change an item
+version, its pinned definition, or any work. Explicitly upgrading an item's facet
+revision is an item edit and follows the same rule as replacing/removing its values.
+
+For a changed item.facets.update, compare the before/after notification inputs inside
+the item transaction. Only facet snapshots, the item version/update evidence, and
+ordinary supporting-row copy identities may differ. Core item lifecycle, title/detail,
+anchors/timezones, locations, subject roles, active temporal binding meaning, recurrence
+revision/hash, profile application meaning and notification intent semantics MUST match.
+For each policy compare intent ID, creation facts, status, recipient, channel, route,
+target, schedule hash and late handling, excluding copy-row IDs/version/authoring
+timestamps/source-policy pointer. Policy sets must match by intent, including disabled
+policies; never match only on eligible time. Mismatch is environment_failure and rolls
+back the entire facet command; it is not permission to repair unrelated scheduling truth.
+
+Do not create a recurrence revision or regenerate provenance for a facet-only version.
+Existing recurrence resolution must still select the unchanged recurrence revision;
+two or more consecutive facet edits must not break ordinary work intent resolution.
+Temporal binding freshness remains owned by relative-temporal-bindings.md: editing a
+source event increments its version and can make downstream follow_source bindings
+stale even when its time is unchanged. Do not rewrite those bindings or dependent tasks
+inside the facet command. Their normal bounded reconciliation must complete before
+dependent work can pass its existing freshness gate. Facet edits on a bound target task
+do not by themselves change the source version or due-anchor meaning. Thus retention
+below covers this item's work, not a promise that every dependent item's work stays current.
+The notification retention permission in notifications.md Section 10 is mandatory
+for a proven facet-only change:
+
+| Existing work | Effect of the facet command |
+| --- | --- |
+| Eligible, zero attempts and no attempt evidence | Retain the exact row, ID, nominal eligibility and original version/policy/provenance evidence; do not cancel/recreate or reschedule it |
+| Leased/in-progress, including before adapter invocation | Do not release/reassign the lease or alter the row; normal attempt-start checks still apply |
+| Eligible retry with attempts | Preserve work, retry budget and attempt history; ordinary retry/freshness rules still apply |
+| Completed/failed/cancelled or otherwise terminal | Preserve history; do not resurrect, resend or reinterpret an already persisted rendering |
+| Already stale for a reason independent of facets | Do not revive or claim deliverability; existing scheduler/worker stale-work handling remains responsible |
+| No work | Create none; later ordinary bounded scheduling may materialize missing opportunities |
+
+Retention means absence of a new facet-induced invalidation, not a delivery guarantee.
+Before every attempt the worker resolves the current policy by `(item_id,
+notification_intent_id)`, verifies semantic continuity against the work's original
+policy and existing target/route/provenance/lifecycle checks. A one-hop
+source_notification_policy_id match is insufficient after multiple copy-forwards.
+Missing/ambiguous current intent fails closed. Work IDs and immutable historical FKs
+are not rebound to the current version to conceal stale evidence. Other work kinds
+retain their owning contracts; this rule covers ordinary notification_reminder only.
+
+`reconciliation_performed=true` on a fresh changed command exactly when current policies
+exist or any notification_reminder work exists and the transaction completed the
+above equivalence check. This is reconciliation by verified retention, not cancellation
+or expansion. Otherwise it is false; no-op and replay always return false. Use a bounded
+indexed existence probe for work, not a scan of all attempts or exhausted work history.
+No work IDs/counts are added to the facet receipt. Inability to establish equivalence
+within the operation budget fails atomically, never commits an unchecked version.
+External route/lifecycle changes can still cause ordinary attempt rejection; a raced
+item edit must yield one committed version and one stale_version, not a lost update.
+
+Current rendering does not consume facets. A future facet-consuming advisory must pin
+its item/schema inputs and define its own acceptance freshness; it cannot infer that
+ordinary reminder retention authorizes use of stale facet values. Required executable
+oracles include multiple successive edits, explicit schema upgrade, recurring work,
+follow_source dependencies, lease/attempt races and retry without a duplicate send.
 
 Initial authoring remains explicit: create the item with its archetype, then attach
 facets using its returned version. This is two atomic commands, not an atomic composite;
@@ -242,6 +300,81 @@ New location references require existing locations and applicable read permissio
 locations have no active/inactive lifecycle in this slice. No new
 reference kinds or access grants arise from a field. The trusted-local CLI retains
 its existing full-scope posture; HTTP requires explicit registry/resolver additions.
+
+### 6.1 Closed resolver mapping
+
+The machine companion is `contracts/archetype-facet-integration.v1.json`. These are
+required resolver semantics for future exposure, not additions to today's web allowlist.
+Trusted-local commands keep full scope but must still enforce domain/reference existence
+and active-on-authoring rules. A deployment-enforced single-operator full-scope mode
+may bypass resource permissions, never catalog lifecycle or domain validation.
+
+| Commands | Required authority in permission-enforced mode |
+| --- | --- |
+| facet_schema.create | Catalog administration of requested owner |
+| facet_schema.publish / retire | Catalog administration of resolved root owner |
+| facet_schema.show | catalog.read (catalog.use also implies read) on root |
+| facet_schema.list | Authorized catalog candidates in explicit owner scope; no all-ledger listing |
+| item_archetype.facet_binding.set | Catalog administration on archetype and schema, same owner, exact readable revision |
+| item_archetype.facet_binding.remove | Catalog administration on archetype; no fresh use of retired schema required |
+| item_archetype.facet_binding.list | catalog.read on archetype and every returned schema; inaccessible nested schemas deny the whole page |
+| item.facets.update | item.edit; each fresh set additionally requires catalog.use on assigned archetype and schema, current binding, and reference checks |
+| item.facets.show | Current item.read, including for historical versions; every returned reference must be visible |
+| item.facets.query | catalog.read on exact schema revision plus item.read for candidate items; reference predicates require reference visibility before lookup |
+
+Catalog administration means the selected subject owns a subject catalog, or is active
+admin/owner of its adopted group. Ordinary member/creator rights do not administer
+catalogs. System catalog mutation is trusted-local administration only. Catalog read/use
+uses ownership, active group membership or existing explicit catalog.read/catalog.use
+grants; extend the existing grant resource-kind vocabulary to facet_schema at implementation
+with immutable owner revision 1. No new grant operation, implicit system-public catalog,
+cross-owner binding or catalog-admin delegation is introduced. Lists return the authorized
+subset in a named scope (explicit per-root grants can expose a subset of a foreign scope),
+not counts of hidden roots. Item query likewise intersects its explicit owner with
+authorized item candidates; foreign ownership alone is not denial of a valid item grant.
+The item owner/revision comes from item_access_owners, not participants, archetype
+ownership or labels. Items without an adopted owner do not match an owner-scoped query,
+including trusted-local queries; exact-ID trusted-local show/update remains available.
+
+Remove-only item edits do not require fresh catalog use or permission to follow the
+removed reference. Unchanged retained entries may copy without renewed catalog/reference
+use checks; this cannot disclose their values. Fresh sets, including same-value no-ops,
+must pass them. Item edit does not authorize unrelated catalog writes or delivery release.
+Readback of a stored definition is authorized by the item, not current catalog access.
+
+**Reference resolver limit:** Do not invent a shared subject/location ACL here. Under
+the existing trusted web subset, the selected subject can reference/read itself; other
+subjects and existing locations with no explicit family-owned sharing resolver are
+unavailable, even if they appear in owner discovery, another item or the same group.
+In trusted-local/full-scope mode, existing locations and existing active subjects are
+usable; readable inactive subjects remain valid historical evidence. A future broader
+resolver requires an explicit owning-family contract and registry update, not a permissive
+fallback. Thus the reference-rich flight proof is initially trusted-local; protected
+web use supports scalar facets and self-subject references, not implicit airport sharing.
+
+Queries return only IDs/versions. Non-predicate nested references are neither returned
+nor resolved by query; a subsequent show can fail independently. A reference predicate
+is checked even when there are zero matches, preventing reference probing by counts.
+All resolution shares the storage leaf's 100-resource budget. Authorization is evaluated
+in one read snapshot and rechecked before response release or write commit, including
+timed grants and identity eligibility. Loss denies the entire result/transaction.
+
+Adapter precedence is shape/bounds, identity and registered operation admission, target
+and nested authority, authorized replay lookup, then fresh version/domain checks.
+Same-command replay still checks current disclosure, but does not demand new catalog
+use for the stored item's historical result. A receipt belonging to another initiating
+identity is command_id_unavailable; never reveal whether its semantic hash matched.
+For web, missing/hidden root or nested reference is resource_unavailable (404), missing
+operation mapping is operation_unavailable (404), lost admitted access is access_changed
+(409), invalid selection is identity_unavailable (403), capacity is capacity_exceeded
+(429), unavailable preflight/key is admission_unavailable (503). Authorized malformed
+cursors are invalid_request (400); authorized domain stale_cursor is access_changed (409).
+Authorized domain validation (exit 2) maps to domain_failure (422), stale_version and
+semantic/binding/archetype conflicts (exits 5/6) to domain_conflict (409); environment
+or invariant/runtime failures map to admission_unavailable (503). Existence/reference
+failures are resource_unavailable (404), without domain details. No reference IDs/values
+are echoed. Trusted-local failures use the registry's CLI error codes;
+bounded-capacity or missing configured cursor context is environment_failure, exit 7.
 
 Item readback includes the pinned definition needed to interpret values even after
 schema retirement. It does not require live use permission on that catalog. Authors
@@ -285,8 +418,8 @@ JSON scan followed by filtering. Resource resolution is capped at 100 per reques
 overflow fails capacity, not false completeness. Use the existing operational SQL,
 elapsed-time and response-byte ceilings. Page cursors bind normalized query, selected
 identity, owner, exact revision, access epoch, source snapshot and expiry. Changed
-facts invalidate the cursor; never silently skip or duplicate matches. A dedicated
-cursor wire contract and index/query-plan proof are required before implementation.
+facts invalidate the cursor; never silently skip or duplicate matches. Section 11
+defines the cursor wire contract; executable index/query-plan proof remains required.
 
 Reads and unsuccessful preflight write nothing durable. No daemon scans facets,
 revalidates every item after schema publication, or emits idle receipts. Revision and
@@ -314,14 +447,16 @@ per-occurrence flight details require separate items in this slice.
 
 ## 9. Acceptance and next gates
 
-Before implementation, publish request/response/type schemas, a fixture manifest,
-normalization/identity vectors, permission resolver mappings, a cursor contract and
-a migration/index plan. No promised runtime family is advertised before executable
-tests pass. Audit this draft first; then close the listed machine-contract and work
-freshness gates without widening it to workflow recipes or live enrichment.
+The logical/storage design and the machine companions now define request/response
+shapes, identity/type vectors, resolver mappings, cursor semantics, work continuity and
+the migration/index plan. Review the new integration amendment before implementation;
+then codify executable DDL/manifests/migration fixtures and runtime acceptance tests.
+No promised runtime family is advertised before those tests pass. Do not widen this
+slice to workflow recipes, live enrichment or a new reference-sharing model.
 
 The structural schemas, fixture manifest and pure normalization/identity vectors are
-now present (Section 10). They do not satisfy the persisted-state, permission, cursor,
+now present (Section 10). Sections 5, 6.1 and 11 and the integration companion specify
+the previously open work, resolver and cursor decisions. They do not satisfy persisted-state, permission, cursor,
 work-freshness, concurrency or query-plan acceptance families below. Their tests must
 not be reported as proof of those runtime behaviors.
 
@@ -363,8 +498,10 @@ Required fixture families and observable oracles:
 The operator confirmed the initial scope on 2026-09-24: scalar-only fields, same-owner
 archetype/schema bindings, optional facets, item/series-level values rather than
 per-occurrence values, and two-command initial authoring. These product choices are
-settled for the initial slice. They do not ratify the physical storage draft, close
-the remaining engineering gates, or advertise implemented capabilities.
+settled for the initial slice. Separately, the operator ratified the physical storage
+design in [archetype-facet-storage.md](archetype-facet-storage.md) as v1.0 on 2026-09-25.
+Neither acceptance closes the remaining engineering gates or advertises implemented
+capabilities.
 
 ## 10. Machine-contract codification (draft)
 
@@ -372,8 +509,9 @@ The repository-only proposed registry is
 `contracts/archetype-facet-contract-registry.v1.json`. It maps all eleven commands to
 their exact request/response schema fragments and family versions. It is not imported
 by runtime preflight, CLI dispatch, package capability declarations or the web allowlist.
-The five `contracts/schemas/archetype-facet-*.schema.json` files define types, requests,
-successes, handler failures and the fixture-manifest structure. The fixture manifest is
+The six `contracts/schemas/archetype-facet-*.schema.json` files define types, requests,
+successes, handler failures, the fixture manifest and cursor payload. The integration
+companion is `contracts/archetype-facet-integration.v1.json`. The fixture manifest is
 `contracts/archetype-facet-fixture-manifest.json`; fixtures and pure vectors live under
 `tests/fixtures/archetype_facets/`. These are draft contracts, not an installed feature.
 
@@ -440,8 +578,8 @@ item versions and sorted `changed_facet_keys` (empty on no-op or replay). Fresh 
 versions advance by one; replay preserves the original version pair.
 `reconciliation_performed` reports whether work reconciliation ran on this invocation;
 no-op and replay require false. The sample changed receipt is for an item with no policies or
-work and uses false. This boolean does not resolve or claim safety for queued, leased
-or attempted work. Section 5 remains a blocking integration gate.
+work and uses false. Section 5 defines verified retention and the exact true/false rule;
+the boolean is not evidence of delivery or a count of cancelled/created work.
 
 Schema show returns a `root` and selected immutable `revision`; the selected revision
 must belong to that root, but can differ from its current pointer. Stored definitions
@@ -462,8 +600,8 @@ in the draft registry. Definition/value errors use exit 2, binding/archetype con
 6, retired-schema use 2, and missing/unreadable references or inactive subjects uniformly 4 with
 `facet_reference_unavailable`. Paths identify fields but never echo private values.
 Admission/permission and operational-capacity envelopes remain owned by their adapters;
-the facet handler schema does not replace or freeze them. Resolver mappings, admission
-ordering and the exact capacity wrapper remain pre-implementation gates. Fixture error
+the facet handler schema does not replace or freeze them. Section 6.1 defines resolver
+mappings, admission ordering and capacity wrappers. Fixture error
 messages are illustrative safe prose, not byte-exact public message constants.
 
 ### 10.3 Pagination and validation limits
@@ -475,10 +613,140 @@ and `next_cursor`; has_more=false requires null, true requires a nonempty opaque
 cursor at most 4096 characters. Returned collection length cannot exceed limit.
 Root IDs, facet keys and item IDs respectively determine the existing total order.
 
-Only the opaque cursor envelope is specified here. Token encoding, authenticated
-binding, snapshot identity, expiry and access-epoch sources still require the dedicated
-cursor contract before runtime. No fixture with an arbitrary token proves pagination
+Section 11 and its machine companion specify token encoding, authenticated binding,
+snapshot identity, expiry and access context. No fixture with an arbitrary token proves pagination
 security or freshness. Likewise, JSON Schema checks structure, not NFC, declared-field
 validation, hash correctness, foreign-key visibility, byte ceilings or transactional
 invariants. Test-only pure oracles cover selected semantic vectors; no application
 validator, database migration, index or command handler is introduced by this bundle.
+
+## 11. Authenticated facet pagination v1
+
+`contracts/archetype-facet-integration.v1.json` and
+`contracts/schemas/archetype-facet-cursor.schema.json` define the dedicated
+`spine.facet-cursor.v1` continuation. It does not extend or replace either existing
+trusted-web cursor family. The three paginated commands are facet_schema.list,
+item_archetype.facet_binding.list and item.facets.query. Show is never paginated.
+
+### 11.1 Bytes, key and context
+
+Token: `fc1.<base64url(payload)>.<base64url(mac)>`, unpadded canonical base64url,
+at most 4096 ASCII bytes. Payload is closed canonical Spine JSON UTF-8 per the cursor
+schema. MAC is HMAC-SHA256 with the preimage `ASCII("spine.facet-cursor.v1")`, one NUL
+byte, then the exact payload bytes. Reject wrong version, padding, noncanonical
+base64url, duplicate JSON keys, unknown fields, noncanonical JSON, invalid schema or
+MAC with invalid_request/field=cursor. Verify MAC with constant-time comparison before
+interpreting payload fields. Never log token contents or signature diagnostics.
+
+Use a separately provisioned deployment secret of at least 32 random bytes per ledger,
+not a model/request supplied key or the public vector key. Reads never create a key,
+receipt or cursor cache. Trusted-local CLI receives key and context through protected
+operator configuration; web receives them through service configuration. Missing config
+fails preflight for paginated commands, including first pages, rather than issuing unsigned
+cursors. This is configuration, not executor authentication. Provision a persistent random
+`cursor_ledger_id` and `cursor_generation` with the key outside the ledger; use distinct
+values for copies/clones and rotate generation after restore. These config IDs are not
+canonical coordination IDs. Rotation invalidates outstanding cursors. No new DB columns.
+
+`context_hash` is a keyed digest of the closed object containing `mode`,
+`cursor_ledger_id`, `cursor_generation`, and `principal`. For trusted_local, principal
+is `{os_uid: <canonical decimal string>}`; full-scope local users still do not assert a
+web account. For permission_enforced, principal is the exact identity mapping from
+`contracts/trusted-web-read-cursor.v2.json` (ledger/realm/recovery, account/subject/
+binding revisions, selection ID and access_epoch). Full-scope single-operator web
+remains permission_enforced for identity binding; its access proof records that
+deployment mode. No caller-controlled actor field substitutes for this context.
+
+For all three digest fields below, use lowercase hex HMAC-SHA256 over canonical JSON
+of `{contract_version: <domain>, value: <specified object>}` with the same key.
+Domains are `spine.facet-cursor-context.v1`, `spine.facet-cursor-access.v1`, and
+`spine.facet-cursor-source.v1`; signatures retain their separate domain above.
+Keying prevents a cursor digest becoming an oracle for low-entropy protected facts.
+
+### 11.2 Query, source and access binding
+
+`query_hash` is ordinary lowercase SHA-256 over canonical JSON of
+`{contract_version:"spine.facet-query.v1", command:<canonical command>, request:<normalized request>}`.
+The request excludes only cursor, includes contract_version and limit (default 25),
+and fills list status=active. NFC/type normalization follows the pinned schema;
+owner discriminators and exact schema/archetype IDs are retained. Changing limit,
+predicate, owner, revision, status or command mid-pagination is invalid_request.
+Bind this digest and command in every payload. Do not accept a token from another route.
+
+Recompute the complete bounded authorized candidate set on each page in one snapshot,
+not only the page after last_key. Use indexed enumeration plus LIMIT 101; more than 100
+candidates or resolved resources fails capacity before returning any page. This is a
+v1 total-candidate ceiling, not just a page limit. Do not silently cap or paginate an
+incomplete set. Candidate enumeration includes nonmatching items/roots, so a later
+matching value or newly visible candidate changes the snapshot. No global JSON scan.
+
+`source_snapshot_hash` covers a closed `{command, query_hash, facts}` object, with
+facts exactly as follows, ordered by the specified primary key:
+
+- Schema list: facts is `{roots: [...]}` containing all authorized roots in the named owner (before status filter), each
+  `{facet_schema_id, current_revision_id, status}`; immutable revision IDs suffice to
+  bind returned definition bytes. No hidden roots or hidden-root counts.
+- Binding list: facts is `{archetype, bindings}`; archetype is
+  `{item_archetype_id, current_revision_id, status}`. Each bindings element is
+  `{binding, schema}` in facet_key order, where binding uses the types schema's exact
+  `$defs/binding` representation and schema is its root's
+  `{facet_schema_id, current_revision_id, status}`. A missing
+  nested read permission denies the page, rather than hashing hidden schema facts.
+- Item query: facts is `{schema, candidates, reference}`. Schema contains exactly
+  `facet_schema_id`, `current_revision_id`, `status`, `facet_schema_revision_id` and
+  `definition_hash` for the selected root/exact revision. Candidates are authorized
+  candidates `{item_id, current_version, owner, owner_revision}` ordered by item ID,
+  and reference is null or, for a reference predicate, its authorized
+  `{target_kind, target_id, status}`.
+  Query typed-index parity with current_version is mandatory; mismatch fails environment,
+  not an empty result. Non-predicate referenced subjects/locations are not dereferenced.
+
+These canonical objects use public wire field spellings and decimal-string versions.
+Immutable revision guarantees and all-version transactional indexes make item-version
+facts sufficient without decoding every candidate's JSON. Do not hash full DB/WAL files.
+
+`access_hash` binds `{mode, identity, memberships, grants, deployment_access_mode}`.
+For trusted_local, identity equals the local principal and memberships/grants are empty;
+deployment_access_mode is trusted_local. Otherwise identity is `{principal, rows}`:
+principal is the web principal; rows contains the ledger_access_state, web_operators,
+login_accounts, account_subject_bindings and selected subjects rows used by admission.
+Memberships contains all subject_memberships rows for the selected subject, with the
+referenced subject_groups and adopted_access_groups rows. Grants contains access_grants
+whose grantee is that subject or one of those groups and resource is in the named scope
+or explicit roots, plus their current-revision access_grant_operations rows. Select these
+before time/status filtering; include future starts and ended/revoked rows. Each proof
+row is `{table, key, row}`; key is its ordered SQL primary-key value array; row includes
+all columns from the schema-matched runtime, with integer columns and integer key values
+converted to canonical decimal strings and SQL NULL to JSON null. Sort by table then
+canonical key bytes (BINARY), deduplicate equal table/key pairs. Missing required admission
+rows fail admission, not a hash of absence. deployment_access_mode is the server's
+multi_user or single_operator_full_scope configuration. The shared 100-row proof limit
+includes all three arrays. No incomplete proof can authorize continuation. These private facts are
+only keyed-hashed, never returned. Re-evaluate permissions at current server time on
+each page, and recheck time/authority at release. Future starts/ends of relevant grants
+or memberships bound `authorization_valid_until_utc` to the earliest transition strictly
+after first-page evaluation (null if none); child pages preserve it. No sliding renewal.
+
+### 11.3 Continuation and errors
+
+Order is BINARY root ID, facet_key or item ID respectively. last_key is exactly the last
+returned key, never a row offset. has_more is true iff the complete authorized matching
+set contains a later key; only then mint next_cursor. Empty/terminal pages return null.
+Children preserve context/query/access/source hashes and original issued/expires/deadline,
+changing only last_key. Replaying a cursor against unchanged facts returns the same
+logical page; no durable read evidence is created. Concurrent source changes between
+snapshot evaluation and release cause revalidation failure, never a mixed page.
+
+Service time, not action_timestamp_utc, governs `issued_at <= now < expires_at` with
+`expires_at = issued_at + 900 seconds`; now must also precede the non-null authorization
+deadline. A non-null deadline must be later than issued_at (otherwise restart evaluation
+or fail access_changed without issuing a token). Malformed dates/future-issued payload
+or mismatched query/command is invalid_request.
+Authentic but expired, changed context/access/source or missing last_key is stale_cursor.
+Web maps stale_cursor to access_changed; invalid selection/hidden targets take the
+Section 6.1 errors before cursor comparison. Key rotation yields invalid_request because
+the old signature no longer verifies. Restart with unchanged protected config preserves
+continuation; there is no retained volatile proof dependency. Full proofs are bounded
+and freshly recomputed. SQL/deadline/byte/proof overflow returns capacity, not stale or
+false completeness. These rules cover local and future web transport without enabling
+a web route. Pure cryptographic/decision vectors are not runtime pagination proof.

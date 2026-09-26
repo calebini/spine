@@ -4,6 +4,13 @@
   "registry": "contracts/archetype-facet-contract-registry.v1.json",
   "fixtures": [
     {
+      "fixture_id": "response_item_facets_update_retained_work",
+      "fixture": "tests/fixtures/archetype_facets/contracts/response_item_facets_update_retained_work.json",
+      "schema": "contracts/schemas/archetype-facet-responses.schema.json",
+      "schema_ref": "#/$defs/item.facets.update",
+      "valid": true
+    },
+    {
       "fixture_id": "request_facet_schema_create",
       "fixture": "tests/fixtures/archetype_facets/contracts/request_facet_schema_create.json",
       "schema": "contracts/schemas/archetype-facet-commands.schema.json",
@@ -361,6 +368,18 @@
   ],
   "vectors": [
     {
+      "kind": "permission_resolution",
+      "path": "tests/fixtures/archetype_facets/vectors/permissions.json"
+    },
+    {
+      "kind": "cursor",
+      "path": "tests/fixtures/archetype_facets/vectors/cursor.json"
+    },
+    {
+      "kind": "work_freshness",
+      "path": "tests/fixtures/archetype_facets/vectors/work_freshness.json"
+    },
+    {
       "kind": "identity",
       "path": "tests/fixtures/archetype_facets/vectors/identity.json"
     },
@@ -373,5 +392,5 @@
       "path": "tests/fixtures/archetype_facets/vectors/typed_values.json"
     }
   ],
-  "coverage_note": "Schema and pure contract oracles only. No persisted command execution, work reconciliation, permissions, cursor security, concurrent mutation, or indexed query-plan claim."
+  "coverage_note": "Structural and test-only decision/cryptographic oracles. No persisted authorization, concurrency, worker, migration or query-plan proof."
 }

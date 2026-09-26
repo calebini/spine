@@ -649,10 +649,18 @@ machine schemas, structural fixtures and pure identity/type vectors were added o
 2026-09-09. The first machine-contract audit identified replay-response alignment
 and test-dependency scope issues; both were manually patched on 2026-09-12, with a
 focused recheck subsequently passing with preserved boundary. Its only clarification
-concerned wording in the recheck notes, not a source-contract mismatch. Remaining
-gates are a migration/index plan, permission resolver mappings, cursor semantics and
-exact notification-work
-freshness behavior on facet-only item edits. Static fixtures do not prove runtime
+concerned wording in the recheck notes, not a source-contract mismatch. The hybrid
+physical design in [archetype-facet-storage.md](../specs/archetype-facet-storage.md)
+was accepted as v1.0 on 2026-09-25 after a bounded buildability audit and its manual
+minor patch. The 2026-09-26 v0.6 logical amendment specifies permission resolver mappings,
+authenticated cursor/source-snapshot semantics and exact notification continuity,
+with `contracts/archetype-facet-integration.v1.json` and test-only oracles. Review that
+amendment next; remaining implementation gates include exact DDL/object manifests,
+migration fixtures and persisted/concurrent proofs of those contracts. In particular,
+attempt-start policy resolution must survive multiple copy-forwards by stable intent;
+source-event edits retain existing downstream follow_source invalidation. Shared
+location references remain unavailable in the permission-enforced web subset until
+their family owns a disclosure rule; the flight proof remains trusted-local. Static fixtures do not prove runtime
 behavior. Workflow recipes and external observations remain separate future work;
 current pack and web registries are unchanged.
 

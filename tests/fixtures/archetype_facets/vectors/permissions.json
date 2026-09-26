@@ -1,0 +1,164 @@
+{
+  "contract_version": "spine.facet-integration.v1",
+  "coverage": "Pure resolver decisions, not persisted authorization or leakage proof.",
+  "catalog_admin_cases": [
+    {
+      "scope": "subject",
+      "self": true,
+      "role": null,
+      "expected": true
+    },
+    {
+      "scope": "subject",
+      "self": false,
+      "role": null,
+      "expected": false
+    },
+    {
+      "scope": "subject_group",
+      "self": false,
+      "role": "member",
+      "expected": false
+    },
+    {
+      "scope": "subject_group",
+      "self": false,
+      "role": "admin",
+      "expected": true
+    },
+    {
+      "scope": "subject_group",
+      "self": false,
+      "role": "owner",
+      "expected": true
+    },
+    {
+      "scope": "subject_group",
+      "self": false,
+      "role": null,
+      "expected": false
+    },
+    {
+      "scope": "system",
+      "self": false,
+      "role": "owner",
+      "expected": false
+    }
+  ],
+  "reference_cases": [
+    {
+      "mode": "trusted_local",
+      "kind": "subject",
+      "self": false,
+      "exists": true,
+      "active": true,
+      "operation": "set",
+      "expected": true
+    },
+    {
+      "mode": "trusted_local",
+      "kind": "subject",
+      "self": false,
+      "exists": true,
+      "active": false,
+      "operation": "set",
+      "expected": false
+    },
+    {
+      "mode": "trusted_local",
+      "kind": "subject",
+      "self": false,
+      "exists": true,
+      "active": false,
+      "operation": "show",
+      "expected": true
+    },
+    {
+      "mode": "trusted_local",
+      "kind": "location",
+      "self": false,
+      "exists": true,
+      "active": null,
+      "operation": "set",
+      "expected": true
+    },
+    {
+      "mode": "trusted_local",
+      "kind": "location",
+      "self": false,
+      "exists": false,
+      "active": null,
+      "operation": "set",
+      "expected": false
+    },
+    {
+      "mode": "permission_enforced",
+      "kind": "subject",
+      "self": true,
+      "exists": true,
+      "active": true,
+      "operation": "set",
+      "expected": true
+    },
+    {
+      "mode": "permission_enforced",
+      "kind": "subject",
+      "self": false,
+      "exists": true,
+      "active": true,
+      "operation": "show",
+      "expected": false
+    },
+    {
+      "mode": "permission_enforced",
+      "kind": "location",
+      "self": false,
+      "exists": true,
+      "active": null,
+      "operation": "show",
+      "expected": false
+    }
+  ],
+  "update_cases": [
+    {
+      "id": "remove_after_catalog_retirement",
+      "item_edit": true,
+      "fresh_set": false,
+      "catalog_use": false,
+      "reference_read": false,
+      "expected": true
+    },
+    {
+      "id": "set_without_catalog_use",
+      "item_edit": true,
+      "fresh_set": true,
+      "catalog_use": false,
+      "reference_read": true,
+      "expected": false
+    },
+    {
+      "id": "set_hidden_reference",
+      "item_edit": true,
+      "fresh_set": true,
+      "catalog_use": true,
+      "reference_read": false,
+      "expected": false
+    },
+    {
+      "id": "catalog_admin_not_item_editor",
+      "item_edit": false,
+      "fresh_set": true,
+      "catalog_use": true,
+      "reference_read": true,
+      "expected": false
+    },
+    {
+      "id": "authorized_set",
+      "item_edit": true,
+      "fresh_set": true,
+      "catalog_use": true,
+      "reference_read": true,
+      "expected": true
+    }
+  ]
+}

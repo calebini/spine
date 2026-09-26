@@ -1,0 +1,157 @@
+{
+  "contract_version": "spine.facet-integration.v1",
+  "status": "draft_not_implemented",
+  "normative_source": "specs/archetype-facets.md",
+  "permission_resolvers": {
+    "facet_schema.create": [
+      "owner.catalog_admin"
+    ],
+    "facet_schema.publish": [
+      "schema.catalog_admin"
+    ],
+    "facet_schema.retire": [
+      "schema.catalog_admin"
+    ],
+    "facet_schema.show": [
+      "schema.catalog_read"
+    ],
+    "facet_schema.list": [
+      "owner.authorized_catalog_candidates"
+    ],
+    "item_archetype.facet_binding.set": [
+      "archetype.catalog_admin",
+      "schema.catalog_admin",
+      "same_catalog_owner"
+    ],
+    "item_archetype.facet_binding.remove": [
+      "archetype.catalog_admin"
+    ],
+    "item_archetype.facet_binding.list": [
+      "archetype.catalog_read",
+      "returned_schemas.catalog_read"
+    ],
+    "item.facets.update": [
+      "item.edit",
+      "fresh_sets.archetype_catalog_use",
+      "fresh_sets.schema_catalog_use",
+      "fresh_sets.reference_authority"
+    ],
+    "item.facets.show": [
+      "item.read_current_authority",
+      "returned_references.read"
+    ],
+    "item.facets.query": [
+      "schema.catalog_read",
+      "owner.authorized_item_candidates",
+      "reference_predicate.read"
+    ]
+  },
+  "reference_visibility": {
+    "trusted_local": "existing; subject must be active on set",
+    "permission_enforced": {
+      "subject": "selected_subject_only",
+      "location": "deny_until_family_owned_sharing_contract"
+    }
+  },
+  "cursor": {
+    "contract_version": "spine.facet-cursor.v1",
+    "payload_schema": "contracts/schemas/archetype-facet-cursor.schema.json",
+    "prefix": "fc1",
+    "mac_domain": "spine.facet-cursor.v1",
+    "mac_separator": "NUL",
+    "algorithm": "HMAC-SHA256",
+    "encoding": "unpadded canonical base64url",
+    "max_token_bytes": 4096,
+    "ttl_seconds": 900,
+    "min_secret_bytes": 32,
+    "max_candidates": 100,
+    "max_resolved_resources": 100,
+    "max_access_proof_rows": 100,
+    "query_domain": "spine.facet-query.v1",
+    "context_domain": "spine.facet-cursor-context.v1",
+    "access_domain": "spine.facet-cursor-access.v1",
+    "source_domain": "spine.facet-cursor-source.v1",
+    "orders": {
+      "facet_schema.list": "facet_schema_id",
+      "item_archetype.facet_binding.list": "facet_key",
+      "item.facets.query": "item_id"
+    },
+    "durable_read_writes": false
+  },
+  "work": {
+    "contract_version": "spine.facet-notification-continuity.v1",
+    "current_policy_key": [
+      "item_id",
+      "notification_intent_id"
+    ],
+    "comparison_policy_fields": [
+      "notification_intent_id",
+      "intent_created_item_version",
+      "intent_created_by_command_id",
+      "status",
+      "recipient_kind",
+      "recipient_subject_id",
+      "recipient_group_id",
+      "channel",
+      "delivery_target_id",
+      "target",
+      "normalized_notification_schedule_hash",
+      "late_handling"
+    ],
+    "row_mutations": [],
+    "materialize": false,
+    "regenerate_provenance": false,
+    "new_attempts": false,
+    "source_event_facet_edit": "dependent follow_source binding becomes stale by existing source-version rules; reconcile separately",
+    "target_task_facet_edit": "preserve unchanged source and due anchor meaning; do not revise binding",
+    "comparison_failure": "environment_failure",
+    "states": {
+      "eligible_unattempted": "retain",
+      "leased_or_in_progress": "preserve_lease_and_recheck_before_attempt",
+      "eligible_retry": "preserve_retry_and_recheck",
+      "terminal": "preserve_history",
+      "independently_stale": "leave_to_existing_stale_handling",
+      "absent": "do_not_materialize"
+    },
+    "reconciliation_performed": "fresh changed and (current policies exist or notification_reminder work exists); equivalence proof only"
+  },
+  "adapter_errors": {
+    "invalid_request": {
+      "cli": "invalid_request",
+      "exit": 2,
+      "web": "invalid_request",
+      "http": 400
+    },
+    "stale_cursor": {
+      "cli": "stale_cursor",
+      "exit": 6,
+      "web": "access_changed",
+      "http": 409
+    },
+    "capacity": {
+      "cli": "environment_failure",
+      "exit": 7,
+      "web": "capacity_exceeded",
+      "http": 429
+    },
+    "missing_cursor_context": {
+      "cli": "environment_failure",
+      "exit": 7,
+      "web": "admission_unavailable",
+      "http": 503
+    },
+    "hidden_reference": {
+      "cli": "facet_reference_unavailable",
+      "exit": 4,
+      "web": "resource_unavailable",
+      "http": 404
+    }
+  },
+  "runtime_proofs_required": [
+    "database_permission_resolution_and_no_disclosure",
+    "authenticated_pagination_concurrent_revocation_and_source_change",
+    "notification_multi_copy_attempt_start",
+    "recurring_and_follow_source_continuity",
+    "migration_rollback_indexes_and_all_version_writers"
+  ]
+}

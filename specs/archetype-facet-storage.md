@@ -1,23 +1,25 @@
 # Spine Archetype Facet Storage
 
-Status: Draft v0.2 — product clarifications incorporated; physical contract not ratified or implemented
+Status: Accepted v1.0 — physical design ratified; not implemented
 Date: 2026-09-24
+Ratified: 2026-09-25
 Scope: SQLite persistence, migration, typed query indexes and storage proof for facets
 
 ## 1. Authority and boundaries
 
 [Archetype facets](archetype-facets.md) owns logical semantics, limits, identities,
-commands and readback. [Decision 0004](decisions/0004-versioned-item-facets.md) ratifies
-the versioned architecture, not this physical layout. The Spine-wide persistence
+commands and readback. [Decision 0004](decisions/0004-versioned-item-facets.md) owns
+the accepted versioned architecture; this leaf owns its physical layout. The Spine-wide persistence
 owner is [STORAGE_ATOMICITY_SPEC.md](STORAGE_ATOMICITY_SPEC.md). This leaf is the
-authoritative *draft location* for the proposed facet SQL layout; it does not ratify
-unsettled logical choices or introduce a second item, audit, permission or work model.
+authoritative accepted facet SQL layout, ratified by the operator on 2026-09-25. It
+does not ratify unsettled logical choices or introduce a second item, audit,
+permission or work model.
 
 The existing [machine registry](../contracts/archetype-facet-contract-registry.v1.json),
 [type schema](../contracts/schemas/archetype-facet-types.schema.json) and
 [fixture manifest](../contracts/archetype-facet-fixture-manifest.json) remain unchanged.
 Storage columns are not new public response fields. No migration number, implemented
-family, pack capability, CLI command or web route is activated by this draft.
+family, pack capability, CLI command or web route is activated by this specification.
 
 ## 2. Layout assessment and selection
 
@@ -343,9 +345,10 @@ result facts store exactly the owning command's stable outcome fields; audit pay
 hashing follows the existing audit writer. No second facet audit table. SQL layout must
 not change logical replay response transformations or duplicate a composite audit.
 
-Facet-only version changes MUST NOT invent work-retention behavior. Logical Section 5's
-queued/leased/attempted reconciliation gate remains blocking. Storage requires its
-eventual outcome to share this transaction but does not pick that outcome here.
+Facet-only version changes follow logical Section 5's verified-retention rule. Its
+continuity check shares this transaction, leaves work/attempt rows unchanged and fails
+atomically on unexpected semantic drift. Runtime proof remains required; this leaf
+does not define a second notification reconciliation engine.
 
 ## 7. References, retirement and historical decoding
 
@@ -412,7 +415,7 @@ only at implementation; rebase on intervening migrations rather than reserve 16 
 
 Backfill is deliberately ledger-size-dependent **maintenance**, not startup or command
 preflight. A large deployment may need a separately designed resumable migration; this
-draft does not hide partial availability or reopen a general scalability project.
+specification does not hide partial availability or reopen a general scalability project.
 
 Rollback before migration commit uses transaction rollback. After commit, either use
 a facet-aware runtime compatible with the new schema or stop all writers and restore
@@ -452,7 +455,7 @@ scan is needed for copy-forward: fetch only the current complete snapshot.
 Equality query accepts only subject/subject_group item owners; reject system owner
 before query execution. System-owned schema definitions remain supported and confer
 no item access. Equality query is permission-first: resolve selected account, requested owner, exact
-schema revision and field under the eventual resolver contract; then enumerate bounded
+schema revision and field under logical Section 6.1; then enumerate bounded
 authorized item candidates **in that owner scope**, ordered by item_id, using existing
 owner/grant indexes. Direct CLI can omit web authorization but still uses the explicit
 owner and operational bounds. Probe current typed rows for each admitted item using
@@ -477,10 +480,11 @@ Publication/retirement of definitions never switches the queried revision.
 Fetch enough authorized candidates to establish the page and permitted lookahead,
 within the shared resolution budget. If that budget is exhausted before completeness
 or has_more can be established, return capacity failure, not a truncated successful
-page or an empty answer. Pagination and source invalidation MUST use the future
-authenticated facet cursor contract; physical keyset SQL is not that contract.
+page or an empty answer. Pagination and source invalidation MUST use logical Section
+11's authenticated facet cursor contract, including its complete bounded candidate
+snapshot; physical keyset SQL is not that contract.
 Permission predicates apply before revealing match/existence counts. Reference equality
-also requires the eventual reference disclosure resolver; knowing an ID is not authority.
+also requires logical Section 6.1's reference disclosure resolver; knowing an ID is not authority.
 
 EXPLAIN QUERY PLAN fixtures must show indexed SEARCHes rooted in the selected item,
 owner or archetype. Reject unrestricted scans of item_facet_entries, current_values,
@@ -499,11 +503,11 @@ resolutions per request. Reference/schema/item checks share that budget, not sep
 100-resource allowances. Large valid snapshots may therefore require the documented
 capacity failure on permission-enforced readback; do not invent partial facet reads.
 
-For this proposed leaf, use the existing trusted web operational ceiling values as
+For this leaf, use the existing trusted web operational ceiling values as
 the upper bounds for facet reads/writes, including trusted-local query commands:
 1 MiB request, 4 MiB response, 5-second end-to-end deadline including at most 2-second
 SQLite busy wait, and 100000 SQL VM steps. Lower configured limits are permitted.
-The remaining adapter/cursor contract must map capacity to its existing safe envelope;
+Logical Section 6.1 maps capacity to the adapter's existing safe envelope;
 this leaf does not invent a public error code or let helpers reset the shared budget.
 Migration and explicit deep verification are separately admitted maintenance paths.
 
@@ -562,12 +566,12 @@ IDs name required future tests; a Markdown row is not runtime verification evide
 | FS-09 budgets/plans | 1 and 100000 unrelated-owner items plus deep unrelated history preserve candidate-rooted SEARCH plans; VM-step/deadline/byte/101st-resolution failures return no false-complete result or durable trace |
 | FS-10 migration | Predecessor fixture with all item types/history backfills exact empty markers, preserves all existing rows/identities, preserves rebuilt audit rows, and rejects old writers; interrupted migration rolls back |
 | FS-11 rollback/repair | Consistent backup restore returns pre-migration data; explicit derived-index rebuild matches canonical values; corrupt definition cannot be repaired from index; missing/drifted schema object fails preflight |
-| FS-12 work integration | Queued, leased/in-progress and attempted work follow the future explicit facet-edit freshness outcome; unchanged schedule semantics and no duplicate send; blocked until that contract lands |
+| FS-12 work integration | Queued, leased/in-progress, retry and terminal work follow logical Section 5's verified-retention rule across multiple facet edits; unchanged schedule semantics and no duplicate send; executable proof still required |
 | FS-13 flight proof | Register -> bind -> create item -> attach -> inspect -> query -> replace -> retire/remove through public commands; failed attach leaves separately created item intact |
 
 Additional gates: assert no full integrity/quick/FK scan during routine facet preflight;
 reads perform no canonical writes; snapshot consistency plus fresh authorization release
-holds; cursor tampering/expiry/source changes fail per the future cursor contract.
+holds; cursor tampering/expiry/source changes fail per logical Section 11.
 Also prove system-owner item queries fail validation while system-owned schema
 creation/listing remains structurally valid. These decisions are settled below;
 permission and cursor behavior still require real runtime proofs, not fake success stubs.
@@ -582,15 +586,23 @@ permission and cursor behavior still require real runtime proofs, not fake succe
    be system-owned; catalog ownership does not determine matching items or visibility.
 3. Logical Section 9's initial scope is confirmed: scalar fields, same-owner bindings,
    optional facets, item/series-level values and two-command initial authoring. The
-   logical owner records this confirmation; no physical-layout ratification is implied.
+   logical owner records this confirmation; that confirmation alone did not ratify
+   a physical layout.
 
-**Engineering gates (not requests to build more product):** review this selected physical
-layout; codify the exact DDL/object manifest/migration fixtures; finalize permission
-resolver mappings and authenticated cursor/source-snapshot rules; settle facet-only
-work freshness under existing notification contracts; map FS fixtures to executable
+**Physical design ratified (2026-09-25):** The operator accepts this v1.0 hybrid layout:
+relational identity/history and reference integrity, canonical JSON definitions and
+versioned values, and derived current-only typed indexes. The bounded buildability
+audit returned one minor response-owner clarification, subsequently patched with a
+negative fixture and local regression checks. This acceptance is not a new reviewer
+verdict, implementation authorization or closure of the remaining engineering gates.
+
+**Engineering gates (not requests to build more product):** codify the exact
+DDL/object manifest/migration fixtures; implement and verify logical Sections 5, 6.1
+and 11's work continuity, permission resolvers and authenticated cursor/source-snapshot
+rules; map FS fixtures to executable
 tests and verify every item-version producer. Capacity/response error mappings must
 agree with the owning adapters. No new runtime capability until these gates close.
 
-This draft deliberately does not decide field ACLs, richer value types, live external
-observations, recipes, occurrence-level facets, pack-v2 installation, cross-ledger
+This specification deliberately does not decide field ACLs, richer value types,
+live external observations, recipes, occurrence-level facets, pack-v2 installation, cross-ledger
 queries, retention/erasure or a general storage redesign.
