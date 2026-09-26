@@ -1,6 +1,6 @@
 # Spine Backlog
 
-Last updated: 2026-09-22
+Last updated: 2026-09-26
 
 This is the single work queue for Spine development. The
 [implementation plan](IMPLEMENTATION_PLAN.md) explains roadmap direction and delivery
@@ -727,9 +727,69 @@ v2 error mapping and non-advertisement. Full command
 526 tests and 567 subtests. `.venv/bin/ruff check .`, `git diff --check`, and planning
 document link/heading checks passed. No new Whetstone run or staging claim.
 
-## Roadmap candidates — not selected work
+## Facet delivery — planning selected; runtime not started
 
-These retained entries require operator selection. They do not schedule a gap analysis.
+The operator selected delivery planning on 2026-09-26 after the clean integration
+recheck. The next bounded implementation target is SPINE-027, followed by SPINE-028
+and SPINE-029. No runtime work is started by this planning update. Design/review history
+remains below under SPINE-008–009; live delivery status belongs to these entries.
+
+### SPINE-027 — Implement facet persistence and all-writer foundation
+
+**Status:** Ready — planned next slice; awaiting operator instruction to implement.
+**Dependencies:** SPINE-008 review complete, Decision 0004 ratified, storage v1.0
+accepted, integration v0.7 focused recheck passed with zero findings. No unresolved
+product decision is currently identified for this internal persistence slice.
+
+**Scope:** Pure canonical validators/decoders; all eight accepted tables and exact
+constraints/indexes/triggers; fresh-schema and migration/object-manifest parity;
+historical empty-marker backfill; transaction-owned catalog/snapshot/reference/index
+primitives; every existing item-version producer's marker/copy-forward participation;
+explicit deep verification and fixture-only backup/restore proof. Choose the next
+available schema number at implementation. No public facet command or web activation.
+
+**Acceptance:** Persisted FS-01–05, storage portions of FS-06–09, FS-10–11; existing
+commands preserve seeded nonempty facets and original evidence; atomic failure leaves
+shell/support/index/audit/receipt facts coherent; immutable history remains decodable;
+candidate-rooted query plans and budgets hold with unrelated history. Routine preflight
+remains bounded. Record a per-FS test/remaining-gate map, not a blanket completion claim.
+The migration and all-version-writer support must ship together; no live DB changes.
+
+### SPINE-028 — Implement facet commands and notification continuity
+
+**Status:** Blocked on SPINE-027; sequenced follow-on, not started.
+**Scope:** All eleven reserved commands through shared handlers/trusted-local CLI;
+exact validation, identity, changed/no-op/replay and transaction semantics; bounded
+reads and configured authenticated cursors; stable-intent notification lookup and
+facet-only verified retention; operator docs, matching package/registry declarations.
+
+**Acceptance:** Public-command FS-07–09 and FS-12–13, including real work/attempt races,
+multiple facet copy-forwards, recurring/follow_source behavior, no duplicate sends,
+and the trusted-local flight lifecycle. Verify first-page/continuation source races,
+no durable read evidence and concrete item-type rejection. Do not expose item updates
+before work-continuity proof, and do not add HTTP routes or frozen schedule fields.
+
+### SPINE-029 — Integrate permission-enforced facets and web admission
+
+**Status:** Blocked on SPINE-028; sequenced follow-on, not started.
+**Scope:** Existing permission model's reviewed catalog extension, item/nested-reference
+resolvers, six-write receipt-disclosure replay matrix, bounded protected cursors and
+release fences. Codify/test exact web registry/admission/package declarations before
+enabling routes; surface any unresolved interface decision in its owning spec.
+
+**Acceptance:** Persisted permission portions of FS-06–09 and adversarial identity,
+revocation, hidden-reference, replay, grant-transition and cursor-race tests. Retained
+read access permits compatible receipt replay without fresh write rights; lost read
+denies without leakage. No implicit shared-location resolver; reference-rich flight
+authoring stays trusted-local. Existing web contracts/behavior remain unchanged unless
+an explicit successor is required and codified. Kinflow adoption is separate work.
+
+**Shared delivery guidance:** [Facet implementation sequence](IMPLEMENTATION_PLAN.md#planned-delivery-versioned-archetype-facets-spine-027029).
+The owning [logical contract](../specs/archetype-facets.md),
+[storage leaf and FS families](../specs/archetype-facet-storage.md), and
+[integration companion](../contracts/archetype-facet-integration.v1.json) remain
+authority for all three tasks. These checkpoints do not require separate staging
+deployments or reopen deferred resilience, recipes, observations or pack-v2 work.
 
 ### SPINE-008 — Close the focused facet machine-contract recheck
 
@@ -758,8 +818,9 @@ additional broad audit campaign or authorize facet implementation.
 
 **Status:** In progress — Decision 0004 logical architecture ratified 2026-09-24;
 physical storage design accepted as v1.0 on 2026-09-25; permission/cursor/work contracts
-codified 2026-09-26, pending review and executable implementation proofs. This specification work is explicitly selected; the roadmap
-heading does not authorize runtime work or the other retained candidates.
+codified and focused-recheck passed 2026-09-26. Contract review is closed; remaining
+executable delivery gates are mapped to SPINE-027–029. This gate tracker stays open
+until those proofs land; it does not schedule another spec sweep or authorize runtime.
 **Dependencies:** SPINE-008 is complete. The deferred resilience campaign is not a
 blanket prerequisite.
 
@@ -776,12 +837,12 @@ physical layout combines relational identity/history and references, canonical J
 definitions/values and derived current-only typed indexes. Neither ratification
 authorizes runtime implementation.
 
-**Acceptance:** Decision 0004 and the physical storage design are resolved. Review the
-2026-09-26 permission/cursor/work-continuity amendment and its machine oracles; codify
-exact DDL/object manifests/migration fixtures and prove persisted authorization,
-cursor concurrency and attempt-start continuity. Then create
-bounded implementation tasks for the flight-details proof. Keep workflow recipes and
-external observations separate; do not advertise runtime facets from draft schemas.
+**Acceptance:** Decision 0004, physical storage and focused integration review are
+resolved; delivery planning is complete. Close the remaining DDL/object-manifest,
+migration, all-writer, persisted authorization, cursor concurrency and attempt-start
+gates through SPINE-027–029 and record the executable flight-details proof. Keep
+workflow recipes and external observations separate; do not advertise runtime facets
+from draft schemas or static fixtures.
 
 **Sources:** [Facet gates](../specs/archetype-facets.md),
 [Accepted physical storage](../specs/archetype-facet-storage.md),
@@ -965,6 +1026,45 @@ The ratified physical storage design, notification-continuity rules, runtime fil
 implemented registries and prior audit artifacts remain unchanged. The pre-existing
 backlog audit record is preserved. No runtime implementation, new Whetstone run,
 commit or push; the prior audit verdict remains historical, not upgraded to a pass.
+
+**Integration focused recheck prepared (2026-09-26):** Staged
+[archetype-facet-integration-contract-audit-002](../whetstone_runs/archetype-facet-integration-contract-audit-002/audit-notes.md)
+against checkpoint 4060e89, including manual patch 2256a90 and the create-only-changed
+replay clarification. One reviewer-only audit-change is proposed with buildability
+and Codex gpt-5.6-sol. The exact twenty-one-file inventory narrows review to the prior
+three findings and directly introduced regressions; no runtime sources or physical
+storage redesign are included. Awaiting explicit authorization for those inputs,
+notes, built-in profile and generated copies. No nested reviewer has been invoked.
+
+**Integration focused recheck completed (2026-09-26):** The operator approved the
+exact twenty-one files, notes, built-in buildability profile and generated copies.
+Ran one reviewer-only audit-change using Codex gpt-5.6-sol, timeout 600 seconds.
+The app update relocated the bundled executable to Resources/codex-cli/bin/codex;
+recorded CLI version 0.158.0-alpha.2.1. Both manifest and feedback identify the
+approved model. Result: **pass**, **boundary_preserved=true**, zero blockers,
+majors, minors or nits. No residual or patch-induced issue was reported for the
+concrete item-type, six-write replay-authority or first-page race closures. Feedback
+contains no separate per-finding narrative; closure is the bounded pass against the
+explicit recheck questions, not additional individual reviewer attestations.
+
+Verified all twenty-one inputs and notes remained byte-identical to launch hashes,
+the exact manifest inventory and normalized hashes, and report/feedback brief hashes.
+No source specification, contract, fixture or runtime changes; no Editor, convergence
+claim, commit or push. This closes the focused integration review gate, not the
+remaining runtime/persistence/authorization/concurrency acceptance tests. Evidence:
+[report](../whetstone_runs/archetype-facet-integration-contract-audit-002/change_audit/change_audit_report.md)
+and [feedback](../whetstone_runs/archetype-facet-integration-contract-audit-002/change_audit/change_audit_feedback.json).
+
+**Implementation planning checkpoint (2026-09-26):** Updated the existing delivery
+plan and opened SPINE-027–029 with concrete scope, dependencies, release fences and
+FS-family acceptance. Next is the cohesive persistence/all-writer slice; command/work
+and protected web integration follow. Removed the stale roadmap statement making
+facets subordinate to the deferred resilience campaign. Preserved prior audit evidence
+and the distinction between a clean review and unimplemented runtime proofs. No source
+spec/contract/runtime changes, migration, reviewer run, commit or push in this update.
+Planning verification: agent-documentation and implemented-declaration tests passed
+**9 tests and 79 subtests**; **117** local Markdown file/heading links and diff hygiene
+passed. These checks verify documentation alignment, not facet implementation.
 
 ## Later horizons
 

@@ -1,7 +1,7 @@
 # Spine Implementation Plan
 
 Role: Roadmap rationale and delivery history; current task status lives in [BACKLOG.md](BACKLOG.md)
-Last updated: 2026-09-22 (OpenClaw retry delivery idempotency repair)
+Last updated: 2026-09-26 (reviewed facet implementation sequence)
 
 This is a non-normative delivery plan. The specifications and machine-readable contracts remain authoritative.
 
@@ -11,9 +11,10 @@ they are not a second live task queue. Update this document when initiative scop
 sequencing rationale changes, and update the backlog for task progress. Future horizons
 stay coarse until promoted into bounded work with acceptance criteria.
 
-The backlog retains deferred resilience work in SPINE-004–007, facets in SPINE-008–009,
-and later horizons in SPINE-010–014. SPINE-010 storage lifecycle is also deferred.
-These are not automatically selected work.
+The backlog retains deferred resilience work in SPINE-004–007 and SPINE-010,
+facet design/review history in SPINE-008–009, and later horizons in SPINE-011–014.
+Facet delivery is now planned as SPINE-027–029 following the clean integration recheck.
+This planning selection does not start runtime implementation or select other horizons.
 The broad web/staging review tasks SPINE-001–003 were withdrawn at the operator's
 request; no general gap analysis is scheduled.
 SPINE-015 separately tracks independent authorized activity reads when linked resources
@@ -59,6 +60,135 @@ delivery through an idempotent gateway double. Old-envelope replay remains
 fail-closed. SPINE-026 records exact verification and limitations. The real gateway's
 key retention, restart persistence and handling of changed retry prose still require
 separate runtime evidence; no deployment or service restart is part of this repair.
+
+## Planned Delivery: Versioned Archetype Facets (SPINE-027–029)
+
+The 2026-09-26 integration recheck passed with no findings and preserved boundaries.
+Its approved model was gpt-5.6-sol. The reviewed sources are checkpointed through
+`4060e89`; the physical storage design is accepted v1.0 and the logical integration
+draft is v0.7. This closes the focused contract review, not runtime verification or
+a convergence declaration. The [backlog](BACKLOG.md#facet-delivery--planning-selected-runtime-not-started)
+owns live task status; this section defines implementation order and release fences.
+
+Authoritative inputs are [the logical facet contract](../specs/archetype-facets.md),
+[its storage leaf](../specs/archetype-facet-storage.md),
+[Decision 0004](../specs/decisions/0004-versioned-item-facets.md),
+[Spine-wide atomicity](../specs/STORAGE_ATOMICITY_SPEC.md), and the
+[integration companion](../contracts/archetype-facet-integration.v1.json),
+[command registry](../contracts/archetype-facet-contract-registry.v1.json) and
+[fixture manifest](../contracts/archetype-facet-fixture-manifest.json).
+These own behavior; the delivery plan does not invent missing policy or override them.
+
+### Slice A — Persistence and all-writer foundation (SPINE-027)
+
+**Next implementation target, once authorized:** one cohesive internal slice covering
+the canonical storage substrate and every existing item-version producer. Do not split
+the migration from its writer support, or deploy a database that existing commands
+can leave without facet markers. Public facet commands stay unregistered in this slice.
+
+1. Implement pure definition/value normalization, compatibility checks, pinned decoder
+   selection and canonical hashes against the published vectors. Keep I/O out of core;
+   unknown decoder selectors and corrupt/noncanonical persisted bytes fail closed.
+2. Codify all eight specified tables, constraints, triggers, FK parent keys and indexes;
+   extend the existing catalog audit resource kinds without losing historical rows.
+   Produce matching fresh-schema SQL, migration, schema-object fingerprints and package
+   data through existing mechanisms. Allocate the next available schema number against
+   the actual implementation base; schema 15 is the inspected baseline, not a reserved
+   next-number promise. Do not add dynamic DDL per operator schema.
+3. Add transaction-owned ledger primitives for immutable definitions/bindings, complete
+   snapshots, historical reference protection and current-only typed projections.
+   Helpers never commit, invent audit/receipt identities, or repair canonical rows on read.
+   Stored definitions/values remain authority; typed rows are derived.
+4. Wire empty-marker creation and exact snapshot/reference copy-forward into **every**
+   version producer: item/lifecycle, schedule, recurrence, notifications/profile
+   application and temporal-binding reconciliation. Inventory actual call sites and
+   prove coverage. Retain original authoring evidence; enforce archetype-change guards;
+   update only the changed item's current typed rows in the same outer transaction.
+5. Backfill explicit empty snapshots for every existing historical item version; leave
+   existing items, audit, receipts, work and attempts semantically unchanged. Prove
+   rollback on injected failures and rejection of old runtimes against the new schema.
+   Verify backup/restore on disposable ledgers; no live deployment or automatic downgrade.
+6. Extend explicit deep verification to canonical/projection parity. Keep routine
+   preflight object/contract-bounded and all read paths free of repair or durable traces.
+   Prove indexed candidate-rooted queries and operation budgets against unrelated data.
+
+**Exit evidence:** real SQLite tests for FS-01–05, storage/reference portions of FS-06,
+transaction/concurrency portions of FS-07–09, and FS-10–11. Publish a concrete mapping
+from every FS family to tests or a named follow-on gate; do not label permission,
+public replay or notification acceptance complete based on helper tests. Include
+multiple existing command paths against seeded nonempty facets, historical decoding
+after catalog retirement, deferred-FK/commit failures, current-index parity, and
+missing/drifted-object admission failures. Pure oracles supplement these tests.
+
+### Slice B — Public commands and notification continuity (SPINE-028)
+
+Build on Slice A to implement all eleven reserved facet commands through shared
+handlers and the trusted-local CLI. Enforce exact request/response pins, produced-row
+identities, stale-version checks, one outer transaction, audit counts and same-ID
+replay. Fresh sets require the concrete item type in both pinned compatibility sets,
+even for same-value no-ops; retained/removal/replay paths keep their specified exemptions.
+
+Integrate facet-only edits with ordinary notification continuity before exposing
+`item.facets.update`. Resolve the current policy by stable item/intent, not a one-hop
+copy predecessor. Verify semantic equality atomically and preserve existing work,
+leases, attempts and rendering evidence without expansion, cancellation or sending.
+Respect downstream follow_source staleness and reconcile it only through its existing
+path. Cover multiple successive edits, recurring work, queued/leased/retry/terminal
+states, independent stale work, concurrent lease/attempt start and lost-response replay.
+
+Implement bounded local show/list/query and the authenticated facet cursor contract,
+including protected key/context provisioning, clone/restore invalidation and no
+durable cursor store. Use the single-request budget for evaluation and release checks;
+first-page source races fail without internal retries and continuations fail stale.
+
+Complete CLI effect/replay portions of FS-07–09, FS-12 and the trusted-local FS-13
+flight proof: register, bind, create item, attach, inspect, query, replace, retire/remove.
+The create/attach pair remains two atomic commands and a failed attach leaves the item.
+Activate only fully tested runtime contract families and command registry entries;
+ship operator documentation and packaged contracts together. No automatic web route
+registration, schedule projection extension or pack-v2 activation follows from CLI support.
+
+### Slice C — Permission-enforced reads and web admission (SPINE-029)
+
+Implement the reviewed catalog resolver/grant extension and item/reference authority
+on the same handlers, including all six receipt-disclosure replay mappings. Prove
+current initiating identity/read checks, safe foreign-ID failures, read-retained/
+write-revoked replay, hidden nested references and release-time revocation with real
+ledger state. Do not reuse fresh write authority as a replay prerequisite or expose
+facet values through receipt replay.
+
+Complete protected pagination with configured context/key, bounded candidate/access
+proofs and fresh release fences: tampering, expiry, key/generation rotation, gained/lost
+visibility, grant transitions and source races. Reuse existing independent-read
+machinery only where semantics match; preserve the distinct facet cursor pin/bytes.
+The permission-enforced subset permits scalar/self-subject references, not implicit
+shared locations; the reference-rich flight demonstration remains trusted-local.
+
+Before activation, codify and test the exact versioned web registry/admission mapping
+and package/capability declarations required by the owning web contract. No mutation
+of a frozen registry or invented permission mapping. If that codification reveals an
+unsettled API/product choice, surface it rather than treating this plan as authority.
+Finish permission portions of FS-06–09 plus adversarial cursor/replay/revocation tests.
+Kinflow UI integration is a separate consumer task, not an implied Spine deliverable.
+
+### Verification, handoff and release discipline
+
+- Run focused tests during each slice, then the relevant full suite, configured strict
+  core/ledger type checks, lint, contract-package parity, clean initialization/upgrade
+  tests and diff/link hygiene. Record actual versions, counts and any skips/limitations.
+- Retain tests proving existing non-facet scheduling, reads and worker behavior; no
+  full integrity/quick/FK scan is introduced at routine startup. Feature-local bounds
+  and failure injection are required, not a restart of the deferred resilience campaign.
+- These are implementation checkpoints, not three mandatory staging deployments.
+  Prefer one cohesive deployable release after its selected public surface is proven.
+  A foundation-only checkpoint must not advertise facet support. Deploy only with a
+  consistent backup, writer-stop/migration procedure, matching runtime and explicit
+  post-commit rollback/restore warning as required by the storage leaf.
+- No blanket audit sweep is planned. A genuine contract conflict discovered while
+  building goes back to its owning spec for a targeted decision/correction.
+- Recipes, observations/advisories, occurrence-level facets, richer types, field ACLs,
+  atomic create-with-facets, generalized location sharing and retention remain outside
+  this delivery. No pack installation or UI changes are implied.
 
 ## Planned Fat Slice: Independent Authorized Activity Reads (SPINE-015)
 
@@ -654,8 +784,10 @@ physical design in [archetype-facet-storage.md](../specs/archetype-facet-storage
 was accepted as v1.0 on 2026-09-25 after a bounded buildability audit and its manual
 minor patch. The 2026-09-26 v0.6 logical amendment specifies permission resolver mappings,
 authenticated cursor/source-snapshot semantics and exact notification continuity,
-with `contracts/archetype-facet-integration.v1.json` and test-only oracles. Review that
-amendment next; remaining implementation gates include exact DDL/object manifests,
+with `contracts/archetype-facet-integration.v1.json` and test-only oracles. Its targeted
+v0.7 corrections passed the focused buildability recheck on 2026-09-26 with zero findings
+and preserved boundaries. Implementation is sequenced above as SPINE-027–029;
+remaining executable gates include exact DDL/object manifests,
 migration fixtures and persisted/concurrent proofs of those contracts. In particular,
 attempt-start policy resolution must survive multiple copy-forwards by stable intent;
 source-event edits retain existing downstream follow_source invalidation. Shared
@@ -667,8 +799,8 @@ current pack and web registries are unchanged.
 Spine's current archetypes are intentionally thin, owner-scoped semantic identities.
 Their future value should grow primarily through separately versioned capabilities
 that bind to them, rather than through rigid event subclasses or an expanding set of
-archetype-specific core tables. This horizon is subordinate to the ordered Operational
-Resilience and Boundedness initiative above and does not authorize implementation.
+archetype-specific core tables. The facet delivery plan does not depend on the deferred
+Operational Resilience and Boundedness campaign and does not authorize implementation.
 
 The intended boundary is:
 
@@ -690,7 +822,9 @@ The intended boundary is:
   suggested, automatic, or disabled for an archetype, without moving recipe execution
   into Spine.
 
-The future work should proceed in this order:
+The architectural progression is retained below; steps 1–2 now have the accepted
+design and reviewed machine-contract foundation described above. Their runtime proof
+belongs to SPINE-027–029; steps 4–5 remain separate future work:
 
 1. Accept an architecture decision defining the core-versus-facet promotion rule,
    schema ownership, immutable schema versioning, provenance, query/index requirements,
