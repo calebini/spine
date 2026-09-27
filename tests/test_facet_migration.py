@@ -16,7 +16,7 @@ from tests.test_ledger_sqlite import insert_valid_event_bundle, insert_valid_tas
 
 
 def predecessor(db):
-    with patch("spine.ledger.facet_migration.install_facet_storage"):
+    with patch("spine.ledger.facet_migration.install_facet_storage"), patch("spine.ledger.facet_access_migration.install_facet_access"):
         initialize_schema(db)
     # Raw predecessor fixture: the new allocator deliberately cannot write schema 15.
     # These helpers normally use its context, so enable no facet gate for this offline fixture.
@@ -53,8 +53,8 @@ class FacetMigrationTests(unittest.TestCase):
                 before = predecessor(db)
                 db.backup(backup)
                 result = migrate_schema(db)
-                self.assertEqual(result.applied_versions, (16,))
-                self.assertEqual(result.after_version, 16)
+                self.assertEqual(result.applied_versions, (16, 17))
+                self.assertEqual(result.after_version, 17)
                 after = all_rows(db)
                 for table, rows in before.items():
                     if table != "ledger_schema":

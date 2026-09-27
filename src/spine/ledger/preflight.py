@@ -46,15 +46,18 @@ def current_schema_version(connection: sqlite3.Connection) -> int:
     return int(version_row["schema_version"])
 
 
-def expected_schema_objects() -> tuple[SchemaObjectExpectation, ...]:
+def expected_schema_objects(*, version: int | None = None) -> tuple[SchemaObjectExpectation, ...]:
     """Load the checked-in manifest shipped with this runtime."""
 
+    version = CURRENT_SCHEMA_VERSION if version is None else version
     payload: Any = json.loads(
-        resources.files("spine.ledger").joinpath("schema_object_manifest.v1.json").read_text(encoding="utf-8")
+        resources.files("spine.ledger").joinpath(
+            "schema_object_manifest.v1.json" if version == CURRENT_SCHEMA_VERSION else f"schema_object_manifest.schema{version}.json"
+        ).read_text(encoding="utf-8")
     )
     if payload.get("manifest_version") != SCHEMA_OBJECT_MANIFEST_ID:
         raise RuntimeError("compiled schema-object manifest identity mismatch")
-    schema_key = str(CURRENT_SCHEMA_VERSION)
+    schema_key = str(version)
     schemas = payload.get("schemas")
     if not isinstance(schemas, dict) or set(schemas) != {schema_key}:
         raise RuntimeError("compiled schema-object manifest version mismatch")
@@ -72,17 +75,18 @@ def expected_schema_objects() -> tuple[SchemaObjectExpectation, ...]:
     return objects
 
 
-def verify_runtime_schema(connection: sqlite3.Connection) -> RuntimeSchemaVerificationResult:
+def verify_runtime_schema(connection: sqlite3.Connection, *, expected_version: int | None = None) -> RuntimeSchemaVerificationResult:
     """Verify current schema identity without scanning domain rows."""
 
+    expected_version = CURRENT_SCHEMA_VERSION if expected_version is None else expected_version
     schema_version = current_schema_version(connection)
-    if schema_version != CURRENT_SCHEMA_VERSION:
+    if schema_version != expected_version:
         raise SpineValidationError(
             "ledger_schema_version_mismatch",
-            f"database schema version {schema_version} does not match expected version {CURRENT_SCHEMA_VERSION}",
+            f"database schema version {schema_version} does not match expected version {expected_version}",
         )
 
-    expected = expected_schema_objects()
+    expected = expected_schema_objects(version=expected_version)
     names = tuple(item.name for item in expected)
     placeholders = ",".join("?" for _ in names)
     rows = connection.execute(

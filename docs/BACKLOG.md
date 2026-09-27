@@ -832,7 +832,9 @@ permission-sensitive resolver/disclosure proofs remain SPINE-029, not claimed he
 
 ### SPINE-029 — Integrate permission-enforced facets and web admission
 
-**Status:** Ready — SPINE-028 dependency complete; sequenced follow-on, not started.
+**Status:** Done — implemented and locally verified 2026-09-27; checkpointed with
+the SPINE-029 implementation commit by operator request. Not deployed.
+SPINE-028 is checkpointed in `335c973`; the working tree was clean at start.
 **Scope:** Existing permission model's reviewed catalog extension, item/nested-reference
 resolvers, six-write receipt-disclosure replay matrix, bounded protected cursors and
 release fences. Codify/test exact web registry/admission/package declarations before
@@ -844,6 +846,45 @@ read access permits compatible receipt replay without fresh write rights; lost r
 denies without leakage. No implicit shared-location resolver; reference-rich flight
 authoring stays trusted-local. Existing web contracts/behavior remain unchanged unless
 an explicit successor is required and codified. Kinflow adoption is separate work.
+
+**Completion evidence:** Runtime **0.8.0 / ledger schema 17** adds all eleven
+permission-enforced facet routes in the separate `spine.trusted-web-facets.v1`
+family and exact `spine.trusted-web-facet-registry.v1` registry. Existing v1 command
+and v2 independent-read registries, schemas and schedule projections are unchanged.
+The [admission leaf](../specs/facet-web-admission.md), closed envelopes/discovery/error
+schemas, wire fixtures, compiled resolver mappings and generated package digest pins
+were codified before activation. The shared canonical handlers retain domain/audit/
+idempotency semantics; the adapter owns protected receipt attribution and release checks.
+
+Schema 17 extends only the existing grant vocabulary with `facet_schema`, retaining
+root owner revision 1 and catalog.read/use semantics. Local provisioning `.v2`
+coexists with frozen `.v1`; neither is a web endpoint. The pinned predecessor
+manifest is byte-identical to the committed schema-16 manifest. Real upgrade tests
+preserve grant revisions/operations, facet definitions, all unrelated rows, custom
+indexes/triggers and FK mode; injected post-DDL failure restores schema/data atomically.
+
+`tests/test_facet_web.py` covers all six writes' changed/no-op replay branches,
+new-session replay, admin demotion and retired catalogs, current-read/lost-edit,
+lost-read/foreign/local receipts, hidden references, inherited pinned-definition
+readback, foreign catalog/item grants, system-mutation denial, complete access-proof
+overflow, grant starts/expiry/revocation, fresh release/source races, cursor expiry/
+key/generation/selection/ledger binding, actor/Origin/route boundaries and zero durable
+read/replay effects. Proof/release share one VM/time/resource budget. Protected
+references remain scalar/self-subject only; reference-rich flight authoring remains local.
+
+Verification: **741 tests + 952 subtests passed** in the full pytest suite;
+subsequent focused facet admission/contract/migration checks **19 passed** after the
+final shared-budget refactor. Ruff, compileall, generated-contract/package parity,
+changed Markdown file links and `git diff --check` passed. Configured strict mypy
+and source-discovery strict mypy both passed **42 core/ledger files** (Python 3.14.6,
+mypy 2.3.0, target 3.12). This included a behavior-neutral `policies`/`policy` variable
+distinction fixing the prior facet-continuity branch's type inference.
+Installed-wheel verification is still unavailable because this venv lacks setuptools;
+source/package asset parity is verified, not an installed wheel.
+
+[Consumer/operator handoff](FACET_WEB_API.md) covers migration/rollback, exact paths,
+grants, retry and private cursor provisioning. No live ledger changes, Whetstone run,
+commit, push, deployment, Kinflow UI changes or new authentication guarantees.
 
 **Shared delivery guidance:** [Facet implementation sequence](IMPLEMENTATION_PLAN.md#planned-delivery-versioned-archetype-facets-spine-027029).
 The owning [logical contract](../specs/archetype-facets.md),

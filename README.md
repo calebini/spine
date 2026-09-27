@@ -51,18 +51,20 @@ allowed to quietly become canonical.
 
 ## What Works Today
 
-Spine `0.7.0` is an implemented alpha; its scheduling core is exercised in a staging
-agent environment. The current SQLite ledger schema is version `16`. The trusted multi-operator backend is also running in staging on `cortext1`, with
+Spine `0.8.0` is an implemented alpha; its scheduling core is exercised in a staging
+agent environment. The current SQLite ledger schema is version `17`. The trusted multi-operator backend is also running in staging on `cortext1`, with
 operator testing through the connected [Kinflow frontend](../kinflow-web-ui/README.md).
 Concrete operator-reported work is tracked in the [backlog](docs/BACKLOG.md);
 this checkout version is not a deployment claim.
 
-Version 0.7.0 adds versioned facet storage and trusted-local schema, binding, value,
-readback and typed-query commands, with an offline schema-15-to-16 migration.
+Version 0.8.0 adds permission-enforced facet HTTP commands and catalog grants to
+the versioned storage and trusted-local commands introduced in 0.7.0.
+Offline schema-15-to-16 and schema-16-to-17 migrations preserve existing data.
 Existing item-version commands preserve complete facet snapshots; facet-only edits
-retain semantically unchanged notification work. Facet web routes are **not enabled**;
-permission-enforced integration is the next slice. See the
+retain semantically unchanged notification work. The dedicated facet API leaves
+existing schedule and web read contracts unchanged. See the
 [facet command guide](docs/FACET_COMMANDS.md) and
+[facet API integration guide](docs/FACET_WEB_API.md), plus the
 [storage handoff and verification map](docs/FACET_STORAGE_IMPLEMENTATION.md).
 
 ### Trusted multi-operator web backend

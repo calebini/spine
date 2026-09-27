@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cortext.local/spine/contracts/schemas/trusted-web-facet-capabilities.schema.json",
+  "type": "object",
+  "properties": {
+    "contract_version": {
+      "const": "spine.trusted-web-facets.v1"
+    },
+    "registry": {
+      "$ref": "trusted-web-facet-registry.schema.json"
+    },
+    "pagination_configured": {
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "contract_version",
+    "registry",
+    "pagination_configured"
+  ],
+  "additionalProperties": false
+}

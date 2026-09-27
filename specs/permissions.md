@@ -217,28 +217,29 @@ current item/route grants allow each attempt, revoke future release when necessa
 and preserve actual in-flight or completed outcomes. This draft does not introduce
 that machinery into today's trusted-local worker.
 
-Future facet values should inherit their owning item's access; facet-schema catalogs
+Facet values inherit their owning item's access; facet-schema catalogs
 need separate use/administration rules. Advisory runtimes receive explicitly authorized
 bounded context and output acceptance, not general ledger access. Neither future area
-requires changing the account identity or group-role model, and neither is implemented
-by these permission rules alone.
+requires changing the account identity or group-role model. The facet implementation
+is linked below; advisory execution remains separate work.
 
-The draft [archetype-facets.md](archetype-facets.md) specifies that distinction:
+[Archetype facets](archetype-facets.md) specifies that distinction:
 item read/edit covers values; catalog administration/use covers definitions and new
 attachments. Stored definition snapshots remain interpretable by item readers, while
 nested references retain current disclosure checks. Same-owner archetype/schema
-bindings are the proposed first slice. No current web route is expanded by this draft.
+bindings define the implemented first slice. Existing schedule routes are unchanged.
 
 Facet resolver closure is specified in archetype-facets.md Section 6.1 and
-`contracts/archetype-facet-integration.v1.json`. It maps every reserved command to
+`contracts/archetype-facet-integration.v1.json`. It maps every facet command to
 item read/edit or catalog read/use/administration and preserves fail-closed handling
 of shared references without an owning-family visibility contract. In the permission-enforced
 subset, subject references are self-only and existing location references remain
 unavailable; trusted-local reference-rich authoring remains valid. This does not
-make owner discovery a permission grant. Implementing facet catalog grants requires
-adding resource kind `facet_schema` to the existing grant contract/storage validation,
+make owner discovery a permission grant. Schema 17 adds
+resource kind `facet_schema` to the existing grant contract/storage validation,
 using catalog.read/catalog.use and immutable root owner revision 1, not a new ACL model.
-No runtime route or permission resolver is enabled by this specification amendment.
+The additive implemented registry, transport and provisioning successor are defined
+in [facet web admission](facet-web-admission.md); frozen web families remain unchanged.
 
 ## 9. Mode Changes and Adoption
 

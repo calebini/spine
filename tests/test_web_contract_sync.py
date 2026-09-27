@@ -28,6 +28,8 @@ class WebContractSyncTests(unittest.TestCase):
         self.current = (
             "trusted-web-schema-pins.v1.json",
             "spine.trusted-web-command-registry.v1.json",
+            "spine.trusted-web-facet-registry.v1.json",
+            "archetype-facet-integration.v1.json",
             "schemas/archetype-facet-types.schema.json",
             "schemas/future-current.schema.json",
         )

@@ -62,7 +62,7 @@ def install_facet_storage(db: sqlite3.Connection, *, applied_at_utc: str, fresh:
         # Fresh initialization is also used to generate the current compiled manifest.
         # Existing-ledger migration must verify it before committing activation.
         if not fresh:
-            verify_runtime_schema(db)
+            verify_runtime_schema(db, expected_version=16)
         db.commit()
     except BaseException:
         db.rollback()

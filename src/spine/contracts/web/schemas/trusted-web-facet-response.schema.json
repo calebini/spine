@@ -1,0 +1,490 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cortext.local/spine/contracts/schemas/trusted-web-facet-response.schema.json",
+  "$defs": {
+    "facet_schema.create": {
+      "type": "object",
+      "properties": {
+        "contract_version": {
+          "const": "spine.trusted-web-facets.v1"
+        },
+        "ok": {
+          "const": true
+        },
+        "identity_basis": {
+          "const": "self_selected"
+        },
+        "account_id": {
+          "$ref": "trusted-web-types.schema.json#/$defs/id"
+        },
+        "subject_id": {
+          "$ref": "trusted-web-types.schema.json#/$defs/id"
+        },
+        "selection_id": {
+          "$ref": "trusted-web-types.schema.json#/$defs/id"
+        },
+        "access_epoch": {
+          "$ref": "trusted-web-types.schema.json#/$defs/decimal"
+        },
+        "result_contract": {
+          "const": "spine.facet-schemas.v1"
+        },
+        "result": {
+          "$ref": "archetype-facet-responses.schema.json#/$defs/facet_schema.create"
+        }
+      },
+      "required": [
+        "contract_version",
+        "ok",
+        "identity_basis",
+        "account_id",
+        "subject_id",
+        "selection_id",
+        "access_epoch",
+        "result_contract",
+        "result"
+      ],
+      "additionalProperties": false
+    },
+    "facet_schema.list": {
+      "type": "object",
+      "properties": {
+        "contract_version": {
+          "const": "spine.trusted-web-facets.v1"
+        },
+        "ok": {
+          "const": true
+        },
+        "identity_basis": {
+          "const": "self_selected"
+        },
+        "account_id": {
+          "$ref": "trusted-web-types.schema.json#/$defs/id"
+        },
+        "subject_id": {
+          "$ref": "trusted-web-types.schema.json#/$defs/id"
+        },
+        "selection_id": {
+          "$ref": "trusted-web-types.schema.json#/$defs/id"
+        },
+        "access_epoch": {
+          "$ref": "trusted-web-types.schema.json#/$defs/decimal"
+        },
+        "result_contract": {
+          "const": "spine.facet-schemas.v1"
+        },
+        "result": {
+          "$ref": "archetype-facet-responses.schema.json#/$defs/facet_schema.list"
+        }
+      },
+      "required": [
+        "contract_version",
+        "ok",
+        "identity_basis",
+        "account_id",
+        "subject_id",
+        "selection_id",
+        "access_epoch",
+        "result_contract",
+        "result"
+      ],
+      "additionalProperties": false
+    },
+    "facet_schema.publish": {
+      "type": "object",
+      "properties": {
+        "contract_version": {
+          "const": "spine.trusted-web-facets.v1"
+        },
+        "ok": {
+          "const": true
+        },
+        "identity_basis": {
+          "const": "self_selected"
+        },
+        "account_id": {
+          "$ref": "trusted-web-types.schema.json#/$defs/id"
+        },
+        "subject_id": {
+          "$ref": "trusted-web-types.schema.json#/$defs/id"
+        },
+        "selection_id": {
+          "$ref": "trusted-web-types.schema.json#/$defs/id"
+        },
+        "access_epoch": {
+          "$ref": "trusted-web-types.schema.json#/$defs/decimal"
+        },
+        "result_contract": {
+          "const": "spine.facet-schemas.v1"
+        },
+        "result": {
+          "$ref": "archetype-facet-responses.schema.json#/$defs/facet_schema.publish"
+        }
+      },
+      "required": [
+        "contract_version",
+        "ok",
+        "identity_basis",
+        "account_id",
+        "subject_id",
+        "selection_id",
+        "access_epoch",
+        "result_contract",
+        "result"
+      ],
+      "additionalProperties": false
+    },
+    "facet_schema.retire": {
+      "type": "object",
+      "properties": {
+        "contract_version": {
+          "const": "spine.trusted-web-facets.v1"
+        },
+        "ok": {
+          "const": true
+        },
+        "identity_basis": {
+          "const": "self_selected"
+        },
+        "account_id": {
+          "$ref": "trusted-web-types.schema.json#/$defs/id"
+        },
+        "subject_id": {
+          "$ref": "trusted-web-types.schema.json#/$defs/id"
+        },
+        "selection_id": {
+          "$ref": "trusted-web-types.schema.json#/$defs/id"
+        },
+        "access_epoch": {
+          "$ref": "trusted-web-types.schema.json#/$defs/decimal"
+        },
+        "result_contract": {
+          "const": "spine.facet-schemas.v1"
+        },
+        "result": {
+          "$ref": "archetype-facet-responses.schema.json#/$defs/facet_schema.retire"
+        }
+      },
+      "required": [
+        "contract_version",
+        "ok",
+        "identity_basis",
+        "account_id",
+        "subject_id",
+        "selection_id",
+        "access_epoch",
+        "result_contract",
+        "result"
+      ],
+      "additionalProperties": false
+    },
+    "facet_schema.show": {
+      "type": "object",
+      "properties": {
+        "contract_version": {
+          "const": "spine.trusted-web-facets.v1"
+        },
+        "ok": {
+          "const": true
+        },
+        "identity_basis": {
+          "const": "self_selected"
+        },
+        "account_id": {
+          "$ref": "trusted-web-types.schema.json#/$defs/id"
+        },
+        "subject_id": {
+          "$ref": "trusted-web-types.schema.json#/$defs/id"
+        },
+        "selection_id": {
+          "$ref": "trusted-web-types.schema.json#/$defs/id"
+        },
+        "access_epoch": {
+          "$ref": "trusted-web-types.schema.json#/$defs/decimal"
+        },
+        "result_contract": {
+          "const": "spine.facet-schemas.v1"
+        },
+        "result": {
+          "$ref": "archetype-facet-responses.schema.json#/$defs/facet_schema.show"
+        }
+      },
+      "required": [
+        "contract_version",
+        "ok",
+        "identity_basis",
+        "account_id",
+        "subject_id",
+        "selection_id",
+        "access_epoch",
+        "result_contract",
+        "result"
+      ],
+      "additionalProperties": false
+    },
+    "item.facets.query": {
+      "type": "object",
+      "properties": {
+        "contract_version": {
+          "const": "spine.trusted-web-facets.v1"
+        },
+        "ok": {
+          "const": true
+        },
+        "identity_basis": {
+          "const": "self_selected"
+        },
+        "account_id": {
+          "$ref": "trusted-web-types.schema.json#/$defs/id"
+        },
+        "subject_id": {
+          "$ref": "trusted-web-types.schema.json#/$defs/id"
+        },
+        "selection_id": {
+          "$ref": "trusted-web-types.schema.json#/$defs/id"
+        },
+        "access_epoch": {
+          "$ref": "trusted-web-types.schema.json#/$defs/decimal"
+        },
+        "result_contract": {
+          "const": "spine.item-facet-query.v1"
+        },
+        "result": {
+          "$ref": "archetype-facet-responses.schema.json#/$defs/item.facets.query"
+        }
+      },
+      "required": [
+        "contract_version",
+        "ok",
+        "identity_basis",
+        "account_id",
+        "subject_id",
+        "selection_id",
+        "access_epoch",
+        "result_contract",
+        "result"
+      ],
+      "additionalProperties": false
+    },
+    "item.facets.show": {
+      "type": "object",
+      "properties": {
+        "contract_version": {
+          "const": "spine.trusted-web-facets.v1"
+        },
+        "ok": {
+          "const": true
+        },
+        "identity_basis": {
+          "const": "self_selected"
+        },
+        "account_id": {
+          "$ref": "trusted-web-types.schema.json#/$defs/id"
+        },
+        "subject_id": {
+          "$ref": "trusted-web-types.schema.json#/$defs/id"
+        },
+        "selection_id": {
+          "$ref": "trusted-web-types.schema.json#/$defs/id"
+        },
+        "access_epoch": {
+          "$ref": "trusted-web-types.schema.json#/$defs/decimal"
+        },
+        "result_contract": {
+          "const": "spine.item-facets.v1"
+        },
+        "result": {
+          "$ref": "archetype-facet-responses.schema.json#/$defs/item.facets.show"
+        }
+      },
+      "required": [
+        "contract_version",
+        "ok",
+        "identity_basis",
+        "account_id",
+        "subject_id",
+        "selection_id",
+        "access_epoch",
+        "result_contract",
+        "result"
+      ],
+      "additionalProperties": false
+    },
+    "item.facets.update": {
+      "type": "object",
+      "properties": {
+        "contract_version": {
+          "const": "spine.trusted-web-facets.v1"
+        },
+        "ok": {
+          "const": true
+        },
+        "identity_basis": {
+          "const": "self_selected"
+        },
+        "account_id": {
+          "$ref": "trusted-web-types.schema.json#/$defs/id"
+        },
+        "subject_id": {
+          "$ref": "trusted-web-types.schema.json#/$defs/id"
+        },
+        "selection_id": {
+          "$ref": "trusted-web-types.schema.json#/$defs/id"
+        },
+        "access_epoch": {
+          "$ref": "trusted-web-types.schema.json#/$defs/decimal"
+        },
+        "result_contract": {
+          "const": "spine.item-facets.v1"
+        },
+        "result": {
+          "$ref": "archetype-facet-responses.schema.json#/$defs/item.facets.update"
+        }
+      },
+      "required": [
+        "contract_version",
+        "ok",
+        "identity_basis",
+        "account_id",
+        "subject_id",
+        "selection_id",
+        "access_epoch",
+        "result_contract",
+        "result"
+      ],
+      "additionalProperties": false
+    },
+    "item_archetype.facet_binding.list": {
+      "type": "object",
+      "properties": {
+        "contract_version": {
+          "const": "spine.trusted-web-facets.v1"
+        },
+        "ok": {
+          "const": true
+        },
+        "identity_basis": {
+          "const": "self_selected"
+        },
+        "account_id": {
+          "$ref": "trusted-web-types.schema.json#/$defs/id"
+        },
+        "subject_id": {
+          "$ref": "trusted-web-types.schema.json#/$defs/id"
+        },
+        "selection_id": {
+          "$ref": "trusted-web-types.schema.json#/$defs/id"
+        },
+        "access_epoch": {
+          "$ref": "trusted-web-types.schema.json#/$defs/decimal"
+        },
+        "result_contract": {
+          "const": "spine.archetype-facet-bindings.v1"
+        },
+        "result": {
+          "$ref": "archetype-facet-responses.schema.json#/$defs/item_archetype.facet_binding.list"
+        }
+      },
+      "required": [
+        "contract_version",
+        "ok",
+        "identity_basis",
+        "account_id",
+        "subject_id",
+        "selection_id",
+        "access_epoch",
+        "result_contract",
+        "result"
+      ],
+      "additionalProperties": false
+    },
+    "item_archetype.facet_binding.remove": {
+      "type": "object",
+      "properties": {
+        "contract_version": {
+          "const": "spine.trusted-web-facets.v1"
+        },
+        "ok": {
+          "const": true
+        },
+        "identity_basis": {
+          "const": "self_selected"
+        },
+        "account_id": {
+          "$ref": "trusted-web-types.schema.json#/$defs/id"
+        },
+        "subject_id": {
+          "$ref": "trusted-web-types.schema.json#/$defs/id"
+        },
+        "selection_id": {
+          "$ref": "trusted-web-types.schema.json#/$defs/id"
+        },
+        "access_epoch": {
+          "$ref": "trusted-web-types.schema.json#/$defs/decimal"
+        },
+        "result_contract": {
+          "const": "spine.archetype-facet-bindings.v1"
+        },
+        "result": {
+          "$ref": "archetype-facet-responses.schema.json#/$defs/item_archetype.facet_binding.remove"
+        }
+      },
+      "required": [
+        "contract_version",
+        "ok",
+        "identity_basis",
+        "account_id",
+        "subject_id",
+        "selection_id",
+        "access_epoch",
+        "result_contract",
+        "result"
+      ],
+      "additionalProperties": false
+    },
+    "item_archetype.facet_binding.set": {
+      "type": "object",
+      "properties": {
+        "contract_version": {
+          "const": "spine.trusted-web-facets.v1"
+        },
+        "ok": {
+          "const": true
+        },
+        "identity_basis": {
+          "const": "self_selected"
+        },
+        "account_id": {
+          "$ref": "trusted-web-types.schema.json#/$defs/id"
+        },
+        "subject_id": {
+          "$ref": "trusted-web-types.schema.json#/$defs/id"
+        },
+        "selection_id": {
+          "$ref": "trusted-web-types.schema.json#/$defs/id"
+        },
+        "access_epoch": {
+          "$ref": "trusted-web-types.schema.json#/$defs/decimal"
+        },
+        "result_contract": {
+          "const": "spine.archetype-facet-bindings.v1"
+        },
+        "result": {
+          "$ref": "archetype-facet-responses.schema.json#/$defs/item_archetype.facet_binding.set"
+        }
+      },
+      "required": [
+        "contract_version",
+        "ok",
+        "identity_basis",
+        "account_id",
+        "subject_id",
+        "selection_id",
+        "access_epoch",
+        "result_contract",
+        "result"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

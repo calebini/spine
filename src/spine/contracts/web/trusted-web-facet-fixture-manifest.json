@@ -1,0 +1,10 @@
+{
+  "contract_version": "spine.trusted-web-facets.v1",
+  "registry": "contracts/spine.trusted-web-facet-registry.v1.json",
+  "fixtures": [
+    {"path": "tests/fixtures/facet_web/request_schema_list.json", "schema": "trusted-web-facet-request.schema.json", "fragment": "#/$defs/facet_schema.list"},
+    {"path": "tests/fixtures/facet_web/request_binding_remove.json", "schema": "trusted-web-facet-request.schema.json", "fragment": "#/$defs/item_archetype.facet_binding.remove"},
+    {"path": "tests/fixtures/facet_web/response_schema_list_empty.json", "schema": "trusted-web-facet-response.schema.json", "fragment": "#/$defs/facet_schema.list"},
+    {"path": "tests/fixtures/facet_web/failure_resource_unavailable.json", "schema": "trusted-web-facet-error.schema.json", "fragment": ""}
+  ]
+}

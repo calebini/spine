@@ -1,7 +1,7 @@
 # Spine Implementation Plan
 
 Role: Roadmap rationale and delivery history; current task status lives in [BACKLOG.md](BACKLOG.md)
-Last updated: 2026-09-27 (facet commands and notification continuity Slice B)
+Last updated: 2026-09-27 (permission-enforced facet integration Slice C)
 
 This is a non-normative delivery plan. The specifications and machine-readable contracts remain authoritative.
 
@@ -14,9 +14,10 @@ stay coarse until promoted into bounded work with acceptance criteria.
 The backlog retains deferred resilience work in SPINE-004–007 and SPINE-010,
 facet design/review history in SPINE-008–009, and later horizons in SPINE-011–014.
 Facet delivery follows SPINE-027–029 after the clean integration recheck. The operator
-authorized Slices A and B on 2026-09-27. Runtime 0.7.0 / schema 16 builds the eleven
-trusted-local facet commands on the storage foundation. Permission-enforced web
-activation remains the separate SPINE-029 follow-on; the web registry is unchanged.
+authorized Slices A, B and C on 2026-09-27. Runtime 0.8.0 / schema 17 builds the eleven
+permission-enforced facet HTTP commands on the trusted-local storage/command foundation.
+A dedicated additive registry leaves the existing v1 command and v2 read families
+unchanged. Concrete verification and delivery status are recorded under SPINE-029.
 The broad web/staging review tasks SPINE-001–003 were withdrawn at the operator's
 request; no general gap analysis is scheduled.
 SPINE-015 separately tracks independent authorized activity reads when linked resources
@@ -190,6 +191,21 @@ ship operator documentation and packaged contracts together. No automatic web ro
 registration, schedule projection extension or pack-v2 activation follows from CLI support.
 
 ### Slice C — Permission-enforced reads and web admission (SPINE-029)
+
+**Implementation checkpoint, 2026-09-27:** runtime 0.8.0 / schema 17 adds the
+`spine.trusted-web-facets.v1` family with a dedicated eleven-command registry,
+closed request/response/error/discovery schemas and packaged digest pins. The
+canonical handlers remain shared; a protected adapter owns transaction, permission,
+receipt-attribution and release fences. Offline schema 17 extends catalog grant
+storage, with v2 local provisioning alongside unchanged v1. No new authentication,
+shared-location resolver, schedule projection or Kinflow UI behavior is claimed.
+
+The [admission leaf](../specs/facet-web-admission.md) records the exact transport and
+migration decisions; the [consumer/operator handoff](FACET_WEB_API.md) covers
+configuration, permissions, retries and upgrade boundaries. Verification exercises
+all six write replay mappings, admin demotion, retained-read/lost-edit, hidden
+references, complete access proofs, grant time boundaries, release races and rollback.
+The task's test counts and final status remain in SPINE-029 rather than this history.
 
 Implement the reviewed catalog resolver/grant extension and item/reference authority
 on the same handlers, including all six receipt-disclosure replay mappings. Prove

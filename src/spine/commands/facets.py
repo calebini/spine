@@ -140,7 +140,7 @@ def execute(command: str, request: Mapping[str, Any], context: CommandContext) -
         failure("environment_failure", "ledger", "facet commands require an idle transaction-aware ledger")
     assert isinstance(db, LedgerConnection)
     if context.transport_metadata.get("adapter") not in {None, "cli"}:
-        failure("environment_failure", "admission", "permission-enforced facets are not enabled")
+        failure("environment_failure", "admission", "use trusted-local admission or the dedicated facet web adapter")
     budget = FacetBudget()
     old_timeout = install_budget(db, budget)
     try:

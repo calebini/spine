@@ -15,29 +15,45 @@ from werkzeug.exceptions import HTTPException
 
 from spine.web.contracts import API, json_object, validate
 from spine.web.errors import WebError
+from spine.web.facet_service import API as FACET_API
+from spine.web.facet_service import FacetService
 from spine.web.read_contracts import READ_API, read_error
 from spine.web.read_service import ReadService
 from spine.web.service import WebConfig, WebService, _id
 
 
-def create_app(config: WebConfig, *, cursor_key: str | None = None) -> Flask:
+def create_app(config: WebConfig, *, cursor_key: str | None = None, facet_cursor_config=None) -> Flask:
     service = WebService(config, cursor_key=cursor_key)
     reads = ReadService(config)
+    facets = FacetService(config, cursor_config=facet_cursor_config)
     app = Flask(__name__)
     app.config.update(MAX_CONTENT_LENGTH=1048576, PROPAGATE_EXCEPTIONS=False)
     app.extensions["spine_service"] = service
     app.extensions["spine_read_service"] = reads
+    app.extensions["spine_facet_service"] = facets
     slots = threading.BoundedSemaphore(4)
 
     def failure(error: WebError):
         selection = request.headers.get("X-Spine-Selection-ID")
+        if request.path.startswith("/api/v1/facets/"):
+            return jsonify(
+                {
+                    "contract_version": FACET_API,
+                    "ok": False,
+                    "error": {"code": error.code, "message": "Facet operation unavailable."},
+                    "correlation_id": secrets.token_hex(16),
+                    "selection_id": selection if _id(selection) else None,
+                }
+            ), error.status
         if request.path.startswith("/api/v2/"):
             codes = reads.contracts.schemas["trusted-web-read-error.schema.json"]["properties"]["error"]["properties"]["code"]["enum"]
             code = error.code if error.code in codes else "admission_unavailable"
             value = {
-                "contract_version": READ_API, "ok": False,
+                "contract_version": READ_API,
+                "ok": False,
                 "error": {"code": code, "message": "Read unavailable."},
-                "correlation_id": secrets.token_hex(16), "selection_id": selection if _id(selection) else None,
+                "correlation_id": secrets.token_hex(16),
+                "selection_id": selection if _id(selection) else None,
             }
             reads.contracts.validate("trusted-web-read-error.schema.json", value, output=True)
             status = error.status if code == "invalid_request" and error.status in {403, 413} else read_error(code).status
@@ -76,9 +92,11 @@ def create_app(config: WebConfig, *, cursor_key: str | None = None) -> Flask:
         if request.query_string:
             raise WebError("invalid_request")
         if request.path == "/api/v2/read-capabilities":
-            if (any("," in request.headers.get(k, "") for k in ("X-Spine-Account-ID", "X-Spine-Selection-ID"))
-                    or not all(_id(request.headers.get(k)) for k in ("X-Spine-Account-ID", "X-Spine-Selection-ID"))
-                    or request.get_data(cache=False)):
+            if (
+                any("," in request.headers.get(k, "") for k in ("X-Spine-Account-ID", "X-Spine-Selection-ID"))
+                or not all(_id(request.headers.get(k)) for k in ("X-Spine-Account-ID", "X-Spine-Selection-ID"))
+                or request.get_data(cache=False)
+            ):
                 raise WebError("invalid_request")
             if request.headers.get("Origin") not in (None, config.origin):
                 raise WebError("invalid_request", status=403)
@@ -149,6 +167,30 @@ def create_app(config: WebConfig, *, cursor_key: str | None = None) -> Flask:
     def command(command):
         return selected(command)
 
+    @app.get("/api/v1/facets/capabilities")
+    def facet_capabilities():
+        if request.get_data(cache=False) or request.headers.get("Origin") not in (None, config.origin):
+            raise WebError("invalid_request")
+        return run(lambda: facets.capabilities(request.headers.get("X-Spine-Account-ID"), request.headers.get("X-Spine-Selection-ID")))
+
+    def facet_command(command):
+        return run(
+            lambda: facets.execute(
+                command,
+                json_object(request.get_data(cache=False)),
+                request.headers.get("X-Spine-Account-ID"),
+                request.headers.get("X-Spine-Selection-ID"),
+            )
+        )
+
+    for entry in facets.registry["commands"]:
+        app.add_url_rule(
+            entry["path"],
+            endpoint="facet_" + entry["command"],
+            view_func=lambda command=entry["command"]: facet_command(command),
+            methods=["POST"],
+        )
+
     def selection():
         return request.headers.get("X-Spine-Account-ID"), request.headers.get("X-Spine-Selection-ID")
 
@@ -188,8 +230,12 @@ def create_app(config: WebConfig, *, cursor_key: str | None = None) -> Flask:
 
     registry = reads.contracts.artifacts["spine.trusted-web-read-registry.v1.json"]
     expected = {(e["path"], e["method"]) for e in [*registry["commands"], registry["agenda"], registry["discovery"]]}
-    actual = {(rule.rule, method) for rule in app.url_map.iter_rules() if rule.rule.startswith("/api/v2/")
-              for method in rule.methods - {"HEAD", "OPTIONS"}}
+    actual = {
+        (rule.rule, method)
+        for rule in app.url_map.iter_rules()
+        if rule.rule.startswith("/api/v2/")
+        for method in rule.methods - {"HEAD", "OPTIONS"}
+    }
     if actual != expected:
         raise read_error("admission_unavailable")
     return app
@@ -206,6 +252,7 @@ def main() -> int:
     parser.add_argument("--origin", default="http://127.0.0.1:8090")
     parser.add_argument("--timezone", default="UTC")
     parser.add_argument("--trusted-network-confirmed", action="store_true")
+    parser.add_argument("--facet-cursor-config", help="protected persistent facet cursor JSON configuration file")
     args = parser.parse_args()
     origin = urlsplit(args.origin)
     local = ipaddress.ip_address(args.listen).is_loopback
@@ -215,7 +262,12 @@ def main() -> int:
         parser.error("Origin must use HTTP or HTTPS")
     if not local and (origin.scheme != "https" or not args.trusted_network_confirmed):
         parser.error("remote use requires an explicitly confirmed trusted network and TLS termination")
-    app = create_app(WebConfig(args.db, args.ledger_id, args.realm_id, args.host, args.origin, args.timezone))
+    from spine.commands.facet_runtime import load_cursor_config
+
+    cursor_config = load_cursor_config(args.facet_cursor_config) if args.facet_cursor_config else None
+    app = create_app(
+        WebConfig(args.db, args.ledger_id, args.realm_id, args.host, args.origin, args.timezone), facet_cursor_config=cursor_config
+    )
     app.extensions["spine_service"].public("ready")
     from waitress import serve
 

@@ -1,6 +1,6 @@
 {
   "format_version": "spine.facet-writer-inventory.v1",
-  "ledger_schema_version": "16",
+  "ledger_schema_version": "17",
   "item_types": [
     "event",
     "task",
@@ -16,7 +16,8 @@
     "spine.commands.facets.execute",
     "spine.commands.core._dispatch_atomic",
     "spine.ledger.items._item_transaction",
-    "spine.web.service.WebService.execute"
+    "spine.web.service.WebService.execute",
+    "spine.web.facet_service.FacetService.execute"
   ],
   "producers": [
     {

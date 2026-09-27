@@ -25,6 +25,7 @@ TABLES = {
     "route": ("delivery_targets", "delivery_target_id"),
     "item_archetype": ("item_archetypes", "item_archetype_id"),
     "notification_profile": ("notification_profiles", "notification_profile_id"),
+    "facet_schema": ("facet_schemas", "facet_schema_id"),
 }
 
 
@@ -38,7 +39,8 @@ def epoch(db: sqlite3.Connection) -> int:
 
 
 def plan(db: sqlite3.Connection, request: dict[str, Any], *, realm: str = "local") -> dict[str, Any]:
-    validate("trusted-web-provisioning-plan-request.schema.json", request)
+    version = ".v2" if request.get("contract_version") == "spine.trusted-web-provisioning.v2" else ""
+    validate(f"trusted-web-provisioning-plan-request{version}.schema.json", request)
     normalized = dict(request)
     for key in ARRAYS:
         normalized[key] = sorted(request.get(key, []), key=canonical_json_bytes)
@@ -66,7 +68,7 @@ def plan(db: sqlite3.Connection, request: dict[str, Any], *, realm: str = "local
             conflict("missing_reference", path)
             return None
         value = dict(row)
-        ref_kind = "catalog" if kind in {"item_archetype", "notification_profile"} else kind
+        ref_kind = "catalog" if kind in {"item_archetype", "notification_profile", "facet_schema"} else kind
         ref_id = kind + ":" + identity if ref_kind == "catalog" else identity
         revision = value.get("current_revision", value.get("revision", value.get("current_version")))
         refs[ref_kind, ref_id] = {
@@ -228,7 +230,7 @@ def plan(db: sqlite3.Connection, request: dict[str, Any], *, realm: str = "local
     referenced = [refs[k] for k in sorted(refs)]
     digest = hash_canonical_json({"normalized_plan": normalized, "references": referenced})
     return {
-        "contract_version": "spine.trusted-web-provisioning.v1",
+        "contract_version": request["contract_version"],
         "ok": True,
         "command": "web_access.plan",
         "normalized_plan": normalized,
@@ -241,7 +243,8 @@ def plan(db: sqlite3.Connection, request: dict[str, Any], *, realm: str = "local
 
 
 def apply(db: sqlite3.Connection, request: dict[str, Any], *, realm: str = "local") -> dict[str, Any]:
-    validate("trusted-web-provisioning-apply-request.schema.json", request)
+    version = ".v2" if request.get("contract_version") == "spine.trusted-web-provisioning.v2" else ""
+    validate(f"trusted-web-provisioning-apply-request{version}.schema.json", request)
     command_id, actor, at = request["command_id"], request["actor_subject_id"], request["action_timestamp_utc"]
     # atomic_command suppresses helper commits and owns rollback of the entire bundle.
     with db.atomic_command():
@@ -295,7 +298,7 @@ def apply(db: sqlite3.Connection, request: dict[str, Any], *, realm: str = "loca
         audit_id = derived(command_id, "access_audit", "/audit")
         receipt_id = derived(command_id, "command_receipt", "/")
         response = {
-            "contract_version": "spine.trusted-web-provisioning.v1",
+            "contract_version": request["contract_version"],
             "ok": True,
             "command": "web_access.apply",
             "command_id": command_id,

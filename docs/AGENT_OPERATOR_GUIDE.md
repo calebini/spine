@@ -4,10 +4,11 @@ Status: operational contract for current runtime surfaces
 Audience: local agents and agent operators integrating with Spine
 
 Versioned facets are available through the trusted-local command surface in runtime
-0.7.0/schema 16. See [Facet commands](FACET_COMMANDS.md) for schema/binding authoring,
+0.8.0/schema 17. See [Facet commands](FACET_COMMANDS.md) for schema/binding authoring,
 full-value replacement, historical readback, bounded typed queries, cursor-secret
-provisioning and notification retention semantics. Facet HTTP routes are not enabled;
-do not add facet fields to existing schedule/agenda payloads.
+provisioning and notification retention semantics. The separate permission-enforced
+[facet API](FACET_WEB_API.md) is also available; do not add facet fields to existing
+schedule/agenda payloads. CLI privileges are unchanged.
 
 This guide tells an agent how to interact with Spine safely. It is intentionally narrower than the ontology and architecture specs. If this guide and implementation behavior disagree, stop and ask an operator before writing or sending.
 

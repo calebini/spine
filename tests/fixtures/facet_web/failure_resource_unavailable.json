@@ -1,0 +1,7 @@
+{
+  "contract_version": "spine.trusted-web-facets.v1",
+  "ok": false,
+  "error": {"code": "resource_unavailable", "message": "Facet operation unavailable."},
+  "correlation_id": "example-correlation",
+  "selection_id": "selection-example"
+}

@@ -94,6 +94,9 @@ def initialize_schema(connection: sqlite3.Connection) -> None:
     from spine.ledger.facet_migration import install_facet_storage
 
     install_facet_storage(connection, applied_at_utc="1970-01-01T00:00:00Z", fresh=True)
+    from spine.ledger.facet_access_migration import install_facet_access
+
+    install_facet_access(connection, applied_at_utc="1970-01-01T00:00:00Z", fresh=True)
 
 
 def _is_file_backed_database(database: str) -> bool:

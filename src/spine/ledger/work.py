@@ -297,7 +297,7 @@ def assert_work_instance_not_stale(connection: sqlite3.Connection, work_instance
             _raise_stale_work(work_instance_id, "event is not scheduled")
         if row["item_type"] == ItemType.TASK.value and row["task_status"] != TaskStatus.OPEN.value:
             _raise_stale_work(work_instance_id, "task is not open")
-        policy = connection.execute(
+        policies = connection.execute(
             """
             SELECT p.*, dt.status AS delivery_target_status,
                    dt.channel AS delivery_target_channel,
@@ -316,7 +316,7 @@ def assert_work_instance_not_stale(connection: sqlite3.Connection, work_instance
                 row["notification_intent_id"],
             ),
         ).fetchall()
-        policy = policy[0] if len(policy) == 1 else None
+        policy = policies[0] if len(policies) == 1 else None
         if policy is None or policy["status"] != NotificationPolicyStatus.ACTIVE.value:
             _raise_stale_work(work_instance_id, "current notification intent is not active")
         from spine.ledger.facet_continuity import policy_meaning

@@ -11,8 +11,9 @@ Slice A (development runtime 0.6.2) / ledger schema 16 delivered the eight-table
 canonical definition/value decoding, historical references, current-only typed
 indexes, and complete snapshots for every existing version producer. At that checkpoint
 public facet contracts were unadvertised. The subsequent runtime 0.7.0 command slice
-is documented in [FACET_COMMANDS.md](FACET_COMMANDS.md); its CLI commands are registered,
-but facet HTTP routes remain disabled. The evidence below records the storage checkpoint.
+is documented in [FACET_COMMANDS.md](FACET_COMMANDS.md); SPINE-029 subsequently adds
+the dedicated [facet API](FACET_WEB_API.md) in runtime 0.8.0/schema 17.
+The evidence below records the storage checkpoint, not later-slice closure.
 
 The [closed writer inventory](../src/spine/ledger/facet_writer_inventory.v1.json)
 records actual allocation call sites, the common finalizer, coverage test and

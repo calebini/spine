@@ -1,6 +1,6 @@
 # Spine Archetype Facet Storage
 
-Status: Accepted v1.0 — physical design ratified; not implemented
+Status: Accepted v1.0 — physical design ratified; implemented by SPINE-027
 Date: 2026-09-24
 Ratified: 2026-09-25
 Updated: 2026-09-26 — activation-proof clarification; accepted physical layout unchanged
@@ -22,6 +22,9 @@ The existing [machine registry](../contracts/archetype-facet-contract-registry.v
 machine-contract authorities, aligned with the logical owner.
 Storage columns are not new public response fields. No migration number, implemented
 family, pack capability, CLI command or web route is activated by this specification.
+Runtime delivery is recorded in [the storage guide](../docs/FACET_STORAGE_IMPLEMENTATION.md).
+The additive schema-17 catalog-grant migration is owned by
+[facet web admission](facet-web-admission.md); it does not change this facet layout.
 
 ## 2. Layout assessment and selection
 

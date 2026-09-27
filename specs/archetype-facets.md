@@ -1,6 +1,6 @@
 # Spine Archetype Facets
 
-Status: v0.9 — trusted-local runtime implemented; permission-enforced integration deferred
+Status: v0.10 — trusted-local and permission-enforced web runtime implemented
 Date: 2026-09-07
 Updated: 2026-09-27
 Scope: Registered typed item facts, immutable schema revisions, archetype bindings,
@@ -29,8 +29,9 @@ The trusted-local runtime implements `spine.facet-schemas.v1`,
 `spine.archetype-facet-bindings.v1`, `spine.item-facets.v1`, and
 `spine.item-facet-query.v1`, with the dedicated cursor and notification-continuity
 contracts below. SPINE-027 provides schema-16 persistence; SPINE-028 provides these
-eleven command surfaces. Permission-enforced resolvers and HTTP activation remain
-SPINE-029 work. Existing schedule/HTTP payloads still accept no facet fields.
+eleven command surfaces. SPINE-029 adds schema-17 catalog grants and the dedicated
+[facet web admission family](facet-web-admission.md). Existing schedule/HTTP
+payloads still accept no facet fields; facet routes have their own closed registry.
 Historical review/gate descriptions below record design-stage evidence; current
 runtime evidence and operations are in [the facet command guide](../docs/FACET_COMMANDS.md).
 
@@ -322,7 +323,8 @@ its existing full-scope posture; HTTP requires explicit registry/resolver additi
 ### 6.1 Closed resolver mapping
 
 The machine companion is `contracts/archetype-facet-integration.v1.json`. These are
-required resolver semantics for future exposure, not additions to today's web allowlist.
+required resolver semantics for the dedicated facet web family, not additions to
+the frozen scheduling/read allowlists.
 Trusted-local commands keep full scope but must still enforce domain/reference existence
 and active-on-authoring rules. A deployment-enforced single-operator full-scope mode
 may bypass resource permissions, never catalog lifecycle or domain validation.
@@ -869,5 +871,6 @@ Section 6.1 errors before cursor comparison. Key rotation yields invalid_request
 the old signature no longer verifies. Restart with unchanged protected config preserves
 continuation; there is no retained volatile proof dependency. Full proofs are bounded
 and freshly recomputed. SQL/deadline/byte/proof overflow returns capacity, not stale or
-false completeness. These rules cover local and future web transport without enabling
-a web route. Pure cryptographic/decision vectors are not runtime pagination proof.
+false completeness. These rules cover local and dedicated facet web transports.
+Pure cryptographic/decision vectors are not runtime pagination proof; see the
+SPINE-029 implementation tests and admission leaf for executable web evidence.

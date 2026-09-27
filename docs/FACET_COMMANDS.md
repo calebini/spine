@@ -1,6 +1,6 @@
 # Versioned facet commands — trusted-local operator guide
 
-Runtime 0.7.0, ledger schema 16. Implements SPINE-028 on the
+Runtime 0.8.0, ledger schema 17. Implements SPINE-028 on the
 [storage foundation](FACET_STORAGE_IMPLEMENTATION.md). The authority remains
 [archetype-facets.md](../specs/archetype-facets.md),
 [its storage leaf](../specs/archetype-facet-storage.md), and the
@@ -10,7 +10,8 @@ Runtime 0.7.0, ledger schema 16. Implements SPINE-028 on the
 
 The CLI and importable shared handlers implement eleven commands. They retain the
 existing trusted-local/full-scope posture, not web authentication or permission
-enforcement. The web allowlist is unchanged; SPINE-029 owns facet web admission.
+enforcement. The original web allowlists are unchanged; SPINE-029 adds a separate
+[permission-enforced facet API](FACET_WEB_API.md).
 Frozen schedule, agenda, rendering, and compact-response payloads are unchanged.
 Facet values are descriptive item/series facts, not new scheduling anchors, primary
 locations, notification policies or automatic workflow triggers.
@@ -123,7 +124,7 @@ first-page/continuation source races, writer contention and no read evidence.
 100000 unrelated items and 10000 unrelated historical versions. Storage and all-writer
 tests remain in force; the new producer is included in the packaged writer inventory.
 
-SPINE-029 remains separate: permission resolvers, protected reference disclosure,
-account-bound cursors, web registry/routes and permission-race tests. These commands
-must not be exposed by adding HTTP aliases without that work. Deployment, migrations
+SPINE-029 implements permission resolvers, protected reference disclosure,
+account-bound cursors, a dedicated web registry and permission-race tests. Only its
+explicit routes may expose facets; do not add bypass aliases. Deployment, migrations
 against a live ledger, commit and push remain operator-controlled actions.

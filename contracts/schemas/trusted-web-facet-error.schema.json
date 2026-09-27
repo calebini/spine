@@ -1,0 +1,61 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cortext.local/spine/contracts/schemas/trusted-web-facet-error.schema.json",
+  "type": "object",
+  "properties": {
+    "contract_version": {
+      "const": "spine.trusted-web-facets.v1"
+    },
+    "ok": {
+      "const": false
+    },
+    "error": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "enum": [
+            "invalid_request",
+            "identity_unavailable",
+            "operation_unavailable",
+            "resource_unavailable",
+            "access_changed",
+            "command_id_unavailable",
+            "domain_conflict",
+            "domain_failure",
+            "capacity_exceeded",
+            "admission_unavailable"
+          ]
+        },
+        "message": {
+          "const": "Facet operation unavailable."
+        }
+      },
+      "required": [
+        "code",
+        "message"
+      ],
+      "additionalProperties": false
+    },
+    "correlation_id": {
+      "$ref": "trusted-web-types.schema.json#/$defs/id"
+    },
+    "selection_id": {
+      "anyOf": [
+        {
+          "$ref": "trusted-web-types.schema.json#/$defs/id"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "required": [
+    "contract_version",
+    "ok",
+    "error",
+    "correlation_id",
+    "selection_id"
+  ],
+  "additionalProperties": false
+}

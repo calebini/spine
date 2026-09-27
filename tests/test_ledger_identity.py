@@ -19,11 +19,15 @@ from spine.runtime.preflight import WorkerBootstrapConfig, admit_worker
 
 def schema13(db):
     # Exercise real initialization up to the boundary without creating identity.
-    with patch("spine.ledger.sqlite.install_identity"), patch("spine.ledger.facet_migration.install_facet_storage"):
+    with (
+        patch("spine.ledger.sqlite.install_identity"),
+        patch("spine.ledger.facet_migration.install_facet_storage"),
+        patch("spine.ledger.facet_access_migration.install_facet_access"),
+    ):
         initialize_schema(db)
     with db:
         for row in db.execute("SELECT name FROM sqlite_schema WHERE name LIKE 'independent_read_%'").fetchall():
-            db.execute('DROP INDEX ' + row[0])
+            db.execute("DROP INDEX " + row[0])
         db.execute("DELETE FROM ledger_schema WHERE schema_version=15")
 
 
@@ -53,12 +57,12 @@ class LedgerIdentityTests(unittest.TestCase):
             db = connect()
             schema13(db)
             db.execute("CREATE TABLE extra (i INTEGER, value BLOB)")
-            db.executemany("INSERT INTO extra VALUES (?, ?)", [(i, b'bytes') for i in values])
+            db.executemany("INSERT INTO extra VALUES (?, ?)", [(i, b"bytes") for i in values])
             db.commit()
             expected = schema13_identity(db)
             with patch("spine.ledger.migrate._utc_now", return_value=f"2026-09-0{values[0]}T00:00:00Z"):
                 result = migrate_schema(db)
-                self.assertEqual(result.applied_versions, (14, 15, 16))
+                self.assertEqual(result.applied_versions, (14, 15, 16, 17))
             self.assertEqual(read_ledger_instance_id(db), expected)
             identities.append(expected)
             changes = db.total_changes
@@ -122,8 +126,7 @@ class LedgerIdentityTests(unittest.TestCase):
         self.assertFalse(response["ok"])
         self.assertEqual(response["error"]["field"], "ledger_instance_id")
         health, events, resolver = Mock(), Mock(), Mock()
-        result = admit_worker(db, config=WorkerBootstrapConfig(), health_sink=health,
-                              event_sink=events, dependency_resolver=resolver)
+        result = admit_worker(db, config=WorkerBootstrapConfig(), health_sink=health, event_sink=events, dependency_resolver=resolver)
         self.assertEqual(result.exit_code, 3)
         self.assertEqual(result.cycles_completed, 0)
         self.assertEqual(events.emit.call_args.args[0]["reason"], "ledger_instance_invalid")
@@ -173,6 +176,7 @@ class LedgerIdentityTests(unittest.TestCase):
 
     def test_v3_contract_requires_identity_and_v2_stays_frozen(self):
         import json
+
         root = Path(__file__).resolve().parents[1] / "contracts/schemas"
         v3 = json.loads((root / "system-info-response-v3.schema.json").read_text())
         self.assertIn("ledger_instance_id", v3["required"])

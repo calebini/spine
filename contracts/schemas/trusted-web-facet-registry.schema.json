@@ -1,0 +1,205 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cortext.local/spine/contracts/schemas/trusted-web-facet-registry.schema.json",
+  "const": {
+    "contract_version": "spine.trusted-web-facet-registry.v1",
+    "api_contract": "spine.trusted-web-facets.v1",
+    "discovery": {
+      "method": "GET",
+      "path": "/api/v1/facets/capabilities"
+    },
+    "commands": [
+      {
+        "command": "facet_schema.create",
+        "path": "/api/v1/facets/commands/facet_schema.create",
+        "method": "POST",
+        "access_mode": "write",
+        "result_contract": "spine.facet-schemas.v1",
+        "required_contract_versions": [
+          "spine.canonical-json.v1",
+          "spine.facet-schemas.v1"
+        ],
+        "resolvers": [
+          "owner.catalog_admin"
+        ],
+        "replay_resolvers": [
+          "receipt.schema.catalog_read"
+        ]
+      },
+      {
+        "command": "facet_schema.list",
+        "path": "/api/v1/facets/commands/facet_schema.list",
+        "method": "POST",
+        "access_mode": "read",
+        "result_contract": "spine.facet-schemas.v1",
+        "required_contract_versions": [
+          "spine.canonical-json.v1",
+          "spine.facet-cursor.v1",
+          "spine.facet-schemas.v1"
+        ],
+        "resolvers": [
+          "owner.authorized_catalog_candidates"
+        ],
+        "replay_resolvers": []
+      },
+      {
+        "command": "facet_schema.publish",
+        "path": "/api/v1/facets/commands/facet_schema.publish",
+        "method": "POST",
+        "access_mode": "write",
+        "result_contract": "spine.facet-schemas.v1",
+        "required_contract_versions": [
+          "spine.canonical-json.v1",
+          "spine.facet-schemas.v1"
+        ],
+        "resolvers": [
+          "schema.catalog_admin"
+        ],
+        "replay_resolvers": [
+          "receipt.schema.catalog_read"
+        ]
+      },
+      {
+        "command": "facet_schema.retire",
+        "path": "/api/v1/facets/commands/facet_schema.retire",
+        "method": "POST",
+        "access_mode": "write",
+        "result_contract": "spine.facet-schemas.v1",
+        "required_contract_versions": [
+          "spine.canonical-json.v1",
+          "spine.facet-schemas.v1"
+        ],
+        "resolvers": [
+          "schema.catalog_admin"
+        ],
+        "replay_resolvers": [
+          "receipt.schema.catalog_read"
+        ]
+      },
+      {
+        "command": "facet_schema.show",
+        "path": "/api/v1/facets/commands/facet_schema.show",
+        "method": "POST",
+        "access_mode": "read",
+        "result_contract": "spine.facet-schemas.v1",
+        "required_contract_versions": [
+          "spine.canonical-json.v1",
+          "spine.facet-schemas.v1"
+        ],
+        "resolvers": [
+          "schema.catalog_read"
+        ],
+        "replay_resolvers": []
+      },
+      {
+        "command": "item.facets.query",
+        "path": "/api/v1/facets/commands/item.facets.query",
+        "method": "POST",
+        "access_mode": "read",
+        "result_contract": "spine.item-facet-query.v1",
+        "required_contract_versions": [
+          "spine.canonical-json.v1",
+          "spine.facet-cursor.v1",
+          "spine.item-facet-query.v1"
+        ],
+        "resolvers": [
+          "schema.catalog_read",
+          "owner.authorized_item_candidates",
+          "reference_predicate.read"
+        ],
+        "replay_resolvers": []
+      },
+      {
+        "command": "item.facets.show",
+        "path": "/api/v1/facets/commands/item.facets.show",
+        "method": "POST",
+        "access_mode": "read",
+        "result_contract": "spine.item-facets.v1",
+        "required_contract_versions": [
+          "spine.canonical-json.v1",
+          "spine.item-facets.v1"
+        ],
+        "resolvers": [
+          "item.read_current_authority",
+          "returned_references.read"
+        ],
+        "replay_resolvers": []
+      },
+      {
+        "command": "item.facets.update",
+        "path": "/api/v1/facets/commands/item.facets.update",
+        "method": "POST",
+        "access_mode": "write",
+        "result_contract": "spine.item-facets.v1",
+        "required_contract_versions": [
+          "spine.canonical-json.v1",
+          "spine.facet-notification-continuity.v1",
+          "spine.item-facets.v1"
+        ],
+        "resolvers": [
+          "item.edit",
+          "fresh_sets.archetype_catalog_use",
+          "fresh_sets.schema_catalog_use",
+          "fresh_sets.reference_authority"
+        ],
+        "replay_resolvers": [
+          "receipt.item.read_current_authority"
+        ]
+      },
+      {
+        "command": "item_archetype.facet_binding.list",
+        "path": "/api/v1/facets/commands/item_archetype.facet_binding.list",
+        "method": "POST",
+        "access_mode": "read",
+        "result_contract": "spine.archetype-facet-bindings.v1",
+        "required_contract_versions": [
+          "spine.archetype-facet-bindings.v1",
+          "spine.canonical-json.v1",
+          "spine.facet-cursor.v1"
+        ],
+        "resolvers": [
+          "archetype.catalog_read",
+          "returned_schemas.catalog_read"
+        ],
+        "replay_resolvers": []
+      },
+      {
+        "command": "item_archetype.facet_binding.remove",
+        "path": "/api/v1/facets/commands/item_archetype.facet_binding.remove",
+        "method": "POST",
+        "access_mode": "write",
+        "result_contract": "spine.archetype-facet-bindings.v1",
+        "required_contract_versions": [
+          "spine.archetype-facet-bindings.v1",
+          "spine.canonical-json.v1"
+        ],
+        "resolvers": [
+          "archetype.catalog_admin"
+        ],
+        "replay_resolvers": [
+          "receipt.archetype.catalog_read"
+        ]
+      },
+      {
+        "command": "item_archetype.facet_binding.set",
+        "path": "/api/v1/facets/commands/item_archetype.facet_binding.set",
+        "method": "POST",
+        "access_mode": "write",
+        "result_contract": "spine.archetype-facet-bindings.v1",
+        "required_contract_versions": [
+          "spine.archetype-facet-bindings.v1",
+          "spine.canonical-json.v1"
+        ],
+        "resolvers": [
+          "archetype.catalog_admin",
+          "schema.catalog_admin",
+          "same_catalog_owner"
+        ],
+        "replay_resolvers": [
+          "receipt.archetype.catalog_read",
+          "receipt.schema.catalog_read"
+        ]
+      }
+    ]
+  }
+}

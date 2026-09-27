@@ -1,12 +1,18 @@
 # Trusted multi-operator backend
 
-Current runtime 0.6.0 requires schema 15 and returns system.info v3 with a separate
+Current runtime 0.8.0 requires schema 17 and returns system.info v3 with a separate
 ledger_instance_id. The existing v1 API and its provisioned ledger_id are unchanged;
 0.6.0 adds the independent v2 reads documented below. Back up before migration:
 schema-13 identity backfill reads/sorts stored
 data and needs maintenance time and temporary-storage headroom. Record the instance
 ID after migration; ordinary subsequent backups/restores preserve it. See
 [ledger identity](../specs/ledger-instance-identity.md) for clone and rollback limits.
+
+0.8.0 adds the separate [facet API](FACET_WEB_API.md), requiring an explicit
+`--facet-cursor-config <private-file>` for paginated facet reads. Schema 17 preserves
+existing grants while adding facet-schema catalog targets. Use provisioning `.v2`
+for those grants; existing `.v1` requests continue to work unchanged. Existing
+operators, scheduling, v1 endpoints and independent v2 reads do not need conversion.
 
 
 Spine 0.4.0 / schema 13 adds an optional backend, not a browser GUI or an

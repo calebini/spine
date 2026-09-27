@@ -1,7 +1,7 @@
 {
   "manifest_version": "spine.sqlite-schema-object-manifest.v1",
   "schemas": {
-    "16": {
+    "17": {
       "objects": [
         {
           "object_type": "index",
@@ -476,7 +476,7 @@
         {
           "object_type": "table",
           "name": "access_grants",
-          "definition_sha256": "e37fb774c823ad3925a59f75060b190b23777ff29689f743b708a77e7a90019a"
+          "definition_sha256": "08098c746d905d9f384779c50760c1e043df9a9b60a3ce1bef8639dd788dadf2"
         },
         {
           "object_type": "table",
@@ -1147,6 +1147,21 @@
           "object_type": "trigger",
           "name": "temporal_binding_catalog_related_item_audit",
           "definition_sha256": "63ee6d3eb7f246bd3aeed92eaa76a09745f38166a51cf1d3a4f211239248eb30"
+        },
+        {
+          "object_type": "trigger",
+          "name": "web_grant_facet_schema_delete",
+          "definition_sha256": "01e868fbc53c5c90237ee6aa0252d86fa21d5d5a184f8d61537e571a4658f740"
+        },
+        {
+          "object_type": "trigger",
+          "name": "web_grant_facet_schema_insert",
+          "definition_sha256": "5ac714ad299d369cd01296fcfe62a1319644757e8fa632b1e82398dd5d86d07c"
+        },
+        {
+          "object_type": "trigger",
+          "name": "web_grant_facet_schema_update",
+          "definition_sha256": "07f816dba93da018198361ff3a975d19706556c066d1d514ff91ca8808bff8ec"
         },
         {
           "object_type": "trigger",

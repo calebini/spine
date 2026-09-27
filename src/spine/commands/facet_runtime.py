@@ -1,7 +1,8 @@
 """Bounded local facet execution and protected cursor configuration.
 
 Configuration is supplied by the adapter, never by a command payload. It is not
-executor authentication. Permission-enforced admission remains a separate slice.
+executor authentication. The dedicated web adapter supplies permission-enforced
+context and access proofs; it does not use the trusted-local OS identity binding.
 """
 
 from __future__ import annotations

@@ -98,9 +98,9 @@ class FacetIntegrationContractTests(unittest.TestCase):
             return "stale_cursor"
         return [key for key in keys if key > payload["last_key"]]
 
-    def test_mapping_is_complete_without_web_advertisement(self):
+    def test_mapping_is_complete_without_changing_frozen_web_registries(self):
         registry = load(ROOT / "contracts/archetype-facet-contract-registry.v1.json")
-        self.assertEqual(self.contract["status"], "implemented_trusted_local_permission_enforcement_deferred")
+        self.assertEqual(self.contract["status"], "implemented_trusted_local_and_permission_enforced_web")
         self.assertEqual(set(self.contract["permission_resolvers"]), set(registry["commands"]))
         self.assertEqual(registry["integration_contract"], "contracts/archetype-facet-integration.v1.json")
         for family in ("command", "read"):

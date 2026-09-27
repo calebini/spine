@@ -1,0 +1,23 @@
+{
+  "contract_version": "spine.trusted-web-facet-pins.v1",
+  "files": {
+    "archetype-facet-integration.v1.json": "b6959a5a6c3c191ca2179cc4a40a17c7783f884bf6d02d05e965d75841e647f8",
+    "schemas/archetype-facet-commands.schema.json": "29321672a1b7ba31599080e968c1b30295fe68748560cba0a64468a4d0e341aa",
+    "schemas/archetype-facet-cursor.schema.json": "23dae9596fa90b29a4712d1338134937571b97603cbfd9206e9f13a326b2ea54",
+    "schemas/archetype-facet-failure.schema.json": "eaaee30acf5002f3da4bb5d41c622d648ed19254ab2323799a6e1632cfa3a25b",
+    "schemas/archetype-facet-fixture-manifest.schema.json": "2e66d1ad35fc71d87a65add6ff1e2cf0eb57e44d076458b843df7b77bf8dba12",
+    "schemas/archetype-facet-responses.schema.json": "ef713cd19b37b48ee014e7fc7e97a23bb7a4657a080a77d6fac3396c0c0ab49e",
+    "schemas/archetype-facet-types.schema.json": "689163800b0aaa07b87a1fc75a7bea7150bd70f1bcf2fbad901466cdf594dcda",
+    "schemas/trusted-web-facet-capabilities.schema.json": "e20512212048ed7dd410df2a33fb1edd1ee259024670f1e037149c70777476cc",
+    "schemas/trusted-web-facet-error.schema.json": "f81da9e48149b4d218a7d1fb4f04b23ca18a0f876d07773279e50e0572a76ef0",
+    "schemas/trusted-web-facet-registry.schema.json": "e250d3b59bcefbf69edd4e52375e8cd53d4e2ac3e11c43f334a8e4eaf5531e30",
+    "schemas/trusted-web-facet-request.schema.json": "9fa3c0c82341807abfaddd60b2e4b457f57584b3155f41647e6c05cd2db3311a",
+    "schemas/trusted-web-facet-response.schema.json": "6b4fe4036828fd8aa0b245a2ca5b410937db52ff628d542b532df8eeb2c8567c",
+    "schemas/trusted-web-provisioning-apply-request.v2.schema.json": "d616d966c26439166d650a8b5ff1b1730fb6725c2c0193101db37bda9635dd65",
+    "schemas/trusted-web-provisioning-apply-response.v2.schema.json": "547876c9dd6190bd06f0386b7291c37d99a3f7651d4ec1bfd202a21cd3c1a61d",
+    "schemas/trusted-web-provisioning-plan-request.v2.schema.json": "41a6c7713f9483566b4f3be6f4a88ad2f6c0c53566effadbabc6854e1da4fb1c",
+    "schemas/trusted-web-provisioning-plan-response.v2.schema.json": "f28389eb7734b990e8a2e40e9f4d14853876fa9880b38587a629ed79bfd8ee58",
+    "schemas/trusted-web-types.schema.json": "2500d14cc1ed9b01b25bbc71d9c68ac84d2def49ab62fd41ce894d97e2b505f8",
+    "spine.trusted-web-facet-registry.v1.json": "113b8a88a76081dce8cc4b4fed96eb3a38871099a86d8abdcbcb8d9895ea6719"
+  }
+}

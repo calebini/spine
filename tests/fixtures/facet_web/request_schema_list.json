@@ -1,0 +1,7 @@
+{
+  "request": {
+    "contract_version": "spine.facet-schemas.v1",
+    "owner": {"owner_kind": "subject", "owner_subject_id": "operator"},
+    "limit": "25"
+  }
+}

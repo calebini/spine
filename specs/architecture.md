@@ -23,11 +23,14 @@ Only explicit migration performs logical backfill; workers, adapters and web
 provisioning cannot regenerate it. It detects accidental targeting, not impersonation.
 
 
-Proposed domain-attribute support is specified in [archetype-facets.md](archetype-facets.md)
-and [Decision 0004](decisions/0004-versioned-item-facets.md). Spine would own registered
+Domain-attribute support is specified in [archetype-facets.md](archetype-facets.md)
+and [Decision 0004](decisions/0004-versioned-item-facets.md). Spine owns registered
 schemas and item-versioned canonical values; packs distribute definitions, not runtime
 code or user data. Facets do not replace core scheduling semantics or external observation
-provenance. This is a draft extension, not a current runtime capability.
+provenance. Trusted-local commands and the additive permission-enforced
+[facet web family](facet-web-admission.md) share canonical mutation handlers.
+The CLI retains full local scope; HTTP requests use the selected operator's current
+authority and protected receipt attribution. This is not verified authentication.
 
 Spine owns:
 

@@ -15,6 +15,7 @@ def main() -> int:
     target = root / "src/spine/contracts/web"
     files = sorted(source.glob("trusted-web-*.json")) + [
         source / "spine.trusted-web-command-registry.v1.json", source / "spine.trusted-web-read-registry.v1.json",
+        source / "spine.trusted-web-facet-registry.v1.json", source / "archetype-facet-integration.v1.json",
     ]
     files += sorted((source / "schemas").glob("*.schema.json"))
     expected = {target / p.relative_to(source): p.read_bytes() for p in files}

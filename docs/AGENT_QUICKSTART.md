@@ -1,13 +1,14 @@
 # Spine Agent Quickstart
 
-Status: executable cold-start path for the current schema-16 runtime
+Status: executable cold-start path for the current schema-17 runtime
 Audience: an agent with repository access and no prior Spine context
 
 For typed archetype attributes, use the dedicated trusted-local
-[facet commands](FACET_COMMANDS.md) (runtime 0.7.0/schema 16). Create the archetyped
+[facet commands](FACET_COMMANDS.md) (runtime 0.8.0/schema 17). Create the archetyped
 item first, then attach values with `item.facets.update`; verify with `item.facets.show`.
-Schema publication never upgrades existing items automatically. These are not web routes
-or new fields on `schedule.create`/`schedule.update`.
+Schema publication never upgrades existing items automatically. The separate
+[facet API](FACET_WEB_API.md) exposes these operations with permission checks;
+they are not new fields on `schedule.create`/`schedule.update`.
 
 Use this document to reach a verified first success. Use `docs/AGENT_OPERATOR_GUIDE.md` afterward for migration, long-running operation, real-send controls, inspection, and troubleshooting.
 

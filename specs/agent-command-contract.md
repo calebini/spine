@@ -50,10 +50,13 @@ implemented trusted-identity HTTP allowlist, outer envelope, local provisioning 
 reads. Existing inner request/response families and the direct CLI remain unchanged.
 
 Local `web_access.plan` and `web_access.apply` use exact
-`spine.trusted-web-provisioning.v1` plus `spine.canonical-json.v1` in the compiled
+`spine.trusted-web-provisioning.v1` or its additive `.v2` successor plus
+`spine.canonical-json.v1`; both provisioning families are declared in the compiled
 runtime registry; plan is read-only and apply is a receipt-bearing atomic write.
 Their closed schemas and normalized ID paths are in the trusted web bundle. They are
 not exposed through the HTTP command registry. Existing CLI privileges do not change.
+V2 adds `facet_schema` grant targets only, as defined by
+[facet web admission](facet-web-admission.md); v1 shapes remain frozen.
 
 ## 2. Authority
 
@@ -89,7 +92,9 @@ The implemented trusted-local facet commands are `facet_schema.create`,
 [archetype-facets.md](archetype-facets.md) and its machine registry. Paginated reads
 require protected `CommandContext.facet_cursor_config`; it is not request JSON or
 executor authentication. The CLI loads it from the private file selected by
-`SPINE_FACET_CURSOR_CONFIG`. No facet HTTP routes are enabled.
+`SPINE_FACET_CURSOR_CONFIG`. The separate permission-enforced HTTP adapter is owned
+by [facet web admission](facet-web-admission.md), with its own closed eleven-command
+registry and protected cursor configuration. It does not extend existing web registries.
 Together with the identifiers above, this is the closed implemented command set.
 
 ## 4. Common Request, Output, and Error Rules

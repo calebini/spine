@@ -19,7 +19,7 @@ from spine.ledger.migrate import CURRENT_SCHEMA_VERSION
 
 
 class ImplementedContractDeclarationTests(unittest.TestCase):
-    def test_facet_contracts_are_local_only_until_web_admission(self) -> None:
+    def test_facet_contracts_use_dedicated_web_admission(self) -> None:
         # Repository-wide integration assertion, separate from the bounded facet
         # fixture bundle. Its evidence includes the runtime and web registries.
         root = Path(__file__).parents[1]
@@ -28,6 +28,11 @@ class ImplementedContractDeclarationTests(unittest.TestCase):
         commands = set(facet_registry["commands"])
         self.assertTrue(commands.issubset(COMMAND_RUNTIME_CONTRACT_REGISTRY))
         self.assertTrue(commands.isdisjoint(row["command"] for row in web_registry["commands"]))
+        facet_web = json.loads((root / "contracts/spine.trusted-web-facet-registry.v1.json").read_text())
+        self.assertEqual(commands, {row["command"] for row in facet_web["commands"]})
+        self.assertTrue(
+            {facet_web["contract_version"], facet_web["api_contract"], "spine.trusted-web-provisioning.v2"} <= IMPLEMENTED_CONTRACT_VERSIONS
+        )
         for entry in facet_registry["commands"].values():
             self.assertIn(entry["contract_version"], IMPLEMENTED_CONTRACT_VERSIONS)
 

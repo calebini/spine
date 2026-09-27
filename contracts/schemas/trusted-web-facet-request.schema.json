@@ -1,0 +1,162 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cortext.local/spine/contracts/schemas/trusted-web-facet-request.schema.json",
+  "$defs": {
+    "facet_schema.create": {
+      "type": "object",
+      "properties": {
+        "request": {
+          "$ref": "archetype-facet-commands.schema.json#/$defs/facet_schema.create"
+        },
+        "expected_access_epoch": {
+          "$ref": "trusted-web-types.schema.json#/$defs/decimal"
+        }
+      },
+      "required": [
+        "request",
+        "expected_access_epoch"
+      ],
+      "additionalProperties": false
+    },
+    "facet_schema.list": {
+      "type": "object",
+      "properties": {
+        "request": {
+          "$ref": "archetype-facet-commands.schema.json#/$defs/facet_schema.list"
+        }
+      },
+      "required": [
+        "request"
+      ],
+      "additionalProperties": false
+    },
+    "facet_schema.publish": {
+      "type": "object",
+      "properties": {
+        "request": {
+          "$ref": "archetype-facet-commands.schema.json#/$defs/facet_schema.publish"
+        },
+        "expected_access_epoch": {
+          "$ref": "trusted-web-types.schema.json#/$defs/decimal"
+        }
+      },
+      "required": [
+        "request",
+        "expected_access_epoch"
+      ],
+      "additionalProperties": false
+    },
+    "facet_schema.retire": {
+      "type": "object",
+      "properties": {
+        "request": {
+          "$ref": "archetype-facet-commands.schema.json#/$defs/facet_schema.retire"
+        },
+        "expected_access_epoch": {
+          "$ref": "trusted-web-types.schema.json#/$defs/decimal"
+        }
+      },
+      "required": [
+        "request",
+        "expected_access_epoch"
+      ],
+      "additionalProperties": false
+    },
+    "facet_schema.show": {
+      "type": "object",
+      "properties": {
+        "request": {
+          "$ref": "archetype-facet-commands.schema.json#/$defs/facet_schema.show"
+        }
+      },
+      "required": [
+        "request"
+      ],
+      "additionalProperties": false
+    },
+    "item.facets.query": {
+      "type": "object",
+      "properties": {
+        "request": {
+          "$ref": "archetype-facet-commands.schema.json#/$defs/item.facets.query"
+        }
+      },
+      "required": [
+        "request"
+      ],
+      "additionalProperties": false
+    },
+    "item.facets.show": {
+      "type": "object",
+      "properties": {
+        "request": {
+          "$ref": "archetype-facet-commands.schema.json#/$defs/item.facets.show"
+        }
+      },
+      "required": [
+        "request"
+      ],
+      "additionalProperties": false
+    },
+    "item.facets.update": {
+      "type": "object",
+      "properties": {
+        "request": {
+          "$ref": "archetype-facet-commands.schema.json#/$defs/item.facets.update"
+        },
+        "expected_access_epoch": {
+          "$ref": "trusted-web-types.schema.json#/$defs/decimal"
+        }
+      },
+      "required": [
+        "request",
+        "expected_access_epoch"
+      ],
+      "additionalProperties": false
+    },
+    "item_archetype.facet_binding.list": {
+      "type": "object",
+      "properties": {
+        "request": {
+          "$ref": "archetype-facet-commands.schema.json#/$defs/item_archetype.facet_binding.list"
+        }
+      },
+      "required": [
+        "request"
+      ],
+      "additionalProperties": false
+    },
+    "item_archetype.facet_binding.remove": {
+      "type": "object",
+      "properties": {
+        "request": {
+          "$ref": "archetype-facet-commands.schema.json#/$defs/item_archetype.facet_binding.remove"
+        },
+        "expected_access_epoch": {
+          "$ref": "trusted-web-types.schema.json#/$defs/decimal"
+        }
+      },
+      "required": [
+        "request",
+        "expected_access_epoch"
+      ],
+      "additionalProperties": false
+    },
+    "item_archetype.facet_binding.set": {
+      "type": "object",
+      "properties": {
+        "request": {
+          "$ref": "archetype-facet-commands.schema.json#/$defs/item_archetype.facet_binding.set"
+        },
+        "expected_access_epoch": {
+          "$ref": "trusted-web-types.schema.json#/$defs/decimal"
+        }
+      },
+      "required": [
+        "request",
+        "expected_access_epoch"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

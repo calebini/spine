@@ -462,12 +462,12 @@ class IndependentReadAssemblyTests(unittest.TestCase):
                 self.db.execute("DROP INDEX " + name)
             self.db.execute("DELETE FROM ledger_schema WHERE schema_version=15")
         before = [line for line in self.db.iterdump() if line.startswith("INSERT") and "ledger_schema" not in line]
-        # Isolate the historical index-only migration; schema 16 is already present
+        # Isolate the historical index-only migration; schema 17 is already present
         # in this runtime fixture and has its own all-data migration proofs.
         from spine.ledger.migrate import _apply_migration
         _apply_migration(self.db, version=15, migration_name="0015_independent_read_indexes.sql")
         self.assertEqual(before, [line for line in self.db.iterdump() if line.startswith("INSERT") and "ledger_schema" not in line])
-        self.assertEqual(verify_runtime_schema(self.db).schema_version, 16)
+        self.assertEqual(verify_runtime_schema(self.db).schema_version, 17)
         self.assertTrue(self.sections(item)["work"]["entries"])
 
     def test_applied_profile_is_pinned_and_catalog_denial_omits_indivisible_evidence(self):

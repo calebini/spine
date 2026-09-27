@@ -1,0 +1,20 @@
+{
+  "contract_version": "spine.trusted-web-facets.v1",
+  "ok": true,
+  "identity_basis": "self_selected",
+  "account_id": "account-operator",
+  "subject_id": "operator",
+  "selection_id": "selection-example",
+  "access_epoch": "1",
+  "result_contract": "spine.facet-schemas.v1",
+  "result": {
+    "ok": true,
+    "command": "facet_schema.list",
+    "response_contract": "spine.facet-schemas.v1",
+    "owner": {"owner_kind": "subject", "owner_subject_id": "operator"},
+    "schemas": [],
+    "limit": "25",
+    "has_more": false,
+    "next_cursor": null
+  }
+}
