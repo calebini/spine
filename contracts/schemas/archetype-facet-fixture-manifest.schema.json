@@ -16,7 +16,7 @@
       "const": "spine.archetype-facet-contract-fixtures.v1"
     },
     "status": {
-      "const": "draft_not_implemented"
+      "const": "implemented_trusted_local"
     },
     "registry": {
       "type": "string",

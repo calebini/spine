@@ -337,7 +337,9 @@ def insert_item_version(
     title: str,
     version: int = 1,
 ) -> None:
-    connection.execute(
+    # Deliberate raw fixture path; production bypass rejection has separate tests.
+    with connection.version_allocation("item_version_from_draft"):
+        connection.execute(
         """
         INSERT INTO coordination_item_versions (
           item_id, version, title, intent_hash, normalized_fields_hash,
@@ -354,6 +356,8 @@ def insert_item_version(
             NOW,
         ),
     )
+    from spine.ledger.facets import insert_snapshot
+    insert_snapshot(connection, item_id, version, ())
 
 
 def insert_audit_log(connection: sqlite3.Connection, *, item_id: str, audit_id: str) -> None:

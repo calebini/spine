@@ -3,6 +3,12 @@
 Status: operational contract for current runtime surfaces
 Audience: local agents and agent operators integrating with Spine
 
+Versioned facets are available through the trusted-local command surface in runtime
+0.7.0/schema 16. See [Facet commands](FACET_COMMANDS.md) for schema/binding authoring,
+full-value replacement, historical readback, bounded typed queries, cursor-secret
+provisioning and notification retention semantics. Facet HTTP routes are not enabled;
+do not add facet fields to existing schedule/agenda payloads.
+
 This guide tells an agent how to interact with Spine safely. It is intentionally narrower than the ontology and architecture specs. If this guide and implementation behavior disagree, stop and ask an operator before writing or sending.
 
 New agents start with `docs/AGENT_QUICKSTART.md`. Its checked-in `examples/agent-first-success.sh` path proves recurrence, recurring notifications, provenance, materialization, observe-only behavior, and one fake delivery on a disposable ledger. Return here for existing-ledger migration, production-shaped operation, inspection, and failure handling.

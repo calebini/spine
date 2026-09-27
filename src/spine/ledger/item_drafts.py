@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import Any
 
 from spine.ledger.common import TemporalAnchorInput
 from spine.ledger.supporting import ItemLocationInput, ItemSubjectRoleInput
@@ -73,3 +74,6 @@ class ItemVersionDraft:
     audit_action: str = "version_created"
     reason_code: str = "item_version_created"
     audit_payload: dict[str, object] | None = None
+    # Internal storage primitive only. None copies the prior complete snapshot;
+    # an explicit empty tuple removes all facets. No public command accepts this.
+    facet_entries: tuple[dict[str, Any], ...] | None = None

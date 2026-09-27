@@ -1,7 +1,7 @@
 # Spine Implementation Plan
 
 Role: Roadmap rationale and delivery history; current task status lives in [BACKLOG.md](BACKLOG.md)
-Last updated: 2026-09-26 (reviewed facet implementation sequence)
+Last updated: 2026-09-27 (facet commands and notification continuity Slice B)
 
 This is a non-normative delivery plan. The specifications and machine-readable contracts remain authoritative.
 
@@ -13,8 +13,10 @@ stay coarse until promoted into bounded work with acceptance criteria.
 
 The backlog retains deferred resilience work in SPINE-004–007 and SPINE-010,
 facet design/review history in SPINE-008–009, and later horizons in SPINE-011–014.
-Facet delivery is now planned as SPINE-027–029 following the clean integration recheck.
-This planning selection does not start runtime implementation or select other horizons.
+Facet delivery follows SPINE-027–029 after the clean integration recheck. The operator
+authorized Slices A and B on 2026-09-27. Runtime 0.7.0 / schema 16 builds the eleven
+trusted-local facet commands on the storage foundation. Permission-enforced web
+activation remains the separate SPINE-029 follow-on; the web registry is unchanged.
 The broad web/staging review tasks SPINE-001–003 were withdrawn at the operator's
 request; no general gap analysis is scheduled.
 SPINE-015 separately tracks independent authorized activity reads when linked resources
@@ -67,7 +69,7 @@ The 2026-09-26 integration recheck passed with no findings and preserved boundar
 Its approved model was gpt-5.6-sol. The reviewed sources are checkpointed through
 `4060e89`; the physical storage design is accepted v1.0 and the reviewed logical
 integration draft was v0.7. This closes that focused contract review, not runtime verification or
-a convergence declaration. The [backlog](BACKLOG.md#facet-delivery--planning-selected-runtime-not-started)
+a convergence declaration. The [backlog](BACKLOG.md#facet-delivery--implementation-sequence)
 owns live task status; this section defines implementation order and release fences.
 
 The subsequent operator-selected diagnostic found a dry-run wire-contract conflict
@@ -86,10 +88,18 @@ These own behavior; the delivery plan does not invent missing policy or override
 
 ### Slice A — Persistence and all-writer foundation (SPINE-027)
 
-**Next implementation target, once authorized:** one cohesive internal slice covering
+**Implemented, 2026-09-27:** one cohesive internal slice covering
 the canonical storage substrate and every existing item-version producer. Do not split
 the migration from its writer support, or deploy a database that existing commands
 can leave without facet markers. Public facet commands stay unregistered in this slice.
+
+Runtime 0.6.2 assigns schema 16 and supplies the atomic predecessor migration,
+canonical codecs, eight-table layout, shared precommit enforcement and
+[closed writer inventory](../src/spine/ledger/facet_writer_inventory.v1.json).
+The [implementation handoff](FACET_STORAGE_IMPLEMENTATION.md) maps each FS family
+to real SQLite tests and explicitly retained Slice B/C gates. No live migration,
+deployment, public facet command or web registry activation occurred. The numbered
+scope below is retained as the delivered Slice A checklist, not a second queue.
 
 1. Implement pure definition/value normalization, compatibility checks, pinned decoder
    selection and canonical hashes against the published vectors. Keep I/O out of core;
@@ -130,6 +140,23 @@ after catalog retirement, deferred-FK/commit failures, current-index parity, and
 missing/drifted-object admission failures. Pure oracles supplement these tests.
 
 ### Slice B — Public commands and notification continuity (SPINE-028)
+
+**Implementation checkpoint, 2026-09-27:** runtime 0.7.0 adds all eleven shared-handler/
+trusted-local commands, six-write atomic preview/replay behavior, authenticated bounded
+pagination and stable-intent notification continuity. The
+[operator guide](FACET_COMMANDS.md) covers exact contract pins, private cursor configuration,
+schema upgrade/removal, and the explicit boundary against automatic web exposure.
+
+Public SQLite tests exercise a reference-rich flight lifecycle, explicit schema upgrade,
+historical decoding, eight-entry retention, same-value reference revalidation and atomic
+failure. Notification tests cover successive facet versions, queued/in-progress/retry/
+terminal rows, recurring provenance, follow-source staleness, and attempt/render replay
+without permission to send again. Two-connection tests cover source-release races and
+concurrent scheduling writes; the large unrelated-ledger fixture exercises the public
+owner-rooted indexed query. No live ledger, service or web route was changed. Final
+verification and completion status are recorded under SPINE-028 in the backlog.
+
+The following scope is retained as the Slice B delivery checklist.
 
 Build on Slice A to implement all eleven reserved facet commands through shared
 handlers and the trusted-local CLI. Enforce exact request/response pins, produced-row

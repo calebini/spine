@@ -570,7 +570,7 @@ class LedgerSupportingSetTests(unittest.TestCase):
                 ),
             ),
         )
-        with self.connection:
+        with self.connection, self.connection.version_allocation("item_version_from_draft"):
             self.connection.execute(
                 """
                 INSERT INTO coordination_item_versions (
@@ -603,6 +603,8 @@ class LedgerSupportingSetTests(unittest.TestCase):
                 WHERE item_id = 'task-no-fallback'
                 """
             )
+            from spine.ledger.facets import insert_snapshot
+            insert_snapshot(self.connection, "task-no-fallback", 2, ())
 
         current = get_current_item(self.connection, "task-no-fallback")
         self.assertEqual(current["current_version"], 2)

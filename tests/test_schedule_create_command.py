@@ -126,6 +126,7 @@ class ScheduleCreateCommandTests(unittest.TestCase):
         request = self.event_request()
         created = handle("schedule.create", request, self.context)
         self.connection.execute("UPDATE delivery_targets SET status = 'inactive' WHERE delivery_target_id = 'whatsapp-owner'")
+        self.connection.commit()
         replay_context = CommandContext(ledger=self.connection, delivery_target_defaults={})
 
         replay = handle("schedule.create", request, replay_context)

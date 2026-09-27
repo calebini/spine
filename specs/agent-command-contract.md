@@ -79,8 +79,18 @@ The implemented dynamic-catalog command identifiers are
 `notification_profile.retire`, `notification_profile.show`,
 `notification_profile.list`, `notification_profile.binding.set`,
 `notification_profile.binding.remove`, `notification_profile.binding.list`,
-and `notification_profile.resolve`. Together with the identifiers in the
-opening paragraph of this section, this is the closed implemented command set.
+and `notification_profile.resolve`.
+
+The implemented trusted-local facet commands are `facet_schema.create`,
+`facet_schema.publish`, `facet_schema.retire`, `facet_schema.show`, `facet_schema.list`,
+`item_archetype.facet_binding.set`, `item_archetype.facet_binding.remove`,
+`item_archetype.facet_binding.list`, `item.facets.update`, `item.facets.show`, and
+`item.facets.query`. Their exact families, receipts and bounds are owned by
+[archetype-facets.md](archetype-facets.md) and its machine registry. Paginated reads
+require protected `CommandContext.facet_cursor_config`; it is not request JSON or
+executor authentication. The CLI loads it from the private file selected by
+`SPINE_FACET_CURSOR_CONFIG`. No facet HTTP routes are enabled.
+Together with the identifiers above, this is the closed implemented command set.
 
 ## 4. Common Request, Output, and Error Rules
 
@@ -106,14 +116,13 @@ Registered ordinary command-derived row roles and prefixes are: `item` -> `item`
 
 Produced-row identity uses stable request paths. Item shells use `/item`. Audit rows use `/audit` or `/audit/<effect>` when a command creates more than one audit row. Command receipts use `/`. Relations use `/relation`. Temporal anchors use their command field path. Initial supporting-set rows use array-indexed paths under `/locations` and `/subject_roles`. Notification rows use the content-addressed preimages in `specs/notifications.md`; audit and receipt rows still use this command-path registry. Copied version-scoped rows use `/copy_forward/<row_role>/<prior_id>` unless the owning structured contract defines successor identity. Composite artifacts whose identity is `(item_id, version)`, including item versions, event details, and task details, do not receive separate generated IDs.
 
-The proposed facet-family extension is defined by [archetype-facets.md](archetype-facets.md)
+The implemented trusted-local facet-family extension is defined by [archetype-facets.md](archetype-facets.md)
 Section 3.1: `facet_schema` -> `facet_schema`, `facet_schema_revision` ->
 `facet_schema_revision`, and `archetype_facet_binding` -> `archetype_facet_binding`,
 with exact production paths and branch rules in that table. Facet snapshots and
 entries use composite item-version keys rather than generated value IDs; audit and
-receipt rows reuse the common roles above. This reserves the owning-spec mapping,
-not implemented commands: executable registration and identity vectors remain required
-before advertising any facet capability. Existing runtime roles and paths are unchanged.
+receipt rows reuse the common roles above. Runtime identity derivation and golden
+vectors follow that registry. Existing non-facet roles and paths are unchanged.
 
 Temporal-anchor inputs are objects with `anchor_kind` and the fields permitted by the ontology. `instant_utc` requires `utc_instant` and forbids local fields. `local_instant` requires `local_date`, `local_time`, `timezone`, and `timezone_database_version` and forbids `utc_instant`. `local_date` requires `local_date`, `timezone`, and `timezone_database_version` and forbids `utc_instant`. `utc_window` requires `window_start_utc` and `window_end_utc` with start less than or equal to end. `local_window` represents a full local-day window, requires `local_date`, `timezone`, and `timezone_database_version`, and forbids `local_time`, `utc_instant`, `window_start_utc`, and `window_end_utc`.
 
@@ -226,6 +235,12 @@ The dynamic-catalog registry rows are:
 | `notification_profile.create`, `notification_profile.revise`, `notification_profile.retire`, `notification_profile.show`, `notification_profile.list` | `spine.notification-profiles.v1`, `spine.notification-profile-readback.v1`, `spine.notification-profile-catalog-cursor.v1` |
 | `notification_profile.metadata.update` | `spine.notification-profiles.v1`, `spine.notification-profile-metadata-update.v1`, `spine.notification-profile-readback.v1`, `spine.notification-profile-catalog-cursor.v1` |
 | `notification_profile.binding.set`, `notification_profile.binding.remove`, `notification_profile.binding.list`, `notification_profile.resolve` | `spine.item-archetypes.v1`, `spine.notification-profiles.v1`, `spine.notification-profile-bindings.v1`, `spine.notification-profile-readback.v1`, `spine.notification-profile-catalog-cursor.v1` |
+
+The trusted-local facet rows additionally require the exact owning family in
+`contracts/archetype-facet-contract-registry.v1.json`. The three paginated reads
+also require `spine.facet-cursor.v1`; `item.facets.update` additionally requires
+`spine.facet-notification-continuity.v1`. Every row retains the common canonical-JSON
+requirement. Their compiled mapping is `commands/registry.py`; none is a web allowlist entry.
 
 ### 5.3 Schema-Object Manifest
 

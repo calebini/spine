@@ -6,6 +6,7 @@ import sqlite3
 from importlib import resources
 from pathlib import Path
 
+from spine import IMPLEMENTED_LEDGER_SCHEMA_VERSION
 from spine.core.errors import SpineValidationError
 from spine.ledger.identity import install_identity, read_ledger_instance_id
 from spine.ledger.transactions import LedgerConnection
@@ -23,6 +24,8 @@ def connect(path: str | Path = ":memory:", *, busy_timeout_ms: int = DEFAULT_BUS
     connection.execute(f"PRAGMA busy_timeout = {int(busy_timeout_ms)}")
     if _is_file_backed_database(database):
         connection.execute("PRAGMA journal_mode = WAL")
+    if connection.execute("SELECT 1 FROM sqlite_schema WHERE name='item_facet_snapshots' AND type='table'").fetchone():
+        connection.enable_facets()
     return connection
 
 
@@ -43,8 +46,10 @@ def initialize_schema(connection: sqlite3.Connection) -> None:
         version = connection.execute(
             "SELECT MAX(schema_version) FROM ledger_schema"
         ).fetchone()[0]
-        if version == 15:
+        if version == IMPLEMENTED_LEDGER_SCHEMA_VERSION:
             read_ledger_instance_id(connection)
+            if isinstance(connection, LedgerConnection):
+                connection.enable_facets()
             return
         raise SpineValidationError(
             "ledger_schema_requires_migration",
@@ -85,6 +90,10 @@ def initialize_schema(connection: sqlite3.Connection) -> None:
     connection.executescript(migration)
     connection.execute("INSERT INTO ledger_schema VALUES (15, '1970-01-01T00:00:00Z')")
     connection.commit()
+
+    from spine.ledger.facet_migration import install_facet_storage
+
+    install_facet_storage(connection, applied_at_utc="1970-01-01T00:00:00Z", fresh=True)
 
 
 def _is_file_backed_database(database: str) -> bool:

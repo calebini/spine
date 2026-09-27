@@ -237,7 +237,7 @@ class ArchetypeFacetContractFixtureTests(unittest.TestCase):
             "item.facets.query",
         }
         self.assertEqual(set(self.contract["commands"]), expected)
-        self.assertEqual(self.contract["status"], "draft_not_implemented")
+        self.assertEqual(self.contract["status"], "implemented_trusted_local")
         for kind in ("commands", "responses"):
             schema = self.schemas[f"archetype-facet-{kind}.schema.json"]
             self.assertEqual(set(schema["$defs"]), expected)

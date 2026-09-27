@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import sqlite3
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from typing import Any
 
 from spine.core.errors import SpineValidationError
@@ -16,6 +16,16 @@ from spine.ledger.recurrence import (
     load_target_occurrence_selector,
     persist_target_occurrence_selector,
 )
+
+
+def policies_by_intent(policies: Sequence[Mapping[str, object]]) -> dict[str, Mapping[str, object]]:
+    result = {}
+    for policy in policies:
+        identity = str(policy["notification_intent_id"])
+        if identity in result:
+            raise SpineValidationError("environment_failure:notification_intent_id", "ambiguous current notification intent")
+        result[identity] = policy
+    return result
 
 
 def notification_policy_actionability(

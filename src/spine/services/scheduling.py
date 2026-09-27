@@ -19,6 +19,7 @@ from spine.ledger.notifications import (
     load_current_notification_policies,
     notification_policy_actionability,
     notification_work_stale_reason,
+    policies_by_intent,
 )
 from spine.ledger.recurrence import load_current_recurrence_set
 
@@ -342,19 +343,14 @@ def _plan_notification_work(
         range_end=range_end,
     )
     missing_work = any(value.get("actionable") and _opportunity_has_no_work(connection, value) for value in opportunities)
-    policies_by_policy_id: dict[str, Mapping[str, object]] = {}
-    for value in policies:
-        policies_by_policy_id[str(value["notification_policy_id"])] = value
-        source_policy_id = value.get("source_notification_policy_id")
-        if source_policy_id is not None:
-            policies_by_policy_id[str(source_policy_id)] = value
+    policies_by_policy_id = policies_by_intent(policies)
     valid_targets = _scheduler_target_snapshots(connection, item=item, policies=policies, recurrence=recurrence)
     stale_work = any(
         notification_work_stale_reason(
             connection,
             item=item,
             work=work,
-            policy=policies_by_policy_id.get(str(work["notification_policy_id"])),
+            policy=policies_by_policy_id.get(str(work["notification_intent_id"])),
             valid_targets=valid_targets,
         )
         is not None

@@ -1,6 +1,6 @@
 # Spine Backlog
 
-Last updated: 2026-09-26
+Last updated: 2026-09-27
 
 This is the single work queue for Spine development. The
 [implementation plan](IMPLEMENTATION_PLAN.md) explains roadmap direction and delivery
@@ -727,19 +727,20 @@ v2 error mapping and non-advertisement. Full command
 526 tests and 567 subtests. `.venv/bin/ruff check .`, `git diff --check`, and planning
 document link/heading checks passed. No new Whetstone run or staging claim.
 
-## Facet delivery — planning selected; runtime not started
+## Facet delivery — implementation sequence
 
 The operator selected delivery planning on 2026-09-26 after the clean integration
-recheck. The next bounded implementation target is SPINE-027, followed by SPINE-028
-and SPINE-029. No runtime work is started by this planning update. Design/review history
-remains below under SPINE-008–009; live delivery status belongs to these entries.
+recheck and authorized SPINE-027 implementation on 2026-09-27. Slice A is complete;
+SPINE-028 then SPINE-029 are the follow-ons. Design/review history remains below under
+SPINE-008–009; live delivery status belongs to these entries.
 
 ### SPINE-027 — Implement facet persistence and all-writer foundation
 
-**Status:** Ready — the operator-requested diagnostic's dry-run contract conflict
-and all-writer activation-proof clarification have received a targeted manual
-spec/contract amendment and local verification. No post-amendment reviewer verdict
-is claimed. Implementation has not started or been authorized by this amendment.
+**Status:** Done — internal persistence Slice A implemented and verified on 2026-09-27;
+runtime 0.6.2 / ledger schema 16. The diagnostic's dry-run and all-writer activation findings
+received a targeted amendment, local verification and a bounded buildability recheck
+on 2026-09-26: pass, zero findings, boundary preserved. This delivers storage,
+migration and all-writer proof only; public facet commands and web activation remain deferred.
 **Dependencies:** SPINE-008 review complete, Decision 0004 ratified, storage v1.0
 accepted, integration v0.7 focused recheck passed with zero findings. No unresolved
 product decision is currently identified for this internal persistence slice.
@@ -765,9 +766,31 @@ tests, before activating the new schema even with public facet commands disabled
 Record a per-FS test/remaining-gate map, not a blanket completion claim.
 The migration and all-version-writer support must ship together; no live DB changes.
 
+**Completion evidence:** [storage implementation handoff and per-FS map](FACET_STORAGE_IMPLEMENTATION.md)
+and [closed producer inventory](../src/spine/ledger/facet_writer_inventory.v1.json).
+The eight-table schema/migration, pinned codecs, historical references/current typed
+projections and shared transaction finalizer are implemented. Every inventoried
+producer executes against both empty and eight-entry persisted snapshots. Missing
+marker/finalizer/touch, stale projection and unregistered/early-commit paths roll back;
+CLI and web mutations share the outer boundary through audit and receipt persistence.
+Migration tests preserve predecessor rows/identities and extra audit objects, cover
+all four item types/history, and prove rollback plus consistent backup restore.
+Candidate-rooted text/integer probes stay bounded with 100000 unrelated items and
+10000 unrelated versions. No public facet contract, CLI command or web route is enabled.
+
+**Verification:** full suite `PYTHONPATH=src:../tickerd/src .venv/bin/pytest -o addopts='' -q --tb=short`
+passed **701 tests and 930 subtests**; Ruff, compileall, focused strict typing on the
+four new/extended facet transaction modules, 68 local document links and diff hygiene
+passed. Repository-wide mypy is not clean outside those focused modules. Wheel-build
+verification could not run because this venv lacks `setuptools.build_meta`; package
+assets are explicitly declared but installed-wheel verification is not claimed.
+No live DB mutation, Whetstone run, commit, push or deployment. Prior audit-tracking
+working-tree edits were preserved.
+
 ### SPINE-028 — Implement facet commands and notification continuity
 
-**Status:** Blocked on SPINE-027; sequenced follow-on, not started.
+**Status:** Done — implemented and verified 2026-09-27; not committed or deployed.
+SPINE-027 storage dependency is complete; its uncommitted implementation is preserved.
 **Scope:** All eleven reserved commands through shared handlers/trusted-local CLI;
 exact validation, identity, changed/no-op/replay and transaction semantics; bounded
 reads and configured authenticated cursors; stable-intent notification lookup and
@@ -779,9 +802,37 @@ and the trusted-local flight lifecycle. Verify first-page/continuation source ra
 no durable read evidence and concrete item-type rejection. Do not expose item updates
 before work-continuity proof, and do not add HTTP routes or frozen schedule fields.
 
+**Completion evidence:** Runtime 0.7.0 / schema 16 implements all eleven commands,
+six-write changed/no-op/replay/rollback previews, exact schema pins and explicit upgrades,
+historical readback, owner-rooted indexed equality queries, and private-config signed
+cursors with shared deadline/VM/resource bounds. The packaged writer inventory includes
+the explicit facet producer. Facet-only equivalence is checked before commit; policy
+resolution uses stable item/intent across successive copies while checking original
+policy meaning. Existing work, attempts and rendering evidence are not rewritten.
+
+`tests/test_facet_commands.py` proves the public flight/reference lifecycle, explicit
+schema adoption, all six preview/replay branches, eight-entry retention, concrete-type
+rejection, fresh no-op reference validation, atomic rollback, queued/in-progress/retry/
+terminal work retention, recurring provenance, follow-source behavior and rendering/
+attempt replay safety. `tests/test_facet_runtime_reads.py` proves real two-connection
+source races and write contention, cursor/key/generation/expiry failures, candidate and
+shared-budget failure without partial pages or durable evidence, protected CLI config,
+and no whole-ledger preview copy. The large-ledger plan test now exercises the public
+query against 100000 unrelated items and 10000 unrelated historical versions.
+
+Verification: full pytest **721 tests and 941 subtests passed**; subsequent focused
+command/integration/package-sync checks, including the added malformed-enum regression,
+**32 tests and 158 subtests passed**. Ruff, compileall, strict focused mypy on all four
+new runtime modules, packaged-schema synchronization, relative file-link checks and
+`git diff --check` passed. Installed-wheel verification remains unavailable because
+this venv lacks setuptools; the declared package assets and generated copies were
+checked, but no installed-wheel result is claimed. See [operator handoff](FACET_COMMANDS.md).
+No live database, Whetstone job, commit, push or deployment. No web route activation;
+permission-sensitive resolver/disclosure proofs remain SPINE-029, not claimed here.
+
 ### SPINE-029 — Integrate permission-enforced facets and web admission
 
-**Status:** Blocked on SPINE-028; sequenced follow-on, not started.
+**Status:** Ready — SPINE-028 dependency complete; sequenced follow-on, not started.
 **Scope:** Existing permission model's reviewed catalog extension, item/nested-reference
 resolvers, six-write receipt-disclosure replay matrix, bounded protected cursors and
 release fences. Codify/test exact web registry/admission/package declarations before
@@ -831,7 +882,8 @@ physical storage design accepted as v1.0 on 2026-09-25; permission/cursor/work c
 codified and focused-recheck passed 2026-09-26. Contract review is closed; remaining
 executable delivery gates are mapped to SPINE-027–029. The subsequent operator-selected
 diagnostic reported one blocker and one major; the v0.8 manual amendment addresses
-both with local spec/contract verification, not a new reviewer verdict. This gate
+both with local spec/contract verification; the subsequent bounded buildability
+recheck passed with zero findings and boundary preserved on 2026-09-26. This gate
 tracker stays open; it does not automatically schedule further review or authorize runtime.
 **Dependencies:** SPINE-008 is complete. The deferred resilience campaign is not a
 blanket prerequisite.
@@ -1133,6 +1185,36 @@ trusted-web, implemented-declaration and agent-documentation suite passed **57 t
 and 416 subtests**; Ruff on both changed test modules, packaged-contract sync check,
 140 local Markdown links and `git diff --check` passed. No new audit, runtime code,
 schema migration, commit or push occurred. Pre-existing diagnostic tracking was preserved.
+
+**Facet diagnostic amendment bounded recheck staged (2026-09-26):** Prepared
+[archetype-facet-diagnostic-amendment-audit-001](../whetstone_runs/archetype-facet-diagnostic-amendment-audit-001/audit-notes.md)
+against `57ca486`. One reviewer-only audit-change with the buildability profile and
+gpt-5.6-sol will target fb_dry_run_response_contract and fb_operability_r3_001 plus
+amendment-induced regressions. Exact outgoing scope: thirty-two listed inputs,
+the notes, built-in profile context and generated copies. Local staging verifies
+file existence, unique inventory, JSON syntax, tracked-source/checkpoint parity,
+hashes and supported CLI options. Input-manifest.json is local control data only.
+Awaiting explicit outbound approval; no reviewer invoked, source specifications
+changed, runtime work, commit or push. This does not reopen a diagnostic sweep or
+make a convergence claim; SPINE-027 remains unstarted.
+
+**Facet diagnostic amendment bounded recheck completed (2026-09-26):** Following
+explicit approval of the thirty-two listed inputs, notes, built-in buildability
+profile and generated copies, audit-change completed using gpt-5.6-sol. Verdict:
+**pass**; **0 blockers, 0 majors, 0 minors, 0 nits**; **boundary_preserved=true**.
+The focused scope covered both diagnostic finding closures and direct amendment
+regressions. No residual finding was reported; the empty feedback artifact supplies
+no separate per-finding closure narrative. Treat this as a clean bounded recheck,
+not convergence or executable migration/finalizer/preview proof.
+
+Verified all 33 approved raw input hashes unchanged, exact outgoing inventory,
+Whetstone-normalized hashes, and manifest model/profile. Whetstone normalizes trailing
+blank lines for its notes hash; the raw notes bytes were not modified. Source specs
+and runtime remain unchanged. SPINE-027 is the next implementation target once
+authorized; no Editor, commit, push or implementation occurred in this audit.
+Evidence: [audit report](../whetstone_runs/archetype-facet-diagnostic-amendment-audit-001/change_audit/change_audit_report.md),
+[feedback](../whetstone_runs/archetype-facet-diagnostic-amendment-audit-001/change_audit/change_audit_feedback.json)
+and [manifest](../whetstone_runs/archetype-facet-diagnostic-amendment-audit-001/change_audit/audit_manifest.json).
 
 ## Later horizons
 

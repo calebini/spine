@@ -19,3 +19,4 @@ class CommandContext:
     correlation_id: str | None = None
     adapter_bindings: Mapping[str, Any] = field(default_factory=dict)
     delivery_target_defaults: Mapping[str, Any] = field(default_factory=dict)
+    facet_cursor_config: Any = None  # Protected adapter configuration, never request JSON.

@@ -798,7 +798,9 @@ class LedgerItemWorkflowTests(unittest.TestCase):
         ).fetchone()
 
     def insert_event_with_unadvanced_current_version(self) -> None:
-        with self.connection:
+        # Deliberately corrupt the unrelated shell/version invariant while keeping
+        # valid facet markers; routine validation must stay touched-item scoped.
+        with self.connection, self.connection.version_allocation("item_version_from_draft"):
             self.connection.execute(
                 """
                 INSERT INTO temporal_anchors (anchor_id, anchor_kind, utc_instant, created_at_utc)
@@ -868,6 +870,9 @@ class LedgerItemWorkflowTests(unittest.TestCase):
                 VALUES ('unrelated-event', 2, 'scheduled', 0, 'unrelated-event-v2-start')
                 """
             )
+            from spine.ledger.facets import insert_snapshot
+            insert_snapshot(self.connection, "unrelated-event", 1, ())
+            insert_snapshot(self.connection, "unrelated-event", 2, ())
 
 
 def insert_subject(connection: sqlite3.Connection) -> None:

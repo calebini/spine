@@ -1,0 +1,289 @@
+{
+  "format_version": "spine.facet-writer-inventory.v1",
+  "ledger_schema_version": "16",
+  "item_types": [
+    "event",
+    "task",
+    "project",
+    "collection"
+  ],
+  "version_allocator": "src/spine/ledger/items.py:_insert_item_version",
+  "registered_allocators": [
+    "item_create",
+    "item_version_from_draft"
+  ],
+  "transaction_entrypoints": [
+    "spine.commands.facets.execute",
+    "spine.commands.core._dispatch_atomic",
+    "spine.ledger.items._item_transaction",
+    "spine.web.service.WebService.execute"
+  ],
+  "producers": [
+    {
+      "producer_key": "src/spine/commands/facets.py:item_write",
+      "entrypoint": "item.facets.update",
+      "allocation_calls": ["create_item_version_from_draft"],
+      "finalizer": "spine.ledger.facets.finalize",
+      "test_ids": ["tests/test_facet_commands.py::FacetCommandTests::test_explicit_writer_retains_unchanged_seven_entries"]
+    },
+    {
+      "producer_key": "src/spine/commands/core.py:_handle_event_create",
+      "entrypoint": "_handle_event_create",
+      "allocation_calls": [
+        "create_event_v1"
+      ],
+      "finalizer": "spine.ledger.facets.finalize",
+      "test_ids": [
+        "tests/test_facet_writers.py::FacetWriterTests::test_all_producers_preserve_empty_and_eight_entry_snapshots"
+      ]
+    },
+    {
+      "producer_key": "src/spine/commands/core.py:_handle_task_create",
+      "entrypoint": "_handle_task_create",
+      "allocation_calls": [
+        "create_task_v1"
+      ],
+      "finalizer": "spine.ledger.facets.finalize",
+      "test_ids": [
+        "tests/test_facet_writers.py::FacetWriterTests::test_all_producers_preserve_empty_and_eight_entry_snapshots"
+      ]
+    },
+    {
+      "producer_key": "src/spine/commands/core.py:_handle_schedule_create",
+      "entrypoint": "_handle_schedule_create",
+      "allocation_calls": [
+        "create_event_v1",
+        "create_task_v1"
+      ],
+      "finalizer": "spine.ledger.facets.finalize",
+      "test_ids": [
+        "tests/test_facet_writers.py::FacetWriterTests::test_all_producers_preserve_empty_and_eight_entry_snapshots"
+      ]
+    },
+    {
+      "producer_key": "src/spine/commands/core.py:_handle_schedule_cancel",
+      "entrypoint": "_handle_schedule_cancel",
+      "allocation_calls": [
+        "create_next_item_version"
+      ],
+      "finalizer": "spine.ledger.facets.finalize",
+      "test_ids": [
+        "tests/test_facet_writers.py::FacetWriterTests::test_all_producers_preserve_empty_and_eight_entry_snapshots"
+      ]
+    },
+    {
+      "producer_key": "src/spine/commands/core.py:_handle_schedule_update",
+      "entrypoint": "_handle_schedule_update",
+      "allocation_calls": [
+        "create_next_item_version"
+      ],
+      "finalizer": "spine.ledger.facets.finalize",
+      "test_ids": [
+        "tests/test_facet_writers.py::FacetWriterTests::test_all_producers_preserve_empty_and_eight_entry_snapshots"
+      ]
+    },
+    {
+      "producer_key": "src/spine/commands/core.py:_handle_common_update",
+      "entrypoint": "_handle_common_update",
+      "allocation_calls": [
+        "create_next_item_version"
+      ],
+      "finalizer": "spine.ledger.facets.finalize",
+      "test_ids": [
+        "tests/test_facet_writers.py::FacetWriterTests::test_all_producers_preserve_empty_and_eight_entry_snapshots"
+      ]
+    },
+    {
+      "producer_key": "src/spine/commands/core.py:_handle_event_reschedule",
+      "entrypoint": "_handle_event_reschedule",
+      "allocation_calls": [
+        "create_next_item_version"
+      ],
+      "finalizer": "spine.ledger.facets.finalize",
+      "test_ids": [
+        "tests/test_facet_writers.py::FacetWriterTests::test_all_producers_preserve_empty_and_eight_entry_snapshots"
+      ]
+    },
+    {
+      "producer_key": "src/spine/commands/core.py:_handle_reminder_create",
+      "entrypoint": "_handle_reminder_create",
+      "allocation_calls": [
+        "create_next_item_version"
+      ],
+      "finalizer": "spine.ledger.facets.finalize",
+      "test_ids": [
+        "tests/test_facet_writers.py::FacetWriterTests::test_all_producers_preserve_empty_and_eight_entry_snapshots"
+      ]
+    },
+    {
+      "producer_key": "src/spine/commands/core.py:_handle_recurrence_instance_mutation",
+      "entrypoint": "_handle_recurrence_instance_mutation",
+      "allocation_calls": [
+        "create_next_item_version"
+      ],
+      "finalizer": "spine.ledger.facets.finalize",
+      "test_ids": [
+        "tests/test_facet_writers.py::FacetWriterTests::test_all_producers_preserve_empty_and_eight_entry_snapshots"
+      ]
+    },
+    {
+      "producer_key": "src/spine/commands/core.py:_persist_series_edit_success",
+      "entrypoint": "_persist_series_edit_success",
+      "allocation_calls": [
+        "create_next_item_version"
+      ],
+      "finalizer": "spine.ledger.facets.finalize",
+      "test_ids": [
+        "tests/test_facet_writers.py::FacetWriterTests::test_all_producers_preserve_empty_and_eight_entry_snapshots"
+      ]
+    },
+    {
+      "producer_key": "src/spine/commands/core.py:_persist_notification_successor",
+      "entrypoint": "_persist_notification_successor",
+      "allocation_calls": [
+        "create_next_item_version"
+      ],
+      "finalizer": "spine.ledger.facets.finalize",
+      "test_ids": [
+        "tests/test_facet_writers.py::FacetWriterTests::test_all_producers_preserve_empty_and_eight_entry_snapshots"
+      ]
+    },
+    {
+      "producer_key": "src/spine/commands/temporal_bindings.py:handle_related_task_create",
+      "entrypoint": "handle_related_task_create",
+      "allocation_calls": [
+        "create_task_v1"
+      ],
+      "finalizer": "spine.ledger.facets.finalize",
+      "test_ids": [
+        "tests/test_facet_writers.py::FacetWriterTests::test_all_producers_preserve_empty_and_eight_entry_snapshots"
+      ]
+    },
+    {
+      "producer_key": "src/spine/commands/temporal_bindings.py:_versioned_reconcile",
+      "entrypoint": "_versioned_reconcile",
+      "allocation_calls": [
+        "create_next_item_version"
+      ],
+      "finalizer": "spine.ledger.facets.finalize",
+      "test_ids": [
+        "tests/test_facet_writers.py::FacetWriterTests::test_all_producers_preserve_empty_and_eight_entry_snapshots"
+      ]
+    },
+    {
+      "producer_key": "src/spine/ledger/items.py:create_event_from_draft",
+      "entrypoint": "create_event_from_draft",
+      "allocation_calls": [
+        "_create_item_v1"
+      ],
+      "finalizer": "spine.ledger.facets.finalize",
+      "test_ids": [
+        "tests/test_facet_writers.py::FacetWriterTests::test_all_producers_preserve_empty_and_eight_entry_snapshots"
+      ]
+    },
+    {
+      "producer_key": "src/spine/ledger/items.py:create_event_v1",
+      "entrypoint": "create_event_v1",
+      "allocation_calls": [
+        "create_event_from_draft"
+      ],
+      "finalizer": "spine.ledger.facets.finalize",
+      "test_ids": [
+        "tests/test_facet_writers.py::FacetWriterTests::test_all_producers_preserve_empty_and_eight_entry_snapshots"
+      ]
+    },
+    {
+      "producer_key": "src/spine/ledger/items.py:create_task_from_draft",
+      "entrypoint": "create_task_from_draft",
+      "allocation_calls": [
+        "_create_item_v1"
+      ],
+      "finalizer": "spine.ledger.facets.finalize",
+      "test_ids": [
+        "tests/test_facet_writers.py::FacetWriterTests::test_all_producers_preserve_empty_and_eight_entry_snapshots"
+      ]
+    },
+    {
+      "producer_key": "src/spine/ledger/items.py:create_task_v1",
+      "entrypoint": "create_task_v1",
+      "allocation_calls": [
+        "create_task_from_draft"
+      ],
+      "finalizer": "spine.ledger.facets.finalize",
+      "test_ids": [
+        "tests/test_facet_writers.py::FacetWriterTests::test_all_producers_preserve_empty_and_eight_entry_snapshots"
+      ]
+    },
+    {
+      "producer_key": "src/spine/ledger/items.py:create_item_version_from_draft",
+      "entrypoint": "create_item_version_from_draft",
+      "allocation_calls": [
+        "_insert_item_version"
+      ],
+      "finalizer": "spine.ledger.facets.finalize",
+      "test_ids": [
+        "tests/test_facet_writers.py::FacetWriterTests::test_all_producers_preserve_empty_and_eight_entry_snapshots"
+      ]
+    },
+    {
+      "producer_key": "src/spine/ledger/items.py:create_next_item_version",
+      "entrypoint": "create_next_item_version",
+      "allocation_calls": [
+        "create_item_version_from_draft"
+      ],
+      "finalizer": "spine.ledger.facets.finalize",
+      "test_ids": [
+        "tests/test_facet_writers.py::FacetWriterTests::test_all_producers_preserve_empty_and_eight_entry_snapshots"
+      ]
+    },
+    {
+      "producer_key": "src/spine/ledger/items.py:cancel_event",
+      "entrypoint": "cancel_event",
+      "allocation_calls": [
+        "create_next_item_version"
+      ],
+      "finalizer": "spine.ledger.facets.finalize",
+      "test_ids": [
+        "tests/test_facet_writers.py::FacetWriterTests::test_all_producers_preserve_empty_and_eight_entry_snapshots"
+      ]
+    },
+    {
+      "producer_key": "src/spine/ledger/items.py:complete_task",
+      "entrypoint": "complete_task",
+      "allocation_calls": [
+        "create_next_item_version"
+      ],
+      "finalizer": "spine.ledger.facets.finalize",
+      "test_ids": [
+        "tests/test_facet_writers.py::FacetWriterTests::test_all_producers_preserve_empty_and_eight_entry_snapshots"
+      ]
+    },
+    {
+      "producer_key": "src/spine/ledger/items.py:cancel_task",
+      "entrypoint": "cancel_task",
+      "allocation_calls": [
+        "create_next_item_version"
+      ],
+      "finalizer": "spine.ledger.facets.finalize",
+      "test_ids": [
+        "tests/test_facet_writers.py::FacetWriterTests::test_all_producers_preserve_empty_and_eight_entry_snapshots"
+      ]
+    },
+    {
+      "producer_key": "src/spine/ledger/items.py:_create_item_v1",
+      "entrypoint": "_create_item_v1",
+      "allocation_calls": [
+        "_insert_item_version"
+      ],
+      "finalizer": "spine.ledger.facets.finalize",
+      "test_ids": [
+        "tests/test_facet_writers.py::FacetWriterTests::test_all_producers_preserve_empty_and_eight_entry_snapshots"
+      ]
+    }
+  ],
+  "maintenance": {
+    "entrypoint": "spine.ledger.facet_migration.install_facet_storage",
+    "test_id": "tests/test_facet_migration.py::FacetMigrationTests::test_predecessor_all_types_history_and_backup_restore",
+    "note": "Project/collection have no ordinary version producers today; existing historical versions receive empty markers. New producers require explicit inventory and runtime coverage."
+  }
+}

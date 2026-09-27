@@ -3,7 +3,8 @@
 from __future__ import annotations
 
 import sqlite3
-from collections.abc import Callable
+from collections.abc import Callable, Iterator
+from contextlib import contextmanager
 from dataclasses import dataclass
 from typing import cast
 
@@ -22,6 +23,7 @@ from spine.ledger.common import (
     require_optional_utc_z,
     require_utc_z,
 )
+from spine.ledger.facets import insert_snapshot, load_snapshot
 from spine.ledger.item_drafts import _UNSET, EventDraft, ItemVersionDraft, TaskDraft
 from spine.ledger.sqlite import assert_ledger_invariants
 from spine.ledger.supporting import (
@@ -34,6 +36,7 @@ from spine.ledger.supporting import (
     insert_supporting_sets,
     replace_item_subject_roles,
 )
+from spine.ledger.transactions import LedgerConnection
 from spine.models.enums import EventStatus, ItemStatus, ItemType, TaskStatus
 
 
@@ -351,7 +354,7 @@ def create_item_version_from_draft(
         raise SpineValidationError("stale_item_version", "target_version must be greater than or equal to 1")
 
     try:
-        with connection:
+        with _item_transaction(connection):
             current = _load_current_row(connection, item_id=draft.item_id)
             if current["current_version"] != draft.target_version:
                 raise SpineValidationError(
@@ -377,6 +380,7 @@ def create_item_version_from_draft(
 
             _insert_item_version(
                 connection,
+                producer="item_version_from_draft",
                 item_id=draft.item_id,
                 version=next_version,
                 title=next_title,
@@ -385,6 +389,9 @@ def create_item_version_from_draft(
                 created_at_utc=draft.created_at_utc,
                 created_by_subject_id=draft.created_by_subject_id,
             )
+            entries = (load_snapshot(connection, draft.item_id, draft.target_version)
+                       if draft.facet_entries is None else draft.facet_entries)
+            insert_snapshot(connection, draft.item_id, next_version, entries)
             _insert_next_detail(
                 connection,
                 item_id=draft.item_id,
@@ -756,7 +763,7 @@ def _create_item_v1(
     audit_payload: dict[str, object] | None = None,
 ) -> CreatedItem:
     try:
-        with connection:
+        with _item_transaction(connection):
             if validate_prerequisites is not None:
                 validate_prerequisites(connection)
             insert_anchors(connection)
@@ -768,6 +775,7 @@ def _create_item_v1(
             )
             _insert_item_version(
                 connection,
+                producer="item_create",
                 item_id=item_id,
                 version=1,
                 title=title,
@@ -776,6 +784,7 @@ def _create_item_v1(
                 created_at_utc=created_at_utc,
                 created_by_subject_id=created_by_subject_id,
             )
+            insert_snapshot(connection, item_id, 1, ())
             insert_detail(connection)
             if insert_canonical_extension is not None:
                 insert_canonical_extension(connection)
@@ -823,6 +832,17 @@ def _create_item_v1(
     return CreatedItem(item_id=item_id, version=1, audit_id=audit_id)
 
 
+@contextmanager
+def _item_transaction(connection: sqlite3.Connection) -> Iterator[None]:
+    if not isinstance(connection, LedgerConnection):
+        raise SpineValidationError("environment_failure:facets", "facet-aware connection required")
+    if connection._command_transaction:
+        yield
+    else:
+        with connection.atomic_command():
+            yield
+
+
 def _insert_item_shell(
     connection: sqlite3.Connection,
     *,
@@ -844,6 +864,7 @@ def _insert_item_shell(
 def _insert_item_version(
     connection: sqlite3.Connection,
     *,
+    producer: str,
     item_id: str,
     version: int,
     title: str,
@@ -852,30 +873,33 @@ def _insert_item_version(
     created_at_utc: str,
     created_by_subject_id: str,
 ) -> None:
-    connection.execute(
-        """
-        INSERT INTO coordination_item_versions (
-          item_id, version, title, summary, intent_hash, normalized_fields_hash,
-          source_ref, created_at_utc, created_by_subject_id
-        )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-        """,
-        (
-            item_id,
-            version,
-            title,
-            summary,
-            coordination_item_version_intent_hash(
-                title=title,
-                summary=summary,
-                source_ref=source_ref,
+    if not isinstance(connection, LedgerConnection) or not getattr(connection, "_facets_enabled", False):
+        raise SpineValidationError("environment_failure:facets", "facet-aware transaction connection required")
+    with connection.version_allocation(producer):
+        connection.execute(
+            """
+            INSERT INTO coordination_item_versions (
+              item_id, version, title, summary, intent_hash, normalized_fields_hash,
+              source_ref, created_at_utc, created_by_subject_id
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                item_id,
+                version,
+                title,
+                summary,
+                coordination_item_version_intent_hash(
+                    title=title,
+                    summary=summary,
+                    source_ref=source_ref,
+                ),
+                coordination_item_version_normalized_fields_hash(title=title, summary=summary),
+                source_ref,
+                created_at_utc,
+                created_by_subject_id,
             ),
-            coordination_item_version_normalized_fields_hash(title=title, summary=summary),
-            source_ref,
-            created_at_utc,
-            created_by_subject_id,
-        ),
-    )
+        )
 
 
 def _insert_next_detail(

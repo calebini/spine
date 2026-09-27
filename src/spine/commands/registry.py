@@ -40,6 +40,11 @@ _READ_COMMANDS = frozenset(
         "schedule.show",
         "system.info",
         "web_access.plan",
+        "facet_schema.show",
+        "facet_schema.list",
+        "item_archetype.facet_binding.list",
+        "item.facets.show",
+        "item.facets.query",
     }
 )
 
@@ -71,6 +76,13 @@ def _requirements(commands: set[str], *versions: str) -> None:
 
 
 _requirements({"web_access.plan", "web_access.apply"}, "spine.trusted-web-provisioning.v1")
+_requirements({"facet_schema.create", "facet_schema.publish", "facet_schema.retire", "facet_schema.show"}, "spine.facet-schemas.v1")
+_requirements({"facet_schema.list"}, "spine.facet-schemas.v1", "spine.facet-cursor.v1")
+_requirements({"item_archetype.facet_binding.set", "item_archetype.facet_binding.remove"}, "spine.archetype-facet-bindings.v1")
+_requirements({"item_archetype.facet_binding.list"}, "spine.archetype-facet-bindings.v1", "spine.facet-cursor.v1")
+_requirements({"item.facets.update"}, "spine.item-facets.v1", "spine.facet-notification-continuity.v1")
+_requirements({"item.facets.show"}, "spine.item-facets.v1")
+_requirements({"item.facets.query"}, "spine.item-facet-query.v1", "spine.facet-cursor.v1")
 _requirements({"system.info"}, "spine.system-info.v3", "spine.ledger-instance.v1", "spine.tickerd-compatibility.v1")
 _requirements(
     {"owner_scope.list"},

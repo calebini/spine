@@ -98,13 +98,14 @@ class FacetIntegrationContractTests(unittest.TestCase):
             return "stale_cursor"
         return [key for key in keys if key > payload["last_key"]]
 
-    def test_mapping_is_complete_without_runtime_advertisement(self):
+    def test_mapping_is_complete_without_web_advertisement(self):
         registry = load(ROOT / "contracts/archetype-facet-contract-registry.v1.json")
-        self.assertEqual(self.contract["status"], "draft_not_implemented")
+        self.assertEqual(self.contract["status"], "implemented_trusted_local_permission_enforcement_deferred")
         self.assertEqual(set(self.contract["permission_resolvers"]), set(registry["commands"]))
         self.assertEqual(registry["integration_contract"], "contracts/archetype-facet-integration.v1.json")
-        web = load(ROOT / "contracts/spine.trusted-web-command-registry.v1.json")
-        self.assertFalse(set(registry["commands"]) & {c["command"] for c in web["commands"]})
+        for family in ("command", "read"):
+            web = load(ROOT / f"contracts/spine.trusted-web-{family}-registry.v1.json")
+            self.assertFalse(set(registry["commands"]) & {c["command"] for c in web["commands"]})
         self.assertEqual(self.contract["work"]["current_policy_key"], ["item_id", "notification_intent_id"])
         self.assertEqual(self.contract["work"]["row_mutations"], [])
 

@@ -1,6 +1,6 @@
 {
   "contract_version": "spine.facet-integration.v1",
-  "status": "draft_not_implemented",
+  "status": "implemented_trusted_local_permission_enforcement_deferred",
   "normative_source": "specs/archetype-facets.md",
   "permission_resolvers": {
     "facet_schema.create": [

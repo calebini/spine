@@ -6,7 +6,6 @@ from unittest.mock import patch
 
 from spine.commands import handle
 from spine.core.schedule import system_timezone_database_version
-from spine.ledger.migrate import migrate_schema
 from spine.ledger.preflight import verify_runtime_schema
 from spine.ledger.recurrence import load_current_recurrence_set
 from spine.web.errors import WebError
@@ -143,7 +142,7 @@ class IndependentReadAssemblyTests(unittest.TestCase):
         include = ["related_items", "relations", "temporal_bindings"]
         before = self.sections(item, include)
         # Real unowned items, with many relation rows on the readable root.
-        with self.db:
+        with self.db.atomic_command():
             for n in range(140):
                 hidden = self.ok(
                     handle(
@@ -463,10 +462,12 @@ class IndependentReadAssemblyTests(unittest.TestCase):
                 self.db.execute("DROP INDEX " + name)
             self.db.execute("DELETE FROM ledger_schema WHERE schema_version=15")
         before = [line for line in self.db.iterdump() if line.startswith("INSERT") and "ledger_schema" not in line]
-        result = migrate_schema(self.db)
-        self.assertEqual(result.applied_versions, (15,))
+        # Isolate the historical index-only migration; schema 16 is already present
+        # in this runtime fixture and has its own all-data migration proofs.
+        from spine.ledger.migrate import _apply_migration
+        _apply_migration(self.db, version=15, migration_name="0015_independent_read_indexes.sql")
         self.assertEqual(before, [line for line in self.db.iterdump() if line.startswith("INSERT") and "ledger_schema" not in line])
-        self.assertEqual(verify_runtime_schema(self.db).schema_version, 15)
+        self.assertEqual(verify_runtime_schema(self.db).schema_version, 16)
         self.assertTrue(self.sections(item)["work"]["entries"])
 
     def test_applied_profile_is_pinned_and_catalog_denial_omits_indivisible_evidence(self):

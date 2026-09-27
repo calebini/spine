@@ -7,9 +7,12 @@ class SpineError(Exception):
     """Base exception for Spine runtime errors."""
 
 
-@dataclass(frozen=True)
+@dataclass
 class SpineValidationError(SpineError):
-    """Validation failure with a stable machine-readable code."""
+    """Validation failure with a stable machine-readable code.
+
+    Exceptions must permit traceback assignment by transaction context managers.
+    """
 
     code: str
     message: str

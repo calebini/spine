@@ -1,6 +1,6 @@
 {
   "schema_version": "spine.archetype-facet-contract-fixtures.v1",
-  "status": "draft_not_implemented",
+  "status": "implemented_trusted_local",
   "registry": "contracts/archetype-facet-contract-registry.v1.json",
   "fixtures": [
     {

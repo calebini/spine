@@ -51,11 +51,19 @@ allowed to quietly become canonical.
 
 ## What Works Today
 
-Spine `0.6.1` is an implemented alpha; its scheduling core is exercised in a staging
-agent environment. The current SQLite ledger schema is version `15`. The trusted multi-operator backend is also running in staging on `cortext1`, with
+Spine `0.7.0` is an implemented alpha; its scheduling core is exercised in a staging
+agent environment. The current SQLite ledger schema is version `16`. The trusted multi-operator backend is also running in staging on `cortext1`, with
 operator testing through the connected [Kinflow frontend](../kinflow-web-ui/README.md).
 Concrete operator-reported work is tracked in the [backlog](docs/BACKLOG.md);
 this checkout version is not a deployment claim.
+
+Version 0.7.0 adds versioned facet storage and trusted-local schema, binding, value,
+readback and typed-query commands, with an offline schema-15-to-16 migration.
+Existing item-version commands preserve complete facet snapshots; facet-only edits
+retain semantically unchanged notification work. Facet web routes are **not enabled**;
+permission-enforced integration is the next slice. See the
+[facet command guide](docs/FACET_COMMANDS.md) and
+[storage handoff and verification map](docs/FACET_STORAGE_IMPLEMENTATION.md).
 
 ### Trusted multi-operator web backend
 
@@ -350,9 +358,9 @@ Draft work is not advertised as an implemented compatibility promise. See
   stable backup-preserved instance ID, schema-14 migration and system.info v3.
 
 
-- **Proposed archetype extensions:** [Archetype facets](specs/archetype-facets.md) and
+- **Versioned archetype extensions:** [Archetype facets](specs/archetype-facets.md) and
   [Decision 0004](specs/decisions/0004-versioned-item-facets.md) — typed domain facts,
-  schema ownership and versioning; draft, not implemented.
+  schema ownership and versioning; trusted-local commands implemented, web integration pending.
 
 Start with the document that matches the job:
 

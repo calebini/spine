@@ -75,6 +75,7 @@ from spine.ledger.notifications import (
     notification_policy_actionability,
     notification_work_stale_reason,
     persist_notification_target_selector,
+    policies_by_intent,
     remove_copied_notification_policy,
 )
 from spine.ledger.provenance import (
@@ -96,6 +97,7 @@ from spine.ledger.supporting import (
     ItemSubjectRoleInput,
     insert_item_location,
 )
+from spine.ledger.transactions import LedgerConnection
 from spine.ledger.work import assert_work_instance_not_stale, cancel_work_instance, create_work_instance
 
 # Preserve command helper imports while core and ledger own the shared implementation.
@@ -120,10 +122,16 @@ def handle(command: str, request: Mapping[str, Any], context: CommandContext) ->
     if context.ledger is None:
         return _error(command, "invalid_request", f"{command} requires CommandContext.ledger", "ledger")
     try:
+        from spine.commands.facets import CONTRACTS as FACET_COMMANDS
+        from spine.commands.facets import execute as execute_facet
+        if command in FACET_COMMANDS:
+            return execute_facet(command, request, context)
         if context.dry_run and command in WRITE_COMMANDS:
-            preview = sqlite3.connect(":memory:")
+            preview = sqlite3.connect(":memory:", factory=LedgerConnection)
             preview.row_factory = sqlite3.Row
             context.ledger.backup(preview)
+            preview.execute("PRAGMA foreign_keys=ON")
+            preview.enable_facets()
             try:
                 preview_context = CommandContext(
                     ledger=preview,
@@ -134,22 +142,52 @@ def handle(command: str, request: Mapping[str, Any], context: CommandContext) ->
                     adapter_bindings=context.adapter_bindings,
                     delivery_target_defaults=context.delivery_target_defaults,
                 )
-                result = _dispatch(command, request, preview_context)
+                result = _dispatch_atomic(command, request, preview_context)
             finally:
                 preview.close()
             result["dry_run"] = True
             return result
-        return _dispatch(command, request, context)
+        return _dispatch_atomic(command, request, context)
     except SpineValidationError as exc:
         response = _validation_error(command, exc)
-        if context.dry_run and command in WRITE_COMMANDS:
+        if context.dry_run and (command in WRITE_COMMANDS or command in FACET_COMMANDS):
             response["dry_run"] = True
         return response
     except sqlite3.IntegrityError as exc:
         response = _error(command, "semantic_conflict", str(exc), "request")
-        if context.dry_run and command in WRITE_COMMANDS:
+        if context.dry_run and (command in WRITE_COMMANDS or command in FACET_COMMANDS):
             response["dry_run"] = True
         return response
+
+
+class _CommandRejected(Exception):
+    def __init__(self, result: dict[str, Any]) -> None:
+        self.result = result
+
+
+def _dispatch_atomic(command: str, request: Mapping[str, Any], context: CommandContext) -> dict[str, Any]:
+    db = context.ledger
+    # Web admission and provisioning already own their outer boundary. All ordinary
+    # CLI writes now absorb helper contexts, including the receipt after item creation.
+    # Owner discovery uses a nested read savepoint; give it an explicit outer
+    # read transaction so RELEASE cannot become an unfinalized outer commit.
+    if (command not in WRITE_COMMANDS and command != "owner_scope.list" or command == "web_access.apply"
+            or isinstance(db, LedgerConnection) and db._command_transaction):
+        return _dispatch(command, request, context)
+    if not isinstance(db, LedgerConnection):
+        raise SpineValidationError("environment_failure:ledger", "transaction-aware ledger connection required")
+    if db.in_transaction:
+        raise SpineValidationError("environment_failure:ledger", "command requires an idle connection or owned transaction")
+    try:
+        with db.atomic_command(write=command in WRITE_COMMANDS):
+            result = _dispatch(command, request, context)
+            if not result.get("ok"):
+                raise _CommandRejected(result)
+            return result
+    except _CommandRejected as exc:
+        return exc.result
+    except sqlite3.OperationalError as exc:
+        raise SpineValidationError("environment_failure:ledger", "ledger transaction could not complete") from exc
 
 
 def _dispatch(command: str, request: Mapping[str, Any], context: CommandContext) -> dict[str, Any]:
@@ -4229,12 +4267,7 @@ def _handle_notification_work_materialize(request: Mapping[str, Any], context: C
     else:
         selected = candidates
     policies = load_current_notification_policies(context.ledger, item_id=item_id)
-    policies_by_policy_id: dict[str, Mapping[str, object]] = {}
-    for value in policies:
-        policies_by_policy_id[str(value["notification_policy_id"])] = value
-        source_policy_id = value.get("source_notification_policy_id")
-        if source_policy_id is not None:
-            policies_by_policy_id[str(source_policy_id)] = value
+    policies_by_policy_id = policies_by_intent(policies)
     valid_targets = _current_notification_target_snapshots(
         context.ledger,
         item=item,
@@ -4266,7 +4299,7 @@ def _handle_notification_work_materialize(request: Mapping[str, Any], context: C
                 context.ledger,
                 item=item,
                 work=work,
-                policy=policies_by_policy_id.get(str(work["notification_policy_id"])),
+                policy=policies_by_policy_id.get(str(work["notification_intent_id"])),
                 valid_targets=valid_targets,
             )
             if reason is not None:
@@ -6590,12 +6623,7 @@ def _schedule_reconcile_work_plan(
     temporal_binding_stale: bool = False,
     parent_terminal: bool = False,
 ) -> tuple[list[str], list[str], list[str], dict[str, str]]:
-    by_policy_id: dict[str, Mapping[str, object]] = {}
-    for value in active_policies:
-        by_policy_id[str(value["notification_policy_id"])] = value
-        source_policy_id = value.get("source_notification_policy_id")
-        if source_policy_id is not None:
-            by_policy_id[str(source_policy_id)] = value
+    by_policy_id = policies_by_intent(active_policies)
     rows = connection.execute(
         """
         SELECT w.*,
@@ -6614,7 +6642,7 @@ def _schedule_reconcile_work_plan(
     protected: list[str] = []
     reasons: dict[str, str] = {}
     for row in rows:
-        policy = by_policy_id.get(str(row["notification_policy_id"]))
+        policy = by_policy_id.get(str(row["notification_intent_id"]))
         reason = None
         if policy is not None and row["normalized_notification_schedule_hash"] != policy["normalized_notification_schedule_hash"]:
             reason = "notification_schedule_superseded"
@@ -9382,6 +9410,10 @@ def _error(command: str, code: str, message: str, field: str | None = None) -> d
 
 def _validation_error(command: str, exc: SpineValidationError) -> dict[str, Any]:
     code = exc.code
+    public, _, field = code.partition(":")
+    if public in {"facet_schema_invalid", "facet_value_invalid", "facet_binding_conflict", "facet_archetype_conflict",
+                  "facet_schema_retired", "facet_reference_unavailable", "wrong_item_type"}:
+        return _error(command, public, exc.message, field or "request")
     if code.startswith("runtime_failure:"):
         return _error(command, "runtime_failure", exc.message)
     if code.startswith("environment_failure:"):

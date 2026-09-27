@@ -14,6 +14,7 @@ from spine.commands.compact import compact_schedule_response
 from spine.commands.context import CommandContext
 from spine.commands.core import handle
 from spine.commands.registry import MVP_COMMANDS, WRITE_COMMANDS, missing_runtime_contract_versions
+from spine.core.errors import SpineValidationError
 from spine.ledger.preflight import verify_runtime_schema
 from spine.ledger.sqlite import connect
 
@@ -30,6 +31,12 @@ EXIT_BY_ERROR = {
     "semantic_conflict": 6,
     "stale_cursor": 6,
     "environment_failure": 7,
+    "facet_schema_invalid": 2,
+    "facet_value_invalid": 2,
+    "facet_binding_conflict": 6,
+    "facet_archetype_conflict": 6,
+    "facet_schema_retired": 2,
+    "facet_reference_unavailable": 4,
 }
 
 
@@ -110,7 +117,9 @@ def main(argv: Sequence[str] | None = None) -> int:
         return 2
     try:
         direct_schedule_show = command == "schedule.show" and (args.item_id is not None or args.include is not None)
-        request = {} if args.input == "-" and (command == "system.info" or direct_schedule_show) else _load_request(args.input)
+        from spine.commands.facets import CONTRACTS as FACET_COMMANDS
+        request = ({} if args.input == "-" and (command == "system.info" or direct_schedule_show)
+                   else _load_request(args.input, facet=command in FACET_COMMANDS))
         if args.item_id is not None:
             if "item_id" in request:
                 raise CliPreflightError("invalid_request", "--item-id conflicts with input item_id", "item_id")
@@ -142,10 +151,23 @@ def main(argv: Sequence[str] | None = None) -> int:
                 return 2
             request = {**request, "command_id": _generated_command_id(command, request, args.db)}
         delivery_target_defaults = _delivery_target_defaults(args.delivery_target_default)
-        connection = _open_ledger(args.db, writable=not args.dry_run and command in WRITE_COMMANDS)
+        from spine.commands.facet_runtime import load_cursor_config
+        from spine.commands.facets import PAGES
+        from spine.commands.facets import WRITES as FACET_WRITES
+        cursor_config = None
+        if command in PAGES and os.environ.get("SPINE_FACET_CURSOR_CONFIG"):
+            cursor_config = load_cursor_config(os.environ["SPINE_FACET_CURSOR_CONFIG"])
+        connection = _open_ledger(args.db, writable=command in WRITE_COMMANDS and (not args.dry_run or command in FACET_WRITES))
+    except SpineValidationError as exc:
+        code, _, field = exc.code.partition(":")
+        _dump({"ok": False, "command": command, "error": {"code": code, "message": exc.message,
+                                                       "field": field or "request"},
+               **({"dry_run": True} if args.dry_run and command in FACET_COMMANDS else {})}, pretty=args.pretty)
+        return EXIT_BY_ERROR.get(code, 2)
     except CliPreflightError as exc:
         _dump(
-            {"ok": False, "command": command, "error": {"code": exc.code, "message": exc.message, "field": exc.field}}, pretty=args.pretty
+            {"ok": False, "command": command, "error": {"code": exc.code, "message": exc.message, "field": exc.field},
+             **({"dry_run": True} if args.dry_run and command in FACET_COMMANDS else {})}, pretty=args.pretty
         )
         return 3
     try:
@@ -156,6 +178,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             transport_metadata={"adapter": "cli"},
             adapter_bindings=_adapter_bindings(args),
             delivery_target_defaults=delivery_target_defaults,
+            facet_cursor_config=cursor_config,
         )
         response = handle(command, request, context)
         if args.compact and response.get("ok") is True:
@@ -253,8 +276,21 @@ def _schedule_show_include(value: str) -> list[str]:
     return values
 
 
-def _load_request(input_ref: str) -> dict[str, Any]:
+def _load_request(input_ref: str, *, facet: bool = False) -> dict[str, Any]:
     try:
+        if facet:
+            if input_ref == "-":
+                text = sys.stdin.read(1024 * 1024 + 1)
+            else:
+                with Path(input_ref).open(encoding="utf-8") as stream:
+                    text = stream.read(1024 * 1024 + 1)
+            from spine.core.facets import parse_object
+            if len(text.encode("utf-8")) > 1024 * 1024:
+                raise SpineValidationError("environment_failure:capacity", "facet request capacity exceeded")
+            try:
+                return parse_object(text or "{}", maximum=1024 * 1024)
+            except SpineValidationError as exc:
+                raise SpineValidationError("invalid_request:request", "invalid facet request JSON") from exc
         text = sys.stdin.read() if input_ref == "-" else Path(input_ref).read_text(encoding="utf-8")
     except OSError as exc:
         raise CliPreflightError("invalid_request", str(exc), "input") from exc

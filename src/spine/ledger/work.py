@@ -307,19 +307,23 @@ def assert_work_instance_not_stale(connection: sqlite3.Connection, work_instance
             FROM notification_policies AS p
             JOIN delivery_targets AS dt ON dt.delivery_target_id = p.delivery_target_id
             WHERE p.item_id = ? AND p.version = ?
-              AND (p.policy_id = ? OR p.source_notification_policy_id = ?)
-            ORDER BY CASE WHEN p.policy_id = ? THEN 0 ELSE 1 END
+              AND p.notification_intent_id = ?
+            LIMIT 2
             """,
             (
                 row["item_id"],
                 row["current_version"],
-                row["notification_policy_id"],
-                row["notification_policy_id"],
-                row["notification_policy_id"],
+                row["notification_intent_id"],
             ),
-        ).fetchone()
+        ).fetchall()
+        policy = policy[0] if len(policy) == 1 else None
         if policy is None or policy["status"] != NotificationPolicyStatus.ACTIVE.value:
             _raise_stale_work(work_instance_id, "current notification intent is not active")
+        from spine.ledger.facet_continuity import policy_meaning
+        from spine.ledger.notifications import _load_policy
+        original = connection.execute("SELECT * FROM notification_policies WHERE policy_id=?", (row["notification_policy_id"],)).fetchone()
+        if original is None or policy_meaning(_load_policy(connection, original)) != policy_meaning(_load_policy(connection, policy)):
+            _raise_stale_work(work_instance_id, "notification intent semantics changed")
         if policy["normalized_notification_schedule_hash"] != row["normalized_notification_schedule_hash"]:
             _raise_stale_work(work_instance_id, "notification schedule changed")
         if (

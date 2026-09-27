@@ -1,8 +1,8 @@
 # Spine Archetype Facets
 
-Status: Draft v0.8 — diagnostic dry-run and writer-activation amendment; not implemented
+Status: v0.9 — trusted-local runtime implemented; permission-enforced integration deferred
 Date: 2026-09-07
-Updated: 2026-09-26
+Updated: 2026-09-27
 Scope: Registered typed item facts, immutable schema revisions, archetype bindings,
 bounded authoring/readback, and a flight-details proof
 
@@ -25,10 +25,14 @@ inventories, typed indexes, migration/rollback and storage fixtures are delegate
 was accepted as v1.0 on 2026-09-25; acceptance is not implementation or closure of the
 remaining gates in Section 9.
 
-Proposed families are `spine.facet-schemas.v1`, `spine.archetype-facet-bindings.v1`,
-`spine.item-facets.v1`, and `spine.item-facet-query.v1`. These names are reservations
-in this draft, not advertised capabilities. Current closed CLI/HTTP schemas do not
-accept facet fields. No runtime or migration is included in this specification task.
+The trusted-local runtime implements `spine.facet-schemas.v1`,
+`spine.archetype-facet-bindings.v1`, `spine.item-facets.v1`, and
+`spine.item-facet-query.v1`, with the dedicated cursor and notification-continuity
+contracts below. SPINE-027 provides schema-16 persistence; SPINE-028 provides these
+eleven command surfaces. Permission-enforced resolvers and HTTP activation remain
+SPINE-029 work. Existing schedule/HTTP payloads still accept no facet fields.
+Historical review/gate descriptions below record design-stage evidence; current
+runtime evidence and operations are in [the facet command guide](../docs/FACET_COMMANDS.md).
 
 ## 2. Model and invariants
 
@@ -122,9 +126,9 @@ root fact, not part of the portable definition hash.
 
 ### 3.1 Produced-row identity registry
 
-The following is the complete proposed identity mapping for the facet commands in
+The following is the complete identity mapping for the facet commands in
 Section 4. It extends the owning-contract registry in `agent-command-contract.md`
-Section 4; it does not add commands to the current runtime registry. The generated
+Section 4. The generated
 encoding is `<prefix>_<sha256>` over `spine.canonical-json.v1` with exactly
 `derivation_version=spine.command-id.v1`, the canonical `command`, caller `command_id`,
 `row_role`, and `request_path`. Prefixes below exclude the separating underscore.
@@ -568,15 +572,17 @@ capabilities.
 
 ## 10. Machine-contract codification (draft)
 
-The repository-only proposed registry is
+The command-family registry is
 `contracts/archetype-facet-contract-registry.v1.json`. It maps all eleven commands to
-their exact request/response schema fragments and family versions. It is not imported
-by runtime preflight, CLI dispatch, package capability declarations or the web allowlist.
+their exact request/response schema fragments and family versions. The compiled runtime
+registry and package declarations advertise the trusted-local implementation. The
+permission-enforced web allowlist deliberately excludes these commands.
 The six `contracts/schemas/archetype-facet-*.schema.json` files define types, requests,
 successes, handler failures, the fixture manifest and cursor payload. The integration
 companion is `contracts/archetype-facet-integration.v1.json`. The fixture manifest is
 `contracts/archetype-facet-fixture-manifest.json`; fixtures and pure vectors live under
-`tests/fixtures/archetype_facets/`. These are draft contracts, not an installed feature.
+`tests/fixtures/archetype_facets/`. These wire vectors remain distinct from the
+persisted runtime tests; neither is a claim of permission-enforced HTTP activation.
 
 ### 10.1 Wire choices
 

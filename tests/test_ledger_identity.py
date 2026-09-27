@@ -19,7 +19,7 @@ from spine.runtime.preflight import WorkerBootstrapConfig, admit_worker
 
 def schema13(db):
     # Exercise real initialization up to the boundary without creating identity.
-    with patch("spine.ledger.sqlite.install_identity"):
+    with patch("spine.ledger.sqlite.install_identity"), patch("spine.ledger.facet_migration.install_facet_storage"):
         initialize_schema(db)
     with db:
         for row in db.execute("SELECT name FROM sqlite_schema WHERE name LIKE 'independent_read_%'").fetchall():
@@ -58,7 +58,7 @@ class LedgerIdentityTests(unittest.TestCase):
             expected = schema13_identity(db)
             with patch("spine.ledger.migrate._utc_now", return_value=f"2026-09-0{values[0]}T00:00:00Z"):
                 result = migrate_schema(db)
-            self.assertEqual(result.applied_versions, (14, 15))
+                self.assertEqual(result.applied_versions, (14, 15, 16))
             self.assertEqual(read_ledger_instance_id(db), expected)
             identities.append(expected)
             changes = db.total_changes
