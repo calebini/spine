@@ -106,7 +106,8 @@ class FacetIntegrationContractTests(unittest.TestCase):
         for family in ("command", "read"):
             web = load(ROOT / f"contracts/spine.trusted-web-{family}-registry.v1.json")
             self.assertFalse(set(registry["commands"]) & {c["command"] for c in web["commands"]})
-        self.assertEqual(self.contract["work"]["current_policy_key"], ["item_id", "notification_intent_id"])
+        self.assertEqual(self.contract["work"]["current_policy_key"], ["item_id", "notification_policy_id"])
+        self.assertFalse(self.contract["work"]["intent_is_unique_policy_identity"])
         self.assertEqual(self.contract["work"]["row_mutations"], [])
 
     def test_permission_decision_vectors(self):

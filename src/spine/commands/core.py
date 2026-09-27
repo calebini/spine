@@ -70,12 +70,12 @@ from spine.ledger.items import (
 )
 from spine.ledger.migrate import current_schema_version
 from spine.ledger.notifications import (
+    NotificationPolicyResolver,
     insert_notification_schedule_policy,
     load_current_notification_policies,
     notification_policy_actionability,
     notification_work_stale_reason,
     persist_notification_target_selector,
-    policies_by_intent,
     remove_copied_notification_policy,
 )
 from spine.ledger.provenance import (
@@ -4267,7 +4267,7 @@ def _handle_notification_work_materialize(request: Mapping[str, Any], context: C
     else:
         selected = candidates
     policies = load_current_notification_policies(context.ledger, item_id=item_id)
-    policies_by_policy_id = policies_by_intent(policies)
+    policy_resolver = NotificationPolicyResolver(context.ledger, policies)
     valid_targets = _current_notification_target_snapshots(
         context.ledger,
         item=item,
@@ -4299,7 +4299,7 @@ def _handle_notification_work_materialize(request: Mapping[str, Any], context: C
                 context.ledger,
                 item=item,
                 work=work,
-                policy=policies_by_policy_id.get(str(work["notification_intent_id"])),
+                policy=policy_resolver.resolve(str(work["notification_policy_id"])),
                 valid_targets=valid_targets,
             )
             if reason is not None:
@@ -6623,7 +6623,7 @@ def _schedule_reconcile_work_plan(
     temporal_binding_stale: bool = False,
     parent_terminal: bool = False,
 ) -> tuple[list[str], list[str], list[str], dict[str, str]]:
-    by_policy_id = policies_by_intent(active_policies)
+    policy_resolver = NotificationPolicyResolver(connection, active_policies)
     rows = connection.execute(
         """
         SELECT w.*,
@@ -6642,7 +6642,7 @@ def _schedule_reconcile_work_plan(
     protected: list[str] = []
     reasons: dict[str, str] = {}
     for row in rows:
-        policy = by_policy_id.get(str(row["notification_intent_id"]))
+        policy = policy_resolver.resolve(str(row["notification_policy_id"]))
         reason = None
         if policy is not None and row["normalized_notification_schedule_hash"] != policy["normalized_notification_schedule_hash"]:
             reason = "notification_schedule_superseded"
@@ -8415,7 +8415,7 @@ def _current_notification_target_snapshots(
                     target.get("occurrence_key"),
                 )
             )
-        result[str(policy["notification_intent_id"])] = snapshots
+        result[str(policy["notification_policy_id"])] = snapshots
     return result
 
 

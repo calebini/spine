@@ -1,6 +1,6 @@
 # Facet API — consumer and operator handoff
 
-Runtime 0.8.0, schema 17. Authoritative transport contract:
+Runtime 0.8.1, schema 17. Authoritative transport contract:
 [facet web admission](../specs/facet-web-admission.md). This is the same restricted
 trusted-network service as the scheduling API: **account selection is not authentication**.
 Anyone with access to this trusted interface can select an eligible operator.
@@ -96,7 +96,7 @@ returns no partial data. Routine reads persist no receipts/cursors/access proofs
 ## Upgrade and local grants
 
 Stop all writers, take a consistent backup, migrate using the checkout-local
-`spine-ledger-migrate`, then restart matching runtime 0.8.0 services. Schema 17
+`spine-ledger-migrate`, then restart matching runtime 0.8.1 services. Schema 17
 preserves all prior grant rows/history and adds facet-schema targets. Schema 16
 is rejected by the new runtime until migration. Rollback means stopping writers
 and restoring the matching old binary/backup pair—not downgrading a live schema.

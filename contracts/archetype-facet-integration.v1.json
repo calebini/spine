@@ -160,8 +160,13 @@
     "contract_version": "spine.facet-notification-continuity.v1",
     "current_policy_key": [
       "item_id",
-      "notification_intent_id"
+      "notification_policy_id"
     ],
+    "current_policy_resolution": "exact current policy or unique current descendant through source_notification_policy_id; same item and intent; strictly decreasing versions; stop at original version",
+    "intent_is_unique_policy_identity": false,
+    "target_snapshot_key": "resolved_current_notification_policy_id",
+    "facet_equivalence": "bijection of prior policy IDs to immediate successor source_notification_policy_id with unchanged comparison fields",
+    "lineage_failure": "missing descendant is stale; forked, broken, cross-item/intent or non-decreasing predecessor chain fails closed",
     "comparison_policy_fields": [
       "notification_intent_id",
       "intent_created_item_version",

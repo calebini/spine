@@ -1,7 +1,7 @@
 {
   "contract_version": "spine.trusted-web-facet-pins.v1",
   "files": {
-    "archetype-facet-integration.v1.json": "b6959a5a6c3c191ca2179cc4a40a17c7783f884bf6d02d05e965d75841e647f8",
+    "archetype-facet-integration.v1.json": "7739b52a6a1a4ddc4902441dd7c8746739acad5fdf2993b53f377a4890cc2fe9",
     "schemas/archetype-facet-commands.schema.json": "29321672a1b7ba31599080e968c1b30295fe68748560cba0a64468a4d0e341aa",
     "schemas/archetype-facet-cursor.schema.json": "23dae9596fa90b29a4712d1338134937571b97603cbfd9206e9f13a326b2ea54",
     "schemas/archetype-facet-failure.schema.json": "eaaee30acf5002f3da4bb5d41c622d648ed19254ab2323799a6e1632cfa3a25b",

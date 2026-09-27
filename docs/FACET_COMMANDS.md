@@ -1,6 +1,6 @@
 # Versioned facet commands — trusted-local operator guide
 
-Runtime 0.8.0, ledger schema 17. Implements SPINE-028 on the
+Runtime 0.8.1, ledger schema 17. Implements SPINE-028 on the
 [storage foundation](FACET_STORAGE_IMPLEMENTATION.md). The authority remains
 [archetype-facets.md](../specs/archetype-facets.md),
 [its storage leaf](../specs/archetype-facet-storage.md), and the

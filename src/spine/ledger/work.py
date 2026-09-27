@@ -297,7 +297,16 @@ def assert_work_instance_not_stale(connection: sqlite3.Connection, work_instance
             _raise_stale_work(work_instance_id, "event is not scheduled")
         if row["item_type"] == ItemType.TASK.value and row["task_status"] != TaskStatus.OPEN.value:
             _raise_stale_work(work_instance_id, "task is not open")
-        policies = connection.execute(
+        from spine.ledger.notifications import NotificationPolicyResolver, load_current_notification_policies
+
+        resolved = NotificationPolicyResolver(
+            connection, load_current_notification_policies(connection, item_id=row["item_id"]),
+        ).resolve(str(row["notification_policy_id"]))
+        if resolved is None:
+            _raise_stale_work(work_instance_id, "current notification policy is unavailable")
+        if resolved["notification_intent_id"] != row["notification_intent_id"]:
+            _raise_stale_work(work_instance_id, "work notification intent does not match its policy")
+        policy = connection.execute(
             """
             SELECT p.*, dt.status AS delivery_target_status,
                    dt.channel AS delivery_target_channel,
@@ -307,16 +316,14 @@ def assert_work_instance_not_stale(connection: sqlite3.Connection, work_instance
             FROM notification_policies AS p
             JOIN delivery_targets AS dt ON dt.delivery_target_id = p.delivery_target_id
             WHERE p.item_id = ? AND p.version = ?
-              AND p.notification_intent_id = ?
-            LIMIT 2
+              AND p.policy_id = ?
             """,
             (
                 row["item_id"],
                 row["current_version"],
-                row["notification_intent_id"],
+                resolved["notification_policy_id"],
             ),
-        ).fetchall()
-        policy = policies[0] if len(policies) == 1 else None
+        ).fetchone()
         if policy is None or policy["status"] != NotificationPolicyStatus.ACTIVE.value:
             _raise_stale_work(work_instance_id, "current notification intent is not active")
         from spine.ledger.facet_continuity import policy_meaning

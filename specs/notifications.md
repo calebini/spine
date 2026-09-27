@@ -1,6 +1,6 @@
 # Spine Notification Scheduling
 
-Status: Draft v0.2.2; executable v1 contract family and scheduler-planning amendment implemented; operational-resilience extension not yet implemented
+Status: Draft v0.2.3; executable v1 contract family, scheduler-planning amendment, and policy-lineage correction implemented; operational-resilience extension not yet implemented
 Scope: Canonical notification intent, bounded schedule expansion, durable work materialization, lifecycle reconciliation, and recurrence binding
 Authority: Normative notification-scheduling target; runtime conformance requires matching persistence, command, fixture, and implementation declarations
 
@@ -244,12 +244,15 @@ A schedule edit, target reschedule, target recurrence revision, selected-occurre
 
 An unchanged policy copy-forward with the same `notification_intent_id`, schedule hash, target facts, and routing MAY retain existing eligible work by opportunity identity even though the version-scoped `notification_policy_id` changed. A changed semantic fact MUST NOT retain the work merely because its `eligible_at_utc` is equal.
 
-Conditional facet integration (not yet implemented): a runtime advertising
+Conditional facet integration: a runtime advertising
 `spine.item-facets.v1` MUST apply [archetype-facets.md](archetype-facets.md) Section 5's
 verified-retention rule to facet-only updates. Ordinary reminder work and its historical
-policy/version FKs stay unchanged; current-policy resolution uses the stable
-`(item_id, notification_intent_id)` across any number of copy-forwards, followed by
-all existing semantic/target/route/provenance checks. A facet schema publication alone
+policy/version FKs stay unchanged; current-policy resolution follows the work's exact
+`notification_policy_id` through same-item, same-intent predecessor links to its unique
+current descendant across any number of copy-forwards. Shared intent IDs do not imply
+policy equivalence or ambiguity when ancestry distinguishes the policies. Reconciliation
+and attempt-start share this lineage rule; target snapshots remain policy-specific.
+All existing semantic/target/route/provenance checks still apply. A facet schema publication alone
 does not revise items or work. The facet command does not materialize, cancel, retry,
 or send, nor bless work already stale for an independent reason. Its atomic continuity
 check does not replace attempt-start freshness or extend retention to advisory work.

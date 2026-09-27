@@ -18,14 +18,60 @@ from spine.ledger.recurrence import (
 )
 
 
-def policies_by_intent(policies: Sequence[Mapping[str, object]]) -> dict[str, Mapping[str, object]]:
-    result = {}
-    for policy in policies:
-        identity = str(policy["notification_intent_id"])
-        if identity in result:
-            raise SpineValidationError("environment_failure:notification_intent_id", "ambiguous current notification intent")
-        result[identity] = policy
-    return result
+class NotificationPolicyResolver:
+    """Resolve immutable work policy IDs to their specific current descendants.
+
+    Intent narrows candidates; it is not unique. Walk only indexed predecessor
+    links, stopping at the original version. Strictly decreasing versions bound
+    traversal and reject cycles. Caches live only within one command/snapshot.
+    Prospective schedule-update policies need not have been persisted yet.
+    """
+
+    def __init__(self, connection: sqlite3.Connection, policies: Sequence[Mapping[str, object]]) -> None:
+        self.connection = connection
+        self.policies = policies
+        self._history: dict[str, Mapping[str, Any] | None] = {}
+        self._resolved: dict[str, Mapping[str, object] | None] = {}
+
+    def _load(self, policy_id: str) -> Mapping[str, Any] | None:
+        if policy_id not in self._history:
+            row = self.connection.execute(
+                "SELECT policy_id,item_id,version,notification_intent_id,source_notification_policy_id "
+                "FROM notification_policies WHERE policy_id=?", (policy_id,),
+            ).fetchone()
+            self._history[policy_id] = None if row is None else dict(row)
+        return self._history[policy_id]
+
+    def resolve(self, policy_id: str) -> Mapping[str, object] | None:
+        if policy_id in self._resolved:
+            return self._resolved[policy_id]
+        original = self._load(policy_id)
+        match = None
+        if original is not None:
+            for policy in self.policies:
+                if (policy["item_id"], policy["notification_intent_id"]) != (
+                    original["item_id"], original["notification_intent_id"],
+                ):
+                    continue
+                identity = str(policy["notification_policy_id"])
+                version = int(str(policy["item_version"]))
+                source = policy.get("source_notification_policy_id")
+                while identity != policy_id and version > original["version"] and source is not None:
+                    predecessor = self._load(str(source))
+                    if (predecessor is None
+                            or predecessor["item_id"] != original["item_id"]
+                            or predecessor["notification_intent_id"] != original["notification_intent_id"]
+                            or predecessor["version"] >= version):
+                        raise SpineValidationError("environment_failure:notification_policy_id", "invalid notification policy lineage")
+                    identity = str(predecessor["policy_id"])
+                    version = predecessor["version"]
+                    source = predecessor["source_notification_policy_id"]
+                if identity == policy_id:
+                    if match is not None:
+                        raise SpineValidationError("environment_failure:notification_policy_id", "ambiguous notification policy lineage")
+                    match = policy
+        self._resolved[policy_id] = match
+        return match
 
 
 def notification_policy_actionability(
@@ -81,7 +127,7 @@ def notification_work_stale_reason(
         work["target_at_utc"],
         work["occurrence_key"],
     )
-    if policy is not None and target_snapshot not in valid_targets.get(str(work["notification_intent_id"]), set()):
+    if policy is not None and target_snapshot not in valid_targets.get(str(policy["notification_policy_id"]), set()):
         return "notification_target_changed"
     if work["occurrence_provenance_id"] is not None:
         active = connection.execute(

@@ -1,6 +1,6 @@
 # Spine Archetype Facets
 
-Status: v0.10 — trusted-local and permission-enforced web runtime implemented
+Status: v0.10.1 — implemented; policy-specific notification-lineage correction
 Date: 2026-09-07
 Updated: 2026-09-27
 Scope: Registered typed item facts, immutable schema revisions, archetype bindings,
@@ -277,11 +277,23 @@ for a proven facet-only change:
 | No work | Create none; later ordinary bounded scheduling may materialize missing opportunities |
 
 Retention means absence of a new facet-induced invalidation, not a delivery guarantee.
-Before every attempt the worker resolves the current policy by `(item_id,
-notification_intent_id)`, verifies semantic continuity against the work's original
-policy and existing target/route/provenance/lifecycle checks. A one-hop
-source_notification_policy_id match is insufficient after multiple copy-forwards.
-Missing/ambiguous current intent fails closed. Work IDs and immutable historical FKs
+Before every attempt the worker resolves the current descendant of the work's exact
+`notification_policy_id`, within the same item and intent. Intent IDs are not unique
+policy identities: preserved policies may share an intent while having distinct
+schedules and policy IDs. An exact current policy ID or a chain of persisted
+`source_notification_policy_id` links proves ancestry; intent or semantic similarity
+alone never does. A one-hop match is insufficient after multiple copy-forwards.
+Traversal uses indexed policy-ID lookups, strictly decreasing item versions, and stops
+at the work's original version; no ledger-wide scan or durable resolver cache is required.
+No descendant means unavailable/stale work; multiple descendants, missing predecessor
+rows, cross-item/intent links, or non-decreasing versions fail closed. Reconciliation
+uses the same resolver, and target snapshots are keyed by the resolved current policy
+ID, never by the shared intent. Attempt-start still verifies semantic continuity
+against the original policy and all existing target/route/provenance/lifecycle checks.
+Facet-only equivalence proves a bijection from each prior policy ID to exactly one
+immediate successor with unchanged semantic facts, not merely equality of intent sets.
+New authoring continues to produce independent intents for distinct reminders.
+Work IDs and immutable historical FKs
 are not rebound to the current version to conceal stale evidence. Other work kinds
 retain their owning contracts; this rule covers ordinary notification_reminder only.
 

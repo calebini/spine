@@ -81,9 +81,10 @@ def capture(db: sqlite3.Connection, item_id: str, version: int) -> dict[str, Any
     policies = load_current_notification_policies(db, item_id=item_id)
     if len(policies) > 100:
         raise SpineValidationError("environment_failure:capacity", "facet continuity capacity exceeded")
-    proof["policies"] = sorted((policy_meaning(p) for p in policies), key=lambda p: str(p["notification_intent_id"]))
-    if len({p["notification_intent_id"] for p in proof["policies"]}) != len(policies):
-        raise SpineValidationError("environment_failure:facets", "ambiguous notification intent")
+    proof["policies"] = [
+        {"policy_id": p["notification_policy_id"], "source_policy_id": p.get("source_notification_policy_id"),
+         "meaning": policy_meaning(p)} for p in policies
+    ]
     proof["recurrence"] = [
         tuple(r)
         for r in db.execute(
@@ -114,5 +115,11 @@ def capture(db: sqlite3.Connection, item_id: str, version: int) -> dict[str, Any
 
 
 def verify(before: dict[str, Any], after: dict[str, Any]) -> None:
-    if before != after:
+    prior = {p["policy_id"]: p["meaning"] for p in before["policies"]}
+    copied = {p["source_policy_id"]: p["meaning"] for p in after["policies"]}
+    # A bijection, not an intent-keyed set: even semantically identical siblings
+    # must each have exactly one unchanged successor in this facet-only command.
+    if (len(prior) != len(before["policies"]) or len(copied) != len(after["policies"])
+            or prior != copied
+            or {k: v for k, v in before.items() if k != "policies"} != {k: v for k, v in after.items() if k != "policies"}):
         raise SpineValidationError("environment_failure:facets", "facet-only notification equivalence failed")

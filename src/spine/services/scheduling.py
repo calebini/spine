@@ -16,10 +16,10 @@ from spine.core.notifications import expand_notification_policy
 from spine.core.occurrences import expand_recurrence_set
 from spine.core.schedule import resolve_local_instant
 from spine.ledger.notifications import (
+    NotificationPolicyResolver,
     load_current_notification_policies,
     notification_policy_actionability,
     notification_work_stale_reason,
-    policies_by_intent,
 )
 from spine.ledger.recurrence import load_current_recurrence_set
 
@@ -343,14 +343,14 @@ def _plan_notification_work(
         range_end=range_end,
     )
     missing_work = any(value.get("actionable") and _opportunity_has_no_work(connection, value) for value in opportunities)
-    policies_by_policy_id = policies_by_intent(policies)
+    policy_resolver = NotificationPolicyResolver(connection, policies)
     valid_targets = _scheduler_target_snapshots(connection, item=item, policies=policies, recurrence=recurrence)
     stale_work = any(
         notification_work_stale_reason(
             connection,
             item=item,
             work=work,
-            policy=policies_by_policy_id.get(str(work["notification_intent_id"])),
+            policy=policy_resolver.resolve(str(work["notification_policy_id"])),
             valid_targets=valid_targets,
         )
         is not None
@@ -619,7 +619,7 @@ def _scheduler_target_snapshots(
                         row["occurrence_key"],
                     )
                 )
-        result[str(policy["notification_intent_id"])] = snapshots
+        result[str(policy["notification_policy_id"])] = snapshots
     return result
 
 

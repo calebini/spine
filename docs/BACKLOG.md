@@ -35,6 +35,23 @@ status labels in the same change. Routine task updates do not change spec author
 
 ## Recently completed backend work
 
+### SPINE-030 — Restore policy-specific notification continuity
+
+**Status:** Done — local implementation and verification, 2026-09-27; deployment pending.
+Preserved schema-15 policies can share an intent while retaining distinct policy IDs.
+The facet implementation incorrectly required intent uniqueness during reconciliation,
+attempt-start validation, and facet continuity. Runtime 0.8.1 now resolves exact policy
+ancestry across repeated copy-forwards and keys target snapshots by resolved policy;
+the owning specifications and packaged integration contract/pins are aligned. Schema 17
+is unchanged. The synthetic schema-15 fixture reproduces the failure before the patch
+and verifies preservation through migration, reconciliation, facet edits, and fake sends.
+**Evidence:** 755 tests + 961 subtests pass; installed-wheel focused run passes 84 tests
++ 182 subtests (one repository-only generator test deselected and verified separately).
+Ruff, strict mypy, compileall, contract parity, and diff hygiene pass. See the
+[hotfix report](NOTIFICATION_POLICY_LINEAGE_HOTFIX.md) for environment, artifact hashes,
+and the remaining disposable-staging-backup deployment gate. No staging mutation,
+deployment, commit, or push was performed.
+
 ### SPINE-015 — Read authorized activities independently of unavailable linked resources
 
 **Completion checkpoint:** Spine 0.6.0 HTTP/package/capability integration is committed
