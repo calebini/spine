@@ -918,14 +918,18 @@ additional broad audit campaign or authorize facet implementation.
 
 ### SPINE-009 — Settle facet implementation gates
 
-**Status:** In progress — Decision 0004 logical architecture ratified 2026-09-24;
+**Status:** Done (2026-09-27) — Decision 0004 logical architecture ratified 2026-09-24;
 physical storage design accepted as v1.0 on 2026-09-25; permission/cursor/work contracts
 codified and focused-recheck passed 2026-09-26. Contract review is closed; remaining
-executable delivery gates are mapped to SPINE-027–029. The subsequent operator-selected
-diagnostic reported one blocker and one major; the v0.8 manual amendment addresses
+executable delivery gates were mapped to and completed through SPINE-027–029. The
+subsequent operator-selected diagnostic reported one blocker and one major; the v0.8
+manual amendment addresses
 both with local spec/contract verification; the subsequent bounded buildability
-recheck passed with zero findings and boundary preserved on 2026-09-26. This gate
-tracker stays open; it does not automatically schedule further review or authorize runtime.
+recheck passed with zero findings and boundary preserved on 2026-09-26. SPINE-027
+closed persistence, migration and all-writer proof; SPINE-028 closed commands, cursors
+and notification continuity; SPINE-029 closed persisted authorization and web admission,
+including the executable flight-details proof. This closes the gate tracker without
+expanding the accepted facet boundary or claiming deployment.
 **Dependencies:** SPINE-008 is complete. The deferred resilience campaign is not a
 blanket prerequisite.
 
