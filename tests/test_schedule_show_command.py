@@ -30,6 +30,7 @@ class ScheduleShowCommandTests(unittest.TestCase):
             schemas["schedule-show-response.schema.json"],
             registry=registry,
         )
+        cls.include_values = schemas["schedule-show-response.schema.json"]["properties"]["included"]["items"]["enum"]
 
     def setUp(self) -> None:
         self.connection = connect()
@@ -178,26 +179,82 @@ class ScheduleShowCommandTests(unittest.TestCase):
             context = CommandContext(ledger=connection)
             self._bootstrap(context)
             created = handle("schedule.create", self._schedule_request(command_id="schedule-show-cli"), context)
+            self.assertTrue(created["ok"], created)
             connection.close()
-            output = StringIO()
-            with redirect_stdout(output):
-                exit_code = cli_main(
-                    [
-                        "--db",
-                        str(path),
-                        "--item-id",
-                        created["item_id"],
-                        "--include",
-                        "policies,work,attempts",
-                        "schedule",
-                        "show",
-                    ]
-                )
+            include_sets = [[value] for value in self.include_values] + [
+                ["policies", "work", "attempts"],
+                ["notification_profile", "policies", "work"],
+                ["policies", "work", "attempts", "notification_profile"],
+                self.include_values,
+            ]
+            for includes in include_sets:
+                with self.subTest(includes=includes):
+                    output = StringIO()
+                    with redirect_stdout(output):
+                        exit_code = cli_main(
+                            [
+                                "--db", str(path),
+                                "--item-id", created["item_id"],
+                                "--include", ",".join(includes),
+                                "--pretty", "schedule", "show",
+                            ]
+                        )
+                    response = json.loads(output.getvalue())
+                    self.assertEqual(exit_code, 0, response)
+                    self.response_validator.validate(response)
+                    self.assertEqual(response["item"]["item_id"], created["item_id"])
+                    self.assertEqual(response["included"], sorted(includes))
+                    self.assertEqual("notification_profile" in response, "notification_profile" in includes)
 
-        response = json.loads(output.getvalue())
-        self.assertEqual(exit_code, 0)
-        self.response_validator.validate(response)
-        self.assertEqual(response["item"]["item_id"], created["item_id"])
+                    request_path = Path(directory) / "request.json"
+                    request_path.write_text(json.dumps({"item_id": created["item_id"], "include": includes}), encoding="utf-8")
+                    json_output = StringIO()
+                    with redirect_stdout(json_output):
+                        json_exit_code = cli_main(["--db", str(path), "--input", str(request_path), "schedule", "show"])
+                    self.assertEqual(json_exit_code, 0, json_output.getvalue())
+                    self.assertEqual(response, json.loads(json_output.getvalue()))
+
+    def test_cli_rejects_unknown_empty_and_duplicate_include_values(self) -> None:
+        cases = [
+            ("unknown", "subset"),
+            ("notification_profile,unknown", "subset"),
+            ("", "subset"),
+            ("notification_profile,", "subset"),
+            ("notification_profile,notification_profile", "unique"),
+            ("policies,policies", "unique"),
+        ]
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "missing.sqlite"
+            for includes, message in cases:
+                with self.subTest(includes=includes):
+                    output = StringIO()
+                    with redirect_stdout(output):
+                        exit_code = cli_main([
+                            "--db", str(path), "--item-id", "unused",
+                            "--include", includes, "schedule", "show",
+                        ])
+                    response = json.loads(output.getvalue())
+                    self.assertEqual(exit_code, 3, response)
+                    self.assertFalse(response["ok"])
+                    self.assertEqual(response["error"]["code"], "invalid_request")
+                    self.assertEqual(response["error"]["field"], "include")
+                    self.assertIn(message, response["error"]["message"])
+                    if message == "subset":
+                        for value in self.include_values:
+                            self.assertIn(value, response["error"]["message"])
+                    self.assertFalse(path.exists())
+                    handler_response = handle("schedule.show", {"item_id": "unused", "include": includes.split(",")}, self.context)
+                    self.assertFalse(handler_response["ok"])
+                    self.assertEqual(handler_response["error"]["code"], response["error"]["code"])
+                    self.assertEqual(handler_response["error"]["field"], response["error"]["field"])
+
+    def test_cli_help_lists_all_schedule_show_include_values(self) -> None:
+        output = StringIO()
+        with redirect_stdout(output), self.assertRaises(SystemExit) as raised:
+            cli_main(["--help"])
+        self.assertEqual(raised.exception.code, 0)
+        for value in self.include_values:
+            self.assertIn(value, output.getvalue())
 
     def _bootstrap(self, context: CommandContext) -> None:
         subject = handle(

@@ -1,6 +1,6 @@
 # Spine Backlog
 
-Last updated: 2026-09-27
+Last updated: 2026-09-30
 
 This is the single work queue for Spine development. The
 [implementation plan](IMPLEMENTATION_PLAN.md) explains roadmap direction and delivery
@@ -34,6 +34,20 @@ record evidence and move it to Completed. Update affected orientation and contra
 status labels in the same change. Routine task updates do not change spec authority.
 
 ## Recently completed backend work
+
+### SPINE-031 — Accept notification-profile readback through CLI include flags
+
+**Status:** Done — local implementation and verification, 2026-09-30; deployment pending.
+Runtime 0.8.2 repairs `schedule.show --include notification_profile` preflight, help,
+and validation text to match the existing handler and `spine.schedule-show.v1`
+response contract. Schema 17 and public contract versions are unchanged.
+**Evidence:** [CLI regression tests](../tests/test_schedule_show_command.py) reproduced
+the rejection before the fix and now cover every contract include, the reported mixed
+invocation, JSON-input response parity, help/error text, and unknown/empty/duplicate
+rejection before opening the ledger. Focused tests: 10 tests + 17 subtests pass.
+Full CI test command: 757 unittest tests pass. CI Ruff and strict mypy checks,
+Ruff on changed tests, packaged web-contract parity, and diff hygiene pass.
+No deployment or production data changes were performed.
 
 ### SPINE-030 — Restore policy-specific notification continuity
 

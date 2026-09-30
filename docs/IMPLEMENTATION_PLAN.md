@@ -1,7 +1,7 @@
 # Spine Implementation Plan
 
 Role: Roadmap rationale and delivery history; current task status lives in [BACKLOG.md](BACKLOG.md)
-Last updated: 2026-09-27 (permission-enforced facet integration Slice C)
+Last updated: 2026-09-30 (schedule-show CLI include repair)
 
 This is a non-normative delivery plan. The specifications and machine-readable contracts remain authoritative.
 
@@ -46,6 +46,15 @@ and resilience following the event-emission fixes and has deferred SPINE-004–0
 SPINE-010. The historical resilience-first sequencing below no longer schedules work
 or makes those initiatives blanket prerequisites for facets or advisories. Preserve
 their feature-specific contract and verification requirements.
+
+## Delivered Fix: Schedule-Show CLI Notification Profile Include (SPINE-031)
+
+Runtime 0.8.2 accepts `notification_profile` in `schedule.show --include`, including
+mixed detail sets, and lists it in CLI help and validation errors. This repairs an
+adapter omission against the existing `spine.schedule-show.v1` contract; schema 17,
+handler behavior, and public contract versions are unchanged. CLI-entry-point tests
+cover every contract include, JSON-input parity, and unknown/duplicate rejection.
+Local verification and deployment status are recorded in SPINE-031 in the backlog.
 
 ## Delivered Fix: OpenClaw Retry Delivery Idempotency (SPINE-026)
 

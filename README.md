@@ -51,11 +51,15 @@ allowed to quietly become canonical.
 
 ## What Works Today
 
-Spine `0.8.1` is an implemented alpha; its scheduling core is exercised in a staging
+Spine `0.8.2` is an implemented alpha; its scheduling core is exercised in a staging
 agent environment. The current SQLite ledger schema is version `17`. The trusted multi-operator backend is also running in staging on `cortext1`, with
 operator testing through the connected [Kinflow frontend](../kinflow-web-ui/README.md).
 Concrete operator-reported work is tracked in the [backlog](docs/BACKLOG.md);
 this checkout version is not a deployment claim.
+
+Version 0.8.2 repairs CLI `schedule.show --include notification_profile` validation,
+help, and diagnostics to match the existing readback contract. Ledger schema 17 and
+public contract versions are unchanged.
 
 Version 0.8.1 restores policy-specific notification lineage for preserved multi-policy
 intents, including repeated facet copy-forwards; it requires no new ledger migration.

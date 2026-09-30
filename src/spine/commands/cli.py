@@ -218,7 +218,7 @@ def _parser() -> argparse.ArgumentParser:
         "--include",
         help=(
             "schedule.show comma-separated detail sets: "
-            "policies,work,attempts,relations,temporal_bindings,primary_location"
+            "policies, work, attempts, relations, temporal_bindings, primary_location, notification_profile"
         ),
     )
     parser.add_argument("--openclaw-whatsapp", action="store_true")
@@ -261,13 +261,14 @@ def _schedule_show_include(value: str) -> list[str]:
         "relations",
         "temporal_bindings",
         "primary_location",
+        "notification_profile",
     }
     if not values or any(candidate not in allowed for candidate in values):
         raise CliPreflightError(
             "invalid_request",
             (
                 "--include must be a comma-separated subset of "
-                "policies,work,attempts,relations,temporal_bindings,primary_location"
+                "policies,work,attempts,relations,temporal_bindings,primary_location,notification_profile"
             ),
             "include",
         )
