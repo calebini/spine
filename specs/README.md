@@ -9,7 +9,7 @@ Current spec surface:
 - `ledger-instance-identity.md`: implemented schema-14 immutable ledger identity, deterministic migration, bounded validation, system.info v3 and restore semantics
 
 - `archetype-facets.md`: draft registered typed item facts, immutable schema revisions, archetype bindings, closed permission/cursor/work-continuity contracts, bounded readback/query and flight proof; not implemented
-- [archetype-facet-storage.md](archetype-facet-storage.md): accepted v1.0 physical facet storage, canonical JSON/relational hybrid, typed indexes, migration/rollback and verification gates; not implemented
+- [archetype-facet-storage.md](archetype-facet-storage.md): accepted v1.0 physical facet storage implemented by SPINE-027; canonical JSON/relational hybrid, typed indexes and migration/rollback; Section 7.1 facet-location freeze implemented in runtime 0.8.3/schema 18 (SPINE-038)
 - [STORAGE_ATOMICITY_SPEC.md](STORAGE_ATOMICITY_SPEC.md): Spine-wide persistence/atomicity authority consolidation and feature-leaf delegation; draft, not a new storage runtime
 - `decisions/0004-versioned-item-facets.md`: accepted logical core-versus-domain-data boundary and pack/schema ownership; physical storage design separately accepted, runtime pending
 
@@ -34,7 +34,7 @@ Current spec surface:
 - `decisions/0005-profile-scoped-advisory-execution.md`: proposed protection amendment separating advisory-specific requirements from future execution boundaries; preserves current contracts and does not add general automation
 - `schedule-primary-location.md`: implemented primary-location authoring, mutation, readback, builder pass-through, and operator projections on scheduled events and tasks
 - `notification-rendering.md`: implemented schema-9 deterministic ordinary-reminder prose and immutable per-attempt rendering evidence
-- [notification-rendering-definitions.md](notification-rendering-definitions.md): first-pass draft of reusable owner-scoped facet-aware detail rendering, exact profile/policy selection, disclosure and attempt evidence; not ratified or implemented
+- [notification-rendering-definitions.md](notification-rendering-definitions.md): accepted v1.0 design for owner-scoped facet detail rendering, exact policy selection, disclosure and attempt evidence; initial machine contracts/fixtures specified, not implemented
 - `notification-profiles.md`: implemented dynamic item-archetype catalog, reusable versioned notification profiles, deterministic scoped defaults, and snapshot application
 - `owner-scope-discovery.md`: implemented bounded read contract for discovering canonical system, subject, and subject-group owner scopes without raw SQL
 - `identity-and-access.md`: protected authentication/delegation architecture preserved as deferred; immediate trusted multi-operator scope is identified separately; not implemented

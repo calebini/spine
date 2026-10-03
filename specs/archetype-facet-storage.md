@@ -1,9 +1,9 @@
 # Spine Archetype Facet Storage
 
-Status: Accepted v1.0 — physical design ratified; implemented by SPINE-027
+Status: Accepted v1.0 baseline implemented by SPINE-027; Section 7.1 amendment implemented by SPINE-038
 Date: 2026-09-24
 Ratified: 2026-09-25
-Updated: 2026-09-26 — activation-proof clarification; accepted physical layout unchanged
+Updated: 2026-10-03 — facet-referenced location freeze amendment; table/index layout unchanged
 Scope: SQLite persistence, migration, typed query indexes and storage proof for facets
 
 ## 1. Authority and boundaries
@@ -434,6 +434,58 @@ current typed projection is disposable/rebuildable, in an explicit maintenance
 transaction with commands stopped and parity checked before release. Definition-field
 or historical-reference projection repair requires a reviewed maintenance procedure
 that restores immutability triggers; it is never an ordinary reader's action.
+
+### 7.1 Facet-referenced location freeze amendment
+
+The existing reference FK prevents target deletion, not canonical-field mutation.
+The schema-17 `locations_referenced_canonical_fields_update` trigger checks only
+`item_locations`; schema 18 extends it to enforce the following rule.
+
+As specified in [ontology Section 7.1](ontology.md#71-locations), canonical fields
+of a location MUST be frozen whenever either a persisted `item_locations` row or
+an `item_facet_references` row names it. The latter predicate is
+`item_facet_references.location_id = locations.location_id`, without a current-version,
+queryable-field, active-item or catalog-status filter. Historical reference rows are
+immutable, so removing/replacing a current facet, retiring a catalog or changing an
+item lifecycle cannot unfreeze its previous location. No synthetic primary-location
+association, new table, location revision or location lifecycle is introduced.
+
+Extend the existing canonical-field update trigger to test both predicates. Preserve
+its canonical column set and rejection behavior; metadata-only updates remain allowed
+under ontology rules. Use the existing partial `item_facet_references_location_idx`
+for the additional existence lookup, not a JSON scan or full facet-history scan.
+The check MUST be enforced in storage for every writer, not only by the renderer.
+Reference insertion and location updates serialize under the ordinary write transaction:
+an update committed before first attachment becomes the attached fact; after attachment
+commits, canonical updates are rejected. A failed command rolls back all tentative rows.
+Corrections use a new location ID and a new item version through the actual reference
+path; old snapshots and persisted attempt bodies remain unchanged.
+
+This gate is implemented in **runtime 0.8.3/schema 18**, not a deployment claim or
+activation of facet-aware rendering. The forward migration and expected-object
+fingerprint update follow Section 8 and the Spine-wide storage owner. Do not silently
+replace the trigger on routine startup or edit previously shipped migrations.
+Existing reference rows already provide the freeze predicate; no value
+backfill or fabricated `item_locations` rows are needed.
+Section 8's backup, atomic migration, verification and compatible-rollback safeguards
+apply; its original facet-bootstrap backfill is not rerun for this trigger amendment.
+
+At migration cutover, preserve the current canonical location rows byte-for-byte and
+freeze targets already referenced by facets. The new guarantee begins at cutover for
+those targets: pre-upgrade label changes cannot be reconstructed from facet IDs and
+MUST NOT be represented as recovered historical labels. Existing attempt evidence is
+untouched. Any subsequent label resolution uses the preserved cutover fact and records
+the label actually used; it does not claim the label was captured at original attachment.
+
+Required executable oracle **FS-14**: attach a location solely through a
+non-queryable facet (zero `item_locations` rows); reject canonical updates; allow only
+non-canonical metadata updates; remove/replace the current facet and still reject
+updates through its historical reference; correct with a new location/new item version
+and retain the old label; prove both serial race outcomes and indexed lookup. Repeat
+across migration with existing facet-only references and interrupted rollback. This
+obligation is not satisfied by schema/fixture-document validation alone.
+Executable coverage is in [test_facet_location_freeze.py](../tests/test_facet_location_freeze.py);
+upgrade and rollback guidance is in the [storage handoff](../docs/FACET_STORAGE_IMPLEMENTATION.md#schema-18-location-freeze--spine-038).
 
 ## 8. Migration and rollback
 

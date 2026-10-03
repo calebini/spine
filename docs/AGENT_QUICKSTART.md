@@ -1,6 +1,6 @@
 # Spine Agent Quickstart
 
-Status: executable cold-start path for the current schema-17 runtime
+Status: executable cold-start path for the current schema-18 runtime
 Audience: an agent with repository access and no prior Spine context
 
 For typed archetype attributes, use the dedicated trusted-local
@@ -9,6 +9,8 @@ item first, then attach values with `item.facets.update`; verify with `item.face
 Schema publication never upgrades existing items automatically. The separate
 [facet API](FACET_WEB_API.md) exposes these operations with permission checks;
 they are not new fields on `schedule.create`/`schedule.update`.
+Schema 18 protects canonical fields of facet-referenced locations too: corrections
+require a new location ID and an explicit item-version update, not an in-place edit.
 
 Use this document to reach a verified first success. Use `docs/AGENT_OPERATOR_GUIDE.md` afterward for migration, long-running operation, real-send controls, inspection, and troubleshooting.
 

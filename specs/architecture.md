@@ -60,14 +60,14 @@ Spine does not own:
 
 ## 3. Shared Core With Profiles
 
-The proposed [notification rendering definitions](notification-rendering-definitions.md)
+The accepted [notification rendering definitions](notification-rendering-definitions.md)
 keep reusable presentation configuration in Spine and bundled definitions in packs.
 Spine resolves explicitly selected facet fields and persists deterministic attempt
 evidence; packs do not execute renderers. Definition revisions are pinned by policy
 application, current values and single-hop location labels are resolved at attempt
 start, and reusable scoped disclosure is separate from catalog use or item read access.
 Existing canonical locations are reused; no new venue catalog is implied.
-This draft adds no current runtime capability
+This accepted design adds no current runtime capability
 and does not move advisory execution, scheduling or delivery authority.
 
 Spine SHOULD use one shared coordination core with profile-specific detail tables.

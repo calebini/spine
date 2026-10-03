@@ -56,7 +56,7 @@ def install_facet_access(db: sqlite3.Connection, *, applied_at_utc: str, fresh: 
             raise SpineValidationError("ledger_migration_verification", "grant migration parity failed")
         db.execute("INSERT INTO ledger_schema VALUES(17,?)", (applied_at_utc,))
         if not fresh:
-            verify_runtime_schema(db)
+            verify_runtime_schema(db, expected_version=17)
         db.commit()
     except BaseException:
         db.rollback()

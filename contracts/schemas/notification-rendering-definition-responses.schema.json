@@ -1,0 +1,830 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cortext.local/spine/contracts/schemas/notification-rendering-definition-responses.schema.json",
+  "title": "Reserved rendering catalog and disclosure responses",
+  "$defs": {
+    "notification_rendering_definition.create": {
+      "type": "object",
+      "required": [
+        "ok",
+        "contract_version",
+        "command",
+        "command_id",
+        "changed",
+        "replayed",
+        "effect",
+        "command_receipt_id",
+        "audit_id",
+        "record"
+      ],
+      "properties": {
+        "ok": {
+          "const": true
+        },
+        "contract_version": {
+          "const": "spine.notification-rendering-definitions.v1"
+        },
+        "command": {
+          "const": "notification_rendering_definition.create"
+        },
+        "command_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "changed": {
+          "type": "boolean"
+        },
+        "replayed": {
+          "type": "boolean"
+        },
+        "dry_run": {
+          "const": true
+        },
+        "effect": {
+          "enum": [
+            "rendering_definition_created"
+          ]
+        },
+        "command_receipt_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "audit_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "record": {
+          "$ref": "notification-rendering-definition-types.schema.json#/$defs/definitionRecord"
+        }
+      },
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "replayed": {
+                "const": true
+              }
+            },
+            "required": [
+              "replayed"
+            ]
+          },
+          "then": {
+            "properties": {
+              "changed": {
+                "const": false
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "changed": {
+                "const": true
+              }
+            }
+          }
+        }
+      ]
+    },
+    "notification_rendering_definition.publish": {
+      "type": "object",
+      "required": [
+        "ok",
+        "contract_version",
+        "command",
+        "command_id",
+        "changed",
+        "replayed",
+        "effect",
+        "command_receipt_id",
+        "audit_id",
+        "record"
+      ],
+      "properties": {
+        "ok": {
+          "const": true
+        },
+        "contract_version": {
+          "const": "spine.notification-rendering-definitions.v1"
+        },
+        "command": {
+          "const": "notification_rendering_definition.publish"
+        },
+        "command_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "changed": {
+          "type": "boolean"
+        },
+        "replayed": {
+          "type": "boolean"
+        },
+        "dry_run": {
+          "const": true
+        },
+        "effect": {
+          "enum": [
+            "rendering_definition_published",
+            "rendering_definition_publish_noop"
+          ]
+        },
+        "command_receipt_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "audit_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "record": {
+          "$ref": "notification-rendering-definition-types.schema.json#/$defs/definitionRecord"
+        }
+      },
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "replayed": {
+                "const": true
+              }
+            },
+            "required": [
+              "replayed"
+            ]
+          },
+          "then": {
+            "properties": {
+              "changed": {
+                "const": false
+              }
+            }
+          },
+          "else": {
+            "if": {
+              "properties": {
+                "effect": {
+                  "enum": [
+                    "rendering_definition_publish_noop"
+                  ]
+                }
+              },
+              "required": [
+                "effect"
+              ]
+            },
+            "then": {
+              "properties": {
+                "changed": {
+                  "const": false
+                }
+              }
+            },
+            "else": {
+              "properties": {
+                "changed": {
+                  "const": true
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "notification_rendering_definition.retire": {
+      "type": "object",
+      "required": [
+        "ok",
+        "contract_version",
+        "command",
+        "command_id",
+        "changed",
+        "replayed",
+        "effect",
+        "command_receipt_id",
+        "audit_id",
+        "record"
+      ],
+      "properties": {
+        "ok": {
+          "const": true
+        },
+        "contract_version": {
+          "const": "spine.notification-rendering-definitions.v1"
+        },
+        "command": {
+          "const": "notification_rendering_definition.retire"
+        },
+        "command_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "changed": {
+          "type": "boolean"
+        },
+        "replayed": {
+          "type": "boolean"
+        },
+        "dry_run": {
+          "const": true
+        },
+        "effect": {
+          "enum": [
+            "rendering_definition_retired",
+            "rendering_definition_retire_noop"
+          ]
+        },
+        "command_receipt_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "audit_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "record": {
+          "$ref": "notification-rendering-definition-types.schema.json#/$defs/definitionRecord"
+        }
+      },
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "replayed": {
+                "const": true
+              }
+            },
+            "required": [
+              "replayed"
+            ]
+          },
+          "then": {
+            "properties": {
+              "changed": {
+                "const": false
+              }
+            }
+          },
+          "else": {
+            "if": {
+              "properties": {
+                "effect": {
+                  "enum": [
+                    "rendering_definition_retire_noop"
+                  ]
+                }
+              },
+              "required": [
+                "effect"
+              ]
+            },
+            "then": {
+              "properties": {
+                "changed": {
+                  "const": false
+                }
+              }
+            },
+            "else": {
+              "properties": {
+                "changed": {
+                  "const": true
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "notification_rendering_definition.show": {
+      "type": "object",
+      "required": [
+        "ok",
+        "contract_version",
+        "command",
+        "record"
+      ],
+      "properties": {
+        "ok": {
+          "const": true
+        },
+        "contract_version": {
+          "const": "spine.notification-rendering-definitions.v1"
+        },
+        "command": {
+          "const": "notification_rendering_definition.show"
+        },
+        "record": {
+          "$ref": "notification-rendering-definition-types.schema.json#/$defs/definitionRecord"
+        },
+        "dry_run": {
+          "const": true
+        }
+      },
+      "additionalProperties": false
+    },
+    "notification_rendering_definition.list": {
+      "type": "object",
+      "required": [
+        "ok",
+        "contract_version",
+        "command",
+        "records",
+        "has_more",
+        "next_cursor",
+        "limit"
+      ],
+      "properties": {
+        "ok": {
+          "const": true
+        },
+        "contract_version": {
+          "const": "spine.notification-rendering-definitions.v1"
+        },
+        "command": {
+          "const": "notification_rendering_definition.list"
+        },
+        "records": {
+          "type": "array",
+          "maxItems": 100,
+          "items": {
+            "$ref": "notification-rendering-definition-types.schema.json#/$defs/definitionRecord"
+          }
+        },
+        "has_more": {
+          "type": "boolean"
+        },
+        "next_cursor": {
+          "oneOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "dry_run": {
+          "const": true
+        },
+        "limit": {
+          "type": "string",
+          "pattern": "^([1-9]|[1-9][0-9]|100)$"
+        }
+      },
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "has_more": {
+                "const": false
+              }
+            },
+            "required": [
+              "has_more"
+            ]
+          },
+          "then": {
+            "properties": {
+              "next_cursor": {
+                "type": "null"
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "next_cursor": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 4096
+              }
+            }
+          }
+        }
+      ]
+    },
+    "notification_rendering_disclosure.provision": {
+      "type": "object",
+      "required": [
+        "ok",
+        "contract_version",
+        "command",
+        "command_id",
+        "changed",
+        "replayed",
+        "effect",
+        "command_receipt_id",
+        "audit_id",
+        "record"
+      ],
+      "properties": {
+        "ok": {
+          "const": true
+        },
+        "contract_version": {
+          "const": "spine.notification-rendering-disclosures.v1"
+        },
+        "command": {
+          "const": "notification_rendering_disclosure.provision"
+        },
+        "command_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "changed": {
+          "type": "boolean"
+        },
+        "replayed": {
+          "type": "boolean"
+        },
+        "dry_run": {
+          "const": true
+        },
+        "effect": {
+          "enum": [
+            "rendering_disclosure_provisioned"
+          ]
+        },
+        "command_receipt_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "audit_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "record": {
+          "$ref": "notification-rendering-definition-types.schema.json#/$defs/authorizationRecord"
+        }
+      },
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "replayed": {
+                "const": true
+              }
+            },
+            "required": [
+              "replayed"
+            ]
+          },
+          "then": {
+            "properties": {
+              "changed": {
+                "const": false
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "changed": {
+                "const": true
+              }
+            }
+          }
+        }
+      ]
+    },
+    "notification_rendering_disclosure.revoke": {
+      "type": "object",
+      "required": [
+        "ok",
+        "contract_version",
+        "command",
+        "command_id",
+        "changed",
+        "replayed",
+        "effect",
+        "command_receipt_id",
+        "audit_id",
+        "record"
+      ],
+      "properties": {
+        "ok": {
+          "const": true
+        },
+        "contract_version": {
+          "const": "spine.notification-rendering-disclosures.v1"
+        },
+        "command": {
+          "const": "notification_rendering_disclosure.revoke"
+        },
+        "command_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "changed": {
+          "type": "boolean"
+        },
+        "replayed": {
+          "type": "boolean"
+        },
+        "dry_run": {
+          "const": true
+        },
+        "effect": {
+          "enum": [
+            "rendering_disclosure_revoked",
+            "rendering_disclosure_revoke_noop"
+          ]
+        },
+        "command_receipt_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "audit_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "record": {
+          "$ref": "notification-rendering-definition-types.schema.json#/$defs/authorizationRecord"
+        }
+      },
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "replayed": {
+                "const": true
+              }
+            },
+            "required": [
+              "replayed"
+            ]
+          },
+          "then": {
+            "properties": {
+              "changed": {
+                "const": false
+              }
+            }
+          },
+          "else": {
+            "if": {
+              "properties": {
+                "effect": {
+                  "enum": [
+                    "rendering_disclosure_revoke_noop"
+                  ]
+                }
+              },
+              "required": [
+                "effect"
+              ]
+            },
+            "then": {
+              "properties": {
+                "changed": {
+                  "const": false
+                }
+              }
+            },
+            "else": {
+              "properties": {
+                "changed": {
+                  "const": true
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "notification_rendering_disclosure.show": {
+      "type": "object",
+      "required": [
+        "ok",
+        "contract_version",
+        "command",
+        "record"
+      ],
+      "properties": {
+        "ok": {
+          "const": true
+        },
+        "contract_version": {
+          "const": "spine.notification-rendering-disclosures.v1"
+        },
+        "command": {
+          "const": "notification_rendering_disclosure.show"
+        },
+        "record": {
+          "$ref": "notification-rendering-definition-types.schema.json#/$defs/authorizationRecord"
+        },
+        "dry_run": {
+          "const": true
+        }
+      },
+      "additionalProperties": false
+    },
+    "notification_rendering_disclosure.list": {
+      "type": "object",
+      "required": [
+        "ok",
+        "contract_version",
+        "command",
+        "records",
+        "has_more",
+        "next_cursor",
+        "limit"
+      ],
+      "properties": {
+        "ok": {
+          "const": true
+        },
+        "contract_version": {
+          "const": "spine.notification-rendering-disclosures.v1"
+        },
+        "command": {
+          "const": "notification_rendering_disclosure.list"
+        },
+        "records": {
+          "type": "array",
+          "maxItems": 100,
+          "items": {
+            "$ref": "notification-rendering-definition-types.schema.json#/$defs/authorizationRecord"
+          }
+        },
+        "has_more": {
+          "type": "boolean"
+        },
+        "next_cursor": {
+          "oneOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "dry_run": {
+          "const": true
+        },
+        "limit": {
+          "type": "string",
+          "pattern": "^([1-9]|[1-9][0-9]|100)$"
+        }
+      },
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "has_more": {
+                "const": false
+              }
+            },
+            "required": [
+              "has_more"
+            ]
+          },
+          "then": {
+            "properties": {
+              "next_cursor": {
+                "type": "null"
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "next_cursor": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 4096
+              }
+            }
+          }
+        }
+      ]
+    },
+    "failure": {
+      "type": "object",
+      "required": [
+        "ok",
+        "command",
+        "error"
+      ],
+      "properties": {
+        "ok": {
+          "const": false
+        },
+        "command": {
+          "enum": [
+            "notification_rendering_definition.create",
+            "notification_rendering_definition.publish",
+            "notification_rendering_definition.retire",
+            "notification_rendering_definition.show",
+            "notification_rendering_definition.list",
+            "notification_rendering_disclosure.provision",
+            "notification_rendering_disclosure.revoke",
+            "notification_rendering_disclosure.show",
+            "notification_rendering_disclosure.list"
+          ]
+        },
+        "error": {
+          "type": "object",
+          "required": [
+            "code",
+            "message"
+          ],
+          "properties": {
+            "code": {
+              "enum": [
+                "invalid_request",
+                "unsupported_field",
+                "missing_required_field",
+                "invalid_timestamp",
+                "referenced_row_not_found",
+                "permission_denied",
+                "stale_version",
+                "stale_cursor",
+                "semantic_conflict",
+                "rendering_definition_invalid",
+                "rendering_definition_retired",
+                "rendering_disclosure_unavailable",
+                "rendering_disclosure_ambiguous",
+                "rendering_disclosure_scope_mismatch",
+                "environment_failure",
+                "runtime_failure"
+              ]
+            },
+            "field": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            "message": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512
+            }
+          },
+          "additionalProperties": false
+        },
+        "dry_run": {
+          "const": true
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "oneOf": [
+    {
+      "$ref": "#/$defs/notification_rendering_definition.create"
+    },
+    {
+      "$ref": "#/$defs/notification_rendering_definition.publish"
+    },
+    {
+      "$ref": "#/$defs/notification_rendering_definition.retire"
+    },
+    {
+      "$ref": "#/$defs/notification_rendering_definition.show"
+    },
+    {
+      "$ref": "#/$defs/notification_rendering_definition.list"
+    },
+    {
+      "$ref": "#/$defs/notification_rendering_disclosure.provision"
+    },
+    {
+      "$ref": "#/$defs/notification_rendering_disclosure.revoke"
+    },
+    {
+      "$ref": "#/$defs/notification_rendering_disclosure.show"
+    },
+    {
+      "$ref": "#/$defs/notification_rendering_disclosure.list"
+    },
+    {
+      "$ref": "#/$defs/failure"
+    }
+  ]
+}

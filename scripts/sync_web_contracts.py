@@ -5,6 +5,17 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 
+# Source-only rendering contracts are not part of the activated web release.
+# Keep this exact allowlist small; activation must deliberately remove it.
+SOURCE_ONLY_SCHEMAS = frozenset({
+    "notification-rendering-definition-types.schema.json",
+    "notification-rendering-definition-commands.schema.json",
+    "notification-rendering-definition-responses.schema.json",
+    "notification-rendering-definition-evidence.schema.json",
+    "notification-rendering-definition-vectors.schema.json",
+    "notification-rendering-definition-obligations.schema.json",
+})
+
 
 def main() -> int:
     parser = argparse.ArgumentParser()
@@ -17,7 +28,7 @@ def main() -> int:
         source / "spine.trusted-web-command-registry.v1.json", source / "spine.trusted-web-read-registry.v1.json",
         source / "spine.trusted-web-facet-registry.v1.json", source / "archetype-facet-integration.v1.json",
     ]
-    files += sorted((source / "schemas").glob("*.schema.json"))
+    files += sorted(p for p in (source / "schemas").glob("*.schema.json") if p.name not in SOURCE_ONLY_SCHEMAS)
     expected = {target / p.relative_to(source): p.read_bytes() for p in files}
     if args.check:
         mismatched = [str(p.relative_to(root)) for p, value in expected.items() if not p.exists() or p.read_bytes() != value]

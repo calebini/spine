@@ -1,7 +1,7 @@
 {
   "manifest_version": "spine.sqlite-schema-object-manifest.v1",
   "schemas": {
-    "17": {
+    "18": {
       "objects": [
         {
           "object_type": "index",
@@ -1051,7 +1051,7 @@
         {
           "object_type": "trigger",
           "name": "locations_referenced_canonical_fields_update",
-          "definition_sha256": "384496ddfd83a4bf94f32ee18f6b7aab97e9f7c8e68d96c03240470cceb3b6d8"
+          "definition_sha256": "8c634840e804d3531ff74f5b6bb2b19f2eb237511c82983662403ef6a3c19ddf"
         },
         {
           "object_type": "trigger",

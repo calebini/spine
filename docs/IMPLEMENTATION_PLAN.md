@@ -47,9 +47,19 @@ SPINE-010. The historical resilience-first sequencing below no longer schedules 
 or makes those initiatives blanket prerequisites for facets or advisories. Preserve
 their feature-specific contract and verification requirements.
 
-## Proposed Extension: Facet-Aware Notification Rendering (SPINE-032)
+## Accepted Design: Facet-Aware Notification Rendering (SPINE-032–035)
 
-The first-pass [rendering-definition spec](../specs/notification-rendering-definitions.md)
+SPINE-037 repairs the initial machine-contract review findings. Location-label rendering
+also requires the newly explicit facet-reference freeze in facet storage Section 7.1:
+the existing FK protects deletion, while schema 17's canonical-field trigger only
+checks `item_locations`. Implement the versioned trigger/manifest migration and FS-14
+proof before enabling this rendering path. This is not a facet layout redesign or an
+already implemented guarantee at that checkpoint; existing canonical location values
+are preserved at cutover without fabricating earlier labels. SPINE-038 subsequently
+implements this prerequisite in runtime 0.8.3/schema 18, without activating the
+rendering-definition family or changing the existing public facet contracts.
+
+The ratified [rendering-definition spec](../specs/notification-rendering-definitions.md)
 separates reusable presentation configuration from facet schemas and reminder timing.
 Spine would own resolution, disclosure, rendering and attempt evidence; packs would
 distribute definitions and profile references through public commands. Start with
@@ -57,10 +67,13 @@ explicit scalar and location-label detail suffixes and exact schema/definition r
 ordinary renderer for unselected reminders and eligible fallback. This is independent
 of LLM advisory execution. The operator agreed reusable scoped disclosure with per-policy
 evidence, narrow location-label lookup and retirement preserving existing pinned use.
-Review the draft's technical realization in a bounded audit, then codify versioned
-authoring/evidence contracts and migration/continuity fixtures
-before runtime work. Pack-format and installer adoption follow that contract rather
-than inventing renderer semantics. Current evidence and open decisions are in SPINE-032.
+The focused bounded recheck passed, and SPINE-035 ratifies the logical design and adds
+initial source-only catalog/disclosure schemas, selection/evidence fragments and
+reference fixtures. This is not runtime activation. Next close physical persistence,
+versioned enclosing authoring/evidence contracts, policy-specific work continuity,
+permission resolver mappings and catalog cursors; review those integration contracts
+before implementation. Pack-format and installer adoption follow Spine's contract
+rather than inventing renderer semantics. Evidence and remaining gates are in SPINE-035.
 
 ## Delivered Fix: Schedule-Show CLI Notification Profile Include (SPINE-031)
 

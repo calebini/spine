@@ -6,12 +6,14 @@ Created: 2026-06-19
 
 ## 1. Purpose
 
-The draft [notification rendering definitions](notification-rendering-definitions.md)
-reserves a conceptual catalog create/publish/retire/show/list family and versioned
+The accepted [notification rendering definitions](notification-rendering-definitions.md)
+reserves a catalog create/publish/retire/show/list family and versioned
 profile/direct-policy selection plus reusable disclosure provision/revoke/read
 operations. These are not implemented commands, additional
 registry requirements, web allowlist entries or optional fields in current schemas.
-Exact machine contracts and permission/disclosure mappings must precede exposure.
+The source-only registry at `contracts/notification-rendering-definition-contract-registry.v1.json`
+defines the initial machine contracts. Storage, versioned enclosing authoring/evidence
+contracts, continuity, permission mappings and cursor integration still precede exposure.
 
 The implemented [ledger-instance-identity.md](ledger-instance-identity.md) defines
 `system.info` v3 instance identity and schema-14 fail-closed metadata validation.

@@ -701,10 +701,17 @@ Minimum contract:
 Location canonicality and mutation posture (MVP):
 
 - Canonical location fields are: `label`, `kind`, `address_text`, `latitude`, `longitude`, `timezone`, and `provider_ref`.
-- Canonical location fields MUST be treated as immutable once the `location_id` is referenced by any persisted `item_locations` row.
-- If a canonical location fact needs correction (e.g., a changed address label or coordinates), the writer MUST create a new `locations` row with a new `location_id` and MUST represent the correction as a new item version that points at the new `location_id` via new `item_locations` rows.
+- Canonical location fields MUST be treated as immutable once the `location_id` is referenced by any persisted `item_locations` or `item_facet_references` row. This includes historical item versions and non-queryable facet fields; removing a current reference does not unfreeze a historical target.
+- If a canonical location fact needs correction (e.g., a changed address label or coordinates), the writer MUST create a new `locations` row with a new `location_id` and MUST represent the correction as a new item version with new `item_locations` rows or updated facet values/reference rows, according to the relationship being corrected. A facet reference does not require a synthetic `item_locations` row.
 - Attempts to update canonical location fields in place for a referenced location MUST be rejected as validation errors.
 - `metadata_json` MAY be updated in place (and `updated_at_utc` advanced) even when referenced, but it MUST be non-canonical and MUST NOT change the semantic meaning of historical item versions.
+
+**Implementation boundary (2026-10-03):** The additional facet-reference freeze is
+implemented in runtime 0.8.3/schema 18. Schema 17 freezes through `item_locations` only.
+[Facet storage Section 7.1](archetype-facet-storage.md#71-facet-referenced-location-freeze-amendment)
+owns its enforcement/migration and cutover proof. Facet-aware location-label rendering
+MUST NOT activate before that gate closes; no past label history is reconstructed by
+this amendment. Existing primary-location behavior is unchanged.
 
 ### 7.2 item_locations
 
@@ -1102,12 +1109,13 @@ external contact. `attempt_id`, `work_instance_id`, `item_id`, and
 stored row; a retry receives a new attempt and rendering. Complete fields, identities,
 failure semantics, and readback are governed by `specs/notification-rendering.md`.
 
-The draft [notification-rendering-definitions.md](notification-rendering-definitions.md)
-proposes a distinct owner-scoped reusable definition root, immutable revisions and
+The accepted [notification-rendering-definitions.md](notification-rendering-definitions.md)
+specifies a distinct owner-scoped reusable definition root, immutable revisions and
 item-policy presentation selections, reusable disclosure authorizations and per-policy
 application evidence. These are configuration, not rendering-attempt rows or a new
-attempt ledger. Facet-aware source/evidence extensions, physical storage
-and migration remain future contracts; no existing table shape is changed here.
+attempt ledger. Initial selection/evidence shapes are source-only machine contracts;
+their enclosing runtime contracts, physical storage and migration remain integration
+gates. No existing table shape is changed here.
 
 ## 10. Projections and Audit
 

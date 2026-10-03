@@ -87,8 +87,8 @@ An item may use a permitted shared profile and still remain privately owned.
 
 ## 4. Permission Operations
 
-The first-pass [notification-rendering-definitions.md](notification-rendering-definitions.md)
-requires an explicit mapping for its proposed catalog and destination-bound facet
+The accepted [notification-rendering-definitions.md](notification-rendering-definitions.md)
+requires an explicit mapping for its specified catalog and destination-bound facet
 disclosure. Existing item-read or catalog-use authority alone does not authorize
 exporting those fields in notifications. The agreed direction is reusable scoped
 authorization with per-policy application evidence, narrowing exceptions and explicit

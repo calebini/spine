@@ -1,0 +1,9 @@
+{
+  "contract_version": "spine.notification-rendering-disclosures.v1",
+  "command_id": "rendering-example-revoke",
+  "actor_subject_id": "example-operator",
+  "action_timestamp_utc": "2026-10-03T12:00:00Z",
+  "disclosure_authorization_id": "notification_rendering_disclosure_53174c12223c65f3cbbe0e1d4b55897790ebf9b1671bb26893448c843c713737",
+  "expected_scope_hash": "a588d9a8b3304e77047eba1c1e380c53242f3f67aae121832b4da70974966334",
+  "reason_code": "audience_changed"
+}

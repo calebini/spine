@@ -1,0 +1,200 @@
+{
+  "schema_version": "spine.notification-rendering-definition-fixtures.v1",
+  "status": "specified_not_implemented",
+  "registry": "contracts/notification-rendering-definition-contract-registry.v1.json",
+  "fixtures": [
+    {
+      "fixture_id": "request_definition_create",
+      "fixture": "tests/fixtures/notification_rendering_definitions/contracts/request_definition_create.json",
+      "schema": "contracts/schemas/notification-rendering-definition-commands.schema.json",
+      "schema_ref": "#/$defs/notification_rendering_definition.create",
+      "kind": "structural"
+    },
+    {
+      "fixture_id": "request_definition_publish",
+      "fixture": "tests/fixtures/notification_rendering_definitions/contracts/request_definition_publish.json",
+      "schema": "contracts/schemas/notification-rendering-definition-commands.schema.json",
+      "schema_ref": "#/$defs/notification_rendering_definition.publish",
+      "kind": "structural"
+    },
+    {
+      "fixture_id": "request_definition_retire",
+      "fixture": "tests/fixtures/notification_rendering_definitions/contracts/request_definition_retire.json",
+      "schema": "contracts/schemas/notification-rendering-definition-commands.schema.json",
+      "schema_ref": "#/$defs/notification_rendering_definition.retire",
+      "kind": "structural"
+    },
+    {
+      "fixture_id": "request_definition_show",
+      "fixture": "tests/fixtures/notification_rendering_definitions/contracts/request_definition_show.json",
+      "schema": "contracts/schemas/notification-rendering-definition-commands.schema.json",
+      "schema_ref": "#/$defs/notification_rendering_definition.show",
+      "kind": "structural"
+    },
+    {
+      "fixture_id": "request_definition_list",
+      "fixture": "tests/fixtures/notification_rendering_definitions/contracts/request_definition_list.json",
+      "schema": "contracts/schemas/notification-rendering-definition-commands.schema.json",
+      "schema_ref": "#/$defs/notification_rendering_definition.list",
+      "kind": "structural"
+    },
+    {
+      "fixture_id": "request_disclosure_provision",
+      "fixture": "tests/fixtures/notification_rendering_definitions/contracts/request_disclosure_provision.json",
+      "schema": "contracts/schemas/notification-rendering-definition-commands.schema.json",
+      "schema_ref": "#/$defs/notification_rendering_disclosure.provision",
+      "kind": "structural"
+    },
+    {
+      "fixture_id": "request_disclosure_revoke",
+      "fixture": "tests/fixtures/notification_rendering_definitions/contracts/request_disclosure_revoke.json",
+      "schema": "contracts/schemas/notification-rendering-definition-commands.schema.json",
+      "schema_ref": "#/$defs/notification_rendering_disclosure.revoke",
+      "kind": "structural"
+    },
+    {
+      "fixture_id": "request_disclosure_show",
+      "fixture": "tests/fixtures/notification_rendering_definitions/contracts/request_disclosure_show.json",
+      "schema": "contracts/schemas/notification-rendering-definition-commands.schema.json",
+      "schema_ref": "#/$defs/notification_rendering_disclosure.show",
+      "kind": "structural"
+    },
+    {
+      "fixture_id": "request_disclosure_list",
+      "fixture": "tests/fixtures/notification_rendering_definitions/contracts/request_disclosure_list.json",
+      "schema": "contracts/schemas/notification-rendering-definition-commands.schema.json",
+      "schema_ref": "#/$defs/notification_rendering_disclosure.list",
+      "kind": "structural"
+    },
+    {
+      "fixture_id": "response_definition_create",
+      "fixture": "tests/fixtures/notification_rendering_definitions/contracts/response_definition_create.json",
+      "schema": "contracts/schemas/notification-rendering-definition-responses.schema.json",
+      "schema_ref": "#/$defs/notification_rendering_definition.create",
+      "kind": "structural"
+    },
+    {
+      "fixture_id": "response_disclosure_show",
+      "fixture": "tests/fixtures/notification_rendering_definitions/contracts/response_disclosure_show.json",
+      "schema": "contracts/schemas/notification-rendering-definition-responses.schema.json",
+      "schema_ref": "#/$defs/notification_rendering_disclosure.show",
+      "kind": "structural"
+    },
+    {
+      "fixture_id": "response_definition_list_empty",
+      "fixture": "tests/fixtures/notification_rendering_definitions/contracts/response_definition_list_empty.json",
+      "schema": "contracts/schemas/notification-rendering-definition-responses.schema.json",
+      "schema_ref": "#/$defs/notification_rendering_definition.list",
+      "kind": "structural"
+    },
+    {
+      "fixture_id": "response_disclosure_scope_mismatch",
+      "fixture": "tests/fixtures/notification_rendering_definitions/contracts/response_disclosure_scope_mismatch.json",
+      "schema": "contracts/schemas/notification-rendering-definition-responses.schema.json",
+      "schema_ref": "#/$defs/failure",
+      "kind": "structural"
+    },
+    {
+      "fixture_id": "selection_unique_match",
+      "fixture": "tests/fixtures/notification_rendering_definitions/contracts/selection_unique_match.json",
+      "schema": "contracts/schemas/notification-rendering-definition-types.schema.json",
+      "schema_ref": "#/$defs/authoringSelection",
+      "kind": "structural"
+    },
+    {
+      "fixture_id": "presentation_profile_replacement",
+      "fixture": "tests/fixtures/notification_rendering_definitions/contracts/presentation_profile_replacement.json",
+      "schema": "contracts/schemas/notification-rendering-definition-types.schema.json",
+      "schema_ref": "#/$defs/policyPresentation",
+      "kind": "structural"
+    },
+    {
+      "fixture_id": "presentation_ordinary",
+      "fixture": "tests/fixtures/notification_rendering_definitions/contracts/presentation_ordinary.json",
+      "schema": "contracts/schemas/notification-rendering-definition-types.schema.json",
+      "schema_ref": "#/$defs/policyPresentation",
+      "kind": "structural"
+    },
+    {
+      "fixture_id": "evidence_flight_details",
+      "fixture": "tests/fixtures/notification_rendering_definitions/contracts/evidence_flight_details.json",
+      "schema": "contracts/schemas/notification-rendering-definition-evidence.schema.json",
+      "kind": "structural"
+    },
+    {
+      "fixture_id": "reference_vectors",
+      "fixture": "tests/fixtures/notification_rendering_definitions/contracts/reference_vectors.json",
+      "schema": "contracts/schemas/notification-rendering-definition-vectors.schema.json",
+      "kind": "reference_vectors"
+    },
+    {
+      "fixture_id": "stateful_obligations",
+      "fixture": "tests/fixtures/notification_rendering_definitions/contracts/stateful_obligations.json",
+      "schema": "contracts/schemas/notification-rendering-definition-obligations.schema.json",
+      "kind": "stateful_obligations"
+    },
+    {
+      "fixture_id": "response_definition_create_dry_run",
+      "fixture": "tests/fixtures/notification_rendering_definitions/contracts/response_definition_create_dry_run.json",
+      "schema": "contracts/schemas/notification-rendering-definition-responses.schema.json",
+      "schema_ref": "#/$defs/notification_rendering_definition.create",
+      "kind": "structural"
+    },
+    {
+      "fixture_id": "response_definition_create_replay",
+      "fixture": "tests/fixtures/notification_rendering_definitions/contracts/response_definition_create_replay.json",
+      "schema": "contracts/schemas/notification-rendering-definition-responses.schema.json",
+      "schema_ref": "#/$defs/notification_rendering_definition.create",
+      "kind": "structural"
+    },
+    {
+      "fixture_id": "response_definition_publish_noop",
+      "fixture": "tests/fixtures/notification_rendering_definitions/contracts/response_definition_publish_noop.json",
+      "schema": "contracts/schemas/notification-rendering-definition-responses.schema.json",
+      "schema_ref": "#/$defs/notification_rendering_definition.publish",
+      "kind": "structural"
+    },
+    {
+      "fixture_id": "request_disclosure_provision_direct",
+      "fixture": "tests/fixtures/notification_rendering_definitions/contracts/request_disclosure_provision_direct.json",
+      "schema": "contracts/schemas/notification-rendering-definition-commands.schema.json",
+      "schema_ref": "#/$defs/notification_rendering_disclosure.provision",
+      "kind": "structural"
+    },
+    {
+      "fixture_id": "response_definition_show_dry_run",
+      "fixture": "tests/fixtures/notification_rendering_definitions/contracts/response_definition_show_dry_run.json",
+      "schema": "contracts/schemas/notification-rendering-definition-responses.schema.json",
+      "schema_ref": "#/$defs/notification_rendering_definition.show",
+      "kind": "structural"
+    },
+    {
+      "fixture_id": "response_definition_list_dry_run",
+      "fixture": "tests/fixtures/notification_rendering_definitions/contracts/response_definition_list_dry_run.json",
+      "schema": "contracts/schemas/notification-rendering-definition-responses.schema.json",
+      "schema_ref": "#/$defs/notification_rendering_definition.list",
+      "kind": "structural"
+    },
+    {
+      "fixture_id": "response_disclosure_show_dry_run",
+      "fixture": "tests/fixtures/notification_rendering_definitions/contracts/response_disclosure_show_dry_run.json",
+      "schema": "contracts/schemas/notification-rendering-definition-responses.schema.json",
+      "schema_ref": "#/$defs/notification_rendering_disclosure.show",
+      "kind": "structural"
+    },
+    {
+      "fixture_id": "response_disclosure_list_dry_run",
+      "fixture": "tests/fixtures/notification_rendering_definitions/contracts/response_disclosure_list_dry_run.json",
+      "schema": "contracts/schemas/notification-rendering-definition-responses.schema.json",
+      "schema_ref": "#/$defs/notification_rendering_disclosure.list",
+      "kind": "structural"
+    },
+    {
+      "fixture_id": "response_disclosure_scope_mismatch_dry_run",
+      "fixture": "tests/fixtures/notification_rendering_definitions/contracts/response_disclosure_scope_mismatch_dry_run.json",
+      "schema": "contracts/schemas/notification-rendering-definition-responses.schema.json",
+      "schema_ref": "#/$defs/failure",
+      "kind": "structural"
+    }
+  ]
+}

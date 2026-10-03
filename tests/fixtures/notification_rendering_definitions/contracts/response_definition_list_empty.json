@@ -1,0 +1,9 @@
+{
+  "ok": true,
+  "contract_version": "spine.notification-rendering-definitions.v1",
+  "command": "notification_rendering_definition.list",
+  "records": [],
+  "has_more": false,
+  "next_cursor": null,
+  "limit": "20"
+}

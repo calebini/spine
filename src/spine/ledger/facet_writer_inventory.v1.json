@@ -1,6 +1,6 @@
 {
   "format_version": "spine.facet-writer-inventory.v1",
-  "ledger_schema_version": "17",
+  "ledger_schema_version": "18",
   "item_types": [
     "event",
     "task",

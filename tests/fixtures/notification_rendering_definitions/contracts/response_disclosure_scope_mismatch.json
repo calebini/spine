@@ -1,0 +1,9 @@
+{
+  "ok": false,
+  "command": "notification_rendering_disclosure.provision",
+  "error": {
+    "code": "rendering_disclosure_scope_mismatch",
+    "field": "scope.destination",
+    "message": "Requested disclosure scope does not match authorized destination."
+  }
+}

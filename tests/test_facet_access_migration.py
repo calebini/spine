@@ -15,7 +15,10 @@ from tests.facet_storage_support import DEFINITION, all_rows
 class FacetAccessMigrationTests(unittest.TestCase):
     def setUp(self):
         self.h = helper.TrustedWebRuntimeTests()
-        with patch("spine.ledger.facet_access_migration.install_facet_access"):
+        with (
+            patch("spine.ledger.facet_access_migration.install_facet_access"),
+            patch("spine.ledger.facet_location_migration.install_facet_location_freeze"),
+        ):
             self.h.setUp()
         self.addCleanup(self.h.doCleanups)
         self.db = self.h.db
@@ -75,12 +78,12 @@ class FacetAccessMigrationTests(unittest.TestCase):
         with self.assertRaises(SpineValidationError):
             verify_runtime_schema(self.db)
         result = migrate_schema(self.db)
-        self.assertEqual(result.applied_versions, (17,))
+        self.assertEqual(result.applied_versions, (17, 18))
         after = all_rows(self.db)
         for table, rows in before.items():
             if table != "ledger_schema":
                 self.assertEqual(rows, after[table], table)
-        self.assertEqual(verify_schema(self.db).schema_version, 17)
+        self.assertEqual(verify_schema(self.db).schema_version, 18)
         self.assertEqual(self.db.execute("PRAGMA foreign_keys").fetchone()[0], 1)
         self.assertEqual(self.db.execute("SELECT count(*) FROM sqlite_schema WHERE name LIKE 'custom_grant_%'").fetchone()[0], 2)
 

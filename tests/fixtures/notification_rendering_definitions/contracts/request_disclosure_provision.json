@@ -1,0 +1,39 @@
+{
+  "contract_version": "spine.notification-rendering-disclosures.v1",
+  "command_id": "rendering-example-provision",
+  "actor_subject_id": "example-operator",
+  "action_timestamp_utc": "2026-10-03T12:00:00Z",
+  "scope": {
+    "item_owner": {
+      "owner_kind": "subject_group",
+      "owner_group_id": "example-group"
+    },
+    "definition": {
+      "notification_rendering_definition_id": "notification_rendering_definition_02f257fab5ae9d05c29ad78672208f2329671a72dbb76fa6773c9623950fa1fe",
+      "notification_rendering_definition_revision_id": "notification_rendering_definition_revision_e0ba4b36ee5a68085a16c17068ce0091ef1fc0834da7cd9fbcf7c55302dddc52"
+    },
+    "approved_selection_keys": [
+      "departure",
+      "flight",
+      "terminal"
+    ],
+    "use_scope": {
+      "kind": "profile",
+      "notification_profile_id": "notification_profile_flight"
+    },
+    "destination": {
+      "recipient": {
+        "kind": "subject_group",
+        "group_id": "example-group"
+      },
+      "delivery_target_id": "delivery_target_example",
+      "channel": "whatsapp",
+      "adapter_name": "openclaw",
+      "destination_source": "delivery_target",
+      "target_ref": "example-group-not-a-real-route"
+    },
+    "permitted_location_ids": [
+      "location_airport"
+    ]
+  }
+}

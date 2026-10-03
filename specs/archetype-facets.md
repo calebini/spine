@@ -314,8 +314,8 @@ ordinary reminder retention authorizes use of stale facet values. Required execu
 oracles include multiple successive edits, explicit schema upgrade, recurring work,
 follow_source dependencies, lease/attempt races and retry without a duplicate send.
 
-The separate draft [notification-rendering-definitions.md](notification-rendering-definitions.md)
-proposes deterministic, explicitly selected facet detail for ordinary reminders,
+The accepted [notification-rendering-definitions.md](notification-rendering-definitions.md)
+specifies deterministic, explicitly selected facet detail for ordinary reminders,
 without an advisory or model invocation. It must resolve current values against exact
 schema revisions, establish destination disclosure and retain attempt evidence. It
 does not alter implemented facet copy-forward/retention semantics or authorize field
@@ -338,6 +338,12 @@ New location references require existing locations and applicable read permissio
 locations have no active/inactive lifecycle in this slice. No new
 reference kinds or access grants arise from a field. The trusted-local CLI retains
 its existing full-scope posture; HTTP requires explicit registry/resolver additions.
+
+Canonical-field immutability for facet-referenced locations is specified by
+[ontology Section 7.1](ontology.md#71-locations), with the enforcement and
+migration amendment in [facet storage Section 7.1](archetype-facet-storage.md#71-facet-referenced-location-freeze-amendment).
+That amendment is implemented in runtime 0.8.3/schema 18; earlier facet runtime support
+does not provide the additional freeze. It changes neither reference encoding nor location lifecycle.
 
 ### 6.1 Closed resolver mapping
 

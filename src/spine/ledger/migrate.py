@@ -168,6 +168,11 @@ def main(argv: Sequence[str] | None = None) -> int:
 
 
 def _apply_migration(connection: sqlite3.Connection, *, version: int, migration_name: str) -> None:
+    if version == 18:
+        from spine.ledger.facet_location_migration import install_facet_location_freeze
+
+        install_facet_location_freeze(connection, applied_at_utc=_utc_now())
+        return
     if version == 17:
         from spine.ledger.facet_access_migration import install_facet_access
 

@@ -83,6 +83,24 @@ class WebContractSyncTests(unittest.TestCase):
                 self.assertTrue(extra.exists())
                 extra.unlink()
 
+    def test_rendering_definition_drafts_are_not_packaged_or_silently_activated(self) -> None:
+        names = (
+            "types", "commands", "responses", "evidence", "vectors", "obligations",
+        )
+        for suffix in names:
+            name = f"notification-rendering-definition-{suffix}.schema.json"
+            (self.source / "schemas" / name).write_text('{"draft": true}\n')
+        self.assertEqual(self.run_sync().returncode, 0)
+        self.assertEqual(self.run_sync("--check").returncode, 0)
+        for suffix in names:
+            name = f"notification-rendering-definition-{suffix}.schema.json"
+            self.assertFalse((self.target / "schemas" / name).exists())
+        extra = self.target / "schemas/notification-rendering-definition-types.schema.json"
+        extra.write_text('{"draft": true}\n')
+        result = self.run_sync("--check")
+        self.assertEqual(result.returncode, 1)
+        self.assertIn(extra.name, result.stdout)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -1,0 +1,9 @@
+{
+  "contract_version": "spine.notification-rendering-disclosures.v1",
+  "owner": {
+    "owner_kind": "subject_group",
+    "owner_group_id": "example-group"
+  },
+  "status": "active",
+  "limit": "20"
+}

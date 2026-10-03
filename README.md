@@ -51,11 +51,18 @@ allowed to quietly become canonical.
 
 ## What Works Today
 
-Spine `0.8.2` is an implemented alpha; its scheduling core is exercised in a staging
-agent environment. The current SQLite ledger schema is version `17`. The trusted multi-operator backend is also running in staging on `cortext1`, with
+Spine `0.8.3` is an implemented alpha; its scheduling core is exercised in a staging
+agent environment. The current SQLite ledger schema is version `18`. The trusted multi-operator backend is also running in staging on `cortext1`, with
 operator testing through the connected [Kinflow frontend](../kinflow-web-ui/README.md).
 Concrete operator-reported work is tracked in the [backlog](docs/BACKLOG.md);
 this checkout version is not a deployment claim.
+
+Version 0.8.3 adds the schema-17-to-18 location-freeze migration: locations referenced
+only by facets now have the same canonical-field protection as primary locations,
+including historical/non-queryable references. Existing values and notification
+history are preserved. This does not activate facet-aware notification rendering.
+Stop all writers and back up the ledger before migrating; older runtimes cannot open
+schema 18. Rollback requires restoring the pre-migration backup with matching code.
 
 Version 0.8.2 repairs CLI `schedule.show --include notification_profile` validation,
 help, and diagnostics to match the existing readback contract. Ledger schema 17 and
@@ -353,7 +360,8 @@ Still deliberately separate or in design:
 
 - governed contextual LLM advisories and agent-generated enrichment;
 - opt-in [facet-aware notification rendering definitions](specs/notification-rendering-definitions.md)
-  supplied as configuration by operators or packs; first-pass design, not implemented;
+  supplied as configuration by operators or packs; ratified design and initial machine
+  contracts/fixtures, not implemented;
 - canonical archival and retention policy for long-lived ledgers;
 - broader external projection adapters;
 - production qualification across sustained load and failure campaigns;

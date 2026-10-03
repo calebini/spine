@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cortext.local/spine/contracts/schemas/notification-rendering-definition-obligations.schema.json",
+  "title": "Future stateful acceptance scenarios — not runtime proofs",
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "const": "spine.notification-rendering-definition-obligations.v1"
+    },
+    "runtime_verified": {
+      "const": false
+    },
+    "scenarios": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "scenario_id": {
+            "type": "string"
+          },
+          "given": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "maxItems": 16
+          },
+          "when": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "maxItems": 16
+          },
+          "then": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "maxItems": 16
+          }
+        },
+        "required": [
+          "scenario_id",
+          "given",
+          "when",
+          "then"
+        ],
+        "additionalProperties": false
+      },
+      "minItems": 1,
+      "maxItems": 32
+    }
+  },
+  "required": [
+    "schema_version",
+    "runtime_verified",
+    "scenarios"
+  ],
+  "additionalProperties": false
+}

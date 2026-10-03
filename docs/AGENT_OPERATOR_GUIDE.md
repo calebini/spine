@@ -10,6 +10,13 @@ provisioning and notification retention semantics. The separate permission-enfor
 [facet API](FACET_WEB_API.md) is also available; do not add facet fields to existing
 schedule/agenda payloads. CLI privileges are unchanged.
 
+Runtime 0.8.3/schema 18 additionally freezes canonical location fields once referenced
+by any facet, including historical/non-queryable fields. Correct a location by creating
+a new location ID and explicitly updating the item's facet values in a new version;
+removing the current facet does not release historical targets. Do not edit referenced
+location labels in place. This migration does not enable facet-aware notification text.
+See [storage upgrade/rollback guidance](FACET_STORAGE_IMPLEMENTATION.md#schema-18-location-freeze--spine-038).
+
 This guide tells an agent how to interact with Spine safely. It is intentionally narrower than the ontology and architecture specs. If this guide and implementation behavior disagree, stop and ask an operator before writing or sending.
 
 New agents start with `docs/AGENT_QUICKSTART.md`. Its checked-in `examples/agent-first-success.sh` path proves recurrence, recurring notifications, provenance, materialization, observe-only behavior, and one fake delivery on a disposable ledger. Return here for existing-ledger migration, production-shaped operation, inspection, and failure handling.

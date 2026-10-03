@@ -2,9 +2,9 @@
 
 __all__ = ["IMPLEMENTED_CONTRACT_VERSIONS", "IMPLEMENTED_LEDGER_SCHEMA_VERSION", "__version__"]
 
-__version__ = "0.8.2"
+__version__ = "0.8.3"
 
-IMPLEMENTED_LEDGER_SCHEMA_VERSION = 17
+IMPLEMENTED_LEDGER_SCHEMA_VERSION = 18
 IMPLEMENTED_CONTRACT_VERSIONS = frozenset(
     {
         "spine.canonical-json.v1",

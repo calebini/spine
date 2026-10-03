@@ -5,6 +5,42 @@ override [the logical contract](../specs/archetype-facets.md),
 [accepted storage design](../specs/archetype-facet-storage.md), or
 [Spine-wide atomicity](../specs/STORAGE_ATOMICITY_SPEC.md).
 
+## Schema 18 location freeze — SPINE-038
+
+Runtime 0.8.3 extends the existing location canonical-field trigger to every persisted
+facet reference, including historical and non-queryable fields. No new tables or
+indexes: the trigger uses `item_facet_references_location_idx`. The only durable
+migration changes are the trigger definition and the schema-18 version row. The
+schema-17 manifest is retained for exact predecessor verification.
+
+Stop all writers (worker, web service and direct CLI), take a consistent verified
+SQLite backup including WAL state, and run the checkout-local `spine-ledger-migrate
+--db <ledger>` before restarting the new runtime. Do not copy a live main file alone
+or remove sidecars. Routine commands/worker startup reject schema 17 until migration;
+older code rejects schema 18. Migration failures roll back the trigger and version
+atomically. For rollback after a successful upgrade, stop writers and restore the
+verified pre-migration backup with matching old code; do not decrement the version or
+manually drop the protection. Restoring that backup discards post-upgrade writes, so
+preserve the failed deployment ledger separately for reconciliation first.
+
+Existing canonical values are frozen as they stand at cutover; earlier label values
+cannot be recovered from reference IDs. Corrections create a new location and a new
+item version referencing it. Metadata-only edits remain allowed. Removing a current
+facet does not unfreeze locations still referenced by history. Notification work and
+attempt bodies are not rewritten; facet-aware message rendering remains unimplemented.
+
+FS-14 coverage: [location-freeze tests](../tests/test_facet_location_freeze.py) exercise
+facet-only/non-queryable history, metadata, correction, both writer-lock orderings,
+indexed lookup, populated migration parity, interrupted DDL/activation, backup restore
+and schema drift. Existing primary-location and multi-policy notification migration
+tests cover retained behavior. These are local disposable-ledger tests, not a deployment.
+
+Verification checkpoint: 776 tests and 1104 subtests passed; strict mypy on 43 source
+files, Ruff, compilation, contract-package synchronization and link/diff checks passed.
+A non-editable 0.8.3 wheel installed outside the checkout passed fresh initialization,
+17-to-18 migration and deep verification; its current manifest differs from schema 17
+in exactly the location trigger fingerprint. No staging ledger was used.
+
 ## Delivered boundary
 
 Slice A (development runtime 0.6.2) / ledger schema 16 delivered the eight-table hybrid layout, immutable

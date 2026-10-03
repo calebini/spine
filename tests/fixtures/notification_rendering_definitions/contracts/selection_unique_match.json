@@ -1,0 +1,14 @@
+{
+  "kind": "definition",
+  "definition": {
+    "notification_rendering_definition_id": "notification_rendering_definition_02f257fab5ae9d05c29ad78672208f2329671a72dbb76fa6773c9623950fa1fe",
+    "notification_rendering_definition_revision_id": "notification_rendering_definition_revision_e0ba4b36ee5a68085a16c17068ce0091ef1fc0834da7cd9fbcf7c55302dddc52"
+  },
+  "authorization": {
+    "resolution": "unique_match"
+  },
+  "effective_selection_keys": [
+    "flight",
+    "terminal"
+  ]
+}

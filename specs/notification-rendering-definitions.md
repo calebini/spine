@@ -1,6 +1,7 @@
 # Spine Notification Rendering Definitions
 
-Status: Draft v0.1.2 — bounded-audit manual corrections; not ratified or implemented
+Status: Accepted logical design v1.0; initial machine contracts specified, not implemented
+Ratified: 2026-10-03 after focused bounded consistency recheck
 Created: 2026-10-03
 Updated: 2026-10-03
 Scope: Owner-scoped declarative rendering definitions, explicit facet-field selection,
@@ -14,8 +15,8 @@ terminal, but the implemented renderer does not consume them. This proposal adds
 explicit, deterministic presentation of selected facet values without turning facet
 schemas into message templates or notification profiles into executable programs.
 
-This is the logical owner of the proposed extension. Requirements below are design
-targets, not additions to current closed request schemas or runtime capabilities.
+This is the logical owner of the accepted extension. Requirements below are design
+contracts, not additions to current closed request schemas or runtime capabilities.
 The agreed product directions and remaining implementation gates are in Section 12.
 
 Existing authorities remain:
@@ -32,14 +33,14 @@ Existing authorities remain:
 - [permissions.md](permissions.md): resource access and the distinction between
   reading data and releasing it to a destination.
 - [STORAGE_ATOMICITY_SPEC.md](STORAGE_ATOMICITY_SPEC.md): persistence and transaction
-  authority; this draft does not select new SQL tables or a ledger schema number.
+  authority; this specification does not select new SQL tables or a ledger schema number.
 - [agent-command-contract.md](agent-command-contract.md): command admission,
   version checks, audit, receipts, replay and dry-run.
 
 Spine owns validation, storage, resolution, rendering and evidence. Spine Packs may
 distribute definitions and references as installation inputs to public commands.
 A pack is neither a renderer nor a runtime plugin. Its installer and manifest
-extension require a separate downstream contract; this draft does not change them.
+extension require a separate downstream contract; this specification does not change them.
 
 ## 2. Preservation invariants and non-goals
 
@@ -83,8 +84,8 @@ Each immutable revision contains its root ID, contiguous revision number, displa
 name, nullable description, supported item types (`event`, `task`, or both), a pinned
 base-renderer contract/profile, ordered field selections and a canonical content hash.
 Display metadata is revisioned in this proposal; there is no independent mutable
-metadata operation in the first slice. IDs, revision preimages and exact encodings
-must be codified before runtime implementation, not inferred from example strings.
+metadata operation in the first slice. Section 13 defines IDs, revision preimages
+and encodings; example strings are not an alternative derivation rule.
 
 Publishing never modifies a prior revision. Retiring a root prevents fresh selection
 or application; historical reads and decoding remain available. Existing policies
@@ -94,7 +95,8 @@ Section 8 separates those meanings.
 ### 3.2 Field selection
 
 Each selection has a unique `selection_key`, `facet_key`, exact
-`facet_schema_revision_id`, declared `field_key`, and a literal display `label`.
+`facet_schema_revision_id`, declared `field_key`, a literal display `label`, and
+`projection=value|location_label`. Projection must agree with the declared field type.
 Array order is presentation order and hash-bearing. Duplicate selections of the same
 facet/schema/field are invalid. There is no wildcard, latest-revision selector, nested
 lookup or cross-item traversal.
@@ -105,7 +107,7 @@ key with that exact schema revision. Matching field names in another revision ar
 not sufficient, even if their apparent types happen to match. A definition may be
 reused by several archetypes that bind the same schema; it need not embed an archetype ID.
 
-Proposed first-slice value types are `text`, `enum`, `integer`, `boolean`, and `date`.
+First-slice value types are `text`, `enum`, `integer`, `boolean`, and `date`.
 One reference type is also supported by this proposal: a facet `reference` field
 whose declared target kind is `location`. It may project only that location's
 canonical `label`, using Section 6.1. Subject references and other reference kinds,
@@ -134,7 +136,7 @@ stored enum token is displayed as data. A location reference displays its author
 canonical label under the same text rules. Adapters retain only their existing
 transport-escaping role and must not add facts or reinterpret labels.
 
-Proposed fixed bounds for the first contract: at most eight selections, labels of at
+Fixed bounds for the first contract: at most eight selections, labels of at
 most 40 normalized Unicode scalar values, and at most 120 normalized scalar values
 per displayed value. A value above that bound is omitted whole, not truncated. The
 complete body still has the ordinary 1,024-scalar limit. If otherwise usable details
@@ -232,9 +234,16 @@ the canonical `label`. Do not expand address, coordinates, metadata, provider da
 timezone, related records or an external place directory. Never substitute the event's
 primary location for a missing facet reference, or use facet locations as time authority.
 
-Use the existing immutable canonical location record, not a new mutable venue entity.
-Referenced historical location facts remain decodable under the existing immutability
-contract. Replacing a location means an explicit new reference in a new item version;
+Use the canonical location record, not a new mutable venue entity. Before enabling
+this location-label path, implement the facet-reference freeze amendment in
+[facet storage Section 7.1](archetype-facet-storage.md#71-facet-referenced-location-freeze-amendment)
+and [ontology Section 7.1](ontology.md#71-locations). Schema 17's freeze checks only
+`item_locations`; reference FKs alone do not make facet-only targets immutable.
+Runtime 0.8.3/schema 18 implements the amendment, covering historical and non-queryable
+references as well. This prerequisite does not activate the rendering family.
+For pre-upgrade targets, the guarantee starts at migration cutover; do not claim a
+historical attachment-time label that was never recorded. Replacing a location means
+an explicit new reference in a new item version;
 the renderer neither follows a latest-location alias nor repoints old events. A future
 reusable location catalog is separate work, not a prerequisite or implied feature here.
 
@@ -266,7 +275,8 @@ failures: stale work, unavailable pinned time data, invalid base title/location,
 route denial, lifecycle denial or expired grace cannot become successful fallback.
 Storage errors, corrupt immutable definitions, exhausted transaction budgets or failure
 to persist evidence also fail the attempt-start operation; do not mask them as missing
-optional detail. Exact closed error/outcome strings are a codification gate.
+optional detail. Section 13 and its machine schemas close catalog errors and optional
+detail outcomes; the existing ordinary-admission errors remain unchanged.
 
 The rendering and started attempt commit atomically before external contact. A future
 versioned rendering evidence shape must include:
@@ -402,16 +412,17 @@ introduce a bulk rewrite of policies or cancellation of already started attempts
 
 ## 9. Command and pack boundary
 
-Reserve a conceptual `notification_rendering_definition` command family with create,
-publish, retire, show and list operations. These names are proposals, not registered
+Reserve the `notification_rendering_definition` command family with create,
+publish, retire, show and list operations. These names are specified, not registered
 CLI commands. Writes require exact expected revisions where applicable, command IDs,
 actor/time attribution, atomic audit and replay receipts. Publish of equivalent
 normalized content and repeated retirement need deterministic no-op semantics. Reads
-are bounded, permission-aware on protected transports, and nondurable. Exact envelopes,
-effects, pagination, identity preimages and field limits precede implementation.
+are bounded, permission-aware on protected transports, and nondurable. Section 13
+defines envelopes, effects, identity preimages and field limits. Cursor authentication
+and physical query plans remain implementation gates.
 
-The same codification must define bounded provision/revoke/show/list operations for
-reusable disclosure authorizations and their application evidence. They share common
+The `notification_rendering_disclosure` family defines provision/revoke/show/list
+operations for reusable disclosure authorizations and their application evidence. They share common
 audit/replay rules but are distinct from publishing a rendering definition. No current
 catalog, schedule or permission command accepts these new facts by implication.
 
@@ -486,23 +497,188 @@ The operator agreed the following product directions on 2026-10-03:
 3. **Lifecycle:** retirement blocks new selection/application; existing pinned use
    remains subject to current disclosure authority. Revocation is a separate action.
 
-These directions do not ratify every technical rule in this draft or make it
-implementation-ready. Exact authorization matching, scope/exception/revocation
-representation and permission mapping require bounded review and machine codification;
-surface any new product tradeoff instead of silently inferring a broader grant.
+The operator ratified the logical design on 2026-10-03 after the focused consistency
+recheck passed with zero findings and preserved boundaries. That review covered
+composition-origin isolation, stable-profile approval reuse and the implemented v2
+schedule baseline. It is not a convergence claim or an audit of the subsequently
+added machine contracts. Surface any new product tradeoff rather than silently
+inferring a broader grant.
 
-The first bounded consistency audit returned one major and two minor findings. This
-revision manually clarifies composition-origin scope, removes profile revision from
-the disclosure match key while retaining it in provenance, and aligns the architecture's
-schedule baseline with implemented v2 contracts. These corrections have not received
-a reviewer recheck and are not a convergence or implementation-readiness claim.
-
-Next: focused bounded recheck after exact send-scope authorization, then codify
-schemas/registry/fixtures and the versioned authoring/evidence integration. Close
-exact policy-presentation identity and continuity rules, comparison/no-op semantics,
-permission/disclosure mappings, catalog pagination/resource bounds, reference handling,
-storage/migration/rollback and version declarations before runtime work. Changes to
+Initial source-only schemas, registry and fixtures are specified in Section 13.
+Before runtime work, close exact policy-presentation identity and continuity rules,
+versioned profile/schedule/policy/attempt integration, permission/disclosure resolver
+mappings, authenticated catalog cursors, physical query plans and storage/migration/
+rollback. Changes to
 definition selection must enter the policy-continuity proof without turning a
 presentation change into a new send. Workers lacking the new capability must reject
 startup against a release requiring it, not silently ignore populated selections.
 No schema number, runtime release, pack version or deployment change is assigned here.
+
+## 13. Initial machine contract family
+
+The [source-only registry](../contracts/notification-rendering-definition-contract-registry.v1.json)
+is authoritative for reserved command names, request/response schema references,
+closed effects/errors, fixed limits and unclosed integration gates. The
+[fixture manifest](../contracts/notification-rendering-definition-fixture-manifest.json)
+separates structural fixtures, computed reference vectors and future stateful
+obligations. Neither artifact belongs in the implemented command registry, runtime
+capability advertisement or web allowlist yet.
+
+### 13.1 Versions, normalization and identities
+
+Reserved versions are `spine.notification-rendering-definitions.v1` (catalog),
+`spine.notification-rendering-disclosures.v1` (authorization management),
+`spine.notification-rendering-presentation.v1` (authoring/application fragments) and
+`spine.notification-rendering-details-evidence.v1` (attempt evidence extension).
+The last two are fragments awaiting versioned enclosing contracts, not new fields
+accepted by existing profile, schedule or attempt envelopes.
+
+Use `spine.canonical-json.v1` from the ontology: sorted object keys, preserved array
+order, UTF-8, explicit nulls/booleans, decimal-string integers, no JSON numbers and no
+Unicode normalization. Reject invalid scalar Unicode. IDs/keys are exact strings,
+not whitespace-trimmed or case-folded. Normalize display names, non-null descriptions
+and selector labels using ordinary renderer text normalization before validation and
+hashing. Empty normalized strings and forbidden control characters are invalid.
+Sort compatible item types, approved/effective selection keys and permitted location
+IDs lexicographically; reject duplicates rather than silently collapsing them. Preserve
+selection array order. Projection/type equality, unique selection keys and unique
+`(facet_key, facet_schema_revision_id, field_key)` tuples are semantic checks beyond
+JSON Schema. Date validity and canonical integer encoding remain facet authority.
+
+For SHA-256 below, hash canonical UTF-8 bytes; digests are lowercase hex. Definition
+content preimage is exactly `{contract_version, canonical_json_version, revision}`
+using the catalog version and normalized complete revision. Scope preimage is exactly
+`{contract_version, canonical_json_version, scope}` using the disclosure version and
+normalized complete immutable scope. Profile revision is absent from scope; it remains
+in the application origin. Empty permitted-location arrays are explicit and retained.
+Each disclosed location must be in that list. Extra fields, wildcards and omitted
+use-scope branches are invalid.
+
+New row IDs use the existing `spine.command-id.v1` derivation, not content IDs. These
+are the exact row roles, prefixes (identical to role), and request paths:
+
+| Creation | Row role/prefix | Request path |
+|---|---|---|
+| Definition create | `notification_rendering_definition` | `/definition` |
+| Definition create or publish | `notification_rendering_definition_revision` | `/revision` |
+| Disclosure provision | `notification_rendering_disclosure` | `/scope` |
+| Every fresh terminal write, including no-op | `audit` | `/audit` |
+| Every fresh terminal write, including no-op | `command_receipt` | `/` |
+
+The command-derived preimage contains exactly `derivation_version`, full `command`,
+`command_id`, `row_role`, `request_path`. The ID is `<prefix>_<digest>`. Revision
+numbers begin at `"1"`, increment only on changed publish, and are not IDs. Root
+owner/key remain immutable. A different command cannot recreate an occupied owner/key,
+even if retired. Identical disclosure scopes may be provisioned under distinct command
+IDs; they remain explicit records and therefore make automatic resolution ambiguous.
+
+### 13.2 Mutation, read and failure semantics
+
+The closed request/response schemas bind commands to their exact contract version.
+New writes carry command ID, actor and UTC timestamp. Dry run uses the existing
+`CommandContext.dry_run` flag (default false), not a JSON request field. Receipt
+comparison uses the full normalized request, plus command and contract version.
+Dry-run performs validation and deterministic preview,
+but writes no root, revision, grant, audit or receipt. Preview IDs are predictions,
+not evidence of persistence; return the same would-be audit/receipt IDs as the commit
+path, qualified by `dry_run=true`, under the shared command contract. Existing receipt
+replay precedes freshness and lifecycle
+validation, after current admission/shape checks. Mismatched command ID reuse is
+`semantic_conflict`. Replay returns the original record/effect/IDs with
+`replayed=true, changed=false`; it must not render a fresh catalog snapshot or authorize
+new disclosure. Dry-run replay follows that same branch with `dry_run=true`.
+Fresh success atomically persists state, one audit and one receipt. Errors persist none;
+handler-level dry-run errors carry `dry_run=true` under the existing context contract.
+Every success and handler-failure response, including show/list, replay and no-op,
+MUST omit `dry_run` on ordinary execution and include only `dry_run=true` for a
+dry-run context. `dry_run=false` is not a valid wire response. Read previews retain
+their ordinary read fields; the marker does not imply a mutation or durable evidence.
+
+Publish requires an active root and matching `expected_current_revision_id`; equal
+normalized content is `rendering_definition_publish_noop`. Retire also requires the
+exact current revision; repeated retirement returns `rendering_definition_retire_noop`
+only with the same reason code, otherwise `semantic_conflict`. Revocation similarly
+requires exact immutable `expected_scope_hash`; repeating the same reason is
+`rendering_disclosure_revoke_noop`, changing it conflicts. No-op records preserve
+original creation/publish/retirement/revocation provenance. Revocation does not publish
+a replacement scope. Provision requires an active, accessible definition and validates
+all fields, owner/use/destination and allowed references before storing the grant.
+
+Fresh validation precedence is: bounded decoding and closed shape/version; admission;
+receipt replay comparison; target/dependency existence and permission; expected revision
+or scope hash; lifecycle; selector/type/ownership/scope semantics; normalized no-op
+comparison; atomic persistence. Missing or inaccessible protected resources do not
+leak their existence. Invalid definition dependencies/types use
+`rendering_definition_invalid`; retired fresh use uses `rendering_definition_retired`.
+No matching authorization uses `rendering_disclosure_unavailable`, multiple matching
+records use `rendering_disclosure_ambiguous`, and an explicit nonmatching scope uses
+`rendering_disclosure_scope_mismatch`. At attempt start these expected disclosure
+failures instead omit optional detail after ordinary admission, never author a grant.
+
+Show may address an exact historical definition revision belonging to the named root;
+omission reads the current revision. Definition list returns current revision records
+in root-ID order; disclosure list returns grant-ID order, filtered by explicit owner
+and lifecycle status. Limit is a decimal string from 1 through 100; no counts or total
+ledger scan. Fetch at most limit+1 indexed candidates, return at most limit, and return
+a non-null cursor exactly when more exist. Both list responses MUST echo the accepted
+request `limit` as a required decimal string, including empty and dry-run pages;
+`len(records) <= int(limit)` is a semantic invariant. JSON Schema enforces the wire
+domain and absolute 100-row cap, not that cross-field count comparison. Read calls
+write no receipt or audit.
+Owner-filtered indexes, consistent permissions, signed cursor payload/version/key
+management and stale-cursor semantics must be specified before implementing these
+reads; an opaque string in the schema does not complete that contract.
+
+### 13.3 Selection and evidence fragments
+
+An authoring selection explicitly chooses `ordinary` or `definition`. Definition
+selection uses exact root/revision, an explicit effective subset, and either exact
+authorization ID or `unique_match` resolution. An empty subset means no facet detail;
+it is not a wildcard. Missing authorization does not silently downgrade authoring:
+the caller must explicitly choose ordinary output or provision permission. Catalog
+profile templates pin definitions, not destination grants; the application resolver
+provides authorization and effective fields. The stored policy presentation contains
+resolved authorization ID/scope hash and composition origin, never `unique_match`.
+Origin is assembled by the composition service, not trusted from a client assertion.
+
+For disclosure matching compare item owner, definition reference, origin-derived use
+scope and full destination structurally. Effective fields must be a subset of approved
+fields; actual location values must be in the permitted set individually. All fields
+on destination are exact: recipient kind/ID, target ID, channel, adapter, destination
+source and target reference. Transport membership and display labels are not identity.
+Retained policies may use retired definitions; new applications may not. Recheck grant
+lifecycle at each new attempt, regardless of prior application evidence.
+
+The evidence schema is an extension of, not a replacement for, existing immutable
+base evidence. The enclosing version must persist base source facts, ordinary hashes
+and this extension atomically with the same attempt. It must not create another
+rendering/send ledger. Each selection has one ordered outcome. Only `included` may
+carry a normalized value and source identities; omissions contain only selection key
+and a closed outcome. For suffix overflow, replace otherwise included outcomes with
+`suffix_overflow` and omit their values/sources, preserving other omissions. An empty
+effective subset yields `not_selected` for every selection. Missing/revoked/mismatching
+authorization yields `disclosure_unavailable` for selected fields, without reads of
+private facet/location data. No successful detail evidence may claim a non-active grant.
+
+Evidence `input_hash` preimage is exactly the evidence object without `input_hash`,
+`content_hash`, or `body_text`, plus `canonical_json_version=spine.canonical-json.v1`.
+It includes the two base hashes, attempt/policy/item facts and selected outcomes.
+Content preimage is `{contract_version, canonical_json_version, body_text}` with the
+evidence contract version. These are new namespaced hashes; existing v1 hashes/IDs
+are not redefined. Stored body must equal base body plus the ordered included suffix,
+or the exact base body for ordinary-only/overflow outcomes.
+
+Limits in the registry are hard rejection bounds on normalized canonical UTF-8 bytes
+where named bytes, Unicode scalars where named scalars. Check raw request bytes before
+decoding too. At most eight selected sources and eight unique location primary-key
+lookups may be evaluated; no discovery scans. At most 64 permitted location IDs may
+appear per grant. Evidence-extension overflow is a persistence/budget failure, not an
+ordinary fallback. These bounds do not substitute for physical query/index proofs.
+
+### 13.4 Verification boundary
+
+The first fixture corpus proves closed shapes, normalization/hash preimages and pure
+reference decisions for rendering/disclosure. Stateful scenarios separately define
+the required future runtime oracles for replay, races, retirement/revocation and work
+preservation. Merely validating those scenario documents does not execute the behavior.
+Machine-contract review and the remaining registry gates precede implementation.

@@ -1,0 +1,46 @@
+{
+  "contract_version": "spine.notification-rendering-definitions.v1",
+  "command_id": "rendering-example-create",
+  "actor_subject_id": "example-operator",
+  "action_timestamp_utc": "2026-10-03T12:00:00Z",
+  "owner": {
+    "owner_kind": "subject_group",
+    "owner_group_id": "example-group"
+  },
+  "definition_key": "flight_details",
+  "revision": {
+    "display_name": "Flight details",
+    "description": null,
+    "compatible_item_types": [
+      "event"
+    ],
+    "base_rendering_contract": "spine.notification-rendering.v1",
+    "base_rendering_profile": "spine.notification-rendering.concise-en-ca.v1",
+    "selections": [
+      {
+        "selection_key": "flight",
+        "facet_key": "flight_details",
+        "facet_schema_revision_id": "facet_schema_revision_flight_v1",
+        "field_key": "flight_number",
+        "label": "Flight",
+        "projection": "value"
+      },
+      {
+        "selection_key": "terminal",
+        "facet_key": "flight_details",
+        "facet_schema_revision_id": "facet_schema_revision_flight_v1",
+        "field_key": "terminal",
+        "label": "Terminal",
+        "projection": "value"
+      },
+      {
+        "selection_key": "departure",
+        "facet_key": "flight_details",
+        "facet_schema_revision_id": "facet_schema_revision_flight_v1",
+        "field_key": "departure_airport",
+        "label": "Departure",
+        "projection": "location_label"
+      }
+    ]
+  }
+}

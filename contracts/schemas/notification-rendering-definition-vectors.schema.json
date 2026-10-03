@@ -1,0 +1,266 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cortext.local/spine/contracts/schemas/notification-rendering-definition-vectors.schema.json",
+  "title": "Reference-only rendering and disclosure vectors",
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "const": "spine.notification-rendering-definition-vectors.v1"
+    },
+    "rendering": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "case_id": {
+            "type": "string"
+          },
+          "base_body": {
+            "type": "string"
+          },
+          "authorization_state": {
+            "enum": [
+              "active",
+              "revoked",
+              "unavailable",
+              "scope_mismatch"
+            ]
+          },
+          "fields": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "selection_key": {
+                  "$ref": "notification-rendering-definition-types.schema.json#/$defs/key"
+                },
+                "label": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 40
+                },
+                "field_type": {
+                  "enum": [
+                    "text",
+                    "enum",
+                    "integer",
+                    "boolean",
+                    "date",
+                    "location_label"
+                  ]
+                },
+                "value": {
+                  "type": [
+                    "string",
+                    "boolean"
+                  ]
+                },
+                "unavailable": {
+                  "enum": [
+                    "included",
+                    "not_selected",
+                    "disclosure_unavailable",
+                    "facet_missing",
+                    "schema_mismatch",
+                    "field_missing",
+                    "reference_unavailable",
+                    "invalid_text",
+                    "value_too_long",
+                    "suffix_overflow"
+                  ]
+                },
+                "selected": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "selection_key",
+                "label",
+                "field_type",
+                "selected"
+              ],
+              "additionalProperties": false
+            },
+            "minItems": 0,
+            "maxItems": 8
+          },
+          "expected": {
+            "type": "object",
+            "properties": {
+              "body_text": {
+                "type": "string"
+              },
+              "outcome": {
+                "enum": [
+                  "details_included",
+                  "ordinary_only",
+                  "suffix_overflow"
+                ]
+              },
+              "selection_outcomes": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "selection_key": {
+                      "$ref": "notification-rendering-definition-types.schema.json#/$defs/key"
+                    },
+                    "outcome": {
+                      "enum": [
+                        "included",
+                        "not_selected",
+                        "disclosure_unavailable",
+                        "facet_missing",
+                        "schema_mismatch",
+                        "field_missing",
+                        "reference_unavailable",
+                        "invalid_text",
+                        "value_too_long",
+                        "suffix_overflow"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "selection_key",
+                    "outcome"
+                  ],
+                  "additionalProperties": false
+                },
+                "minItems": 0,
+                "maxItems": 8
+              }
+            },
+            "required": [
+              "body_text",
+              "outcome",
+              "selection_outcomes"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "case_id",
+          "base_body",
+          "authorization_state",
+          "fields",
+          "expected"
+        ],
+        "additionalProperties": false
+      },
+      "minItems": 1,
+      "maxItems": 32
+    },
+    "disclosure": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "case_id": {
+            "type": "string"
+          },
+          "scope": {
+            "$ref": "notification-rendering-definition-types.schema.json#/$defs/disclosureScope"
+          },
+          "authorization_state": {
+            "enum": [
+              "active",
+              "revoked",
+              "unavailable"
+            ]
+          },
+          "facts": {
+            "type": "object",
+            "properties": {
+              "item_owner": {
+                "$ref": "notification-rendering-definition-types.schema.json#/$defs/owner"
+              },
+              "definition": {
+                "$ref": "notification-rendering-definition-types.schema.json#/$defs/definitionReference"
+              },
+              "origin": {
+                "$ref": "notification-rendering-definition-types.schema.json#/$defs/origin"
+              },
+              "destination": {
+                "$ref": "notification-rendering-definition-types.schema.json#/$defs/destination"
+              },
+              "effective_selection_keys": {
+                "type": "array",
+                "items": {
+                  "$ref": "notification-rendering-definition-types.schema.json#/$defs/key"
+                },
+                "minItems": 0,
+                "maxItems": 8
+              },
+              "location_ids": {
+                "type": "array",
+                "items": {
+                  "$ref": "notification-rendering-definition-types.schema.json#/$defs/id"
+                },
+                "minItems": 0,
+                "maxItems": 8
+              }
+            },
+            "required": [
+              "item_owner",
+              "definition",
+              "origin",
+              "destination",
+              "effective_selection_keys",
+              "location_ids"
+            ],
+            "additionalProperties": false
+          },
+          "expected_all_details_authorized": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "case_id",
+          "scope",
+          "authorization_state",
+          "facts",
+          "expected_all_details_authorized"
+        ],
+        "additionalProperties": false
+      },
+      "minItems": 1,
+      "maxItems": 32
+    },
+    "hashes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "case_id": {
+            "type": "string"
+          },
+          "preimage": {
+            "type": "object"
+          },
+          "canonical_json": {
+            "type": "string"
+          },
+          "sha256": {
+            "$ref": "notification-rendering-definition-types.schema.json#/$defs/sha256"
+          }
+        },
+        "required": [
+          "case_id",
+          "preimage",
+          "canonical_json",
+          "sha256"
+        ],
+        "additionalProperties": false
+      },
+      "minItems": 1,
+      "maxItems": 32
+    }
+  },
+  "required": [
+    "schema_version",
+    "rendering",
+    "disclosure",
+    "hashes"
+  ],
+  "additionalProperties": false
+}

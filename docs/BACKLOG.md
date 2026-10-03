@@ -1,6 +1,6 @@
 # Spine Backlog
 
-Last updated: 2026-10-03
+Last updated: 2026-10-04
 
 This is the single work queue for Spine development. The
 [implementation plan](IMPLEMENTATION_PLAN.md) explains roadmap direction and delivery
@@ -35,11 +35,176 @@ status labels in the same change. Routine task updates do not change spec author
 
 ## Current specification follow-up
 
+### SPINE-039 — Bounded facet-location freeze specification audit
+
+**Status:** Done — approved reviewer-only audit completed on 2026-10-04.
+**Scope:** One reviewer-only Whetstone `audit-change`, built-in consistency profile,
+`gpt-6.1-sol`. Review the storage/ontology freeze amendment, historical cutover,
+concurrency, migration/rollback and preservation of existing facet/rendering behavior.
+**Package:** [Audit notes](../whetstone_runs/facet-location-freeze-contract-audit-001/audit-notes.md)
+name seven specifications plus the notes and generated copies. No runtime source or
+tests are sent; this is not implementation certification, an Editor workflow or a
+convergence run. Existing uncommitted implementation and contract work stay intact.
+**Acceptance:** Inspect the report, classify findings/decisions, verify unchanged input
+hashes and report the bounded verdict and preservation status. No automatic patches,
+runtime changes, commit, push or deployment.
+**Result:** [Report](../whetstone_runs/facet-location-freeze-contract-audit-001/change_audit/change_audit_report.md)
+and [feedback](../whetstone_runs/facet-location-freeze-contract-audit-001/change_audit/change_audit_feedback.json):
+`pass`, `boundary_preserved=true`; zero blockers, majors, minors or nits. Reviewer
+`gpt-6.1-sol` confirmed in manifest and feedback; built-in consistency profile.
+No in-scope findings or product decisions were returned. All seven source hashes and
+the approved notes hash match the prepared baseline and final audit manifest; source
+bytes stayed unchanged. This is bounded specification evidence, not convergence,
+runtime certification or deployment approval. Existing uncommitted implementation
+and rendering contracts remain intact; no Editor, patch, commit or push ran.
+
+### SPINE-038 — Enforce facet-referenced location immutability
+
+**Status:** Done — implemented and locally verified; checkpointed with runtime 0.8.3,
+not deployed. The operator requested this checkpoint on 2026-10-04 after the clean
+SPINE-039 specification audit; rendering contracts remain source-only.
+**Scope:** Schema-18 forward trigger migration, exact schema-object manifests,
+fresh initialization, historical/non-queryable reference protection, migration
+rollback and concurrency tests. Preserve existing data and rendering contract work.
+No deployment, commit, push or activation of facet-aware rendering.
+**Result:** Runtime 0.8.3/schema 18. Migration 0018 changes only the existing location
+canonical-field trigger plus schema activation; all historical SQL migrations are
+unchanged. The schema-17 manifest is retained, the current manifest changes exactly
+one object fingerprint, and the writer inventory now pins schema 18. Schema-17
+activation verification is explicitly versioned so older migration chains still work.
+The existing reference index serves both historical and non-queryable facet protection.
+Metadata updates remain permitted; corrections require new location/item versions.
+No location/catalog tables, public command contracts, work rows or attempt bodies change.
+**Verification:** FS-14 has six executable tests / eleven subtests for all canonical
+fields, metadata, historical removal/correction, failed attachment rollback, populated
+cutover/backup restore, interrupted DDL/activation, schema drift, indexed lookup and both
+two-connection writer orders. Full pytest: **776 passed, 1104 subtests passed** with
+`PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src .venv/bin/python -m pytest -o addopts='' -q`.
+Ruff, strict mypy (43 source files), compileall, source-only contract synchronization,
+212 local links across eleven documents and diff hygiene passed.
+Installed non-editable wheel smoke outside the checkout passed fresh schema-18
+initialization, real schema-17-to-18 migration, deep verification, packaged migration/
+manifest presence and exclusion of the source-only rendering family. Wheel SHA-256:
+`43b81445d157b1331ea955a7f08df8c5175fd5204831af92ad8b786219259f74`.
+**Environment notes:** Initial worker verification using `../tickerd/src` correctly
+failed closed because that checkout is now 0.3.0/capability v2. Final verification uses
+the already installed compatible Tickerd 0.2.0/capability v1, with no compatibility
+relaxation. The local venv lacked setuptools for a non-isolated wheel build; ordinary
+isolated build-dependency provisioning succeeded without changing runtime dependencies.
+**Handoff:** Preserve the existing uncommitted rendering contracts. Deployment requires
+all writers stopped, a consistent verified backup, migration, then the new runtime.
+Rollback restores the pre-migration backup with matching code; preserve any newer data
+before restoration. No live ledger or service was touched; no audit rerun, commit or push.
+
+### SPINE-037 — Align rendering contracts and facet-location immutability
+
+**Status:** Done — operator-authorized targeted manual contract patch; not re-audited.
+**Dependencies:** SPINE-036 findings and the implemented facet reference storage.
+**Scope:** Shared dry-run response convention, accepted list-limit echo, and canonical
+location freeze for all persisted facet references, including historical/non-queryable
+fields. Check existing storage rules before extending them; preserve source-only
+activation fences. No runtime implementation, migration, audit rerun, commit or push.
+**Acceptance:** Consistent normative owners, matching schemas/fixtures and negative
+tests; explicit future runtime proof for the additional location freeze.
+**Result:** All success/failure response schemas accept only an optional true dry-run
+marker, including reads; normal/replay/no-op fixtures omit it. Both list responses
+require the accepted decimal-string limit. Added five preview fixtures (28 total),
+all-command marker/limit tests and the separate record-count semantic oracle.
+Storage inspection confirmed the existing immutable historical reference rows/FKs
+protect deletion, while `locations_referenced_canonical_fields_update` checks only
+`item_locations`. The ontology and facet-storage Section 7.1 now specify a freeze for
+all persisted facet references, using the existing location-reference index. The
+required forward migration/manifest update and FS-14 race/history/cutover proof remain
+unimplemented; the stateful fixture is expressly not runtime evidence. No historical
+label recovery, synthetic location association or new location lifecycle is implied.
+**Verification:** Focused rendering contracts: 12 tests / 115 subtests passed. Two
+non-overlapping regression selections covering rendering/notification/facet contracts,
+facet storage/migration, supporting sets, declarations and packaging passed 101 tests
+and 456 subtests in total. Ruff, source-only package synchronization, 158 local links
+across seven affected documents and `git diff --check` passed. Runtime `src/` and the
+index remain unchanged; prior working-tree edits and original audit artifacts preserved.
+**Next:** A focused reviewer recheck would need an updated scope including the
+facet-storage amendment; the previous audit verdict is not superseded by local tests.
+
+### SPINE-036 — Bounded rendering-definition machine-contract review
+
+**Status:** Done — operator-approved reviewer-only audit completed with `gpt-6.1-sol`.
+Verdict `needs_revision`, `boundary_preserved=false`: zero blockers, two majors,
+one minor and zero nits. This completes the review, not the findings or feature.
+**Dependencies:** SPINE-035 initial codification in the current uncommitted worktree.
+**Scope:** One reviewer-only `audit-change`, built-in consistency profile,
+`gpt-6.1-sol` (operator-selected upgrade), app CLI 0.160.0. Review nine reserved commands, six schemas,
+selection/evidence fragments, identities and receipt semantics, disclosure isolation,
+23 fixtures/reference oracles and source-only packaging fences. Preserve the ratified
+design and distinguish known remaining integration gates from new contradictions.
+**Evidence:** [Audit notes and exact 43-file scope](../whetstone_runs/notification-rendering-definitions-machine-contract-audit-001/audit-notes.md).
+Source byte/hash inventory is local-only in the same run root; verify unchanged inputs
+before launch. Review is against working-tree bytes, not the earlier HEAD checkpoint.
+**Acceptance:** Inspect one completed report, classify findings and product decisions,
+verify unchanged source bytes and report boundary preservation. No Editor, convergence
+claim, source edits, runtime, commit or push. Approval of prior design audits does not
+authorize sending this newly codified family.
+**Result:** [Audit report](../whetstone_runs/notification-rendering-definitions-machine-contract-audit-001/change_audit/change_audit_report.md)
+and [structured feedback](../whetstone_runs/notification-rendering-definitions-machine-contract-audit-001/change_audit/change_audit_feedback.json).
+Major findings: response shapes require/allow `dry_run=false` and cannot represent
+dry-run read successes; facet-only location references assume immutability beyond the
+ontology's stated `item_locations` freeze predicate. Minor: both list-response shapes
+omit the accepted-limit echo. The reviewer confirms source-only packaging/activation
+and the distinction between reference tests and unexecuted stateful obligations remain
+preserved; the overall boundary verdict is false because of the identified contract
+contradictions, not an observed runtime change.
+**Verification:** The report and feedback both name the requested model. All 43 input
+hashes match the prepared baseline and Whetstone manifest; the approved notes hash
+also matches. No source specification, schema, fixture, test or build input changed
+during review. No Editor or implementation ran.
+**Follow-up:** Operator authorized SPINE-037 to patch the findings and inspect existing
+facet storage. The selected amendment extends the location freeze to persisted facet
+references; it introduces no location catalog or revision model. The audit verdict
+above remains historical evidence, not a claim that the patch has been re-audited.
+
+### SPINE-035 — Ratify rendering definitions and codify initial machine contracts
+
+**Status:** Done — logical design ratified v1.0 and initial source-only machine
+contracts/fixtures codified on 2026-10-03 following the clean SPINE-034 focused recheck.
+**Scope:** Ratify the reviewed logical design; define source-only catalog/disclosure
+command schemas, selection/evidence shapes, version registry and conformance fixtures.
+Preserve existing authoring schemas, runtime declarations, ordinary rendering and work
+identity. Physical storage, migration and final authoring/worker integration remain
+explicit implementation gates, not silently invented in a schema-only step.
+**Acceptance:** Closed schema fixtures and computed reference vectors pass; negative
+fixtures cover disclosure isolation and preservation boundaries; existing contract and
+documentation checks remain green. No runtime code, database migration, audit, commit
+or push is included in this task.
+**Delivered:** [Logical contract, Section 13](../specs/notification-rendering-definitions.md#13-initial-machine-contract-family),
+[reserved registry](../contracts/notification-rendering-definition-contract-registry.v1.json),
+six closed schemas, and [23 fixture files](../contracts/notification-rendering-definition-fixture-manifest.json).
+Nine reserved catalog/disclosure commands do not enter the implemented registry.
+Selection/evidence fragments are explicitly not fields accepted by current envelopes.
+Reference coverage includes 16 rendering cases, 14 disclosure cases and nine canonical
+preimage/digest vectors. Twelve stateful acceptance scenarios remain unexecuted runtime
+obligations, not claimed implementation evidence.
+The existing shared command-context dry-run and replay rules are preserved. A narrow
+build-script exclusion prevents these six future schemas from entering the current web
+wheel; packaging regressions cover accidental activation. The older notification family
+test excludes this separate family without changing its expected existing schema set.
+**Verification:** Contract/documentation regression suite passed 167 tests and 807
+subtests; new negative cases cover revoked detail evidence, closed shapes, field limits,
+wrong versions, invalid dates and omission privacy. Ruff, offline web-contract parity,
+local Markdown links and diff hygiene pass. Existing `src/`, current contract schemas,
+runtime version and ledger schema are unchanged. The pre-existing SPINE-034 completion
+record in this working tree is preserved.
+**Next gate:** Review the newly codified machine contracts, then close the explicitly
+listed physical-storage/migration, enclosing authoring/evidence, policy-specific work
+continuity, permission-resolver and authenticated-cursor integration contracts before
+runtime work. No new product decision is required by this codification; no approval of
+future web exposure or pack installation is inferred.
+
 ### SPINE-032 — Draft opt-in facet-aware notification rendering definitions
 
 **Status:** Done — specification drafted and manually corrected after its first
-bounded audit on 2026-10-03; not ratified, codified or implemented. This completion
-covers the requested design pass only, not feature delivery or a clean recheck.
+bounded audit on 2026-10-03; not ratified, codified or implemented at that checkpoint. This completion
+covers the requested design pass only, not feature delivery. The focused recheck is
+now clean under SPINE-034; broader implementation contracts remain open.
 **Evidence:** [Rendering definitions](../specs/notification-rendering-definitions.md)
 owns proposed catalog/policy selection, scalar detail composition, exact schema
 matching, attempt-time freshness, immutable evidence, fallback and pack boundaries.
@@ -53,8 +218,9 @@ scalar detail plus existing location-reference labels; retirement blocks fresh u
 without suppressing pinned existing reminders. Draft v0.1.2 records these directions;
 exact authorization matching, location scope, permission and lifecycle mechanisms
 remain reviewable design proposals, not a ratified machine contract.
-**Next gate:** Focused recheck of the SPINE-033 manual corrections, followed by machine
-contracts/fixtures and storage/identity/permission integration before implementation.
+**Follow-up:** SPINE-034 completed the focused recheck without findings; SPINE-035
+subsequently records ratification and initial machine contracts/fixtures. Its remaining
+integration gates precede implementation.
 No runtime, schema, pack, web exposure or deployed-agent changes are authorized by
 this entry. Deferred resilience initiatives are not reopened.
 
@@ -90,13 +256,39 @@ remains provenance. New verification oracles cover origin isolation and timing-o
 approval reuse. Architecture v0.2.5 corrects the implemented v2 baseline without
 changing current contracts. Local verification: 12 documentation/rendering-fixture/
 implemented-declaration tests pass, all 23 added local links resolve and diff hygiene
-passes. No reviewer recheck, runtime change, commit or push was performed.
+passes. This patch step did not run a reviewer or change runtime; the subsequent
+checkpoint is `48be7d4` and its reviewer recheck is recorded under SPINE-034.
 At review completion, all ten specification hashes and the approved notes hash matched
 the completed manifest; no source specification changed during that review. The manual
 patch deliberately follows it and does not rewrite the preserved audit evidence.
 **Acceptance:** One bounded reviewer-only report inspected, findings classified and
 remaining decision/implementation gates stated; manual source changes only with
 operator authorization. No Editor, Phase 1/2, machine contracts or runtime work.
+
+### SPINE-034 — Focused rendering-definition manual-patch recheck
+
+**Status:** Done — exact send scope approved and focused consistency recheck completed
+2026-10-03 against checkpoint `48be7d4` using `gpt-5.6-sol` and app CLI 0.160.0.
+Verdict `pass`, `boundary_preserved=true`; zero blockers, majors, minors or nits.
+**Dependencies:** SPINE-033 completed feedback and the committed v0.1.2 manual fixes.
+**Scope:** Custom-addition versus profile-derived disclosure scope, timing-only profile
+revision approval reuse, and the corrected implemented v2 schedule baseline. No runtime
+or broader specification rewrite. Four specifications plus prior feedback and the notes
+form the exact proposed send scope.
+**Evidence:** [Recheck notes](../whetstone_runs/notification-rendering-definitions-contract-audit-002/audit-notes.md).
+**Result:** [Recheck report](../whetstone_runs/notification-rendering-definitions-contract-audit-002/change_audit/change_audit_report.md)
+and [structured feedback](../whetstone_runs/notification-rendering-definitions-contract-audit-002/change_audit/change_audit_feedback.json).
+The reviewer returned an empty feedback array on the explicitly scoped three-finding
+closure/regression recheck. The five input hashes and approved notes hash match the
+manifest; all four source specs remain byte-identical to the checkpoint. No source
+mutation, Editor, implementation, further commit or push occurred during this review.
+This is bounded consistency evidence, not convergence or implementation readiness.
+Existing audit artifacts
+remain local/ignored under the repository convention; the checkpoint contains the
+specification and documentation changes, not generated reviewer payloads.
+**Acceptance:** Inspect one completed report, account for closure of all three findings,
+verify unchanged source hashes, and record residuals without claiming convergence or
+implementation readiness. Any source patch requires separate operator direction.
 
 ## Recently completed backend work
 

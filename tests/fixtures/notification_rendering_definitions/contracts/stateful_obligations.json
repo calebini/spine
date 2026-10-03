@@ -1,0 +1,203 @@
+{
+  "schema_version": "spine.notification-rendering-definition-obligations.v1",
+  "runtime_verified": false,
+  "scenarios": [
+    {
+      "scenario_id": "same_command_replay",
+      "given": [
+        "Committed successful definition create"
+      ],
+      "when": [
+        "Replay identical normalized request",
+        "Replay altered request with same command_id"
+      ],
+      "then": [
+        "First replay returns original record and IDs with replayed=true",
+        "Altered replay returns semantic_conflict",
+        "Neither writes a second root, revision, audit or receipt"
+      ]
+    },
+    {
+      "scenario_id": "retirement_not_revocation",
+      "given": [
+        "Existing policy pins revision and active matching authorization"
+      ],
+      "when": [
+        "Retire definition",
+        "Attempt existing eligible reminder",
+        "Try fresh application"
+      ],
+      "then": [
+        "Existing attempt may include approved details",
+        "Fresh application fails rendering_definition_retired",
+        "No existing policy/work/attempt is rewritten"
+      ]
+    },
+    {
+      "scenario_id": "revocation_serialization",
+      "given": [
+        "Queued eligible work and active grant"
+      ],
+      "when": [
+        "Race revocation and attempt-start transaction in both commit orders"
+      ],
+      "then": [
+        "Revocation-first starts at most one ordinary-only attempt",
+        "Attempt-first body remains immutable",
+        "No second work, attempt or send created to remove details"
+      ]
+    },
+    {
+      "scenario_id": "facet_race",
+      "given": [
+        "Facet value is old in item version N"
+      ],
+      "when": [
+        "Race facet update to N+1 with attempt start"
+      ],
+      "then": [
+        "Body and evidence both represent a single admitted item version",
+        "Never combine N values with N+1 evidence"
+      ]
+    },
+    {
+      "scenario_id": "presentation_only_work_continuity",
+      "given": [
+        "Queued, leased, attempted and terminal work for multiple policies sharing one intent"
+      ],
+      "when": [
+        "Explicitly change presentation while preserving timing/route"
+      ],
+      "then": [
+        "Resolve policy-specific lineage, never infer uniqueness from intent",
+        "Preserve logical delivery and existing attempt bodies",
+        "Do not duplicate sends or resurrect attempted/terminal work",
+        "Queued/leased admitted attempt observes fresh presentation"
+      ]
+    },
+    {
+      "scenario_id": "attempt_persistence_failure",
+      "given": [
+        "Ordinary admission succeeds and detail is resolvable"
+      ],
+      "when": [
+        "Fail evidence persistence or transaction budget"
+      ],
+      "then": [
+        "No started attempt or rendering commit",
+        "No provider contact",
+        "Do not disguise failure as ordinary fallback"
+      ]
+    },
+    {
+      "scenario_id": "same_attempt_and_new_retry",
+      "given": [
+        "Committed attempt body and stable provider idempotency key"
+      ],
+      "when": [
+        "Replay same attempt",
+        "Create permitted later retry after facet correction"
+      ],
+      "then": [
+        "Same attempt returns exact persisted bytes",
+        "New retry may record new body but retains logical delivery idempotency",
+        "Readback does not assert which retry body recipient saw"
+      ]
+    },
+    {
+      "scenario_id": "base_admission_failure",
+      "given": [
+        "Selected valid definition and active authorization"
+      ],
+      "when": [
+        "Deny lifecycle, stale work, route, timezone or grace admission"
+      ],
+      "then": [
+        "No optional rendering fallback authorizes a send",
+        "Existing ordinary failure remains authoritative"
+      ]
+    },
+    {
+      "scenario_id": "multi_grant_resolution",
+      "given": [
+        "Two active exact scopes under distinct grant IDs"
+      ],
+      "when": [
+        "Apply with unique_match",
+        "Apply with one explicit grant ID"
+      ],
+      "then": [
+        "unique_match fails rendering_disclosure_ambiguous without writes",
+        "Explicit valid grant may apply",
+        "Profile application cannot mint a grant implicitly"
+      ]
+    },
+    {
+      "scenario_id": "publish_concurrency",
+      "given": [
+        "Two publishers name the same expected current revision"
+      ],
+      "when": [
+        "Commit first changed revision then evaluate second"
+      ],
+      "then": [
+        "Second returns stale_version",
+        "Contiguous revision numbers without historical mutation"
+      ]
+    },
+    {
+      "scenario_id": "dry_run_and_bounded_reads",
+      "given": [
+        "Valid authoring preview and many unrelated catalog rows"
+      ],
+      "when": [
+        "Execute dry_run",
+        "List one owner page"
+      ],
+      "then": [
+        "Dry-run writes no state/audit/receipt",
+        "List uses bounded indexed owner/status keyset scan",
+        "Read makes no durable audit/no-op receipt",
+        "Ordinary success/failure responses omit dry_run; preview success/failure responses carry only dry_run=true, including show/list, replay and no-op",
+        "Both lists echo the accepted decimal-string limit on every page and return no more than that many records"
+      ]
+    },
+    {
+      "scenario_id": "startup_capability_and_migration",
+      "given": [
+        "Ledger requiring detail capability with populated selections"
+      ],
+      "when": [
+        "Start incapable worker",
+        "Migrate disposable historical ledger then verify"
+      ],
+      "then": [
+        "Incapable worker fails closed before processing",
+        "Historical ordinary attempt bytes remain unchanged",
+        "Rollback never opens a new schema with incompatible old code"
+      ]
+    },
+    {
+      "scenario_id": "facet_only_location_freeze",
+      "given": [
+        "A readable location referenced only by a persisted non-queryable facet; no item_locations row",
+        "The versioned facet-location freeze migration is active"
+      ],
+      "when": [
+        "Attempt canonical label updates before and after current facet removal",
+        "Correct the location by creating a new location ID and setting it in a new item version",
+        "Race first facet attachment against canonical update in both serial orders",
+        "Migrate existing facet-only references, and separately interrupt migration to test rollback"
+      ],
+      "then": [
+        "Reject canonical-field updates whenever any historical facet reference exists; metadata-only updates remain permitted",
+        "Historical snapshots retain the old location ID and its frozen label; new versions may reference the new ID",
+        "Update-before-first-attachment becomes the attached fact; attachment-before-update rejects the update",
+        "Freeze lookup uses the existing location reference index without JSON or full-history scanning",
+        "Migration preserves current canonical rows and existing attempt bodies; no backdated attachment-time label is invented",
+        "Interrupted migration restores the predecessor schema and trigger; no mixed activation",
+        "No synthetic item_locations row, notification work churn or new send is caused by the freeze"
+      ]
+    }
+  ]
+}

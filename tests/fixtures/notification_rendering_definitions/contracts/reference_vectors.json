@@ -1,0 +1,1681 @@
+{
+  "schema_version": "spine.notification-rendering-definition-vectors.v1",
+  "rendering": [
+    {
+      "case_id": "flight_details",
+      "base_body": "Reminder: Flight to Paris in 2 hours",
+      "authorization_state": "active",
+      "fields": [
+        {
+          "selection_key": "flight",
+          "label": "Flight",
+          "field_type": "text",
+          "value": "AC872",
+          "selected": true
+        },
+        {
+          "selection_key": "terminal",
+          "label": "Terminal",
+          "field_type": "integer",
+          "value": "1",
+          "selected": true
+        },
+        {
+          "selection_key": "departure",
+          "label": "Departure",
+          "field_type": "location_label",
+          "value": "Toronto Pearson",
+          "selected": true
+        }
+      ],
+      "expected": {
+        "body_text": "Reminder: Flight to Paris in 2 hours · Flight: AC872 · Terminal: 1 · Departure: Toronto Pearson",
+        "outcome": "details_included",
+        "selection_outcomes": [
+          {
+            "selection_key": "flight",
+            "outcome": "included"
+          },
+          {
+            "selection_key": "terminal",
+            "outcome": "included"
+          },
+          {
+            "selection_key": "departure",
+            "outcome": "included"
+          }
+        ]
+      }
+    },
+    {
+      "case_id": "ordinary_preservation",
+      "base_body": "Reminder: Flight to Paris in 2 hours",
+      "authorization_state": "active",
+      "fields": [],
+      "expected": {
+        "body_text": "Reminder: Flight to Paris in 2 hours",
+        "outcome": "ordinary_only",
+        "selection_outcomes": []
+      }
+    },
+    {
+      "case_id": "one_optional_field_missing",
+      "base_body": "Reminder: Flight to Paris in 2 hours",
+      "authorization_state": "active",
+      "fields": [
+        {
+          "selection_key": "flight",
+          "label": "Flight",
+          "field_type": "text",
+          "value": "AC872",
+          "selected": true
+        },
+        {
+          "selection_key": "terminal",
+          "label": "Terminal",
+          "field_type": "text",
+          "selected": true,
+          "unavailable": "field_missing"
+        }
+      ],
+      "expected": {
+        "body_text": "Reminder: Flight to Paris in 2 hours · Flight: AC872",
+        "outcome": "details_included",
+        "selection_outcomes": [
+          {
+            "selection_key": "flight",
+            "outcome": "included"
+          },
+          {
+            "selection_key": "terminal",
+            "outcome": "field_missing"
+          }
+        ]
+      }
+    },
+    {
+      "case_id": "revoked_no_detail",
+      "base_body": "Reminder: Flight to Paris in 2 hours",
+      "authorization_state": "revoked",
+      "fields": [
+        {
+          "selection_key": "flight",
+          "label": "Flight",
+          "field_type": "text",
+          "value": "AC872",
+          "selected": true
+        },
+        {
+          "selection_key": "departure",
+          "label": "Departure",
+          "field_type": "location_label",
+          "value": "Toronto Pearson",
+          "selected": true
+        }
+      ],
+      "expected": {
+        "body_text": "Reminder: Flight to Paris in 2 hours",
+        "outcome": "ordinary_only",
+        "selection_outcomes": [
+          {
+            "selection_key": "flight",
+            "outcome": "disclosure_unavailable"
+          },
+          {
+            "selection_key": "departure",
+            "outcome": "disclosure_unavailable"
+          }
+        ]
+      }
+    },
+    {
+      "case_id": "wrong_destination",
+      "base_body": "Reminder: Flight to Paris in 2 hours",
+      "authorization_state": "scope_mismatch",
+      "fields": [
+        {
+          "selection_key": "flight",
+          "label": "Flight",
+          "field_type": "text",
+          "value": "AC872",
+          "selected": true
+        }
+      ],
+      "expected": {
+        "body_text": "Reminder: Flight to Paris in 2 hours",
+        "outcome": "ordinary_only",
+        "selection_outcomes": [
+          {
+            "selection_key": "flight",
+            "outcome": "disclosure_unavailable"
+          }
+        ]
+      }
+    },
+    {
+      "case_id": "empty_subset",
+      "base_body": "Reminder: Flight to Paris in 2 hours",
+      "authorization_state": "active",
+      "fields": [
+        {
+          "selection_key": "flight",
+          "label": "Flight",
+          "field_type": "text",
+          "value": "SECRET",
+          "selected": false
+        }
+      ],
+      "expected": {
+        "body_text": "Reminder: Flight to Paris in 2 hours",
+        "outcome": "ordinary_only",
+        "selection_outcomes": [
+          {
+            "selection_key": "flight",
+            "outcome": "not_selected"
+          }
+        ]
+      }
+    },
+    {
+      "case_id": "schema_upgrade",
+      "base_body": "Reminder: Flight to Paris in 2 hours",
+      "authorization_state": "active",
+      "fields": [
+        {
+          "selection_key": "flight",
+          "label": "Flight",
+          "field_type": "text",
+          "selected": true,
+          "unavailable": "schema_mismatch"
+        }
+      ],
+      "expected": {
+        "body_text": "Reminder: Flight to Paris in 2 hours",
+        "outcome": "ordinary_only",
+        "selection_outcomes": [
+          {
+            "selection_key": "flight",
+            "outcome": "schema_mismatch"
+          }
+        ]
+      }
+    },
+    {
+      "case_id": "facet_removed",
+      "base_body": "Reminder: Flight to Paris in 2 hours",
+      "authorization_state": "active",
+      "fields": [
+        {
+          "selection_key": "flight",
+          "label": "Flight",
+          "field_type": "text",
+          "selected": true,
+          "unavailable": "facet_missing"
+        }
+      ],
+      "expected": {
+        "body_text": "Reminder: Flight to Paris in 2 hours",
+        "outcome": "ordinary_only",
+        "selection_outcomes": [
+          {
+            "selection_key": "flight",
+            "outcome": "facet_missing"
+          }
+        ]
+      }
+    },
+    {
+      "case_id": "private_location",
+      "base_body": "Reminder: Flight to Paris in 2 hours",
+      "authorization_state": "active",
+      "fields": [
+        {
+          "selection_key": "flight",
+          "label": "Flight",
+          "field_type": "text",
+          "value": "AC872",
+          "selected": true
+        },
+        {
+          "selection_key": "departure",
+          "label": "Departure",
+          "field_type": "location_label",
+          "selected": true,
+          "unavailable": "reference_unavailable"
+        }
+      ],
+      "expected": {
+        "body_text": "Reminder: Flight to Paris in 2 hours · Flight: AC872",
+        "outcome": "details_included",
+        "selection_outcomes": [
+          {
+            "selection_key": "flight",
+            "outcome": "included"
+          },
+          {
+            "selection_key": "departure",
+            "outcome": "reference_unavailable"
+          }
+        ]
+      }
+    },
+    {
+      "case_id": "whitespace",
+      "base_body": "Reminder: Flight to Paris in 2 hours",
+      "authorization_state": "active",
+      "fields": [
+        {
+          "selection_key": "flight",
+          "label": "Flight",
+          "field_type": "text",
+          "value": "  AC872 \t  test  ",
+          "selected": true
+        }
+      ],
+      "expected": {
+        "body_text": "Reminder: Flight to Paris in 2 hours · Flight: AC872 test",
+        "outcome": "details_included",
+        "selection_outcomes": [
+          {
+            "selection_key": "flight",
+            "outcome": "included"
+          }
+        ]
+      }
+    },
+    {
+      "case_id": "forbidden_control",
+      "base_body": "Reminder: Flight to Paris in 2 hours",
+      "authorization_state": "active",
+      "fields": [
+        {
+          "selection_key": "flight",
+          "label": "Flight",
+          "field_type": "text",
+          "value": "AC\u0000872",
+          "selected": true
+        }
+      ],
+      "expected": {
+        "body_text": "Reminder: Flight to Paris in 2 hours",
+        "outcome": "ordinary_only",
+        "selection_outcomes": [
+          {
+            "selection_key": "flight",
+            "outcome": "invalid_text"
+          }
+        ]
+      }
+    },
+    {
+      "case_id": "empty_text",
+      "base_body": "Reminder: Flight to Paris in 2 hours",
+      "authorization_state": "active",
+      "fields": [
+        {
+          "selection_key": "flight",
+          "label": "Flight",
+          "field_type": "text",
+          "value": " \t ",
+          "selected": true
+        }
+      ],
+      "expected": {
+        "body_text": "Reminder: Flight to Paris in 2 hours",
+        "outcome": "ordinary_only",
+        "selection_outcomes": [
+          {
+            "selection_key": "flight",
+            "outcome": "invalid_text"
+          }
+        ]
+      }
+    },
+    {
+      "case_id": "value_at_limit",
+      "base_body": "Reminder: Flight to Paris in 2 hours",
+      "authorization_state": "active",
+      "fields": [
+        {
+          "selection_key": "flight",
+          "label": "Flight",
+          "field_type": "text",
+          "value": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+          "selected": true
+        }
+      ],
+      "expected": {
+        "body_text": "Reminder: Flight to Paris in 2 hours · Flight: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+        "outcome": "details_included",
+        "selection_outcomes": [
+          {
+            "selection_key": "flight",
+            "outcome": "included"
+          }
+        ]
+      }
+    },
+    {
+      "case_id": "value_above_limit",
+      "base_body": "Reminder: Flight to Paris in 2 hours",
+      "authorization_state": "active",
+      "fields": [
+        {
+          "selection_key": "flight",
+          "label": "Flight",
+          "field_type": "text",
+          "value": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+          "selected": true
+        }
+      ],
+      "expected": {
+        "body_text": "Reminder: Flight to Paris in 2 hours",
+        "outcome": "ordinary_only",
+        "selection_outcomes": [
+          {
+            "selection_key": "flight",
+            "outcome": "value_too_long"
+          }
+        ]
+      }
+    },
+    {
+      "case_id": "suffix_overflow",
+      "base_body": "BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB",
+      "authorization_state": "active",
+      "fields": [
+        {
+          "selection_key": "flight",
+          "label": "Flight",
+          "field_type": "text",
+          "value": "AC872",
+          "selected": true
+        },
+        {
+          "selection_key": "terminal",
+          "label": "Terminal",
+          "field_type": "integer",
+          "value": "1",
+          "selected": true
+        }
+      ],
+      "expected": {
+        "body_text": "BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB",
+        "outcome": "suffix_overflow",
+        "selection_outcomes": [
+          {
+            "selection_key": "flight",
+            "outcome": "suffix_overflow"
+          },
+          {
+            "selection_key": "terminal",
+            "outcome": "suffix_overflow"
+          }
+        ]
+      }
+    },
+    {
+      "case_id": "scalar_encoding",
+      "base_body": "Reminder: Flight to Paris in 2 hours",
+      "authorization_state": "active",
+      "fields": [
+        {
+          "selection_key": "count",
+          "label": "Count",
+          "field_type": "integer",
+          "value": "-3",
+          "selected": true
+        },
+        {
+          "selection_key": "ready",
+          "label": "Ready",
+          "field_type": "boolean",
+          "value": false,
+          "selected": true
+        },
+        {
+          "selection_key": "date",
+          "label": "Date",
+          "field_type": "date",
+          "value": "2026-10-03",
+          "selected": true
+        },
+        {
+          "selection_key": "status",
+          "label": "Status",
+          "field_type": "enum",
+          "value": "confirmed",
+          "selected": true
+        }
+      ],
+      "expected": {
+        "body_text": "Reminder: Flight to Paris in 2 hours · Count: -3 · Ready: false · Date: 2026-10-03 · Status: confirmed",
+        "outcome": "details_included",
+        "selection_outcomes": [
+          {
+            "selection_key": "count",
+            "outcome": "included"
+          },
+          {
+            "selection_key": "ready",
+            "outcome": "included"
+          },
+          {
+            "selection_key": "date",
+            "outcome": "included"
+          },
+          {
+            "selection_key": "status",
+            "outcome": "included"
+          }
+        ]
+      }
+    }
+  ],
+  "disclosure": [
+    {
+      "case_id": "same_profile",
+      "scope": {
+        "item_owner": {
+          "owner_kind": "subject_group",
+          "owner_group_id": "example-group"
+        },
+        "definition": {
+          "notification_rendering_definition_id": "notification_rendering_definition_02f257fab5ae9d05c29ad78672208f2329671a72dbb76fa6773c9623950fa1fe",
+          "notification_rendering_definition_revision_id": "notification_rendering_definition_revision_e0ba4b36ee5a68085a16c17068ce0091ef1fc0834da7cd9fbcf7c55302dddc52"
+        },
+        "approved_selection_keys": [
+          "departure",
+          "flight",
+          "terminal"
+        ],
+        "use_scope": {
+          "kind": "profile",
+          "notification_profile_id": "notification_profile_flight"
+        },
+        "destination": {
+          "recipient": {
+            "kind": "subject_group",
+            "group_id": "example-group"
+          },
+          "delivery_target_id": "delivery_target_example",
+          "channel": "whatsapp",
+          "adapter_name": "openclaw",
+          "destination_source": "delivery_target",
+          "target_ref": "example-group-not-a-real-route"
+        },
+        "permitted_location_ids": [
+          "location_airport"
+        ]
+      },
+      "authorization_state": "active",
+      "facts": {
+        "item_owner": {
+          "owner_kind": "subject_group",
+          "owner_group_id": "example-group"
+        },
+        "definition": {
+          "notification_rendering_definition_id": "notification_rendering_definition_02f257fab5ae9d05c29ad78672208f2329671a72dbb76fa6773c9623950fa1fe",
+          "notification_rendering_definition_revision_id": "notification_rendering_definition_revision_e0ba4b36ee5a68085a16c17068ce0091ef1fc0834da7cd9fbcf7c55302dddc52"
+        },
+        "origin": {
+          "kind": "profile_template",
+          "notification_profile_id": "notification_profile_flight",
+          "notification_profile_revision_id": "notification_profile_revision_one",
+          "template_key": "one_hour_before"
+        },
+        "destination": {
+          "recipient": {
+            "kind": "subject_group",
+            "group_id": "example-group"
+          },
+          "delivery_target_id": "delivery_target_example",
+          "channel": "whatsapp",
+          "adapter_name": "openclaw",
+          "destination_source": "delivery_target",
+          "target_ref": "example-group-not-a-real-route"
+        },
+        "effective_selection_keys": [
+          "flight",
+          "terminal"
+        ],
+        "location_ids": []
+      },
+      "expected_all_details_authorized": true
+    },
+    {
+      "case_id": "timing_revision_reuse",
+      "scope": {
+        "item_owner": {
+          "owner_kind": "subject_group",
+          "owner_group_id": "example-group"
+        },
+        "definition": {
+          "notification_rendering_definition_id": "notification_rendering_definition_02f257fab5ae9d05c29ad78672208f2329671a72dbb76fa6773c9623950fa1fe",
+          "notification_rendering_definition_revision_id": "notification_rendering_definition_revision_e0ba4b36ee5a68085a16c17068ce0091ef1fc0834da7cd9fbcf7c55302dddc52"
+        },
+        "approved_selection_keys": [
+          "departure",
+          "flight",
+          "terminal"
+        ],
+        "use_scope": {
+          "kind": "profile",
+          "notification_profile_id": "notification_profile_flight"
+        },
+        "destination": {
+          "recipient": {
+            "kind": "subject_group",
+            "group_id": "example-group"
+          },
+          "delivery_target_id": "delivery_target_example",
+          "channel": "whatsapp",
+          "adapter_name": "openclaw",
+          "destination_source": "delivery_target",
+          "target_ref": "example-group-not-a-real-route"
+        },
+        "permitted_location_ids": [
+          "location_airport"
+        ]
+      },
+      "authorization_state": "active",
+      "facts": {
+        "item_owner": {
+          "owner_kind": "subject_group",
+          "owner_group_id": "example-group"
+        },
+        "definition": {
+          "notification_rendering_definition_id": "notification_rendering_definition_02f257fab5ae9d05c29ad78672208f2329671a72dbb76fa6773c9623950fa1fe",
+          "notification_rendering_definition_revision_id": "notification_rendering_definition_revision_e0ba4b36ee5a68085a16c17068ce0091ef1fc0834da7cd9fbcf7c55302dddc52"
+        },
+        "origin": {
+          "kind": "profile_template",
+          "notification_profile_id": "notification_profile_flight",
+          "notification_profile_revision_id": "notification_profile_revision_two",
+          "template_key": "one_hour_before"
+        },
+        "destination": {
+          "recipient": {
+            "kind": "subject_group",
+            "group_id": "example-group"
+          },
+          "delivery_target_id": "delivery_target_example",
+          "channel": "whatsapp",
+          "adapter_name": "openclaw",
+          "destination_source": "delivery_target",
+          "target_ref": "example-group-not-a-real-route"
+        },
+        "effective_selection_keys": [
+          "flight",
+          "terminal"
+        ],
+        "location_ids": []
+      },
+      "expected_all_details_authorized": true
+    },
+    {
+      "case_id": "replacement_origin",
+      "scope": {
+        "item_owner": {
+          "owner_kind": "subject_group",
+          "owner_group_id": "example-group"
+        },
+        "definition": {
+          "notification_rendering_definition_id": "notification_rendering_definition_02f257fab5ae9d05c29ad78672208f2329671a72dbb76fa6773c9623950fa1fe",
+          "notification_rendering_definition_revision_id": "notification_rendering_definition_revision_e0ba4b36ee5a68085a16c17068ce0091ef1fc0834da7cd9fbcf7c55302dddc52"
+        },
+        "approved_selection_keys": [
+          "departure",
+          "flight",
+          "terminal"
+        ],
+        "use_scope": {
+          "kind": "profile",
+          "notification_profile_id": "notification_profile_flight"
+        },
+        "destination": {
+          "recipient": {
+            "kind": "subject_group",
+            "group_id": "example-group"
+          },
+          "delivery_target_id": "delivery_target_example",
+          "channel": "whatsapp",
+          "adapter_name": "openclaw",
+          "destination_source": "delivery_target",
+          "target_ref": "example-group-not-a-real-route"
+        },
+        "permitted_location_ids": [
+          "location_airport"
+        ]
+      },
+      "authorization_state": "active",
+      "facts": {
+        "item_owner": {
+          "owner_kind": "subject_group",
+          "owner_group_id": "example-group"
+        },
+        "definition": {
+          "notification_rendering_definition_id": "notification_rendering_definition_02f257fab5ae9d05c29ad78672208f2329671a72dbb76fa6773c9623950fa1fe",
+          "notification_rendering_definition_revision_id": "notification_rendering_definition_revision_e0ba4b36ee5a68085a16c17068ce0091ef1fc0834da7cd9fbcf7c55302dddc52"
+        },
+        "origin": {
+          "kind": "profile_replacement",
+          "notification_profile_id": "notification_profile_flight",
+          "notification_profile_revision_id": "notification_profile_revision_one",
+          "template_key": "one_hour_before"
+        },
+        "destination": {
+          "recipient": {
+            "kind": "subject_group",
+            "group_id": "example-group"
+          },
+          "delivery_target_id": "delivery_target_example",
+          "channel": "whatsapp",
+          "adapter_name": "openclaw",
+          "destination_source": "delivery_target",
+          "target_ref": "example-group-not-a-real-route"
+        },
+        "effective_selection_keys": [
+          "flight",
+          "terminal"
+        ],
+        "location_ids": []
+      },
+      "expected_all_details_authorized": true
+    },
+    {
+      "case_id": "custom_addition_cannot_borrow_profile",
+      "scope": {
+        "item_owner": {
+          "owner_kind": "subject_group",
+          "owner_group_id": "example-group"
+        },
+        "definition": {
+          "notification_rendering_definition_id": "notification_rendering_definition_02f257fab5ae9d05c29ad78672208f2329671a72dbb76fa6773c9623950fa1fe",
+          "notification_rendering_definition_revision_id": "notification_rendering_definition_revision_e0ba4b36ee5a68085a16c17068ce0091ef1fc0834da7cd9fbcf7c55302dddc52"
+        },
+        "approved_selection_keys": [
+          "departure",
+          "flight",
+          "terminal"
+        ],
+        "use_scope": {
+          "kind": "profile",
+          "notification_profile_id": "notification_profile_flight"
+        },
+        "destination": {
+          "recipient": {
+            "kind": "subject_group",
+            "group_id": "example-group"
+          },
+          "delivery_target_id": "delivery_target_example",
+          "channel": "whatsapp",
+          "adapter_name": "openclaw",
+          "destination_source": "delivery_target",
+          "target_ref": "example-group-not-a-real-route"
+        },
+        "permitted_location_ids": [
+          "location_airport"
+        ]
+      },
+      "authorization_state": "active",
+      "facts": {
+        "item_owner": {
+          "owner_kind": "subject_group",
+          "owner_group_id": "example-group"
+        },
+        "definition": {
+          "notification_rendering_definition_id": "notification_rendering_definition_02f257fab5ae9d05c29ad78672208f2329671a72dbb76fa6773c9623950fa1fe",
+          "notification_rendering_definition_revision_id": "notification_rendering_definition_revision_e0ba4b36ee5a68085a16c17068ce0091ef1fc0834da7cd9fbcf7c55302dddc52"
+        },
+        "origin": {
+          "kind": "custom_addition"
+        },
+        "destination": {
+          "recipient": {
+            "kind": "subject_group",
+            "group_id": "example-group"
+          },
+          "delivery_target_id": "delivery_target_example",
+          "channel": "whatsapp",
+          "adapter_name": "openclaw",
+          "destination_source": "delivery_target",
+          "target_ref": "example-group-not-a-real-route"
+        },
+        "effective_selection_keys": [
+          "flight",
+          "terminal"
+        ],
+        "location_ids": []
+      },
+      "expected_all_details_authorized": false
+    },
+    {
+      "case_id": "direct_cannot_borrow_profile",
+      "scope": {
+        "item_owner": {
+          "owner_kind": "subject_group",
+          "owner_group_id": "example-group"
+        },
+        "definition": {
+          "notification_rendering_definition_id": "notification_rendering_definition_02f257fab5ae9d05c29ad78672208f2329671a72dbb76fa6773c9623950fa1fe",
+          "notification_rendering_definition_revision_id": "notification_rendering_definition_revision_e0ba4b36ee5a68085a16c17068ce0091ef1fc0834da7cd9fbcf7c55302dddc52"
+        },
+        "approved_selection_keys": [
+          "departure",
+          "flight",
+          "terminal"
+        ],
+        "use_scope": {
+          "kind": "profile",
+          "notification_profile_id": "notification_profile_flight"
+        },
+        "destination": {
+          "recipient": {
+            "kind": "subject_group",
+            "group_id": "example-group"
+          },
+          "delivery_target_id": "delivery_target_example",
+          "channel": "whatsapp",
+          "adapter_name": "openclaw",
+          "destination_source": "delivery_target",
+          "target_ref": "example-group-not-a-real-route"
+        },
+        "permitted_location_ids": [
+          "location_airport"
+        ]
+      },
+      "authorization_state": "active",
+      "facts": {
+        "item_owner": {
+          "owner_kind": "subject_group",
+          "owner_group_id": "example-group"
+        },
+        "definition": {
+          "notification_rendering_definition_id": "notification_rendering_definition_02f257fab5ae9d05c29ad78672208f2329671a72dbb76fa6773c9623950fa1fe",
+          "notification_rendering_definition_revision_id": "notification_rendering_definition_revision_e0ba4b36ee5a68085a16c17068ce0091ef1fc0834da7cd9fbcf7c55302dddc52"
+        },
+        "origin": {
+          "kind": "direct"
+        },
+        "destination": {
+          "recipient": {
+            "kind": "subject_group",
+            "group_id": "example-group"
+          },
+          "delivery_target_id": "delivery_target_example",
+          "channel": "whatsapp",
+          "adapter_name": "openclaw",
+          "destination_source": "delivery_target",
+          "target_ref": "example-group-not-a-real-route"
+        },
+        "effective_selection_keys": [
+          "flight",
+          "terminal"
+        ],
+        "location_ids": []
+      },
+      "expected_all_details_authorized": false
+    },
+    {
+      "case_id": "custom_addition_direct_grant",
+      "scope": {
+        "item_owner": {
+          "owner_kind": "subject_group",
+          "owner_group_id": "example-group"
+        },
+        "definition": {
+          "notification_rendering_definition_id": "notification_rendering_definition_02f257fab5ae9d05c29ad78672208f2329671a72dbb76fa6773c9623950fa1fe",
+          "notification_rendering_definition_revision_id": "notification_rendering_definition_revision_e0ba4b36ee5a68085a16c17068ce0091ef1fc0834da7cd9fbcf7c55302dddc52"
+        },
+        "approved_selection_keys": [
+          "departure",
+          "flight",
+          "terminal"
+        ],
+        "use_scope": {
+          "kind": "direct_policy"
+        },
+        "destination": {
+          "recipient": {
+            "kind": "subject_group",
+            "group_id": "example-group"
+          },
+          "delivery_target_id": "delivery_target_example",
+          "channel": "whatsapp",
+          "adapter_name": "openclaw",
+          "destination_source": "delivery_target",
+          "target_ref": "example-group-not-a-real-route"
+        },
+        "permitted_location_ids": [
+          "location_airport"
+        ]
+      },
+      "authorization_state": "active",
+      "facts": {
+        "item_owner": {
+          "owner_kind": "subject_group",
+          "owner_group_id": "example-group"
+        },
+        "definition": {
+          "notification_rendering_definition_id": "notification_rendering_definition_02f257fab5ae9d05c29ad78672208f2329671a72dbb76fa6773c9623950fa1fe",
+          "notification_rendering_definition_revision_id": "notification_rendering_definition_revision_e0ba4b36ee5a68085a16c17068ce0091ef1fc0834da7cd9fbcf7c55302dddc52"
+        },
+        "origin": {
+          "kind": "custom_addition"
+        },
+        "destination": {
+          "recipient": {
+            "kind": "subject_group",
+            "group_id": "example-group"
+          },
+          "delivery_target_id": "delivery_target_example",
+          "channel": "whatsapp",
+          "adapter_name": "openclaw",
+          "destination_source": "delivery_target",
+          "target_ref": "example-group-not-a-real-route"
+        },
+        "effective_selection_keys": [
+          "flight",
+          "terminal"
+        ],
+        "location_ids": []
+      },
+      "expected_all_details_authorized": true
+    },
+    {
+      "case_id": "different_profile_root",
+      "scope": {
+        "item_owner": {
+          "owner_kind": "subject_group",
+          "owner_group_id": "example-group"
+        },
+        "definition": {
+          "notification_rendering_definition_id": "notification_rendering_definition_02f257fab5ae9d05c29ad78672208f2329671a72dbb76fa6773c9623950fa1fe",
+          "notification_rendering_definition_revision_id": "notification_rendering_definition_revision_e0ba4b36ee5a68085a16c17068ce0091ef1fc0834da7cd9fbcf7c55302dddc52"
+        },
+        "approved_selection_keys": [
+          "departure",
+          "flight",
+          "terminal"
+        ],
+        "use_scope": {
+          "kind": "profile",
+          "notification_profile_id": "notification_profile_flight"
+        },
+        "destination": {
+          "recipient": {
+            "kind": "subject_group",
+            "group_id": "example-group"
+          },
+          "delivery_target_id": "delivery_target_example",
+          "channel": "whatsapp",
+          "adapter_name": "openclaw",
+          "destination_source": "delivery_target",
+          "target_ref": "example-group-not-a-real-route"
+        },
+        "permitted_location_ids": [
+          "location_airport"
+        ]
+      },
+      "authorization_state": "active",
+      "facts": {
+        "item_owner": {
+          "owner_kind": "subject_group",
+          "owner_group_id": "example-group"
+        },
+        "definition": {
+          "notification_rendering_definition_id": "notification_rendering_definition_02f257fab5ae9d05c29ad78672208f2329671a72dbb76fa6773c9623950fa1fe",
+          "notification_rendering_definition_revision_id": "notification_rendering_definition_revision_e0ba4b36ee5a68085a16c17068ce0091ef1fc0834da7cd9fbcf7c55302dddc52"
+        },
+        "origin": {
+          "kind": "profile_template",
+          "notification_profile_id": "notification_profile_other",
+          "notification_profile_revision_id": "notification_profile_revision_one",
+          "template_key": "one_hour_before"
+        },
+        "destination": {
+          "recipient": {
+            "kind": "subject_group",
+            "group_id": "example-group"
+          },
+          "delivery_target_id": "delivery_target_example",
+          "channel": "whatsapp",
+          "adapter_name": "openclaw",
+          "destination_source": "delivery_target",
+          "target_ref": "example-group-not-a-real-route"
+        },
+        "effective_selection_keys": [
+          "flight",
+          "terminal"
+        ],
+        "location_ids": []
+      },
+      "expected_all_details_authorized": false
+    },
+    {
+      "case_id": "different_definition_revision",
+      "scope": {
+        "item_owner": {
+          "owner_kind": "subject_group",
+          "owner_group_id": "example-group"
+        },
+        "definition": {
+          "notification_rendering_definition_id": "notification_rendering_definition_02f257fab5ae9d05c29ad78672208f2329671a72dbb76fa6773c9623950fa1fe",
+          "notification_rendering_definition_revision_id": "notification_rendering_definition_revision_e0ba4b36ee5a68085a16c17068ce0091ef1fc0834da7cd9fbcf7c55302dddc52"
+        },
+        "approved_selection_keys": [
+          "departure",
+          "flight",
+          "terminal"
+        ],
+        "use_scope": {
+          "kind": "profile",
+          "notification_profile_id": "notification_profile_flight"
+        },
+        "destination": {
+          "recipient": {
+            "kind": "subject_group",
+            "group_id": "example-group"
+          },
+          "delivery_target_id": "delivery_target_example",
+          "channel": "whatsapp",
+          "adapter_name": "openclaw",
+          "destination_source": "delivery_target",
+          "target_ref": "example-group-not-a-real-route"
+        },
+        "permitted_location_ids": [
+          "location_airport"
+        ]
+      },
+      "authorization_state": "active",
+      "facts": {
+        "item_owner": {
+          "owner_kind": "subject_group",
+          "owner_group_id": "example-group"
+        },
+        "definition": {
+          "notification_rendering_definition_id": "notification_rendering_definition_02f257fab5ae9d05c29ad78672208f2329671a72dbb76fa6773c9623950fa1fe",
+          "notification_rendering_definition_revision_id": "revision_other"
+        },
+        "origin": {
+          "kind": "profile_template",
+          "notification_profile_id": "notification_profile_flight",
+          "notification_profile_revision_id": "notification_profile_revision_one",
+          "template_key": "one_hour_before"
+        },
+        "destination": {
+          "recipient": {
+            "kind": "subject_group",
+            "group_id": "example-group"
+          },
+          "delivery_target_id": "delivery_target_example",
+          "channel": "whatsapp",
+          "adapter_name": "openclaw",
+          "destination_source": "delivery_target",
+          "target_ref": "example-group-not-a-real-route"
+        },
+        "effective_selection_keys": [
+          "flight",
+          "terminal"
+        ],
+        "location_ids": []
+      },
+      "expected_all_details_authorized": false
+    },
+    {
+      "case_id": "changed_chat_even_with_fewer_fields",
+      "scope": {
+        "item_owner": {
+          "owner_kind": "subject_group",
+          "owner_group_id": "example-group"
+        },
+        "definition": {
+          "notification_rendering_definition_id": "notification_rendering_definition_02f257fab5ae9d05c29ad78672208f2329671a72dbb76fa6773c9623950fa1fe",
+          "notification_rendering_definition_revision_id": "notification_rendering_definition_revision_e0ba4b36ee5a68085a16c17068ce0091ef1fc0834da7cd9fbcf7c55302dddc52"
+        },
+        "approved_selection_keys": [
+          "departure",
+          "flight",
+          "terminal"
+        ],
+        "use_scope": {
+          "kind": "profile",
+          "notification_profile_id": "notification_profile_flight"
+        },
+        "destination": {
+          "recipient": {
+            "kind": "subject_group",
+            "group_id": "example-group"
+          },
+          "delivery_target_id": "delivery_target_example",
+          "channel": "whatsapp",
+          "adapter_name": "openclaw",
+          "destination_source": "delivery_target",
+          "target_ref": "example-group-not-a-real-route"
+        },
+        "permitted_location_ids": [
+          "location_airport"
+        ]
+      },
+      "authorization_state": "active",
+      "facts": {
+        "item_owner": {
+          "owner_kind": "subject_group",
+          "owner_group_id": "example-group"
+        },
+        "definition": {
+          "notification_rendering_definition_id": "notification_rendering_definition_02f257fab5ae9d05c29ad78672208f2329671a72dbb76fa6773c9623950fa1fe",
+          "notification_rendering_definition_revision_id": "notification_rendering_definition_revision_e0ba4b36ee5a68085a16c17068ce0091ef1fc0834da7cd9fbcf7c55302dddc52"
+        },
+        "origin": {
+          "kind": "profile_template",
+          "notification_profile_id": "notification_profile_flight",
+          "notification_profile_revision_id": "notification_profile_revision_one",
+          "template_key": "one_hour_before"
+        },
+        "destination": {
+          "recipient": {
+            "kind": "subject_group",
+            "group_id": "example-group"
+          },
+          "delivery_target_id": "delivery_target_example",
+          "channel": "whatsapp",
+          "adapter_name": "openclaw",
+          "destination_source": "delivery_target",
+          "target_ref": "other-chat"
+        },
+        "effective_selection_keys": [
+          "flight"
+        ],
+        "location_ids": []
+      },
+      "expected_all_details_authorized": false
+    },
+    {
+      "case_id": "new_field",
+      "scope": {
+        "item_owner": {
+          "owner_kind": "subject_group",
+          "owner_group_id": "example-group"
+        },
+        "definition": {
+          "notification_rendering_definition_id": "notification_rendering_definition_02f257fab5ae9d05c29ad78672208f2329671a72dbb76fa6773c9623950fa1fe",
+          "notification_rendering_definition_revision_id": "notification_rendering_definition_revision_e0ba4b36ee5a68085a16c17068ce0091ef1fc0834da7cd9fbcf7c55302dddc52"
+        },
+        "approved_selection_keys": [
+          "departure",
+          "flight",
+          "terminal"
+        ],
+        "use_scope": {
+          "kind": "profile",
+          "notification_profile_id": "notification_profile_flight"
+        },
+        "destination": {
+          "recipient": {
+            "kind": "subject_group",
+            "group_id": "example-group"
+          },
+          "delivery_target_id": "delivery_target_example",
+          "channel": "whatsapp",
+          "adapter_name": "openclaw",
+          "destination_source": "delivery_target",
+          "target_ref": "example-group-not-a-real-route"
+        },
+        "permitted_location_ids": [
+          "location_airport"
+        ]
+      },
+      "authorization_state": "active",
+      "facts": {
+        "item_owner": {
+          "owner_kind": "subject_group",
+          "owner_group_id": "example-group"
+        },
+        "definition": {
+          "notification_rendering_definition_id": "notification_rendering_definition_02f257fab5ae9d05c29ad78672208f2329671a72dbb76fa6773c9623950fa1fe",
+          "notification_rendering_definition_revision_id": "notification_rendering_definition_revision_e0ba4b36ee5a68085a16c17068ce0091ef1fc0834da7cd9fbcf7c55302dddc52"
+        },
+        "origin": {
+          "kind": "profile_template",
+          "notification_profile_id": "notification_profile_flight",
+          "notification_profile_revision_id": "notification_profile_revision_one",
+          "template_key": "one_hour_before"
+        },
+        "destination": {
+          "recipient": {
+            "kind": "subject_group",
+            "group_id": "example-group"
+          },
+          "delivery_target_id": "delivery_target_example",
+          "channel": "whatsapp",
+          "adapter_name": "openclaw",
+          "destination_source": "delivery_target",
+          "target_ref": "example-group-not-a-real-route"
+        },
+        "effective_selection_keys": [
+          "booking_reference"
+        ],
+        "location_ids": []
+      },
+      "expected_all_details_authorized": false
+    },
+    {
+      "case_id": "changed_owner",
+      "scope": {
+        "item_owner": {
+          "owner_kind": "subject_group",
+          "owner_group_id": "example-group"
+        },
+        "definition": {
+          "notification_rendering_definition_id": "notification_rendering_definition_02f257fab5ae9d05c29ad78672208f2329671a72dbb76fa6773c9623950fa1fe",
+          "notification_rendering_definition_revision_id": "notification_rendering_definition_revision_e0ba4b36ee5a68085a16c17068ce0091ef1fc0834da7cd9fbcf7c55302dddc52"
+        },
+        "approved_selection_keys": [
+          "departure",
+          "flight",
+          "terminal"
+        ],
+        "use_scope": {
+          "kind": "profile",
+          "notification_profile_id": "notification_profile_flight"
+        },
+        "destination": {
+          "recipient": {
+            "kind": "subject_group",
+            "group_id": "example-group"
+          },
+          "delivery_target_id": "delivery_target_example",
+          "channel": "whatsapp",
+          "adapter_name": "openclaw",
+          "destination_source": "delivery_target",
+          "target_ref": "example-group-not-a-real-route"
+        },
+        "permitted_location_ids": [
+          "location_airport"
+        ]
+      },
+      "authorization_state": "active",
+      "facts": {
+        "item_owner": {
+          "owner_kind": "subject",
+          "owner_subject_id": "someone_else"
+        },
+        "definition": {
+          "notification_rendering_definition_id": "notification_rendering_definition_02f257fab5ae9d05c29ad78672208f2329671a72dbb76fa6773c9623950fa1fe",
+          "notification_rendering_definition_revision_id": "notification_rendering_definition_revision_e0ba4b36ee5a68085a16c17068ce0091ef1fc0834da7cd9fbcf7c55302dddc52"
+        },
+        "origin": {
+          "kind": "profile_template",
+          "notification_profile_id": "notification_profile_flight",
+          "notification_profile_revision_id": "notification_profile_revision_one",
+          "template_key": "one_hour_before"
+        },
+        "destination": {
+          "recipient": {
+            "kind": "subject_group",
+            "group_id": "example-group"
+          },
+          "delivery_target_id": "delivery_target_example",
+          "channel": "whatsapp",
+          "adapter_name": "openclaw",
+          "destination_source": "delivery_target",
+          "target_ref": "example-group-not-a-real-route"
+        },
+        "effective_selection_keys": [
+          "flight",
+          "terminal"
+        ],
+        "location_ids": []
+      },
+      "expected_all_details_authorized": false
+    },
+    {
+      "case_id": "allowed_location",
+      "scope": {
+        "item_owner": {
+          "owner_kind": "subject_group",
+          "owner_group_id": "example-group"
+        },
+        "definition": {
+          "notification_rendering_definition_id": "notification_rendering_definition_02f257fab5ae9d05c29ad78672208f2329671a72dbb76fa6773c9623950fa1fe",
+          "notification_rendering_definition_revision_id": "notification_rendering_definition_revision_e0ba4b36ee5a68085a16c17068ce0091ef1fc0834da7cd9fbcf7c55302dddc52"
+        },
+        "approved_selection_keys": [
+          "departure",
+          "flight",
+          "terminal"
+        ],
+        "use_scope": {
+          "kind": "profile",
+          "notification_profile_id": "notification_profile_flight"
+        },
+        "destination": {
+          "recipient": {
+            "kind": "subject_group",
+            "group_id": "example-group"
+          },
+          "delivery_target_id": "delivery_target_example",
+          "channel": "whatsapp",
+          "adapter_name": "openclaw",
+          "destination_source": "delivery_target",
+          "target_ref": "example-group-not-a-real-route"
+        },
+        "permitted_location_ids": [
+          "location_airport"
+        ]
+      },
+      "authorization_state": "active",
+      "facts": {
+        "item_owner": {
+          "owner_kind": "subject_group",
+          "owner_group_id": "example-group"
+        },
+        "definition": {
+          "notification_rendering_definition_id": "notification_rendering_definition_02f257fab5ae9d05c29ad78672208f2329671a72dbb76fa6773c9623950fa1fe",
+          "notification_rendering_definition_revision_id": "notification_rendering_definition_revision_e0ba4b36ee5a68085a16c17068ce0091ef1fc0834da7cd9fbcf7c55302dddc52"
+        },
+        "origin": {
+          "kind": "profile_template",
+          "notification_profile_id": "notification_profile_flight",
+          "notification_profile_revision_id": "notification_profile_revision_one",
+          "template_key": "one_hour_before"
+        },
+        "destination": {
+          "recipient": {
+            "kind": "subject_group",
+            "group_id": "example-group"
+          },
+          "delivery_target_id": "delivery_target_example",
+          "channel": "whatsapp",
+          "adapter_name": "openclaw",
+          "destination_source": "delivery_target",
+          "target_ref": "example-group-not-a-real-route"
+        },
+        "effective_selection_keys": [
+          "departure"
+        ],
+        "location_ids": [
+          "location_airport"
+        ]
+      },
+      "expected_all_details_authorized": true
+    },
+    {
+      "case_id": "unapproved_location",
+      "scope": {
+        "item_owner": {
+          "owner_kind": "subject_group",
+          "owner_group_id": "example-group"
+        },
+        "definition": {
+          "notification_rendering_definition_id": "notification_rendering_definition_02f257fab5ae9d05c29ad78672208f2329671a72dbb76fa6773c9623950fa1fe",
+          "notification_rendering_definition_revision_id": "notification_rendering_definition_revision_e0ba4b36ee5a68085a16c17068ce0091ef1fc0834da7cd9fbcf7c55302dddc52"
+        },
+        "approved_selection_keys": [
+          "departure",
+          "flight",
+          "terminal"
+        ],
+        "use_scope": {
+          "kind": "profile",
+          "notification_profile_id": "notification_profile_flight"
+        },
+        "destination": {
+          "recipient": {
+            "kind": "subject_group",
+            "group_id": "example-group"
+          },
+          "delivery_target_id": "delivery_target_example",
+          "channel": "whatsapp",
+          "adapter_name": "openclaw",
+          "destination_source": "delivery_target",
+          "target_ref": "example-group-not-a-real-route"
+        },
+        "permitted_location_ids": [
+          "location_airport"
+        ]
+      },
+      "authorization_state": "active",
+      "facts": {
+        "item_owner": {
+          "owner_kind": "subject_group",
+          "owner_group_id": "example-group"
+        },
+        "definition": {
+          "notification_rendering_definition_id": "notification_rendering_definition_02f257fab5ae9d05c29ad78672208f2329671a72dbb76fa6773c9623950fa1fe",
+          "notification_rendering_definition_revision_id": "notification_rendering_definition_revision_e0ba4b36ee5a68085a16c17068ce0091ef1fc0834da7cd9fbcf7c55302dddc52"
+        },
+        "origin": {
+          "kind": "profile_template",
+          "notification_profile_id": "notification_profile_flight",
+          "notification_profile_revision_id": "notification_profile_revision_one",
+          "template_key": "one_hour_before"
+        },
+        "destination": {
+          "recipient": {
+            "kind": "subject_group",
+            "group_id": "example-group"
+          },
+          "delivery_target_id": "delivery_target_example",
+          "channel": "whatsapp",
+          "adapter_name": "openclaw",
+          "destination_source": "delivery_target",
+          "target_ref": "example-group-not-a-real-route"
+        },
+        "effective_selection_keys": [
+          "departure"
+        ],
+        "location_ids": [
+          "location_private_home"
+        ]
+      },
+      "expected_all_details_authorized": false
+    },
+    {
+      "case_id": "revoked",
+      "scope": {
+        "item_owner": {
+          "owner_kind": "subject_group",
+          "owner_group_id": "example-group"
+        },
+        "definition": {
+          "notification_rendering_definition_id": "notification_rendering_definition_02f257fab5ae9d05c29ad78672208f2329671a72dbb76fa6773c9623950fa1fe",
+          "notification_rendering_definition_revision_id": "notification_rendering_definition_revision_e0ba4b36ee5a68085a16c17068ce0091ef1fc0834da7cd9fbcf7c55302dddc52"
+        },
+        "approved_selection_keys": [
+          "departure",
+          "flight",
+          "terminal"
+        ],
+        "use_scope": {
+          "kind": "profile",
+          "notification_profile_id": "notification_profile_flight"
+        },
+        "destination": {
+          "recipient": {
+            "kind": "subject_group",
+            "group_id": "example-group"
+          },
+          "delivery_target_id": "delivery_target_example",
+          "channel": "whatsapp",
+          "adapter_name": "openclaw",
+          "destination_source": "delivery_target",
+          "target_ref": "example-group-not-a-real-route"
+        },
+        "permitted_location_ids": [
+          "location_airport"
+        ]
+      },
+      "authorization_state": "revoked",
+      "facts": {
+        "item_owner": {
+          "owner_kind": "subject_group",
+          "owner_group_id": "example-group"
+        },
+        "definition": {
+          "notification_rendering_definition_id": "notification_rendering_definition_02f257fab5ae9d05c29ad78672208f2329671a72dbb76fa6773c9623950fa1fe",
+          "notification_rendering_definition_revision_id": "notification_rendering_definition_revision_e0ba4b36ee5a68085a16c17068ce0091ef1fc0834da7cd9fbcf7c55302dddc52"
+        },
+        "origin": {
+          "kind": "profile_template",
+          "notification_profile_id": "notification_profile_flight",
+          "notification_profile_revision_id": "notification_profile_revision_one",
+          "template_key": "one_hour_before"
+        },
+        "destination": {
+          "recipient": {
+            "kind": "subject_group",
+            "group_id": "example-group"
+          },
+          "delivery_target_id": "delivery_target_example",
+          "channel": "whatsapp",
+          "adapter_name": "openclaw",
+          "destination_source": "delivery_target",
+          "target_ref": "example-group-not-a-real-route"
+        },
+        "effective_selection_keys": [
+          "flight",
+          "terminal"
+        ],
+        "location_ids": []
+      },
+      "expected_all_details_authorized": false
+    }
+  ],
+  "hashes": [
+    {
+      "case_id": "definition_content",
+      "preimage": {
+        "contract_version": "spine.notification-rendering-definitions.v1",
+        "canonical_json_version": "spine.canonical-json.v1",
+        "revision": {
+          "display_name": "Flight details",
+          "description": null,
+          "compatible_item_types": [
+            "event"
+          ],
+          "base_rendering_contract": "spine.notification-rendering.v1",
+          "base_rendering_profile": "spine.notification-rendering.concise-en-ca.v1",
+          "selections": [
+            {
+              "selection_key": "flight",
+              "facet_key": "flight_details",
+              "facet_schema_revision_id": "facet_schema_revision_flight_v1",
+              "field_key": "flight_number",
+              "label": "Flight",
+              "projection": "value"
+            },
+            {
+              "selection_key": "terminal",
+              "facet_key": "flight_details",
+              "facet_schema_revision_id": "facet_schema_revision_flight_v1",
+              "field_key": "terminal",
+              "label": "Terminal",
+              "projection": "value"
+            },
+            {
+              "selection_key": "departure",
+              "facet_key": "flight_details",
+              "facet_schema_revision_id": "facet_schema_revision_flight_v1",
+              "field_key": "departure_airport",
+              "label": "Departure",
+              "projection": "location_label"
+            }
+          ]
+        }
+      },
+      "canonical_json": "{\"canonical_json_version\":\"spine.canonical-json.v1\",\"contract_version\":\"spine.notification-rendering-definitions.v1\",\"revision\":{\"base_rendering_contract\":\"spine.notification-rendering.v1\",\"base_rendering_profile\":\"spine.notification-rendering.concise-en-ca.v1\",\"compatible_item_types\":[\"event\"],\"description\":null,\"display_name\":\"Flight details\",\"selections\":[{\"facet_key\":\"flight_details\",\"facet_schema_revision_id\":\"facet_schema_revision_flight_v1\",\"field_key\":\"flight_number\",\"label\":\"Flight\",\"projection\":\"value\",\"selection_key\":\"flight\"},{\"facet_key\":\"flight_details\",\"facet_schema_revision_id\":\"facet_schema_revision_flight_v1\",\"field_key\":\"terminal\",\"label\":\"Terminal\",\"projection\":\"value\",\"selection_key\":\"terminal\"},{\"facet_key\":\"flight_details\",\"facet_schema_revision_id\":\"facet_schema_revision_flight_v1\",\"field_key\":\"departure_airport\",\"label\":\"Departure\",\"projection\":\"location_label\",\"selection_key\":\"departure\"}]}}",
+      "sha256": "6d8aaffc80a2e54efa76fcd02be0a1f65881e111f5902b8fd271a6ae0a7d5fdb"
+    },
+    {
+      "case_id": "disclosure_scope",
+      "preimage": {
+        "contract_version": "spine.notification-rendering-disclosures.v1",
+        "canonical_json_version": "spine.canonical-json.v1",
+        "scope": {
+          "item_owner": {
+            "owner_kind": "subject_group",
+            "owner_group_id": "example-group"
+          },
+          "definition": {
+            "notification_rendering_definition_id": "notification_rendering_definition_02f257fab5ae9d05c29ad78672208f2329671a72dbb76fa6773c9623950fa1fe",
+            "notification_rendering_definition_revision_id": "notification_rendering_definition_revision_e0ba4b36ee5a68085a16c17068ce0091ef1fc0834da7cd9fbcf7c55302dddc52"
+          },
+          "approved_selection_keys": [
+            "departure",
+            "flight",
+            "terminal"
+          ],
+          "use_scope": {
+            "kind": "profile",
+            "notification_profile_id": "notification_profile_flight"
+          },
+          "destination": {
+            "recipient": {
+              "kind": "subject_group",
+              "group_id": "example-group"
+            },
+            "delivery_target_id": "delivery_target_example",
+            "channel": "whatsapp",
+            "adapter_name": "openclaw",
+            "destination_source": "delivery_target",
+            "target_ref": "example-group-not-a-real-route"
+          },
+          "permitted_location_ids": [
+            "location_airport"
+          ]
+        }
+      },
+      "canonical_json": "{\"canonical_json_version\":\"spine.canonical-json.v1\",\"contract_version\":\"spine.notification-rendering-disclosures.v1\",\"scope\":{\"approved_selection_keys\":[\"departure\",\"flight\",\"terminal\"],\"definition\":{\"notification_rendering_definition_id\":\"notification_rendering_definition_02f257fab5ae9d05c29ad78672208f2329671a72dbb76fa6773c9623950fa1fe\",\"notification_rendering_definition_revision_id\":\"notification_rendering_definition_revision_e0ba4b36ee5a68085a16c17068ce0091ef1fc0834da7cd9fbcf7c55302dddc52\"},\"destination\":{\"adapter_name\":\"openclaw\",\"channel\":\"whatsapp\",\"delivery_target_id\":\"delivery_target_example\",\"destination_source\":\"delivery_target\",\"recipient\":{\"group_id\":\"example-group\",\"kind\":\"subject_group\"},\"target_ref\":\"example-group-not-a-real-route\"},\"item_owner\":{\"owner_group_id\":\"example-group\",\"owner_kind\":\"subject_group\"},\"permitted_location_ids\":[\"location_airport\"],\"use_scope\":{\"kind\":\"profile\",\"notification_profile_id\":\"notification_profile_flight\"}}}",
+      "sha256": "a588d9a8b3304e77047eba1c1e380c53242f3f67aae121832b4da70974966334"
+    },
+    {
+      "case_id": "evidence_input",
+      "preimage": {
+        "contract_version": "spine.notification-rendering-details-evidence.v1",
+        "attempt_id": "attempt_example",
+        "base_rendering_input_hash": "1111111111111111111111111111111111111111111111111111111111111111",
+        "base_rendered_content_hash": "2222222222222222222222222222222222222222222222222222222222222222",
+        "rendered_item_version": "3",
+        "policy_id": "notification_policy_example",
+        "policy_version": "3",
+        "definition": {
+          "notification_rendering_definition_id": "notification_rendering_definition_02f257fab5ae9d05c29ad78672208f2329671a72dbb76fa6773c9623950fa1fe",
+          "notification_rendering_definition_revision_id": "notification_rendering_definition_revision_e0ba4b36ee5a68085a16c17068ce0091ef1fc0834da7cd9fbcf7c55302dddc52"
+        },
+        "definition_hash": "6d8aaffc80a2e54efa76fcd02be0a1f65881e111f5902b8fd271a6ae0a7d5fdb",
+        "disclosure_authorization_id": "notification_rendering_disclosure_53174c12223c65f3cbbe0e1d4b55897790ebf9b1671bb26893448c843c713737",
+        "disclosure_scope_hash": "a588d9a8b3304e77047eba1c1e380c53242f3f67aae121832b4da70974966334",
+        "authorization_state": "active",
+        "effective_selection_keys": [
+          "departure",
+          "flight",
+          "terminal"
+        ],
+        "destination": {
+          "recipient": {
+            "kind": "subject_group",
+            "group_id": "example-group"
+          },
+          "delivery_target_id": "delivery_target_example",
+          "channel": "whatsapp",
+          "adapter_name": "openclaw",
+          "destination_source": "delivery_target",
+          "target_ref": "example-group-not-a-real-route"
+        },
+        "selections": [
+          {
+            "selection_key": "flight",
+            "outcome": "included",
+            "value": "AC872",
+            "source": {
+              "facet_key": "flight_details",
+              "facet_schema_revision_id": "facet_schema_revision_flight_v1",
+              "archetype_facet_binding_id": "archetype_facet_binding_flight",
+              "field_key": "flight_number"
+            }
+          },
+          {
+            "selection_key": "terminal",
+            "outcome": "included",
+            "value": "1",
+            "source": {
+              "facet_key": "flight_details",
+              "facet_schema_revision_id": "facet_schema_revision_flight_v1",
+              "archetype_facet_binding_id": "archetype_facet_binding_flight",
+              "field_key": "terminal"
+            }
+          },
+          {
+            "selection_key": "departure",
+            "outcome": "included",
+            "value": "Toronto Pearson",
+            "source": {
+              "facet_key": "flight_details",
+              "facet_schema_revision_id": "facet_schema_revision_flight_v1",
+              "archetype_facet_binding_id": "archetype_facet_binding_flight",
+              "field_key": "departure_airport",
+              "location_id": "location_airport"
+            }
+          }
+        ],
+        "outcome": "details_included",
+        "canonical_json_version": "spine.canonical-json.v1"
+      },
+      "canonical_json": "{\"attempt_id\":\"attempt_example\",\"authorization_state\":\"active\",\"base_rendered_content_hash\":\"2222222222222222222222222222222222222222222222222222222222222222\",\"base_rendering_input_hash\":\"1111111111111111111111111111111111111111111111111111111111111111\",\"canonical_json_version\":\"spine.canonical-json.v1\",\"contract_version\":\"spine.notification-rendering-details-evidence.v1\",\"definition\":{\"notification_rendering_definition_id\":\"notification_rendering_definition_02f257fab5ae9d05c29ad78672208f2329671a72dbb76fa6773c9623950fa1fe\",\"notification_rendering_definition_revision_id\":\"notification_rendering_definition_revision_e0ba4b36ee5a68085a16c17068ce0091ef1fc0834da7cd9fbcf7c55302dddc52\"},\"definition_hash\":\"6d8aaffc80a2e54efa76fcd02be0a1f65881e111f5902b8fd271a6ae0a7d5fdb\",\"destination\":{\"adapter_name\":\"openclaw\",\"channel\":\"whatsapp\",\"delivery_target_id\":\"delivery_target_example\",\"destination_source\":\"delivery_target\",\"recipient\":{\"group_id\":\"example-group\",\"kind\":\"subject_group\"},\"target_ref\":\"example-group-not-a-real-route\"},\"disclosure_authorization_id\":\"notification_rendering_disclosure_53174c12223c65f3cbbe0e1d4b55897790ebf9b1671bb26893448c843c713737\",\"disclosure_scope_hash\":\"a588d9a8b3304e77047eba1c1e380c53242f3f67aae121832b4da70974966334\",\"effective_selection_keys\":[\"departure\",\"flight\",\"terminal\"],\"outcome\":\"details_included\",\"policy_id\":\"notification_policy_example\",\"policy_version\":\"3\",\"rendered_item_version\":\"3\",\"selections\":[{\"outcome\":\"included\",\"selection_key\":\"flight\",\"source\":{\"archetype_facet_binding_id\":\"archetype_facet_binding_flight\",\"facet_key\":\"flight_details\",\"facet_schema_revision_id\":\"facet_schema_revision_flight_v1\",\"field_key\":\"flight_number\"},\"value\":\"AC872\"},{\"outcome\":\"included\",\"selection_key\":\"terminal\",\"source\":{\"archetype_facet_binding_id\":\"archetype_facet_binding_flight\",\"facet_key\":\"flight_details\",\"facet_schema_revision_id\":\"facet_schema_revision_flight_v1\",\"field_key\":\"terminal\"},\"value\":\"1\"},{\"outcome\":\"included\",\"selection_key\":\"departure\",\"source\":{\"archetype_facet_binding_id\":\"archetype_facet_binding_flight\",\"facet_key\":\"flight_details\",\"facet_schema_revision_id\":\"facet_schema_revision_flight_v1\",\"field_key\":\"departure_airport\",\"location_id\":\"location_airport\"},\"value\":\"Toronto Pearson\"}]}",
+      "sha256": "2b9ed2c8d906d9389b49fb86b5e28eb4d184f4b5edbcb5a83abc6199c1fdf01f"
+    },
+    {
+      "case_id": "evidence_content",
+      "preimage": {
+        "contract_version": "spine.notification-rendering-details-evidence.v1",
+        "canonical_json_version": "spine.canonical-json.v1",
+        "body_text": "Reminder: Flight to Paris in 2 hours · Flight: AC872 · Terminal: 1 · Departure: Toronto Pearson"
+      },
+      "canonical_json": "{\"body_text\":\"Reminder: Flight to Paris in 2 hours · Flight: AC872 · Terminal: 1 · Departure: Toronto Pearson\",\"canonical_json_version\":\"spine.canonical-json.v1\",\"contract_version\":\"spine.notification-rendering-details-evidence.v1\"}",
+      "sha256": "4f0044af1de50557be68549a5ac39d475041f4d9df6a29b5b7b029a69d7aa975"
+    },
+    {
+      "case_id": "notification_rendering_definition",
+      "preimage": {
+        "derivation_version": "spine.command-id.v1",
+        "command": "notification_rendering_definition.create",
+        "command_id": "rendering-example-create",
+        "row_role": "notification_rendering_definition",
+        "request_path": "/definition"
+      },
+      "canonical_json": "{\"command\":\"notification_rendering_definition.create\",\"command_id\":\"rendering-example-create\",\"derivation_version\":\"spine.command-id.v1\",\"request_path\":\"/definition\",\"row_role\":\"notification_rendering_definition\"}",
+      "sha256": "02f257fab5ae9d05c29ad78672208f2329671a72dbb76fa6773c9623950fa1fe"
+    },
+    {
+      "case_id": "notification_rendering_definition_revision",
+      "preimage": {
+        "derivation_version": "spine.command-id.v1",
+        "command": "notification_rendering_definition.create",
+        "command_id": "rendering-example-create",
+        "row_role": "notification_rendering_definition_revision",
+        "request_path": "/revision"
+      },
+      "canonical_json": "{\"command\":\"notification_rendering_definition.create\",\"command_id\":\"rendering-example-create\",\"derivation_version\":\"spine.command-id.v1\",\"request_path\":\"/revision\",\"row_role\":\"notification_rendering_definition_revision\"}",
+      "sha256": "e0ba4b36ee5a68085a16c17068ce0091ef1fc0834da7cd9fbcf7c55302dddc52"
+    },
+    {
+      "case_id": "notification_rendering_disclosure",
+      "preimage": {
+        "derivation_version": "spine.command-id.v1",
+        "command": "notification_rendering_disclosure.provision",
+        "command_id": "rendering-example-provision",
+        "row_role": "notification_rendering_disclosure",
+        "request_path": "/scope"
+      },
+      "canonical_json": "{\"command\":\"notification_rendering_disclosure.provision\",\"command_id\":\"rendering-example-provision\",\"derivation_version\":\"spine.command-id.v1\",\"request_path\":\"/scope\",\"row_role\":\"notification_rendering_disclosure\"}",
+      "sha256": "53174c12223c65f3cbbe0e1d4b55897790ebf9b1671bb26893448c843c713737"
+    },
+    {
+      "case_id": "command_receipt",
+      "preimage": {
+        "derivation_version": "spine.command-id.v1",
+        "command": "notification_rendering_definition.create",
+        "command_id": "rendering-example-create",
+        "row_role": "command_receipt",
+        "request_path": "/"
+      },
+      "canonical_json": "{\"command\":\"notification_rendering_definition.create\",\"command_id\":\"rendering-example-create\",\"derivation_version\":\"spine.command-id.v1\",\"request_path\":\"/\",\"row_role\":\"command_receipt\"}",
+      "sha256": "dd4776c5d577d6546bfd1a8355f613a2ff15ea56df1d73e9e66e4f0a3d1502b3"
+    },
+    {
+      "case_id": "audit",
+      "preimage": {
+        "derivation_version": "spine.command-id.v1",
+        "command": "notification_rendering_definition.create",
+        "command_id": "rendering-example-create",
+        "row_role": "audit",
+        "request_path": "/audit"
+      },
+      "canonical_json": "{\"command\":\"notification_rendering_definition.create\",\"command_id\":\"rendering-example-create\",\"derivation_version\":\"spine.command-id.v1\",\"request_path\":\"/audit\",\"row_role\":\"audit\"}",
+      "sha256": "dc74aec2532b800cebd3e45400dda9b093ed1bdec7ce94f29eb06d0fc3fa73e1"
+    }
+  ]
+}
