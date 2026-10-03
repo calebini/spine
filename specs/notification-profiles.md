@@ -115,6 +115,13 @@ behavior only. It does not own:
 Those facts continue to come from the applying schedule command and existing canonical
 authorities.
 
+The draft [notification-rendering-definitions.md](notification-rendering-definitions.md)
+proposes an optional exact rendering-definition reference per template in a future
+versioned authoring contract. Application would snapshot that reference into the
+corresponding item policy, never inherit the catalog's latest revision at delivery.
+It is not accepted by the current closed template shape, does not grant destination
+disclosure, and does not introduce rendering instructions into facet schemas.
+
 ### 3.4 Profile binding
 
 A profile binding declares that one profile is the default for one archetype within

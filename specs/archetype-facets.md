@@ -314,6 +314,13 @@ ordinary reminder retention authorizes use of stale facet values. Required execu
 oracles include multiple successive edits, explicit schema upgrade, recurring work,
 follow_source dependencies, lease/attempt races and retry without a duplicate send.
 
+The separate draft [notification-rendering-definitions.md](notification-rendering-definitions.md)
+proposes deterministic, explicitly selected facet detail for ordinary reminders,
+without an advisory or model invocation. It must resolve current values against exact
+schema revisions, establish destination disclosure and retain attempt evidence. It
+does not alter implemented facet copy-forward/retention semantics or authorize field
+output merely because a schema or pack exists.
+
 Initial authoring remains explicit: create the item with its archetype, then attach
 facets using its returned version. This is two atomic commands, not an atomic composite;
 if attachment fails, the created item remains and the operator must see that outcome.

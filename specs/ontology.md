@@ -1102,6 +1102,13 @@ external contact. `attempt_id`, `work_instance_id`, `item_id`, and
 stored row; a retry receives a new attempt and rendering. Complete fields, identities,
 failure semantics, and readback are governed by `specs/notification-rendering.md`.
 
+The draft [notification-rendering-definitions.md](notification-rendering-definitions.md)
+proposes a distinct owner-scoped reusable definition root, immutable revisions and
+item-policy presentation selections, reusable disclosure authorizations and per-policy
+application evidence. These are configuration, not rendering-attempt rows or a new
+attempt ledger. Facet-aware source/evidence extensions, physical storage
+and migration remain future contracts; no existing table shape is changed here.
+
 ## 10. Projections and Audit
 
 ### 10.1 external_projections

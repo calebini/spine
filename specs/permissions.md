@@ -87,6 +87,14 @@ An item may use a permitted shared profile and still remain privately owned.
 
 ## 4. Permission Operations
 
+The first-pass [notification-rendering-definitions.md](notification-rendering-definitions.md)
+requires an explicit mapping for its proposed catalog and destination-bound facet
+disclosure. Existing item-read or catalog-use authority alone does not authorize
+exporting those fields in notifications. The agreed direction is reusable scoped
+authorization with per-policy application evidence, narrowing exceptions and explicit
+revocation. Exact permission mappings remain a codification gate; this reference adds
+no grant kind or implemented release gate.
+
 Permission operations distinguish read, create, mutate, use, share, administer,
 release content, and transfer ownership. Each resource family defines which apply;
 the release command-to-permission registry must map exact commands and nested effects.

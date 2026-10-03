@@ -352,6 +352,8 @@ frontend reviews SPINE-001–003 were withdrawn.
 Still deliberately separate or in design:
 
 - governed contextual LLM advisories and agent-generated enrichment;
+- opt-in [facet-aware notification rendering definitions](specs/notification-rendering-definitions.md)
+  supplied as configuration by operators or packs; first-pass design, not implemented;
 - canonical archival and retention policy for long-lived ledgers;
 - broader external projection adapters;
 - production qualification across sustained load and failure campaigns;

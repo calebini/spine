@@ -1,6 +1,6 @@
 # Spine Backlog
 
-Last updated: 2026-09-30
+Last updated: 2026-10-03
 
 This is the single work queue for Spine development. The
 [implementation plan](IMPLEMENTATION_PLAN.md) explains roadmap direction and delivery
@@ -32,6 +32,71 @@ outcomes; leave later horizons coarse. Before promoting a horizon, define its sc
 dependencies, acceptance criteria, and required decisions. When finishing a task,
 record evidence and move it to Completed. Update affected orientation and contract
 status labels in the same change. Routine task updates do not change spec authority.
+
+## Current specification follow-up
+
+### SPINE-032 — Draft opt-in facet-aware notification rendering definitions
+
+**Status:** Done — specification drafted and manually corrected after its first
+bounded audit on 2026-10-03; not ratified, codified or implemented. This completion
+covers the requested design pass only, not feature delivery or a clean recheck.
+**Evidence:** [Rendering definitions](../specs/notification-rendering-definitions.md)
+owns proposed catalog/policy selection, scalar detail composition, exact schema
+matching, attempt-time freshness, immutable evidence, fallback and pack boundaries.
+Targeted delegation updates preserve current renderer/profile/facet contracts.
+**Verification:** Seven agent-documentation tests, three current rendering-fixture
+tests and two implemented-contract declaration tests pass. All 23 new/added local
+Markdown link targets resolve; diff hygiene passes. These verify the draft's
+integration/preservation, not executable behavior of the proposed extension.
+**Operator directions incorporated:** Reusable scoped disclosure recorded per policy;
+scalar detail plus existing location-reference labels; retirement blocks fresh use
+without suppressing pinned existing reminders. Draft v0.1.2 records these directions;
+exact authorization matching, location scope, permission and lifecycle mechanisms
+remain reviewable design proposals, not a ratified machine contract.
+**Next gate:** Focused recheck of the SPINE-033 manual corrections, followed by machine
+contracts/fixtures and storage/identity/permission integration before implementation.
+No runtime, schema, pack, web exposure or deployed-agent changes are authorized by
+this entry. Deferred resilience initiatives are not reopened.
+
+### SPINE-033 — Bounded audit of rendering definitions and scoped disclosure
+
+**Status:** Done — bounded review completed 2026-10-03 with `needs_revision`:
+zero blockers, one major, two minors; `boundary_preserved=false`. This closes the
+review task, not the findings or the feature's implementation gates. No convergence claim.
+**Dependencies:** SPINE-032 amended draft and operator-approved product directions.
+**Scope:** Definition/profile/policy boundary, reusable destination-scoped disclosure,
+single-hop existing location labels, retirement versus revocation, attempt freshness,
+failure separation and preservation of current reminder behavior. Review the draft's
+technical choices; do not assume the product discussion ratified them.
+**Evidence:** [Audit notes and exact proposed send scope](../whetstone_runs/notification-rendering-definitions-contract-audit-001/audit-notes.md).
+Local preparation verifies ten unique source paths, exact invocation/allowlist parity,
+resolved added links and diff hygiene. The Whetstone CLI help was inspected; no live
+reviewer was invoked during staging. The authorized live audit subsequently completed.
+The shell-path Codex CLI 0.142.0 was rejected before semantic review because the selected
+model requires a newer client. The failed output is preserved; the same approved bytes
+and model were reviewed using already-installed app CLI 0.160.0 in an isolated recovery
+root. No CLI upgrade or model substitution occurred.
+**Result:** [Completed report](../whetstone_runs/notification-rendering-definitions-contract-audit-001/retry-cli-0160/change_audit/change_audit_report.md)
+and [structured findings](../whetstone_runs/notification-rendering-definitions-contract-audit-001/retry-cli-0160/change_audit/change_audit_feedback.json).
+The major is ambiguous authorization classification for custom additions inside a
+profile-backed application. Minors concern unnecessary reapproval after timing-only
+profile revisions and a pre-existing architecture reference to v1 instead of the
+implemented v2 schedule contracts.
+**Manual correction:** Authorized 2026-10-03; draft v0.1.2 now classifies templates
+and replacements as profile-scoped, custom additions/direct reminders as direct-policy
+scoped, and suppressed entries as producing no policy. Approval binds to the stable
+profile root and disclosure facts, not its behavioral revision; exact profile revision
+remains provenance. New verification oracles cover origin isolation and timing-only
+approval reuse. Architecture v0.2.5 corrects the implemented v2 baseline without
+changing current contracts. Local verification: 12 documentation/rendering-fixture/
+implemented-declaration tests pass, all 23 added local links resolve and diff hygiene
+passes. No reviewer recheck, runtime change, commit or push was performed.
+At review completion, all ten specification hashes and the approved notes hash matched
+the completed manifest; no source specification changed during that review. The manual
+patch deliberately follows it and does not rewrite the preserved audit evidence.
+**Acceptance:** One bounded reviewer-only report inspected, findings classified and
+remaining decision/implementation gates stated; manual source changes only with
+operator authorization. No Editor, Phase 1/2, machine contracts or runtime work.
 
 ## Recently completed backend work
 

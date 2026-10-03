@@ -1,6 +1,6 @@
 # Spine Architecture
 
-Status: Draft v0.2.4
+Status: Draft v0.2.5
 Scope: Component boundaries, module posture, and runtime relationships
 
 ## 1. Architectural Doctrine
@@ -59,6 +59,16 @@ Spine does not own:
 - side effects without a persisted attempt row
 
 ## 3. Shared Core With Profiles
+
+The proposed [notification rendering definitions](notification-rendering-definitions.md)
+keep reusable presentation configuration in Spine and bundled definitions in packs.
+Spine resolves explicitly selected facet fields and persists deterministic attempt
+evidence; packs do not execute renderers. Definition revisions are pinned by policy
+application, current values and single-hop location labels are resolved at attempt
+start, and reusable scoped disclosure is separate from catalog use or item read access.
+Existing canonical locations are reused; no new venue catalog is implied.
+This draft adds no current runtime capability
+and does not move advisory execution, scheduling or delivery authority.
 
 Spine SHOULD use one shared coordination core with profile-specific detail tables.
 
@@ -231,9 +241,11 @@ items through live inheritance.
 Core and service code MUST NOT classify free text, consult agent memory, or infer
 owner-scope precedence. The accepted command supplies an explicit archetype selection
 and ordered scope chain. Agent interpretation remains outside Spine and becomes
-canonical only through accepted command facts. Profile-aware behavior requires
-successor schedule contract versions; the implemented closed v1 schedule request
-shapes remain unchanged.
+canonical only through accepted command facts. Profile-aware behavior is implemented
+through `spine.schedule-create.v2` and `spine.schedule-update.v2`, the sole high-level
+schedule write contracts. Their closed request shapes remain unchanged. The proposed
+rendering-definition selection requires successor versions of those v2 contracts;
+it must not widen either current schema in place.
 
 One fresh success is one database transaction containing the complete new item bundle, initial policies, requested recurrence provenance and bounded work, one audit, and one command receipt. The orchestration service reuses internal deterministic domain and persistence functions; it MUST NOT chain public command handlers whose independent commits would expose partial state or synthetic subcommand receipts.
 

@@ -1,7 +1,7 @@
 # Spine Implementation Plan
 
 Role: Roadmap rationale and delivery history; current task status lives in [BACKLOG.md](BACKLOG.md)
-Last updated: 2026-09-30 (schedule-show CLI include repair)
+Last updated: 2026-10-03 (facet-aware rendering first-pass design)
 
 This is a non-normative delivery plan. The specifications and machine-readable contracts remain authoritative.
 
@@ -46,6 +46,21 @@ and resilience following the event-emission fixes and has deferred SPINE-004–0
 SPINE-010. The historical resilience-first sequencing below no longer schedules work
 or makes those initiatives blanket prerequisites for facets or advisories. Preserve
 their feature-specific contract and verification requirements.
+
+## Proposed Extension: Facet-Aware Notification Rendering (SPINE-032)
+
+The first-pass [rendering-definition spec](../specs/notification-rendering-definitions.md)
+separates reusable presentation configuration from facet schemas and reminder timing.
+Spine would own resolution, disclosure, rendering and attempt evidence; packs would
+distribute definitions and profile references through public commands. Start with
+explicit scalar and location-label detail suffixes and exact schema/definition revisions, preserving the
+ordinary renderer for unselected reminders and eligible fallback. This is independent
+of LLM advisory execution. The operator agreed reusable scoped disclosure with per-policy
+evidence, narrow location-label lookup and retirement preserving existing pinned use.
+Review the draft's technical realization in a bounded audit, then codify versioned
+authoring/evidence contracts and migration/continuity fixtures
+before runtime work. Pack-format and installer adoption follow that contract rather
+than inventing renderer semantics. Current evidence and open decisions are in SPINE-032.
 
 ## Delivered Fix: Schedule-Show CLI Notification Profile Include (SPINE-031)
 

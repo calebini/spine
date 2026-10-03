@@ -71,6 +71,12 @@ the capability selects the single profile above for every supported ordinary rem
 A later contract may add explicit locale or profile selection without changing the v1
 meaning.
 
+The first-pass [notification-rendering-definitions.md](notification-rendering-definitions.md)
+proposes separately versioned, opt-in facet detail definitions and profile/policy
+selection. It does not extend this v1 input object, renderer, hashes or authoring
+surfaces in place. Existing ordinary rendering remains the default; the proposal's
+disclosure, work-continuity and machine-contract gates precede implementation.
+
 ## 4. Supported Work and Required Source Facts
 
 The v1 renderer accepts only an actionable `work_instances` row with
