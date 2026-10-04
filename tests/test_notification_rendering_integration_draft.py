@@ -66,6 +66,27 @@ class RenderingIntegrationDraftTests(unittest.TestCase):
         self.assertIn("Fresh trusted-local creation is therefore **ordinary-only**", self.spec)
         self.assertIn("These are separately receipted transactions, not one atomic composite", self.spec)
 
+    def test_setup_ordering_requires_external_exclusion_not_a_hidden_hold(self):
+        ordering = self.matrix["authoring"]["detail_setup_ordering"]
+        self.assertEqual(ordering, {
+            "materialization_none_scope": "invoking_command_only",
+            "implicit_scheduler_hold": False,
+            "without_exclusion": "ordinary_reminder_may_start_between_steps",
+            "strict_precondition": "verified_operational_exclusion_of_all_concurrent_materializers_and_inflight_operations",
+            "exclusion_starts": "before_creation",
+            "exclusion_ends_earliest": "after_presentation_edit_commit",
+            "explicit_readiness_control": "retain_exclusion_through_designated_materialization_and_readback",
+            "failure_release": "operator_finishes_setup_or_explicitly_accepts_ordinary_delivery",
+            "automatic_service_control": False,
+            "late_handling": "unchanged_no_grace_extension",
+            "stateful_interleaving_oracle": "RI-03_pending_execution",
+        })
+        self.assertIn("not a scheduler hold", self.spec)
+        self.assertIn("ordinary reminder may start between any", self.spec)
+        self.assertIn("before creation through presentation commit", self.spec)
+        self.assertIn("Source-only consistency checks do not execute these oracles", self.spec)
+        self.assertFalse(self.matrix["verification"]["runtime_verified"])
+
     def test_old_profile_revision_guard_preserves_history(self):
         rule = self.matrix["authoring"]["legacy_profile_revise"]
         self.assertEqual(rule["current_v1"], "existing_v1_rules")

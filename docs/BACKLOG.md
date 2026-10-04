@@ -35,6 +35,44 @@ status labels in the same change. Routine task updates do not change spec author
 
 ## Current specification follow-up
 
+### SPINE-047 — Qualify staged rendering setup ordering
+
+**Status:** Done — manual spec-only correction on 2026-10-04; not re-audited.
+**Dependencies:** SPINE-046 residual R1-01.
+**Scope:** Command-local materialization semantics, explicit operational exclusion
+for strict setup ordering, and scheduler-interleaving verification obligations.
+No new hold state, scheduler behavior, ownership mechanism or runtime implementation.
+**Acceptance:** Align draft/matrix/source-only tests; focused checks, links and diff hygiene.
+**Result:** Draft v0.3 states that materialization=none is command-local, not a hold.
+Strict ordering requires verified exclusion of concurrent/in-flight materialization
+from before creation through presentation commit (through designated materialization
+when controlling readiness explicitly). No automatic service control or grace extension;
+failed setup requires an operator choice before exclusion is released. RI-03 now
+requires stateful interleaving oracles with and without exclusion, explicitly pending.
+**Verification:** 31 focused tests and 335 subtests, Ruff, package sync, 146 local link
+targets and diff hygiene passed. Existing SPINE-046 audit evidence retained. No runtime
+code, deployment operations, reviewer invocation, commit or push.
+
+### SPINE-046 — Rendering integration focused recheck
+
+**Status:** Done — reviewer-only recheck completed on 2026-10-04; `needs_revision`
+(0 blockers, 1 major, 0 minors); design boundary preservation reported false.
+**Dependencies:** SPINE-045 corrections committed at `053ec93`.
+**Scope:** One reviewer-only Whetstone buildability recheck with GPT-6.1 Sol of
+R1-01–R1-03 and their immediate consequences, including staged setup versus automatic
+materialization. No source editing or new ownership/permission mechanism.
+**Package:** [Exact 16-file scope and audit notes](../whetstone_runs/notification-rendering-integration-contract-audit-002/audit-notes.md).
+**Acceptance:** Inspect findings and boundary verdict, verify manifest/source hashes,
+and record closed/residual findings. No implementation, ratification,
+Editor/convergence run, commit, push or deployment.
+**Evidence:** [Report](../whetstone_runs/notification-rendering-integration-contract-audit-002/change_audit/change_audit_report.json)
+and [findings](../whetstone_runs/notification-rendering-integration-contract-audit-002/change_audit/change_audit_feedback.json).
+Exact 16-file scope, source/notes hashes, report brief hash and GPT-6.1 Sol/buildability
+verified. Reviewer confirms the ownership path, revision guard and required-status
+corrections; one directly introduced delivery-ordering claim remains unsound.
+**Follow-up:** Section 3.3/matrix/RI-03/tests manually qualified under SPINE-047.
+The audit verdict remains evidence about the pre-patch draft; no recheck yet.
+
 ### SPINE-045 — Rendering integration audit corrections
 
 **Status:** Done — targeted manual draft correction on 2026-10-04; not re-audited.

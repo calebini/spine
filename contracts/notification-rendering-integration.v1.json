@@ -43,6 +43,19 @@
     ],
     "detail_setup_atomic_across_steps": false,
     "detail_setup_failure_preserves_prior_commits": true,
+    "detail_setup_ordering": {
+      "materialization_none_scope": "invoking_command_only",
+      "implicit_scheduler_hold": false,
+      "without_exclusion": "ordinary_reminder_may_start_between_steps",
+      "strict_precondition": "verified_operational_exclusion_of_all_concurrent_materializers_and_inflight_operations",
+      "exclusion_starts": "before_creation",
+      "exclusion_ends_earliest": "after_presentation_edit_commit",
+      "explicit_readiness_control": "retain_exclusion_through_designated_materialization_and_readback",
+      "failure_release": "operator_finishes_setup_or_explicitly_accepts_ordinary_delivery",
+      "automatic_service_control": false,
+      "late_handling": "unchanged_no_grace_extension",
+      "stateful_interleaving_oracle": "RI-03_pending_execution"
+    },
     "legacy_profile_revise": {
       "current_v1": "existing_v1_rules",
       "current_v2": "reject_including_all_ordinary_and_noop",

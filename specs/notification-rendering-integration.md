@@ -1,6 +1,6 @@
 # Notification Rendering Integration
 
-Status: Draft v0.2 — proposed integration amendment; not ratified or implemented
+Status: Draft v0.3 — proposed integration amendment; not ratified or implemented
 Created: 2026-10-04
 Scope: Persistence, authoring, continuity, attempt evidence, permissions and bounded reads
 
@@ -162,10 +162,28 @@ item, policy, work, audit or receipt commit. A profile containing definition pin
 still be used at creation, but every surviving pinned template must have an explicit
 ordinary application entry under Section 3.1. Never infer an owner from that profile.
 
-The supported detail-enabled setup sequence is:
+`materialization=none` suppresses only the invoking command's work creation. It is
+not a scheduler hold. Automatic planning can materialize missing actionable work for
+the committed active policies regardless of pending ownership adoption or presentation
+setup. Without an operational exclusion, an ordinary reminder may start between any
+two setup steps, including for a reminder already due within its late-delivery grace.
 
-1. Create the item with ordinary presentations. Select materialization mode `none`
-   if details must be configured before any reminder work becomes deliverable.
+If details must be configured before any reminder can start, the operator MUST establish
+and verify an operational exclusion of concurrent materialization **before creation**
+and retain it until the presentation edit commits. This includes automatic schedulers,
+other explicit materializers and their in-flight operations: for example, quiesce the
+relevant worker/scheduler processes and exclude other materializing callers. Merely
+requesting a stop, omitting initial work, or relying on an unadopted owner is not proof
+of exclusion. Keep the exclusion through step 4 when explicit materialization is to
+control readiness, allowing only that designated materialization. This is an external
+operational precondition, not an implicit command lock or new durable hold state.
+If exclusion cannot be verified or is lost, no details-before-delivery guarantee may
+be claimed. This amendment authorizes no automatic service stop/restart.
+
+The supported detail-enabled setup sequence, subject to that ordering qualification, is:
+
+1. Create the item with ordinary presentations and materialization mode `none` to
+   avoid work creation by this command; this does not exclude automatic scheduling.
 2. Explicitly adopt the created item's exact current version into a subject/group
    owner using the existing trusted-local ownership provisioning boundary in
    [the web API specification, Section 4](trusted-multi-operator-web-api.md).
@@ -175,11 +193,16 @@ The supported detail-enabled setup sequence is:
    still requires materialization mode `none` and creates no work.
 4. When delivery is wanted, invoke the existing bounded notification-work
    materialization command explicitly and verify the resulting work/readback.
+   Release any operational exclusion deliberately after the required setup succeeds.
+   Normal current-time/late-handling eligibility still applies; setup delay neither
+   extends grace nor creates a guarantee that an expired opportunity will be delivered.
 
 These are separately receipted transactions, not one atomic composite. If adoption
 or selection fails, the already created item remains ordinary; do not auto-delete it
-or claim the entire sequence rolled back. Retrying uses each step's own command ID
-and current-version checks. If ordinary work was already materialized, existing
+or claim the entire sequence rolled back. If strict ordering was required, do not
+automatically release the exclusion on failure: the operator must finish setup or
+explicitly accept ordinary delivery before resuming materialization. Retrying uses
+each step's own command ID and current-version checks. If ordinary work was already materialized, existing
 attempt/continuity rules apply; later setup cannot retract an already started send.
 Protected creation's existing envelope ownership orchestration is not removed, but
 this amendment neither activates rendering there nor extends its registry. An atomic
@@ -568,7 +591,7 @@ executable fixtures are checked in and run. At minimum:
 | --- | --- |
 | RI-01 | V1 unselected body, hashes and provider envelope byte-identical before/after migration |
 | RI-02 | Profile v2 and presentation hash preimages/digests; explicit ordinary, empty subset, unique/exact grant selection; v1 request against v1 current, v2 request against v1/v2 current; fresh v1 against v2 rejected even all-ordinary/no-op, stale guard first, historical replay unchanged |
-| RI-03 | Fresh local detail create rejected with no residue; ordinary create -> explicit adoption -> presentation edit -> materialization succeeds; adoption/edit failure preserves prior committed ordinary item; each individual create/full-plan transaction rolls back all its item/policy/presentation/work/audit/receipt writes |
+| RI-03 | Fresh local detail create rejected with no residue; staged ordinary create/adoption/edit/materialization obeys Section 3.3 operational exclusion for strict ordering; without exclusion ordinary sends may start between steps; adoption/edit failure preserves prior commits; each individual create/full-plan transaction rolls back all its item/policy/presentation/work/audit/receipt writes; scheduler-interleaving oracles below |
 | RI-04 | Presentation-only change/no-op/dry-run/replay with identical work IDs; old schema cannot silently clear |
 | RI-05 | Shared intent, multiple predecessors and repeated copy-forward; wrong/forked ancestry fails closed |
 | RI-06 | Queued, leased, retry, started, terminal and absent work across facet/presentation edits |
@@ -580,6 +603,16 @@ executable fixtures are checked in and run. At minimum:
 | RI-12 | Populated/fresh migration, interruption at each DDL stage, backup restore and old-worker refusal |
 | RI-13 | Every item-version producer copies presentations; omitted producer/finalizer/row is detected |
 | RI-14 | Full readback discriminates v1/v2; old summaries leak no details; packaging excludes unimplemented families |
+
+RI-03 additionally requires a future stateful scheduler-interleaving oracle: create
+an ordinary reminder already due within grace using materialization=none, then run an
+automatic cycle before adoption/edit and prove ordinary work can be materialized and
+started. After editing, preserve the started attempt/body and delivery identity.
+Under verified operational exclusion from before creation through presentation commit,
+prove no interleaved materialization/start occurs; releasing only after setup permits
+normal current-policy rendering with no duplicate delivery. Also cover exclusion
+through explicit step 4, failed setup retaining prior commits, and opportunity expiry
+without grace extension. Source-only consistency checks do not execute these oracles.
 
 Before implementation, review/ratify this amendment, codify complete successor schemas,
 cursor config/payload and computed vectors, update the reference registry/fixture
