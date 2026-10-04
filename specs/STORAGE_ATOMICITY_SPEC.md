@@ -19,6 +19,11 @@ owns those details for facets; [archetype facets](archetype-facets.md) retains l
 authority. In a conflict, do not implement a leaf as an implicit change to its parent
 or logical owner: reconcile the owning contract explicitly first.
 
+The draft [rendering integration leaf](notification-rendering-integration.md) proposes
+catalog/disclosure and policy-presentation persistence plus a versioned extension to
+the existing notification-rendering table. The accepted rendering-definition document
+retains logical authority; this delegation does not ratify the leaf or activate DDL.
+
 ## 2. Shared persistence boundary
 
 - One canonical SQLite ledger owns coordination truth. Derived indexes and external

@@ -1,0 +1,150 @@
+{
+  "contract_version": "spine.notification-rendering-integration.v1",
+  "status": "draft_specification_only",
+  "normative_source": "specs/notification-rendering-integration.md",
+  "logical_owner": "specs/notification-rendering-definitions.md",
+  "storage_owner": "specs/STORAGE_ATOMICITY_SPEC.md",
+  "runtime_activation": false,
+  "proposed_successors": {
+    "profile": "spine.notification-profiles.v2",
+    "profile_application": "spine.notification-profile-application.v2",
+    "profile_readback": "spine.notification-profile-readback.v2",
+    "schedule_create": "spine.schedule-create.v3",
+    "schedule_update": "spine.schedule-update.v3",
+    "notification_authoring": "spine.notification-schedule-authoring.v2",
+    "schedule_show": "spine.schedule-show.v2",
+    "rendering": "spine.notification-rendering.v2"
+  },
+  "gate_status": {
+    "physical_storage_migration_rollback": "draft_section_5_and_9",
+    "versioned_profile_schedule_policy_and_attempt_envelopes": "draft_sections_2_3_6_successor_schemas_pending",
+    "presentation_identity_and_policy_specific_work_continuity": "draft_section_4",
+    "permission_resolver_and_location_release_mapping": "draft_section_7_protected_locations_remain_denied",
+    "authenticated_catalog_cursor_and_index_plans": "draft_section_8_payload_schema_and_vectors_pending",
+    "runtime_capability_activation_and_stateful_conformance": "pending_runtime",
+    "facet_referenced_location_freeze_migration_and_fs14": "implemented_schema_18_separate_prerequisite"
+  },
+  "authoring": {
+    "profile_template_field": "rendering",
+    "schedule_plan_field": "rendering_applications",
+    "presentation_only_field": "patch.policy_presentations",
+    "max_entries": 32,
+    "presentation_only_exclusive_patch": true,
+    "presentation_only_materialization": "none",
+    "origins_from_composition_not_client": true,
+    "unadopted_item_detail_selection": "rendering_disclosure_unavailable",
+    "legacy_fresh_creation": "ordinary",
+    "legacy_unchanged_copy": "preserve",
+    "legacy_lossy_plan_replacement": "reject_unsupported_field"
+  },
+  "work": {
+    "resolver": "exact_policy_or_unique_current_descendant",
+    "intent_is_policy_identity": false,
+    "presentation_in_delivery_preimages": false,
+    "comparison_authority": "contracts/archetype-facet-integration.v1.json#/work/comparison_policy_fields",
+    "presentation_only_materialize": false,
+    "presentation_only_retry": false,
+    "states": {
+      "eligible_unattempted": "retain_and_fresh_fence",
+      "leased_unstarted": "preserve_lease_and_fresh_fence",
+      "eligible_retry": "preserve_retry_and_provider_key",
+      "started": "preserve_body_and_attempt",
+      "terminal": "preserve_history",
+      "independently_stale": "existing_stale_handling",
+      "absent": "do_not_materialize"
+    }
+  },
+  "hash_domains": {
+    "policy_presentation": "spine.notification-policy-presentation-hash.v1",
+    "presentation_set": "spine.notification-presentation-set-hash.v1",
+    "profile_revision": "spine.notification-profile-revision-hash.v2",
+    "profile_template": "spine.notification-profile-template-hash.v2",
+    "rendering_input": "spine.notification-rendering-input-hash.v2",
+    "rendering_content": "spine.notification-rendering-content-hash.v2",
+    "rendering_identity": "spine.notification-rendering-id.v2",
+    "disclosure_match": "spine.rendering-disclosure-match.v1"
+  },
+  "persistence": {
+    "new_tables": [
+      "notification_rendering_definitions",
+      "notification_rendering_definition_revisions",
+      "notification_rendering_definition_fields",
+      "notification_rendering_disclosures",
+      "notification_rendering_disclosure_locations",
+      "notification_rendering_disclosure_profiles",
+      "notification_profile_rendering_revisions",
+      "notification_profile_template_renderings",
+      "notification_policy_presentations",
+      "notification_rendering_catalog_state"
+    ],
+    "extended_tables": [
+      "notification_renderings"
+    ],
+    "historical_policy_backfill": "explicit_ordinary",
+    "historical_profile_decoder": "v1_unchanged",
+    "historical_attempt_rewrite": false,
+    "all_policy_writers_finalized": true,
+    "rollback": "verified_pre_migration_backup_and_matching_code"
+  },
+  "permissions": {
+    "definition_resource_kind": "notification_rendering_definition",
+    "definition_read_operations": [
+      "catalog.read",
+      "catalog.use"
+    ],
+    "definition_writes": "owner_catalog_administration",
+    "disclosure_management": "scope_owner_subject_or_group_admin_owner",
+    "application": "item_create_edit_and_catalog_use_and_exact_active_disclosure_and_route_release",
+    "trusted_local": "full_scope_with_domain_validation",
+    "permission_enforced_locations": "deny_until_owning_family_visibility_contract",
+    "web_activation": "separate_versioned_registry_required"
+  },
+  "cursor": {
+    "contract_version": "spine.notification-rendering-cursor.v1",
+    "prefix": "nrc1",
+    "algorithm": "HMAC-SHA256",
+    "max_token_bytes": 4096,
+    "ttl_seconds": 900,
+    "min_secret_bytes": 32,
+    "query_fields": [
+      "owner",
+      "status",
+      "limit"
+    ],
+    "generation": "global_changed_catalog_transactions_only",
+    "max_candidates": 101,
+    "max_returned_records": 100,
+    "max_access_proof_rows": 100,
+    "max_response_bytes": 4194304,
+    "max_elapsed_seconds": 5,
+    "max_sql_vm_steps": 100000,
+    "durable_reads": false
+  },
+  "verification": {
+    "runtime_verified": false,
+    "required_families": {
+      "RI-01": "ordinary_byte_preservation",
+      "RI-02": "hashes_and_selection",
+      "RI-03": "atomic_authoring_rollback",
+      "RI-04": "presentation_edits_replay_dry_run",
+      "RI-05": "policy_specific_ancestry",
+      "RI-06": "work_state_matrix",
+      "RI-07": "attempt_revocation_races",
+      "RI-08": "atomic_attempt_evidence",
+      "RI-09": "retry_provider_identity",
+      "RI-10": "permission_and_location_boundary",
+      "RI-11": "cursor_and_index_bounds",
+      "RI-12": "migration_rollback_preflight",
+      "RI-13": "all_writer_finalization",
+      "RI-14": "readback_and_packaging"
+    },
+    "pending_before_runtime": [
+      "amendment_review_and_ratification",
+      "complete_successor_wire_schemas",
+      "cursor_payload_and_configuration_schemas",
+      "computed_preimage_vectors",
+      "executable_stateful_fixture_implementation",
+      "release_runtime_and_web_activation_decision"
+    ]
+  }
+}

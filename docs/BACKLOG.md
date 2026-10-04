@@ -35,6 +35,62 @@ status labels in the same change. Routine task updates do not change spec author
 
 ## Current specification follow-up
 
+### SPINE-043 — Rendering integration amendment
+
+**Status:** Done — draft amendment and source-only integration matrix authored on
+2026-10-04; not ratified, audited or implemented.
+**Dependencies:** Accepted rendering logical design, SPINE-042 clean machine-contract
+recheck and implemented schema-18 facet-location freeze.
+**Scope:** Draft persistence/migration, versioned authoring and evidence integration,
+policy-specific work continuity, permission/release mappings and bounded catalog
+cursors; align delegated authorities and source-only machine tracking.
+**Acceptance:** Concrete integration contracts and verification obligations, preserved
+ordinary behavior and working-tree changes, explicit remaining decisions/gates,
+local link/contract checks and diff hygiene. No runtime code, migration execution,
+Whetstone run, commit, push or deployment.
+**Result:** [Rendering integration draft](../specs/notification-rendering-integration.md)
+defines the hybrid table/constraint/index layout, historical ordinary backfill,
+versioned profile/schedule/direct-reminder and rendering envelopes, presentation-only
+edit branch, exact policy ancestry, one final rendering per attempt, permission
+mapping and signed bounded catalog cursors. The companion
+`contracts/notification-rendering-integration.v1.json` maps all existing integration
+gates and RI-01–RI-14 acceptance obligations. No stateful fixture is claimed executed.
+Minimal authority/delegation/index/plan amendments retain the accepted logical owner
+and current source-only status. Existing SPINE-042 working-tree evidence is preserved.
+**Verification:** 27 focused tests and 333 subtests passed; new checks cover draft
+status, gate coverage, version/table/obligation consistency and absence of runtime/
+packaged activation. Ruff, source-only web-contract synchronization, 237 local Markdown
+links across the changed documents (before this result entry) and diff hygiene passed.
+**Open decisions:** None required for the retained first-slice scope. Protected
+shared-location authority, broader cross-owner release, web family activation and
+pack adoption remain separate scope choices, not implicitly authorized by this draft.
+**Next:** Review/ratify the amendment; codify complete successor wire/cursor schemas
+and computed fixtures, then bounded buildability review before runtime work. No
+schema number or release version is reserved and no implementation gate is waived.
+
+### SPINE-042 — Focused rendering list-limit recheck
+
+**Status:** Done — approved focused recheck completed cleanly on 2026-10-04.
+**Dependencies:** SPINE-040 minor finding and SPINE-041 correction, committed as
+`18146e6` after 21 tests / 333 subtests passed.
+**Scope:** One reviewer-only `audit-change`, consistency profile, `gpt-6.1-sol`.
+Check strict canonical limit rejection in all four request/response properties,
+JSON Schema regex portability, valid 1–100 strings and preserved echo/count semantics.
+**Package:** [Audit notes and exact 13-file scope](../whetstone_runs/notification-rendering-definitions-machine-contract-audit-003/audit-notes.md).
+**Acceptance:** Inspect the bounded finding-closure/verdict and preservation result;
+verify unchanged input hashes and requested model. No source edits, Editor,
+convergence claim, runtime implementation, commit or push as part of this review.
+Broader closed findings are not reopened.
+**Result:** [Report](../whetstone_runs/notification-rendering-definitions-machine-contract-audit-003/change_audit/change_audit_report.md)
+and [feedback](../whetstone_runs/notification-rendering-definitions-machine-contract-audit-003/change_audit/change_audit_feedback.json):
+`pass`, `boundary_preserved=true`; zero blockers, majors, minors or nits. The remaining
+list-limit clarification is closed for this bounded contract scope. Requested
+`gpt-6.1-sol` confirmed in manifest and feedback; built-in consistency profile.
+All 13 source hashes match the staged baseline and audit manifest; approved notes
+match the manifest. No source edits, Editor, runtime changes, commit or push ran.
+This is bounded consistency evidence, not convergence or rendering implementation
+readiness; remaining integration contracts are not waived.
+
 ### SPINE-041 — Reject noncanonical rendering list limits
 
 **Status:** Done — operator-authorized targeted patch verified on 2026-10-04.

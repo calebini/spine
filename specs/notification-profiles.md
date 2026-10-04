@@ -524,6 +524,11 @@ required for v1.
 
 ## 11. Schedule-Surface Integration
 
+The draft [rendering integration amendment](notification-rendering-integration.md)
+proposes profile v2 and schedule v3 successors for template definition pins and scoped
+application selections. It specifies origin-preserving presentation-only edits and
+separate presentation hashes; it does not add fields to the implemented contracts below.
+
 ### 11.1 Profile-aware schedule creation
 
 The implemented `spine.schedule-create.v2` contract accepts:

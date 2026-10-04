@@ -76,6 +76,10 @@ specifies separately versioned, opt-in facet detail definitions and profile/poli
 selection. It does not extend this v1 input object, renderer, hashes or authoring
 surfaces in place. Existing ordinary rendering remains the default; the proposal's
 disclosure, work-continuity and remaining integration gates precede implementation.
+The draft [integration amendment](notification-rendering-integration.md) proposes a
+v2 enclosing rendering object with a preserved v1 base, detail evidence and one final
+body/identity per attempt. It leaves this v1 algorithm, hashes and ordinary output
+unchanged; no runtime capability follows from publishing the draft.
 
 ## 4. Supported Work and Required Source Facts
 

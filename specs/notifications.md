@@ -234,6 +234,12 @@ This invariant does not change the public `notification_work.materialize` comman
 
 ## 10. Reconciliation and Lifecycle
 
+The draft [rendering integration amendment](notification-rendering-integration.md)
+proposes presentation-only supporting facts and an explicit policy-presentation edit
+branch. Its continuity proof uses exact policy ancestry and leaves timing/opportunity/
+work identities unchanged. It is not yet a change to the executable policy contract;
+existing stale-work, retry and attempt admission below remain authoritative.
+
 Schedule-generated work carries enough provenance to revalidate its notification intent, current policy semantics, item target, recurrence occurrence when present, and routing before processing.
 
 For this notification contract, `unstarted work` and `cancellable work` mean exactly a work row with `status=eligible`, `attempt_count=0`, and no `side_effect_attempts` row referencing it. An owning workflow MAY define a stricter cancellation predicate but MUST NOT weaken these three requirements. Eligible retry work with a positive attempt count or any attempt evidence, in-progress work, and terminal work are protected historical evidence and are never cancellable notification work.

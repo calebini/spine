@@ -93,7 +93,11 @@ disclosure. Existing item-read or catalog-use authority alone does not authorize
 exporting those fields in notifications. The agreed direction is reusable scoped
 authorization with per-policy application evidence, narrowing exceptions and explicit
 revocation. Exact permission mappings remain a codification gate; this reference adds
-no grant kind or implemented release gate.
+no grant kind or implemented release gate. The draft
+[rendering integration amendment](notification-rendering-integration.md) proposes the
+exact catalog/admin, disclosure and attempt-release mapping. It preserves existing
+protected-location denial and trusted-local authority; review and versioned transport/
+grant artifacts are still required before exposure.
 
 Permission operations distinguish read, create, mutate, use, share, administer,
 release content, and transfer ownership. Each resource family defines which apply;

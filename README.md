@@ -361,7 +361,8 @@ Still deliberately separate or in design:
 - governed contextual LLM advisories and agent-generated enrichment;
 - opt-in [facet-aware notification rendering definitions](specs/notification-rendering-definitions.md)
   supplied as configuration by operators or packs; ratified design and initial machine
-  contracts/fixtures, not implemented;
+  contracts/fixtures, not implemented; the [integration amendment](specs/notification-rendering-integration.md)
+  is a draft covering persistence, authoring, delivery continuity and evidence;
 - canonical archival and retention policy for long-lived ledgers;
 - broader external projection adapters;
 - production qualification across sustained load and failure campaigns;
