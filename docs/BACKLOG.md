@@ -35,10 +35,52 @@ status labels in the same change. Routine task updates do not change spec author
 
 ## Current specification follow-up
 
+### SPINE-045 — Rendering integration audit corrections
+
+**Status:** Done — targeted manual draft correction on 2026-10-04; not re-audited.
+**Dependencies:** SPINE-044 findings R1-01–R1-03.
+**Scope:** Explicit staged trusted-local creation/adoption/presentation flow; reject
+fresh v1 profile revision against a v2 current revision; required-status cursor rules.
+Update the draft, source-only matrix and consistency tests; preserve runtime behavior.
+**Acceptance:** Focused tests, authority/link consistency and diff hygiene. No runtime
+implementation, schema activation, Whetstone invocation, commit or push.
+**Result:** Draft v0.2 and its matrix define ordinary-only fresh local creation followed
+by explicit adoption/presentation editing, with separately committed steps and no
+inferred ownership. Fresh v1 profile revise rejects v2 current revisions (including
+all-ordinary/no-op) after replay/reference/freshness checks; required list status is
+bound verbatim into cursors. RI-02/03/11 carry the future behavioral proof obligations.
+**Verification:** 30 focused tests and 335 subtests passed; Ruff, affected local links,
+web-contract sync and diff hygiene passed. Tests prove source-only consistency, not
+the unimplemented runtime behaviors. Ratification and bounded recheck remain pending.
+
+### SPINE-044 — Rendering integration buildability audit
+
+**Status:** Done — reviewer-only audit completed on 2026-10-04; `needs_revision`
+(0 blockers, 2 majors, 1 minor); design boundary preservation reported false.
+**Dependencies:** SPINE-043 draft checkpoint `2dc3f05`; prior machine-contract
+findings are closed within SPINE-042's narrower review scope.
+**Scope:** One reviewer-only Whetstone `audit-change`, built-in buildability profile,
+`gpt-6.1-sol`. Assess storage/migration, authoring/version boundaries, policy-specific
+work continuity, attempt evidence, permissions and bounded catalog cursors before
+ratification. Distinguish missing semantics from explicitly pending wire codification.
+**Package:** [Audit notes and exact 30-file scope](../whetstone_runs/notification-rendering-integration-contract-audit-001/audit-notes.md)
+include the draft/matrix, owning specifications, relevant schema fragments, draft test
+and three historical SQL files as read-only layout evidence. No source mutation authorized.
+**Acceptance:** Inspect the report, severity/decision and preservation outcomes;
+verify input hashes and requested model. No source edits, runtime/migration execution,
+Editor/convergence workflow, commit, push or deployment.
+**Evidence:** [Report](../whetstone_runs/notification-rendering-integration-contract-audit-001/change_audit/change_audit_report.json)
+and [findings](../whetstone_runs/notification-rendering-integration-contract-audit-001/change_audit/change_audit_feedback.json).
+Exact 30-file manifest, source hashes, notes hash and GPT-6.1 Sol/buildability verified.
+**Follow-up:** R1-01–R1-03 manually addressed under SPINE-045; no recheck yet.
+The original verdict remains evidence about the pre-patch draft. Ratification
+remains pending. Boundary verdict describes draft gaps, not an audit scope violation.
+
 ### SPINE-043 — Rendering integration amendment
 
 **Status:** Done — draft amendment and source-only integration matrix authored on
-2026-10-04; not ratified, audited or implemented.
+2026-10-04; not ratified or implemented. Subsequent audit and correction are tracked
+under SPINE-044/045.
 **Dependencies:** Accepted rendering logical design, SPINE-042 clean machine-contract
 recheck and implemented schema-18 facet-location freeze.
 **Scope:** Draft persistence/migration, versioned authoring and evidence integration,

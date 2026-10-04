@@ -47,6 +47,52 @@ class RenderingIntegrationDraftTests(unittest.TestCase):
         self.assertFalse(self.matrix["persistence"]["historical_attempt_rewrite"])
         self.assertEqual(self.matrix["persistence"]["extended_tables"], ["notification_renderings"])
 
+    def test_fresh_local_details_require_separate_explicit_adoption(self):
+        authoring = self.matrix["authoring"]
+        self.assertEqual(
+            authoring["fresh_trusted_local_create"],
+            "ordinary_only_then_explicit_adoption_and_presentation_edit",
+        )
+        self.assertFalse(authoring["fresh_create_establishes_owner"])
+        self.assertEqual(authoring["unadopted_item_detail_selection"], "rendering_disclosure_unavailable")
+        self.assertEqual(authoring["detail_setup_steps"], [
+            "ordinary_create_materialization_none",
+            "explicit_owner_adoption",
+            "presentation_only_edit_materialization_none",
+            "explicit_bounded_materialization_when_delivery_wanted",
+        ])
+        self.assertFalse(authoring["detail_setup_atomic_across_steps"])
+        self.assertTrue(authoring["detail_setup_failure_preserves_prior_commits"])
+        self.assertIn("Fresh trusted-local creation is therefore **ordinary-only**", self.spec)
+        self.assertIn("These are separately receipted transactions, not one atomic composite", self.spec)
+
+    def test_old_profile_revision_guard_preserves_history(self):
+        rule = self.matrix["authoring"]["legacy_profile_revise"]
+        self.assertEqual(rule["current_v1"], "existing_v1_rules")
+        self.assertEqual(rule["current_v2"], "reject_including_all_ordinary_and_noop")
+        self.assertEqual((rule["error"], rule["field"]), ("unsupported_field", "revision"))
+        self.assertEqual(
+            rule["order"],
+            "compatible_replay_then_existing_reference_and_freshness_checks_then_decoder_guard",
+        )
+        self.assertEqual(rule["historical_hashes_and_replay"], "unchanged")
+        self.assertIn(rule["diagnostic"], self.spec)
+        self.assertIn("This includes v2 revisions whose templates are all ordinary", self.spec)
+
+    def test_cursor_status_agrees_with_closed_list_requests(self):
+        cursor = self.matrix["cursor"]
+        commands = json.loads(
+            (ROOT / "contracts/schemas/notification-rendering-definition-commands.schema.json").read_text()
+        )["$defs"]
+        self.assertTrue(cursor["status_required"])
+        self.assertTrue(cursor["invalid_status_precedes_cursor_processing"])
+        self.assertFalse(cursor["unfiltered_lists"])
+        for command, statuses in cursor["status_domains"].items():
+            with self.subTest(command=command):
+                self.assertIn("status", commands[command]["required"])
+                self.assertEqual(commands[command]["properties"]["status"]["enum"], statuses)
+        self.assertIn("there is no unfiltered-list mode or null-status normalization", self.spec)
+
     def test_all_obligations_are_in_the_spec_not_claimed_as_executed(self):
         families = self.matrix["verification"]["required_families"]
         self.assertEqual(set(families), {f"RI-{n:02}" for n in range(1, 15)})

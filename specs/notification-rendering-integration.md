@@ -1,6 +1,6 @@
 # Notification Rendering Integration
 
-Status: Draft v0.1 — proposed integration amendment; not ratified or implemented
+Status: Draft v0.2 — proposed integration amendment; not ratified or implemented
 Created: 2026-10-04
 Scope: Persistence, authoring, continuity, attempt evidence, permissions and bounded reads
 
@@ -56,6 +56,21 @@ expressing that intent MUST fail `unsupported_field`, field `notification_plan`,
 with no writes and a fixed upgrade-contract diagnostic. It must not silently clear
 details, auto-resolve a new grant or drop sidecar state. Exact stored receipt replay
 remains unchanged and must not require today's catalogs to be active.
+
+For `notification_profile.revise`, compatible stored receipt replay precedes all
+fresh-execution checks, including the guard below; incompatible command-ID reuse
+still fails under the existing replay rules. On fresh execution, perform existing
+root/lifecycle and expected-current-revision checks first. If the current revision
+uses the v2 decoder, a `spine.notification-profiles.v1` revise request MUST fail
+`unsupported_field`, field `revision`, with diagnostic
+`Use spine.notification-profiles.v2 to revise a v2 profile revision.`
+This includes v2 revisions whose templates are all ordinary and requests that would
+otherwise be no-ops. Do not demote to v1, copy pins implicitly, or silently clear them.
+No revision, pointer, audit or receipt is written by that failure. V1-to-v1 revision
+remains unchanged; a v2 request may revise a v1 or v2 current revision using the v2
+normalization/hashes. In v2 complete replacements, omitted template rendering means
+ordinary as specified below. Historical v1 hashes and compatible replay never change.
+Metadata-only updates and retirement remain governed by their existing contracts.
 
 All writers must understand copy-forward before storage activation, even writers
 whose public schema cannot author rendering. A runtime without the integration
@@ -137,6 +152,38 @@ An unadopted item can keep ordinary reminders, but selecting detail fails
 `rendering_disclosure_unavailable` until explicit ownership adoption. This adds no
 implicit adoption inside schedule commands. Composite rollback includes profile
 application, policy presentation, materialization, audit and receipt.
+
+### 3.3 Fresh trusted-local creation and explicit adoption
+
+This slice does not add an owner input or ownership establishment to the trusted-local
+schedule-create command. Fresh trusted-local creation is therefore **ordinary-only**:
+a definition selection fails `rendering_disclosure_unavailable` before any durable
+item, policy, work, audit or receipt commit. A profile containing definition pins may
+still be used at creation, but every surviving pinned template must have an explicit
+ordinary application entry under Section 3.1. Never infer an owner from that profile.
+
+The supported detail-enabled setup sequence is:
+
+1. Create the item with ordinary presentations. Select materialization mode `none`
+   if details must be configured before any reminder work becomes deliverable.
+2. Explicitly adopt the created item's exact current version into a subject/group
+   owner using the existing trusted-local ownership provisioning boundary in
+   [the web API specification, Section 4](trusted-multi-operator-web-api.md).
+   Adoption is not ownership transfer and grants no inferred creator entitlement.
+3. Read the current item version/policy IDs and apply the Section 3.2 presentation-only
+   edit against that version, resolving the exact definition/disclosure. This edit
+   still requires materialization mode `none` and creates no work.
+4. When delivery is wanted, invoke the existing bounded notification-work
+   materialization command explicitly and verify the resulting work/readback.
+
+These are separately receipted transactions, not one atomic composite. If adoption
+or selection fails, the already created item remains ordinary; do not auto-delete it
+or claim the entire sequence rolled back. Retrying uses each step's own command ID
+and current-version checks. If ordinary work was already materialized, existing
+attempt/continuity rules apply; later setup cannot retract an already started send.
+Protected creation's existing envelope ownership orchestration is not removed, but
+this amendment neither activates rendering there nor extends its registry. An atomic
+trusted-local owner-plus-rendering create would require a separate explicit contract.
 
 ## 4. Identity, copy-forward and work continuity
 
@@ -419,7 +466,7 @@ transaction. No-op, replay and reads do not increment. Overflow fails closed. Gl
 generation deliberately invalidates pages across owners; it is not a user-visible count.
 
 Required indexes: roots `(owner_kind,owner_subject_id,owner_group_id,status,root_id)`
-and same prefix without status for unfiltered lists; disclosures likewise ending in
+with required owner/status predicates; disclosures likewise ending in
 disclosure_authorization_id; revisions `(root_id,revision_number)`; fields by revision;
 policy presentations by `(item_id,item_version,notification_policy_id)` and by grant;
 template-renderings by definition revision. Root/revision IDs refer to the full column
@@ -457,8 +504,12 @@ expiry across pages. Key retirement, restore-generation change or ledger clone i
 Payload has exactly: contract_version, ledger_instance_id, key_generation, command,
 query_hash, context_hash, access_hash, catalog_generation, last_id, issued_at_utc,
 expires_at_utc, access_epoch, access_valid_until_utc. Canonical query is
-`{owner,status,limit}`; omitted status normalizes to
-null and limit is bound, not adjustable mid-pagination. Hash preimages use the exact
+`{owner,status,limit}`. Status is required by both existing closed list contracts:
+definition lists accept `active|retired`, disclosure lists accept `active|revoked`.
+Omitted, null or otherwise invalid status fails request validation before cursor
+processing; there is no unfiltered-list mode or null-status normalization. Use the
+admitted status enum verbatim. Limit is bound, not adjustable mid-pagination.
+Hash preimages use the exact
 objects `{derivation_version,canonical_json_version,<named object>}` with domains
 `spine.rendering-cursor-query.v1`, `spine.rendering-cursor-context.v1`,
 `spine.rendering-cursor-access.v1` and keys query, context, access respectively.
@@ -516,8 +567,8 @@ executable fixtures are checked in and run. At minimum:
 | ID | Required oracle |
 | --- | --- |
 | RI-01 | V1 unselected body, hashes and provider envelope byte-identical before/after migration |
-| RI-02 | Profile v2 and presentation hash preimages/digests; explicit ordinary, empty subset, unique/exact grant selection |
-| RI-03 | Atomic create/full plan failure: no item, policy, presentation, work, receipt or audit residue |
+| RI-02 | Profile v2 and presentation hash preimages/digests; explicit ordinary, empty subset, unique/exact grant selection; v1 request against v1 current, v2 request against v1/v2 current; fresh v1 against v2 rejected even all-ordinary/no-op, stale guard first, historical replay unchanged |
+| RI-03 | Fresh local detail create rejected with no residue; ordinary create -> explicit adoption -> presentation edit -> materialization succeeds; adoption/edit failure preserves prior committed ordinary item; each individual create/full-plan transaction rolls back all its item/policy/presentation/work/audit/receipt writes |
 | RI-04 | Presentation-only change/no-op/dry-run/replay with identical work IDs; old schema cannot silently clear |
 | RI-05 | Shared intent, multiple predecessors and repeated copy-forward; wrong/forked ancestry fails closed |
 | RI-06 | Queued, leased, retry, started, terminal and absent work across facet/presentation edits |
@@ -525,7 +576,7 @@ executable fixtures are checked in and run. At minimum:
 | RI-08 | One v2 rendering+attempt atomic commit; interruption/overflow/corruption invokes no adapter |
 | RI-09 | Same-attempt replay and new retry; stable provider key, old body never recomputed |
 | RI-10 | Subject/group roles, forbidden grant issuance, protected location denial, trusted-local exact-location approval |
-| RI-11 | Signed cursor tamper/query/identity/epoch/generation/time transitions, bounded plans and no read writes |
+| RI-11 | Signed cursor tamper/query/identity/epoch/generation/time transitions, bounded plans and no read writes; required legal status on both lists, omitted/null rejected before cursor processing, status change invalidates continuation |
 | RI-12 | Populated/fresh migration, interruption at each DDL stage, backup restore and old-worker refusal |
 | RI-13 | Every item-version producer copies presentations; omitted producer/finalizer/row is detected |
 | RI-14 | Full readback discriminates v1/v2; old summaries leak no details; packaging excludes unimplemented families |

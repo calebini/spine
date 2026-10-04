@@ -33,6 +33,25 @@
     "presentation_only_materialization": "none",
     "origins_from_composition_not_client": true,
     "unadopted_item_detail_selection": "rendering_disclosure_unavailable",
+    "fresh_trusted_local_create": "ordinary_only_then_explicit_adoption_and_presentation_edit",
+    "fresh_create_establishes_owner": false,
+    "detail_setup_steps": [
+      "ordinary_create_materialization_none",
+      "explicit_owner_adoption",
+      "presentation_only_edit_materialization_none",
+      "explicit_bounded_materialization_when_delivery_wanted"
+    ],
+    "detail_setup_atomic_across_steps": false,
+    "detail_setup_failure_preserves_prior_commits": true,
+    "legacy_profile_revise": {
+      "current_v1": "existing_v1_rules",
+      "current_v2": "reject_including_all_ordinary_and_noop",
+      "error": "unsupported_field",
+      "field": "revision",
+      "diagnostic": "Use spine.notification-profiles.v2 to revise a v2 profile revision.",
+      "order": "compatible_replay_then_existing_reference_and_freshness_checks_then_decoder_guard",
+      "historical_hashes_and_replay": "unchanged"
+    },
     "legacy_fresh_creation": "ordinary",
     "legacy_unchanged_copy": "preserve",
     "legacy_lossy_plan_replacement": "reject_unsupported_field"
@@ -111,6 +130,13 @@
       "status",
       "limit"
     ],
+    "status_required": true,
+    "status_domains": {
+      "notification_rendering_definition.list": ["active", "retired"],
+      "notification_rendering_disclosure.list": ["active", "revoked"]
+    },
+    "invalid_status_precedes_cursor_processing": true,
+    "unfiltered_lists": false,
     "generation": "global_changed_catalog_transactions_only",
     "max_candidates": 101,
     "max_returned_records": 100,
