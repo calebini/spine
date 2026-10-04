@@ -383,7 +383,7 @@
         },
         "limit": {
           "type": "string",
-          "pattern": "^([1-9]|[1-9][0-9]|100)$"
+          "pattern": "^([1-9]|[1-9][0-9]|100)(?![\\s\\S])"
         }
       },
       "additionalProperties": false,
@@ -689,7 +689,7 @@
         },
         "limit": {
           "type": "string",
-          "pattern": "^([1-9]|[1-9][0-9]|100)$"
+          "pattern": "^([1-9]|[1-9][0-9]|100)(?![\\s\\S])"
         }
       },
       "additionalProperties": false,

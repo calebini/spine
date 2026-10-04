@@ -35,6 +35,53 @@ status labels in the same change. Routine task updates do not change spec author
 
 ## Current specification follow-up
 
+### SPINE-041 — Reject noncanonical rendering list limits
+
+**Status:** Done — operator-authorized targeted patch verified on 2026-10-04.
+**Scope:** Tighten the four rendering definition/disclosure list request/response
+limit patterns and add request/response newline-rejection tests. Preserve canonical
+1–100 values, required response echoes and the separate record-count oracle.
+**Dependencies:** SPINE-040's single minor finding.
+No runtime activation, migration, audit rerun, commit or push.
+**Result:** Replaced the four `$` terminators with strict end-of-input assertions.
+Both request and response validators reject LF, CRLF and other whitespace/suffixes;
+all canonical decimal strings 1–100 remain accepted. Echo and record-count rules
+are unchanged. The new regression test reproduced the trailing-LF failure before
+the schema correction. Focused rendering/notification/packaging checks passed:
+**21 tests, 333 subtests**; Ruff, web-contract synchronization and diff hygiene passed.
+Source-only status and existing backlog changes are preserved. This is a locally
+verified manual correction, not a new Whetstone verdict.
+
+### SPINE-040 — Focused rendering machine-contract recheck
+
+**Status:** Done — approved reviewer-only recheck completed on 2026-10-04;
+one minor clarification remains for a separately authorized manual patch.
+**Dependencies:** SPINE-036 findings, SPINE-037 manual patch, and SPINE-039's clean
+location amendment review; checkpoint `866081c` includes the schema-18 prerequisite.
+**Scope:** One reviewer-only `audit-change`, built-in consistency profile,
+`gpt-6.1-sol`. Recheck dry-run response encoding, accepted list-limit echo and
+facet-location source immutability, plus source-only activation preservation.
+**Package:** [Exact 35-file inventory and audit notes](../whetstone_runs/notification-rendering-definitions-machine-contract-audit-002/audit-notes.md).
+Prior findings and the clean location-spec report are context, not a replacement
+for this machine-contract recheck. Storage implementation certification is excluded.
+**Acceptance:** Classify each prior finding, inspect the bounded report/severities
+and boundary result, verify unchanged inputs and report any remaining decisions.
+No Editor, source patch, runtime change, convergence claim, commit or push.
+
+**Result:** [Report](../whetstone_runs/notification-rendering-definitions-machine-contract-audit-002/change_audit/change_audit_report.md)
+and [feedback](../whetstone_runs/notification-rendering-definitions-machine-contract-audit-002/change_audit/change_audit_feedback.json):
+`pass_with_minor_clarification`, `boundary_preserved=true`; zero blockers/majors,
+one minor, zero nits. Requested `gpt-6.1-sol` confirmed in manifest and feedback.
+Prior dry-run and facet-location findings are closed at the contract level. The
+list-limit finding is partially closed: required echoes and record-count semantics
+are correct, but all four request/response limit regexes accept a trailing LF.
+Local read-only JSON Schema probes reproduced acceptance of `"20\n"` in all four
+properties. Recommended patch: strict end-of-input matching and LF/CRLF negative
+cases; no product decision needed. No source patch was performed.
+All 35 input hashes match the prepared baseline and run manifest; approved notes
+match the run manifest. This closes the bounded review, not rendering integration
+contracts or runtime implementation. No Editor, commit, push or deployment ran.
+
 ### SPINE-039 — Bounded facet-location freeze specification audit
 
 **Status:** Done — approved reviewer-only audit completed on 2026-10-04.

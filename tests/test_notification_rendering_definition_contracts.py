@@ -308,13 +308,22 @@ class RenderingDefinitionContractTests(unittest.TestCase):
             page = load(FIXTURES / f"response_{family}_list_dry_run.json")
             request = load(FIXTURES / f"request_{family}_list.json")
             validator = self.validator(RESPONSES, command)
+            request_validator = self.validator(COMMANDS, command)
             self.assertEqual(page["limit"], request["limit"])
             self.assertLessEqual(len(page["records"]), int(page["limit"]))
             missing = {key: value for key, value in page.items() if key != "limit"}
             self.assertFalse(validator.is_valid(missing))
-            for invalid in (0, 1, "0", "01", "101", "-1", None):
+            for valid in range(1, 101):
+                with self.subTest(command=command, limit=str(valid)):
+                    self.assertTrue(validator.is_valid({**page, "limit": str(valid)}))
+                    self.assertTrue(request_validator.is_valid({**request, "limit": str(valid)}))
+            for invalid in (
+                0, 1, "0", "01", "101", "-1", None,
+                "20\n", "20\r\n", "20\r", "20 ", "20\t", " 20", "\n20", "20\n1",
+            ):
                 with self.subTest(command=command, limit=invalid):
                     self.assertFalse(validator.is_valid({**page, "limit": invalid}))
+                    self.assertFalse(request_validator.is_valid({**request, "limit": invalid}))
             source = "response_definition_create" if family == "definition" else "response_disclosure_show"
             record = load(FIXTURES / f"{source}.json")["record"]
             too_many = {**page, "limit": "1", "records": [record, record]}
