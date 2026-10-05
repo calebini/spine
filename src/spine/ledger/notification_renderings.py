@@ -96,6 +96,11 @@ def get_notification_rendering(connection: sqlite3.Connection, *, attempt_id: st
     if row is None:
         return None
     value: dict[str, Any] = dict(row)
+    if value["rendering_contract"] == "spine.notification-rendering.v1":
+        # Candidate storage adds nullable v2 columns, not fields to frozen v1
+        # evidence or readbacks. Historical projections remain byte-equivalent.
+        for field in ("base_rendering_json", "details_evidence_json", "details_contract_version"):
+            value.pop(field, None)
     source_input = _canonical_object(value.pop("source_input_json"), "source_input_json")
     phrase_facts = _canonical_object(value.pop("phrase_facts_json"), "phrase_facts_json")
     value["rendered_item_version"] = str(value["rendered_item_version"])

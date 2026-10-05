@@ -113,6 +113,10 @@ def load_profile(
         template["late_handling"] = json.loads(str(template.pop("late_handling_json")))
         templates.append(template)
     result["revision"]["templates"] = templates
+    if getattr(connection, "_renderings_enabled", False):
+        from spine.ledger.rendering_profiles import decode_revision
+
+        decode_revision(connection, result)
     return result
 
 

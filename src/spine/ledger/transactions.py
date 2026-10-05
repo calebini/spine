@@ -18,6 +18,47 @@ class LedgerConnection(sqlite3.Connection):
 
     _command_transaction: bool = False
 
+    def enable_renderings(self) -> None:
+        """Candidate storage tracking, armed only when explicitly installed."""
+        if getattr(self, "_renderings_enabled", False):
+            return
+        self.enable_facets()
+        self._renderings_enabled = True
+        self._rendering_pending: dict[str, dict] = {}
+        self._rendering_versions: set[tuple[str, int]] = set()
+        self._rendering_catalog: set[tuple[str, str]] = set()
+        self._rendering_profiles: set[str] = set()
+        self.create_function("spine_touch_policy", 2, self._touch_policy)
+        self.create_function("spine_touch_rendering", 2, self._touch_rendering)
+        self.create_function("spine_touch_rendering_profile", 1, lambda identity: self._rendering_profiles.add(identity) or 0)
+        self.execute("""CREATE TEMP TRIGGER spine_rendering_profile_insert AFTER INSERT ON main.notification_profile_revisions
+            BEGIN SELECT spine_touch_rendering_profile(NEW.notification_profile_revision_id); END""")
+        self.execute("""CREATE TEMP TRIGGER spine_rendering_profile_marker AFTER INSERT ON main.notification_profile_rendering_revisions
+            BEGIN SELECT spine_touch_rendering_profile(NEW.notification_profile_revision_id); END""")
+        self.execute("""CREATE TEMP TRIGGER spine_rendering_profile_template AFTER INSERT ON main.notification_profile_template_renderings
+            BEGIN SELECT spine_touch_rendering_profile(notification_profile_revision_id)
+              FROM notification_profile_templates WHERE notification_profile_template_id=NEW.notification_profile_template_id; END""")
+        for operation in ("INSERT", "UPDATE", "DELETE"):
+            record = "OLD" if operation == "DELETE" else "NEW"
+            self.execute(f"""CREATE TEMP TRIGGER spine_rendering_policy_{operation} AFTER {operation} ON main.notification_policies
+                BEGIN SELECT spine_touch_policy({record}.item_id,{record}.version); END""")
+        for table, kind, column, operations in (
+            ("notification_rendering_definitions", "root", "notification_rendering_definition_id", ("INSERT", "UPDATE")),
+            ("notification_rendering_definition_revisions", "revision", "notification_rendering_definition_revision_id", ("INSERT",)),
+            ("notification_rendering_disclosures", "disclosure", "disclosure_authorization_id", ("INSERT", "UPDATE")),
+        ):
+            for operation in operations:
+                self.execute(f"""CREATE TEMP TRIGGER spine_rendering_{table}_{operation} AFTER {operation} ON main.{table}
+                    BEGIN SELECT spine_touch_rendering('{kind}',NEW.{column}); END""")
+
+    def _touch_policy(self, item_id: str, version: int) -> int:
+        self._rendering_versions.add((item_id, version))
+        return 0
+
+    def _touch_rendering(self, kind: str, identity: str) -> int:
+        self._rendering_catalog.add((kind, identity))
+        return 0
+
     def enable_facets(self) -> None:
         """Install connection-local write tracking; no persistent runtime tables."""
         if getattr(self, "_facets_enabled", False):
@@ -97,6 +138,11 @@ class LedgerConnection(sqlite3.Connection):
             self._facet_producer = None
 
     def _clear_facets(self) -> None:
+        if getattr(self, "_renderings_enabled", False):
+            self._rendering_pending.clear()
+            self._rendering_versions.clear()
+            self._rendering_catalog.clear()
+            self._rendering_profiles.clear()
         if getattr(self, "_facets_enabled", False):
             self._facet_versions.clear()
             self._facet_allocations.clear()
@@ -107,6 +153,10 @@ class LedgerConnection(sqlite3.Connection):
 
     def _commit_checked(self) -> None:
         try:
+            if getattr(self, "_renderings_enabled", False):
+                from spine.ledger.rendering_definitions import finalize as finalize_renderings
+
+                finalize_renderings(self)
             if getattr(self, "_facets_enabled", False):
                 from spine.ledger.facets import finalize
 

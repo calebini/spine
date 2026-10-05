@@ -1,0 +1,19 @@
+{
+  "format_version": "spine.rendering-writer-inventory.v1",
+  "activation": "internal_candidate_only",
+  "predecessor_schema_version": "18",
+  "item_version_inventory": "facet_writer_inventory.v1.json",
+  "policy_sql_writer": "spine.ledger.notifications.insert_notification_schedule_policy",
+  "exact_copy_writer": "spine.ledger.notifications.copy_forward_notification_policies",
+  "transaction_finalizer": "spine.ledger.rendering_definitions.finalize",
+  "policy_callers": [
+    "src/spine/commands/core.py",
+    "src/spine/commands/temporal_bindings.py",
+    "src/spine/ledger/notifications.py"
+  ],
+  "maintenance_writer": "spine.ledger.rendering_migration.install_candidate",
+  "proof_tests": [
+    "tests.test_rendering_successor_authoring",
+    "tests.test_rendering_storage_integrity"
+  ]
+}

@@ -20,3 +20,4 @@ class CommandContext:
     adapter_bindings: Mapping[str, Any] = field(default_factory=dict)
     delivery_target_defaults: Mapping[str, Any] = field(default_factory=dict)
     facet_cursor_config: Any = None  # Protected adapter configuration, never request JSON.
+    rendering_authoring: Any = None  # Internal candidate hook; public adapters do not populate it.

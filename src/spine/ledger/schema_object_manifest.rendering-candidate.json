@@ -1,0 +1,327 @@
+{
+  "manifest_version": "spine.rendering-candidate-schema-manifest.v1",
+  "predecessor_schema_version": "18",
+  "activation": "internal_candidate_only",
+  "objects": [
+    {
+      "object_type": "index",
+      "name": "notification_policy_presentations_definition_root_id_definition_revision_id_idx",
+      "definition_sha256": "00d1d3bbbbdce1c0c19459e64b360921975459bf3993cc3b2980d75c063df065"
+    },
+    {
+      "object_type": "index",
+      "name": "notification_policy_presentations_disclosure_authorization_id_idx",
+      "definition_sha256": "31c6dab647bf8ce552bde82f3f6dd283c0097aee97921525dbd09c40c5d43712"
+    },
+    {
+      "object_type": "index",
+      "name": "notification_policy_presentations_item_id_item_version_notification_policy_id_idx",
+      "definition_sha256": "75ee828ca3089597613aa15666f946879cac2186444139e02092914b95220674"
+    },
+    {
+      "object_type": "index",
+      "name": "notification_policy_presentations_source_policy_id_idx",
+      "definition_sha256": "adcf416e9adcc1acacfbb35ecb2aad523e358f2dbc4a03610d70ea7ff7d56b2a"
+    },
+    {
+      "object_type": "index",
+      "name": "notification_profile_template_renderings_definition_root_id_definition_revision_id_idx",
+      "definition_sha256": "28176d9c134f7e9f97802fc409d74ad9e16e622309f9c23567054fc6c14dfe75"
+    },
+    {
+      "object_type": "index",
+      "name": "notification_rendering_definition_fields_facet_schema_revision_id_field_key_idx",
+      "definition_sha256": "6c17c5851cf3c5809618fb8638b97224fe2bbc5c7731a742a1ac6425f7ff6dfd"
+    },
+    {
+      "object_type": "index",
+      "name": "notification_rendering_definition_revisions_created_receipt_id_idx",
+      "definition_sha256": "b857557600d5fd9fb1d7bd37337a979dce357f9048904127d464afbbe13d873b"
+    },
+    {
+      "object_type": "index",
+      "name": "notification_rendering_definitions_created_receipt_id_idx",
+      "definition_sha256": "2d19c23d54ef37918a5eef28afb6e8d5780c589a9bfd2f94864d260d4bed5e23"
+    },
+    {
+      "object_type": "index",
+      "name": "notification_rendering_definitions_current_revision_id_idx",
+      "definition_sha256": "9864ca2862f62ebc31654b4c46c9f70c270e9ebb90926ea8e80f380fd08c4f72"
+    },
+    {
+      "object_type": "index",
+      "name": "notification_rendering_definitions_owner_kind_owner_subject_id_owner_group_id_status_notification_rendering_definition_id_idx",
+      "definition_sha256": "a2690cc9db4bf4b8cae8a5c69cf516145bd1c422edfdf6806b3fae24744d7af2"
+    },
+    {
+      "object_type": "index",
+      "name": "notification_rendering_definitions_retired_receipt_id_idx",
+      "definition_sha256": "3e8190a7de0c1f36746c3a0cafe32eb645712fdca4b8d0673cfa66e2d867c239"
+    },
+    {
+      "object_type": "index",
+      "name": "notification_rendering_disclosure_locations_location_id_idx",
+      "definition_sha256": "d2e4a0fab00dd5e4064d321ea76077ba98cda50fe880481ffb06df0141bcd858"
+    },
+    {
+      "object_type": "index",
+      "name": "notification_rendering_disclosure_profiles_notification_profile_id_idx",
+      "definition_sha256": "953542158276927c06455ec9a70f622ecee7918208fe768bc7d0bd1fd0d5647b"
+    },
+    {
+      "object_type": "index",
+      "name": "notification_rendering_disclosures_created_receipt_id_idx",
+      "definition_sha256": "57b554a87fe60b1ef69f517743d4b55afdb72c684c0439be8ca7ab2ca4e1db71"
+    },
+    {
+      "object_type": "index",
+      "name": "notification_rendering_disclosures_definition_root_id_definition_revision_id_idx",
+      "definition_sha256": "8cbc0e798289617ffb3f47c8451d5dd8304a6998770314b9cb66f20c8d22ecbf"
+    },
+    {
+      "object_type": "index",
+      "name": "notification_rendering_disclosures_delivery_target_id_idx",
+      "definition_sha256": "af238c8e1af2d12636fe6992637605c665d63744909b0ec48b30ce7de06197b9"
+    },
+    {
+      "object_type": "index",
+      "name": "notification_rendering_disclosures_match_hash_status_disclosure_authorization_id_idx",
+      "definition_sha256": "c0488b040d944c12843f6a7f85b1c7752b0eaed37ec8a7765311852e3054c9fa"
+    },
+    {
+      "object_type": "index",
+      "name": "notification_rendering_disclosures_owner_kind_owner_subject_id_owner_group_id_status_disclosure_authorization_id_idx",
+      "definition_sha256": "80f9eee047c218a718eb68bead6d2379530a54b22007f52835d5e79c60642d6c"
+    },
+    {
+      "object_type": "index",
+      "name": "notification_rendering_disclosures_recipient_group_id_idx",
+      "definition_sha256": "ecb2d73744dc7ac0af184122e5016e2f537b01b39ef941e439689067a15428fb"
+    },
+    {
+      "object_type": "index",
+      "name": "notification_rendering_disclosures_recipient_subject_id_idx",
+      "definition_sha256": "4579c7833dcefd8704517b224e1dc6c17f5c685183c80e7a11bf890ebfe6fe56"
+    },
+    {
+      "object_type": "index",
+      "name": "notification_rendering_disclosures_revoked_receipt_id_idx",
+      "definition_sha256": "2453a5fd80fa771bf1e741f7d849a23f30f54e4bd6a812bda5fab9555150610e"
+    },
+    {
+      "object_type": "index",
+      "name": "rendering_definition_subject_group_key",
+      "definition_sha256": "8b36e71d98b69883823d85def364c052386c53d0f6659a087a2b51967ed49f8f"
+    },
+    {
+      "object_type": "index",
+      "name": "rendering_definition_subject_key",
+      "definition_sha256": "af34f8f3cfb58a6244594fe58f31f8f8df61c5255c907a8c1af0befeb66d1478"
+    },
+    {
+      "object_type": "index",
+      "name": "rendering_definition_system_key",
+      "definition_sha256": "631339b448d2587855157a83c4f53662283ef9600c474560a68c3cab8a27330a"
+    },
+    {
+      "object_type": "table",
+      "name": "access_grants",
+      "definition_sha256": "fd5abc90d3d3d14a4c3e255cee574b84142707ccd884c5e0b28806ea48a07a99"
+    },
+    {
+      "object_type": "table",
+      "name": "coordination_catalog_audit_log",
+      "definition_sha256": "b3e0c48fb8f5fe890dd2d09c7733edc7d752e0095c9ca27a978a79fc7504f575"
+    },
+    {
+      "object_type": "table",
+      "name": "notification_policy_presentations",
+      "definition_sha256": "cba6bd38b2f46d91c3aa6a7a817f8771387590ea86df63edbafdd236f6306114"
+    },
+    {
+      "object_type": "table",
+      "name": "notification_profile_rendering_revisions",
+      "definition_sha256": "deea44f0d2df6c4872caba1396d97216d0214669a0b1e65114a1ca98bd211129"
+    },
+    {
+      "object_type": "table",
+      "name": "notification_profile_template_renderings",
+      "definition_sha256": "2d71ac92b9bc90eda43553264034e25183500e801db283a6000eadb7a2cbc988"
+    },
+    {
+      "object_type": "table",
+      "name": "notification_rendering_catalog_state",
+      "definition_sha256": "1d6fdeca11c90dad43e25d9c49355d553a0305d1dc642e5b044d1b3ea137c865"
+    },
+    {
+      "object_type": "table",
+      "name": "notification_rendering_definition_fields",
+      "definition_sha256": "e6744aa0b8d06e2ce27a227b2b0bad34257833eab2c4051820b558b79847aa40"
+    },
+    {
+      "object_type": "table",
+      "name": "notification_rendering_definition_revisions",
+      "definition_sha256": "90ba02380f16efd1ad4a370813defb46563b89eb852257fd1e77315622df29f1"
+    },
+    {
+      "object_type": "table",
+      "name": "notification_rendering_definitions",
+      "definition_sha256": "2cd41a42292434a9d2727e5af3f5aea439a38ed42de0b50b4a472ad57e472761"
+    },
+    {
+      "object_type": "table",
+      "name": "notification_rendering_disclosure_locations",
+      "definition_sha256": "6b418cff2ff626db867a0b0816092e35e41f1b34ac363c196f118ce02e9daf81"
+    },
+    {
+      "object_type": "table",
+      "name": "notification_rendering_disclosure_profiles",
+      "definition_sha256": "dfddef3ffd5bd7bc35e5fa676c057a56a70fab464c14265182241daa30697190"
+    },
+    {
+      "object_type": "table",
+      "name": "notification_rendering_disclosures",
+      "definition_sha256": "407cb4f826dae11b79399d82fa750d5643f446edfe4a3fa1c4088fc20eb15cc8"
+    },
+    {
+      "object_type": "table",
+      "name": "notification_renderings",
+      "definition_sha256": "66f1ee3801dc0841aa8ba48b21ceecef07be85170884a9b4a5cfd85e8ff383d8"
+    },
+    {
+      "object_type": "trigger",
+      "name": "notification_policy_presentation_binding",
+      "definition_sha256": "c588a8ed7d9e0198801e300ba116aadac49600feaec6a28837fb3630608a56d5"
+    },
+    {
+      "object_type": "trigger",
+      "name": "notification_policy_presentations_immutable_delete",
+      "definition_sha256": "4a360494828d589b053bf27ab600a6c63df3a53d71f7690fc3eb1ae22515751c"
+    },
+    {
+      "object_type": "trigger",
+      "name": "notification_policy_presentations_immutable_update",
+      "definition_sha256": "b015bc86e4f485740abdfa15c3ca389d89329b7231838aab47ab4f2c28037b42"
+    },
+    {
+      "object_type": "trigger",
+      "name": "notification_profile_rendering_revisions_immutable_delete",
+      "definition_sha256": "b134e130e7de75c4f8bb09f9105d5933c2a8ef7e3836a43e7e9e47e36f2f5238"
+    },
+    {
+      "object_type": "trigger",
+      "name": "notification_profile_rendering_revisions_immutable_update",
+      "definition_sha256": "296555c826949b18d6ecc5be129bcf6180f65aa8e01a3d4b7a408879e3db6d93"
+    },
+    {
+      "object_type": "trigger",
+      "name": "notification_profile_template_renderings_immutable_delete",
+      "definition_sha256": "085f6241cbca4eaa0bcc0c24f70fb39c60624506a88b287d4eafaa77227f6366"
+    },
+    {
+      "object_type": "trigger",
+      "name": "notification_profile_template_renderings_immutable_update",
+      "definition_sha256": "313f5cc219f95d0347503708f5f89fdeda17246485a2eb9deca1578abbe8ff03"
+    },
+    {
+      "object_type": "trigger",
+      "name": "notification_rendering_definition_fields_immutable_delete",
+      "definition_sha256": "2cef9d2e2dc2b0fac787304d4444ac4c35246cff7e068d2ad5f57805938d8e9d"
+    },
+    {
+      "object_type": "trigger",
+      "name": "notification_rendering_definition_fields_immutable_update",
+      "definition_sha256": "a0142137b3bdac17333660794b7ace0493fd5be79e9159e3ef3ef5a40c98a744"
+    },
+    {
+      "object_type": "trigger",
+      "name": "notification_rendering_definition_revisions_immutable_delete",
+      "definition_sha256": "4caea030ba1080b6b71cb73c320d4e615bd3b15fffeb89a1be7adf881a740b18"
+    },
+    {
+      "object_type": "trigger",
+      "name": "notification_rendering_definition_revisions_immutable_update",
+      "definition_sha256": "e945132fcecd8c9a817f77d5a6af1e09a028848915b708aefaf9ae2551a98fcc"
+    },
+    {
+      "object_type": "trigger",
+      "name": "notification_rendering_definitions_guard",
+      "definition_sha256": "ef925735365d82f53e2f497d43e1f036446664f0d5bfc1fe3dfdb325316077cf"
+    },
+    {
+      "object_type": "trigger",
+      "name": "notification_rendering_definitions_no_delete",
+      "definition_sha256": "52b29cee278199d4ff8cc9897e248bbfb6c2e7c6b5a454301274cebf0e161b68"
+    },
+    {
+      "object_type": "trigger",
+      "name": "notification_rendering_disclosure_locations_immutable_delete",
+      "definition_sha256": "14d3c4a71dfc5695eb9c879d5756a67c28f04f72aab58c223d70954bfce6613b"
+    },
+    {
+      "object_type": "trigger",
+      "name": "notification_rendering_disclosure_locations_immutable_update",
+      "definition_sha256": "420124b232e7969c25fd5f8327fe546fd579767c260059a56603d5759e71fd17"
+    },
+    {
+      "object_type": "trigger",
+      "name": "notification_rendering_disclosure_profiles_immutable_delete",
+      "definition_sha256": "d8937952c7837beb2d3d3f6d018ed92fdfbac14ed2405cc500dd15fe7fe2803e"
+    },
+    {
+      "object_type": "trigger",
+      "name": "notification_rendering_disclosure_profiles_immutable_update",
+      "definition_sha256": "06465aab735d35a5ed0794332b6280f5637fb52b2baecda8fa8f0537a7f215cc"
+    },
+    {
+      "object_type": "trigger",
+      "name": "notification_rendering_disclosures_guard",
+      "definition_sha256": "d71458208c48241dd9633a47618680f572fc9ca24d3049cf76b1f53db770e560"
+    },
+    {
+      "object_type": "trigger",
+      "name": "notification_rendering_disclosures_no_delete",
+      "definition_sha256": "918fcf5cd9bbe3f793057ed647763c0e174754670c8c6102749f50447947a5de"
+    },
+    {
+      "object_type": "trigger",
+      "name": "notification_renderings_immutable_delete",
+      "definition_sha256": "00352b1fb0bdf27539d5c331327f8e06e9d5269fda991851d4cb0950724cc51e"
+    },
+    {
+      "object_type": "trigger",
+      "name": "notification_renderings_immutable_update",
+      "definition_sha256": "b763ceb38f642f99df5bf0070dc048fd08dff210971c0078f56f00d10d0db5df"
+    },
+    {
+      "object_type": "trigger",
+      "name": "rendering_grant_resource_insert",
+      "definition_sha256": "57b0055f9e34bdc1e66d9228f64d7e054800cc196e7c63728fbf4a1d8c5cea6b"
+    },
+    {
+      "object_type": "trigger",
+      "name": "rendering_grant_resource_update",
+      "definition_sha256": "03f63ab531c636cce79b6ab78d555d2390546262573344eab9c12f6604f8c240"
+    },
+    {
+      "object_type": "trigger",
+      "name": "rendering_profile_revision_no_delete",
+      "definition_sha256": "11a1a409a3c41962190f35edb0e146ec2ccd08523d9da4d2feb9af7912a41590"
+    },
+    {
+      "object_type": "trigger",
+      "name": "rendering_profile_revision_no_update",
+      "definition_sha256": "2ccd04a2c35086ee6f868b111973e4e38725216b9ac317ca290f2a16caee5ae9"
+    },
+    {
+      "object_type": "trigger",
+      "name": "rendering_profile_template_no_delete",
+      "definition_sha256": "41156ca6947df16edfd053c1258787e93cd72d2b743fbe7d0b34b043f51c6857"
+    },
+    {
+      "object_type": "trigger",
+      "name": "rendering_profile_template_no_update",
+      "definition_sha256": "b0a2083e695ca296da4243ac90f4b88287d960f9f4f73c63254caaffa864a14b"
+    }
+  ]
+}

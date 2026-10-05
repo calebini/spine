@@ -33,12 +33,118 @@ dependencies, acceptance criteria, and required decisions. When finishing a task
 record evidence and move it to Completed. Update affected orientation and contract
 status labels in the same change. Routine task updates do not change spec authority.
 
-## Current specification follow-up
+## Rendering delivery — implementation sequence
+
+The operator approved implementation planning and then SPINE-051 implementation on
+2026-10-05. SPINE-051 has an implemented internal checkpoint; later slices remain unstarted. These three internal checkpoints
+deliver one cohesive backend release; there is no intermediate staging deployment.
+Specs/contracts retain authority. Slice A has executable evidence below; complete
+RI-01–RI-14 release qualification remains pending the delivery/readback slices.
+The [implementation plan](IMPLEMENTATION_PLAN.md#planned-delivery-facet-aware-notification-rendering-spine-051053)
+owns sequencing rationale and the proof allocation. Do not activate successor command
+families, the integration capability or production migration until all three slices
+and end-to-end verification are complete. New HTTP exposure and pack adoption stay separate.
+
+### SPINE-051 — Rendering persistence and authoring foundation
+
+**Status:** Implemented — internal candidate checkpoint, 2026-10-05; public activation remains off.
+**Dependencies:** SPINE-038 schema-18 location protection; SPINE-049 ratified design;
+SPINE-050 bounded review and locally verified fixture correction (`da128c5`).
+**Scope:** Integration Sections 2–5, 7–9 and 11: candidate migration/fresh schema,
+canonical storage/reference indexes/guards, historical ordinary backfill, all-policy-
+writer inventory/finalization, shared exact-descendant resolver, definition/disclosure
+catalog commands and permission/cursor rules, profile/schedule/direct-reminder
+successor authoring, and original application evidence. Preserve replay/no-op/dry-run,
+old decoders and old-request loss guards. Fresh local creation stays ordinary-only;
+selected detail requires explicit ownership adoption and a later presentation edit.
+**Acceptance:** Implement disposable-ledger proofs for RI-02/04/11/13 and the A portions
+of RI-01/03/05/10/12. Demonstrate all writers copy valid supporting facts, atomic
+rollback includes materialization/audit/receipts, read paths meet declared bounds,
+and candidate migrations preserve history and fail without partial activation.
+Test exact/ambiguous grants, role denials, profile duplicate semantics and all corrected
+wire limits/evidence. Record concrete test mappings; unexecuted RI cases stay pending.
+**Boundary:** No live ledger, deployment, adapter sends or public activation. Candidate
+migrations/handlers are exercised internally. Do not add an owner input, implicit
+adoption, scheduler hold, broader protected-location rights or schema number in this plan.
+**Handoff:** Slice B receives working storage, authoring, writer/ancestry services and
+their tests, not merely schema files. Actual schema/version assignment is coordinated
+with final release activation, after checking the then-current migration baseline.
+**Evidence:** Candidate DDL, an atomic schema-18 installer, compiled object-fingerprint
+manifest and writer inventory; immutable catalog/profile/presentation decoding;
+transaction-owned finalization over allocator- and SQL-tracked writes; private shared
+profile/schedule/direct-reminder authoring hooks and catalog/admission/cursor handlers.
+`tests/test_rendering_authoring_foundation.py` exercises catalog replay/no-op/dry-run,
+computed v2 hash oracles, cursor/query bounds, missing support and interrupted migration.
+`tests/test_rendering_successor_authoring.py` exercises profile pins, v1 loss guards,
+ordinary creation → explicit adoption → presentation edit, exact/ambiguous disclosure,
+application provenance, direct v2 edits, work preservation and rollback (RI-02/04 and
+authoring portions of RI-03/05). `tests/test_rendering_permissions.py` covers roles,
+spoofed actors, private catalog visibility, protected-location denial, cursor identity,
+expiry and key rotation (authoring RI-10/11). `tests/test_rendering_storage_integrity.py`
+executes all existing producer paths and shared-intent copy chains, validates manifests,
+checks the fresh read-release fence, and preserves populated v1 profile/attempt bytes
+(RI-13 and A portions of RI-01/05/12). Delivery races, operational exclusion, complete
+restore/old-worker release checks and readback/activation remain assigned to B/C.
+**Packaging note:** Candidate DDL is outside numbered migrations; package-data patterns
+include it and both inventories. Local wheel building could not run because the
+available Python environments lack `setuptools`; installed-wheel qualification remains
+a release-checkpoint requirement, not a claim of completed packaging verification.
+**Verification:** Full unittest discovery passed 894 tests; a subsequently added
+candidate-storage run of the eight existing profile regressions also passed. Focused
+candidate tests, Ruff, compileall, changed-document local links and diff hygiene pass.
+No commit, push, deployment or live-ledger change was performed.
+
+### SPINE-052 — Integrate facet details into notification attempts
+
+**Status:** Ready — SPINE-051 internal checkpoint implemented; not started.
+**Dependencies:** Complete candidate persistence/authoring and shared ancestry services.
+**Scope:** Integration Sections 4/6 and attempt-time Section 7 rules: scheduler/worker
+current-policy resolution, unchanged work/lease/retry/provider identity, deterministic
+scalar/location-label suffixes, current facet/disclosure/access checks, ordinary fallback
+and omission privacy, one immutable v2 rendering committed with its existing attempt.
+Exercise recurring/follow-source and shared-intent cases, stored replay versus a fresh
+retry, and edit/revoke/ownership/route races. Preserve v1 ordinary bytes and no-idle-write
+behavior. Evidence corruption/size errors fail before adapter invocation.
+**Acceptance:** Execute RI-06/07/08/09, complete delivery portions of RI-01/03/05/10,
+and preserve Slice A regressions. Cover queued, leased, retry, started, terminal,
+independently stale and absent work; prove presentation-only edits neither materialize
+nor resend. Prove strict setup with verified operational exclusion and the possible
+ordinary send between setup steps without it. Use deterministic adapters and fault
+injection, no real recipients. Map evidence to each required oracle.
+**Boundary:** No new send ledger, new provider identity, automatic service controls,
+grace extension, advisory runtime or public activation.
+**Handoff:** Slice C receives the tested authoring-to-attempt flow, including fallback,
+replay, concurrency and failure-path evidence; readback/release gates remain outstanding.
+
+### SPINE-053 — Complete rendering readback and release verification
+
+**Status:** Blocked — depends on SPINE-051 and SPINE-052; not started.
+**Dependencies:** End-to-end candidate storage, authoring and delivery behavior.
+**Scope:** Schedule-show v2 and successor response/receipt projections; exact historical
+v1/v2 decoding; safe old summary/redaction behavior; CLI discovery/help; generic operator
+guidance with progressive disclosure; complete release proof and activation packaging.
+Keep current compact/web families unchanged. Document explicit ownership/adoption,
+definition/disclosure/presentation setup, retirement versus revocation, fallback versus
+failure, and strict setup's external materializer-exclusion requirement.
+**Acceptance:** Execute RI-14 and release RI-12 checks, rerun every RI-01–RI-14 family
+together with focused/full regression suites, and record tests, results and any skipped
+or blocked proof. Verify fresh/populated migration, all-writer coverage, concurrency,
+paired backup/code rollback, old-worker refusal, exact capability/schema pins, bounded
+preflight and installed package resources. Only then activate matching local command
+families, integration capability and migration/runtime manifest as one coherent release.
+**Boundary:** Planning/implementation completion does not authorize deployment, external
+sends or new HTTP registry exposure. No fields added to frozen web schemas; a broader
+web contract and pack installer support require separate work and approval.
+**Handoff:** A version-pinned staging deployment prompt with backup, all-writer shutdown,
+deliberate protected cursor configuration, health/readback checks, controlled canaries,
+and restore instructions that retain the newer ledger. No live execution in this task.
+
+## Rendering design and review history
 
 ### SPINE-050 — Review rendering integration successor machine contracts
 
-**Status:** Manual fixture correction complete and locally verified (2026-10-05);
-corrected bytes not re-audited.
+**Status:** Done — bounded review and manual fixture correction complete (2026-10-05).
+Corrected bytes locally verified and committed; not re-audited.
 **Dependencies:** SPINE-049 ratification and source-only contract codification.
 **Scope:** One reviewer-only Whetstone audit-change with the built-in consistency
 profile and GPT-6.1 Sol. Review successor schema/spec agreement, version/decoder
@@ -100,8 +206,10 @@ and proves deliberately duplicated timing fails even with different template key
 **Verification:** 22 focused tests/149 subtests and 184 broader contract tests/1,139
 subtests passed; exact fixture regeneration, Ruff, web-contract sync --check and
 git diff --check passed. Source specs, schemas and runtime are unchanged. Prior audit
-artifacts and existing tracking changes are preserved; no new audit, commit or push.
-**Next:** Checkpoint the correction when requested. Runtime implementation remains
+artifacts and existing tracking changes were preserved. The fixture correction and
+audit closeout are committed in `da128c5`; no new audit or push was performed.
+**Next:** SPINE-051–053 allocate implementation and remaining stateful proofs. No
+further routine audit is scheduled for the fixture-only residual. Runtime work remains
 separately authorized; no convergence or post-patch external-review claim.
 **Boundary:** The operator approved the exact 103-file package for the completed
 review and subsequently authorized targeted manual fixes and checkpoint. No runtime

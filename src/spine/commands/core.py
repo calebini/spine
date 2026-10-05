@@ -132,6 +132,8 @@ def handle(command: str, request: Mapping[str, Any], context: CommandContext) ->
             context.ledger.backup(preview)
             preview.execute("PRAGMA foreign_keys=ON")
             preview.enable_facets()
+            if getattr(context.ledger, "_renderings_enabled", False):
+                preview.enable_renderings()
             try:
                 preview_context = CommandContext(
                     ledger=preview,
@@ -1428,6 +1430,7 @@ def _handle_task_create(request: Mapping[str, Any], context: CommandContext) -> 
 
 def _handle_schedule_create(request: Mapping[str, Any], context: CommandContext) -> dict[str, Any]:
     command = "schedule.create"
+    rendering = context.rendering_authoring
     allowed = {
         "contract_version",
         "command_id",
@@ -1441,7 +1444,7 @@ def _handle_schedule_create(request: Mapping[str, Any], context: CommandContext)
     }
     _check_fields(command, request, allowed)
     contract_version = request.get("contract_version")
-    if contract_version != "spine.schedule-create.v2":
+    if contract_version != ("spine.schedule-create.v3" if rendering else "spine.schedule-create.v2"):
         raise SpineValidationError(
             "invalid_request:contract_version",
             "contract_version must be spine.schedule-create.v2",
@@ -1543,7 +1546,7 @@ def _handle_schedule_create(request: Mapping[str, Any], context: CommandContext)
         item=item_request,
         item_id=item_id,
         item_type=item_type,
-        notification_plan=request.get("notification_plan"),
+        notification_plan=rendering.plan(request.get("notification_plan")) if rendering else request.get("notification_plan"),
         command_id=command_id,
         actor_subject_id=actor,
         created_at_utc=created_at,
@@ -1655,6 +1658,8 @@ def _handle_schedule_create(request: Mapping[str, Any], context: CommandContext)
         created_at_utc=created_at,
         delivery=delivery,
     )
+    if rendering:
+        rendering.prepare(profile_prepared, normalized_policies, item_id, item_type)
     audit_payload: dict[str, object] = {
         "action": "schedule_created",
         "item_id": item_id,
@@ -1713,6 +1718,8 @@ def _handle_schedule_create(request: Mapping[str, Any], context: CommandContext)
                 ],
             )
         _schedule_fail_if_requested(context, "policies")
+        if rendering:
+            rendering.persist(item_id, 1)
 
         provenance_ids: list[str] = []
         opportunity_work: list[dict[str, object]] = []
@@ -1932,6 +1939,8 @@ def _handle_schedule_create(request: Mapping[str, Any], context: CommandContext)
                 "normalized_recurrence_set_hash": recurrence.value["normalized_recurrence_set_hash"],
                 "diagnostics": [],
             }
+        if rendering:
+            rendering.augment(result_facts, item_id, 1)
         receipt = _make_receipt(
             command=command,
             command_id=command_id,
@@ -2153,6 +2162,7 @@ def _handle_schedule_cancel(request: Mapping[str, Any], context: CommandContext)
 
 def _handle_schedule_update(request: Mapping[str, Any], context: CommandContext) -> dict[str, Any]:
     command = "schedule.update"
+    rendering = context.rendering_authoring
     allowed = {
         "contract_version",
         "command_id",
@@ -2165,7 +2175,7 @@ def _handle_schedule_update(request: Mapping[str, Any], context: CommandContext)
     }
     _check_fields(command, request, allowed)
     contract_version = request.get("contract_version")
-    if contract_version != "spine.schedule-update.v2":
+    if contract_version != ("spine.schedule-update.v3" if rendering else "spine.schedule-update.v2"):
         raise SpineValidationError(
             "invalid_request:contract_version",
             "contract_version must be spine.schedule-update.v2",
@@ -2184,7 +2194,8 @@ def _handle_schedule_update(request: Mapping[str, Any], context: CommandContext)
             "delivery",
             "archetype",
             "notification_plan",
-        },
+        }
+        | ({"policy_presentations"} if rendering else set()),
         "patch",
     )
     if not patch:
@@ -2434,7 +2445,7 @@ def _handle_schedule_update(request: Mapping[str, Any], context: CommandContext)
         archetype_patch_present="archetype" in patch,
         archetype_patch=patch.get("archetype"),
         notification_plan_present="notification_plan" in patch,
-        notification_plan=patch.get("notification_plan"),
+        notification_plan=rendering.plan(patch.get("notification_plan")) if rendering else patch.get("notification_plan"),
         command_id=command_id,
         actor_subject_id=actor,
         updated_at_utc=updated_at,
@@ -2476,6 +2487,15 @@ def _handle_schedule_update(request: Mapping[str, Any], context: CommandContext)
         established_policy_intents=established_policy_intents,
         recurring=current_recurrence is not None or "recurrence" in patch,
     )
+    if rendering:
+        rendering.prepare(profile_prepared, desired_policies, item_id, str(item["item_type"]), current=current_policies)
+    elif profile_replaces_policies and getattr(context.ledger, "_renderings_enabled", False):
+        from spine.ledger.rendering_definitions import load_presentation
+
+        if any(load_presentation(context.ledger, str(p["notification_policy_id"]))["kind"] == "definition" for p in active_current):
+            raise SpineValidationError(
+                "unsupported_field:notification_plan", "Use spine.schedule-update.v3 to replace a selected presentation plan."
+            )
 
     changed_dimensions: list[str] = []
     if item_patch["changed"]:
@@ -2514,6 +2534,8 @@ def _handle_schedule_update(request: Mapping[str, Any], context: CommandContext)
         )
         if value in changed_dimensions
     ]
+    if rendering and rendering.changes:
+        changed_dimensions.append("policy_presentations")
     truth_changed = bool(changed_dimensions)
     result_version = target_version + 1 if truth_changed else target_version
 
@@ -2690,6 +2712,8 @@ def _handle_schedule_update(request: Mapping[str, Any], context: CommandContext)
                 )
         else:
             profile_persistence = None
+        if rendering:
+            rendering.persist(item_id, next_version)
         _schedule_operations_fail_if_requested(context, command, "truth")
         for work_id in cancelled_ids:
             cancel_work_instance(
@@ -2798,6 +2822,8 @@ def _handle_schedule_update(request: Mapping[str, Any], context: CommandContext)
             }
         if audit_id is not None:
             result_facts["audit_id"] = audit_id
+        if rendering:
+            rendering.augment(result_facts, item_id, next_version)
         receipt = _make_receipt(
             command=command,
             command_id=command_id,
@@ -3387,6 +3413,7 @@ def _relation_matches_filters(
 
 
 def _handle_reminder_create(request: Mapping[str, Any], context: CommandContext) -> dict[str, Any]:
+    rendering = context.rendering_authoring
     allowed = {
         "command_id",
         "actor_subject_id",
@@ -3419,6 +3446,8 @@ def _handle_reminder_create(request: Mapping[str, Any], context: CommandContext)
     notification = request.get("notification")
     if not isinstance(notification, Mapping):
         return _error("reminder.create", "invalid_request", "notification must be an object", "notification")
+    if rendering:
+        notification = rendering.direct_notification(notification)
     target = notification.get("target")
     if not isinstance(target, Mapping):
         return _error("reminder.create", "invalid_request", "notification.target must be an object", "notification.target")
@@ -3499,6 +3528,8 @@ def _handle_reminder_create(request: Mapping[str, Any], context: CommandContext)
         return _reminder_response(receipt["result_identity_facts"], created=False)
     if duplicate is not None:
         return _error("reminder.create", "semantic_conflict", "matching active notification already exists", "notification")
+    if rendering:
+        rendering.prepare_direct(normalized.value, str(item["item_type"]))
     next_version = target_version + 1
     audit_id = _derived_id("reminder.create", command_id, "audit", "/audit")
     policy = normalized.value
@@ -3520,6 +3551,8 @@ def _handle_reminder_create(request: Mapping[str, Any], context: CommandContext)
         "canonical_json_version": policy["canonical_json_version"],
         "created": True,
     }
+    if rendering:
+        rendering.direct_facts(facts, str(policy["notification_policy_id"]))
     receipt = _make_receipt(
         command="reminder.create",
         command_id=command_id,
@@ -3553,6 +3586,8 @@ def _handle_reminder_create(request: Mapping[str, Any], context: CommandContext)
             )
             normalized.value["target"]["target_occurrence_selector_ref"] = target_ref  # type: ignore[index]
         insert_notification_schedule_policy(connection, normalized=normalized)
+        if rendering:
+            rendering.persist(item_id, _version)
         insert_command_receipt(connection, receipt)
 
     create_next_item_version(
@@ -3571,6 +3606,7 @@ def _handle_reminder_create(request: Mapping[str, Any], context: CommandContext)
 
 
 def _handle_reminder_edit(request: Mapping[str, Any], context: CommandContext) -> dict[str, Any]:
+    rendering = context.rendering_authoring
     allowed = {
         "command_id",
         "actor_subject_id",
@@ -3599,7 +3635,7 @@ def _handle_reminder_edit(request: Mapping[str, Any], context: CommandContext) -
         "target",
         "schedule",
         "late_handling",
-    }
+    } | ({"notification"} if rendering else set())
     unknown = sorted(set(patch) - allowed_patch)
     if unknown:
         raise SpineValidationError(f"unsupported_patch.{unknown[0]}", "unsupported notification patch field")
@@ -3607,6 +3643,15 @@ def _handle_reminder_edit(request: Mapping[str, Any], context: CommandContext) -
     replay = _compatible_replay("reminder.edit", command_id, semantic, context)
     if replay is not None:
         return {"ok": True, "command": "reminder.edit", **replay["result_identity_facts"]}
+    if rendering:
+        if "notification" not in patch:
+            raise SpineValidationError("missing_required_field:patch.notification", "v2 direct editing requires patch.notification")
+        if {"target", "schedule", "late_handling"} & set(patch):
+            raise SpineValidationError("invalid_request:patch.notification", "v2 wrapper cannot mix flattened timing fields")
+        notification = rendering.direct_notification(patch["notification"], edit=True)
+        patch = {k: v for k, v in patch.items() if k != "notification"} | {
+            k: v for k, v in notification.items() if k != "authoring_contract"
+        }
     item = _require_item_for_write(context.ledger, "reminder.edit", item_id, None, target_version)
     current = _current_notification_policy(
         context.ledger,
@@ -3658,6 +3703,8 @@ def _handle_reminder_edit(request: Mapping[str, Any], context: CommandContext) -
         and current["delivery_target_id"] == revised.value["delivery_target_id"]
         and current["normalized_notification_schedule_hash"] == revised.value["normalized_notification_schedule_hash"]
     )
+    if rendering:
+        unchanged = not rendering.prepare_direct(revised.value, str(item["item_type"]), current) and unchanged
     if unchanged:
         facts = {
             "command_receipt_id": _receipt_id("reminder.edit", command_id),
@@ -3671,6 +3718,8 @@ def _handle_reminder_edit(request: Mapping[str, Any], context: CommandContext) -
             "updated": False,
             "effect": "reminder_edit_noop",
         }
+        if rendering:
+            rendering.direct_facts(facts, policy_id)
         receipt = _store_write_receipt(
             context,
             command="reminder.edit",
@@ -3695,6 +3744,8 @@ def _handle_reminder_edit(request: Mapping[str, Any], context: CommandContext) -
         changed_field="updated",
         effect="reminder_updated",
     )
+    if rendering:
+        rendering.direct_facts(facts, str(revised.value["notification_policy_id"]))
     receipt = _make_receipt(
         command="reminder.edit",
         command_id=command_id,
@@ -6747,11 +6798,15 @@ def _schedule_update_response(receipt: Mapping[str, Any], *, response_effect: st
     return {
         "ok": True,
         "command": "schedule.update",
-        "response_contract": "spine.schedule-update-response.v2",
+        "response_contract": "spine.schedule-update-response.v3"
+        if receipt["semantic_facts"].get("contract_version") == "spine.schedule-update.v3"
+        else "spine.schedule-update-response.v2",
         "effect": response_effect,
         **dict(facts),
         "receipt": {
-            "receipt_contract": "spine.schedule-update-receipt.v2",
+            "receipt_contract": "spine.schedule-update-receipt.v3"
+            if receipt["semantic_facts"].get("contract_version") == "spine.schedule-update.v3"
+            else "spine.schedule-update-receipt.v2",
             "command_receipt_id": receipt["command_receipt_id"],
             "effect": receipt["effect"],
             "semantic_facts_hash": receipt["semantic_facts_hash"],
@@ -7640,11 +7695,15 @@ def _schedule_create_response(receipt: Mapping[str, Any], *, response_effect: st
     return {
         "ok": True,
         "command": "schedule.create",
-        "response_contract": "spine.schedule-create-response.v2",
+        "response_contract": "spine.schedule-create-response.v3"
+        if receipt["semantic_facts"].get("contract_version") == "spine.schedule-create.v3"
+        else "spine.schedule-create-response.v2",
         "effect": response_effect,
         **dict(facts),
         "receipt": {
-            "receipt_contract": "spine.schedule-create-receipt.v2",
+            "receipt_contract": "spine.schedule-create-receipt.v3"
+            if receipt["semantic_facts"].get("contract_version") == "spine.schedule-create.v3"
+            else "spine.schedule-create-receipt.v2",
             "command_receipt_id": receipt["command_receipt_id"],
             "effect": "schedule_created",
             "semantic_facts_hash": receipt["semantic_facts_hash"],
@@ -8948,6 +9007,8 @@ def _persist_notification_successor(
             )
             target["target_occurrence_selector_ref"] = target_ref
         insert_notification_schedule_policy(connection, normalized=revised)
+        if context.rendering_authoring:
+            context.rendering_authoring.persist(str(item["item_id"]), next_version)
         insert_command_receipt(connection, receipt)
 
     create_next_item_version(

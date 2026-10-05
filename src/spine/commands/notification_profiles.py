@@ -58,11 +58,7 @@ PROFILE_COMMANDS = frozenset(
 )
 
 _CONTRACT_BY_COMMAND = {
-    **{
-        command: ITEM_ARCHETYPE_CONTRACT
-        for command in PROFILE_COMMANDS
-        if command.startswith("item_archetype.")
-    },
+    **{command: ITEM_ARCHETYPE_CONTRACT for command in PROFILE_COMMANDS if command.startswith("item_archetype.")},
     **{
         command: NOTIFICATION_PROFILE_CONTRACT
         for command in PROFILE_COMMANDS
@@ -73,8 +69,7 @@ _CONTRACT_BY_COMMAND = {
     **{
         command: NOTIFICATION_PROFILE_BINDING_CONTRACT
         for command in PROFILE_COMMANDS
-        if command.startswith("notification_profile.binding.")
-        or command == "notification_profile.resolve"
+        if command.startswith("notification_profile.binding.") or command == "notification_profile.resolve"
     },
     "notification_profile.metadata.update": NOTIFICATION_PROFILE_METADATA_UPDATE_CONTRACT,
 }
@@ -321,9 +316,7 @@ def _archetype_revise(
     return _success(command, receipt)
 
 
-def _profile_create(
-    request: Mapping[str, Any], context: CommandContext
-) -> dict[str, Any]:
+def _profile_create(request: Mapping[str, Any], context: CommandContext, *, candidate_v2: bool = False) -> dict[str, Any]:
     command = "notification_profile.create"
     _check(
         command,
@@ -340,7 +333,7 @@ def _profile_create(
             "revision",
         },
     )
-    _require_contract(command, request)
+    _require_contract(command, request, "spine.notification-profiles.v2" if candidate_v2 else None)
     connection = _connection(context)
     command_id, actor, timestamp = _write_identity(request, context)
     owner = _operator_owner(request)
@@ -348,7 +341,9 @@ def _profile_create(
     profile_key = normalize_catalog_key(request.get("profile_key"), "profile_key")
     display_name = _required_string(request, "display_name", maximum=160)
     description = _optional_string(request, "description", maximum=2000)
-    revision = normalize_profile_revision(request.get("revision"))
+    from spine.core.rendering_definitions import normalize_profile_v2
+
+    revision = (normalize_profile_v2 if candidate_v2 else normalize_profile_revision)(request.get("revision"))
     semantic = dict(request)
     replay = _compatible_replay(connection, command, command_id, semantic)
     if replay is not None:
@@ -518,9 +513,7 @@ def _profile_metadata_update(
     return _success(command, receipt)
 
 
-def _profile_revise(
-    request: Mapping[str, Any], context: CommandContext
-) -> dict[str, Any]:
+def _profile_revise(request: Mapping[str, Any], context: CommandContext, *, candidate_v2: bool = False) -> dict[str, Any]:
     command = "notification_profile.revise"
     _check(
         command,
@@ -535,12 +528,14 @@ def _profile_revise(
             "revision",
         },
     )
-    _require_contract(command, request)
+    _require_contract(command, request, "spine.notification-profiles.v2" if candidate_v2 else None)
     connection = _connection(context)
     command_id, actor, timestamp = _write_identity(request, context)
     profile_id = _required_string(request, "notification_profile_id")
     expected = _required_string(request, "expected_current_revision_id")
-    revision = normalize_profile_revision(request.get("revision"))
+    from spine.core.rendering_definitions import normalize_profile_v2
+
+    revision = (normalize_profile_v2 if candidate_v2 else normalize_profile_revision)(request.get("revision"))
     semantic = dict(request)
     replay = _compatible_replay(connection, command, command_id, semantic)
     if replay is not None:
@@ -552,6 +547,14 @@ def _profile_revise(
             "stale_version:expected_current_revision_id",
             "expected_current_revision_id is not current",
         )
+    if (
+        not candidate_v2
+        and getattr(connection, "_renderings_enabled", False)
+        and connection.execute(
+            "SELECT 1 FROM notification_profile_rendering_revisions WHERE notification_profile_revision_id=?", (expected,)
+        ).fetchone()
+    ):
+        raise SpineValidationError("unsupported_field:revision", "Use spine.notification-profiles.v2 to revise a v2 profile revision.")
     next_number = int(root["revision"]["revision_number"]) + 1
     revision_id = _derived(
         command, command_id, "notification_profile_revision", "/revision"
@@ -694,6 +697,24 @@ def _insert_profile_revision(
                 canonical_json_text(template["late_handling"]),
                 template["normalized_template_hash"],
             ),
+        )
+        if "rendering" in template:
+            if not getattr(connection, "_renderings_enabled", False):
+                raise SpineValidationError("environment_failure:rendering", "candidate storage is required")
+            rendering = template["rendering"]
+            ref = rendering.get("definition", {})
+            connection.execute(
+                "INSERT INTO notification_profile_template_renderings VALUES (?,?,?,?)",
+                (
+                    template_id,
+                    rendering["kind"],
+                    ref.get("notification_rendering_definition_id"),
+                    ref.get("notification_rendering_definition_revision_id"),
+                ),
+            )
+    if all("rendering" in template for template in revision.templates):
+        connection.execute(
+            "INSERT INTO notification_profile_rendering_revisions VALUES (?,?)", (revision_id, "spine.notification-profiles.v2")
         )
 
 
@@ -1347,7 +1368,9 @@ def _success(command: str, receipt: Mapping[str, Any]) -> dict[str, Any]:
     return {
         "ok": True,
         "command": command,
-        "response_contract": _CONTRACT_BY_COMMAND[command],
+        "response_contract": receipt["semantic_facts"]["contract_version"]
+        if command in {"notification_profile.create", "notification_profile.revise"}
+        else _CONTRACT_BY_COMMAND[command],
         "effect": receipt["effect"],
         **dict(_mapping(receipt["result_identity_facts"], "result_identity_facts")),
         "receipt": {
@@ -1448,9 +1471,9 @@ def _normalize_scope_chain(value: Any) -> tuple[dict[str, str | None], ...]:
     return owners
 
 
-def _require_contract(command: str, request: Mapping[str, Any]) -> None:
+def _require_contract(command: str, request: Mapping[str, Any], expected: str | None = None) -> None:
     actual = _required_string(request, "contract_version")
-    expected = _CONTRACT_BY_COMMAND[command]
+    expected = expected or _CONTRACT_BY_COMMAND[command]
     if actual != expected:
         raise SpineValidationError(
             "unsupported_contract_version:contract_version",

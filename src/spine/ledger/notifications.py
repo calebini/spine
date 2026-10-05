@@ -204,6 +204,9 @@ def insert_notification_schedule_policy(connection: sqlite3.Connection, *, norma
         ),
     )
     _insert_schedule(connection, value)
+    from spine.ledger.rendering_definitions import stage_policy
+
+    stage_policy(connection, value)
 
 
 def load_current_notification_policies(
@@ -247,6 +250,8 @@ def remove_copied_notification_policy(
     connection.execute("DELETE FROM notification_schedule_offsets WHERE schedule_id = ?", (row["schedule_id"],))
     connection.execute("DELETE FROM notification_schedules WHERE schedule_id = ?", (row["schedule_id"],))
     connection.execute("DELETE FROM notification_policies WHERE policy_id = ?", (row["policy_id"],))
+    if getattr(connection, "_renderings_enabled", False):
+        connection._rendering_pending.pop(row["policy_id"], None)
 
 
 def copy_forward_notification_policies(

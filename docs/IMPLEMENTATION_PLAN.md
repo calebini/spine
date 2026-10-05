@@ -1,7 +1,7 @@
 # Spine Implementation Plan
 
 Role: Roadmap rationale and delivery history; current task status lives in [BACKLOG.md](BACKLOG.md)
-Last updated: 2026-10-04 (rendering integration ratification and successor contracts)
+Last updated: 2026-10-05 (rendering integration implementation sequence)
 
 This is a non-normative delivery plan. The specifications and machine-readable contracts remain authoritative.
 
@@ -47,18 +47,22 @@ SPINE-010. The historical resilience-first sequencing below no longer schedules 
 or makes those initiatives blanket prerequisites for facets or advisories. Preserve
 their feature-specific contract and verification requirements.
 
-## Accepted Design: Facet-Aware Notification Rendering (SPINE-032–035)
+## Planned Delivery: Facet-Aware Notification Rendering (SPINE-051–053)
 
 SPINE-042 closed the final machine-contract minor with a clean bounded consistency
 recheck. SPINE-043 drafted the [integration amendment](../specs/notification-rendering-integration.md);
-SPINE-048 closed its buildability recheck with no findings. SPINE-049 ratifies the
-design and codifies source-only successor authoring/evidence/cursor schemas and computed
-fixtures. Next audit that resulting machine-contract package, then implement one
-end-to-end authoring/worker/readback slice after authorization. Existing
+SPINE-048 closed its buildability recheck with no findings. SPINE-049 ratified the
+design and codified source-only successor authoring/evidence/cursor schemas and computed
+fixtures. SPINE-050's focused machine-contract recheck returned
+`pass_with_minor_clarification`, no blockers/majors, with boundaries preserved.
+The fixture-only residual was corrected and locally verified in `da128c5`, following
+the main contract checkpoint `78fc71a`. The corrected bytes have not been externally
+re-audited; this is not a clean post-patch audit or convergence claim. Existing
 ordinary output, policy-specific work identity and source-only activation fences are
 preserved. Schema-18 location protection is already delivered locally; broader
 protected-location sharing, new web family exposure and pack adoption remain separate.
-No additional broad audit of the corrected list-limit patterns is scheduled.
+No further routine audit is scheduled for that fixture-only correction. Concrete
+contract or product ambiguities discovered during implementation must still be surfaced.
 
 SPINE-037 repairs the initial machine-contract review findings. Location-label rendering
 also requires the newly explicit facet-reference freeze in facet storage Section 7.1:
@@ -80,11 +84,163 @@ of LLM advisory execution. The operator agreed reusable scoped disclosure with p
 evidence, narrow location-label lookup and retirement preserving existing pinned use.
 The focused bounded recheck passed, and SPINE-035 ratifies the logical design and adds
 initial source-only catalog/disclosure schemas, selection/evidence fragments and
-reference fixtures. This is not runtime activation. Next close physical persistence,
-versioned enclosing authoring/evidence contracts, policy-specific work continuity,
-permission resolver mappings and catalog cursors; review those integration contracts
-before implementation. Pack-format and installer adoption follow Spine's contract
-rather than inventing renderer semantics. Evidence and remaining gates are in SPINE-035.
+reference fixtures. SPINE-049–050 subsequently closed the integration design and
+machine-contract work for implementation planning; executable stateful proof remains
+pending. Pack-format and installer adoption follow Spine's contract rather than
+inventing renderer semantics. Historical evidence remains in SPINE-035 and SPINE-050.
+
+### Delivery authority and release boundary
+
+The [logical rendering spec](../specs/notification-rendering-definitions.md),
+[integration leaf](../specs/notification-rendering-integration.md),
+[storage/atomicity owner](../specs/STORAGE_ATOMICITY_SPEC.md),
+[integration matrix](../contracts/notification-rendering-integration.v1.json),
+[successor registry](../contracts/notification-rendering-integration-contract-registry.v1.json)
+and [fixture manifest](../contracts/notification-rendering-integration-fixture-manifest.json)
+own behavior. Existing profiles, notifications, permissions and facet-continuity
+contracts retain their authority. This plan allocates implementation and proof; it
+does not change schemas, assign a release/schema number or mark any capability implemented.
+
+The planning update did not authorize runtime work or deployment. The operator
+subsequently authorized Slice A implementation on 2026-10-05; deployment remains gated.
+[SPINE-051–053](BACKLOG.md#rendering-delivery--implementation-sequence) are three
+cohesive internal checkpoints for **one end-to-end release**. Add tests with each
+slice, not only at the end. Keep successor command registration, compiled capability
+advertising, production migration activation and deployment gated until all three
+slices and all required RI families pass. Internal test harnesses may exercise the
+candidate migration and handlers without exposing partially supported live contracts.
+No service cutover or environment patch is required between these checkpoints.
+
+### Slice A — Persistence and authoring (SPINE-051)
+
+Build the complete storage and authoring foundation against schema 18 or a separately
+verified successor; do not select a schema number from this roadmap.
+
+- Implement the Section 5 relational tables, immutable canonical payloads/reference
+  projections, FKs, unique indexes, guards, hashes and catalog generation. Extend the
+  existing rendering table for its v1/v2 branches; do not create a second attempt ledger.
+- Add a candidate atomic migration and equivalent fresh initialization. Backfill
+  explicit ordinary presentations for active, disabled and historical policies;
+  preserve existing IDs, receipts, v1 profile hashes and rendering bytes. Add expected
+  schema objects and explicit deep verification without introducing startup scans.
+- Cover every item-version/policy producer with an explicit writer inventory and
+  shared finalization. Copy from exact predecessor policy IDs, including shared-intent
+  and multi-copy-forward cases; reject missing, forked or inconsistent support rows.
+  Establish the common current-descendant resolver for worker/scheduler use in Slice B.
+- Implement rendering-definition and disclosure catalog commands, immutable revisions,
+  retirement/revocation, bounded show/list, exact/unique-match selection, permission
+  resolvers and authenticated cursor/config handling. Preserve owner/role boundaries,
+  the protected-location denial and trusted-local exact-location approval rules.
+- Implement profile v2, schedule create/update v3 and direct authoring v2 through
+  shared services: profile pins, complete-plan composition, presentation-only edits,
+  origin provenance and application evidence. Honor replay, no-op, dry-run, transaction
+  rollback, v1 historical decoding and the old-request lossy-replacement/revise guards.
+- Preserve fresh trusted-local ordinary-only creation followed by explicit owner
+  adoption and presentation editing. Never infer ownership or introduce a scheduler hold.
+
+**Exit evidence:** Real disposable-ledger tests for catalog and authoring transactions,
+permission/cursor bounds, writer coverage, history preservation, migration interruption
+and failed-write rollback. Exercise the fixed profile-list limits, shared failure
+envelopes, dry-run markers and original composition evidence. Candidate storage and
+all writers must agree before proceeding; public activation remains off.
+
+**2026-10-05 internal checkpoint:** Candidate relational storage and atomic migration,
+historical ordinary backfill, metadata-only object-manifest checks, exact-policy
+supporting-row finalization, catalog/permission/cursor handlers and shared successor
+authoring are implemented. Real disposable-ledger tests cover catalog and authoring
+replay/no-op/dry-run, owner adoption, exact/ambiguous grants, protected-location denial,
+work-preserving presentation edits, all inventoried item/policy writers, shared-intent
+lineage, migration interruptions and unchanged populated v1 profile/attempt evidence.
+See [SPINE-051 evidence](BACKLOG.md#spine-051--rendering-persistence-and-authoring-foundation)
+for test mappings and the local wheel-build limitation. This is not public activation
+or full RI-family closure. Slice B is the next implementation checkpoint.
+
+### Slice B — Delivery integration (SPINE-052)
+
+Wire the foundation into the existing scheduler/worker attempt path, not a new pipeline.
+
+- Share exact-policy/current-descendant resolution across scheduler and worker.
+  Presentation/facet-only edits retain eligible, leased and retry work identities,
+  leases, retries and provider keys; absent work stays absent and independently stale
+  work still follows its existing rules. Preserve started/terminal history.
+- Implement deterministic scalar and permitted location-label suffixes over the
+  unchanged ordinary renderer, using pinned schema/definition decoders and current
+  facet values. Revalidate item owner, grant, route and access at the attempt fence.
+- Keep unselected reminders byte-identical v1. Selected-but-omitted detail remains
+  v2 evidence with ordinary wording; revocation, empty selections and suffix overflow
+  must not leak values or source references. Corruption and evidence-size failures
+  fail closed before adapter invocation, not through an invented fallback.
+- Persist one final rendering with its existing side-effect attempt atomically.
+  Same-attempt replay uses stored bytes; a new retry may use current facts while
+  retaining the provider idempotency key. No second send identity or advisory execution.
+- Exercise edit/revoke/ownership/route races and recurring/follow-source items.
+  Prove the setup interleaving rules both with verified operational exclusion and
+  without it: materialization=none is command-local, and ordinary delivery can begin
+  between separately committed create/adopt/edit steps without exclusion.
+
+**Exit evidence:** Real-ledger work-state and race tests, injected commit/adapter-boundary
+failures, immutable replay evidence and provider-key assertions. Use deterministic
+test adapters, not real recipients. Ordinary bytes and delivery identity remain
+unchanged; activation and deployment remain off.
+
+### Slice C — Readback, operator handoff and release verification (SPINE-053)
+
+- Complete full schedule-show v2 and successor response/receipt projections with
+  preserved selection, scope-chain, revision-hash, overlay and policy-origin evidence.
+  Distinguish persisted v1/v2 attempts; preserve old summary/redaction behavior without
+  adding fields to frozen compact or web contracts.
+- Finish CLI discovery/help and generic operator guidance with progressive disclosure:
+  definition/grant setup, ownership adoption, exact presentation edits, optional
+  explicit materialization and evidence readback. Explain retirement versus revocation,
+  ordinary fallback versus failure, and the operational exclusion needed for strict
+  details-before-delivery ordering. No automatic service control or assumed chat consent.
+- Re-run populated/fresh migration, all-writer, concurrency, rollback/restore, old-worker
+  refusal and ordinary rendering regressions as a single release candidate. Check
+  non-editable package resources, exact registry/schema pins, bounded preflight and
+  current web-contract nonactivation. Run focused checks first, then the appropriate
+  full suite; record any skipped or blocked proof explicitly.
+- Only after end-to-end evidence passes, enable the coherent local command families,
+  integration capability and matching migration/runtime manifest together. Do not
+  advertise support earlier. Broader HTTP registry exposure needs its own versioned
+  contract and approval; this slice does not silently extend the current web registry.
+- Prepare a separately approved staging handoff: preserve/verify the ledger backup,
+  stop all writers for migration, provision protected cursor configuration deliberately,
+  verify startup/readback and use controlled canaries. Rollback pairs the pre-migration
+  backup with matching code and preserves the newer ledger; it is not a down migration.
+
+**Exit evidence:** All RI families linked to executable passing tests, honest release
+capability declarations, complete package/CLI readback, and actionable operator and
+rollback instructions. Deployment and any real send remain separate authorizations.
+
+### Required proof allocation
+
+Every family in integration Section 10 remains pending runtime evidence today. This
+table assigns where proofs are introduced; Slice C reruns them together and records
+test names/results. Static schemas, vector regeneration and audit reports do not count
+as executed stateful proof.
+
+| Family | Introduce proof | Required release evidence |
+| --- | --- | --- |
+| RI-01 | A/B | Historical migration and unselected ordinary bytes/hashes/provider envelope unchanged |
+| RI-02 | A | Profile/presentation hashes, exact/unique selection, decoder guards and historical replay |
+| RI-03 | A/B | Authoring rollback plus operational-exclusion and automatic-scheduler interleavings |
+| RI-04 | A | Changed/no-op/dry-run/replay presentation edits preserve work and reject lossy old requests |
+| RI-05 | A/B | Shared-intent exact ancestry, repeated copy-forward and conflict on ambiguity/forks |
+| RI-06 | B | Eligible, leased, retry, started, terminal, stale and absent work-state matrix |
+| RI-07 | B | Attempt versus edit/revoke/owner/route races; no private values on omission |
+| RI-08 | B | Atomic attempt/evidence commit, suffix overflow and corruption fail-closed behavior |
+| RI-09 | B | Same-attempt stored replay, fresh retry evidence and stable provider identity |
+| RI-10 | A/B | Role/grant checks at authoring and attempt time, protected-location denial |
+| RI-11 | A | Signed cursor/context/epoch/time fences, bounded indexed reads and no durable read writes |
+| RI-12 | A/C | Fresh/populated migration, interruption, verified backup restore and old-worker refusal |
+| RI-13 | A | Exhaustive producer inventory and finalization detects missing/mismatched support rows |
+| RI-14 | C | Complete v1/v2 readback, safe old projections, coherent packaging and activation |
+
+No unresolved product decision is currently identified. If implementation exposes a
+missing normative rule, stop that affected path and seek a targeted specification
+decision rather than inventing policy. These slices do not restart deferred resilience,
+retention or general qualification campaigns, introduce authentication, expand protected
+location visibility, install packs, change the GUI, or implement contextual advisories.
 
 ## Delivered Fix: Schedule-Show CLI Notification Profile Include (SPINE-031)
 

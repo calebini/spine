@@ -26,6 +26,8 @@ def connect(path: str | Path = ":memory:", *, busy_timeout_ms: int = DEFAULT_BUS
         connection.execute("PRAGMA journal_mode = WAL")
     if connection.execute("SELECT 1 FROM sqlite_schema WHERE name='item_facet_snapshots' AND type='table'").fetchone():
         connection.enable_facets()
+    if connection.execute("SELECT 1 FROM sqlite_schema WHERE name='notification_policy_presentations' AND type='table'").fetchone():
+        connection.enable_renderings()
     return connection
 
 
