@@ -17,7 +17,7 @@
       "notification_profile_revision_id": "revision-example",
       "revision_number": "2",
       "revision_contract": "spine.notification-profiles.v2",
-      "normalized_revision_hash": "b3cd5f4cf5be1c7f920005316fe17c1a83816b1ad607bc5bea94a63b5e0f2821",
+      "normalized_revision_hash": "f4c2ffc6dbfabcc20da20ac1b6a70744493a73344c7d597185554b7720081591",
       "content": {
         "compatible_item_types": [
           "event"
@@ -52,7 +52,7 @@
               "at": {
                 "kind": "target_offset",
                 "offset_basis": "elapsed",
-                "offset_seconds": "-86400"
+                "offset_seconds": "-172800"
               }
             },
             "late_handling": {
@@ -65,7 +65,7 @@
                 "notification_rendering_definition_revision_id": "notification_rendering_definition_revision_e0ba4b36ee5a68085a16c17068ce0091ef1fc0834da7cd9fbcf7c55302dddc52"
               }
             },
-            "normalized_template_hash": "9ed2c38162ba07b7d7de98ae286f3790f621f0e752799016c5cf1ddacaec0b0f"
+            "normalized_template_hash": "24a8dac32b45e4efc12a47a26c113dfe21164d85429987f286f46082f6f10d34"
           }
         ]
       }

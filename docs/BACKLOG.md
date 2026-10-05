@@ -37,7 +37,8 @@ status labels in the same change. Routine task updates do not change spec author
 
 ### SPINE-050 — Review rendering integration successor machine contracts
 
-**Status:** Manual corrections complete — focused recheck pending (2026-10-05).
+**Status:** Manual fixture correction complete and locally verified (2026-10-05);
+corrected bytes not re-audited.
 **Dependencies:** SPINE-049 ratification and source-only contract codification.
 **Scope:** One reviewer-only Whetstone audit-change with the built-in consistency
 profile and GPT-6.1 Sol. Review successor schema/spec agreement, version/decoder
@@ -72,11 +73,39 @@ Section 11 states the preserved evidence and wire domains; no product scope chan
 sync --check, 154 local Markdown links and git diff --check passed. All 20 existing
 schema dependency/comparison files in the audited package remain byte-identical.
 Runtime source, schema activation and pending RI-01–RI-14 obligations are unchanged.
-**Next:** Focused recheck with fresh exact-package approval; no new audit performed,
-implementation readiness or convergence claim.
+**Checkpoint:** `78fc71a` commits the ratified successor contracts, fixtures and five
+manual corrections. Rechecked 183 tests/1,139 subtests, Ruff, web sync and diff hygiene.
+**Recheck package:** [Audit-002 notes](../whetstone_runs/notification-rendering-integration-machine-contract-audit-002/audit-notes.md)
+enumerate 62 files plus notes, built-in consistency context and generated copies for
+GPT-6.1 Sol. Scope: closure of the five findings and directly introduced regressions;
+selected fixture family and its schema dependencies, not a new full-package audit.
+Local preparation metadata pins the committed inputs. The operator explicitly
+approved the 62-file package, notes, built-in context and generated copies on 2026-10-05.
+**Recheck outcome:** Audit-002 returned `pass_with_minor_clarification`, zero
+blockers/majors, one minor, `boundary_preserved=true`. Prior audit-001 findings
+were not reissued; the sole new finding is an inadmissible overlay fixture revision:
+the suppressed and day-before templates have identical ordinary scheduling semantics,
+contrary to the preserved duplicate-policy prohibition. Give the suppressed template
+distinct timing, recompute its hashes/fixtures, and assert semantic uniqueness.
+[Recheck report](../whetstone_runs/notification-rendering-integration-machine-contract-audit-002/change_audit/change_audit_report.md)
+and [feedback](../whetstone_runs/notification-rendering-integration-machine-contract-audit-002/change_audit/change_audit_feedback.json).
+Verified exact 62-file inventory, source/notes hashes unchanged, GPT-6.1 Sol/consistency,
+and report-to-brief binding. No Editor or automatic correction/rerun.
+**Minor correction:** The operator authorized the fixture-only fix. The suppressed
+template now uses elapsed offset -172800 (48 hours), distinct from day_before's
+-86400 (24 hours). Regenerated the selected revision, application/readback pins and
+computed vectors. A focused regression strips rendering/derived fields, validates
+ordinary profile semantics through the existing normalizer, checks distinct timings,
+and proves deliberately duplicated timing fails even with different template keys.
+**Verification:** 22 focused tests/149 subtests and 184 broader contract tests/1,139
+subtests passed; exact fixture regeneration, Ruff, web-contract sync --check and
+git diff --check passed. Source specs, schemas and runtime are unchanged. Prior audit
+artifacts and existing tracking changes are preserved; no new audit, commit or push.
+**Next:** Checkpoint the correction when requested. Runtime implementation remains
+separately authorized; no convergence or post-patch external-review claim.
 **Boundary:** The operator approved the exact 103-file package for the completed
-review and subsequently authorized targeted manual fixes. No runtime implementation,
-SQL migration, Editor/convergence, new audit, commit, push or deployment.
+review and subsequently authorized targeted manual fixes and checkpoint. No runtime
+implementation, SQL migration, Editor/convergence, push or deployment.
 
 ### SPINE-049 — Ratify rendering integration and codify successors
 

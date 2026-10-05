@@ -16,7 +16,9 @@ from jsonschema import Draft202012Validator, FormatChecker
 from referencing import Registry, Resource
 
 from spine import IMPLEMENTED_CONTRACT_VERSIONS
+from spine.core import SpineValidationError
 from spine.core.canonical_json import canonical_json_bytes, canonical_json_text
+from spine.core.notification_profiles import normalize_profile_revision
 from tests.rendering_integration_reference import build, normalized_v2_revision, reference_suffix
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -210,6 +212,26 @@ class RenderingIntegrationContractsTests(unittest.TestCase):
         historical = load(FIXTURES / "response_profile_historical_v1.json")["notification_profile"]["revision"]
         # The v2 projection accepts the original v1 digest; it does not rehash it.
         self.assertTrue(validator.is_valid({**application, "normalized_profile_revision_hash": historical["normalized_revision_hash"]}))
+
+    def test_overlay_revision_has_distinct_ordinary_policy_semantics(self):
+        content = load(FIXTURES / "response_profile_overlay_revision.json")["notification_profile"]["revision"]["content"]
+        # Rendering and derived hashes do not distinguish ordinary policies.
+        ordinary = {
+            "compatible_item_types": content["compatible_item_types"],
+            "templates": [{k: t[k] for k in ("template_key", "schedule", "late_handling")} for t in content["templates"]],
+        }
+        normalized = normalize_profile_revision(ordinary)
+        semantics = [canonical_json_text({k: t[k] for k in ("schedule", "late_handling")}) for t in normalized.templates]
+        self.assertEqual(len(semantics), len(set(semantics)))
+        self.assertEqual(
+            {t["template_key"]: t["schedule"]["at"]["offset_seconds"] for t in normalized.templates},
+            {"day_before": "-86400", "suppressed": "-172800"},
+        )
+        duplicate = copy.deepcopy(ordinary)
+        duplicate["templates"][1]["schedule"] = copy.deepcopy(duplicate["templates"][0]["schedule"])
+        duplicate["templates"][1]["late_handling"] = copy.deepcopy(duplicate["templates"][0]["late_handling"])
+        with self.assertRaisesRegex(SpineValidationError, "duplicate"):
+            normalize_profile_revision(duplicate)
 
     def test_every_preimage_canonical_bytes_and_digest(self):
         names = set()

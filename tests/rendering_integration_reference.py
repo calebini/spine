@@ -385,7 +385,9 @@ def build():
     emit("readback_v2", readback, "notification-profile-readback-v2")
     # Default resolution through two owners, with suppression, replacement and addition.
     overlay_revision = copy.deepcopy(create["revision"])
-    overlay_revision["templates"].append({**copy.deepcopy(overlay_revision["templates"][0]), "template_key": "suppressed"})
+    suppressed_template = {**copy.deepcopy(overlay_revision["templates"][0]), "template_key": "suppressed"}
+    suppressed_template["schedule"]["at"]["offset_seconds"] = "-172800"
+    overlay_revision["templates"].append(suppressed_template)
     overlay_revision = normalized_v2_revision(overlay_revision)
     overlay_hash = hashed("overlay_profile_revision", preimage("spine.notification-profile-revision-hash.v2", revision=overlay_revision))
     overlay_profile = copy.deepcopy(profile)
