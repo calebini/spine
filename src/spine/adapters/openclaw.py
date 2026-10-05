@@ -313,7 +313,7 @@ def build_openclaw_outbound_message(
         target_ref=target_ref,
         body_text=rendering.body_text,
         dedupe_key=f"openclaw:{work_instance_id}:{attempt_count}",
-        created_at_utc=created_at_utc,
+        created_at_utc=rendering.attempted_at_utc,
         notification_rendering=rendering,
     )
 

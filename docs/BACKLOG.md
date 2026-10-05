@@ -1,6 +1,6 @@
 # Spine Backlog
 
-Last updated: 2026-10-05
+Last updated: 2026-10-06
 
 This is the single work queue for Spine development. The
 [implementation plan](IMPLEMENTATION_PLAN.md) explains roadmap direction and delivery
@@ -36,10 +36,12 @@ status labels in the same change. Routine task updates do not change spec author
 ## Rendering delivery — implementation sequence
 
 The operator approved implementation planning and then SPINE-051 implementation on
-2026-10-05. SPINE-051 has an implemented internal checkpoint; later slices remain unstarted. These three internal checkpoints
+2026-10-05, then committed that checkpoint and authorized SPINE-052 on 2026-10-06.
+SPINE-051 and SPINE-052 have implemented internal checkpoints; SPINE-053 remains
+unstarted. These three internal checkpoints
 deliver one cohesive backend release; there is no intermediate staging deployment.
-Specs/contracts retain authority. Slice A has executable evidence below; complete
-RI-01–RI-14 release qualification remains pending the delivery/readback slices.
+Specs/contracts retain authority. Slices A/B have executable evidence below; complete
+RI-01–RI-14 release qualification remains pending the readback/release checkpoint.
 The [implementation plan](IMPLEMENTATION_PLAN.md#planned-delivery-facet-aware-notification-rendering-spine-051053)
 owns sequencing rationale and the proof allocation. Do not activate successor command
 families, the integration capability or production migration until all three slices
@@ -47,7 +49,8 @@ and end-to-end verification are complete. New HTTP exposure and pack adoption st
 
 ### SPINE-051 — Rendering persistence and authoring foundation
 
-**Status:** Implemented — internal candidate checkpoint, 2026-10-05; public activation remains off.
+**Status:** Implemented — internal candidate checkpoint, 2026-10-05; committed as
+`653e135` on 2026-10-06. Public activation remains off.
 **Dependencies:** SPINE-038 schema-18 location protection; SPINE-049 ratified design;
 SPINE-050 bounded review and locally verified fixture correction (`da128c5`).
 **Scope:** Integration Sections 2–5, 7–9 and 11: candidate migration/fresh schema,
@@ -92,11 +95,13 @@ a release-checkpoint requirement, not a claim of completed packaging verificatio
 **Verification:** Full unittest discovery passed 894 tests; a subsequently added
 candidate-storage run of the eight existing profile regressions also passed. Focused
 candidate tests, Ruff, compileall, changed-document local links and diff hygiene pass.
-No commit, push, deployment or live-ledger change was performed.
+Checkpoint committed as `653e135` after 104 focused tests, Ruff and diff checks.
+No push, deployment or live-ledger change was performed.
 
 ### SPINE-052 — Integrate facet details into notification attempts
 
-**Status:** Ready — SPINE-051 internal checkpoint implemented; not started.
+**Status:** Implemented — verified internal candidate checkpoint, 2026-10-06.
+Public activation remains gated.
 **Dependencies:** Complete candidate persistence/authoring and shared ancestry services.
 **Scope:** Integration Sections 4/6 and attempt-time Section 7 rules: scheduler/worker
 current-policy resolution, unchanged work/lease/retry/provider identity, deterministic
@@ -115,10 +120,43 @@ injection, no real recipients. Map evidence to each required oracle.
 grace extension, advisory runtime or public activation.
 **Handoff:** Slice C receives the tested authoring-to-attempt flow, including fallback,
 replay, concurrency and failure-path evidence; readback/release gates remain outstanding.
+**Evidence:** `tests/test_rendering_delivery.py` executes real disposable-ledger
+authoring, scheduler/worker and attempt paths. The candidate renderer builds ordered
+typed-scalar/approved-location-label suffixes over the unchanged v1 base. Selected
+omissions stay v2; inactive disclosure and unapproved location cases avoid private
+source lookups. Exact immutable definition/schema/presentation pins and bounded
+canonical evidence are checked at insertion and by the SQL-tracked commit finalizer.
+The existing attempt's `BEGIN IMMEDIATE` fence rechecks current item, policy, facet,
+ownership, disclosure and route facts; same-attempt replay loads stored bytes, while
+a new retry retains its provider identity and may render current values.
+
+| Proof allocation | Executed evidence |
+| --- | --- |
+| RI-01/05 | Frozen unselected v1 body/hash/envelope comparison; shared-intent siblings with distinct presentations after facet copy-forward; existing ancestry and profile regressions rerun |
+| RI-03 | Already-due within-grace ordinary start before adoption/edit; exclusion through explicit materialization; failed edit preserves separately committed item/adoption; expired opportunities receive no new grace; started ordinary history is retained |
+| RI-06 | Complete queued, in-progress, retry, started and terminal work rows unchanged across facet/presentation edits; selected Tickerd work survives an intervening edit; absent work stays absent; independently stale/cancelled work is not rescued |
+| RI-07 | Facet/revoke/ownership/route edits between preparation and commit fail before send; fresh attempts use current facts; real two-connection SQLite writer contention serializes revocation behind the attempt commit |
+| RI-08 | Rendering insert and commit-finalizer interruption roll back both rows and invoke no adapter; corrupt supporting facts/raw evidence and byte-cap failures fail closed; scalar limits, missing/schema-mismatched facets and suffix overflow omit without private evidence |
+| RI-09 | Started replay after edits/revocation/clock advance reuses immutable bytes; gateway timeout followed by new retry creates two attempt/rendering records but one simulated provider delivery under the unchanged provider key |
+| RI-10 delivery portion | Only explicitly approved location labels appear, never addresses/other metadata; unapproved locations are not looked up; existing protected-location/role tests rerun |
+
+Recurring work uses the current series facet snapshot and the occurrence's target;
+follow-source tasks use their own facets and reject a stale source binding. No real
+recipient or external gateway was contacted. The fixtures' source-only obligation labels remain
+historical; this table records actual execution rather than asserting complete
+RI-01–RI-14 release qualification. Readback, restore/old-worker and installed-wheel
+release proofs remain assigned to C.
+**Verification:** Final consolidated full unittest discovery passed 960 tests;
+217 focused tests passed, including all 58 delivery-module tests (inherited authoring
+regressions included). Ruff, compileall, both web-contract sync checks, 152 local
+documentation link targets and diff hygiene passed. Runtime 0.8.3/schema 18, public
+registry and current web contracts are unchanged; candidate support is not advertised.
+No push or deployment. Installed-wheel verification remains a C release gate.
 
 ### SPINE-053 — Complete rendering readback and release verification
 
-**Status:** Blocked — depends on SPINE-051 and SPINE-052; not started.
+**Status:** Ready — SPINE-051 and SPINE-052 internal checkpoints are implemented;
+not started or separately authorized. Release activation remains gated.
 **Dependencies:** End-to-end candidate storage, authoring and delivery behavior.
 **Scope:** Schedule-show v2 and successor response/receipt projections; exact historical
 v1/v2 decoding; safe old summary/redaction behavior; CLI discovery/help; generic operator

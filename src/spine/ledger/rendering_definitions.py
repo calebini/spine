@@ -232,6 +232,9 @@ def finalize(db: sqlite3.Connection) -> None:
         ).fetchone()
         invariant(parent is not None)
         load_profile(db, parent[0], revision_id=identity)
+    from spine.ledger.notification_renderings import get_notification_rendering
+    for attempt_id in sorted(db._rendering_attempts):
+        invariant(get_notification_rendering(db, attempt_id=attempt_id) is not None, "missing attempt rendering")
     if db._rendering_catalog:
         db.execute(
             "UPDATE notification_rendering_catalog_state SET generation=generation+1 WHERE singleton=1 AND generation<?",
@@ -267,3 +270,6 @@ def verify_deep(db: sqlite3.Connection) -> None:
         db.execute("SELECT COUNT(*) FROM notification_policies").fetchone()[0]
         == db.execute("SELECT COUNT(*) FROM notification_policy_presentations").fetchone()[0]
     )
+    from spine.ledger.notification_renderings import get_notification_rendering
+    for row in db.execute("SELECT attempt_id FROM notification_renderings"):
+        invariant(get_notification_rendering(db, attempt_id=row[0]) is not None)

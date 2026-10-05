@@ -1,7 +1,7 @@
 # Spine Implementation Plan
 
 Role: Roadmap rationale and delivery history; current task status lives in [BACKLOG.md](BACKLOG.md)
-Last updated: 2026-10-05 (rendering integration implementation sequence)
+Last updated: 2026-10-06 (rendering delivery integration checkpoint)
 
 This is a non-normative delivery plan. The specifications and machine-readable contracts remain authoritative.
 
@@ -153,7 +153,7 @@ work-preserving presentation edits, all inventoried item/policy writers, shared-
 lineage, migration interruptions and unchanged populated v1 profile/attempt evidence.
 See [SPINE-051 evidence](BACKLOG.md#spine-051--rendering-persistence-and-authoring-foundation)
 for test mappings and the local wheel-build limitation. This is not public activation
-or full RI-family closure. Slice B is the next implementation checkpoint.
+or full RI-family closure. Committed as `653e135` on 2026-10-06 before beginning B.
 
 ### Slice B — Delivery integration (SPINE-052)
 
@@ -182,6 +182,21 @@ Wire the foundation into the existing scheduler/worker attempt path, not a new p
 failures, immutable replay evidence and provider-key assertions. Use deterministic
 test adapters, not real recipients. Ordinary bytes and delivery identity remain
 unchanged; activation and deployment remain off.
+
+**2026-10-06 internal checkpoint:** Delivery integration is implemented over the
+existing attempt ledger and shared exact-policy resolver. Selected reminders append
+deterministic scalar/permitted-location labels, with omission privacy and immutable
+v2 evidence; ordinary reminders retain their v1 bytes and envelope. The attempt-start
+transaction rechecks current facts and commits rendering plus attempt atomically.
+Same-attempt replay uses stored bytes; fresh retries preserve the provider key.
+Real disposable-ledger proofs include shared-intent policy distinctions, recurring and
+follow-source targets, work-state preservation, prepared-edit/revocation/ownership/route
+races, two-connection SQLite writer contention, commit faults, byte limits and the
+already-due/grace/setup interleavings. See
+[SPINE-052 evidence](BACKLOG.md#spine-052--integrate-facet-details-into-notification-attempts)
+for executable mappings and verification results. No live
+ledger, service, public contract activation or release version changed. Slice C is
+the next separately authorized checkpoint; do not deploy A/B alone.
 
 ### Slice C — Readback, operator handoff and release verification (SPINE-053)
 

@@ -28,9 +28,13 @@ class LedgerConnection(sqlite3.Connection):
         self._rendering_versions: set[tuple[str, int]] = set()
         self._rendering_catalog: set[tuple[str, str]] = set()
         self._rendering_profiles: set[str] = set()
+        self._rendering_attempts: set[str] = set()
         self.create_function("spine_touch_policy", 2, self._touch_policy)
         self.create_function("spine_touch_rendering", 2, self._touch_rendering)
         self.create_function("spine_touch_rendering_profile", 1, lambda identity: self._rendering_profiles.add(identity) or 0)
+        self.create_function("spine_touch_rendering_attempt", 1, lambda identity: self._rendering_attempts.add(identity) or 0)
+        self.execute("""CREATE TEMP TRIGGER spine_rendering_attempt_insert AFTER INSERT ON main.notification_renderings
+            BEGIN SELECT spine_touch_rendering_attempt(NEW.attempt_id); END""")
         self.execute("""CREATE TEMP TRIGGER spine_rendering_profile_insert AFTER INSERT ON main.notification_profile_revisions
             BEGIN SELECT spine_touch_rendering_profile(NEW.notification_profile_revision_id); END""")
         self.execute("""CREATE TEMP TRIGGER spine_rendering_profile_marker AFTER INSERT ON main.notification_profile_rendering_revisions
@@ -143,6 +147,7 @@ class LedgerConnection(sqlite3.Connection):
             self._rendering_versions.clear()
             self._rendering_catalog.clear()
             self._rendering_profiles.clear()
+            self._rendering_attempts.clear()
         if getattr(self, "_facets_enabled", False):
             self._facet_versions.clear()
             self._facet_allocations.clear()

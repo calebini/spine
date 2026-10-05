@@ -12,8 +12,12 @@
     "src/spine/ledger/notifications.py"
   ],
   "maintenance_writer": "spine.ledger.rendering_migration.install_candidate",
+  "rendering_sql_writer": "spine.ledger.notification_renderings.insert_notification_rendering",
+  "attempt_transaction": "spine.services.attempts.prepare_work_attempt",
+  "attempt_finalizer": "spine.ledger.rendering_definitions.finalize",
   "proof_tests": [
     "tests.test_rendering_successor_authoring",
-    "tests.test_rendering_storage_integrity"
+    "tests.test_rendering_storage_integrity",
+    "tests.test_rendering_delivery"
   ]
 }

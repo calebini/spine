@@ -125,6 +125,25 @@ def prepare_work_attempt(
             work_row=dict(work_row),
             rendering=notification_rendering,
         )
+        if getattr(connection, "_renderings_enabled", False) and adapter_name == "openclaw":
+            # Destination text is outside the ordinary rendering preimage. Fence
+            # it too, so a route edit after preparation cannot send the old body
+            # to an unfenced destination.
+            route = connection.execute(
+                "SELECT target_ref,adapter_name,channel,status FROM delivery_targets WHERE delivery_target_id=?",
+                (work_row["delivery_target_id"],),
+            ).fetchone()
+            if (
+                route is None
+                or not isinstance(request_envelope, dict)
+                or request_envelope.get("target_ref") != route["target_ref"]
+                or route["adapter_name"] != adapter_name
+                or route["channel"] != request_envelope.get("channel_hint")
+                or route["status"] != "active"
+            ):
+                raise SpineValidationError(
+                    "notification_rendering_persistence_conflict", "delivery route changed before attempt persistence"
+                )
         attempt = create_started_attempt(
             connection,
             attempt_id=attempt_id,

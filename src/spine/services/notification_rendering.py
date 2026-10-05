@@ -18,14 +18,32 @@ def resolve_notification_rendering(
     work_row: Mapping[str, object],
     attempt_id: str,
     attempted_at_utc: str,
+    use_stored: bool = True,
 ) -> NotificationRendering:
     """Resolve current canonical facts and render one ordinary reminder attempt."""
 
+    if getattr(connection, "_renderings_enabled", False) and use_stored:
+        from spine.core.notification_details import decode_detailed, decode_ordinary
+        from spine.ledger.notification_renderings import get_notification_rendering, notification_rendering_view
+
+        stored = get_notification_rendering(connection, attempt_id=attempt_id)
+        if stored is not None:
+            result = (
+                decode_detailed(stored)
+                if stored["rendering_contract"].endswith(".v2")
+                else decode_ordinary(notification_rendering_view(stored))
+            )
+            if result.work_instance_id != work_row["work_instance_id"]:
+                _unresolved("stored attempt belongs to another work instance")
+            return result
     if work_row.get("work_kind") != "notification_reminder" or work_row.get("notification_opportunity_id") is None:
         raise SpineValidationError(
             "notification_rendering_unsupported_work",
             "v1 rendering requires structured notification_reminder work",
         )
+    if getattr(connection, "_renderings_enabled", False):
+        from spine.ledger.work import assert_work_instance_not_stale
+        assert_work_instance_not_stale(connection, str(work_row["work_instance_id"]))
     item_id = str(work_row["item_id"])
     item = get_current_item(connection, item_id)
     item_type = str(item["item_type"])
@@ -70,7 +88,12 @@ def resolve_notification_rendering(
                     "temporal_binding_revision_id": str(revision["temporal_binding_revision_id"]),
                 }
             )
-    return render_notification(source)
+    base = render_notification(source)
+    if getattr(connection, "_renderings_enabled", False):
+        from spine.services.notification_details import resolve_details
+
+        return resolve_details(connection, work_row=work_row, base=base)
+    return base
 
 
 def assert_rendering_matches_current(
@@ -86,6 +109,7 @@ def assert_rendering_matches_current(
         work_row=work_row,
         attempt_id=rendering.attempt_id,
         attempted_at_utc=rendering.attempted_at_utc,
+        use_stored=False,
     )
     if (
         current.notification_rendering_id != rendering.notification_rendering_id

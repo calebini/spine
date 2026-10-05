@@ -9,6 +9,7 @@ from typing import Any
 
 from spine.core.canonical_json import canonical_json_text
 from spine.core.errors import SpineValidationError
+from spine.core.notification_details import DetailedNotificationRendering, decode_detailed, decode_ordinary, require
 from spine.core.notification_rendering import NotificationRendering
 
 
@@ -21,10 +22,19 @@ def insert_notification_rendering(
     """Persist one immutable rendering linked to its started attempt."""
 
     value = rendering.as_persistence()
+    if isinstance(rendering, DetailedNotificationRendering):
+        checked = decode_detailed(rendering.as_view())
+        from spine.ledger.rendering_evidence import validate_evidence_definition
+
+        validate_evidence_definition(connection, checked)
+        require(checked.as_persistence() == value)
+    extension = isinstance(rendering, DetailedNotificationRendering)
+    extra_columns = ", base_rendering_json, details_evidence_json, details_contract_version" if extension else ""
+    extra_values = ", ?, ?, ?" if extension else ""
     try:
         with connection if manage_transaction else nullcontext():
             connection.execute(
-                """
+                f"""
                 INSERT INTO notification_renderings (
                   notification_rendering_id, attempt_id, work_instance_id,
                   notification_opportunity_id, notification_intent_id, item_id,
@@ -36,10 +46,10 @@ def insert_notification_rendering(
                   delta_seconds, occurrence_provenance_id, recurrence_revision_id,
                   occurrence_key, temporal_binding_id, temporal_binding_revision_id,
                   location_id, item_location_id, location_kind, location_label,
-                  source_input_json, phrase_facts_json, created_at_utc
+                  source_input_json, phrase_facts_json, created_at_utc{extra_columns}
                 ) VALUES (
                   ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
-                  ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
+                  ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?{extra_values}
                 )
                 """,
                 (
@@ -77,7 +87,8 @@ def insert_notification_rendering(
                     value["source_input_json"],
                     value["phrase_facts_json"],
                     value["created_at_utc"],
-                ),
+                )
+                + ((value["base_rendering_json"], value["details_evidence_json"], value["details_contract_version"]) if extension else ()),
             )
     except sqlite3.Error as exc:
         raise SpineValidationError(
@@ -108,12 +119,38 @@ def get_notification_rendering(connection: sqlite3.Connection, *, attempt_id: st
         value["delta_seconds"] = str(value["delta_seconds"])
     value["source_input"] = source_input
     value["phrase_facts"] = phrase_facts
+    if value["rendering_contract"] == "spine.notification-rendering.v2":
+        from spine.core.rendering_definitions import stored_object
+        from spine.ledger.rendering_evidence import validate_evidence_definition
+
+        base = stored_object(value.pop("base_rendering_json"), 32768)
+        details = stored_object(value.pop("details_evidence_json"), 16384)
+        require(value.pop("details_contract_version") == "spine.notification-rendering-details-evidence.v1")
+        envelope = {
+            k: value[k]
+            for k in ("rendering_contract", "notification_rendering_id", "rendering_input_hash", "rendered_content_hash", "body_text")
+        }
+        envelope.update(base_rendering=base, details=details)
+        rendering = decode_detailed(envelope)
+        validate_evidence_definition(connection, rendering)
+        # SQL's common columns are not an independent source of truth.
+        expected = rendering.as_persistence()
+        if expected["delta_seconds"] is not None:
+            expected["delta_seconds"] = int(expected["delta_seconds"])
+        require(dict(row) == expected)
+        return envelope
+    require(value["rendering_contract"] == "spine.notification-rendering.v1")
+    if getattr(connection, "_renderings_enabled", False):
+        decode_ordinary(notification_rendering_view(value))
     return value
 
 
 def notification_rendering_view(value: dict[str, Any]) -> dict[str, Any]:
     """Project stored rendering evidence into the capability-gated readback shape."""
 
+    if value.get("rendering_contract") == "spine.notification-rendering.v2":
+        # Only the successor full-evidence projector may release this branch.
+        raise SpineValidationError("unsupported_contract_version", "v2 rendering requires schedule-show.v2")
     fields = (
         "notification_rendering_id",
         "attempt_id",
