@@ -1,0 +1,25 @@
+{
+  "compatible_item_types": [
+    "event"
+  ],
+  "templates": [
+    {
+      "template_key": "day_before",
+      "schedule": {
+        "kind": "once",
+        "at": {
+          "kind": "target_offset",
+          "offset_basis": "elapsed",
+          "offset_seconds": "-86400"
+        }
+      },
+      "late_handling": {
+        "kind": "skip"
+      },
+      "rendering": {
+        "kind": "ordinary"
+      },
+      "normalized_template_hash": "6bc9c81ff03a9186ec4248c133d8c4b7c066cfbe96d5f5523db9d960abf776f6"
+    }
+  ]
+}

@@ -1,0 +1,121 @@
+{
+  "contract_version": "spine.notification-rendering-integration-contract-registry.v1",
+  "status": "specified_not_implemented",
+  "normative_source": "specs/notification-rendering-integration.md",
+  "runtime_activation": false,
+  "schemas": [
+    "contracts/schemas/notification-rendering-integration-types.schema.json",
+    "contracts/schemas/notification-profile-types-v2.schema.json",
+    "contracts/schemas/notification-profile-commands-v2.schema.json",
+    "contracts/schemas/notification-authoring-v2.schema.json",
+    "contracts/schemas/schedule-create-request-v3.schema.json",
+    "contracts/schemas/schedule-update-request-v3.schema.json",
+    "contracts/schemas/schedule-show-request-v2.schema.json",
+    "contracts/schemas/notification-rendering-v2.schema.json",
+    "contracts/schemas/notification-profile-application-v2.schema.json",
+    "contracts/schemas/notification-profile-readback-v2.schema.json",
+    "contracts/schemas/schedule-create-response-v3.schema.json",
+    "contracts/schemas/schedule-update-response-v3.schema.json",
+    "contracts/schemas/schedule-show-response-v2.schema.json",
+    "contracts/schemas/notification-profile-responses-v2.schema.json",
+    "contracts/schemas/notification-rendering-cursor.schema.json",
+    "contracts/schemas/notification-rendering-cursor-config.schema.json",
+    "contracts/schemas/notification-command-v2.schema.json",
+    "contracts/schemas/notification-rendering-integration-failure.schema.json"
+  ],
+  "commands": {
+    "notification_profile.create": {
+      "contract_version": "spine.notification-profiles.v2",
+      "request_schema": "contracts/schemas/notification-profile-commands-v2.schema.json#/$defs/profileCreate",
+      "response_schema": "contracts/schemas/notification-profile-responses-v2.schema.json#/$defs/create",
+      "exposure": "specified_only",
+      "mutates": true,
+      "failure_schema": "contracts/schemas/notification-rendering-integration-failure.schema.json"
+    },
+    "notification_profile.revise": {
+      "contract_version": "spine.notification-profiles.v2",
+      "request_schema": "contracts/schemas/notification-profile-commands-v2.schema.json#/$defs/profileRevise",
+      "response_schema": "contracts/schemas/notification-profile-responses-v2.schema.json#/$defs/revise",
+      "exposure": "specified_only",
+      "mutates": true,
+      "failure_schema": "contracts/schemas/notification-rendering-integration-failure.schema.json"
+    },
+    "notification_profile.show": {
+      "contract_version": "spine.notification-profiles.v2",
+      "request_schema": "contracts/schemas/notification-profile-commands-v2.schema.json#/$defs/profileShow",
+      "response_schema": "contracts/schemas/notification-profile-responses-v2.schema.json#/$defs/show",
+      "exposure": "specified_only",
+      "mutates": false,
+      "failure_schema": "contracts/schemas/notification-rendering-integration-failure.schema.json"
+    },
+    "notification_profile.list": {
+      "contract_version": "spine.notification-profiles.v2",
+      "request_schema": "contracts/schemas/notification-profile-commands-v2.schema.json#/$defs/profileList",
+      "response_schema": "contracts/schemas/notification-profile-responses-v2.schema.json#/$defs/list",
+      "exposure": "specified_only",
+      "mutates": false,
+      "failure_schema": "contracts/schemas/notification-rendering-integration-failure.schema.json"
+    },
+    "schedule.create": {
+      "contract_version": "spine.schedule-create.v3",
+      "request_schema": "contracts/schemas/schedule-create-request-v3.schema.json",
+      "response_schema": "contracts/schemas/schedule-create-response-v3.schema.json",
+      "exposure": "specified_only",
+      "mutates": true,
+      "failure_schema": "contracts/schemas/notification-rendering-integration-failure.schema.json"
+    },
+    "schedule.update": {
+      "contract_version": "spine.schedule-update.v3",
+      "request_schema": "contracts/schemas/schedule-update-request-v3.schema.json",
+      "response_schema": "contracts/schemas/schedule-update-response-v3.schema.json",
+      "exposure": "specified_only",
+      "mutates": true,
+      "failure_schema": "contracts/schemas/notification-rendering-integration-failure.schema.json"
+    },
+    "schedule.show": {
+      "contract_version": "spine.schedule-show.v2",
+      "request_schema": "contracts/schemas/schedule-show-request-v2.schema.json",
+      "response_schema": "contracts/schemas/schedule-show-response-v2.schema.json",
+      "exposure": "specified_only",
+      "mutates": false,
+      "failure_schema": "contracts/schemas/notification-rendering-integration-failure.schema.json"
+    }
+  },
+  "fragments": {
+    "spine.notification-schedule-authoring.v2": "contracts/schemas/notification-authoring-v2.schema.json",
+    "spine.notification-profile-application.v2": "contracts/schemas/notification-profile-application-v2.schema.json",
+    "spine.notification-profile-readback.v2": "contracts/schemas/notification-profile-readback-v2.schema.json",
+    "spine.notification-rendering.v2": "contracts/schemas/notification-rendering-v2.schema.json",
+    "spine.notification-rendering-cursor.v1": "contracts/schemas/notification-rendering-cursor.schema.json",
+    "spine.notification-rendering-cursor-config.v1": "contracts/schemas/notification-rendering-cursor-config.schema.json",
+    "direct_reminder_command_envelopes": "contracts/schemas/notification-command-v2.schema.json",
+    "standard_failure": "contracts/schemas/notification-rendering-integration-failure.schema.json"
+  },
+  "verification": {
+    "stateful_runtime_verified": false
+  },
+  "semantic_oracles": [
+    "normalized_template_and_revision_hashes",
+    "presentation_and_set_hashes",
+    "attempt_base_details_binding_and_v2_hashes",
+    "canonical_signed_cursor_and_current_context_fences",
+    "application_address_uniqueness_and_order",
+    "profile_readback_null_and_revision_consistency"
+  ],
+  "pending_runtime_families": [
+    "RI-01",
+    "RI-02",
+    "RI-03",
+    "RI-04",
+    "RI-05",
+    "RI-06",
+    "RI-07",
+    "RI-08",
+    "RI-09",
+    "RI-10",
+    "RI-11",
+    "RI-12",
+    "RI-13",
+    "RI-14"
+  ]
+}

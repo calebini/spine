@@ -14,8 +14,8 @@ registry requirements, web allowlist entries or optional fields in current schem
 The source-only registry at `contracts/notification-rendering-definition-contract-registry.v1.json`
 defines the initial machine contracts. Storage, versioned enclosing authoring/evidence
 contracts, continuity, permission mappings and cursor integration still precede exposure.
-Their proposed closure is the draft [rendering integration amendment](notification-rendering-integration.md).
-Its reserved successor pins and source-only integration matrix do not change the
+Their design closure is the ratified [rendering integration amendment](notification-rendering-integration.md).
+Its successor schemas, computed fixtures and source-only integration matrix do not change the
 implemented-command list, compiled registry or current request shapes.
 
 The implemented [ledger-instance-identity.md](ledger-instance-identity.md) defines

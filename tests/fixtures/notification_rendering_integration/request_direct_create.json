@@ -1,0 +1,48 @@
+{
+  "command": "reminder.create",
+  "request": {
+    "command_id": "direct-create-example",
+    "actor_subject_id": "subject_agent",
+    "item_id": "item-example",
+    "target_version": "2",
+    "created_at_utc": "2035-02-01T12:00:01Z",
+    "recipient_kind": "subject",
+    "recipient_subject_id": "subject_owner",
+    "channel": "whatsapp",
+    "delivery_target_id": "delivery-target-example",
+    "notification": {
+      "authoring_contract": "spine.notification-schedule-authoring.v2",
+      "target": {
+        "anchor_role": "event_start",
+        "application_scope": "item"
+      },
+      "schedule": {
+        "kind": "once",
+        "at": {
+          "kind": "target_offset",
+          "offset_basis": "elapsed",
+          "offset_seconds": "-86400"
+        }
+      },
+      "late_handling": {
+        "kind": "skip"
+      },
+      "presentation": {
+        "kind": "definition",
+        "definition": {
+          "notification_rendering_definition_id": "notification_rendering_definition_02f257fab5ae9d05c29ad78672208f2329671a72dbb76fa6773c9623950fa1fe",
+          "notification_rendering_definition_revision_id": "notification_rendering_definition_revision_e0ba4b36ee5a68085a16c17068ce0091ef1fc0834da7cd9fbcf7c55302dddc52"
+        },
+        "authorization": {
+          "resolution": "exact",
+          "disclosure_authorization_id": "notification_rendering_disclosure_53174c12223c65f3cbbe0e1d4b55897790ebf9b1671bb26893448c843c713737"
+        },
+        "effective_selection_keys": [
+          "departure",
+          "flight",
+          "terminal"
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,58 @@
+{
+  "application_contract": "spine.notification-profile-application.v2",
+  "notification_profile_application_id": "application-example",
+  "notification_profile_id": "profile-example",
+  "notification_profile_revision_id": "revision-example",
+  "selection_mode": "explicit",
+  "notification_profile_binding_id": null,
+  "scope_chain": [],
+  "normalized_profile_revision_hash": "dfde522127e4cdb593d0946e8ea04a0b82692b43db2de933b80fc47bf415816e",
+  "suppress_template_keys": [
+    "day_before"
+  ],
+  "replacements": [],
+  "custom_additions": [
+    {
+      "policy_key": "custom",
+      "schedule": {
+        "kind": "once",
+        "at": {
+          "kind": "target_offset",
+          "offset_basis": "elapsed",
+          "offset_seconds": "-86400"
+        }
+      },
+      "late_handling": {
+        "kind": "skip"
+      }
+    }
+  ],
+  "normalized_effective_policy_set_hash": "33a0234e6218556970d6efaba6c42d67f6bd69968c3d42f28e4bf7b44bff6034",
+  "effective_presentation_set_hash": "741fa5a763674b8130be32608fd4d2c7811132f7720b8f7ca19fd1204b6fef38",
+  "policies": [
+    {
+      "policy_origin": "custom_addition",
+      "source_key": "custom",
+      "notification_intent_id": "intent-example",
+      "notification_policy_id": "policy-example",
+      "presentation": {
+        "kind": "definition",
+        "definition": {
+          "notification_rendering_definition_id": "notification_rendering_definition_02f257fab5ae9d05c29ad78672208f2329671a72dbb76fa6773c9623950fa1fe",
+          "notification_rendering_definition_revision_id": "notification_rendering_definition_revision_e0ba4b36ee5a68085a16c17068ce0091ef1fc0834da7cd9fbcf7c55302dddc52"
+        },
+        "disclosure_authorization_id": "notification_rendering_disclosure_53174c12223c65f3cbbe0e1d4b55897790ebf9b1671bb26893448c843c713737",
+        "disclosure_scope_hash": "a588d9a8b3304e77047eba1c1e380c53242f3f67aae121832b4da70974966334",
+        "effective_selection_keys": [
+          "departure",
+          "flight",
+          "terminal"
+        ],
+        "origin": {
+          "kind": "custom_addition"
+        }
+      },
+      "presentation_hash": "50927ef914b810caeb811b8875852beee311043c865959446112dc7adc528f5c"
+    }
+  ]
+}

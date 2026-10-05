@@ -1,0 +1,45 @@
+{
+  "ok": true,
+  "command": "notification_profile.show",
+  "response_contract": "spine.notification-profiles.v2",
+  "notification_profile": {
+    "notification_profile_id": "profile-example",
+    "owner": {
+      "owner_kind": "subject",
+      "owner_subject_id": "subject_owner"
+    },
+    "profile_key": "appointment_standard",
+    "display_name": "Appointment standard",
+    "description": "One day before",
+    "status": "active",
+    "current_revision_id": "revision-example",
+    "revision": {
+      "notification_profile_revision_id": "revision-old",
+      "revision_number": "1",
+      "revision_contract": "spine.notification-profiles.v1",
+      "normalized_revision_hash": "8dcae6cd5b03d21a1945ce6407fe622fdb9f6b9da03dd5449e4ef3022d26a7b6",
+      "content": {
+        "compatible_item_types": [
+          "event"
+        ],
+        "templates": [
+          {
+            "template_key": "day_before",
+            "schedule": {
+              "kind": "once",
+              "at": {
+                "kind": "target_offset",
+                "offset_basis": "elapsed",
+                "offset_seconds": "-86400"
+              }
+            },
+            "late_handling": {
+              "kind": "skip"
+            },
+            "normalized_template_hash": "b2316725c7b9ee85862cbe9709d4e0ebe0afbcc7550e74371434ef31ab9628f2"
+          }
+        ]
+      }
+    }
+  }
+}

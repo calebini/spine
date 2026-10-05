@@ -69,7 +69,7 @@ start, and reusable scoped disclosure is separate from catalog use or item read 
 Existing canonical locations are reused; no new venue catalog is implied.
 This accepted design adds no current runtime capability
 and does not move advisory execution, scheduling or delivery authority.
-The draft [rendering integration leaf](notification-rendering-integration.md) proposes
+The ratified [rendering integration leaf](notification-rendering-integration.md) specifies
 how this connects to storage, authoring, current-policy resolution and one immutable
 final rendering per attempt. It delegates to the same ledger and permission owners;
 it adds no daemon, renderer plugin runtime or separate send pipeline.

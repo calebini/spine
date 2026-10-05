@@ -1,0 +1,63 @@
+{
+  "ok": true,
+  "command": "schedule.show",
+  "response_contract": "spine.schedule-show.v2",
+  "item": {
+    "item_id": "item-example",
+    "item_type": "event",
+    "current_version": "1",
+    "status": "active",
+    "created_at_utc": "2035-02-01T12:00:01Z",
+    "updated_at_utc": "2035-02-01T12:00:01Z",
+    "current_common": {
+      "title": "Unscheduled event"
+    }
+  },
+  "scheduled_times": [],
+  "delivery_targets": [],
+  "included": [
+    "notification_profile"
+  ],
+  "notification_profile": {
+    "readback_contract": "spine.notification-profile-readback.v2",
+    "archetype_assignment": null,
+    "application": null,
+    "pinned_notification_profile_revision_id": null,
+    "current_notification_profile_revision_id": null,
+    "upgrade_available": false,
+    "effective_policy_diverged": false
+  },
+  "lifecycle": {
+    "authored": {
+      "state": "committed",
+      "item_version": "1",
+      "policy_count": "0"
+    },
+    "opportunities": {
+      "state": "not_requested",
+      "count": "0"
+    },
+    "work": {
+      "state": "none",
+      "count": "0",
+      "status_counts": {
+        "eligible": "0",
+        "in_progress": "0",
+        "succeeded": "0",
+        "failed": "0",
+        "cancelled": "0"
+      }
+    },
+    "delivery": {
+      "attempt_state": "not_attempted",
+      "outcome_state": "none",
+      "attempt_count": "0",
+      "status_counts": {
+        "started": "0",
+        "succeeded": "0",
+        "failed": "0",
+        "rejected": "0"
+      }
+    }
+  }
+}

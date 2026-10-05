@@ -1,0 +1,402 @@
+{
+  "contract_version": "spine.notification-rendering-integration-fixtures.v1",
+  "status": "specified_not_implemented",
+  "registry": "contracts/notification-rendering-integration-contract-registry.v1.json",
+  "fixtures": [
+    {
+      "fixture_id": "request_profile_create",
+      "fixture": "tests/fixtures/notification_rendering_integration/request_profile_create.json",
+      "schema": "contracts/schemas/notification-profile-commands-v2.schema.json",
+      "schema_ref": "#/$defs/profileCreate",
+      "valid": true,
+      "kind": "wire"
+    },
+    {
+      "fixture_id": "request_profile_ordinary_omitted",
+      "fixture": "tests/fixtures/notification_rendering_integration/request_profile_ordinary_omitted.json",
+      "schema": "contracts/schemas/notification-profile-commands-v2.schema.json",
+      "schema_ref": "#/$defs/profileCreate",
+      "valid": true,
+      "kind": "wire"
+    },
+    {
+      "fixture_id": "normalized_ordinary_revision",
+      "fixture": "tests/fixtures/notification_rendering_integration/normalized_ordinary_revision.json",
+      "schema": "contracts/schemas/notification-profile-types-v2.schema.json",
+      "schema_ref": "#/$defs/normalizedRevision",
+      "valid": true,
+      "kind": "wire"
+    },
+    {
+      "fixture_id": "request_profile_revise",
+      "fixture": "tests/fixtures/notification_rendering_integration/request_profile_revise.json",
+      "schema": "contracts/schemas/notification-profile-commands-v2.schema.json",
+      "schema_ref": "#/$defs/profileRevise",
+      "valid": true,
+      "kind": "wire"
+    },
+    {
+      "fixture_id": "request_profile_show",
+      "fixture": "tests/fixtures/notification_rendering_integration/request_profile_show.json",
+      "schema": "contracts/schemas/notification-profile-commands-v2.schema.json",
+      "schema_ref": "#/$defs/profileShow",
+      "valid": true,
+      "kind": "wire"
+    },
+    {
+      "fixture_id": "request_profile_list",
+      "fixture": "tests/fixtures/notification_rendering_integration/request_profile_list.json",
+      "schema": "contracts/schemas/notification-profile-commands-v2.schema.json",
+      "schema_ref": "#/$defs/profileList",
+      "valid": true,
+      "kind": "wire"
+    },
+    {
+      "fixture_id": "request_profile_list_101",
+      "fixture": "tests/fixtures/notification_rendering_integration/request_profile_list_101.json",
+      "schema": "contracts/schemas/notification-profile-commands-v2.schema.json",
+      "schema_ref": "#/$defs/profileList",
+      "valid": true,
+      "kind": "wire"
+    },
+    {
+      "fixture_id": "response_profile_show",
+      "fixture": "tests/fixtures/notification_rendering_integration/response_profile_show.json",
+      "schema": "contracts/schemas/notification-profile-responses-v2.schema.json",
+      "schema_ref": "#/$defs/show",
+      "valid": true,
+      "kind": "wire"
+    },
+    {
+      "fixture_id": "response_profile_historical_v1",
+      "fixture": "tests/fixtures/notification_rendering_integration/response_profile_historical_v1.json",
+      "schema": "contracts/schemas/notification-profile-responses-v2.schema.json",
+      "schema_ref": "#/$defs/show",
+      "valid": true,
+      "kind": "wire"
+    },
+    {
+      "fixture_id": "response_profile_list",
+      "fixture": "tests/fixtures/notification_rendering_integration/response_profile_list.json",
+      "schema": "contracts/schemas/notification-profile-responses-v2.schema.json",
+      "schema_ref": "#/$defs/list",
+      "valid": true,
+      "kind": "wire"
+    },
+    {
+      "fixture_id": "response_profile_create",
+      "fixture": "tests/fixtures/notification_rendering_integration/response_profile_create.json",
+      "schema": "contracts/schemas/notification-profile-responses-v2.schema.json",
+      "schema_ref": "#/$defs/create",
+      "valid": true,
+      "kind": "wire"
+    },
+    {
+      "fixture_id": "response_profile_revise",
+      "fixture": "tests/fixtures/notification_rendering_integration/response_profile_revise.json",
+      "schema": "contracts/schemas/notification-profile-responses-v2.schema.json",
+      "schema_ref": "#/$defs/revise",
+      "valid": true,
+      "kind": "wire"
+    },
+    {
+      "fixture_id": "request_schedule_create_ordinary",
+      "fixture": "tests/fixtures/notification_rendering_integration/request_schedule_create_ordinary.json",
+      "schema": "contracts/schemas/schedule-create-request-v3.schema.json",
+      "schema_ref": "#",
+      "valid": true,
+      "kind": "wire"
+    },
+    {
+      "fixture_id": "request_presentation_edit",
+      "fixture": "tests/fixtures/notification_rendering_integration/request_presentation_edit.json",
+      "schema": "contracts/schemas/schedule-update-request-v3.schema.json",
+      "schema_ref": "#",
+      "valid": true,
+      "kind": "wire"
+    },
+    {
+      "fixture_id": "request_presentation_unique_match",
+      "fixture": "tests/fixtures/notification_rendering_integration/request_presentation_unique_match.json",
+      "schema": "contracts/schemas/schedule-update-request-v3.schema.json",
+      "schema_ref": "#",
+      "valid": true,
+      "kind": "wire"
+    },
+    {
+      "fixture_id": "request_presentation_clear",
+      "fixture": "tests/fixtures/notification_rendering_integration/request_presentation_clear.json",
+      "schema": "contracts/schemas/schedule-update-request-v3.schema.json",
+      "schema_ref": "#",
+      "valid": true,
+      "kind": "wire"
+    },
+    {
+      "fixture_id": "request_show_v2",
+      "fixture": "tests/fixtures/notification_rendering_integration/request_show_v2.json",
+      "schema": "contracts/schemas/schedule-show-request-v2.schema.json",
+      "schema_ref": "#",
+      "valid": true,
+      "kind": "wire"
+    },
+    {
+      "fixture_id": "direct_authoring",
+      "fixture": "tests/fixtures/notification_rendering_integration/direct_authoring.json",
+      "schema": "contracts/schemas/notification-authoring-v2.schema.json",
+      "schema_ref": "#",
+      "valid": true,
+      "kind": "wire"
+    },
+    {
+      "fixture_id": "request_direct_create",
+      "fixture": "tests/fixtures/notification_rendering_integration/request_direct_create.json",
+      "schema": "contracts/schemas/notification-command-v2.schema.json",
+      "schema_ref": "#",
+      "valid": true,
+      "kind": "wire"
+    },
+    {
+      "fixture_id": "request_direct_edit_clear",
+      "fixture": "tests/fixtures/notification_rendering_integration/request_direct_edit_clear.json",
+      "schema": "contracts/schemas/notification-command-v2.schema.json",
+      "schema_ref": "#",
+      "valid": true,
+      "kind": "wire"
+    },
+    {
+      "fixture_id": "invalid_direct_edit_mixed_timing",
+      "fixture": "tests/fixtures/notification_rendering_integration/invalid_direct_edit_mixed_timing.json",
+      "schema": "contracts/schemas/notification-command-v2.schema.json",
+      "schema_ref": "#",
+      "valid": false,
+      "kind": "wire"
+    },
+    {
+      "fixture_id": "failure_unadopted_create",
+      "fixture": "tests/fixtures/notification_rendering_integration/failure_unadopted_create.json",
+      "schema": "contracts/schemas/notification-rendering-integration-failure.schema.json",
+      "schema_ref": "#",
+      "valid": true,
+      "kind": "wire"
+    },
+    {
+      "fixture_id": "failure_schedule_create_permission_denied",
+      "fixture": "tests/fixtures/notification_rendering_integration/failure_schedule_create_permission_denied.json",
+      "schema": "contracts/schemas/schedule-create-response-v3.schema.json",
+      "schema_ref": "#",
+      "valid": true,
+      "kind": "wire"
+    },
+    {
+      "fixture_id": "application_v2",
+      "fixture": "tests/fixtures/notification_rendering_integration/application_v2.json",
+      "schema": "contracts/schemas/notification-profile-application-v2.schema.json",
+      "schema_ref": "#",
+      "valid": true,
+      "kind": "wire"
+    },
+    {
+      "fixture_id": "readback_v2",
+      "fixture": "tests/fixtures/notification_rendering_integration/readback_v2.json",
+      "schema": "contracts/schemas/notification-profile-readback-v2.schema.json",
+      "schema_ref": "#",
+      "valid": true,
+      "kind": "wire"
+    },
+    {
+      "fixture_id": "response_profile_overlay_revision",
+      "fixture": "tests/fixtures/notification_rendering_integration/response_profile_overlay_revision.json",
+      "schema": "contracts/schemas/notification-profile-responses-v2.schema.json",
+      "schema_ref": "#/$defs/show",
+      "valid": true,
+      "kind": "wire"
+    },
+    {
+      "fixture_id": "application_archetype_default_overlays",
+      "fixture": "tests/fixtures/notification_rendering_integration/application_archetype_default_overlays.json",
+      "schema": "contracts/schemas/notification-profile-application-v2.schema.json",
+      "schema_ref": "#",
+      "valid": true,
+      "kind": "wire"
+    },
+    {
+      "fixture_id": "readback_archetype_default_overlays",
+      "fixture": "tests/fixtures/notification_rendering_integration/readback_archetype_default_overlays.json",
+      "schema": "contracts/schemas/notification-profile-readback-v2.schema.json",
+      "schema_ref": "#",
+      "valid": true,
+      "kind": "wire"
+    },
+    {
+      "fixture_id": "readback_no_profile",
+      "fixture": "tests/fixtures/notification_rendering_integration/readback_no_profile.json",
+      "schema": "contracts/schemas/notification-profile-readback-v2.schema.json",
+      "schema_ref": "#",
+      "valid": true,
+      "kind": "wire"
+    },
+    {
+      "fixture_id": "presentation_change",
+      "fixture": "tests/fixtures/notification_rendering_integration/presentation_change.json",
+      "schema": "contracts/schemas/notification-rendering-integration-types.schema.json",
+      "schema_ref": "#/$defs/presentationChange",
+      "valid": true,
+      "kind": "wire"
+    },
+    {
+      "fixture_id": "response_schedule_create",
+      "fixture": "tests/fixtures/notification_rendering_integration/response_schedule_create.json",
+      "schema": "contracts/schemas/schedule-create-response-v3.schema.json",
+      "schema_ref": "#",
+      "valid": true,
+      "kind": "wire"
+    },
+    {
+      "fixture_id": "response_schedule_update_copy_forward",
+      "fixture": "tests/fixtures/notification_rendering_integration/response_schedule_update_copy_forward.json",
+      "schema": "contracts/schemas/schedule-update-response-v3.schema.json",
+      "schema_ref": "#",
+      "valid": true,
+      "kind": "wire"
+    },
+    {
+      "fixture_id": "response_presentation_edit",
+      "fixture": "tests/fixtures/notification_rendering_integration/response_presentation_edit.json",
+      "schema": "contracts/schemas/schedule-update-response-v3.schema.json",
+      "schema_ref": "#",
+      "valid": true,
+      "kind": "wire"
+    },
+    {
+      "fixture_id": "response_schedule_show",
+      "fixture": "tests/fixtures/notification_rendering_integration/response_schedule_show.json",
+      "schema": "contracts/schemas/schedule-show-response-v2.schema.json",
+      "schema_ref": "#",
+      "valid": true,
+      "kind": "wire"
+    },
+    {
+      "fixture_id": "ordinary_v1",
+      "fixture": "tests/fixtures/notification_rendering_integration/ordinary_v1.json",
+      "schema": "contracts/schemas/notification-rendering.schema.json",
+      "schema_ref": "#",
+      "valid": true,
+      "kind": "wire"
+    },
+    {
+      "fixture_id": "ordinary_overflow_base_v1",
+      "fixture": "tests/fixtures/notification_rendering_integration/ordinary_overflow_base_v1.json",
+      "schema": "contracts/schemas/notification-rendering.schema.json",
+      "schema_ref": "#",
+      "valid": true,
+      "kind": "wire"
+    },
+    {
+      "fixture_id": "rendering_included",
+      "fixture": "tests/fixtures/notification_rendering_integration/rendering_included.json",
+      "schema": "contracts/schemas/notification-rendering-v2.schema.json",
+      "schema_ref": "#",
+      "valid": true,
+      "kind": "wire"
+    },
+    {
+      "fixture_id": "rendering_revoked",
+      "fixture": "tests/fixtures/notification_rendering_integration/rendering_revoked.json",
+      "schema": "contracts/schemas/notification-rendering-v2.schema.json",
+      "schema_ref": "#",
+      "valid": true,
+      "kind": "wire"
+    },
+    {
+      "fixture_id": "rendering_empty_subset",
+      "fixture": "tests/fixtures/notification_rendering_integration/rendering_empty_subset.json",
+      "schema": "contracts/schemas/notification-rendering-v2.schema.json",
+      "schema_ref": "#",
+      "valid": true,
+      "kind": "wire"
+    },
+    {
+      "fixture_id": "rendering_overflow",
+      "fixture": "tests/fixtures/notification_rendering_integration/rendering_overflow.json",
+      "schema": "contracts/schemas/notification-rendering-v2.schema.json",
+      "schema_ref": "#",
+      "valid": true,
+      "kind": "wire"
+    },
+    {
+      "fixture_id": "readback_attempt_v1",
+      "fixture": "tests/fixtures/notification_rendering_integration/readback_attempt_v1.json",
+      "schema": "contracts/schemas/schedule-show-response-v2.schema.json",
+      "schema_ref": "#/$defs/attempt",
+      "valid": true,
+      "kind": "wire"
+    },
+    {
+      "fixture_id": "readback_attempt_v2",
+      "fixture": "tests/fixtures/notification_rendering_integration/readback_attempt_v2.json",
+      "schema": "contracts/schemas/schedule-show-response-v2.schema.json",
+      "schema_ref": "#/$defs/attempt",
+      "valid": true,
+      "kind": "wire"
+    },
+    {
+      "fixture_id": "cursor_config_test_only",
+      "fixture": "tests/fixtures/notification_rendering_integration/cursor_config_test_only.json",
+      "schema": "contracts/schemas/notification-rendering-cursor-config.schema.json",
+      "schema_ref": "#",
+      "valid": true,
+      "kind": "wire"
+    },
+    {
+      "fixture_id": "cursor_trusted_local",
+      "fixture": "tests/fixtures/notification_rendering_integration/cursor_trusted_local.json",
+      "schema": "contracts/schemas/notification-rendering-cursor.schema.json",
+      "schema_ref": "#",
+      "valid": true,
+      "kind": "wire"
+    },
+    {
+      "fixture_id": "cursor_permission_enforced",
+      "fixture": "tests/fixtures/notification_rendering_integration/cursor_permission_enforced.json",
+      "schema": "contracts/schemas/notification-rendering-cursor.schema.json",
+      "schema_ref": "#",
+      "valid": true,
+      "kind": "wire"
+    },
+    {
+      "fixture_id": "invalid_mixed_presentation_patch",
+      "fixture": "tests/fixtures/notification_rendering_integration/invalid_mixed_presentation_patch.json",
+      "schema": "contracts/schemas/schedule-update-request-v3.schema.json",
+      "schema_ref": "#",
+      "valid": false,
+      "kind": "wire"
+    },
+    {
+      "fixture_id": "invalid_template_grant",
+      "fixture": "tests/fixtures/notification_rendering_integration/invalid_template_grant.json",
+      "schema": "contracts/schemas/notification-profile-commands-v2.schema.json",
+      "schema_ref": "#/$defs/profileCreate",
+      "valid": false,
+      "kind": "wire"
+    },
+    {
+      "fixture_id": "invalid_client_origin",
+      "fixture": "tests/fixtures/notification_rendering_integration/invalid_client_origin.json",
+      "schema": "contracts/schemas/schedule-update-request-v3.schema.json",
+      "schema_ref": "#",
+      "valid": false,
+      "kind": "wire"
+    },
+    {
+      "fixture_id": "invalid_cursor_secret_newline",
+      "fixture": "tests/fixtures/notification_rendering_integration/invalid_cursor_secret_newline.json",
+      "schema": "contracts/schemas/notification-rendering-cursor-config.schema.json",
+      "schema_ref": "#",
+      "valid": false,
+      "kind": "wire"
+    }
+  ],
+  "computed_vectors": "tests/fixtures/notification_rendering_integration/computed_vectors.json",
+  "stateful_obligations": "tests/fixtures/notification_rendering_integration/stateful_obligations.json",
+  "runtime_verified": false
+}

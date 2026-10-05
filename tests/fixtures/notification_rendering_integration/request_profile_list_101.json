@@ -1,0 +1,8 @@
+{
+  "contract_version": "spine.notification-profiles.v2",
+  "owner": {
+    "owner_kind": "subject",
+    "owner_subject_id": "subject_owner"
+  },
+  "limit": "101"
+}

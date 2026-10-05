@@ -1,0 +1,21 @@
+{
+  "contract_version": "spine.schedule-update.v3",
+  "command_id": "presentation-edit",
+  "actor_subject_id": "subject_agent",
+  "item_id": "item-example",
+  "target_version": "2",
+  "updated_at_utc": "2035-02-01T12:00:01Z",
+  "patch": {
+    "policy_presentations": [
+      {
+        "notification_policy_id": "policy-old",
+        "selection": {
+          "kind": "ordinary"
+        }
+      }
+    ]
+  },
+  "materialization": {
+    "mode": "none"
+  }
+}

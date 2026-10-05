@@ -1,4 +1,4 @@
-"""Draft integration matrix consistency, not runtime or stateful conformance."""
+"""Ratified integration matrix consistency, not runtime or stateful conformance."""
 
 import json
 import unittest
@@ -18,7 +18,7 @@ class RenderingIntegrationDraftTests(unittest.TestCase):
         cls.spec = (ROOT / cls.matrix["normative_source"]).read_text()
 
     def test_draft_has_no_runtime_or_packaged_activation(self):
-        self.assertEqual(self.matrix["status"], "draft_specification_only")
+        self.assertEqual(self.matrix["status"], "specified_not_implemented")
         self.assertFalse(self.matrix["runtime_activation"])
         self.assertFalse(self.matrix["verification"]["runtime_verified"])
         versions = {self.matrix["contract_version"], *self.matrix["proposed_successors"].values()}
@@ -121,7 +121,8 @@ class RenderingIntegrationDraftTests(unittest.TestCase):
             self.assertIn(f"| {family} |", self.spec)
         for table in self.matrix["persistence"]["new_tables"]:
             self.assertIn(table, self.spec)
-        self.assertIn("complete_successor_wire_schemas", self.matrix["verification"]["pending_before_runtime"])
+        self.assertIn("successor_machine_contract_review", self.matrix["verification"]["pending_before_runtime"])
+        self.assertTrue((ROOT / self.matrix["successor_registry"]).is_file())
 
 
 if __name__ == "__main__":

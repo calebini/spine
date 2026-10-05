@@ -1,0 +1,8 @@
+{
+  "ok": false,
+  "command": "schedule.create",
+  "error": {
+    "code": "permission_denied",
+    "message": "Item creation denied."
+  }
+}

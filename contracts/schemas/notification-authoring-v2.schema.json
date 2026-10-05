@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cortext.local/spine/contracts/schemas/notification-authoring-v2.schema.json",
+  "title": "Spine Notification Authoring v2 (source only)",
+  "type": "object",
+  "required": [
+    "authoring_contract",
+    "target",
+    "schedule",
+    "late_handling"
+  ],
+  "properties": {
+    "authoring_contract": {
+      "const": "spine.notification-schedule-authoring.v2"
+    },
+    "target": {
+      "allOf": [
+        {
+          "$ref": "notification-types.schema.json#/$defs/target"
+        },
+        {
+          "not": {
+            "required": [
+              "target_occurrence_selector"
+            ]
+          }
+        }
+      ]
+    },
+    "schedule": {
+      "$ref": "notification-types.schema.json#/$defs/schedule"
+    },
+    "late_handling": {
+      "$ref": "notification-types.schema.json#/$defs/lateHandling"
+    },
+    "presentation": {
+      "$ref": "notification-rendering-definition-types.schema.json#/$defs/authoringSelection"
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "edit": {
+      "type": "object",
+      "required": [
+        "authoring_contract"
+      ],
+      "properties": {
+        "authoring_contract": {
+          "const": "spine.notification-schedule-authoring.v2"
+        },
+        "target": {
+          "allOf": [
+            {
+              "$ref": "notification-types.schema.json#/$defs/target"
+            },
+            {
+              "not": {
+                "required": [
+                  "target_occurrence_selector"
+                ]
+              }
+            }
+          ]
+        },
+        "schedule": {
+          "$ref": "notification-types.schema.json#/$defs/schedule"
+        },
+        "late_handling": {
+          "$ref": "notification-types.schema.json#/$defs/lateHandling"
+        },
+        "presentation": {
+          "$ref": "notification-rendering-definition-types.schema.json#/$defs/authoringSelection"
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

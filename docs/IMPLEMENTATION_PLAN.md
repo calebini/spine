@@ -1,7 +1,7 @@
 # Spine Implementation Plan
 
 Role: Roadmap rationale and delivery history; current task status lives in [BACKLOG.md](BACKLOG.md)
-Last updated: 2026-10-04 (rendering integration amendment draft)
+Last updated: 2026-10-04 (rendering integration ratification and successor contracts)
 
 This is a non-normative delivery plan. The specifications and machine-readable contracts remain authoritative.
 
@@ -50,10 +50,11 @@ their feature-specific contract and verification requirements.
 ## Accepted Design: Facet-Aware Notification Rendering (SPINE-032–035)
 
 SPINE-042 closed the final machine-contract minor with a clean bounded consistency
-recheck. SPINE-043 drafts the [integration amendment](../specs/notification-rendering-integration.md)
-and source-only integration matrix. Sequence: review/ratify the amendment, codify
-successor authoring/evidence/cursor schemas and computed fixtures, audit the resulting
-package, then implement one end-to-end authoring/worker/readback slice. Existing
+recheck. SPINE-043 drafted the [integration amendment](../specs/notification-rendering-integration.md);
+SPINE-048 closed its buildability recheck with no findings. SPINE-049 ratifies the
+design and codifies source-only successor authoring/evidence/cursor schemas and computed
+fixtures. Next audit that resulting machine-contract package, then implement one
+end-to-end authoring/worker/readback slice after authorization. Existing
 ordinary output, policy-specific work identity and source-only activation fences are
 preserved. Schema-18 location protection is already delivered locally; broader
 protected-location sharing, new web family exposure and pack adoption remain separate.

@@ -1,0 +1,9 @@
+{
+  "readback_contract": "spine.notification-profile-readback.v2",
+  "archetype_assignment": null,
+  "application": null,
+  "pinned_notification_profile_revision_id": null,
+  "current_notification_profile_revision_id": null,
+  "upgrade_available": false,
+  "effective_policy_diverged": false
+}

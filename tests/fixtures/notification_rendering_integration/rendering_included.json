@@ -1,0 +1,130 @@
+{
+  "rendering_contract": "spine.notification-rendering.v2",
+  "notification_rendering_id": "notification_rendering_4d271cfd4353b28ab8169f9a51adb473095ba159f3f1dd51b51b1bf318c82e32",
+  "base_rendering": {
+    "notification_rendering_id": "notification_rendering_1795dfcd831e5949e05fbb94178147c92cd5dcdee32e610adaf0e591d745eeb9",
+    "attempt_id": "attempt-vector-1",
+    "work_instance_id": "work-vector-1",
+    "notification_opportunity_id": "opportunity-vector-1",
+    "notification_intent_id": "intent-vector-1",
+    "item_id": "item-vector-1",
+    "rendered_item_version": "3",
+    "rendering_contract": "spine.notification-rendering.v1",
+    "rendering_profile": "spine.notification-rendering.concise-en-ca.v1",
+    "input_normalization_version": "spine.notification-rendering-input.v1",
+    "canonical_json_version": "spine.canonical-json.v1",
+    "rendering_input_hash": "2b7d8b15076e8c51131f272c04a97bc330b80241a10055cb5c335d4e7ad74038",
+    "rendered_content_hash": "82594c2ac2cb52663ff507e76b6c4b691f06493c17ddcfe3682fde69934e4096",
+    "body_text": "Reminder: Flight to Paris in 2 hours",
+    "phrase_kind": "future_relative",
+    "attempted_at_utc": "2026-08-23T18:00:00Z",
+    "target_scheduled_fact": "2026-08-23T20:00:00Z",
+    "target_at_utc": "2026-08-23T20:00:00Z",
+    "display_time_basis": "instant_utc",
+    "display_timezone": "UTC",
+    "delta_seconds": "7200",
+    "created_at_utc": "2026-08-23T18:00:00Z",
+    "source_input": {
+      "attempt_id": "attempt-vector-1",
+      "attempted_at_utc": "2026-08-23T18:00:00Z",
+      "work_instance_id": "work-vector-1",
+      "notification_opportunity_id": "opportunity-vector-1",
+      "notification_intent_id": "intent-vector-1",
+      "item_id": "item-vector-1",
+      "rendered_item_version": "3",
+      "item_type": "event",
+      "title": "Flight to Paris",
+      "anchor_role": "event_start",
+      "target_scheduled_fact": "2026-08-23T20:00:00Z",
+      "target_at_utc": "2026-08-23T20:00:00Z",
+      "display_time_basis": "instant_utc",
+      "display_timezone": "UTC",
+      "timezone_database_version": null,
+      "primary_location": null
+    },
+    "phrase_facts": {
+      "normalized_title": "Flight to Paris",
+      "location_clause": "",
+      "delta_seconds": "7200",
+      "display_minutes": "120",
+      "duration": "2 hours"
+    },
+    "primary_location": null
+  },
+  "details": {
+    "contract_version": "spine.notification-rendering-details-evidence.v1",
+    "attempt_id": "attempt-vector-1",
+    "base_rendering_input_hash": "2b7d8b15076e8c51131f272c04a97bc330b80241a10055cb5c335d4e7ad74038",
+    "base_rendered_content_hash": "82594c2ac2cb52663ff507e76b6c4b691f06493c17ddcfe3682fde69934e4096",
+    "rendered_item_version": "3",
+    "policy_id": "notification_policy_example",
+    "policy_version": "3",
+    "definition": {
+      "notification_rendering_definition_id": "notification_rendering_definition_02f257fab5ae9d05c29ad78672208f2329671a72dbb76fa6773c9623950fa1fe",
+      "notification_rendering_definition_revision_id": "notification_rendering_definition_revision_e0ba4b36ee5a68085a16c17068ce0091ef1fc0834da7cd9fbcf7c55302dddc52"
+    },
+    "definition_hash": "6d8aaffc80a2e54efa76fcd02be0a1f65881e111f5902b8fd271a6ae0a7d5fdb",
+    "disclosure_authorization_id": "notification_rendering_disclosure_53174c12223c65f3cbbe0e1d4b55897790ebf9b1671bb26893448c843c713737",
+    "disclosure_scope_hash": "a588d9a8b3304e77047eba1c1e380c53242f3f67aae121832b4da70974966334",
+    "authorization_state": "active",
+    "effective_selection_keys": [
+      "departure",
+      "flight",
+      "terminal"
+    ],
+    "destination": {
+      "recipient": {
+        "kind": "subject_group",
+        "group_id": "example-group"
+      },
+      "delivery_target_id": "delivery_target_example",
+      "channel": "whatsapp",
+      "adapter_name": "openclaw",
+      "destination_source": "delivery_target",
+      "target_ref": "example-group-not-a-real-route"
+    },
+    "selections": [
+      {
+        "selection_key": "flight",
+        "outcome": "included",
+        "value": "AC872",
+        "source": {
+          "facet_key": "flight_details",
+          "facet_schema_revision_id": "facet_schema_revision_flight_v1",
+          "archetype_facet_binding_id": "archetype_facet_binding_flight",
+          "field_key": "flight_number"
+        }
+      },
+      {
+        "selection_key": "terminal",
+        "outcome": "included",
+        "value": "1",
+        "source": {
+          "facet_key": "flight_details",
+          "facet_schema_revision_id": "facet_schema_revision_flight_v1",
+          "archetype_facet_binding_id": "archetype_facet_binding_flight",
+          "field_key": "terminal"
+        }
+      },
+      {
+        "selection_key": "departure",
+        "outcome": "included",
+        "value": "Toronto Pearson",
+        "source": {
+          "facet_key": "flight_details",
+          "facet_schema_revision_id": "facet_schema_revision_flight_v1",
+          "archetype_facet_binding_id": "archetype_facet_binding_flight",
+          "field_key": "departure_airport",
+          "location_id": "location_airport"
+        }
+      }
+    ],
+    "outcome": "details_included",
+    "body_text": "Reminder: Flight to Paris in 2 hours · Flight: AC872 · Terminal: 1 · Departure: Toronto Pearson",
+    "input_hash": "475996f59d21955614713753ba77b6422b7fcfa831f3937a770122c594949511",
+    "content_hash": "4f0044af1de50557be68549a5ac39d475041f4d9df6a29b5b7b029a69d7aa975"
+  },
+  "rendering_input_hash": "090512d3af9c83a6c705ad85b5b04ddbf66919061fe6bae700e2ac6189bfeaa8",
+  "rendered_content_hash": "e86f61e82ca344345b89a6812f8d639a405dd6ed0f143d0f961cd0f5d68c2973",
+  "body_text": "Reminder: Flight to Paris in 2 hours · Flight: AC872 · Terminal: 1 · Departure: Toronto Pearson"
+}

@@ -1,0 +1,20 @@
+{
+  "command": "reminder.edit",
+  "request": {
+    "command_id": "direct-edit-example",
+    "actor_subject_id": "subject_agent",
+    "item_id": "item-example",
+    "target_version": "2",
+    "updated_at_utc": "2035-02-01T12:00:01Z",
+    "notification_intent_id": "intent-example",
+    "notification_policy_id": "policy-old",
+    "patch": {
+      "notification": {
+        "authoring_contract": "spine.notification-schedule-authoring.v2",
+        "presentation": {
+          "kind": "ordinary"
+        }
+      }
+    }
+  }
+}

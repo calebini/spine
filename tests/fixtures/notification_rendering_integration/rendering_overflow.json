@@ -1,0 +1,108 @@
+{
+  "rendering_contract": "spine.notification-rendering.v2",
+  "notification_rendering_id": "notification_rendering_f304464e47f9571c881204c7802456087eaaf902c9a4f83f217546fb14b14798",
+  "base_rendering": {
+    "notification_rendering_id": "notification_rendering_318a947195e7f4378fae2d43278d1fdfd11806b726557099f9f2861bc117cf91",
+    "attempt_id": "attempt-vector-1",
+    "work_instance_id": "work-vector-1",
+    "notification_opportunity_id": "opportunity-vector-1",
+    "notification_intent_id": "intent-vector-1",
+    "item_id": "item-vector-1",
+    "rendered_item_version": "3",
+    "rendering_contract": "spine.notification-rendering.v1",
+    "rendering_profile": "spine.notification-rendering.concise-en-ca.v1",
+    "input_normalization_version": "spine.notification-rendering-input.v1",
+    "canonical_json_version": "spine.canonical-json.v1",
+    "rendering_input_hash": "03639c26865cf030bae4d2e9a352d23e05395da198af13537d1e79932b272a55",
+    "rendered_content_hash": "386709c1eb9954846eeb64b27504075fc9c07ada402c02b1fa69dca071c9cdc9",
+    "body_text": "Reminder: Flight xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx in 2 hours",
+    "phrase_kind": "future_relative",
+    "attempted_at_utc": "2026-08-23T18:00:00Z",
+    "target_scheduled_fact": "2026-08-23T20:00:00Z",
+    "target_at_utc": "2026-08-23T20:00:00Z",
+    "display_time_basis": "instant_utc",
+    "display_timezone": "UTC",
+    "delta_seconds": "7200",
+    "created_at_utc": "2026-08-23T18:00:00Z",
+    "source_input": {
+      "attempt_id": "attempt-vector-1",
+      "attempted_at_utc": "2026-08-23T18:00:00Z",
+      "work_instance_id": "work-vector-1",
+      "notification_opportunity_id": "opportunity-vector-1",
+      "notification_intent_id": "intent-vector-1",
+      "item_id": "item-vector-1",
+      "rendered_item_version": "3",
+      "item_type": "event",
+      "title": "Flight xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+      "anchor_role": "event_start",
+      "target_scheduled_fact": "2026-08-23T20:00:00Z",
+      "target_at_utc": "2026-08-23T20:00:00Z",
+      "display_time_basis": "instant_utc",
+      "display_timezone": "UTC",
+      "timezone_database_version": null,
+      "primary_location": null
+    },
+    "phrase_facts": {
+      "normalized_title": "Flight xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+      "location_clause": "",
+      "delta_seconds": "7200",
+      "display_minutes": "120",
+      "duration": "2 hours"
+    },
+    "primary_location": null
+  },
+  "details": {
+    "contract_version": "spine.notification-rendering-details-evidence.v1",
+    "attempt_id": "attempt-vector-1",
+    "base_rendering_input_hash": "03639c26865cf030bae4d2e9a352d23e05395da198af13537d1e79932b272a55",
+    "base_rendered_content_hash": "386709c1eb9954846eeb64b27504075fc9c07ada402c02b1fa69dca071c9cdc9",
+    "rendered_item_version": "3",
+    "policy_id": "notification_policy_example",
+    "policy_version": "3",
+    "definition": {
+      "notification_rendering_definition_id": "notification_rendering_definition_02f257fab5ae9d05c29ad78672208f2329671a72dbb76fa6773c9623950fa1fe",
+      "notification_rendering_definition_revision_id": "notification_rendering_definition_revision_e0ba4b36ee5a68085a16c17068ce0091ef1fc0834da7cd9fbcf7c55302dddc52"
+    },
+    "definition_hash": "6d8aaffc80a2e54efa76fcd02be0a1f65881e111f5902b8fd271a6ae0a7d5fdb",
+    "disclosure_authorization_id": "notification_rendering_disclosure_53174c12223c65f3cbbe0e1d4b55897790ebf9b1671bb26893448c843c713737",
+    "disclosure_scope_hash": "a588d9a8b3304e77047eba1c1e380c53242f3f67aae121832b4da70974966334",
+    "authorization_state": "active",
+    "effective_selection_keys": [
+      "departure",
+      "flight",
+      "terminal"
+    ],
+    "destination": {
+      "recipient": {
+        "kind": "subject_group",
+        "group_id": "example-group"
+      },
+      "delivery_target_id": "delivery_target_example",
+      "channel": "whatsapp",
+      "adapter_name": "openclaw",
+      "destination_source": "delivery_target",
+      "target_ref": "example-group-not-a-real-route"
+    },
+    "selections": [
+      {
+        "selection_key": "flight",
+        "outcome": "suffix_overflow"
+      },
+      {
+        "selection_key": "terminal",
+        "outcome": "suffix_overflow"
+      },
+      {
+        "selection_key": "departure",
+        "outcome": "suffix_overflow"
+      }
+    ],
+    "outcome": "suffix_overflow",
+    "body_text": "Reminder: Flight xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx in 2 hours",
+    "input_hash": "e677ffd3ec1b9fcdbc1432916f4b700c7defc6bb15150e1438d32f70dfdcd0b8",
+    "content_hash": "c4c907e8e30a956fa682a1ad25d2738e367f047032854612e402f829b8f85117"
+  },
+  "rendering_input_hash": "1fae110efe7f65cf9eebf7c7d8e82d4cf12141bf7a358603a9f18b94dc3f6292",
+  "rendered_content_hash": "acbd56e64a0cee0583be438d8ffcca4e401e8735d3307299b37641443711679c",
+  "body_text": "Reminder: Flight xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx in 2 hours"
+}

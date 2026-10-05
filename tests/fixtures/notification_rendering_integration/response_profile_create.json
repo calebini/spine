@@ -1,0 +1,19 @@
+{
+  "ok": true,
+  "command": "notification_profile.create",
+  "response_contract": "spine.notification-profiles.v2",
+  "effect": "notification_profile_created",
+  "notification_profile_id": "profile-example",
+  "notification_profile_revision_id": "revision-example",
+  "revision_number": "1",
+  "status": "active",
+  "normalized_revision_hash": "dfde522127e4cdb593d0946e8ea04a0b82692b43db2de933b80fc47bf415816e",
+  "receipt": {
+    "command_receipt_id": "receipt-example",
+    "command_id": "command-example",
+    "effect": "notification_profile_created",
+    "semantic_facts_hash": "036d030445d89c3bca7804fec6b020b625df927e23a19d164466e71f5bb2f858",
+    "created_at_utc": "2035-02-01T12:00:01Z"
+  },
+  "profile_key": "appointment_standard"
+}

@@ -1,0 +1,15 @@
+{
+  "contract_version": "spine.notification-rendering-cursor.v1",
+  "ledger_instance_id": "ledger-test",
+  "key_generation": "generation-test-1",
+  "command": "notification_rendering_definition.list",
+  "catalog_generation": "7",
+  "last_id": "definition-test",
+  "issued_at_utc": "2026-10-04T12:00:00Z",
+  "expires_at_utc": "2026-10-04T12:15:00Z",
+  "access_epoch": null,
+  "access_valid_until_utc": null,
+  "query_hash": "7c6cce2c44fe9858dc83169e5aa0a42459edc8b64ae7fef1b5bae82ff0802c95",
+  "context_hash": "bd335d4270a6e46e0ddb48c16c4b21def0df05a21f18c0cef29519aba16d5938",
+  "access_hash": "88744fdc92ffbdefbbc0ecaa4d7d8adcafc6f0bfd9910e22cafc9633a4a5a04a"
+}

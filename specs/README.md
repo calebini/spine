@@ -35,7 +35,7 @@ Current spec surface:
 - `schedule-primary-location.md`: implemented primary-location authoring, mutation, readback, builder pass-through, and operator projections on scheduled events and tasks
 - `notification-rendering.md`: implemented schema-9 deterministic ordinary-reminder prose and immutable per-attempt rendering evidence
 - [notification-rendering-definitions.md](notification-rendering-definitions.md): accepted v1.0 design for owner-scoped facet detail rendering, exact policy selection, disclosure and attempt evidence; initial machine contracts/fixtures specified, not implemented
-- [notification-rendering-integration.md](notification-rendering-integration.md): draft storage, authoring/evidence successors, policy-specific continuity, permissions and bounded catalog-read integration; not ratified or implemented
+- [notification-rendering-integration.md](notification-rendering-integration.md): ratified storage, authoring/evidence successors, policy-specific continuity, permissions and bounded catalog-read integration; source-only machine contracts and computed fixtures, not implemented
 - `notification-profiles.md`: implemented dynamic item-archetype catalog, reusable versioned notification profiles, deterministic scoped defaults, and snapshot application
 - `owner-scope-discovery.md`: implemented bounded read contract for discovering canonical system, subject, and subject-group owner scopes without raw SQL
 - `identity-and-access.md`: protected authentication/delegation architecture preserved as deferred; immediate trusted multi-operator scope is identified separately; not implemented

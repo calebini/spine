@@ -1,6 +1,6 @@
 # Spine Backlog
 
-Last updated: 2026-10-04
+Last updated: 2026-10-05
 
 This is the single work queue for Spine development. The
 [implementation plan](IMPLEMENTATION_PLAN.md) explains roadmap direction and delivery
@@ -35,9 +35,104 @@ status labels in the same change. Routine task updates do not change spec author
 
 ## Current specification follow-up
 
+### SPINE-050 — Review rendering integration successor machine contracts
+
+**Status:** Manual corrections complete — focused recheck pending (2026-10-05).
+**Dependencies:** SPINE-049 ratification and source-only contract codification.
+**Scope:** One reviewer-only Whetstone audit-change with the built-in consistency
+profile and GPT-6.1 Sol. Review successor schema/spec agreement, version/decoder
+boundaries, computed evidence, cursor/config semantics, fixture coverage and exclusion
+from runtime/web activation. Existing dependencies are read-only comparison context.
+**Package:** [Audit notes](../whetstone_runs/notification-rendering-integration-machine-contract-audit-001/audit-notes.md)
+enumerate 103 source/context files plus the notes. Local prepared-inputs.json pins the
+current uncommitted source bytes and HEAD; no commit is implied by staging.
+**Acceptance:** Verify exact model/profile/inventory, review findings and boundary
+verdict, and prove source hashes unchanged. Known RI runtime obligations remain pending.
+**Evidence:** One consistency audit with GPT-6.1 Sol returned `needs_revision`:
+0 blocker, 3 major, 2 minor; `boundary_preserved=false` because the successor
+application/readback projection drops required existing selection/composition evidence.
+Other findings: profile-list request/response caps disagree (500 versus 100),
+schedule-create failure schemas disagree, schedule-update dry-run marker is too broad,
+and overflow-vector candidate inputs are disconnected from its omission decision.
+[Report](../whetstone_runs/notification-rendering-integration-machine-contract-audit-001/change_audit/change_audit_report.md)
+and [feedback](../whetstone_runs/notification-rendering-integration-machine-contract-audit-001/change_audit/change_audit_feedback.json).
+At audit completion all 103 source hashes and approved notes remained unchanged;
+manifest inventory, model/profile and report-to-brief hash verified. The original
+audit artifacts remain immutable evidence of the pre-patch package.
+**Manual correction:** Accepted all five findings. Restored the 500-entry profile-list
+response cap, required application scope-chain/revision-hash/overlay evidence (also
+embedded in readback), reused the shared schedule-create failure schema, restricted
+schedule-update dry_run to optional true, and derived overflow suffix/outcomes from
+explicit normalized candidate selections before stripping private values/sources.
+Added default-profile overlay/readback, permission-denied and limit-101 fixtures;
+tests cover 100/101/500/501 page limits, missing evidence, all shared failure codes,
+success dry-run markers, and overflow versus fitting suffixes/preserved omissions.
+Section 11 states the preserved evidence and wire domains; no product scope change.
+**Verification:** 183 contract tests and 1,139 subtests passed; Ruff, web-contract
+sync --check, 154 local Markdown links and git diff --check passed. All 20 existing
+schema dependency/comparison files in the audited package remain byte-identical.
+Runtime source, schema activation and pending RI-01–RI-14 obligations are unchanged.
+**Next:** Focused recheck with fresh exact-package approval; no new audit performed,
+implementation readiness or convergence claim.
+**Boundary:** The operator approved the exact 103-file package for the completed
+review and subsequently authorized targeted manual fixes. No runtime implementation,
+SQL migration, Editor/convergence, new audit, commit, push or deployment.
+
+### SPINE-049 — Ratify rendering integration and codify successors
+
+**Status:** Done — ratified and source-only successor contracts codified on 2026-10-04.
+**Dependencies:** SPINE-048 clean bounded buildability recheck; logical rendering family.
+**Scope:** Ratify the reviewed integration design; add source-only successor wire,
+cursor/config schemas, registry and computed reference fixtures with contract tests.
+Preserve all deployed contracts, historical decoders and pending runtime obligations.
+**Acceptance:** Closed schema validation, independently recomputed hashes/cursor vectors,
+negative fixtures, source-only packaging/activation guards, links and diff hygiene.
+No runtime feature implementation, SQL migration, Whetstone run, commit or push.
+
+**Outcome:** Integration v1.0 accepted after SPINE-048; logical and persistence owners
+unchanged. Added 18 successor schemas, an exact source-only registry and fixture
+manifest, 44 positive/negative wire examples, 34 computed canonical-hash vectors,
+two signed cursor vectors, and an independently checked overflow example. V1
+historical profile decoding and ordinary rendering remain explicit. Closed the direct
+reminder edit wrapper, profile application/readback projection, cursor config domains,
+standard failures and dry-run markers without changing any deployed schema or command.
+All 14 RI stateful families remain pending, not counted as executed reference proofs.
+
+**Verification:** 180 contract/regression tests and 1,123 subtests passed. Exact fixture
+regeneration, independent canonical hashes/HMACs, negative wire cases, reference cursor
+fences, historical decoding, nested attempt evidence and nonactivation checks pass.
+Ruff, packaged-web synchronization, 226 local Markdown targets and diff hygiene pass.
+Only test/reference machinery and the build-time exclusion list changed outside
+specification/contract/tracking artifacts. Existing SPINE-048 closeout edits preserved.
+
+**Next:** Bounded review of this successor machine-contract package, then separately
+authorized authoring/worker/readback implementation with migration and concurrency
+oracles. No product decision remains open in this codification; runtime activation,
+web exposure and deployment remain unperformed and separately controlled.
+
+### SPINE-048 — Rendering setup ordering recheck
+
+**Status:** Done — reviewer-only recheck passed on 2026-10-04; zero findings,
+boundary preserved. Bounded evidence only; not ratification or runtime qualification.
+**Dependencies:** SPINE-047 correction committed at `59f3a1e`.
+**Scope:** One reviewer-only buildability audit with GPT-6.1 Sol, focused on audit-002
+R1-01: command-local materialization, operational exclusion, failure/resumption and
+interleaving oracles. No new scheduler behavior or reopening unrelated closed findings.
+**Package:** [Exact seven-file scope and notes](../whetstone_runs/notification-rendering-integration-contract-audit-003/audit-notes.md).
+**Acceptance:** Inspect verdict and preservation, verify hashes/model/profile, record
+closure or remaining findings. No source edits or runtime changes authorized.
+**Evidence:** [Report](../whetstone_runs/notification-rendering-integration-contract-audit-003/change_audit/change_audit_report.json)
+and [feedback](../whetstone_runs/notification-rendering-integration-contract-audit-003/change_audit/change_audit_feedback.json).
+Verified exact seven-file inventory, GPT-6.1 Sol/buildability, source/notes hashes and
+report/brief binding; all sources unchanged. Audit-002's delivery-ordering residual
+has no remaining finding in this focused recheck. No Editor, commit or push.
+**Next:** Operator ratification of the integration draft, then successor wire/cursor
+schemas and computed fixtures before runtime implementation; no further audit started.
+
 ### SPINE-047 — Qualify staged rendering setup ordering
 
-**Status:** Done — manual spec-only correction on 2026-10-04; not re-audited.
+**Status:** Done — manual spec-only correction on 2026-10-04; focused recheck passed
+under SPINE-048. Ratification remains separate.
 **Dependencies:** SPINE-046 residual R1-01.
 **Scope:** Command-local materialization semantics, explicit operational exclusion
 for strict setup ordering, and scheduler-interleaving verification obligations.
@@ -71,7 +166,8 @@ Exact 16-file scope, source/notes hashes, report brief hash and GPT-6.1 Sol/buil
 verified. Reviewer confirms the ownership path, revision guard and required-status
 corrections; one directly introduced delivery-ordering claim remains unsound.
 **Follow-up:** Section 3.3/matrix/RI-03/tests manually qualified under SPINE-047.
-The audit verdict remains evidence about the pre-patch draft; no recheck yet.
+The audit verdict remains evidence about the pre-patch draft; SPINE-048 subsequently
+passed its focused recheck of the residual correction.
 
 ### SPINE-045 — Rendering integration audit corrections
 

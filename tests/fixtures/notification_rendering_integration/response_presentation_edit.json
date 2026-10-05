@@ -1,0 +1,108 @@
+{
+  "ok": true,
+  "command": "schedule.update",
+  "response_contract": "spine.schedule-update-response.v3",
+  "effect": "schedule_updated",
+  "command_id": "schedule-update-title-reconcile-001",
+  "command_receipt_id": "command_receipt_schedule_update_title_reconcile_001",
+  "audit_id": "audit_schedule_update_title_reconcile_001",
+  "item_id": "item_recurring_event",
+  "item_type": "event",
+  "target_version": "4",
+  "current_version": "5",
+  "truth_changed": true,
+  "work_changed": false,
+  "changed_dimensions": [
+    "policy_presentations"
+  ],
+  "scheduled_time": {
+    "anchor_id": "anchor_recurring_event_current",
+    "time_basis": "local_instant",
+    "local_date": "2035-02-14",
+    "local_time": "11:00:00",
+    "timezone": "America/Toronto",
+    "timezone_database_version": "2035a",
+    "resolution_kind": "unambiguous",
+    "utc_instant": "2035-02-14T16:00:00Z",
+    "offset_seconds": "-18000"
+  },
+  "recurrence": {
+    "recurrence_set_id": "recurrence_set_recurring_event",
+    "recurrence_revision_id": "recurrence_revision_recurring_event_004",
+    "revision_number": "2",
+    "normalized_recurrence_set_hash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+    "diagnostics": []
+  },
+  "policies": [
+    {
+      "policy_key": "countdown",
+      "notification_intent_id": "notification_intent_countdown",
+      "notification_policy_id": "notification_policy_countdown_v5",
+      "notification_schedule_id": "notification_schedule_countdown_v5",
+      "normalized_notification_schedule_hash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+      "status": "active",
+      "effect": "retained",
+      "presentation": {
+        "kind": "definition",
+        "definition": {
+          "notification_rendering_definition_id": "notification_rendering_definition_02f257fab5ae9d05c29ad78672208f2329671a72dbb76fa6773c9623950fa1fe",
+          "notification_rendering_definition_revision_id": "notification_rendering_definition_revision_e0ba4b36ee5a68085a16c17068ce0091ef1fc0834da7cd9fbcf7c55302dddc52"
+        },
+        "disclosure_authorization_id": "notification_rendering_disclosure_53174c12223c65f3cbbe0e1d4b55897790ebf9b1671bb26893448c843c713737",
+        "disclosure_scope_hash": "a588d9a8b3304e77047eba1c1e380c53242f3f67aae121832b4da70974966334",
+        "effective_selection_keys": [
+          "departure",
+          "flight",
+          "terminal"
+        ],
+        "origin": {
+          "kind": "direct"
+        }
+      },
+      "presentation_hash": "2527952995b07a5713b59eaa815c8a5433b0fb8bc0838aec074381e739d5bfca"
+    }
+  ],
+  "disabled_notification_intent_ids": [],
+  "work_reconciliation": {
+    "state": "reconciled",
+    "cancelled_work_instance_ids": [],
+    "retained_work_instance_ids": [
+      "work_current_eligible_001"
+    ],
+    "protected_stale_work_instance_ids": [],
+    "created_work_instance_ids": []
+  },
+  "materialization": {
+    "mode": "none",
+    "state": "not_requested",
+    "opportunity_count": "0",
+    "work_instance_count": "0",
+    "opportunity_work": [],
+    "work_instance_ids": []
+  },
+  "phases": {
+    "truth": "updated",
+    "provenance": "retained",
+    "opportunities": "not_requested",
+    "work": "reconciled",
+    "delivery": "not_attempted"
+  },
+  "archetype_action": "retain",
+  "notification_profile_action": "retain",
+  "receipt": {
+    "receipt_contract": "spine.schedule-update-receipt.v3",
+    "command_receipt_id": "command_receipt_schedule_update_title_reconcile_001",
+    "effect": "schedule_updated",
+    "semantic_facts_hash": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+    "created_at_utc": "2035-02-11T12:00:00Z"
+  },
+  "presentation_changes": [
+    {
+      "source_policy_id": "notification_policy_countdown_v4",
+      "policy_id": "notification_policy_countdown_v5",
+      "before_hash": "6d5522cfdf85172ff7f5409081477e09a4ed3ac6c1e5cbb5a4a070d143a1e3f9",
+      "after_hash": "2527952995b07a5713b59eaa815c8a5433b0fb8bc0838aec074381e739d5bfca"
+    }
+  ],
+  "notification_profile": null
+}

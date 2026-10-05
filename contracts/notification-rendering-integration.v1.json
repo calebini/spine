@@ -1,6 +1,6 @@
 {
   "contract_version": "spine.notification-rendering-integration.v1",
-  "status": "draft_specification_only",
+  "status": "specified_not_implemented",
   "normative_source": "specs/notification-rendering-integration.md",
   "logical_owner": "specs/notification-rendering-definitions.md",
   "storage_owner": "specs/STORAGE_ATOMICITY_SPEC.md",
@@ -16,11 +16,11 @@
     "rendering": "spine.notification-rendering.v2"
   },
   "gate_status": {
-    "physical_storage_migration_rollback": "draft_section_5_and_9",
-    "versioned_profile_schedule_policy_and_attempt_envelopes": "draft_sections_2_3_6_successor_schemas_pending",
-    "presentation_identity_and_policy_specific_work_continuity": "draft_section_4",
-    "permission_resolver_and_location_release_mapping": "draft_section_7_protected_locations_remain_denied",
-    "authenticated_catalog_cursor_and_index_plans": "draft_section_8_payload_schema_and_vectors_pending",
+    "physical_storage_migration_rollback": "specified_section_5_and_9",
+    "versioned_profile_schedule_policy_and_attempt_envelopes": "specified_sections_2_3_6_successor_schemas_codified",
+    "presentation_identity_and_policy_specific_work_continuity": "specified_section_4",
+    "permission_resolver_and_location_release_mapping": "specified_section_7_protected_locations_remain_denied",
+    "authenticated_catalog_cursor_and_index_plans": "specified_section_8_payload_schema_and_vectors_codified",
     "runtime_capability_activation_and_stateful_conformance": "pending_runtime",
     "facet_referenced_location_freeze_migration_and_fs14": "implemented_schema_18_separate_prerequisite"
   },
@@ -145,8 +145,14 @@
     ],
     "status_required": true,
     "status_domains": {
-      "notification_rendering_definition.list": ["active", "retired"],
-      "notification_rendering_disclosure.list": ["active", "revoked"]
+      "notification_rendering_definition.list": [
+        "active",
+        "retired"
+      ],
+      "notification_rendering_disclosure.list": [
+        "active",
+        "revoked"
+      ]
     },
     "invalid_status_precedes_cursor_processing": true,
     "unfiltered_lists": false,
@@ -178,12 +184,12 @@
       "RI-14": "readback_and_packaging"
     },
     "pending_before_runtime": [
-      "amendment_review_and_ratification",
-      "complete_successor_wire_schemas",
-      "cursor_payload_and_configuration_schemas",
-      "computed_preimage_vectors",
+      "successor_machine_contract_review",
       "executable_stateful_fixture_implementation",
       "release_runtime_and_web_activation_decision"
     ]
-  }
+  },
+  "ratified_at": "2026-10-04",
+  "successor_registry": "contracts/notification-rendering-integration-contract-registry.v1.json",
+  "fixture_manifest": "contracts/notification-rendering-integration-fixture-manifest.json"
 }

@@ -1,26 +1,29 @@
 # Notification Rendering Integration
 
-Status: Draft v0.3 — proposed integration amendment; not ratified or implemented
+Status: Accepted v1.0 — ratified specification; not implemented
 Created: 2026-10-04
+Ratified: 2026-10-04 — operator approval after bounded buildability recheck 003
 Scope: Persistence, authoring, continuity, attempt evidence, permissions and bounded reads
 
 ## 1. Authority and delivery boundary
 
 [Rendering definitions](notification-rendering-definitions.md) remains the accepted
-logical owner. This leaf proposes the engineering closure of its Section 12 gates;
+logical owner. This leaf specifies the engineering closure of its Section 12 gates;
 it does not change the accepted product decisions. [Storage and atomicity](STORAGE_ATOMICITY_SPEC.md)
 remains the Spine-wide persistence owner. [Notifications](notifications.md),
 [ordinary rendering](notification-rendering.md), [profiles](notification-profiles.md)
 and [permissions](permissions.md) retain their respective authority.
 
 The clean machine-contract audits establish consistency of the existing source-only
-family, not acceptance of this amendment. Runtime 0.8.3/schema 18 implements only the
+family. Integration buildability recheck 003 passed with zero findings and preserved
+boundaries; subsequent operator ratification accepts this design, not runtime behavior.
+Runtime 0.8.3/schema 18 implements only the
 facet-location prerequisite. No migration number, package release, new web route or
 implemented capability is assigned here. No existing closed schema is extended in
 place. [The integration matrix](../contracts/notification-rendering-integration.v1.json)
-is a source-only companion; full successor wire schemas and runtime proofs remain
-required before activation. Draft provisions below use MUST to specify the proposed
-implementation, not to claim present behavior.
+is a source-only companion. Section 11 codifies successor wire contracts and reference
+fixtures; their review and executable runtime proofs remain required before activation.
+Normative provisions below specify future implementation, not present behavior.
 
 Preserve: ordinary reminder bytes and v1 hashes; one work/opportunity identity per
 logical reminder; policy-specific ancestry even for shared intents; current facet
@@ -33,7 +36,7 @@ general automation, new authentication or shared-location catalog is introduced.
 Reserve these successors. They are not added to compiled runtime declarations,
 packaged web registries or capabilities by this document.
 
-| Surface | Proposed successor | Integration delta |
+| Surface | Specified successor | Integration delta |
 | --- | --- | --- |
 | Profile create/revise/show/list and revision content | `spine.notification-profiles.v2` | Optional template rendering reference, exact revision decoder |
 | Profile application/readback | `spine.notification-profile-application.v2`, `spine.notification-profile-readback.v2` | Per-policy presentation pins and separate presentation hash |
@@ -544,8 +547,8 @@ null when no temporal transition exists. It limits expiry to the next temporal a
 transition. Continuation verifies access_hash against these authenticated payload facts,
 then recomputes authority at current time, checks current epoch/context and rejects an
 expired transition bound. It does not compare a fresh evaluation timestamp with the
-old one. All token field
-types/domains and tampering vectors must be closed in the later cursor schema.
+old one. Section 11 and the cursor schemas close token field domains and reference
+vectors; stateful permission and catalog fences remain runtime obligations.
 
 Malformed/MAC/query/expired/source/context mismatch is stale_cursor without payload
 release; missing key/config or capacity is environment_failure. Revalidate current
@@ -614,14 +617,130 @@ normal current-policy rendering with no duplicate delivery. Also cover exclusion
 through explicit step 4, failed setup retaining prior commits, and opportunity expiry
 without grace extension. Source-only consistency checks do not execute these oracles.
 
-Before implementation, review/ratify this amendment, codify complete successor schemas,
-cursor config/payload and computed vectors, update the reference registry/fixture
-manifest, and audit those artifacts. Do not count a JSON obligation as execution.
+The amendment is ratified and Section 11 supplies the source-only successor schemas,
+cursor config/payload and computed vectors with a registry/fixture manifest. Audit
+those artifacts before implementation. Do not count a JSON obligation as execution.
 Then implement one environment-sized slice spanning authoring through attempt/readback,
 with staged activation only after the stateful, migration and regression tests pass.
 
-No new product decision is presumed. This draft deliberately preserves trusted-local
+No new product decision is presumed. This design deliberately preserves trusted-local
 location access and the protected transport's existing denial. Broader cross-owner
 release, shared-location permissions, pack installation and web exposure are separate
 choices, not silently settled here. Review may identify a genuine tradeoff to take
 back to the operator; none of these deferrals licenses weakening existing protection.
+
+## 11. Successor machine contracts and reference fixtures
+
+The [integration registry](../contracts/notification-rendering-integration-contract-registry.v1.json)
+is the source-only index of exact request, response and embedded contracts. The
+[fixture manifest](../contracts/notification-rendering-integration-fixture-manifest.json)
+distinguishes wire validation, computed reference proofs and pending stateful oracles.
+These files are excluded from packaged web contracts and implemented declarations.
+No existing schema, compiled registry, CLI selector or SQL migration is activated here.
+
+Successor requests use their exact Section 2 contract_version, including the new
+required selector on schedule.show v2; direct authoring uses authoring_contract.
+The exact direct-create wrapper is notification as before, now using authoring v2.
+The v2 direct-edit wrapper is patch.notification, a partial object requiring
+authoring_contract; it may carry target, schedule, late_handling and presentation.
+Omitted fields retain current values. Recipient/channel/route patch fields retain
+their existing outer positions. Flattened timing fields cannot be mixed into this
+new wrapper. A selector-only notification object performs no notification change;
+existing no-op/replay rules apply. Old direct command envelopes remain unchanged.
+Create/update responses and receipt_contract use matching v3 suffixes
+(`spine.schedule-create-response.v3`, `spine.schedule-create-receipt.v3`,
+`spine.schedule-update-response.v3`, `spine.schedule-update-receipt.v3`). Existing
+effects, replay semantics and standard command failure envelopes remain unchanged;
+detail selection additionally permits the logical rendering error codes. Command
+failures use the registry's shared standard failure envelope; dry-run failures carry
+dry_run=true. All successor success projections, including schedule-create/update v3,
+profile v2 and schedule-show v2, likewise permit only the optional dry_run=true marker,
+not false. No schema rejection is a substitute for
+fresh ownership/grant validation.
+Presentation edits report changed_dimensions=policy_presentations when changed, an empty list on
+no-op, and required presentation_changes (empty if none). Each new policy projection
+includes presentation and presentation_hash, including ordinary policies.
+
+Profile create/revise/show/list v2 use the closed successor schemas. V2 read records
+project a normalized owner object and selected revision envelope rather than raw SQL
+joins. revision_contract selects the historical v1 or v2 content decoder; old hashes
+are never recomputed as v2. V2 normalization preserves existing timing normalization,
+sorts compatible_item_types and templates by template_key, and inserts explicit
+ordinary rendering for omission. Hash each template without derived fields first;
+the complete normalized revision includes those normalized_template_hash values.
+Catalog IDs, row indexes and timestamps do not enter the revision-content preimage.
+Profile-list v2 retains the existing 1–500 request limit and a maximum 500-entry
+response; the separate rendering-definition/disclosure catalog's 100-entry bound
+does not apply to notification-profile lists.
+
+Application v2 is a closed projection of a persisted selected-profile application,
+not a replacement plan or an instruction to select a profile. It carries explicit
+application_contract, existing application/profile/revision/binding IDs, selection
+mode, scope_chain, normalized_profile_revision_hash, suppress_template_keys,
+replacements, custom_additions, ordinary effective-policy hash,
+effective_presentation_set_hash and policy
+mappings ordered by notification_policy_id. Each mapping retains policy_origin and
+source_key as well as the resolved presentation/hash. No selected profile means null
+application, including custom-only policies; those policies still expose presentation
+through ordinary policy projections. Schedule create/update notification_profile is
+this application projection or null. Full schedule.show uses readback v2 with nullable
+application, nullable pinned/current revision IDs, and the existing upgrade/divergence
+booleans. With no application both IDs are null and both booleans false; otherwise
+the pinned ID equals application's revision and upgrade_available compares the two.
+Archetype assignment remains a nullable, closed projection with assignment/item/version,
+archetype/revision, selection-source/source-ref and creator/time facts; no nested raw
+catalog join is exposed. Historical revision content retains normalized template hashes.
+
+Application evidence preserves the accepted selection/composition snapshot, not a
+fresh resolution against today's catalog. scope_chain is the ordered unique owner
+chain (one through eight) actually searched for archetype_default, whose binding ID
+is required; explicit selection records an empty chain and null binding. Owner
+objects use the profile owner's closed wire shape. normalized_profile_revision_hash
+is the pinned revision's stored hash using its original v1/v2 decoder, never a v2
+rehash of historical v1 content. The three overlay arrays are always present, empty
+when unused: sorted unique suppress_template_keys, replacements ordered uniquely by
+template_key with complete normalized schedule/late_handling, and custom_additions
+ordered uniquely by policy_key with complete normalized schedule/late_handling.
+They retain the profile composition contract's bounds and semantics; the projection
+calls the stored additions facts custom_additions to match the authoring contract.
+Readback embeds this same evidence, including its scope chain and binding, rather
+than discarding it. Copy-forward/direct edits preserve that snapshot and report
+divergence by the existing rules, not by rewriting original composition facts.
+
+Schema validation alone cannot enforce ordering, unique policy/source addresses,
+grant availability, current ancestry, cross-object equality, page fences or hash
+recomputation. The manifest names reference oracles for the pure checks. Ledger,
+permission, transaction and lifecycle checks remain mandatory runtime validation.
+Rendering v2 must bind the same attempt/item version as its v1 base and detail evidence,
+use details.body_text as final body, and verify all nested hashes before persistence.
+Omission of details after selection remains a v2 envelope with no private source/value
+facts in omitted selections; wholly unselected ordinary rendering stays v1.
+
+### 11.1 Cursor configuration and exact scalar domains
+
+The separate protected config file has exactly contract_version
+`spine.notification-rendering-cursor-config.v1`, key_id, key_generation,
+ledger_instance_id and secret_hex. It reuses the facet configuration's deployment
+lifecycle, not its file shape or key. One active key is supported; key_id and
+key_generation are opaque 1–64 ASCII alphanumeric/underscore/hyphen tokens. The
+secret is 32–64 cryptographically random bytes represented as lowercase hex. Fixture
+keys are public test values and MUST NOT be provisioned. Config ledger_instance_id
+must match the actual ledger; missing/invalid/mismatched config fails environment_failure.
+Config is protected deployment input, never request JSON, receipt or log content.
+
+catalog_generation and non-null access_epoch are canonical positive decimal strings,
+bounded by 9223372036854775807; JSON-schema length is only the first bound. UTC timestamps
+are real Gregorian seconds in YYYY-MM-DDTHH:MM:SSZ format, without fractions, offsets
+or leap seconds. All three cursor hashes are lowercase SHA-256 over the exact canonical
+preimages in Section 8. context.mode is trusted_local or permission_enforced; the
+latter requires non-null account_id and subject_id and its resolver-provided audience.
+Trusted-local access has null epoch/valid_until; permission-enforced access has a
+positive epoch and optional transition bound. Cross-object mode/access checks are
+semantic constraints, not grounds for weakening admission.
+
+Continuation requires issued_at <= now < expires_at <= issued_at+900 seconds; expiry
+must also be <= any non-null access_valid_until. Reject noncanonical base64url or
+payload bytes, not just bad MACs. Verify the MAC before trusting payload facts, then
+compare command, query, context, ledger/key/catalog generation and current access
+epoch/time fence. No token renewal on continuation. The reference vectors exercise
+these pure decisions, not database permission resolution or a running cursor service.

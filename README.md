@@ -362,7 +362,8 @@ Still deliberately separate or in design:
 - opt-in [facet-aware notification rendering definitions](specs/notification-rendering-definitions.md)
   supplied as configuration by operators or packs; ratified design and initial machine
   contracts/fixtures, not implemented; the [integration amendment](specs/notification-rendering-integration.md)
-  is a draft covering persistence, authoring, delivery continuity and evidence;
+  is ratified with source-only successor schemas and computed fixtures for persistence,
+  authoring, delivery continuity and evidence; runtime activation remains pending;
 - canonical archival and retention policy for long-lived ledgers;
 - broader external projection adapters;
 - production qualification across sustained load and failure campaigns;

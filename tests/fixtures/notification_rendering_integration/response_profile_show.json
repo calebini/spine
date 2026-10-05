@@ -1,0 +1,52 @@
+{
+  "ok": true,
+  "command": "notification_profile.show",
+  "response_contract": "spine.notification-profiles.v2",
+  "notification_profile": {
+    "notification_profile_id": "profile-example",
+    "owner": {
+      "owner_kind": "subject",
+      "owner_subject_id": "subject_owner"
+    },
+    "profile_key": "appointment_standard",
+    "display_name": "Appointment standard",
+    "description": "One day before",
+    "status": "active",
+    "current_revision_id": "revision-example",
+    "revision": {
+      "notification_profile_revision_id": "revision-example",
+      "revision_number": "2",
+      "revision_contract": "spine.notification-profiles.v2",
+      "normalized_revision_hash": "dfde522127e4cdb593d0946e8ea04a0b82692b43db2de933b80fc47bf415816e",
+      "content": {
+        "compatible_item_types": [
+          "event"
+        ],
+        "templates": [
+          {
+            "template_key": "day_before",
+            "schedule": {
+              "kind": "once",
+              "at": {
+                "kind": "target_offset",
+                "offset_basis": "elapsed",
+                "offset_seconds": "-86400"
+              }
+            },
+            "late_handling": {
+              "kind": "skip"
+            },
+            "rendering": {
+              "kind": "definition",
+              "definition": {
+                "notification_rendering_definition_id": "notification_rendering_definition_02f257fab5ae9d05c29ad78672208f2329671a72dbb76fa6773c9623950fa1fe",
+                "notification_rendering_definition_revision_id": "notification_rendering_definition_revision_e0ba4b36ee5a68085a16c17068ce0091ef1fc0834da7cd9fbcf7c55302dddc52"
+              }
+            },
+            "normalized_template_hash": "767aea675f91719c3574baf19657c8cc8d99c9cce70cacf71f97fb9d29774c17"
+          }
+        ]
+      }
+    }
+  }
+}

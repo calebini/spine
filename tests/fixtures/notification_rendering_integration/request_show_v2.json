@@ -1,0 +1,9 @@
+{
+  "contract_version": "spine.schedule-show.v2",
+  "item_id": "item-example",
+  "include": [
+    "policies",
+    "attempts",
+    "notification_profile"
+  ]
+}

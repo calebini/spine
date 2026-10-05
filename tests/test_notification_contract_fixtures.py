@@ -1,6 +1,7 @@
 import unittest
 from pathlib import Path
 
+from scripts.sync_web_contracts import SOURCE_ONLY_SCHEMAS
 from tests.test_recurrence_contract_fixtures import (
     _collect_refs,
     _is_valid,
@@ -156,6 +157,7 @@ def _schemas() -> dict[str, dict[str, object]]:
         path.name: _load_json(path)
         for path in sorted(SCHEMA_DIR.glob("notification-*.schema.json"))
         if not path.name.startswith(("notification-profile-", "notification-rendering-definition-"))
+        and path.name not in SOURCE_ONLY_SCHEMAS
     }
 
 

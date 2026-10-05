@@ -1,0 +1,236 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cortext.local/spine/contracts/schemas/notification-rendering-cursor.schema.json",
+  "title": "Spine notification-rendering-cursor (source only)",
+  "$ref": "#/$defs/payload",
+  "$defs": {
+    "token": {
+      "type": "string",
+      "maxLength": 4096,
+      "pattern": "^nrc1\\.[A-Za-z0-9_-]{1,64}\\.[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]{43}(?![\\s\\S])"
+    },
+    "payload": {
+      "type": "object",
+      "required": [
+        "contract_version",
+        "ledger_instance_id",
+        "key_generation",
+        "command",
+        "query_hash",
+        "context_hash",
+        "access_hash",
+        "catalog_generation",
+        "last_id",
+        "issued_at_utc",
+        "expires_at_utc",
+        "access_epoch",
+        "access_valid_until_utc"
+      ],
+      "properties": {
+        "contract_version": {
+          "const": "spine.notification-rendering-cursor.v1"
+        },
+        "ledger_instance_id": {
+          "$ref": "notification-types.schema.json#/$defs/id"
+        },
+        "key_generation": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]{1,64}(?![\\s\\S])"
+        },
+        "command": {
+          "enum": [
+            "notification_rendering_definition.list",
+            "notification_rendering_disclosure.list"
+          ]
+        },
+        "query_hash": {
+          "$ref": "notification-types.schema.json#/$defs/sha256"
+        },
+        "context_hash": {
+          "$ref": "notification-types.schema.json#/$defs/sha256"
+        },
+        "access_hash": {
+          "$ref": "notification-types.schema.json#/$defs/sha256"
+        },
+        "catalog_generation": {
+          "type": "string",
+          "pattern": "^[1-9][0-9]{0,18}(?![\\s\\S])"
+        },
+        "last_id": {
+          "$ref": "notification-types.schema.json#/$defs/id"
+        },
+        "issued_at_utc": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])T([01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]Z(?![\\s\\S])"
+        },
+        "expires_at_utc": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])T([01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]Z(?![\\s\\S])"
+        },
+        "access_epoch": {
+          "oneOf": [
+            {
+              "type": "string",
+              "pattern": "^[1-9][0-9]{0,18}(?![\\s\\S])"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "access_valid_until_utc": {
+          "oneOf": [
+            {
+              "type": "string",
+              "format": "date-time",
+              "pattern": "^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])T([01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]Z(?![\\s\\S])"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "query": {
+      "type": "object",
+      "required": [
+        "owner",
+        "status",
+        "limit"
+      ],
+      "properties": {
+        "owner": {
+          "$ref": "notification-profile-types.schema.json#/$defs/owner"
+        },
+        "status": {
+          "enum": [
+            "active",
+            "retired",
+            "revoked"
+          ]
+        },
+        "limit": {
+          "type": "string",
+          "pattern": "^(?:[1-9]|[1-9][0-9]|100)(?![\\s\\S])"
+        }
+      },
+      "additionalProperties": false
+    },
+    "context": {
+      "type": "object",
+      "required": [
+        "mode",
+        "account_id",
+        "subject_id",
+        "audience",
+        "ledger_instance_id"
+      ],
+      "properties": {
+        "mode": {
+          "enum": [
+            "trusted_local",
+            "permission_enforced"
+          ]
+        },
+        "account_id": {
+          "oneOf": [
+            {
+              "$ref": "notification-types.schema.json#/$defs/id"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "subject_id": {
+          "oneOf": [
+            {
+              "$ref": "notification-types.schema.json#/$defs/id"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "audience": {
+          "$ref": "notification-types.schema.json#/$defs/id"
+        },
+        "ledger_instance_id": {
+          "$ref": "notification-types.schema.json#/$defs/id"
+        }
+      },
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "mode": {
+                "const": "trusted_local"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "account_id": {
+                "type": "null"
+              },
+              "subject_id": {
+                "type": "null"
+              },
+              "audience": {
+                "const": "trusted_local_full_scope"
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "account_id": {
+                "$ref": "notification-types.schema.json#/$defs/id"
+              },
+              "subject_id": {
+                "$ref": "notification-types.schema.json#/$defs/id"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "access": {
+      "type": "object",
+      "required": [
+        "access_epoch",
+        "valid_until_utc"
+      ],
+      "properties": {
+        "access_epoch": {
+          "oneOf": [
+            {
+              "type": "string",
+              "pattern": "^[1-9][0-9]{0,18}(?![\\s\\S])"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "valid_until_utc": {
+          "oneOf": [
+            {
+              "type": "string",
+              "format": "date-time",
+              "pattern": "^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])T([01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]Z(?![\\s\\S])"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

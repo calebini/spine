@@ -1,0 +1,124 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cortext.local/spine/contracts/schemas/notification-profile-readback-v2.schema.json",
+  "title": "Spine notification-profile-readback-v2 (specified, not implemented)",
+  "type": "object",
+  "required": [
+    "readback_contract",
+    "application",
+    "pinned_notification_profile_revision_id",
+    "current_notification_profile_revision_id",
+    "upgrade_available",
+    "effective_policy_diverged",
+    "archetype_assignment"
+  ],
+  "properties": {
+    "readback_contract": {
+      "const": "spine.notification-profile-readback.v2"
+    },
+    "application": {
+      "oneOf": [
+        {
+          "$ref": "notification-profile-application-v2.schema.json"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "pinned_notification_profile_revision_id": {
+      "oneOf": [
+        {
+          "$ref": "notification-types.schema.json#/$defs/id"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "current_notification_profile_revision_id": {
+      "oneOf": [
+        {
+          "$ref": "notification-types.schema.json#/$defs/id"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "upgrade_available": {
+      "type": "boolean"
+    },
+    "effective_policy_diverged": {
+      "type": "boolean"
+    },
+    "archetype_assignment": {
+      "oneOf": [
+        {
+          "type": "object",
+          "required": [
+            "item_archetype_assignment_id",
+            "item_id",
+            "item_version",
+            "item_archetype_id",
+            "item_archetype_revision_id",
+            "selection_source",
+            "source_ref",
+            "created_by_subject_id",
+            "created_by_command_id",
+            "created_at_utc"
+          ],
+          "properties": {
+            "item_archetype_assignment_id": {
+              "$ref": "notification-types.schema.json#/$defs/id"
+            },
+            "item_id": {
+              "$ref": "notification-types.schema.json#/$defs/id"
+            },
+            "item_version": {
+              "$ref": "notification-types.schema.json#/$defs/decimalPositive"
+            },
+            "item_archetype_id": {
+              "$ref": "notification-types.schema.json#/$defs/id"
+            },
+            "item_archetype_revision_id": {
+              "$ref": "notification-types.schema.json#/$defs/id"
+            },
+            "selection_source": {
+              "enum": [
+                "operator_explicit",
+                "agent_selected",
+                "imported"
+              ]
+            },
+            "source_ref": {
+              "oneOf": [
+                {
+                  "type": "string",
+                  "minLength": 1
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "created_by_subject_id": {
+              "$ref": "notification-types.schema.json#/$defs/id"
+            },
+            "created_by_command_id": {
+              "$ref": "notification-types.schema.json#/$defs/id"
+            },
+            "created_at_utc": {
+              "$ref": "notification-types.schema.json#/$defs/utcTimestamp"
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "additionalProperties": false
+}

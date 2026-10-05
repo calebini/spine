@@ -1,0 +1,10 @@
+{
+  "ok": false,
+  "command": "schedule.create",
+  "dry_run": true,
+  "error": {
+    "code": "rendering_disclosure_unavailable",
+    "field": "rendering_applications",
+    "message": "Selected details require an adopted item owner."
+  }
+}

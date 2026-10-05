@@ -3,7 +3,7 @@
 Status: Accepted logical design v1.0; initial machine contracts specified, not implemented
 Ratified: 2026-10-03 after focused bounded consistency recheck
 Created: 2026-10-03
-Updated: 2026-10-04 — draft integration leaf added; accepted v1.0 semantics unchanged
+Updated: 2026-10-04 — integration leaf ratified and successors codified; logical v1.0 unchanged
 Scope: Owner-scoped declarative rendering definitions, explicit facet-field selection,
 profile/policy snapshot application, disclosure boundaries, and attempt-time evidence
 
@@ -34,9 +34,9 @@ Existing authorities remain:
   reading data and releasing it to a destination.
 - [STORAGE_ATOMICITY_SPEC.md](STORAGE_ATOMICITY_SPEC.md): persistence and transaction
   authority; this logical specification does not select a ledger schema number.
-- [notification-rendering-integration.md](notification-rendering-integration.md): draft
+- [notification-rendering-integration.md](notification-rendering-integration.md): ratified
   physical storage, versioned authoring/evidence, continuity, access and cursor closure.
-  It is not yet ratified or an implemented extension to current interfaces.
+  Successor schemas/fixtures are source-only, not implemented extensions to current interfaces.
 - [agent-command-contract.md](agent-command-contract.md): command admission,
   version checks, audit, receipts, replay and dry-run.
 
@@ -508,10 +508,10 @@ added machine contracts. Surface any new product tradeoff rather than silently
 inferring a broader grant.
 
 Initial source-only schemas, registry and fixtures are specified in Section 13.
-The [integration amendment](notification-rendering-integration.md) now proposes the
-remaining engineering decisions below. Review/ratification, complete successor wire
-schemas and computed/stateful fixtures remain gates; the leaf's publication alone
-does not close them or revise this accepted logical contract.
+The ratified [integration amendment](notification-rendering-integration.md) specifies
+the remaining engineering decisions below with source-only successor wire schemas
+and computed fixtures. Review of those new artifacts and executable stateful proofs
+remain gates; ratification does not implement them or revise this logical contract.
 Before runtime work, close exact policy-presentation identity and continuity rules,
 versioned profile/schedule/policy/attempt integration, permission/disclosure resolver
 mappings, authenticated catalog cursors, physical query plans and storage/migration/
