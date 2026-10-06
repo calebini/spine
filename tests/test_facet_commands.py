@@ -560,6 +560,8 @@ class FacetCommandTests(unittest.TestCase):
         work = dict(self.db.execute("SELECT * FROM work_instances ORDER BY eligible_at_utc LIMIT 1").fetchone())
         start_work(self.db, work_instance_id=work["work_instance_id"], started_at_utc=work["eligible_at_utc"])
         render = resolve_notification_rendering(self.db, work_row=work, attempt_id="render-race", attempted_at_utc=work["eligible_at_utc"])
+        route = self.db.execute("SELECT target_ref,channel FROM delivery_targets WHERE delivery_target_id=?",
+                                (work["delivery_target_id"],)).fetchone()
         self.call("item.facets.update", self.update(event["item_id"], schema, binding))
         arguments = {
             "work_instance_id": work["work_instance_id"],
@@ -567,7 +569,7 @@ class FacetCommandTests(unittest.TestCase):
             "adapter_name": "openclaw",
             "idempotency_key": "render-race",
             "attempted_at_utc": work["eligible_at_utc"],
-            "request_envelope": {"body": render.body_text},
+            "request_envelope": {"body": render.body_text, "target_ref": route["target_ref"], "channel_hint": route["channel"]},
             "notification_rendering": render,
         }
         before = all_rows(self.db)

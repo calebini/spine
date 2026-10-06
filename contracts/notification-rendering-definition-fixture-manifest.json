@@ -1,6 +1,6 @@
 {
   "schema_version": "spine.notification-rendering-definition-fixtures.v1",
-  "status": "specified_not_implemented",
+  "status": "implemented_local",
   "registry": "contracts/notification-rendering-definition-contract-registry.v1.json",
   "fixtures": [
     {

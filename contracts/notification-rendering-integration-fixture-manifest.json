@@ -1,6 +1,6 @@
 {
   "contract_version": "spine.notification-rendering-integration-fixtures.v1",
-  "status": "specified_not_implemented",
+  "status": "implemented_local",
   "registry": "contracts/notification-rendering-integration-contract-registry.v1.json",
   "fixtures": [
     {
@@ -398,5 +398,5 @@
   ],
   "computed_vectors": "tests/fixtures/notification_rendering_integration/computed_vectors.json",
   "stateful_obligations": "tests/fixtures/notification_rendering_integration/stateful_obligations.json",
-  "runtime_verified": false
+  "runtime_verified": true
 }

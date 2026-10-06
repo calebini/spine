@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cortext.local/spine/contracts/schemas/notification-rendering-v2.schema.json",
+  "title": "Spine notification-rendering-v2 (specified, not implemented)",
+  "type": "object",
+  "required": [
+    "rendering_contract",
+    "notification_rendering_id",
+    "base_rendering",
+    "details",
+    "rendering_input_hash",
+    "rendered_content_hash",
+    "body_text"
+  ],
+  "properties": {
+    "rendering_contract": {
+      "const": "spine.notification-rendering.v2"
+    },
+    "notification_rendering_id": {
+      "$ref": "notification-types.schema.json#/$defs/id"
+    },
+    "base_rendering": {
+      "$ref": "notification-rendering.schema.json"
+    },
+    "details": {
+      "$ref": "notification-rendering-definition-evidence.schema.json"
+    },
+    "rendering_input_hash": {
+      "$ref": "notification-types.schema.json#/$defs/sha256"
+    },
+    "rendered_content_hash": {
+      "$ref": "notification-types.schema.json#/$defs/sha256"
+    },
+    "body_text": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1024
+    }
+  },
+  "additionalProperties": false
+}

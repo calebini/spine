@@ -467,7 +467,7 @@ class IndependentReadAssemblyTests(unittest.TestCase):
         from spine.ledger.migrate import _apply_migration
         _apply_migration(self.db, version=15, migration_name="0015_independent_read_indexes.sql")
         self.assertEqual(before, [line for line in self.db.iterdump() if line.startswith("INSERT") and "ledger_schema" not in line])
-        self.assertEqual(verify_runtime_schema(self.db).schema_version, 18)
+        self.assertEqual(verify_runtime_schema(self.db).schema_version, 19)
         self.assertTrue(self.sections(item)["work"]["entries"])
 
     def test_applied_profile_is_pinned_and_catalog_denial_omits_indivisible_evidence(self):

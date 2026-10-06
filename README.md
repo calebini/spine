@@ -51,11 +51,20 @@ allowed to quietly become canonical.
 
 ## What Works Today
 
-Spine `0.8.3` is an implemented alpha; its scheduling core is exercised in a staging
-agent environment. The current SQLite ledger schema is version `18`. The trusted multi-operator backend is also running in staging on `cortext1`, with
+Spine `0.9.0` is an implemented alpha; its scheduling core is exercised in a staging
+agent environment. The current SQLite ledger schema is version `19`. The trusted multi-operator backend is also running in staging on `cortext1`, with
 operator testing through the connected [Kinflow frontend](../kinflow-web-ui/README.md).
 Concrete operator-reported work is tracked in the [backlog](docs/BACKLOG.md);
 this checkout version is not a deployment claim.
+
+Version 0.9.0 adds facet-aware notification details: versioned rendering definitions,
+reusable destination-scoped disclosure, policy presentation pins, and exact attempt
+evidence. Ordinary reminders remain unchanged. The local CLI gains v3 schedule
+authoring, v2 profiles/full readback, and definition/disclosure commands; current web
+and compact families stay unchanged. See [the operator setup guide](docs/NOTIFICATION_RENDERING_GUIDE.md).
+Schema 19 requires an offline migration with all writers stopped and a verified backup.
+An older runtime refuses the upgraded ledger; rollback pairs that backup with matching
+old code and preserves the newer ledger. This checkout is not a staging deployment claim.
 
 Version 0.8.3 adds the schema-17-to-18 location-freeze migration: locations referenced
 only by facets now have the same canonical-field protection as primary locations,

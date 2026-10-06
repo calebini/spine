@@ -12,7 +12,7 @@ from jsonschema import Draft202012Validator, FormatChecker
 from referencing import Registry, Resource
 
 from spine import IMPLEMENTED_CONTRACT_VERSIONS
-from spine.commands.registry import COMMAND_RUNTIME_CONTRACT_REGISTRY
+from spine.commands.registry import COMMAND_RUNTIME_CONTRACT_REGISTRY, frozen_web_required_contract_versions
 from spine.core.hashing import hash_canonical_json
 from spine.web.errors import WebError
 
@@ -62,7 +62,10 @@ def registry() -> tuple[dict[str, dict[str, Any]], str]:
             "schedule.cancel": "item_edit_stop_intent",
             "task.complete": "item_edit_stop_intent",
         }
-        if actual is None or list(actual.required_contract_versions) != entry["required_contract_versions"]:
+        # Wire v1 stays pinned; additional local successor requirements do not
+        # extend HTTP admission. Both the pinned family and the full local
+        # runtime dependency union must still be implemented.
+        if actual is None or entry["required_contract_versions"] != list(frozen_web_required_contract_versions(command)):
             raise WebError("admission_unavailable")
         if (
             entry["resolver"] != resolvers[command]
@@ -72,7 +75,7 @@ def registry() -> tuple[dict[str, dict[str, Any]], str]:
             or entry["requires_expected_access_epoch"] != (actual.access_mode == "write")
         ):
             raise WebError("admission_unavailable")
-        if not set(entry["required_contract_versions"]) <= IMPLEMENTED_CONTRACT_VERSIONS:
+        if not set(actual.required_contract_versions) <= IMPLEMENTED_CONTRACT_VERSIONS:
             raise WebError("admission_unavailable")
     for name, digest in artifact("trusted-web-schema-pins.v1.json")["files"].items():
         raw = resources.files("spine.contracts").joinpath("web", "schemas", name).read_bytes()

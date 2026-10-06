@@ -26,6 +26,7 @@ def build_schedule_readback(
     policies_limit: int,
     work_limit: int,
     attempts_limit: int,
+    rendering_v2: bool = False,
 ) -> dict[str, Any]:
     """Build one bounded, deterministic view of schedule and delivery evidence."""
 
@@ -67,7 +68,7 @@ def build_schedule_readback(
     result: dict[str, Any] = {
         "ok": True,
         "command": "schedule.show",
-        "response_contract": "spine.schedule-show.v1",
+        "response_contract": "spine.schedule-show.v2" if rendering_v2 else "spine.schedule-show.v1",
         "item": dict(item_view),
         "scheduled_times": _scheduled_times(item, schedule_create_facts),
         "lifecycle": lifecycle,
@@ -92,6 +93,18 @@ def build_schedule_readback(
             "created_at_utc": authoring_receipt["created_at_utc"],
         }
     if "policies" in include:
+        if rendering_v2:
+            from spine.core import rendering_definitions as codec
+            from spine.ledger.rendering_definitions import load_presentation
+
+            policy_page = [
+                policy
+                | {
+                    "presentation": (presentation := load_presentation(connection, policy["notification_policy_id"])),
+                    "presentation_hash": codec.presentation_hash(presentation),
+                }
+                for policy in policy_page
+            ]
         result.update(
             {
                 "notification_policies": policy_page,
@@ -112,7 +125,7 @@ def build_schedule_readback(
     if "attempts" in include:
         result.update(
             {
-                "side_effect_attempts": [_attempt_view(connection, row) for row in attempt_page],
+                "side_effect_attempts": [_attempt_view(connection, row, rendering_v2=rendering_v2) for row in attempt_page],
                 "side_effect_attempts_count": str(sum(attempt_counts.values())),
                 "side_effect_attempts_limit": str(attempts_limit),
                 "side_effect_attempts_truncated": attempts_truncated,
@@ -150,6 +163,7 @@ def build_schedule_readback(
             connection,
             item_id=item_id,
             item_version=int(item["current_version"]),
+            rendering_v2=rendering_v2,
         )
     return result
 
@@ -159,18 +173,39 @@ def _notification_profile_projection(
     *,
     item_id: str,
     item_version: int,
+    rendering_v2: bool = False,
 ) -> dict[str, Any]:
     from spine.ledger.notification_profiles import (
         current_application,
         current_assignment,
     )
 
-    assignment = current_assignment(
-        connection, item_id=item_id, item_version=item_version
-    )
-    application = current_application(
-        connection, item_id=item_id, item_version=item_version
-    )
+    assignment = current_assignment(connection, item_id=item_id, item_version=item_version)
+    application = current_application(connection, item_id=item_id, item_version=item_version)
+    if rendering_v2:
+        from spine.services.rendering_authoring import application_projection
+
+        if assignment is not None:
+            assignment = {k: v for k, v in assignment.items() if k != "archetype"}
+            assignment["item_version"] = str(assignment["item_version"])
+        profile = application["profile"] if application is not None else None
+        current_ids = {
+            r[0]
+            for r in connection.execute(
+                "SELECT policy_id FROM notification_policies WHERE item_id=? AND version=? AND status='active'", (item_id, item_version)
+            )
+        }
+        return {
+            "readback_contract": "spine.notification-profile-readback.v2",
+            "archetype_assignment": assignment,
+            "application": application_projection(connection, item_id, item_version),
+            "pinned_notification_profile_revision_id": application["notification_profile_revision_id"] if application else None,
+            "current_notification_profile_revision_id": profile["current_revision_id"] if profile else None,
+            "upgrade_available": bool(application and application["notification_profile_revision_id"] != profile["current_revision_id"]),
+            "effective_policy_diverged": bool(
+                application and {p["notification_policy_id"] for p in application["policies"]} != current_ids
+            ),
+        }
     if application is None:
         return {
             "readback_contract": "spine.notification-profile-readback.v1",
@@ -180,11 +215,12 @@ def _notification_profile_projection(
             "effective_policy_diverged": False,
         }
     profile = application["profile"]
+    if profile["revision"].get("revision_contract") == "spine.notification-profiles.v2":
+        raise SpineValidationError("unsupported_contract_version:contract_version", "use spine.schedule-show.v2 for full profile evidence")
+    profile["revision"].pop("revision_contract", None)
     pinned_revision_id = str(application["notification_profile_revision_id"])
     current_revision_id = str(profile["current_revision_id"])
-    mapped_policy_ids = {
-        str(value["notification_policy_id"]) for value in application["policies"]
-    }
+    mapped_policy_ids = {str(value["notification_policy_id"]) for value in application["policies"]}
     current_policy_ids = {
         str(row["policy_id"])
         for row in connection.execute(
@@ -485,7 +521,7 @@ def _work_view(row: Mapping[str, Any]) -> dict[str, Any]:
     return result
 
 
-def _attempt_view(connection: sqlite3.Connection, row: Mapping[str, Any]) -> dict[str, Any]:
+def _attempt_view(connection: sqlite3.Connection, row: Mapping[str, Any], *, rendering_v2: bool = False) -> dict[str, Any]:
     result = _omit_none(
         {
             key: row.get(key)
@@ -508,7 +544,11 @@ def _attempt_view(connection: sqlite3.Connection, row: Mapping[str, Any]) -> dic
     )
     rendering = get_notification_rendering(connection, attempt_id=str(row["attempt_id"]))
     if rendering is not None:
-        result["notification_rendering"] = notification_rendering_view(rendering)
+        result["notification_rendering"] = (
+            rendering
+            if rendering_v2 and rendering["rendering_contract"] == "spine.notification-rendering.v2"
+            else notification_rendering_view(rendering)
+        )
     return result
 
 

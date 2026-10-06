@@ -1,7 +1,6 @@
-"""Internal SPINE-051 entry point, intentionally absent from runtime registries.
+"""Version-selected local rendering commands over the shared command handlers.
 
-This is not an alternate CLI/service or an admission bypass. Public activation is
-reserved for the end-to-end release after delivery and readback checkpoints.
+The frozen web registries do not expose these successor families.
 """
 
 from __future__ import annotations
@@ -20,6 +19,23 @@ from spine.services.rendering_authoring import RenderingAuthoring
 from spine.web.errors import WebError
 
 
+def accepts(command, request):
+    if command.startswith(("notification_rendering_definition.", "notification_rendering_disclosure.")):
+        return True
+    selector = request.get("contract_version")
+    if command in {"notification_profile.create", "notification_profile.revise", "notification_profile.show", "notification_profile.list"}:
+        return selector == codec.PROFILE_V2
+    if command in {"schedule.create", "schedule.update"}:
+        return selector == ("spine.schedule-create.v3" if command.endswith("create") else "spine.schedule-update.v3")
+    if command in {"reminder.create", "reminder.edit"}:
+        patch = request.get("patch")
+        notification = (
+            request.get("notification") if command.endswith("create") else (patch.get("notification") if isinstance(patch, dict) else None)
+        )
+        return isinstance(notification, dict) and notification.get("authoring_contract") == "spine.notification-schedule-authoring.v2"
+    return False
+
+
 def normalized_request(command, request):
     value = copy.deepcopy(dict(request))
     codec.bounded(value, 32768, "request")
@@ -29,7 +45,10 @@ def normalized_request(command, request):
             "compatible_item_types": list(revision.compatible_item_types),
             "templates": [{k: v for k, v in template.items() if k != "normalized_template_hash"} for template in revision.templates],
         }
-    plan = value.get("notification_plan") or value.get("patch", {}).get("notification_plan")
+    patch = value.get("patch", {})
+    if not isinstance(patch, dict):
+        codec.fail("invalid_request", "patch")
+    plan = value.get("notification_plan") or patch.get("notification_plan")
     if isinstance(plan, dict) and "rendering_applications" in plan:
         apps = plan["rendering_applications"]
         if not isinstance(apps, list) or len(apps) > 32:
@@ -38,13 +57,13 @@ def normalized_request(command, request):
             codec.exact(entry, {"source_kind", "source_key", "selection"})
             entry["selection"] = codec.normalize_selection(entry["selection"])
         apps.sort(key=lambda e: (e["source_kind"], e["source_key"]))
-    presentations = value.get("patch", {}).get("policy_presentations")
+    presentations = patch.get("policy_presentations")
     if isinstance(presentations, list):
         for entry in presentations:
             codec.exact(entry, {"notification_policy_id", "selection"})
             entry["selection"] = codec.normalize_selection(entry["selection"])
         presentations.sort(key=lambda e: e["notification_policy_id"])
-    notification = value.get("notification", value.get("patch", {}).get("notification"))
+    notification = value.get("notification", patch.get("notification"))
     if isinstance(notification, dict) and "presentation" in notification:
         notification["presentation"] = codec.normalize_selection(notification["presentation"])
     return value

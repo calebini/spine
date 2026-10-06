@@ -122,6 +122,9 @@ def handle(command: str, request: Mapping[str, Any], context: CommandContext) ->
     if context.ledger is None:
         return _error(command, "invalid_request", f"{command} requires CommandContext.ledger", "ledger")
     try:
+        from spine.commands import rendering_candidate
+        if rendering_candidate.accepts(command, request):
+            return rendering_candidate.execute(command, request, context, cursor_config=context.rendering_cursor_config)
         from spine.commands.facets import CONTRACTS as FACET_COMMANDS
         from spine.commands.facets import execute as execute_facet
         if command in FACET_COMMANDS:
@@ -660,8 +663,14 @@ def _handle_schedule_show(request: Mapping[str, Any], context: CommandContext) -
     _check_fields(
         "schedule.show",
         request,
-        {"item_id", "include", "notification_policies_limit", "work_instances_limit", "side_effect_attempts_limit"},
+        {"item_id", "include", "notification_policies_limit", "work_instances_limit", "side_effect_attempts_limit", "contract_version"},
     )
+    selector = request.get("contract_version")
+    if selector not in {None, "spine.schedule-show.v1", "spine.schedule-show.v2"}:
+        raise SpineValidationError("unsupported_contract_version:contract_version", "unsupported schedule.show contract")
+    rendering_v2 = selector == "spine.schedule-show.v2"
+    if rendering_v2 and not getattr(context.ledger, "_renderings_enabled", False):
+        raise SpineValidationError("environment_failure:ledger", "rendering integration storage is required")
     item_id = _required_str(request, "item_id")
     raw_include = request.get("include", ["policies", "work", "attempts"])
     if not isinstance(raw_include, Sequence) or isinstance(raw_include, (str, bytes, bytearray)):
@@ -705,6 +714,7 @@ def _handle_schedule_show(request: Mapping[str, Any], context: CommandContext) -
         policies_limit=policies_limit,
         work_limit=work_limit,
         attempts_limit=attempts_limit,
+        rendering_v2=rendering_v2,
     )
 
 
@@ -9473,7 +9483,7 @@ def _validation_error(command: str, exc: SpineValidationError) -> dict[str, Any]
     code = exc.code
     public, _, field = code.partition(":")
     if public in {"facet_schema_invalid", "facet_value_invalid", "facet_binding_conflict", "facet_archetype_conflict",
-                  "facet_schema_retired", "facet_reference_unavailable", "wrong_item_type"}:
+                  "facet_schema_retired", "facet_reference_unavailable", "wrong_item_type", "unsupported_contract_version"}:
         return _error(command, public, exc.message, field or "request")
     if code.startswith("runtime_failure:"):
         return _error(command, "runtime_failure", exc.message)

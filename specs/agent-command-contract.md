@@ -107,6 +107,15 @@ executor authentication. The CLI loads it from the private file selected by
 `SPINE_FACET_CURSOR_CONFIG`. The separate permission-enforced HTTP adapter is owned
 by [facet web admission](facet-web-admission.md), with its own closed eleven-command
 registry and protected cursor configuration. It does not extend existing web registries.
+The schema-19 rendering release also implements
+`notification_rendering_definition.create`, `notification_rendering_definition.publish`,
+`notification_rendering_definition.retire`, `notification_rendering_definition.show`,
+`notification_rendering_definition.list`, `notification_rendering_disclosure.provision`,
+`notification_rendering_disclosure.revoke`, `notification_rendering_disclosure.show`, and
+`notification_rendering_disclosure.list`. Their local families and exact selectors are
+owned by [rendering integration](notification-rendering-integration.md). Catalog list
+commands require protected `CommandContext.rendering_cursor_config`, loaded by the CLI
+from `SPINE_RENDERING_CURSOR_CONFIG`; this is not request identity or authentication.
 Together with the identifiers above, this is the closed implemented command set.
 
 ## 4. Common Request, Output, and Error Rules
@@ -258,6 +267,26 @@ The trusted-local facet rows additionally require the exact owning family in
 also require `spine.facet-cursor.v1`; `item.facets.update` additionally requires
 `spine.facet-notification-continuity.v1`. Every row retains the common canonical-JSON
 requirement. Their compiled mapping is `commands/registry.py`; none is a web allowlist entry.
+
+The schema-19 registry retains the prior family requirements and adds:
+
+| Commands | Additional exact local versions |
+| --- | --- |
+| Definition create/publish/retire/show | `spine.notification-rendering-definitions.v1` |
+| Definition list | `spine.notification-rendering-definitions.v1`, `spine.notification-rendering-cursor.v1` |
+| Disclosure provision/revoke/show | `spine.notification-rendering-disclosures.v1` |
+| Disclosure list | `spine.notification-rendering-disclosures.v1`, `spine.notification-rendering-cursor.v1` |
+| `notification_profile.create/revise/show/list` | `spine.notification-profiles.v2` |
+| `schedule.create` | `spine.schedule-create.v3`, `spine.schedule-create-response.v3`, `spine.schedule-create-receipt.v3`, `spine.notification-profile-application.v2` |
+| `schedule.update` | `spine.schedule-update.v3`, `spine.schedule-update-response.v3`, `spine.schedule-update-receipt.v3`, `spine.notification-profile-application.v2` |
+| `schedule.show` | `spine.schedule-show.v2`, `spine.notification-profile-readback.v2`, `spine.notification-rendering.v2` |
+| `reminder.create/edit` | `spine.notification-schedule-authoring.v2` |
+
+Every compiled command row additionally requires `spine.notification-rendering-integration.v1`.
+The registry's dependency union does not change an omitted selector or authorize a
+new HTTP payload. Frozen web registries retain their exact pre-existing family pins;
+only the enumerated local rendering additions are excluded when comparing those pins,
+and runtime admission still requires the complete compiled union to be implemented.
 
 ### 5.3 Schema-Object Manifest
 

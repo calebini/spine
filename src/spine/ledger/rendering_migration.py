@@ -1,8 +1,4 @@
-"""Offline candidate installation, deliberately absent from public migration dispatch.
-
-The complete rendering release will allocate a schema version and activate this
-candidate. Until then callers must explicitly opt in on a disposable test ledger.
-"""
+"""Atomic offline schema-19 installation and predecessor test support."""
 
 from __future__ import annotations
 
@@ -104,6 +100,23 @@ def install_candidate(db: sqlite3.Connection, *, disposable_test_ledger: bool = 
     """Atomic schema-18 candidate, never a production initialize/migrate path."""
     if not disposable_test_ledger or db.in_transaction or not isinstance(db, LedgerConnection):
         raise SpineValidationError("ledger_migration_predecessor", "candidate rendering storage requires an idle disposable test ledger")
+    if db.execute("SELECT MAX(schema_version) FROM ledger_schema").fetchone()[0] == 19:
+        verify_candidate_schema(db)
+        db.enable_renderings()
+        return
+    _install(db, fault=fault)
+
+
+def install_rendering_storage(
+    db: sqlite3.Connection, *, applied_at_utc: str, fresh: bool = False, fault: Callable[[str], None] | None = None
+) -> None:
+    """Offline schema-19 activation; all writers must be excluded by the operator."""
+    if db.in_transaction or not isinstance(db, LedgerConnection):
+        raise SpineValidationError("ledger_migration_predecessor", "rendering migration requires an idle transaction-aware ledger")
+    _install(db, applied_at_utc=applied_at_utc, fault=fault)
+
+
+def _install(db, *, applied_at_utc=None, fault=None):
     verify_runtime_schema(db, expected_version=18)
     inject = fault or (lambda stage: None)
     fk = db.execute("PRAGMA foreign_keys").fetchone()[0]
@@ -174,6 +187,10 @@ def install_candidate(db: sqlite3.Connection, *, disposable_test_ledger: bool = 
         verify_candidate_schema(db)
         invariant(not db.execute("PRAGMA foreign_key_check").fetchall(), "candidate foreign key verification failed")
         inject("verified")
+        if applied_at_utc is not None:
+            db.execute("INSERT INTO ledger_schema VALUES(19,?)", (applied_at_utc,))
+            verify_runtime_schema(db, expected_version=19)
+            inject("activation")
         db.commit()
     except BaseException:
         db.rollback()

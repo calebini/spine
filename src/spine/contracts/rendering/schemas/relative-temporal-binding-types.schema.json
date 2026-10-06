@@ -1,0 +1,161 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cortext.local/spine/contracts/schemas/relative-temporal-binding-types.schema.json",
+  "title": "Spine Relative Temporal Binding Shared Types v1",
+  "$defs": {
+    "nullableId": {
+      "oneOf": [
+        { "$ref": "notification-types.schema.json#/$defs/id" },
+        { "type": "null" }
+      ]
+    },
+    "bindingState": {
+      "enum": [
+        "retired", "snapshot_resolved", "snapshot_diverged", "target_terminal",
+        "source_terminal", "relationship_inactive", "source_unresolved",
+        "target_diverged", "stale", "current"
+      ]
+    },
+    "occurrenceSelector": {
+      "type": "object",
+      "required": ["recurrence_set_id", "segment_ref", "scheduled_fact", "source_kind", "source_precedence"],
+      "properties": {
+        "recurrence_set_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+        "segment_ref": { "type": "string", "minLength": 1 },
+        "scheduled_fact": { "type": "string", "minLength": 1 },
+        "source_kind": { "enum": ["rule", "rdate", "union"] },
+        "source_precedence": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": true
+    },
+    "bindingRevision": {
+      "type": "object",
+      "required": [
+        "temporal_binding_revision_id", "temporal_binding_id", "revision_index",
+        "source_target_version", "source_scope", "source_anchor_id",
+        "source_recurrence_revision_id", "source_occurrence_key",
+        "source_occurrence_selector_ref", "source_occurrence_provenance_id",
+        "source_scheduled_fact", "offset_basis", "offset_seconds", "resolved_source_utc",
+        "resolved_target_utc", "target_local_date", "target_local_time", "target_timezone",
+        "target_timezone_database_version", "target_item_version", "target_anchor_id",
+        "resolution_kind", "normalized_temporal_binding_revision_hash",
+        "created_by_command_id", "created_at_utc"
+      ],
+      "properties": {
+        "temporal_binding_revision_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+        "temporal_binding_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+        "revision_index": { "$ref": "notification-types.schema.json#/$defs/decimalPositive" },
+        "source_temporal_binding_revision_id": { "$ref": "#/$defs/nullableId" },
+        "source_target_version": { "$ref": "notification-types.schema.json#/$defs/decimalPositive" },
+        "source_scope": { "enum": ["item", "selected_occurrence"] },
+        "source_anchor_id": { "$ref": "#/$defs/nullableId" },
+        "source_recurrence_revision_id": { "$ref": "#/$defs/nullableId" },
+        "source_occurrence_key": { "$ref": "#/$defs/nullableId" },
+        "source_occurrence_selector_ref": { "$ref": "#/$defs/nullableId" },
+        "source_occurrence_provenance_id": { "$ref": "#/$defs/nullableId" },
+        "target_occurrence_selector": { "$ref": "#/$defs/occurrenceSelector" },
+        "source_scheduled_fact": { "type": "string", "minLength": 1 },
+        "offset_basis": { "const": "elapsed" },
+        "offset_seconds": { "$ref": "notification-types.schema.json#/$defs/signedDecimal" },
+        "resolved_source_utc": { "$ref": "notification-types.schema.json#/$defs/utcTimestamp" },
+        "resolved_target_utc": { "$ref": "notification-types.schema.json#/$defs/utcTimestamp" },
+        "target_local_date": { "$ref": "notification-types.schema.json#/$defs/localDate" },
+        "target_local_time": { "$ref": "notification-types.schema.json#/$defs/localTime" },
+        "target_timezone": { "type": "string", "minLength": 1 },
+        "target_timezone_database_version": { "type": "string", "minLength": 1 },
+        "target_item_version": { "$ref": "notification-types.schema.json#/$defs/decimalPositive" },
+        "target_anchor_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+        "resolution_kind": {
+          "enum": [
+            "initial", "target_rescheduled", "source_refreshed", "detached",
+            "source_terminal", "target_terminal", "relationship_inactive"
+          ]
+        },
+        "normalized_temporal_binding_revision_hash": { "$ref": "notification-types.schema.json#/$defs/sha256" },
+        "created_by_command_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+        "created_at_utc": { "$ref": "notification-types.schema.json#/$defs/utcTimestamp" }
+      },
+      "additionalProperties": false
+    },
+    "reconcileInputs": {
+      "type": "object",
+      "required": [
+        "temporal_binding_id", "target_temporal_binding_revision_id",
+        "source_target_version", "target_target_version", "expected_binding_state"
+      ],
+      "properties": {
+        "temporal_binding_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+        "target_temporal_binding_revision_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+        "source_target_version": { "$ref": "notification-types.schema.json#/$defs/decimalPositive" },
+        "source_recurrence_revision_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+        "target_target_version": { "$ref": "notification-types.schema.json#/$defs/decimalPositive" },
+        "expected_binding_state": { "$ref": "#/$defs/bindingState" }
+      },
+      "additionalProperties": false
+    },
+    "bindingView": {
+      "type": "object",
+      "required": [
+        "temporal_binding_id", "binding_contract", "target_item_id", "target_anchor_role",
+        "source_item_id", "source_anchor_role", "relationship_id", "binding_mode",
+        "source_terminal_behavior", "created_by_command_id", "created_by_subject_id",
+        "created_at_utc", "binding_status", "retired_at_utc", "retired_by_command_id",
+        "latest_revision", "binding_state", "reconcile_required",
+        "automatic_reconcile_eligible", "operator_decision_required", "reconcile_inputs"
+      ],
+      "properties": {
+        "temporal_binding_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+        "binding_contract": { "const": "spine.relative-temporal-binding.v1" },
+        "target_item_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+        "target_anchor_role": { "const": "task_due" },
+        "source_item_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+        "source_anchor_role": { "const": "event_start" },
+        "relationship_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+        "binding_mode": { "enum": ["snapshot", "follow_source"] },
+        "source_terminal_behavior": {
+          "oneOf": [
+            { "enum": ["cancel_target", "detach_at_last_value", "require_decision"] },
+            { "type": "null" }
+          ]
+        },
+        "created_by_command_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+        "created_by_subject_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+        "created_at_utc": { "$ref": "notification-types.schema.json#/$defs/utcTimestamp" },
+        "binding_status": { "enum": ["active", "retired"] },
+        "retired_at_utc": {
+          "oneOf": [
+            { "$ref": "notification-types.schema.json#/$defs/utcTimestamp" },
+            { "type": "null" }
+          ]
+        },
+        "retired_by_command_id": { "$ref": "#/$defs/nullableId" },
+        "latest_revision": { "$ref": "#/$defs/bindingRevision" },
+        "binding_state": { "$ref": "#/$defs/bindingState" },
+        "reconcile_required": { "type": "boolean" },
+        "automatic_reconcile_eligible": { "type": "boolean" },
+        "operator_decision_required": { "type": "boolean" },
+        "reconcile_inputs": { "$ref": "#/$defs/reconcileInputs" },
+        "current_source": { "type": "object", "additionalProperties": true }
+      },
+      "additionalProperties": false
+    },
+    "relationView": {
+      "type": "object",
+      "required": [
+        "relation_id", "source_item_id", "target_item_id", "relation_type",
+        "relation_status", "created_at_utc", "created_by_subject_id", "metadata_json"
+      ],
+      "properties": {
+        "relation_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+        "source_item_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+        "target_item_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+        "relation_type": { "enum": ["depends_on", "part_of"] },
+        "relation_status": { "enum": ["active", "inactive"] },
+        "created_at_utc": { "$ref": "notification-types.schema.json#/$defs/utcTimestamp" },
+        "created_by_subject_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+        "metadata_json": { "type": ["string", "null"] }
+      },
+      "additionalProperties": false
+    }
+  }
+}

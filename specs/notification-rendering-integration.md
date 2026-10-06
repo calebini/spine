@@ -1,6 +1,6 @@
 # Notification Rendering Integration
 
-Status: Accepted v1.0 — ratified specification; not implemented
+Status: Accepted v1.0 — implemented trusted-local in runtime 0.9.0/schema 19
 Created: 2026-10-04
 Ratified: 2026-10-04 — operator approval after bounded buildability recheck 003
 Scope: Persistence, authoring, continuity, attempt evidence, permissions and bounded reads
@@ -17,13 +17,14 @@ and [permissions](permissions.md) retain their respective authority.
 The clean machine-contract audits establish consistency of the existing source-only
 family. Integration buildability recheck 003 passed with zero findings and preserved
 boundaries; subsequent operator ratification accepts this design, not runtime behavior.
-Runtime 0.8.3/schema 18 implements only the
-facet-location prerequisite. No migration number, package release, new web route or
-implemented capability is assigned here. No existing closed schema is extended in
-place. [The integration matrix](../contracts/notification-rendering-integration.v1.json)
-is a source-only companion. Section 11 codifies successor wire contracts and reference
-fixtures; their review and executable runtime proofs remain required before activation.
-Normative provisions below specify future implementation, not present behavior.
+Runtime 0.9.0/schema 19 implements the local integration after the authoring, delivery,
+readback, migration/restore and installed-wheel checkpoints. See
+[release evidence](../docs/BACKLOG.md#spine-053--complete-rendering-readback-and-release-verification).
+The schema-18 facet-location prerequisite remains intact. No existing closed schema
+is extended in place and no new HTTP family is activated.
+[The integration matrix](../contracts/notification-rendering-integration.v1.json)
+and Section 11 identify the successor local families; activation is not a deployment
+claim or a Whetstone convergence claim.
 
 Preserve: ordinary reminder bytes and v1 hashes; one work/opportunity identity per
 logical reminder; policy-specific ancestry even for shared intents; current facet
@@ -632,11 +633,14 @@ back to the operator; none of these deferrals licenses weakening existing protec
 ## 11. Successor machine contracts and reference fixtures
 
 The [integration registry](../contracts/notification-rendering-integration-contract-registry.v1.json)
-is the source-only index of exact request, response and embedded contracts. The
+is the local index of exact request, response and embedded contracts. The
 [fixture manifest](../contracts/notification-rendering-integration-fixture-manifest.json)
-distinguishes wire validation, computed reference proofs and pending stateful oracles.
-These files are excluded from packaged web contracts and implemented declarations.
-No existing schema, compiled registry, CLI selector or SQL migration is activated here.
+distinguishes wire validation, computed reference proofs and stateful runtime evidence.
+The local schema closure is packaged separately under `spine.contracts/rendering`,
+with exact SHA-256 pins. These successor files remain excluded from packaged web
+contracts. Runtime 0.9.0 activates the local selectors and schema-19 migration together;
+frozen web families keep their exact wire prerequisites, while startup still verifies
+the complete compiled runtime dependency union.
 
 Successor requests use their exact Section 2 contract_version, including the new
 required selector on schedule.show v2; direct authoring uses authoring_contract.

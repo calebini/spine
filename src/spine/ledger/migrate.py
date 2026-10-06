@@ -120,6 +120,8 @@ def verify_schema(connection: sqlite3.Connection) -> SchemaVerificationResult:
     from spine.ledger.facets import verify_all
 
     verify_all(connection)
+    from spine.ledger.rendering_definitions import verify_deep
+    verify_deep(connection)
     return SchemaVerificationResult(
         schema_version=runtime_result.schema_version,
         table_count=runtime_result.table_count,
@@ -168,6 +170,10 @@ def main(argv: Sequence[str] | None = None) -> int:
 
 
 def _apply_migration(connection: sqlite3.Connection, *, version: int, migration_name: str) -> None:
+    if version == 19:
+        from spine.ledger.rendering_migration import install_rendering_storage
+        install_rendering_storage(connection, applied_at_utc=_utc_now())
+        return
     if version == 18:
         from spine.ledger.facet_location_migration import install_facet_location_freeze
 

@@ -703,20 +703,24 @@ def build():
         "runtime_verified": False,
     }
     matrix = load("contracts/notification-rendering-integration.v1.json")
+    # Copy release metadata from its authority; generating reference vectors
+    # never executes or certifies the runtime (computed_vectors stays false).
+    verified = matrix["verification"]["runtime_verified"]
     files[PREFIX + "stateful_obligations.json"] = {
-        "runtime_verified": False,
+        "runtime_verified": verified,
         "families": [
-            {"family": k, "oracle": v, "status": "pending_runtime"} for k, v in matrix["verification"]["required_families"].items()
+            {"family": k, "oracle": v, "status": "passed_local" if verified else "pending_runtime"}
+            for k, v in matrix["verification"]["required_families"].items()
         ],
     }
     files["contracts/notification-rendering-integration-fixture-manifest.json"] = {
         "contract_version": "spine.notification-rendering-integration-fixtures.v1",
-        "status": "specified_not_implemented",
+        "status": matrix["status"],
         "registry": "contracts/notification-rendering-integration-contract-registry.v1.json",
         "fixtures": cases,
         "computed_vectors": PREFIX + "computed_vectors.json",
         "stateful_obligations": PREFIX + "stateful_obligations.json",
-        "runtime_verified": False,
+        "runtime_verified": verified,
     }
     return files
 

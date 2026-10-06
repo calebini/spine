@@ -17,12 +17,12 @@ class RenderingIntegrationDraftTests(unittest.TestCase):
         )
         cls.spec = (ROOT / cls.matrix["normative_source"]).read_text()
 
-    def test_draft_has_no_runtime_or_packaged_activation(self):
-        self.assertEqual(self.matrix["status"], "specified_not_implemented")
-        self.assertFalse(self.matrix["runtime_activation"])
-        self.assertFalse(self.matrix["verification"]["runtime_verified"])
+    def test_release_metadata_does_not_activate_the_web_package(self):
+        self.assertEqual(self.matrix["status"], "implemented_local")
+        self.assertTrue(self.matrix["runtime_activation"])
+        self.assertTrue(self.matrix["verification"]["runtime_verified"])
         versions = {self.matrix["contract_version"], *self.matrix["proposed_successors"].values()}
-        self.assertFalse(versions & IMPLEMENTED_CONTRACT_VERSIONS)
+        self.assertTrue(versions <= IMPLEMENTED_CONTRACT_VERSIONS)
         self.assertFalse(
             (ROOT / "src/spine/contracts/web/notification-rendering-integration.v1.json").exists()
         )
@@ -85,7 +85,7 @@ class RenderingIntegrationDraftTests(unittest.TestCase):
         self.assertIn("ordinary reminder may start between any", self.spec)
         self.assertIn("before creation through presentation commit", self.spec)
         self.assertIn("Source-only consistency checks do not execute these oracles", self.spec)
-        self.assertFalse(self.matrix["verification"]["runtime_verified"])
+        self.assertTrue(self.matrix["verification"]["runtime_verified"])
 
     def test_old_profile_revision_guard_preserves_history(self):
         rule = self.matrix["authoring"]["legacy_profile_revise"]
@@ -114,14 +114,14 @@ class RenderingIntegrationDraftTests(unittest.TestCase):
                 self.assertEqual(commands[command]["properties"]["status"]["enum"], statuses)
         self.assertIn("there is no unfiltered-list mode or null-status normalization", self.spec)
 
-    def test_all_obligations_are_in_the_spec_not_claimed_as_executed(self):
+    def test_all_obligations_are_in_the_spec_with_release_evidence(self):
         families = self.matrix["verification"]["required_families"]
         self.assertEqual(set(families), {f"RI-{n:02}" for n in range(1, 15)})
         for family in families:
             self.assertIn(f"| {family} |", self.spec)
         for table in self.matrix["persistence"]["new_tables"]:
             self.assertIn(table, self.spec)
-        self.assertIn("successor_machine_contract_review", self.matrix["verification"]["pending_before_runtime"])
+        self.assertEqual(self.matrix["verification"]["pending_before_runtime"], [])
         self.assertTrue((ROOT / self.matrix["successor_registry"]).is_file())
 
 

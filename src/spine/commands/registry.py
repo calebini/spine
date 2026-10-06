@@ -39,6 +39,10 @@ _READ_COMMANDS = frozenset(
         "schedule.build",
         "schedule.show",
         "system.info",
+        "notification_rendering_definition.show",
+        "notification_rendering_definition.list",
+        "notification_rendering_disclosure.show",
+        "notification_rendering_disclosure.list",
         "web_access.plan",
         "facet_schema.show",
         "facet_schema.list",
@@ -276,12 +280,67 @@ _requirements(
 )
 
 
+_requirements(
+    {
+        "notification_rendering_definition.create",
+        "notification_rendering_definition.publish",
+        "notification_rendering_definition.retire",
+        "notification_rendering_definition.show",
+    },
+    "spine.notification-rendering-definitions.v1",
+)
+_requirements(
+    {"notification_rendering_definition.list"}, "spine.notification-rendering-definitions.v1", "spine.notification-rendering-cursor.v1"
+)
+_requirements(
+    {"notification_rendering_disclosure.provision", "notification_rendering_disclosure.revoke", "notification_rendering_disclosure.show"},
+    "spine.notification-rendering-disclosures.v1",
+)
+_requirements(
+    {"notification_rendering_disclosure.list"}, "spine.notification-rendering-disclosures.v1", "spine.notification-rendering-cursor.v1"
+)
+_SUCCESSOR_REQUIREMENTS = {
+    "schedule.create": (
+        "spine.schedule-create.v3",
+        "spine.schedule-create-response.v3",
+        "spine.schedule-create-receipt.v3",
+        "spine.notification-profile-application.v2",
+    ),
+    "schedule.update": (
+        "spine.schedule-update.v3",
+        "spine.schedule-update-response.v3",
+        "spine.schedule-update-receipt.v3",
+        "spine.notification-profile-application.v2",
+    ),
+    "schedule.show": ("spine.schedule-show.v2", "spine.notification-profile-readback.v2", "spine.notification-rendering.v2"),
+    **{
+        c: ("spine.notification-profiles.v2",)
+        for c in ("notification_profile.create", "notification_profile.revise", "notification_profile.show", "notification_profile.list")
+    },
+    **{c: ("spine.notification-schedule-authoring.v2",) for c in ("reminder.create", "reminder.edit")},
+}
+for _command, _versions in _SUCCESSOR_REQUIREMENTS.items():
+    _ADDITIONAL_REQUIREMENTS[_command] += _versions
+for _command in _ADDITIONAL_REQUIREMENTS:
+    _ADDITIONAL_REQUIREMENTS[_command] += ("spine.notification-rendering-integration.v1",)
+
+
 def _entry(command: str, additional: tuple[str, ...]) -> CommandContractEntry:
     return CommandContractEntry(
         command=command,
         access_mode="read" if command in _READ_COMMANDS else "write",
         required_contract_versions=tuple(sorted({CANONICAL_JSON_CONTRACT, *additional})),
     )
+
+
+def frozen_web_required_contract_versions(command: str) -> tuple[str, ...]:
+    """Preserve exact HTTP-family pins while admitting the larger local runtime.
+
+    Only this release's explicitly local additions are subtracted. A changed
+    prerequisite outside that closed set still invalidates the frozen registry.
+    """
+    local = {"spine.notification-rendering-integration.v1", *_SUCCESSOR_REQUIREMENTS.get(command, ())}
+    return tuple(v for v in COMMAND_RUNTIME_CONTRACT_REGISTRY[command].required_contract_versions if v not in local)
 
 
 COMMAND_RUNTIME_CONTRACT_REGISTRY: Mapping[str, CommandContractEntry] = MappingProxyType(
@@ -297,11 +356,7 @@ WORKER_COMMANDS = (
 )
 WORKER_REQUIRED_CONTRACT_VERSIONS = tuple(
     sorted(
-        {
-            version
-            for command in WORKER_COMMANDS
-            for version in COMMAND_RUNTIME_CONTRACT_REGISTRY[command].required_contract_versions
-        }
+        {version for command in WORKER_COMMANDS for version in COMMAND_RUNTIME_CONTRACT_REGISTRY[command].required_contract_versions}
         | {
             "spine.notification-rendering.v1",
             "spine.notification-rendering.concise-en-ca.v1",
@@ -317,11 +372,7 @@ def missing_runtime_contract_versions(
     implemented_versions: frozenset[str] | None = None,
 ) -> tuple[str, ...]:
     versions = IMPLEMENTED_CONTRACT_VERSIONS if implemented_versions is None else implemented_versions
-    return tuple(
-        version
-        for version in COMMAND_RUNTIME_CONTRACT_REGISTRY[command].required_contract_versions
-        if version not in versions
-    )
+    return tuple(version for version in COMMAND_RUNTIME_CONTRACT_REGISTRY[command].required_contract_versions if version not in versions)
 
 
 def missing_worker_runtime_contract_versions(

@@ -805,12 +805,23 @@ def _show_root(
     revision_id = _optional_string(request, revision_field)
     loader = load_archetype if kind == "item_archetype" else load_profile
     entry = loader(_connection(context), root_id, revision_id=revision_id)
+    if kind == "notification_profile":
+        entry = _legacy_profile(entry)
     return {
         "ok": True,
         "command": command,
         "response_contract": _CONTRACT_BY_COMMAND[command],
         kind: entry,
     }
+
+
+def _legacy_profile(entry):
+    """A frozen v1 full projection cannot label successor content as v1."""
+    revision = entry["revision"]
+    if revision.get("revision_contract") == "spine.notification-profiles.v2":
+        raise SpineValidationError("unsupported_contract_version:contract_version", "use spine.notification-profiles.v2 for this revision")
+    revision.pop("revision_contract", None)
+    return entry
 
 
 def _list_roots(
@@ -909,6 +920,8 @@ def _list_roots(
         loader(connection, str(row[id_field]))
         for row in page
     ]
+    if kind == "notification_profile":
+        entries = [_legacy_profile(entry) for entry in entries]
     next_cursor = None
     if has_more and page:
         final = page[-1]

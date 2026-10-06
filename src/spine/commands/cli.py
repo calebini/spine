@@ -37,6 +37,11 @@ EXIT_BY_ERROR = {
     "facet_archetype_conflict": 6,
     "facet_schema_retired": 2,
     "facet_reference_unavailable": 4,
+    "unsupported_contract_version": 2,
+    "rendering_definition_invalid": 2,
+    "rendering_definition_retired": 2,
+    "rendering_disclosure_unavailable": 4,
+    "rendering_disclosure_scope_mismatch": 6,
 }
 
 
@@ -118,8 +123,13 @@ def main(argv: Sequence[str] | None = None) -> int:
     try:
         direct_schedule_show = command == "schedule.show" and (args.item_id is not None or args.include is not None)
         from spine.commands.facets import CONTRACTS as FACET_COMMANDS
-        request = ({} if args.input == "-" and (command == "system.info" or direct_schedule_show)
-                   else _load_request(args.input, facet=command in FACET_COMMANDS))
+        from spine.commands.rendering_catalog import COMMANDS as RENDERING_COMMANDS
+
+        request = (
+            {}
+            if args.input == "-" and (command == "system.info" or direct_schedule_show)
+            else _load_request(args.input, facet=command in FACET_COMMANDS, rendering=command in RENDERING_COMMANDS)
+        )
         if args.item_id is not None:
             if "item_id" in request:
                 raise CliPreflightError("invalid_request", "--item-id conflicts with input item_id", "item_id")
@@ -131,7 +141,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         if args.compact and command == "schedule.show":
             raw_include = request.get("include", ["policies", "work", "attempts"])
             if isinstance(raw_include, list):
-                request["include"] = sorted(set(raw_include) | {"policies", "work"})
+                request["include"] = sorted((set(raw_include) | {"policies", "work"}) - {"attempts", "notification_profile"})
         if args.if_absent:
             request = {**request, "if_absent": True}
         if args.generate_command_id:
@@ -154,20 +164,42 @@ def main(argv: Sequence[str] | None = None) -> int:
         from spine.commands.facet_runtime import load_cursor_config
         from spine.commands.facets import PAGES
         from spine.commands.facets import WRITES as FACET_WRITES
+
         cursor_config = None
         if command in PAGES and os.environ.get("SPINE_FACET_CURSOR_CONFIG"):
             cursor_config = load_cursor_config(os.environ["SPINE_FACET_CURSOR_CONFIG"])
-        connection = _open_ledger(args.db, writable=command in WRITE_COMMANDS and (not args.dry_run or command in FACET_WRITES))
+        rendering_cursor_config = None
+        if command in {"notification_rendering_definition.list", "notification_rendering_disclosure.list"}:
+            from spine.commands.rendering_runtime import load_cursor_config as load_rendering_config
+
+            rendering_cursor_config = load_rendering_config(os.environ.get("SPINE_RENDERING_CURSOR_CONFIG", ""))
+        from spine.commands.rendering_candidate import accepts as rendering_request
+
+        connection = _open_ledger(
+            args.db,
+            writable=command in WRITE_COMMANDS and (not args.dry_run or command in FACET_WRITES or rendering_request(command, request)),
+        )
     except SpineValidationError as exc:
         code, _, field = exc.code.partition(":")
-        _dump({"ok": False, "command": command, "error": {"code": code, "message": exc.message,
-                                                       "field": field or "request"},
-               **({"dry_run": True} if args.dry_run and command in FACET_COMMANDS else {})}, pretty=args.pretty)
+        _dump(
+            {
+                "ok": False,
+                "command": command,
+                "error": {"code": code, "message": exc.message, "field": field or "request"},
+                **({"dry_run": True} if args.dry_run and command in FACET_COMMANDS else {}),
+            },
+            pretty=args.pretty,
+        )
         return EXIT_BY_ERROR.get(code, 2)
     except CliPreflightError as exc:
         _dump(
-            {"ok": False, "command": command, "error": {"code": exc.code, "message": exc.message, "field": exc.field},
-             **({"dry_run": True} if args.dry_run and command in FACET_COMMANDS else {})}, pretty=args.pretty
+            {
+                "ok": False,
+                "command": command,
+                "error": {"code": exc.code, "message": exc.message, "field": exc.field},
+                **({"dry_run": True} if args.dry_run and command in FACET_COMMANDS else {}),
+            },
+            pretty=args.pretty,
         )
         return 3
     try:
@@ -179,6 +211,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             adapter_bindings=_adapter_bindings(args),
             delivery_target_defaults=delivery_target_defaults,
             facet_cursor_config=cursor_config,
+            rendering_cursor_config=rendering_cursor_config,
         )
         response = handle(command, request, context)
         if args.compact and response.get("ok") is True:
@@ -204,7 +237,15 @@ class CliPreflightError(Exception):
 
 
 def _parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(prog="spine-command")
+    parser = argparse.ArgumentParser(
+        prog="spine-command",
+        epilog=(
+            "Facet-aware rendering: notification_rendering_definition create/publish/retire/show/list; "
+            "notification_rendering_disclosure provision/revoke/show/list. Select spine.schedule-show.v2, "
+            "spine.schedule-create.v3, spine.schedule-update.v3 or spine.notification-profiles.v2 in request contract_version. "
+            "Catalog list commands require protected SPINE_RENDERING_CURSOR_CONFIG."
+        ),
+    )
     parser.add_argument("command_words", nargs="*")
     parser.add_argument("--db")
     parser.add_argument("--input", default="-")
@@ -277,21 +318,24 @@ def _schedule_show_include(value: str) -> list[str]:
     return values
 
 
-def _load_request(input_ref: str, *, facet: bool = False) -> dict[str, Any]:
+def _load_request(input_ref: str, *, facet: bool = False, rendering: bool = False) -> dict[str, Any]:
     try:
-        if facet:
+        if facet or rendering:
+            maximum = 32768 if rendering else 1024 * 1024
+            family = "rendering" if rendering else "facet"
             if input_ref == "-":
-                text = sys.stdin.read(1024 * 1024 + 1)
+                text = sys.stdin.read(maximum + 1)
             else:
                 with Path(input_ref).open(encoding="utf-8") as stream:
-                    text = stream.read(1024 * 1024 + 1)
+                    text = stream.read(maximum + 1)
             from spine.core.facets import parse_object
-            if len(text.encode("utf-8")) > 1024 * 1024:
-                raise SpineValidationError("environment_failure:capacity", "facet request capacity exceeded")
+
+            if len(text.encode("utf-8")) > maximum:
+                raise SpineValidationError("environment_failure:capacity", f"{family} request capacity exceeded")
             try:
-                return parse_object(text or "{}", maximum=1024 * 1024)
+                return parse_object(text or "{}", maximum=maximum)
             except SpineValidationError as exc:
-                raise SpineValidationError("invalid_request:request", "invalid facet request JSON") from exc
+                raise SpineValidationError("invalid_request:request", f"invalid {family} request JSON") from exc
         text = sys.stdin.read() if input_ref == "-" else Path(input_ref).read_text(encoding="utf-8")
     except OSError as exc:
         raise CliPreflightError("invalid_request", str(exc), "input") from exc

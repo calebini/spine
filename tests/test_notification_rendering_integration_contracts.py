@@ -411,10 +411,10 @@ class RenderingIntegrationContractsTests(unittest.TestCase):
                 )
 
     def test_registry_references_nonactivation_and_pending_stateful_proofs(self):
-        self.assertEqual(self.registry["status"], "specified_not_implemented")
-        self.assertFalse(self.registry["runtime_activation"])
+        self.assertEqual(self.registry["status"], "implemented_local")
+        self.assertTrue(self.registry["runtime_activation"])
         for entry in self.registry["commands"].values():
-            self.assertNotIn(entry["contract_version"], IMPLEMENTED_CONTRACT_VERSIONS)
+            self.assertIn(entry["contract_version"], IMPLEMENTED_CONTRACT_VERSIONS)
             for field in ("request_schema", "response_schema"):
                 path, _, fragment = entry[field].partition("#")
                 schema = load(ROOT / path)
@@ -435,9 +435,9 @@ class RenderingIntegrationContractsTests(unittest.TestCase):
                     pending.extend(value)
             self.assertFalse((ROOT / "src/spine/contracts/web/schemas" / Path(path).name).exists())
         obligations = load(ROOT / self.manifest["stateful_obligations"])
-        self.assertFalse(obligations["runtime_verified"])
+        self.assertTrue(obligations["runtime_verified"])
         self.assertEqual({v["family"] for v in obligations["families"]}, {f"RI-{n:02}" for n in range(1, 15)})
-        self.assertTrue(all(v["status"] == "pending_runtime" for v in obligations["families"]))
+        self.assertTrue(all(v["status"] == "passed_local" for v in obligations["families"]))
 
 
 if __name__ == "__main__":

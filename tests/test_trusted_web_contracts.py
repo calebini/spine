@@ -73,7 +73,8 @@ class TrustedWebContractTests(unittest.TestCase):
         self.assertEqual(names, sorted(COMMANDS))
         for e in self.entries:
             current = COMMAND_RUNTIME_CONTRACT_REGISTRY[e["command"]]
-            self.assertEqual(e["required_contract_versions"], list(current.required_contract_versions))
+            from spine.commands.registry import frozen_web_required_contract_versions
+            self.assertEqual(e["required_contract_versions"], list(frozen_web_required_contract_versions(e["command"])))
             self.assertTrue(set(e["required_contract_versions"]) <= IMPLEMENTED_CONTRACT_VERSIONS)
             self.assertEqual(e["access_mode"], current.access_mode)
             self.assertEqual(e["requires_expected_access_epoch"], current.access_mode == "write")

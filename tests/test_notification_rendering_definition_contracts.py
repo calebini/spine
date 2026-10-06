@@ -118,7 +118,7 @@ class RenderingDefinitionContractTests(unittest.TestCase):
         for name, schema in self.schemas.items():
             if name.startswith(PREFIX):
                 Draft202012Validator.check_schema(schema)
-        self.assertEqual(self.manifest["status"], "specified_not_implemented")
+        self.assertEqual(self.manifest["status"], "implemented_local")
         ids, paths = [], set()
         for entry in self.manifest["fixtures"]:
             with self.subTest(fixture=entry["fixture_id"]):
@@ -129,20 +129,20 @@ class RenderingDefinitionContractTests(unittest.TestCase):
         self.assertEqual(len(ids), len(set(ids)))
         self.assertEqual(paths, set(FIXTURES.glob("*.json")))
 
-    def test_registry_has_exact_command_shapes_and_no_runtime_activation(self):
-        self.assertEqual(self.registry["status"], "specified_not_implemented")
+    def test_registry_has_exact_command_shapes_and_local_runtime_mapping(self):
+        self.assertEqual(self.registry["status"], "implemented_local")
         commands = self.schemas[COMMANDS]["$defs"]
         self.assertEqual(set(commands), set(self.registry["commands"]))
         self.assertEqual(len(commands), 9)
         for name, value in self.registry["commands"].items():
-            self.assertEqual(value["exposure"], "specified_only")
+            self.assertEqual(value["exposure"], "trusted_local")
             self.assertEqual(commands[name]["properties"]["contract_version"]["const"], value["contract_version"])
             for field in ("request_schema", "response_schema"):
                 path, fragment = value[field].split("#/$defs/")
                 self.assertIn(fragment, load(ROOT / path)["$defs"])
         runtime_registry = (ROOT / "src/spine/commands/registry.py").read_text()
         for name in commands:
-            self.assertNotIn(f'"{name}"', runtime_registry)
+            self.assertIn(f'"{name}"', runtime_registry)
         self.assertTrue(self.registry["implementation_gates"])
 
     def test_closed_command_shapes_and_bounds(self):

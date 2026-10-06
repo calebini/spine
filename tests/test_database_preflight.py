@@ -60,10 +60,12 @@ class CommandRuntimeContractRegistryTests(unittest.TestCase):
     def test_registry_is_complete_sorted_and_exact(self) -> None:
         self.assertEqual(COMMAND_RUNTIME_CONTRACT_REGISTRY_ID, "spine.command-runtime-contract-registry.v1")
         from spine.commands.facets import CONTRACTS as FACET_COMMANDS
-        self.assertEqual(len(COMMAND_RUNTIME_CONTRACT_REGISTRY), 66)
+        from spine.commands.rendering_catalog import COMMANDS as RENDERING_COMMANDS
+
+        self.assertEqual(len(COMMAND_RUNTIME_CONTRACT_REGISTRY), 75)
         self.assertEqual(
             set(COMMAND_RUNTIME_CONTRACT_REGISTRY),
-            _dispatch_commands() | set(PROFILE_COMMANDS) | set(FACET_COMMANDS),
+            _dispatch_commands() | set(PROFILE_COMMANDS) | set(FACET_COMMANDS) | set(RENDERING_COMMANDS),
         )
         expected_read_commands = {
             "agenda.show",
@@ -84,7 +86,15 @@ class CommandRuntimeContractRegistryTests(unittest.TestCase):
             "schedule.show",
             "system.info",
             "web_access.plan",
-            "facet_schema.show", "facet_schema.list", "item_archetype.facet_binding.list", "item.facets.show", "item.facets.query",
+            "facet_schema.show",
+            "facet_schema.list",
+            "item_archetype.facet_binding.list",
+            "item.facets.show",
+            "item.facets.query",
+            "notification_rendering_definition.show",
+            "notification_rendering_definition.list",
+            "notification_rendering_disclosure.show",
+            "notification_rendering_disclosure.list",
         }
         self.assertEqual(
             {command for command, entry in COMMAND_RUNTIME_CONTRACT_REGISTRY.items() if entry.access_mode == "read"},

@@ -1,0 +1,441 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cortext.local/spine/contracts/schemas/notification-rendering-definition-evidence.schema.json",
+  "title": "Opt-in rendering evidence extension v1; not the existing attempt envelope",
+  "type": "object",
+  "required": [
+    "contract_version",
+    "attempt_id",
+    "base_rendering_input_hash",
+    "base_rendered_content_hash",
+    "rendered_item_version",
+    "policy_id",
+    "policy_version",
+    "definition",
+    "definition_hash",
+    "disclosure_authorization_id",
+    "disclosure_scope_hash",
+    "authorization_state",
+    "effective_selection_keys",
+    "destination",
+    "selections",
+    "outcome",
+    "body_text",
+    "input_hash",
+    "content_hash"
+  ],
+  "properties": {
+    "contract_version": {
+      "const": "spine.notification-rendering-details-evidence.v1"
+    },
+    "attempt_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "base_rendering_input_hash": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "base_rendered_content_hash": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "rendered_item_version": {
+      "type": "string",
+      "pattern": "^[1-9][0-9]{0,18}$"
+    },
+    "policy_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "policy_version": {
+      "type": "string",
+      "pattern": "^[1-9][0-9]{0,18}$"
+    },
+    "definition": {
+      "$ref": "notification-rendering-definition-types.schema.json#/$defs/definitionReference"
+    },
+    "definition_hash": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "disclosure_authorization_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "disclosure_scope_hash": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "authorization_state": {
+      "enum": [
+        "active",
+        "revoked",
+        "unavailable",
+        "scope_mismatch"
+      ]
+    },
+    "effective_selection_keys": {
+      "type": "array",
+      "items": {
+        "$ref": "notification-rendering-definition-types.schema.json#/$defs/key"
+      },
+      "minItems": 0,
+      "maxItems": 8,
+      "uniqueItems": true
+    },
+    "destination": {
+      "$ref": "notification-rendering-definition-types.schema.json#/$defs/destination"
+    },
+    "selections": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 8,
+      "items": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "selection_key",
+              "outcome",
+              "value",
+              "source"
+            ],
+            "properties": {
+              "selection_key": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9_-]{0,63}$"
+              },
+              "outcome": {
+                "const": "included"
+              },
+              "value": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              "source": {
+                "type": "object",
+                "required": [
+                  "facet_key",
+                  "facet_schema_revision_id",
+                  "archetype_facet_binding_id",
+                  "field_key"
+                ],
+                "properties": {
+                  "facet_key": {
+                    "type": "string",
+                    "pattern": "^[a-z][a-z0-9_-]{0,63}$"
+                  },
+                  "facet_schema_revision_id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 256
+                  },
+                  "archetype_facet_binding_id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 256
+                  },
+                  "field_key": {
+                    "type": "string",
+                    "pattern": "^[a-z][a-z0-9_-]{0,63}$"
+                  },
+                  "location_id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 256
+                  }
+                },
+                "additionalProperties": false
+              }
+            },
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "required": [
+              "selection_key",
+              "outcome"
+            ],
+            "properties": {
+              "selection_key": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9_-]{0,63}$"
+              },
+              "outcome": {
+                "enum": [
+                  "not_selected",
+                  "disclosure_unavailable",
+                  "facet_missing",
+                  "schema_mismatch",
+                  "field_missing",
+                  "reference_unavailable",
+                  "invalid_text",
+                  "value_too_long",
+                  "suffix_overflow"
+                ]
+              }
+            },
+            "additionalProperties": false
+          }
+        ]
+      }
+    },
+    "outcome": {
+      "enum": [
+        "details_included",
+        "ordinary_only",
+        "suffix_overflow"
+      ]
+    },
+    "body_text": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1024
+    },
+    "input_hash": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "content_hash": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "selectionOutcome": {
+      "oneOf": [
+        {
+          "type": "object",
+          "required": [
+            "selection_key",
+            "outcome",
+            "value",
+            "source"
+          ],
+          "properties": {
+            "selection_key": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_-]{0,63}$"
+            },
+            "outcome": {
+              "const": "included"
+            },
+            "value": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120
+            },
+            "source": {
+              "type": "object",
+              "required": [
+                "facet_key",
+                "facet_schema_revision_id",
+                "archetype_facet_binding_id",
+                "field_key"
+              ],
+              "properties": {
+                "facet_key": {
+                  "type": "string",
+                  "pattern": "^[a-z][a-z0-9_-]{0,63}$"
+                },
+                "facet_schema_revision_id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 256
+                },
+                "archetype_facet_binding_id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 256
+                },
+                "field_key": {
+                  "type": "string",
+                  "pattern": "^[a-z][a-z0-9_-]{0,63}$"
+                },
+                "location_id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 256
+                }
+              },
+              "additionalProperties": false
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": [
+            "selection_key",
+            "outcome"
+          ],
+          "properties": {
+            "selection_key": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_-]{0,63}$"
+            },
+            "outcome": {
+              "enum": [
+                "not_selected",
+                "disclosure_unavailable",
+                "facet_missing",
+                "schema_mismatch",
+                "field_missing",
+                "reference_unavailable",
+                "invalid_text",
+                "value_too_long",
+                "suffix_overflow"
+              ]
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "authorization_state": {
+            "enum": [
+              "revoked",
+              "unavailable",
+              "scope_mismatch"
+            ]
+          }
+        },
+        "required": [
+          "authorization_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "outcome": {
+            "const": "ordinary_only"
+          },
+          "selections": {
+            "items": {
+              "properties": {
+                "outcome": {
+                  "enum": [
+                    "not_selected",
+                    "disclosure_unavailable"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "outcome": {
+            "const": "details_included"
+          }
+        },
+        "required": [
+          "outcome"
+        ]
+      },
+      "then": {
+        "properties": {
+          "authorization_state": {
+            "const": "active"
+          },
+          "selections": {
+            "contains": {
+              "type": "object",
+              "properties": {
+                "outcome": {
+                  "const": "included"
+                }
+              },
+              "required": [
+                "outcome"
+              ]
+            }
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "selections": {
+            "not": {
+              "contains": {
+                "type": "object",
+                "properties": {
+                  "outcome": {
+                    "const": "included"
+                  }
+                },
+                "required": [
+                  "outcome"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "outcome": {
+            "const": "suffix_overflow"
+          }
+        },
+        "required": [
+          "outcome"
+        ]
+      },
+      "then": {
+        "properties": {
+          "authorization_state": {
+            "const": "active"
+          },
+          "selections": {
+            "contains": {
+              "type": "object",
+              "properties": {
+                "outcome": {
+                  "const": "suffix_overflow"
+                }
+              },
+              "required": [
+                "outcome"
+              ]
+            }
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "selections": {
+            "not": {
+              "contains": {
+                "type": "object",
+                "properties": {
+                  "outcome": {
+                    "const": "suffix_overflow"
+                  }
+                },
+                "required": [
+                  "outcome"
+                ]
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}

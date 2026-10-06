@@ -1,6 +1,6 @@
 {
   "schema_version": "spine.notification-rendering-definition-contract-registry.v1",
-  "status": "specified_not_implemented",
+  "status": "implemented_local",
   "logical_owner": "specs/notification-rendering-definitions.md",
   "commands": {
     "notification_rendering_definition.create": {
@@ -8,63 +8,63 @@
       "request_schema": "contracts/schemas/notification-rendering-definition-commands.schema.json#/$defs/notification_rendering_definition.create",
       "response_schema": "contracts/schemas/notification-rendering-definition-responses.schema.json#/$defs/notification_rendering_definition.create",
       "mutates": true,
-      "exposure": "specified_only"
+      "exposure": "trusted_local"
     },
     "notification_rendering_definition.publish": {
       "contract_version": "spine.notification-rendering-definitions.v1",
       "request_schema": "contracts/schemas/notification-rendering-definition-commands.schema.json#/$defs/notification_rendering_definition.publish",
       "response_schema": "contracts/schemas/notification-rendering-definition-responses.schema.json#/$defs/notification_rendering_definition.publish",
       "mutates": true,
-      "exposure": "specified_only"
+      "exposure": "trusted_local"
     },
     "notification_rendering_definition.retire": {
       "contract_version": "spine.notification-rendering-definitions.v1",
       "request_schema": "contracts/schemas/notification-rendering-definition-commands.schema.json#/$defs/notification_rendering_definition.retire",
       "response_schema": "contracts/schemas/notification-rendering-definition-responses.schema.json#/$defs/notification_rendering_definition.retire",
       "mutates": true,
-      "exposure": "specified_only"
+      "exposure": "trusted_local"
     },
     "notification_rendering_definition.show": {
       "contract_version": "spine.notification-rendering-definitions.v1",
       "request_schema": "contracts/schemas/notification-rendering-definition-commands.schema.json#/$defs/notification_rendering_definition.show",
       "response_schema": "contracts/schemas/notification-rendering-definition-responses.schema.json#/$defs/notification_rendering_definition.show",
       "mutates": false,
-      "exposure": "specified_only"
+      "exposure": "trusted_local"
     },
     "notification_rendering_definition.list": {
       "contract_version": "spine.notification-rendering-definitions.v1",
       "request_schema": "contracts/schemas/notification-rendering-definition-commands.schema.json#/$defs/notification_rendering_definition.list",
       "response_schema": "contracts/schemas/notification-rendering-definition-responses.schema.json#/$defs/notification_rendering_definition.list",
       "mutates": false,
-      "exposure": "specified_only"
+      "exposure": "trusted_local"
     },
     "notification_rendering_disclosure.provision": {
       "contract_version": "spine.notification-rendering-disclosures.v1",
       "request_schema": "contracts/schemas/notification-rendering-definition-commands.schema.json#/$defs/notification_rendering_disclosure.provision",
       "response_schema": "contracts/schemas/notification-rendering-definition-responses.schema.json#/$defs/notification_rendering_disclosure.provision",
       "mutates": true,
-      "exposure": "specified_only"
+      "exposure": "trusted_local"
     },
     "notification_rendering_disclosure.revoke": {
       "contract_version": "spine.notification-rendering-disclosures.v1",
       "request_schema": "contracts/schemas/notification-rendering-definition-commands.schema.json#/$defs/notification_rendering_disclosure.revoke",
       "response_schema": "contracts/schemas/notification-rendering-definition-responses.schema.json#/$defs/notification_rendering_disclosure.revoke",
       "mutates": true,
-      "exposure": "specified_only"
+      "exposure": "trusted_local"
     },
     "notification_rendering_disclosure.show": {
       "contract_version": "spine.notification-rendering-disclosures.v1",
       "request_schema": "contracts/schemas/notification-rendering-definition-commands.schema.json#/$defs/notification_rendering_disclosure.show",
       "response_schema": "contracts/schemas/notification-rendering-definition-responses.schema.json#/$defs/notification_rendering_disclosure.show",
       "mutates": false,
-      "exposure": "specified_only"
+      "exposure": "trusted_local"
     },
     "notification_rendering_disclosure.list": {
       "contract_version": "spine.notification-rendering-disclosures.v1",
       "request_schema": "contracts/schemas/notification-rendering-definition-commands.schema.json#/$defs/notification_rendering_disclosure.list",
       "response_schema": "contracts/schemas/notification-rendering-definition-responses.schema.json#/$defs/notification_rendering_disclosure.list",
       "mutates": false,
-      "exposure": "specified_only"
+      "exposure": "trusted_local"
     }
   },
   "effects": {

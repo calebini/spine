@@ -85,8 +85,9 @@ evidence, narrow location-label lookup and retirement preserving existing pinned
 The focused bounded recheck passed, and SPINE-035 ratifies the logical design and adds
 initial source-only catalog/disclosure schemas, selection/evidence fragments and
 reference fixtures. SPINE-049–050 subsequently closed the integration design and
-machine-contract work for implementation planning; executable stateful proof remains
-pending. Pack-format and installer adoption follow Spine's contract rather than
+machine-contract work for implementation planning. SPINE-051–053 subsequently closed
+the executable local release in 0.9.0/schema 19, with evidence linked below. Pack-format
+and installer adoption follow Spine's contract rather than
 inventing renderer semantics. Historical evidence remains in SPINE-035 and SPINE-050.
 
 ### Delivery authority and release boundary
@@ -227,12 +228,22 @@ the next separately authorized checkpoint; do not deploy A/B alone.
 capability declarations, complete package/CLI readback, and actionable operator and
 rollback instructions. Deployment and any real send remain separate authorizations.
 
+**Implemented 2026-10-06 (release checkpoint; not pushed/deployed):** Runtime 0.9.0/schema 19
+activates the local successor authoring/catalog/readback families as one release.
+Full suite: 1,017 tests passed; focused final contracts/readback: 41 passed. The installed
+non-editable wheel passed fresh/populated migration, exact resource/registry pins,
+actual predecessor worker refusal and paired-backup verification using the pinned
+Tickerd package. Compact and current web contracts remain unchanged. See
+[SPINE-053](BACKLOG.md#spine-053--complete-rendering-readback-and-release-verification)
+for the RI-01–14 evidence map, artifact hash and
+[operator handoff](NOTIFICATION_RENDERING_GUIDE.md). Next action requires a separate
+push/deployment decision; do not expose successor payloads through frozen HTTP routes.
+
 ### Required proof allocation
 
-Every family in integration Section 10 remains pending runtime evidence today. This
-table assigns where proofs are introduced; Slice C reruns them together and records
-test names/results. Static schemas, vector regeneration and audit reports do not count
-as executed stateful proof.
+The table preserves the introduction/allocation plan. Slice C has now rerun these
+families together and recorded test names/results under SPINE-053. Static schemas,
+vector regeneration and audit reports still do not count as executed stateful proof.
 
 | Family | Introduce proof | Required release evidence |
 | --- | --- | --- |

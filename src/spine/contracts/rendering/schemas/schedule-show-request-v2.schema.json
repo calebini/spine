@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cortext.local/spine/contracts/schemas/schedule-show-request-v2.schema.json",
+  "title": "Spine Schedule Show v2 Request (source only)",
+  "type": "object",
+  "required": [
+    "item_id",
+    "contract_version"
+  ],
+  "properties": {
+    "item_id": {
+      "$ref": "notification-types.schema.json#/$defs/id"
+    },
+    "include": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "enum": [
+          "policies",
+          "work",
+          "attempts",
+          "relations",
+          "temporal_bindings",
+          "primary_location",
+          "notification_profile"
+        ]
+      }
+    },
+    "notification_policies_limit": {
+      "$ref": "#/$defs/policyLimit"
+    },
+    "work_instances_limit": {
+      "$ref": "#/$defs/evidenceLimit"
+    },
+    "side_effect_attempts_limit": {
+      "$ref": "#/$defs/evidenceLimit"
+    },
+    "contract_version": {
+      "const": "spine.schedule-show.v2"
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "policyLimit": {
+      "oneOf": [
+        {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100
+        },
+        {
+          "type": "string",
+          "pattern": "^(0|[1-9][0-9]?|100)(?![\\s\\S])"
+        }
+      ]
+    },
+    "evidenceLimit": {
+      "oneOf": [
+        {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000
+        },
+        {
+          "type": "string",
+          "pattern": "^(0|[1-9][0-9]{0,2}|1000)(?![\\s\\S])"
+        }
+      ]
+    }
+  }
+}

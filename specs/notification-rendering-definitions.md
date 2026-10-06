@@ -1,6 +1,6 @@
 # Spine Notification Rendering Definitions
 
-Status: Accepted logical design v1.0; initial machine contracts specified, not implemented
+Status: Accepted logical design v1.0; implemented trusted-local in runtime 0.9.0/schema 19
 Ratified: 2026-10-03 after focused bounded consistency recheck
 Created: 2026-10-03
 Updated: 2026-10-04 — integration leaf ratified and successors codified; logical v1.0 unchanged
@@ -11,12 +11,13 @@ profile/policy snapshot application, disclosure boundaries, and attempt-time evi
 
 Ordinary reminders can already describe an item's title, target time and primary
 location. Typed facets can hold useful additional facts, such as a flight number or
-terminal, but the implemented renderer does not consume them. This proposal adds
+terminal. The schema-19 rendering extension adds
 explicit, deterministic presentation of selected facet values without turning facet
 schemas into message templates or notification profiles into executable programs.
 
 This is the logical owner of the accepted extension. Requirements below are design
-contracts, not additions to current closed request schemas or runtime capabilities.
+contracts, with versioned local successors defined by the integration leaf rather
+than additions to existing closed request schemas. Current HTTP families are unchanged.
 The agreed product directions and remaining implementation gates are in Section 12.
 
 Existing authorities remain:
@@ -507,38 +508,41 @@ schedule baseline. It is not a convergence claim or an audit of the subsequently
 added machine contracts. Surface any new product tradeoff rather than silently
 inferring a broader grant.
 
-Initial source-only schemas, registry and fixtures are specified in Section 13.
+The initial schemas, registry and fixtures are specified in Section 13.
 The ratified [integration amendment](notification-rendering-integration.md) specifies
-the remaining engineering decisions below with source-only successor wire schemas
-and computed fixtures. Review of those new artifacts and executable stateful proofs
-remain gates; ratification does not implement them or revise this logical contract.
-Before runtime work, close exact policy-presentation identity and continuity rules,
-versioned profile/schedule/policy/attempt integration, permission/disclosure resolver
-mappings, authenticated catalog cursors, physical query plans and storage/migration/
-rollback. Changes to
+the engineering decisions below with successor wire schemas and computed fixtures.
+Those review and runtime gates were closed by the linked schema-19 release evidence;
+ratification itself was not implementation or a revision of this logical contract.
+The integration owns exact policy-presentation identity and continuity rules,
+versioned profile/schedule/policy/attempt envelopes, permission/disclosure resolvers,
+authenticated catalog cursors, physical query plans and storage/migration/rollback.
+Changes to
 definition selection must enter the policy-continuity proof without turning a
 presentation change into a new send. Workers lacking the new capability must reject
 startup against a release requiring it, not silently ignore populated selections.
-No schema number, runtime release, pack version or deployment change is assigned here.
+The integration leaf owns runtime 0.9.0/schema 19 activation and its linked executable
+release evidence. This logical design assigns no pack version or deployment change.
 
 ## 13. Initial machine contract family
 
-The [source-only registry](../contracts/notification-rendering-definition-contract-registry.v1.json)
+The [local registry](../contracts/notification-rendering-definition-contract-registry.v1.json)
 is authoritative for reserved command names, request/response schema references,
-closed effects/errors, fixed limits and unclosed integration gates. The
+closed effects/errors, fixed limits and the integration gate inventory. The
 [fixture manifest](../contracts/notification-rendering-definition-fixture-manifest.json)
 separates structural fixtures, computed reference vectors and future stateful
-obligations. Neither artifact belongs in the implemented command registry, runtime
-capability advertisement or web allowlist yet.
+obligation sketches. The local command/capability registry is activated in schema 19;
+the current web allowlists remain unchanged. Computed vectors and prose sketches do
+not become runtime proofs merely because release status changed; see the executable
+tests and wheel checks linked from SPINE-053.
 
 ### 13.1 Versions, normalization and identities
 
-Reserved versions are `spine.notification-rendering-definitions.v1` (catalog),
+Implemented local versions are `spine.notification-rendering-definitions.v1` (catalog),
 `spine.notification-rendering-disclosures.v1` (authorization management),
 `spine.notification-rendering-presentation.v1` (authoring/application fragments) and
 `spine.notification-rendering-details-evidence.v1` (attempt evidence extension).
-The last two are fragments awaiting versioned enclosing contracts, not new fields
-accepted by existing profile, schedule or attempt envelopes.
+The last two are fragments within the integration's versioned successor envelopes,
+not new fields accepted by frozen profile, schedule or attempt contracts.
 
 Use `spine.canonical-json.v1` from the ontology: sorted object keys, preserved array
 order, UTF-8, explicit nulls/booleans, decimal-string integers, no JSON numbers and no

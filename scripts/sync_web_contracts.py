@@ -5,8 +5,8 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 
-# Source-only rendering contracts are not part of the activated web release.
-# Keep this exact allowlist small; activation must deliberately remove it.
+# Local rendering successor contracts are not part of the frozen web release.
+# Only a separately versioned HTTP admission contract may change this exclusion.
 SOURCE_ONLY_SCHEMAS = frozenset({
     "notification-rendering-definition-types.schema.json",
     "notification-rendering-definition-commands.schema.json",

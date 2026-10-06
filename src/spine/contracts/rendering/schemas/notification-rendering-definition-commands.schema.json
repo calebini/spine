@@ -1,0 +1,349 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cortext.local/spine/contracts/schemas/notification-rendering-definition-commands.schema.json",
+  "title": "Reserved rendering catalog and disclosure commands",
+  "$defs": {
+    "notification_rendering_definition.create": {
+      "type": "object",
+      "required": [
+        "contract_version",
+        "command_id",
+        "actor_subject_id",
+        "action_timestamp_utc",
+        "owner",
+        "definition_key",
+        "revision"
+      ],
+      "properties": {
+        "contract_version": {
+          "const": "spine.notification-rendering-definitions.v1"
+        },
+        "command_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "actor_subject_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "action_timestamp_utc": {
+          "$ref": "notification-rendering-definition-types.schema.json#/$defs/utcTimestamp"
+        },
+        "owner": {
+          "$ref": "notification-rendering-definition-types.schema.json#/$defs/owner"
+        },
+        "definition_key": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_-]{0,63}$"
+        },
+        "revision": {
+          "$ref": "notification-rendering-definition-types.schema.json#/$defs/revision"
+        }
+      },
+      "additionalProperties": false
+    },
+    "notification_rendering_definition.publish": {
+      "type": "object",
+      "required": [
+        "contract_version",
+        "command_id",
+        "actor_subject_id",
+        "action_timestamp_utc",
+        "notification_rendering_definition_id",
+        "expected_current_revision_id",
+        "revision"
+      ],
+      "properties": {
+        "contract_version": {
+          "const": "spine.notification-rendering-definitions.v1"
+        },
+        "command_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "actor_subject_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "action_timestamp_utc": {
+          "$ref": "notification-rendering-definition-types.schema.json#/$defs/utcTimestamp"
+        },
+        "notification_rendering_definition_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "expected_current_revision_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "revision": {
+          "$ref": "notification-rendering-definition-types.schema.json#/$defs/revision"
+        }
+      },
+      "additionalProperties": false
+    },
+    "notification_rendering_definition.retire": {
+      "type": "object",
+      "required": [
+        "contract_version",
+        "command_id",
+        "actor_subject_id",
+        "action_timestamp_utc",
+        "notification_rendering_definition_id",
+        "expected_current_revision_id",
+        "reason_code"
+      ],
+      "properties": {
+        "contract_version": {
+          "const": "spine.notification-rendering-definitions.v1"
+        },
+        "command_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "actor_subject_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "action_timestamp_utc": {
+          "$ref": "notification-rendering-definition-types.schema.json#/$defs/utcTimestamp"
+        },
+        "notification_rendering_definition_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "expected_current_revision_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "reason_code": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_-]{0,63}$"
+        }
+      },
+      "additionalProperties": false
+    },
+    "notification_rendering_definition.show": {
+      "type": "object",
+      "required": [
+        "contract_version",
+        "notification_rendering_definition_id"
+      ],
+      "properties": {
+        "contract_version": {
+          "const": "spine.notification-rendering-definitions.v1"
+        },
+        "notification_rendering_definition_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "notification_rendering_definition_revision_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        }
+      },
+      "additionalProperties": false
+    },
+    "notification_rendering_definition.list": {
+      "type": "object",
+      "required": [
+        "contract_version",
+        "owner",
+        "status",
+        "limit"
+      ],
+      "properties": {
+        "contract_version": {
+          "const": "spine.notification-rendering-definitions.v1"
+        },
+        "owner": {
+          "$ref": "notification-rendering-definition-types.schema.json#/$defs/owner"
+        },
+        "status": {
+          "enum": [
+            "active",
+            "retired"
+          ]
+        },
+        "limit": {
+          "type": "string",
+          "pattern": "^([1-9]|[1-9][0-9]|100)(?![\\s\\S])"
+        },
+        "cursor": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        }
+      },
+      "additionalProperties": false
+    },
+    "notification_rendering_disclosure.provision": {
+      "type": "object",
+      "required": [
+        "contract_version",
+        "command_id",
+        "actor_subject_id",
+        "action_timestamp_utc",
+        "scope"
+      ],
+      "properties": {
+        "contract_version": {
+          "const": "spine.notification-rendering-disclosures.v1"
+        },
+        "command_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "actor_subject_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "action_timestamp_utc": {
+          "$ref": "notification-rendering-definition-types.schema.json#/$defs/utcTimestamp"
+        },
+        "scope": {
+          "$ref": "notification-rendering-definition-types.schema.json#/$defs/disclosureScope"
+        }
+      },
+      "additionalProperties": false
+    },
+    "notification_rendering_disclosure.revoke": {
+      "type": "object",
+      "required": [
+        "contract_version",
+        "command_id",
+        "actor_subject_id",
+        "action_timestamp_utc",
+        "disclosure_authorization_id",
+        "expected_scope_hash",
+        "reason_code"
+      ],
+      "properties": {
+        "contract_version": {
+          "const": "spine.notification-rendering-disclosures.v1"
+        },
+        "command_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "actor_subject_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "action_timestamp_utc": {
+          "$ref": "notification-rendering-definition-types.schema.json#/$defs/utcTimestamp"
+        },
+        "disclosure_authorization_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "expected_scope_hash": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "reason_code": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_-]{0,63}$"
+        }
+      },
+      "additionalProperties": false
+    },
+    "notification_rendering_disclosure.show": {
+      "type": "object",
+      "required": [
+        "contract_version",
+        "disclosure_authorization_id"
+      ],
+      "properties": {
+        "contract_version": {
+          "const": "spine.notification-rendering-disclosures.v1"
+        },
+        "disclosure_authorization_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        }
+      },
+      "additionalProperties": false
+    },
+    "notification_rendering_disclosure.list": {
+      "type": "object",
+      "required": [
+        "contract_version",
+        "owner",
+        "status",
+        "limit"
+      ],
+      "properties": {
+        "contract_version": {
+          "const": "spine.notification-rendering-disclosures.v1"
+        },
+        "owner": {
+          "$ref": "notification-rendering-definition-types.schema.json#/$defs/owner"
+        },
+        "status": {
+          "enum": [
+            "active",
+            "revoked"
+          ]
+        },
+        "limit": {
+          "type": "string",
+          "pattern": "^([1-9]|[1-9][0-9]|100)(?![\\s\\S])"
+        },
+        "cursor": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "oneOf": [
+    {
+      "$ref": "#/$defs/notification_rendering_definition.create"
+    },
+    {
+      "$ref": "#/$defs/notification_rendering_definition.publish"
+    },
+    {
+      "$ref": "#/$defs/notification_rendering_definition.retire"
+    },
+    {
+      "$ref": "#/$defs/notification_rendering_definition.show"
+    },
+    {
+      "$ref": "#/$defs/notification_rendering_definition.list"
+    },
+    {
+      "$ref": "#/$defs/notification_rendering_disclosure.provision"
+    },
+    {
+      "$ref": "#/$defs/notification_rendering_disclosure.revoke"
+    },
+    {
+      "$ref": "#/$defs/notification_rendering_disclosure.show"
+    },
+    {
+      "$ref": "#/$defs/notification_rendering_disclosure.list"
+    }
+  ]
+}

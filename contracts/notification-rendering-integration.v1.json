@@ -1,10 +1,10 @@
 {
   "contract_version": "spine.notification-rendering-integration.v1",
-  "status": "specified_not_implemented",
+  "status": "implemented_local",
   "normative_source": "specs/notification-rendering-integration.md",
   "logical_owner": "specs/notification-rendering-definitions.md",
   "storage_owner": "specs/STORAGE_ATOMICITY_SPEC.md",
-  "runtime_activation": false,
+  "runtime_activation": true,
   "proposed_successors": {
     "profile": "spine.notification-profiles.v2",
     "profile_application": "spine.notification-profile-application.v2",
@@ -16,12 +16,12 @@
     "rendering": "spine.notification-rendering.v2"
   },
   "gate_status": {
-    "physical_storage_migration_rollback": "specified_section_5_and_9",
-    "versioned_profile_schedule_policy_and_attempt_envelopes": "specified_sections_2_3_6_successor_schemas_codified",
-    "presentation_identity_and_policy_specific_work_continuity": "specified_section_4",
-    "permission_resolver_and_location_release_mapping": "specified_section_7_protected_locations_remain_denied",
-    "authenticated_catalog_cursor_and_index_plans": "specified_section_8_payload_schema_and_vectors_codified",
-    "runtime_capability_activation_and_stateful_conformance": "pending_runtime",
+    "physical_storage_migration_rollback": "implemented_local_spine_0.9.0_schema_19",
+    "versioned_profile_schedule_policy_and_attempt_envelopes": "implemented_local_spine_0.9.0_schema_19",
+    "presentation_identity_and_policy_specific_work_continuity": "implemented_local_spine_0.9.0_schema_19",
+    "permission_resolver_and_location_release_mapping": "implemented_local_spine_0.9.0_schema_19",
+    "authenticated_catalog_cursor_and_index_plans": "implemented_local_spine_0.9.0_schema_19",
+    "runtime_capability_activation_and_stateful_conformance": "implemented_local_spine_0.9.0_schema_19",
     "facet_referenced_location_freeze_migration_and_fs14": "implemented_schema_18_separate_prerequisite"
   },
   "authoring": {
@@ -166,7 +166,7 @@
     "durable_reads": false
   },
   "verification": {
-    "runtime_verified": false,
+    "runtime_verified": true,
     "required_families": {
       "RI-01": "ordinary_byte_preservation",
       "RI-02": "hashes_and_selection",
@@ -183,11 +183,7 @@
       "RI-13": "all_writer_finalization",
       "RI-14": "readback_and_packaging"
     },
-    "pending_before_runtime": [
-      "successor_machine_contract_review",
-      "executable_stateful_fixture_implementation",
-      "release_runtime_and_web_activation_decision"
-    ]
+    "pending_before_runtime": []
   },
   "ratified_at": "2026-10-04",
   "successor_registry": "contracts/notification-rendering-integration-contract-registry.v1.json",

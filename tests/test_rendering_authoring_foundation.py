@@ -6,6 +6,7 @@ import sqlite3
 import unittest
 from dataclasses import replace
 from pathlib import Path
+from unittest.mock import patch
 
 from jsonschema import Draft202012Validator
 from referencing import Registry, Resource
@@ -91,14 +92,16 @@ class RenderingFoundationTests(unittest.TestCase):
     def create(self, key="flight"):
         return self.call("notification_rendering_definition.create", owner=self.scope, definition_key=key, revision=self.revision)
 
-    def test_candidate_is_not_publicly_activated(self):
-        self.assertEqual(self.db.execute("SELECT MAX(schema_version) FROM ledger_schema").fetchone()[0], 18)
+    def test_rendering_is_publicly_activated_only_on_local_surface(self):
+        self.assertEqual(self.db.execute("SELECT MAX(schema_version) FROM ledger_schema").fetchone()[0], 19)
         result = handle(
             "notification_rendering_definition.create",
             self.request("notification_rendering_definition.create", owner=self.scope, definition_key="flight", revision=self.revision),
             self.context,
         )
-        self.assertFalse(result["ok"])
+        self.assertTrue(result["ok"], result)
+        web_registry = json.loads((ROOT / "contracts/spine.trusted-web-command-registry.v1.json").read_text())
+        self.assertNotIn("notification_rendering_definition.create", {r["command"] for r in web_registry["commands"]})
 
     def test_catalog_replay_noop_retirement_dry_run_and_immutability(self):
         command = "notification_rendering_definition.create"
@@ -215,7 +218,8 @@ class RenderingFoundationTests(unittest.TestCase):
         for stage in ("preflight", "ddl", "backfill", "verified"):
             with self.subTest(stage=stage):
                 db = connect()
-                initialize_schema(db)
+                with patch("spine.ledger.rendering_migration.install_rendering_storage"):
+                    initialize_schema(db)
                 before = [tuple(r) for r in db.execute("SELECT type,name,sql FROM sqlite_schema ORDER BY name")]
 
                 def fault(current, stage=stage):

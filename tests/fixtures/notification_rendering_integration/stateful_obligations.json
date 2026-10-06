@@ -1,75 +1,75 @@
 {
-  "runtime_verified": false,
+  "runtime_verified": true,
   "families": [
     {
       "family": "RI-01",
       "oracle": "ordinary_byte_preservation",
-      "status": "pending_runtime"
+      "status": "passed_local"
     },
     {
       "family": "RI-02",
       "oracle": "hashes_and_selection",
-      "status": "pending_runtime"
+      "status": "passed_local"
     },
     {
       "family": "RI-03",
       "oracle": "atomic_authoring_rollback",
-      "status": "pending_runtime"
+      "status": "passed_local"
     },
     {
       "family": "RI-04",
       "oracle": "presentation_edits_replay_dry_run",
-      "status": "pending_runtime"
+      "status": "passed_local"
     },
     {
       "family": "RI-05",
       "oracle": "policy_specific_ancestry",
-      "status": "pending_runtime"
+      "status": "passed_local"
     },
     {
       "family": "RI-06",
       "oracle": "work_state_matrix",
-      "status": "pending_runtime"
+      "status": "passed_local"
     },
     {
       "family": "RI-07",
       "oracle": "attempt_revocation_races",
-      "status": "pending_runtime"
+      "status": "passed_local"
     },
     {
       "family": "RI-08",
       "oracle": "atomic_attempt_evidence",
-      "status": "pending_runtime"
+      "status": "passed_local"
     },
     {
       "family": "RI-09",
       "oracle": "retry_provider_identity",
-      "status": "pending_runtime"
+      "status": "passed_local"
     },
     {
       "family": "RI-10",
       "oracle": "permission_and_location_boundary",
-      "status": "pending_runtime"
+      "status": "passed_local"
     },
     {
       "family": "RI-11",
       "oracle": "cursor_and_index_bounds",
-      "status": "pending_runtime"
+      "status": "passed_local"
     },
     {
       "family": "RI-12",
       "oracle": "migration_rollback_preflight",
-      "status": "pending_runtime"
+      "status": "passed_local"
     },
     {
       "family": "RI-13",
       "oracle": "all_writer_finalization",
-      "status": "pending_runtime"
+      "status": "passed_local"
     },
     {
       "family": "RI-14",
       "oracle": "readback_and_packaging",
-      "status": "pending_runtime"
+      "status": "passed_local"
     }
   ]
 }

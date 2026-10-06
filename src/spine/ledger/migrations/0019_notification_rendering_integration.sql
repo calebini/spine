@@ -1,0 +1,3 @@
+-- Schema 19 is installed atomically by rendering_migration.install_rendering_storage.
+-- Python owns table rebuilds, canonical ordinary backfill and historical verification.
+-- This marker is migration discovery/package data, not executable standalone DDL.

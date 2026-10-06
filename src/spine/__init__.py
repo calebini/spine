@@ -2,11 +2,30 @@
 
 __all__ = ["IMPLEMENTED_CONTRACT_VERSIONS", "IMPLEMENTED_LEDGER_SCHEMA_VERSION", "__version__"]
 
-__version__ = "0.8.3"
+__version__ = "0.9.0"
 
-IMPLEMENTED_LEDGER_SCHEMA_VERSION = 18
+IMPLEMENTED_LEDGER_SCHEMA_VERSION = 19
 IMPLEMENTED_CONTRACT_VERSIONS = frozenset(
     {
+        "spine.notification-rendering-definitions.v1",
+        "spine.notification-rendering-disclosures.v1",
+        "spine.notification-rendering-details-evidence.v1",
+        "spine.notification-rendering-presentation.v1",
+        "spine.notification-rendering-cursor.v1",
+        "spine.notification-rendering-cursor-config.v1",
+        "spine.notification-rendering-integration.v1",
+        "spine.notification-rendering.v2",
+        "spine.notification-profiles.v2",
+        "spine.notification-profile-application.v2",
+        "spine.notification-profile-readback.v2",
+        "spine.notification-schedule-authoring.v2",
+        "spine.schedule-create.v3",
+        "spine.schedule-create-response.v3",
+        "spine.schedule-create-receipt.v3",
+        "spine.schedule-update.v3",
+        "spine.schedule-update-response.v3",
+        "spine.schedule-update-receipt.v3",
+        "spine.schedule-show.v2",
         "spine.canonical-json.v1",
         "spine.facet-schemas.v1",
         "spine.archetype-facet-bindings.v1",

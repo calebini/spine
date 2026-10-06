@@ -12,7 +12,7 @@ from spine.commands import facet_reads, facets
 from spine.commands.core import _validation_error
 from spine.commands.facet_runtime import FacetBudget, FacetCursorConfig, decode_cursor, encode_cursor, install_budget, parse_time, wire_time
 from spine.commands.receipts import get_command_receipt
-from spine.commands.registry import COMMAND_RUNTIME_CONTRACT_REGISTRY
+from spine.commands.registry import COMMAND_RUNTIME_CONTRACT_REGISTRY, frozen_web_required_contract_versions
 from spine.core.canonical_json import canonical_json_bytes
 from spine.core.errors import SpineValidationError
 from spine.core.hashing import hash_canonical_json
@@ -52,11 +52,11 @@ def registry():
             "method": "POST",
             "access_mode": "write" if command in facets.WRITES else "read",
             "result_contract": facets.CONTRACTS[command],
-            "required_contract_versions": list(COMMAND_RUNTIME_CONTRACT_REGISTRY[command].required_contract_versions),
+            "required_contract_versions": list(frozen_web_required_contract_versions(command)),
             "resolvers": list(PERMISSION_RESOLVERS[command]),
             "replay_resolvers": list(REPLAY_RESOLVERS.get(command, ())),
         }
-        if e != expected or not set(e["required_contract_versions"]) <= IMPLEMENTED_CONTRACT_VERSIONS:
+        if e != expected or not set(COMMAND_RUNTIME_CONTRACT_REGISTRY[command].required_contract_versions) <= IMPLEMENTED_CONTRACT_VERSIONS:
             raise WebError("admission_unavailable")
     for name, digest in artifact("trusted-web-facet-pins.v1.json")["files"].items():
         raw = resources.files("spine.contracts").joinpath("web", name).read_bytes()

@@ -52,6 +52,7 @@ def initialize_schema(connection: sqlite3.Connection) -> None:
             read_ledger_instance_id(connection)
             if isinstance(connection, LedgerConnection):
                 connection.enable_facets()
+                connection.enable_renderings()
             return
         raise SpineValidationError(
             "ledger_schema_requires_migration",
@@ -102,6 +103,8 @@ def initialize_schema(connection: sqlite3.Connection) -> None:
     from spine.ledger.facet_location_migration import install_facet_location_freeze
 
     install_facet_location_freeze(connection, applied_at_utc="1970-01-01T00:00:00Z", fresh=True)
+    from spine.ledger.rendering_migration import install_rendering_storage
+    install_rendering_storage(connection, applied_at_utc="1970-01-01T00:00:00Z", fresh=True)
 
 
 def _is_file_backed_database(database: str) -> bool:

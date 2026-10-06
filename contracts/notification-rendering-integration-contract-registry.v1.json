@@ -1,8 +1,8 @@
 {
   "contract_version": "spine.notification-rendering-integration-contract-registry.v1",
-  "status": "specified_not_implemented",
+  "status": "implemented_local",
   "normative_source": "specs/notification-rendering-integration.md",
-  "runtime_activation": false,
+  "runtime_activation": true,
   "schemas": [
     "contracts/schemas/notification-rendering-integration-types.schema.json",
     "contracts/schemas/notification-profile-types-v2.schema.json",
@@ -28,7 +28,7 @@
       "contract_version": "spine.notification-profiles.v2",
       "request_schema": "contracts/schemas/notification-profile-commands-v2.schema.json#/$defs/profileCreate",
       "response_schema": "contracts/schemas/notification-profile-responses-v2.schema.json#/$defs/create",
-      "exposure": "specified_only",
+      "exposure": "trusted_local",
       "mutates": true,
       "failure_schema": "contracts/schemas/notification-rendering-integration-failure.schema.json"
     },
@@ -36,7 +36,7 @@
       "contract_version": "spine.notification-profiles.v2",
       "request_schema": "contracts/schemas/notification-profile-commands-v2.schema.json#/$defs/profileRevise",
       "response_schema": "contracts/schemas/notification-profile-responses-v2.schema.json#/$defs/revise",
-      "exposure": "specified_only",
+      "exposure": "trusted_local",
       "mutates": true,
       "failure_schema": "contracts/schemas/notification-rendering-integration-failure.schema.json"
     },
@@ -44,7 +44,7 @@
       "contract_version": "spine.notification-profiles.v2",
       "request_schema": "contracts/schemas/notification-profile-commands-v2.schema.json#/$defs/profileShow",
       "response_schema": "contracts/schemas/notification-profile-responses-v2.schema.json#/$defs/show",
-      "exposure": "specified_only",
+      "exposure": "trusted_local",
       "mutates": false,
       "failure_schema": "contracts/schemas/notification-rendering-integration-failure.schema.json"
     },
@@ -52,7 +52,7 @@
       "contract_version": "spine.notification-profiles.v2",
       "request_schema": "contracts/schemas/notification-profile-commands-v2.schema.json#/$defs/profileList",
       "response_schema": "contracts/schemas/notification-profile-responses-v2.schema.json#/$defs/list",
-      "exposure": "specified_only",
+      "exposure": "trusted_local",
       "mutates": false,
       "failure_schema": "contracts/schemas/notification-rendering-integration-failure.schema.json"
     },
@@ -60,7 +60,7 @@
       "contract_version": "spine.schedule-create.v3",
       "request_schema": "contracts/schemas/schedule-create-request-v3.schema.json",
       "response_schema": "contracts/schemas/schedule-create-response-v3.schema.json",
-      "exposure": "specified_only",
+      "exposure": "trusted_local",
       "mutates": true,
       "failure_schema": "contracts/schemas/notification-rendering-integration-failure.schema.json"
     },
@@ -68,7 +68,7 @@
       "contract_version": "spine.schedule-update.v3",
       "request_schema": "contracts/schemas/schedule-update-request-v3.schema.json",
       "response_schema": "contracts/schemas/schedule-update-response-v3.schema.json",
-      "exposure": "specified_only",
+      "exposure": "trusted_local",
       "mutates": true,
       "failure_schema": "contracts/schemas/notification-rendering-integration-failure.schema.json"
     },
@@ -76,7 +76,7 @@
       "contract_version": "spine.schedule-show.v2",
       "request_schema": "contracts/schemas/schedule-show-request-v2.schema.json",
       "response_schema": "contracts/schemas/schedule-show-response-v2.schema.json",
-      "exposure": "specified_only",
+      "exposure": "trusted_local",
       "mutates": false,
       "failure_schema": "contracts/schemas/notification-rendering-integration-failure.schema.json"
     }
@@ -92,7 +92,7 @@
     "standard_failure": "contracts/schemas/notification-rendering-integration-failure.schema.json"
   },
   "verification": {
-    "stateful_runtime_verified": false
+    "stateful_runtime_verified": true
   },
   "semantic_oracles": [
     "normalized_template_and_revision_hashes",
@@ -102,7 +102,7 @@
     "application_address_uniqueness_and_order",
     "profile_readback_null_and_revision_consistency"
   ],
-  "pending_runtime_families": [
+  "verified_runtime_families": [
     "RI-01",
     "RI-02",
     "RI-03",

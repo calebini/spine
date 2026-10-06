@@ -1,0 +1,143 @@
+{
+  "schema_version": "spine.notification-rendering-definition-contract-registry.v1",
+  "status": "implemented_local",
+  "logical_owner": "specs/notification-rendering-definitions.md",
+  "commands": {
+    "notification_rendering_definition.create": {
+      "contract_version": "spine.notification-rendering-definitions.v1",
+      "request_schema": "contracts/schemas/notification-rendering-definition-commands.schema.json#/$defs/notification_rendering_definition.create",
+      "response_schema": "contracts/schemas/notification-rendering-definition-responses.schema.json#/$defs/notification_rendering_definition.create",
+      "mutates": true,
+      "exposure": "trusted_local"
+    },
+    "notification_rendering_definition.publish": {
+      "contract_version": "spine.notification-rendering-definitions.v1",
+      "request_schema": "contracts/schemas/notification-rendering-definition-commands.schema.json#/$defs/notification_rendering_definition.publish",
+      "response_schema": "contracts/schemas/notification-rendering-definition-responses.schema.json#/$defs/notification_rendering_definition.publish",
+      "mutates": true,
+      "exposure": "trusted_local"
+    },
+    "notification_rendering_definition.retire": {
+      "contract_version": "spine.notification-rendering-definitions.v1",
+      "request_schema": "contracts/schemas/notification-rendering-definition-commands.schema.json#/$defs/notification_rendering_definition.retire",
+      "response_schema": "contracts/schemas/notification-rendering-definition-responses.schema.json#/$defs/notification_rendering_definition.retire",
+      "mutates": true,
+      "exposure": "trusted_local"
+    },
+    "notification_rendering_definition.show": {
+      "contract_version": "spine.notification-rendering-definitions.v1",
+      "request_schema": "contracts/schemas/notification-rendering-definition-commands.schema.json#/$defs/notification_rendering_definition.show",
+      "response_schema": "contracts/schemas/notification-rendering-definition-responses.schema.json#/$defs/notification_rendering_definition.show",
+      "mutates": false,
+      "exposure": "trusted_local"
+    },
+    "notification_rendering_definition.list": {
+      "contract_version": "spine.notification-rendering-definitions.v1",
+      "request_schema": "contracts/schemas/notification-rendering-definition-commands.schema.json#/$defs/notification_rendering_definition.list",
+      "response_schema": "contracts/schemas/notification-rendering-definition-responses.schema.json#/$defs/notification_rendering_definition.list",
+      "mutates": false,
+      "exposure": "trusted_local"
+    },
+    "notification_rendering_disclosure.provision": {
+      "contract_version": "spine.notification-rendering-disclosures.v1",
+      "request_schema": "contracts/schemas/notification-rendering-definition-commands.schema.json#/$defs/notification_rendering_disclosure.provision",
+      "response_schema": "contracts/schemas/notification-rendering-definition-responses.schema.json#/$defs/notification_rendering_disclosure.provision",
+      "mutates": true,
+      "exposure": "trusted_local"
+    },
+    "notification_rendering_disclosure.revoke": {
+      "contract_version": "spine.notification-rendering-disclosures.v1",
+      "request_schema": "contracts/schemas/notification-rendering-definition-commands.schema.json#/$defs/notification_rendering_disclosure.revoke",
+      "response_schema": "contracts/schemas/notification-rendering-definition-responses.schema.json#/$defs/notification_rendering_disclosure.revoke",
+      "mutates": true,
+      "exposure": "trusted_local"
+    },
+    "notification_rendering_disclosure.show": {
+      "contract_version": "spine.notification-rendering-disclosures.v1",
+      "request_schema": "contracts/schemas/notification-rendering-definition-commands.schema.json#/$defs/notification_rendering_disclosure.show",
+      "response_schema": "contracts/schemas/notification-rendering-definition-responses.schema.json#/$defs/notification_rendering_disclosure.show",
+      "mutates": false,
+      "exposure": "trusted_local"
+    },
+    "notification_rendering_disclosure.list": {
+      "contract_version": "spine.notification-rendering-disclosures.v1",
+      "request_schema": "contracts/schemas/notification-rendering-definition-commands.schema.json#/$defs/notification_rendering_disclosure.list",
+      "response_schema": "contracts/schemas/notification-rendering-definition-responses.schema.json#/$defs/notification_rendering_disclosure.list",
+      "mutates": false,
+      "exposure": "trusted_local"
+    }
+  },
+  "effects": {
+    "notification_rendering_definition.create": [
+      "rendering_definition_created"
+    ],
+    "notification_rendering_definition.publish": [
+      "rendering_definition_published",
+      "rendering_definition_publish_noop"
+    ],
+    "notification_rendering_definition.retire": [
+      "rendering_definition_retired",
+      "rendering_definition_retire_noop"
+    ],
+    "notification_rendering_disclosure.provision": [
+      "rendering_disclosure_provisioned"
+    ],
+    "notification_rendering_disclosure.revoke": [
+      "rendering_disclosure_revoked",
+      "rendering_disclosure_revoke_noop"
+    ]
+  },
+  "handler_errors": [
+    "invalid_request",
+    "unsupported_field",
+    "missing_required_field",
+    "invalid_timestamp",
+    "referenced_row_not_found",
+    "permission_denied",
+    "stale_version",
+    "stale_cursor",
+    "semantic_conflict",
+    "rendering_definition_invalid",
+    "rendering_definition_retired",
+    "rendering_disclosure_unavailable",
+    "rendering_disclosure_ambiguous",
+    "rendering_disclosure_scope_mismatch",
+    "environment_failure",
+    "runtime_failure"
+  ],
+  "contracts": {
+    "catalog": "spine.notification-rendering-definitions.v1",
+    "disclosure": "spine.notification-rendering-disclosures.v1",
+    "presentation": "spine.notification-rendering-presentation.v1",
+    "evidence": "spine.notification-rendering-details-evidence.v1",
+    "canonical_json": "spine.canonical-json.v1"
+  },
+  "fragments": {
+    "authoring_selection": "contracts/schemas/notification-rendering-definition-types.schema.json#/$defs/authoringSelection",
+    "policy_presentation": "contracts/schemas/notification-rendering-definition-types.schema.json#/$defs/policyPresentation",
+    "attempt_evidence": "contracts/schemas/notification-rendering-definition-evidence.schema.json"
+  },
+  "limits": {
+    "max_selections": 8,
+    "max_label_scalars": 40,
+    "max_value_scalars": 120,
+    "max_body_scalars": 1024,
+    "max_permitted_locations": 64,
+    "max_page": 100,
+    "max_request_bytes": 32768,
+    "max_definition_bytes": 8192,
+    "max_scope_bytes": 24576,
+    "max_evidence_extension_bytes": 16384,
+    "max_cursor_bytes": 4096,
+    "max_location_lookups": 8
+  },
+  "implementation_gates": [
+    "physical_storage_migration_rollback",
+    "versioned_profile_schedule_policy_and_attempt_envelopes",
+    "presentation_identity_and_policy_specific_work_continuity",
+    "permission_resolver_and_location_release_mapping",
+    "authenticated_catalog_cursor_and_index_plans",
+    "runtime_capability_activation_and_stateful_conformance",
+    "facet_referenced_location_freeze_migration_and_fs14"
+  ]
+}

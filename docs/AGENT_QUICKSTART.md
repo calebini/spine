@@ -1,6 +1,6 @@
 # Spine Agent Quickstart
 
-Status: executable cold-start path for the current schema-18 runtime
+Status: executable cold-start path for the current schema-19 runtime
 Audience: an agent with repository access and no prior Spine context
 
 For typed archetype attributes, use the dedicated trusted-local
@@ -11,6 +11,10 @@ Schema publication never upgrades existing items automatically. The separate
 they are not new fields on `schedule.create`/`schedule.update`.
 Schema 18 protects canonical fields of facet-referenced locations too: corrections
 require a new location ID and an explicit item-version update, not an in-place edit.
+
+Selected facet facts in reminders use the separate schema-19
+[rendering setup guide](NOTIFICATION_RENDERING_GUIDE.md). Ordinary scheduling needs
+no new setup. Local v3 authoring/v2 readback do not extend the current web families.
 
 Use this document to reach a verified first success. Use `docs/AGENT_OPERATOR_GUIDE.md` afterward for migration, long-running operation, real-send controls, inspection, and troubleshooting.
 

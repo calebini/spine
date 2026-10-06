@@ -37,11 +37,11 @@ status labels in the same change. Routine task updates do not change spec author
 
 The operator approved implementation planning and then SPINE-051 implementation on
 2026-10-05, then committed that checkpoint and authorized SPINE-052 on 2026-10-06.
-SPINE-051 and SPINE-052 have implemented internal checkpoints; SPINE-053 remains
-unstarted. These three internal checkpoints
-deliver one cohesive backend release; there is no intermediate staging deployment.
-Specs/contracts retain authority. Slices A/B have executable evidence below; complete
-RI-01–RI-14 release qualification remains pending the readback/release checkpoint.
+SPINE-051 and SPINE-052 were committed as internal checkpoints (`653e135`, `b729346`).
+SPINE-053 completes the cohesive local release in runtime 0.9.0/schema 19 and is
+included in this release checkpoint. There was no intermediate staging deployment.
+Specs/contracts retain authority. RI-01–RI-14 local release evidence is recorded below;
+deployment, real sends, new HTTP exposure and pack adoption remain separate.
 The [implementation plan](IMPLEMENTATION_PLAN.md#planned-delivery-facet-aware-notification-rendering-spine-051053)
 owns sequencing rationale and the proof allocation. Do not activate successor command
 families, the integration capability or production migration until all three slices
@@ -155,8 +155,8 @@ No push or deployment. Installed-wheel verification remains a C release gate.
 
 ### SPINE-053 — Complete rendering readback and release verification
 
-**Status:** Ready — SPINE-051 and SPINE-052 internal checkpoints are implemented;
-not started or separately authorized. Release activation remains gated.
+**Status:** Done — implemented and locally verified 2026-10-06 after SPINE-052 commit
+`b729346`; included in this release checkpoint, not pushed or deployed.
 **Dependencies:** End-to-end candidate storage, authoring and delivery behavior.
 **Scope:** Schedule-show v2 and successor response/receipt projections; exact historical
 v1/v2 decoding; safe old summary/redaction behavior; CLI discovery/help; generic operator
@@ -176,6 +176,48 @@ web contract and pack installer support require separate work and approval.
 **Handoff:** A version-pinned staging deployment prompt with backup, all-writer shutdown,
 deliberate protected cursor configuration, health/readback checks, controlled canaries,
 and restore instructions that retain the newer ledger. No live execution in this task.
+
+**Delivered:** Exact `spine.schedule-show.v2` projections preserve stored v1/v2 attempt
+renderings and expose current presentation/application pins; v1 full projections
+reject unrepresentable successor evidence instead of mislabelling it. Frozen compact
+and independent web summaries omit facet values and do not load rendering evidence.
+The local dispatch/registry, schema-19 migration and manifest, runtime 0.9.0 capability
+declarations, CLI help/configuration, packaged local schemas/pins and progressive
+[operator guide](NOTIFICATION_RENDERING_GUIDE.md) activate together. Current HTTP
+schemas/registries and their packaged bytes are unchanged. Web dependency validation
+keeps exact frozen prerequisites and checks the full local runtime union.
+
+**Release proof mapping:**
+
+| Families | Executable evidence |
+| --- | --- |
+| RI-01/02/03/04/05 | `test_rendering_authoring_foundation`, `test_rendering_successor_authoring`, `test_rendering_storage_integrity`, plus the ordinary-byte/shared-intent/setup interleaving tests in `test_rendering_delivery` recorded under SPINE-052 |
+| RI-06/07/08/09 | `test_rendering_delivery`: work-state matrix, actual two-connection writer contention, preparation/commit interruptions, immutable started replay, fresh retry and simulated provider deduplication |
+| RI-10/11 | `test_rendering_permissions`: authoring roles/grants, protected-location denial, cursor/context/expiry/rotation and indexed bounded reads; `test_rendering_delivery` verifies attempt-time scope/label-only release |
+| RI-12/13 | Existing storage finalizer/all-writer proofs rerun; `test_rendering_release.test_populated_migration_faults_and_backup_restore` checks five failure stages, populated migration, metadata parity and backup; `scripts/verify_rendering_wheel.py` checks the actual predecessor wheel/worker refusal and paired backup verification |
+| RI-14 | Seven `RenderingReleaseTests`: stored v1/v2 attempts after edits/revocation, v1/v2 profile readback against schemas, public CLI/compact/dry-run, frozen web summaries with no rendering reads, and bounded metadata-only preflight; installed-wheel resource pin/registry validation |
+
+**Verification:** Focused final contracts/readback: 41 tests passed. Full
+`.venv/bin/python -m unittest discover -s tests -q`: 1,017 tests passed (163.140s).
+Ruff, compileall, schema-manifest checks, all three contract sync checks, local links
+and `git diff --check` passed. No skipped release proof or blocked dependency remains.
+Non-editable 0.9.0 and predecessor 0.8.3 wheels were installed in separate disposable
+virtual environments, outside the checkout without `PYTHONPATH`. Exact Tickerd source
+`ffe613c65ea3d6fc70a1dc3603c32068f06350df` produced its required 0.2.0 descriptor
+`215f9aa6b54e6c0e6186796a55d78e1c5a270adc9b3ccefb433df5a3bb87b58b`.
+The installed wheel verifies all 35 pinned local resources, fresh initialization,
+populated migration, preserved policies/receipts, bounded `system.info`, unchanged web
+registries, predecessor worker DOWN/not-ready/nonzero with one diagnostic and zero
+processing, and old-runtime deep verification of the independent backup. `pip check`
+passed. Candidate wheel SHA-256:
+`3e9fc688c8d08d5300e5ee97d99b67815c705e578a42ce70de64614e694cb5de`.
+Build/validation files under `/private/tmp/spine-rendering-wheel.wXcluz` are temporary
+local artifacts, not a published release. No live ledger, service or real adapter was used.
+
+**Next handoff:** Use this coherent release checkpoint to select an exact deployment
+revision after a separately authorized push. Follow the guide's all-writer shutdown, verified backup, schema-19 migration,
+protected pagination configuration and paired-code/backup rollback steps. Any staging
+or real-send canary remains separately authorized.
 
 ## Rendering design and review history
 

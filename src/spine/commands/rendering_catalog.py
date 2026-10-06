@@ -24,6 +24,10 @@ DEFINITION_ID = "notification_rendering_definition_id"
 REVISION_ID = "notification_rendering_definition_revision_id"
 DISCLOSURE_ID = "disclosure_authorization_id"
 WRITES = {"create", "publish", "retire", "provision", "revoke"}
+COMMANDS = frozenset(
+    {f"notification_rendering_definition.{operation}" for operation in ("create", "publish", "retire", "show", "list")}
+    | {f"notification_rendering_disclosure.{operation}" for operation in ("provision", "revoke", "show", "list")}
+)
 
 
 class _Preview(Exception):

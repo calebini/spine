@@ -20,7 +20,10 @@ class FacetLocationFreezeTests(unittest.TestCase):
     def seed(self, *, predecessor=False):
         h = storage_tests.FacetStorageTests()
         if predecessor:
-            with patch("spine.ledger.facet_location_migration.install_facet_location_freeze"):
+            with (
+                patch("spine.ledger.facet_location_migration.install_facet_location_freeze"),
+                patch("spine.ledger.rendering_migration.install_rendering_storage"),
+            ):
                 h.setUp()
         else:
             h.setUp()
@@ -40,8 +43,12 @@ class FacetLocationFreezeTests(unittest.TestCase):
         # Caller owns the transaction so lock-interleaving tests exercise the real finalizer.
         version = h.db.execute("SELECT current_version FROM coordination_items WHERE item_id='task'").fetchone()[0]
         entry = facets.prepare_entry(
-            h.db, item_id="task", item_version=version, binding_id="binding0",
-            values={"flight": "AC123", "airport": location}, receipt_id=receipt(h.db, f"attach-{version}"),
+            h.db,
+            item_id="task",
+            item_version=version,
+            binding_id="binding0",
+            values={"flight": "AC123", "airport": location},
+            receipt_id=receipt(h.db, f"attach-{version}"),
         )
         h.next(facet_entries=[entry])
 
@@ -90,7 +97,7 @@ class FacetLocationFreezeTests(unittest.TestCase):
         with self.assertRaises(SpineValidationError):
             verify_runtime_schema(h.db)
         result = migrate_schema(h.db)
-        self.assertEqual(result.applied_versions, (18,))
+        self.assertEqual(result.applied_versions, (18, 19))
         for table, rows in before.items():
             if table != "ledger_schema":
                 self.assertEqual(all_rows(h.db)[table], rows, table)
@@ -133,17 +140,21 @@ class FacetLocationFreezeTests(unittest.TestCase):
                     self.attach(h)
                 before, objects = all_rows(h.db), self.objects(h.db)
                 if stage == "create":
+
                     def reject_create(action, *args):
                         return sqlite3.SQLITE_DENY if action == sqlite3.SQLITE_CREATE_TRIGGER else sqlite3.SQLITE_OK
+
                     h.db.set_authorizer(reject_create)
                     with self.assertRaises(sqlite3.DatabaseError):
                         install_facet_location_freeze(h.db, applied_at_utc=NOW)
                     h.db.set_authorizer(h.db._authorize_commit)
                 else:
+
                     def check(db, **kwargs):
                         if current_schema_version(db) == 18:
                             raise RuntimeError("injected activation failure")
                         return verify_runtime_schema(db, **kwargs)
+
                     with (
                         patch("spine.ledger.facet_location_migration.verify_runtime_schema", check),
                         self.assertRaisesRegex(RuntimeError, "injected"),
@@ -193,9 +204,13 @@ class FacetLocationFreezeTests(unittest.TestCase):
                             self.attach(h)
                         label = h.db.execute("SELECT label FROM locations WHERE location_id='airport'").fetchone()[0]
                         self.assertEqual(label, "Before attachment")
-                    plan = " ".join(r[3] for r in h.db.execute(
-                        "EXPLAIN QUERY PLAN SELECT 1 FROM item_facet_references WHERE location_id=?", ("airport",),
-                    ))
+                    plan = " ".join(
+                        r[3]
+                        for r in h.db.execute(
+                            "EXPLAIN QUERY PLAN SELECT 1 FROM item_facet_references WHERE location_id=?",
+                            ("airport",),
+                        )
+                    )
                     self.assertIn("SEARCH", plan)
                     self.assertIn("item_facet_references_location_idx", plan)
                     verify_schema(h.db)

@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cortext.local/spine/contracts/schemas/notification-rendering-cursor-config.schema.json",
+  "title": "Spine notification-rendering-cursor-config (source only)",
+  "type": "object",
+  "required": [
+    "contract_version",
+    "key_id",
+    "key_generation",
+    "ledger_instance_id",
+    "secret_hex"
+  ],
+  "properties": {
+    "contract_version": {
+      "const": "spine.notification-rendering-cursor-config.v1"
+    },
+    "key_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_-]{1,64}(?![\\s\\S])"
+    },
+    "key_generation": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_-]{1,64}(?![\\s\\S])"
+    },
+    "ledger_instance_id": {
+      "$ref": "notification-types.schema.json#/$defs/id"
+    },
+    "secret_hex": {
+      "type": "string",
+      "minLength": 64,
+      "maxLength": 128,
+      "pattern": "^(?:[0-9a-f]{2}){32,64}(?![\\s\\S])"
+    }
+  },
+  "additionalProperties": false
+}

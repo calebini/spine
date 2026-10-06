@@ -3,6 +3,12 @@
 Status: operational contract for current runtime surfaces
 Audience: local agents and agent operators integrating with Spine
 
+For approved facet details in reminders, use
+[Facet-aware notification rendering](NOTIFICATION_RENDERING_GUIDE.md). It covers
+the schema-19 local selectors, scoped disclosure, explicit item adoption, safe
+setup ordering, compact versus full evidence, and migration/rollback. The existing
+web registries are not extended by these local successors.
+
 Versioned facets are available through the trusted-local command surface in runtime
 0.8.0/schema 17. See [Facet commands](FACET_COMMANDS.md) for schema/binding authoring,
 full-value replacement, historical readback, bounded typed queries, cursor-secret
@@ -14,7 +20,7 @@ Runtime 0.8.3/schema 18 additionally freezes canonical location fields once refe
 by any facet, including historical/non-queryable fields. Correct a location by creating
 a new location ID and explicitly updating the item's facet values in a new version;
 removing the current facet does not release historical targets. Do not edit referenced
-location labels in place. This migration does not enable facet-aware notification text.
+location labels in place. The schema-18 migration alone does not enable facet-aware notification text.
 See [storage upgrade/rollback guidance](FACET_STORAGE_IMPLEMENTATION.md#schema-18-location-freeze--spine-038).
 
 This guide tells an agent how to interact with Spine safely. It is intentionally narrower than the ontology and architecture specs. If this guide and implementation behavior disagree, stop and ask an operator before writing or sending.
