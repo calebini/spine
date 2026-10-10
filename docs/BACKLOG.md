@@ -1,6 +1,6 @@
 # Spine Backlog
 
-Last updated: 2026-10-06
+Last updated: 2026-10-10
 
 This is the single work queue for Spine development. The
 [implementation plan](IMPLEMENTATION_PLAN.md) explains roadmap direction and delivery
@@ -32,6 +32,43 @@ outcomes; leave later horizons coarse. Before promoting a horizon, define its sc
 dependencies, acceptance criteria, and required decisions. When finishing a task,
 record evidence and move it to Completed. Update affected orientation and contract
 status labels in the same change. Routine task updates do not change spec authority.
+
+## Post-release corrective work
+
+### SPINE-054 — Repair successor notification-profile listing
+
+**Status:** Done — implemented and locally verified 2026-10-10; included in this
+authorized corrective release checkpoint, not pushed or deployed.
+**Baseline:** `01ebce7b0c5fb9234e0eab55daca96b01c5cb6a7`, runtime 0.9.0/schema 19.
+**Evidence:** Exact-source public CLI reproduction on a disposable ledger confirmed
+ordinary v2 create/show success but v2 list failure whenever a selected page contains
+a v2 revision. Empty/v1-only pages, filtering and cursor invalidation still work.
+**Scope:** Separate catalog page selection from version-specific profile projection;
+preserve the legacy guard, snapshot/cursor semantics, historical hashes and read-only
+behavior. Prepare runtime 0.9.1 with unchanged schema and public contract families.
+**Acceptance:** Public CLI regressions for ordinary/definition-pinned v2, mixed catalogs,
+pagination, v1-to-v2 histories, owner/status filters, cursor invalidation and schema
+validation; focused and full suites plus packaging/manifest hygiene checks.
+**Boundary:** No live ledger, migration change, notification send, deployment
+or push. Spine Packs must separately approve and pin the repaired release.
+**Delivered:** The shared catalog helper takes an internal projection callback with
+the original legacy guard as its default. The v2 list handler supplies the exact
+successor projection and no longer reloads every page entry. Selection, ordering,
+snapshot hashes and cursor validation are unchanged; no stored facts are rewritten.
+`tests/test_profile_v2_listing.py` provides six public-CLI regressions on disposable
+ledgers. V2-list cases failed against the original handler and pass after repair;
+legacy rejection, historical hashes and read-only ledger snapshots are retained.
+**Verification:** Focused suite: 116 tests passed. Full unittest discovery: 1,023
+tests passed (162.610s). Ruff, compileall, contract sync, schema manifest and diff
+hygiene checks passed. A non-editable 0.9.1 wheel installed in the disposable test
+runtime passed all six listing regressions and the release script, including mixed
+v1/v2 public-CLI pagination, exact resource pins, migration and paired-backup checks,
+and old-worker refusal. `pip check` passed. Wheel SHA-256:
+`2be842511413a87a614a49d1b917498cc1323fcab9cc78b3d9ebd80dc1cecdfc`.
+Temporary logs/artifacts are under `/private/tmp/spine-profile-v2-wheel.kJF3vy` and
+`/private/tmp/spine-profile-v2-{focused,full}.log`; not published release assets.
+**Next handoff:** Push this checkpoint when authorized; Spine Packs must approve
+its exact repaired commit instead of qualifying `01ebce7` unchanged.
 
 ## Rendering delivery — implementation sequence
 

@@ -1,9 +1,18 @@
 # Spine Implementation Plan
 
 Role: Roadmap rationale and delivery history; current task status lives in [BACKLOG.md](BACKLOG.md)
-Last updated: 2026-10-06 (rendering delivery integration checkpoint)
+Last updated: 2026-10-10 (successor profile-list correction)
 
 This is a non-normative delivery plan. The specifications and machine-readable contracts remain authoritative.
+
+The selected post-release correction is
+[SPINE-054](BACKLOG.md#spine-054--repair-successor-notification-profile-listing).
+An exact-source public-CLI reproduction at `01ebce7` confirmed that the shared
+legacy projection rejects v2 profiles before the successor list can project them.
+Runtime 0.9.1 separates projection from unchanged snapshot-bound page selection.
+Schema 19, contract selectors and stored hashes remain unchanged. Spine Packs
+qualification must use a separately approved repaired commit, not relabel the
+original 0.9.0 baseline; deployment and pack adoption remain separate decisions.
 
 Use [the backlog](BACKLOG.md) to select work, record dependencies, and track completion.
 The status labels, audit reports, and checklists below are retained delivery snapshots;

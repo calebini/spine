@@ -124,9 +124,8 @@ def execute(command, request, context, *, admission=None, now=None, budget=None)
             old = dict(request, contract_version="spine.notification-profiles.v1")
             if permissions and not permissions.scope(codec.owner(request["owner"])):
                 codec.fail("permission_denied", "owner")
-            result = shared._list_roots(old, context, kind="notification_profile")
+            result = shared._list_roots(old, context, kind="notification_profile", profile_projection=project)
             result["response_contract"] = codec.PROFILE_V2
-            result["entries"] = [project(load_profile(db, r["notification_profile_id"])) for r in result["entries"]]
         else:
             codec.fail("invalid_request", "command")
         codec.bounded(result, 4 * 1024 * 1024, "capacity")

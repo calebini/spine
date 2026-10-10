@@ -5,7 +5,7 @@ from __future__ import annotations
 import base64
 import json
 import sqlite3
-from collections.abc import Mapping, Sequence
+from collections.abc import Callable, Mapping, Sequence
 from typing import Any
 
 from spine.commands.context import CommandContext
@@ -829,7 +829,13 @@ def _list_roots(
     context: CommandContext,
     *,
     kind: str,
+    profile_projection: Callable[[dict[str, Any]], dict[str, Any]] = _legacy_profile,
 ) -> dict[str, Any]:
+    """Select one snapshot-bound page, then apply the caller's wire projection.
+
+    The default preserves the frozen v1 guard. Successor profile callers supply
+    their exact projection without routing stored v2 content through that guard.
+    """
     command = f"{kind}.list"
     _check(
         command,
@@ -921,7 +927,7 @@ def _list_roots(
         for row in page
     ]
     if kind == "notification_profile":
-        entries = [_legacy_profile(entry) for entry in entries]
+        entries = [profile_projection(entry) for entry in entries]
     next_cursor = None
     if has_more and page:
         final = page[-1]

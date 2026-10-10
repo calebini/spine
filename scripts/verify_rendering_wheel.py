@@ -1,4 +1,4 @@
-"""Run with the installed 0.9.0 wheel's Python, outside the checkout/PYTHONPATH.
+"""Run with the installed 0.9.1 wheel's Python, outside the checkout/PYTHONPATH.
 
     <wheel-python> /absolute/path/scripts/verify_rendering_wheel.py --old-python <0.8.3-wheel-python>
 
@@ -45,7 +45,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--old-python", required=True)
     args = parser.parse_args()
-    assert spine.__version__ == "0.9.0"
+    assert spine.__version__ == "0.9.1"
     assert "site-packages" in str(Path(spine.__file__))
     dependency = resolve_tickerd_compatibility()
     assert dependency.descriptor_sha256 == "215f9aa6b54e6c0e6186796a55d78e1c5a270adc9b3ccefb433df5a3bb87b58b"
@@ -190,6 +190,33 @@ def main():
         finally:
             db.close()
         run(sys.executable, "spine.commands.cli", ["--db", str(old), "system", "info"])
+        # Exercise the installed public successor list, not only its show path.
+        for version, key in (("spine.notification-profiles.v1", "a_legacy"), ("spine.notification-profiles.v2", "b_successor")):
+            template = {
+                "template_key": "before",
+                "schedule": {"kind": "once", "at": {"kind": "target_offset", "offset_basis": "elapsed", "offset_seconds": "-3600"}},
+                "late_handling": {"kind": "skip"},
+            }
+            if version.endswith(".v2"):
+                template["rendering"] = {"kind": "ordinary"}
+            run(sys.executable, "spine.commands.cli", ["--db", str(old), "notification_profile", "create"], {
+                "contract_version": version, "command_id": "wheel-profile-" + key,
+                "actor_subject_id": "owner", "action_timestamp_utc": now,
+                "owner": {"owner_kind": "subject", "owner_subject_id": "owner"},
+                "profile_key": key, "display_name": key,
+                "revision": {"compatible_item_types": ["event"], "templates": [template]},
+            })
+        query = {
+            "contract_version": "spine.notification-profiles.v2",
+            "owner": {"owner_kind": "subject", "owner_subject_id": "owner"}, "status": "active", "limit": "1",
+        }
+        first = json.loads(run(sys.executable, "spine.commands.cli", ["--db", str(old), "notification_profile", "list"], query).stdout)
+        second = json.loads(run(sys.executable, "spine.commands.cli", ["--db", str(old), "notification_profile", "list"],
+                                query | {"cursor": first["next_cursor"]}).stdout)
+        assert first["entries"][0]["revision"]["revision_contract"] == "spine.notification-profiles.v1"
+        assert second["entries"][0]["revision"]["revision_contract"] == "spine.notification-profiles.v2"
+        assert first["has_more"] and not second["has_more"]
+        assert first["catalog_snapshot_hash"] == second["catalog_snapshot_hash"]
         run(args.old_python, "spine.commands.cli", ["--db", str(old), "system", "info"], success=False)
         state = root / "old-worker"
         run(args.old_python, "spine.runtime.worker", ["--db", str(old), "--state-dir", str(state), "--max-cycles", "1"], success=False)
@@ -212,6 +239,7 @@ def main():
                 "tickerd_descriptor_sha256": dependency.descriptor_sha256,
                 "old_worker_refused": True,
                 "paired_backup_verified": True,
+                "mixed_profile_v2_listing_verified": True,
                 "real_sends": 0,
             },
             sort_keys=True,

@@ -51,11 +51,15 @@ allowed to quietly become canonical.
 
 ## What Works Today
 
-Spine `0.9.0` is an implemented alpha; its scheduling core is exercised in a staging
+Spine `0.9.1` is an implemented alpha; its scheduling core is exercised in a staging
 agent environment. The current SQLite ledger schema is version `19`. The trusted multi-operator backend is also running in staging on `cortext1`, with
 operator testing through the connected [Kinflow frontend](../kinflow-web-ui/README.md).
 Concrete operator-reported work is tracked in the [backlog](docs/BACKLOG.md);
 this checkout version is not a deployment claim.
+
+Version 0.9.1 repairs v2 notification-profile listing, including mixed v1/v2 catalogs
+and pagination. It preserves historical decoders, existing cursor semantics and
+schema 19; upgrading an existing schema-19 ledger requires no new migration.
 
 Version 0.9.0 adds facet-aware notification details: versioned rendering definitions,
 reusable destination-scoped disclosure, policy presentation pins, and exact attempt
