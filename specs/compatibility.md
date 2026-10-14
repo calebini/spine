@@ -15,6 +15,12 @@ migration. Existing v1 response contracts and authorization semantics are unchan
 
 ## 1. Purpose
 
+The proposed [facet revision readback](facet-schema-revision-readback.md) is an
+additive trusted-local read reservation with its own source-only contract. It is
+not supported by runtime 0.9.1 or commit `57cda1c`; adoption needs a separately
+verified release pin and refreshed consumer schema/command inventory. It changes
+neither schema 19 nor Tickerd compatibility and does not extend current HTTP families.
+
 Spine owns coordination truth, work eligibility, storage-pressure policy, and domain
 failure classification. Tickerd owns generic cadence, ownership, health/readiness,
 event mechanics, and the pre-cycle safety-stop lifecycle. This contract binds those

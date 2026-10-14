@@ -72,6 +72,11 @@ V2 adds `facet_schema` grant targets only, as defined by
 
 ## 2. Authority
 
+The draft [facet revision readback](facet-schema-revision-readback.md) separately
+reserves trusted-local `facet_schema.revision.show`. It has source-only contracts
+and fixtures, not a compiled command/dependency declaration or an HTTP route.
+Existing implemented-command lists and admission registries remain unchanged.
+
 This contract depends on `specs/overview.md`, `specs/architecture.md`, `specs/operational-resilience.md`, `specs/compatibility.md`, `specs/ontology.md`, `specs/recurrence.md`, `specs/notifications.md`, `specs/schedule-create.md`, `specs/schedule-show.md`, `specs/schedule-operator-tools.md`, `specs/schedule-operations.md`, the additive `specs/schedule-primary-location.md` capability, `specs/notification-profiles.md`, and `specs/SPINE_SPEC_VERSIONING_AND_FREEZE_POLICY.md`. If this document conflicts with `specs/ontology.md`, the ontology wins for ledger truth and this document must be corrected.
 
 Spine is the canonical coordination ledger and planning fabric. External tools are projections or side-effect targets. The authoring commands in this contract do not send externally.

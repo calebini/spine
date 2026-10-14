@@ -4,6 +4,8 @@ This directory contains Spine's normative design and compatibility promises.
 
 Current spec surface:
 
+- [facet-schema-revision-readback.md](facet-schema-revision-readback.md): draft trusted-local exact revision-to-root lookup, complete immutable definition readback, standalone schemas/fixtures; not implemented or exposed through HTTP
+
 - `independent-activity-reads.md`: proposed independent authorized web activity/occurrence reads, related-context completeness, disclosure-safe availability, compatibility migration, and test matrix; specification only, not implemented (SPINE-015)
 
 - `ledger-instance-identity.md`: implemented schema-14 immutable ledger identity, deterministic migration, bounded validation, system.info v3 and restore semantics

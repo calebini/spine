@@ -1,0 +1,37 @@
+{
+  "ok": true,
+  "command": "facet_schema.revision.show",
+  "response_contract": "spine.facet-schema-revision-readback.v1",
+  "root": {
+    "facet_schema_id": "facet_schema_B",
+    "owner": {
+      "owner_kind": "subject_group",
+      "owner_group_id": "example-owner-group"
+    },
+    "schema_key": "legacy_details",
+    "current_revision_id": "facet_schema_revision_B2",
+    "status": "active"
+  },
+  "revision": {
+    "facet_schema_id": "facet_schema_B",
+    "facet_schema_revision_id": "facet_schema_revision_B2",
+    "revision_number": "2",
+    "definition": {
+      "display_name": "Current flight details",
+      "description": null,
+      "compatible_item_types": [
+        "event"
+      ],
+      "fields": [
+        {
+          "key": "flight_number",
+          "type": "text",
+          "max_length": "32",
+          "required": true,
+          "queryable": true
+        }
+      ]
+    },
+    "definition_hash": "3b238cee77177cbcf0457273158a85f3e847b04fe33cbe3ae3e08dfc6e85b59d"
+  }
+}

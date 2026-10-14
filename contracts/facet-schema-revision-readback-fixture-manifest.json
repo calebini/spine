@@ -1,0 +1,117 @@
+{
+  "schema_version": "spine.facet-schema-revision-readback-fixtures.v1",
+  "status": "draft_contract_only",
+  "registry": "contracts/facet-schema-revision-readback.v1.json",
+  "fixtures": [
+    {
+      "fixture_id": "request_historical",
+      "fixture": "tests/fixtures/facet_schema_revision_readback/contracts/request_historical.json",
+      "schema": "contracts/schemas/facet-schema-revision-show-request.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "request_current",
+      "fixture": "tests/fixtures/facet_schema_revision_readback/contracts/request_current.json",
+      "schema": "contracts/schemas/facet-schema-revision-show-request.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "response_historical_active",
+      "fixture": "tests/fixtures/facet_schema_revision_readback/contracts/response_historical_active.json",
+      "schema": "contracts/schemas/facet-schema-revision-show-response.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "response_current",
+      "fixture": "tests/fixtures/facet_schema_revision_readback/contracts/response_current.json",
+      "schema": "contracts/schemas/facet-schema-revision-show-response.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "response_historical_retired",
+      "fixture": "tests/fixtures/facet_schema_revision_readback/contracts/response_historical_retired.json",
+      "schema": "contracts/schemas/facet-schema-revision-show-response.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "response_historical_dry_run",
+      "fixture": "tests/fixtures/facet_schema_revision_readback/contracts/response_historical_dry_run.json",
+      "schema": "contracts/schemas/facet-schema-revision-show-response.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "failure_revision_missing",
+      "fixture": "tests/fixtures/facet_schema_revision_readback/contracts/failure_revision_missing.json",
+      "schema": "contracts/schemas/facet-schema-revision-show-failure.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "failure_corrupt_evidence",
+      "fixture": "tests/fixtures/facet_schema_revision_readback/contracts/failure_corrupt_evidence.json",
+      "schema": "contracts/schemas/facet-schema-revision-show-failure.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "failure_capacity",
+      "fixture": "tests/fixtures/facet_schema_revision_readback/contracts/failure_capacity.json",
+      "schema": "contracts/schemas/facet-schema-revision-show-failure.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "failure_unsupported_contract",
+      "fixture": "tests/fixtures/facet_schema_revision_readback/contracts/failure_unsupported_contract.json",
+      "schema": "contracts/schemas/facet-schema-revision-show-failure.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "invalid_request_root_guess",
+      "fixture": "tests/fixtures/facet_schema_revision_readback/contracts/invalid_request_root_guess.json",
+      "schema": "contracts/schemas/facet-schema-revision-show-request.schema.json",
+      "valid": false
+    },
+    {
+      "fixture_id": "invalid_request_missing_revision",
+      "fixture": "tests/fixtures/facet_schema_revision_readback/contracts/invalid_request_missing_revision.json",
+      "schema": "contracts/schemas/facet-schema-revision-show-request.schema.json",
+      "valid": false
+    },
+    {
+      "fixture_id": "invalid_request_empty_revision",
+      "fixture": "tests/fixtures/facet_schema_revision_readback/contracts/invalid_request_empty_revision.json",
+      "schema": "contracts/schemas/facet-schema-revision-show-request.schema.json",
+      "valid": false
+    },
+    {
+      "fixture_id": "invalid_request_null_revision",
+      "fixture": "tests/fixtures/facet_schema_revision_readback/contracts/invalid_request_null_revision.json",
+      "schema": "contracts/schemas/facet-schema-revision-show-request.schema.json",
+      "valid": false
+    },
+    {
+      "fixture_id": "invalid_request_numeric_revision",
+      "fixture": "tests/fixtures/facet_schema_revision_readback/contracts/invalid_request_numeric_revision.json",
+      "schema": "contracts/schemas/facet-schema-revision-show-request.schema.json",
+      "valid": false
+    },
+    {
+      "fixture_id": "invalid_request_old_selector",
+      "fixture": "tests/fixtures/facet_schema_revision_readback/contracts/invalid_request_old_selector.json",
+      "schema": "contracts/schemas/facet-schema-revision-show-request.schema.json",
+      "valid": false
+    },
+    {
+      "fixture_id": "invalid_response_false_dry_run",
+      "fixture": "tests/fixtures/facet_schema_revision_readback/contracts/invalid_response_false_dry_run.json",
+      "schema": "contracts/schemas/facet-schema-revision-show-response.schema.json",
+      "valid": false
+    },
+    {
+      "fixture_id": "invalid_response_partial_definition",
+      "fixture": "tests/fixtures/facet_schema_revision_readback/contracts/invalid_response_partial_definition.json",
+      "schema": "contracts/schemas/facet-schema-revision-show-response.schema.json",
+      "valid": false
+    }
+  ],
+  "model_witness": "tests/fixtures/facet_schema_revision_readback/historical_pin_witness.json",
+  "runtime_verified": false
+}

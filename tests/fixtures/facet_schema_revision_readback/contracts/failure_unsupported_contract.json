@@ -1,0 +1,9 @@
+{
+  "ok": false,
+  "command": "facet_schema.revision.show",
+  "error": {
+    "code": "unsupported_contract_version",
+    "field": "contract_version",
+    "message": "Unsupported readback contract."
+  }
+}

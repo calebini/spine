@@ -1,0 +1,9 @@
+{
+  "ok": false,
+  "command": "facet_schema.revision.show",
+  "error": {
+    "code": "referenced_row_not_found",
+    "field": "facet_schema_revision_id",
+    "message": "Facet schema revision was not found."
+  }
+}

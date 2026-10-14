@@ -5,6 +5,8 @@ import hashlib
 import json
 from pathlib import Path
 
+from sync_web_contracts import SOURCE_ONLY_SCHEMAS
+
 ROOT = Path(__file__).resolve().parents[1]
 CONTRACTS = ROOT / "contracts"
 SCHEMAS = CONTRACTS / "schemas"
@@ -145,7 +147,7 @@ def main():
 
         save(old.with_name(old.name.replace(".schema.json", ".v2.schema.json")), transform(value))
     files = ["spine.trusted-web-facet-registry.v1.json", "archetype-facet-integration.v1.json"]
-    files += ["schemas/" + p.name for p in SCHEMAS.glob("*facet*.schema.json")]
+    files += ["schemas/" + p.name for p in SCHEMAS.glob("*facet*.schema.json") if p.name not in SOURCE_ONLY_SCHEMAS]
     files += ["schemas/" + p.name for p in SCHEMAS.glob("trusted-web-provisioning-*.v2.schema.json")]
     files += ["schemas/trusted-web-types.schema.json"]
     files += [str(p.relative_to(CONTRACTS)) for p in GENERATED]

@@ -1,0 +1,9 @@
+{
+  "ok": false,
+  "command": "facet_schema.revision.show",
+  "error": {
+    "code": "environment_failure",
+    "field": "capacity",
+    "message": "Facet operation capacity was exceeded."
+  }
+}

@@ -1,6 +1,6 @@
 # Spine Backlog
 
-Last updated: 2026-10-10
+Last updated: 2026-10-14
 
 This is the single work queue for Spine development. The
 [implementation plan](IMPLEMENTATION_PLAN.md) explains roadmap direction and delivery
@@ -34,6 +34,35 @@ record evidence and move it to Completed. Update affected orientation and contra
 status labels in the same change. Routine task updates do not change spec authority.
 
 ## Post-release corrective work
+
+### SPINE-055 — Specify trusted-local facet revision readback
+
+**Status:** Done — draft spec, source-only contracts and offline fixtures verified
+2026-10-13; included in the authorized 2026-10-14 specification checkpoint.
+Not ratified, implemented or pushed.
+**Baseline:** `57cda1c2d5589360ee8efe7155fd20b503034c2a`, runtime 0.9.1/schema 19.
+**Finding:** Current root lists cannot map an arbitrary historical revision pin to
+its root; old show requires that unknown root. Static source and ten offline schema
+checks confirmed the gap, not an implementation violation. Root probing cannot
+distinguish a missing revision from a wrong root/revision pair by error code/field.
+**Scope:** Draft `facet_schema.revision.show` with source-only closed contracts,
+immutable current/historical/retired readback, bounds/failures, computed fixtures and
+offline oracles. Keep the logical/storage owners and existing registries unchanged.
+**Boundary:** No runtime dispatch/declaration, HTTP exposure, storage migration,
+operator ledger, send, Whetstone run, push or changes to Spine Packs.
+**Delivered:** [Readback leaf](../specs/facet-schema-revision-readback.md), separate
+draft command/fixture manifests, three closed request/success/failure schemas,
+18 structural fixtures, six synthetic historical-state witnesses and eight offline
+contract/model tests. The A2/B2/B1 witness resolves B1 to actual root B without
+following current pointers or desired keys. Current/retired success and corruption/
+not-found distinctions preserve immutable hashes. Web generators explicitly exclude
+these source-only schemas; existing bundles, pins and registries are unchanged.
+**Verification:** 45 focused contract tests passed. Ruff, all three contract-sync
+checks, schema-object manifest check, 243 local Markdown link targets and
+`git diff --check` passed. These are offline contract/model checks, not runtime
+qualification. RR-01–11 executable acceptance obligations remain pending.
+**Next gate:** Bounded contract review, then explicit ratification/implementation
+and exact-baseline consumer adoption; not an authorization to start those steps.
 
 ### SPINE-054 — Repair successor notification-profile listing
 

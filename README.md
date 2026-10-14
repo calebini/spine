@@ -395,6 +395,9 @@ Draft work is not advertised as an implemented compatibility promise. See
   [Decision 0004](specs/decisions/0004-versioned-item-facets.md) — typed domain facts,
   schema ownership and versioning; trusted-local commands implemented, web integration pending.
 
+- **Proposed historical schema discovery:** [Facet revision readback](specs/facet-schema-revision-readback.md) —
+  trusted-local revision-to-root lookup contract and fixtures; not yet implemented.
+
 Start with the document that matches the job:
 
 - **Explore the illustrated product guide:**

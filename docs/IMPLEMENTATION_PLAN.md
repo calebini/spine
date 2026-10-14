@@ -1,9 +1,18 @@
 # Spine Implementation Plan
 
 Role: Roadmap rationale and delivery history; current task status lives in [BACKLOG.md](BACKLOG.md)
-Last updated: 2026-10-10 (successor profile-list correction)
+Last updated: 2026-10-13 (trusted-local facet revision readback draft)
 
 This is a non-normative delivery plan. The specifications and machine-readable contracts remain authoritative.
+
+The next selected design task is
+[SPINE-055](BACKLOG.md#spine-055--specify-trusted-local-facet-revision-readback):
+draft an exact revision-addressed catalog read and its machine contracts/fixtures
+to unblock historical-pin planning in Spine Packs. Use one bounded indexed lookup,
+not a new root-probing protocol. Current scope is trusted-local specification only;
+existing runtime/schema, HTTP registries and Packs artifacts remain unchanged.
+Review/ratification, implementation and a separately approved consumer release pin
+follow as explicit gates, not automatic work from this plan.
 
 The selected post-release correction is
 [SPINE-054](BACKLOG.md#spine-054--repair-successor-notification-profile-listing).

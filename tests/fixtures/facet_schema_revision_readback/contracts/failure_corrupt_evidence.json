@@ -1,0 +1,9 @@
+{
+  "ok": false,
+  "command": "facet_schema.revision.show",
+  "error": {
+    "code": "environment_failure",
+    "field": "facets",
+    "message": "Facet persistence evidence could not be verified."
+  }
+}

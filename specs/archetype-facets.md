@@ -178,6 +178,11 @@ none of these artifacts. These rules apply to all six facet write commands in Se
 
 ## 4. Proposed command surfaces
 
+The separately drafted [revision-addressed readback leaf](facet-schema-revision-readback.md)
+reserves `facet_schema.revision.show` for exact historical revision-to-root lookup.
+It is trusted-local only and not implemented; it does not change the eleven existing
+facet commands, their closed schemas or the dedicated HTTP registry below.
+
 All mutation requests use the owning proposed family, `command_id`, actor and explicit
 action timestamp under the existing common command contract. Fresh requests require
 the expected target revision/version. Read requests do not write receipts. Exact JSON

@@ -1,0 +1,748 @@
+{
+  "schema_version": "spine.facet-schema-revision-readback-model-witness.v1",
+  "status": "offline_model_only",
+  "runtime_verified": false,
+  "description": "Synthetic readback facts, not a complete ledger or runtime qualification.",
+  "scenarios": [
+    {
+      "id": "cross_root_historical_pin",
+      "state": {
+        "roots": [
+          {
+            "facet_schema_id": "facet_schema_A",
+            "owner": {
+              "owner_kind": "subject_group",
+              "owner_group_id": "example-owner-group"
+            },
+            "schema_key": "flight_details",
+            "current_revision_id": "facet_schema_revision_A2",
+            "status": "active"
+          },
+          {
+            "facet_schema_id": "facet_schema_B",
+            "owner": {
+              "owner_kind": "subject_group",
+              "owner_group_id": "example-owner-group"
+            },
+            "schema_key": "legacy_details",
+            "current_revision_id": "facet_schema_revision_B2",
+            "status": "active"
+          }
+        ],
+        "revisions": [
+          {
+            "facet_schema_id": "facet_schema_A",
+            "facet_schema_revision_id": "facet_schema_revision_A2",
+            "revision_number": "2",
+            "definition": {
+              "display_name": "Current flight details",
+              "description": null,
+              "compatible_item_types": [
+                "event"
+              ],
+              "fields": [
+                {
+                  "key": "flight_number",
+                  "type": "text",
+                  "max_length": "32",
+                  "required": true,
+                  "queryable": true
+                }
+              ]
+            },
+            "definition_hash": "3b238cee77177cbcf0457273158a85f3e847b04fe33cbe3ae3e08dfc6e85b59d"
+          },
+          {
+            "facet_schema_id": "facet_schema_B",
+            "facet_schema_revision_id": "facet_schema_revision_B1",
+            "revision_number": "1",
+            "definition": {
+              "display_name": "Legacy flight details",
+              "description": null,
+              "compatible_item_types": [
+                "event"
+              ],
+              "fields": [
+                {
+                  "key": "flight_number",
+                  "type": "text",
+                  "max_length": "32",
+                  "required": true,
+                  "queryable": true
+                }
+              ]
+            },
+            "definition_hash": "9d05f95b9e6a03489b759c4f7f82a38f8df4c52ddfc449d23e9319b3e0b1d1f6"
+          },
+          {
+            "facet_schema_id": "facet_schema_B",
+            "facet_schema_revision_id": "facet_schema_revision_B2",
+            "revision_number": "2",
+            "definition": {
+              "display_name": "Current flight details",
+              "description": null,
+              "compatible_item_types": [
+                "event"
+              ],
+              "fields": [
+                {
+                  "key": "flight_number",
+                  "type": "text",
+                  "max_length": "32",
+                  "required": true,
+                  "queryable": true
+                }
+              ]
+            },
+            "definition_hash": "3b238cee77177cbcf0457273158a85f3e847b04fe33cbe3ae3e08dfc6e85b59d"
+          }
+        ]
+      },
+      "context": {
+        "desired_facet_schema_id": "facet_schema_A",
+        "existing_binding": {
+          "facet_binding_id": "archetype_facet_binding_example",
+          "item_archetype_id": "item_archetype_example",
+          "facet_key": "flight_details",
+          "facet_schema_revision_id": "facet_schema_revision_B1",
+          "status": "active"
+        },
+        "rendering_selection": {
+          "selection_key": "flight",
+          "facet_key": "flight_details",
+          "facet_schema_revision_id": "facet_schema_revision_B1",
+          "field_key": "flight_number",
+          "label": "Flight",
+          "projection": "value"
+        }
+      },
+      "request": {
+        "contract_version": "spine.facet-schema-revision-readback.v1",
+        "facet_schema_revision_id": "facet_schema_revision_B1"
+      },
+      "expected": {
+        "ok": true,
+        "command": "facet_schema.revision.show",
+        "response_contract": "spine.facet-schema-revision-readback.v1",
+        "root": {
+          "facet_schema_id": "facet_schema_B",
+          "owner": {
+            "owner_kind": "subject_group",
+            "owner_group_id": "example-owner-group"
+          },
+          "schema_key": "legacy_details",
+          "current_revision_id": "facet_schema_revision_B2",
+          "status": "active"
+        },
+        "revision": {
+          "facet_schema_id": "facet_schema_B",
+          "facet_schema_revision_id": "facet_schema_revision_B1",
+          "revision_number": "1",
+          "definition": {
+            "display_name": "Legacy flight details",
+            "description": null,
+            "compatible_item_types": [
+              "event"
+            ],
+            "fields": [
+              {
+                "key": "flight_number",
+                "type": "text",
+                "max_length": "32",
+                "required": true,
+                "queryable": true
+              }
+            ]
+          },
+          "definition_hash": "9d05f95b9e6a03489b759c4f7f82a38f8df4c52ddfc449d23e9319b3e0b1d1f6"
+        }
+      }
+    },
+    {
+      "id": "current_revision",
+      "state": {
+        "roots": [
+          {
+            "facet_schema_id": "facet_schema_A",
+            "owner": {
+              "owner_kind": "subject_group",
+              "owner_group_id": "example-owner-group"
+            },
+            "schema_key": "flight_details",
+            "current_revision_id": "facet_schema_revision_A2",
+            "status": "active"
+          },
+          {
+            "facet_schema_id": "facet_schema_B",
+            "owner": {
+              "owner_kind": "subject_group",
+              "owner_group_id": "example-owner-group"
+            },
+            "schema_key": "legacy_details",
+            "current_revision_id": "facet_schema_revision_B2",
+            "status": "active"
+          }
+        ],
+        "revisions": [
+          {
+            "facet_schema_id": "facet_schema_A",
+            "facet_schema_revision_id": "facet_schema_revision_A2",
+            "revision_number": "2",
+            "definition": {
+              "display_name": "Current flight details",
+              "description": null,
+              "compatible_item_types": [
+                "event"
+              ],
+              "fields": [
+                {
+                  "key": "flight_number",
+                  "type": "text",
+                  "max_length": "32",
+                  "required": true,
+                  "queryable": true
+                }
+              ]
+            },
+            "definition_hash": "3b238cee77177cbcf0457273158a85f3e847b04fe33cbe3ae3e08dfc6e85b59d"
+          },
+          {
+            "facet_schema_id": "facet_schema_B",
+            "facet_schema_revision_id": "facet_schema_revision_B1",
+            "revision_number": "1",
+            "definition": {
+              "display_name": "Legacy flight details",
+              "description": null,
+              "compatible_item_types": [
+                "event"
+              ],
+              "fields": [
+                {
+                  "key": "flight_number",
+                  "type": "text",
+                  "max_length": "32",
+                  "required": true,
+                  "queryable": true
+                }
+              ]
+            },
+            "definition_hash": "9d05f95b9e6a03489b759c4f7f82a38f8df4c52ddfc449d23e9319b3e0b1d1f6"
+          },
+          {
+            "facet_schema_id": "facet_schema_B",
+            "facet_schema_revision_id": "facet_schema_revision_B2",
+            "revision_number": "2",
+            "definition": {
+              "display_name": "Current flight details",
+              "description": null,
+              "compatible_item_types": [
+                "event"
+              ],
+              "fields": [
+                {
+                  "key": "flight_number",
+                  "type": "text",
+                  "max_length": "32",
+                  "required": true,
+                  "queryable": true
+                }
+              ]
+            },
+            "definition_hash": "3b238cee77177cbcf0457273158a85f3e847b04fe33cbe3ae3e08dfc6e85b59d"
+          }
+        ]
+      },
+      "request": {
+        "contract_version": "spine.facet-schema-revision-readback.v1",
+        "facet_schema_revision_id": "facet_schema_revision_B2"
+      },
+      "expected": {
+        "ok": true,
+        "command": "facet_schema.revision.show",
+        "response_contract": "spine.facet-schema-revision-readback.v1",
+        "root": {
+          "facet_schema_id": "facet_schema_B",
+          "owner": {
+            "owner_kind": "subject_group",
+            "owner_group_id": "example-owner-group"
+          },
+          "schema_key": "legacy_details",
+          "current_revision_id": "facet_schema_revision_B2",
+          "status": "active"
+        },
+        "revision": {
+          "facet_schema_id": "facet_schema_B",
+          "facet_schema_revision_id": "facet_schema_revision_B2",
+          "revision_number": "2",
+          "definition": {
+            "display_name": "Current flight details",
+            "description": null,
+            "compatible_item_types": [
+              "event"
+            ],
+            "fields": [
+              {
+                "key": "flight_number",
+                "type": "text",
+                "max_length": "32",
+                "required": true,
+                "queryable": true
+              }
+            ]
+          },
+          "definition_hash": "3b238cee77177cbcf0457273158a85f3e847b04fe33cbe3ae3e08dfc6e85b59d"
+        }
+      }
+    },
+    {
+      "id": "retired_historical_revision",
+      "state": {
+        "roots": [
+          {
+            "facet_schema_id": "facet_schema_A",
+            "owner": {
+              "owner_kind": "subject_group",
+              "owner_group_id": "example-owner-group"
+            },
+            "schema_key": "flight_details",
+            "current_revision_id": "facet_schema_revision_A2",
+            "status": "active"
+          },
+          {
+            "facet_schema_id": "facet_schema_B",
+            "owner": {
+              "owner_kind": "subject_group",
+              "owner_group_id": "example-owner-group"
+            },
+            "schema_key": "legacy_details",
+            "current_revision_id": "facet_schema_revision_B2",
+            "status": "retired"
+          }
+        ],
+        "revisions": [
+          {
+            "facet_schema_id": "facet_schema_A",
+            "facet_schema_revision_id": "facet_schema_revision_A2",
+            "revision_number": "2",
+            "definition": {
+              "display_name": "Current flight details",
+              "description": null,
+              "compatible_item_types": [
+                "event"
+              ],
+              "fields": [
+                {
+                  "key": "flight_number",
+                  "type": "text",
+                  "max_length": "32",
+                  "required": true,
+                  "queryable": true
+                }
+              ]
+            },
+            "definition_hash": "3b238cee77177cbcf0457273158a85f3e847b04fe33cbe3ae3e08dfc6e85b59d"
+          },
+          {
+            "facet_schema_id": "facet_schema_B",
+            "facet_schema_revision_id": "facet_schema_revision_B1",
+            "revision_number": "1",
+            "definition": {
+              "display_name": "Legacy flight details",
+              "description": null,
+              "compatible_item_types": [
+                "event"
+              ],
+              "fields": [
+                {
+                  "key": "flight_number",
+                  "type": "text",
+                  "max_length": "32",
+                  "required": true,
+                  "queryable": true
+                }
+              ]
+            },
+            "definition_hash": "9d05f95b9e6a03489b759c4f7f82a38f8df4c52ddfc449d23e9319b3e0b1d1f6"
+          },
+          {
+            "facet_schema_id": "facet_schema_B",
+            "facet_schema_revision_id": "facet_schema_revision_B2",
+            "revision_number": "2",
+            "definition": {
+              "display_name": "Current flight details",
+              "description": null,
+              "compatible_item_types": [
+                "event"
+              ],
+              "fields": [
+                {
+                  "key": "flight_number",
+                  "type": "text",
+                  "max_length": "32",
+                  "required": true,
+                  "queryable": true
+                }
+              ]
+            },
+            "definition_hash": "3b238cee77177cbcf0457273158a85f3e847b04fe33cbe3ae3e08dfc6e85b59d"
+          }
+        ]
+      },
+      "request": {
+        "contract_version": "spine.facet-schema-revision-readback.v1",
+        "facet_schema_revision_id": "facet_schema_revision_B1"
+      },
+      "expected": {
+        "ok": true,
+        "command": "facet_schema.revision.show",
+        "response_contract": "spine.facet-schema-revision-readback.v1",
+        "root": {
+          "facet_schema_id": "facet_schema_B",
+          "owner": {
+            "owner_kind": "subject_group",
+            "owner_group_id": "example-owner-group"
+          },
+          "schema_key": "legacy_details",
+          "current_revision_id": "facet_schema_revision_B2",
+          "status": "retired"
+        },
+        "revision": {
+          "facet_schema_id": "facet_schema_B",
+          "facet_schema_revision_id": "facet_schema_revision_B1",
+          "revision_number": "1",
+          "definition": {
+            "display_name": "Legacy flight details",
+            "description": null,
+            "compatible_item_types": [
+              "event"
+            ],
+            "fields": [
+              {
+                "key": "flight_number",
+                "type": "text",
+                "max_length": "32",
+                "required": true,
+                "queryable": true
+              }
+            ]
+          },
+          "definition_hash": "9d05f95b9e6a03489b759c4f7f82a38f8df4c52ddfc449d23e9319b3e0b1d1f6"
+        }
+      }
+    },
+    {
+      "id": "missing_revision",
+      "state": {
+        "roots": [
+          {
+            "facet_schema_id": "facet_schema_A",
+            "owner": {
+              "owner_kind": "subject_group",
+              "owner_group_id": "example-owner-group"
+            },
+            "schema_key": "flight_details",
+            "current_revision_id": "facet_schema_revision_A2",
+            "status": "active"
+          },
+          {
+            "facet_schema_id": "facet_schema_B",
+            "owner": {
+              "owner_kind": "subject_group",
+              "owner_group_id": "example-owner-group"
+            },
+            "schema_key": "legacy_details",
+            "current_revision_id": "facet_schema_revision_B2",
+            "status": "active"
+          }
+        ],
+        "revisions": [
+          {
+            "facet_schema_id": "facet_schema_A",
+            "facet_schema_revision_id": "facet_schema_revision_A2",
+            "revision_number": "2",
+            "definition": {
+              "display_name": "Current flight details",
+              "description": null,
+              "compatible_item_types": [
+                "event"
+              ],
+              "fields": [
+                {
+                  "key": "flight_number",
+                  "type": "text",
+                  "max_length": "32",
+                  "required": true,
+                  "queryable": true
+                }
+              ]
+            },
+            "definition_hash": "3b238cee77177cbcf0457273158a85f3e847b04fe33cbe3ae3e08dfc6e85b59d"
+          },
+          {
+            "facet_schema_id": "facet_schema_B",
+            "facet_schema_revision_id": "facet_schema_revision_B1",
+            "revision_number": "1",
+            "definition": {
+              "display_name": "Legacy flight details",
+              "description": null,
+              "compatible_item_types": [
+                "event"
+              ],
+              "fields": [
+                {
+                  "key": "flight_number",
+                  "type": "text",
+                  "max_length": "32",
+                  "required": true,
+                  "queryable": true
+                }
+              ]
+            },
+            "definition_hash": "9d05f95b9e6a03489b759c4f7f82a38f8df4c52ddfc449d23e9319b3e0b1d1f6"
+          },
+          {
+            "facet_schema_id": "facet_schema_B",
+            "facet_schema_revision_id": "facet_schema_revision_B2",
+            "revision_number": "2",
+            "definition": {
+              "display_name": "Current flight details",
+              "description": null,
+              "compatible_item_types": [
+                "event"
+              ],
+              "fields": [
+                {
+                  "key": "flight_number",
+                  "type": "text",
+                  "max_length": "32",
+                  "required": true,
+                  "queryable": true
+                }
+              ]
+            },
+            "definition_hash": "3b238cee77177cbcf0457273158a85f3e847b04fe33cbe3ae3e08dfc6e85b59d"
+          }
+        ]
+      },
+      "request": {
+        "contract_version": "spine.facet-schema-revision-readback.v1",
+        "facet_schema_revision_id": "facet_schema_revision_missing"
+      },
+      "expected": {
+        "ok": false,
+        "command": "facet_schema.revision.show",
+        "error": {
+          "code": "referenced_row_not_found",
+          "field": "facet_schema_revision_id",
+          "message": "Facet schema revision was not found."
+        }
+      }
+    },
+    {
+      "id": "corrupt_missing_root",
+      "state": {
+        "roots": [
+          {
+            "facet_schema_id": "facet_schema_A",
+            "owner": {
+              "owner_kind": "subject_group",
+              "owner_group_id": "example-owner-group"
+            },
+            "schema_key": "flight_details",
+            "current_revision_id": "facet_schema_revision_A2",
+            "status": "active"
+          }
+        ],
+        "revisions": [
+          {
+            "facet_schema_id": "facet_schema_A",
+            "facet_schema_revision_id": "facet_schema_revision_A2",
+            "revision_number": "2",
+            "definition": {
+              "display_name": "Current flight details",
+              "description": null,
+              "compatible_item_types": [
+                "event"
+              ],
+              "fields": [
+                {
+                  "key": "flight_number",
+                  "type": "text",
+                  "max_length": "32",
+                  "required": true,
+                  "queryable": true
+                }
+              ]
+            },
+            "definition_hash": "3b238cee77177cbcf0457273158a85f3e847b04fe33cbe3ae3e08dfc6e85b59d"
+          },
+          {
+            "facet_schema_id": "facet_schema_B",
+            "facet_schema_revision_id": "facet_schema_revision_B1",
+            "revision_number": "1",
+            "definition": {
+              "display_name": "Legacy flight details",
+              "description": null,
+              "compatible_item_types": [
+                "event"
+              ],
+              "fields": [
+                {
+                  "key": "flight_number",
+                  "type": "text",
+                  "max_length": "32",
+                  "required": true,
+                  "queryable": true
+                }
+              ]
+            },
+            "definition_hash": "9d05f95b9e6a03489b759c4f7f82a38f8df4c52ddfc449d23e9319b3e0b1d1f6"
+          },
+          {
+            "facet_schema_id": "facet_schema_B",
+            "facet_schema_revision_id": "facet_schema_revision_B2",
+            "revision_number": "2",
+            "definition": {
+              "display_name": "Current flight details",
+              "description": null,
+              "compatible_item_types": [
+                "event"
+              ],
+              "fields": [
+                {
+                  "key": "flight_number",
+                  "type": "text",
+                  "max_length": "32",
+                  "required": true,
+                  "queryable": true
+                }
+              ]
+            },
+            "definition_hash": "3b238cee77177cbcf0457273158a85f3e847b04fe33cbe3ae3e08dfc6e85b59d"
+          }
+        ]
+      },
+      "request": {
+        "contract_version": "spine.facet-schema-revision-readback.v1",
+        "facet_schema_revision_id": "facet_schema_revision_B1"
+      },
+      "expected": {
+        "ok": false,
+        "command": "facet_schema.revision.show",
+        "error": {
+          "code": "environment_failure",
+          "field": "facets",
+          "message": "Facet persistence evidence could not be verified."
+        }
+      }
+    },
+    {
+      "id": "corrupt_definition_hash",
+      "state": {
+        "roots": [
+          {
+            "facet_schema_id": "facet_schema_A",
+            "owner": {
+              "owner_kind": "subject_group",
+              "owner_group_id": "example-owner-group"
+            },
+            "schema_key": "flight_details",
+            "current_revision_id": "facet_schema_revision_A2",
+            "status": "active"
+          },
+          {
+            "facet_schema_id": "facet_schema_B",
+            "owner": {
+              "owner_kind": "subject_group",
+              "owner_group_id": "example-owner-group"
+            },
+            "schema_key": "legacy_details",
+            "current_revision_id": "facet_schema_revision_B2",
+            "status": "active"
+          }
+        ],
+        "revisions": [
+          {
+            "facet_schema_id": "facet_schema_A",
+            "facet_schema_revision_id": "facet_schema_revision_A2",
+            "revision_number": "2",
+            "definition": {
+              "display_name": "Current flight details",
+              "description": null,
+              "compatible_item_types": [
+                "event"
+              ],
+              "fields": [
+                {
+                  "key": "flight_number",
+                  "type": "text",
+                  "max_length": "32",
+                  "required": true,
+                  "queryable": true
+                }
+              ]
+            },
+            "definition_hash": "3b238cee77177cbcf0457273158a85f3e847b04fe33cbe3ae3e08dfc6e85b59d"
+          },
+          {
+            "facet_schema_id": "facet_schema_B",
+            "facet_schema_revision_id": "facet_schema_revision_B1",
+            "revision_number": "1",
+            "definition": {
+              "display_name": "Legacy flight details",
+              "description": null,
+              "compatible_item_types": [
+                "event"
+              ],
+              "fields": [
+                {
+                  "key": "flight_number",
+                  "type": "text",
+                  "max_length": "32",
+                  "required": true,
+                  "queryable": true
+                }
+              ]
+            },
+            "definition_hash": "0000000000000000000000000000000000000000000000000000000000000000"
+          },
+          {
+            "facet_schema_id": "facet_schema_B",
+            "facet_schema_revision_id": "facet_schema_revision_B2",
+            "revision_number": "2",
+            "definition": {
+              "display_name": "Current flight details",
+              "description": null,
+              "compatible_item_types": [
+                "event"
+              ],
+              "fields": [
+                {
+                  "key": "flight_number",
+                  "type": "text",
+                  "max_length": "32",
+                  "required": true,
+                  "queryable": true
+                }
+              ]
+            },
+            "definition_hash": "3b238cee77177cbcf0457273158a85f3e847b04fe33cbe3ae3e08dfc6e85b59d"
+          }
+        ]
+      },
+      "request": {
+        "contract_version": "spine.facet-schema-revision-readback.v1",
+        "facet_schema_revision_id": "facet_schema_revision_B1"
+      },
+      "expected": {
+        "ok": false,
+        "command": "facet_schema.revision.show",
+        "error": {
+          "code": "environment_failure",
+          "field": "facets",
+          "message": "Facet persistence evidence could not be verified."
+        }
+      }
+    }
+  ]
+}
