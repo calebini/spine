@@ -1,18 +1,19 @@
 # Spine Implementation Plan
 
 Role: Roadmap rationale and delivery history; current task status lives in [BACKLOG.md](BACKLOG.md)
-Last updated: 2026-10-13 (trusted-local facet revision readback draft)
+Last updated: 2026-10-15 (trusted-local facet revision readback delivery plan)
 
 This is a non-normative delivery plan. The specifications and machine-readable contracts remain authoritative.
 
-The next selected design task is
-[SPINE-055](BACKLOG.md#spine-055--specify-trusted-local-facet-revision-readback):
-draft an exact revision-addressed catalog read and its machine contracts/fixtures
-to unblock historical-pin planning in Spine Packs. Use one bounded indexed lookup,
-not a new root-probing protocol. Current scope is trusted-local specification only;
-existing runtime/schema, HTTP registries and Packs artifacts remain unchanged.
-Review/ratification, implementation and a separately approved consumer release pin
-follow as explicit gates, not automatic work from this plan.
+The next bounded delivery is
+[SPINE-058](BACKLOG.md#spine-058--deliver-trusted-local-facet-revision-readback):
+ratify, then implement an exact revision-addressed catalog read to unblock historical-
+pin planning in Spine Packs. SPINE-055–057 delivered and pushed the draft, contracts,
+fixtures and manually verified review clarification through `3968dfd`. The review
+had no blockers or majors; its corrected minor has not been re-audited. This plan
+does not ratify the draft or authorize runtime work. Implementation and exact-pin
+consumer adoption follow explicit gates; current runtime/schema and web exposure
+remain unchanged.
 
 The selected post-release correction is
 [SPINE-054](BACKLOG.md#spine-054--repair-successor-notification-profile-listing).
@@ -64,6 +65,48 @@ and resilience following the event-emission fixes and has deferred SPINE-004–0
 SPINE-010. The historical resilience-first sequencing below no longer schedules work
 or makes those initiatives blanket prerequisites for facets or advisories. Preserve
 their feature-specific contract and verification requirements.
+
+## Planned Delivery: Trusted-Local Facet Revision Readback (SPINE-058)
+
+Spine Packs FR-2 needs to resolve historical revision pins without guessing roots
+from desired keys or current catalog pointers. One indexed lookup is a smaller,
+more coherent addition than a client probing protocol or changes to several closed
+binding/rendering projections. The [readback leaf](../specs/facet-schema-revision-readback.md),
+[machine companion](../contracts/facet-schema-revision-readback.v1.json) and
+[fixture manifest](../contracts/facet-schema-revision-readback-fixture-manifest.json)
+own behavior. Existing facet logical/storage and command/preflight owners retain
+authority. Current progress and completion evidence belong only in SPINE-058.
+
+Deliver this as one cohesive runtime slice after explicit ratification and
+implementation authorization, with three internal gates rather than separate
+environment deployments:
+
+1. **Contract acceptance:** Ratify draft v0.1.1 and its source-only machine contract
+   without treating offline models as runtime proof. No additional routine audit
+   is planned for the recommendation-aligned minor correction; new substantive
+   ambiguity must still be surfaced.
+2. **Implementation and proof:** Add trusted-local CLI dispatch, bounded read-only
+   snapshot resolution, exact compiled prerequisite declarations and deliberate
+   installed schema closure. Preserve original stored decoding and hashes, apply
+   the specified deterministic error order, and add real disposable-ledger tests
+   for all RR-01–11 obligations. Include concurrent catalog changes, failure/limit
+   injection, no-write assertions and installed-package command verification.
+   Do not advertise a partially verified capability.
+3. **Release and consumer handoff:** Complete operator examples, version declarations,
+   focused then full regression checks, contract-sync/package checks and RR evidence.
+   After separately authorized commit/push, provide the exact implemented release pin
+   to Spine Packs. Its adoption refreshes its inventory/schema closure and qualifies
+   FR-2 planning against old cross-root pins; that is separate work, not accomplished
+   by Spine's release tests. Deployment also remains separately authorized.
+
+No database migration, index/layout change, HTTP/MCP route, new permission model,
+batch/history enumeration or root probing is part of this delivery. Existing web
+registries, packaged web bytes, facet commands and binding/rendering wire shapes
+must remain unchanged; local packaging changes must not leak into the frozen web
+closure. Do not choose a runtime version from this roadmap or claim a schema bump:
+the inspected baseline is 0.9.1/schema 19 and the additive release number is assigned
+with implementation. No Spine Packs changes, live ledgers or notification sends are
+authorized by this plan.
 
 ## Planned Delivery: Facet-Aware Notification Rendering (SPINE-051–053)
 

@@ -35,11 +35,64 @@ status labels in the same change. Routine task updates do not change spec author
 
 ## Post-release corrective work
 
+### SPINE-058 — Deliver trusted-local facet revision readback
+
+**Status:** Ready — bounded delivery plan recorded 2026-10-15; ratification and
+runtime implementation remain separately authorized gates. No runtime work started.
+**Dependency:** SPINE-055–057 draft/contracts/fixtures and minor clarification are
+pushed through `3968dfd2beeb08411468494b7cb465471bbc52fd`. The bounded review found
+no blockers or majors; its single minor was manually corrected and verified, not
+re-audited. The design remains draft v0.1.1.
+**Authority:** [Readback leaf](../specs/facet-schema-revision-readback.md), its
+[machine companion](../contracts/facet-schema-revision-readback.v1.json) and
+[fixture manifest](../contracts/facet-schema-revision-readback-fixture-manifest.json).
+This task allocates implementation/proof; it does not change those contracts.
+**Scope:** One cohesive additive trusted-local release of
+`facet_schema.revision.show`, resolving an exact revision ID to its actual root and
+complete immutable definition using existing storage.
+**Sequence:**
+
+1. Explicitly ratify the reviewed logical/machine contract, preserving pending
+   runtime obligations and unimplemented status until executable proof exists.
+2. On implementation authorization, add bounded snapshot lookup, public CLI dispatch,
+   read-only compiled registry/prerequisite declarations and deliberate installed
+   local schema dependency closure. Reuse stored versioned decoding and existing
+   indexes. Add runtime tests alongside the command, not as a later project.
+3. Complete RR-01–11, operator documentation and additive release declarations;
+   record exact evidence before advertising the capability. Commit/push, deployment
+   and Spine Packs adoption each require their own authorization.
+
+**Acceptance/proof:** Map every RR-01–11 obligation to executable evidence:
+
+- Public CLI current/historical/retired reads and the A2/B2/B1 cross-root witness
+  preserve exact root identity, definition/hash/ordinal (RR-01–03).
+- Missing versus corrupt/unsupported-history failures, combined-input precedence
+  and dry-run markers match the closed contract (RR-04–06).
+- Success/failure are mutation-free; indexed bounded lookup fails closed at all
+  specified byte/resource/SQL/time/lock limits; concurrent publish/retire yields one
+  coherent snapshot (RR-07–09).
+- Existing commands, binding/rendering shapes and frozen web surfaces remain
+  unchanged; an installed non-editable package exposes the intended local contracts
+  with exact compiled prerequisite parity (RR-10–11).
+
+Run focused command/contract/storage/preflight/package regressions first, then the
+appropriate full repository suite, contract-sync and diff hygiene checks. Use only
+disposable ledgers and test adapters; no operator-ledger or delivery activity.
+**Boundary:** No HTTP/MCP exposure, new authorization model, batch/history enumeration,
+root probing, database migration, schema/index changes, facet-value authoring,
+notification behavior changes or Spine Packs edits. Do not revive deferred work.
+**Handoff:** Supply Spine Packs the exact implemented release commit/runtime/schema,
+selector/request/result/failure contract and schema closure, with RR evidence and
+the A2/B2/B1 example. Packs must explicitly adopt that pin and qualify FR-2 planning;
+neither this plan nor Spine's tests qualify its installer.
+**Next:** Obtain ratification and implementation authorization; no further routine
+Whetstone pass is scheduled for the already corrected minor. Surface any new genuine
+contract ambiguity rather than inventing behavior.
+
 ### SPINE-057 — Clarify revision-readback request error precedence
 
 **Status:** Done — targeted manual draft-contract/model patch verified 2026-10-15;
-included in this authorized specification checkpoint; not ratified, implemented,
-pushed or re-audited.
+committed and pushed as `3968dfd`; not ratified, implemented or re-audited.
 **Source:** SPINE-056 audit `fb_001` (minor); pass_with_minor_clarification with
 boundary preserved, no blocker or major finding.
 **Scope:** Specify extra-before-missing shape validation and deterministic field
@@ -94,7 +147,7 @@ re-audited. No convergence is claimed.
 
 **Status:** Done — draft spec, source-only contracts and offline fixtures verified
 2026-10-13; included in the authorized 2026-10-14 specification checkpoint.
-Not ratified, implemented or pushed.
+Pushed through `3968dfd`; not ratified or implemented.
 **Baseline:** `57cda1c2d5589360ee8efe7155fd20b503034c2a`, runtime 0.9.1/schema 19.
 **Finding:** Current root lists cannot map an arbitrary historical revision pin to
 its root; old show requires that unknown root. Static source and ten offline schema
