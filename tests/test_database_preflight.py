@@ -62,7 +62,7 @@ class CommandRuntimeContractRegistryTests(unittest.TestCase):
         from spine.commands.facets import CONTRACTS as FACET_COMMANDS
         from spine.commands.rendering_catalog import COMMANDS as RENDERING_COMMANDS
 
-        self.assertEqual(len(COMMAND_RUNTIME_CONTRACT_REGISTRY), 75)
+        self.assertEqual(len(COMMAND_RUNTIME_CONTRACT_REGISTRY), 76)
         self.assertEqual(
             set(COMMAND_RUNTIME_CONTRACT_REGISTRY),
             _dispatch_commands() | set(PROFILE_COMMANDS) | set(FACET_COMMANDS) | set(RENDERING_COMMANDS),
@@ -87,6 +87,7 @@ class CommandRuntimeContractRegistryTests(unittest.TestCase):
             "system.info",
             "web_access.plan",
             "facet_schema.show",
+            "facet_schema.revision.show",
             "facet_schema.list",
             "item_archetype.facet_binding.list",
             "item.facets.show",

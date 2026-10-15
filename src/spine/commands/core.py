@@ -9482,6 +9482,8 @@ def _error(command: str, code: str, message: str, field: str | None = None) -> d
 def _validation_error(command: str, exc: SpineValidationError) -> dict[str, Any]:
     code = exc.code
     public, _, field = code.partition(":")
+    if command == "facet_schema.revision.show" and public == "missing_required_field":
+        return _error(command, public, exc.message, field)
     if public in {"facet_schema_invalid", "facet_value_invalid", "facet_binding_conflict", "facet_archetype_conflict",
                   "facet_schema_retired", "facet_reference_unavailable", "wrong_item_type", "unsupported_contract_version"}:
         return _error(command, public, exc.message, field or "request")

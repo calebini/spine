@@ -1,4 +1,4 @@
-"""Offline draft wire/model checks; no handler, ledger or runtime qualification."""
+"""Offline wire/model checks, separate from the executable RR-01–11 proofs."""
 
 import copy
 import hashlib
@@ -84,7 +84,7 @@ class FacetSchemaRevisionReadbackContractTests(unittest.TestCase):
         for schema in self.schemas.values():
             Draft202012Validator.check_schema(schema)
         self.assertEqual(self.manifest["schema_version"], "spine.facet-schema-revision-readback-fixtures.v1")
-        self.assertEqual(self.manifest["status"], "draft_contract_only")
+        self.assertEqual(self.manifest["status"], "ratified_contract")
         self.assertFalse(self.manifest["runtime_verified"])
         ids, paths = set(), set()
         for row in self.manifest["fixtures"]:
@@ -100,15 +100,18 @@ class FacetSchemaRevisionReadbackContractTests(unittest.TestCase):
                 self.assertEqual(not errors, row["valid"], "\n".join(e.message for e in errors))
         self.assertEqual(paths, {str(p.relative_to(ROOT)) for p in (FIXTURES / "contracts").glob("*.json")})
 
-    def test_draft_surface_is_not_runtime_or_http_advertisement(self):
+    def test_implemented_local_surface_does_not_extend_frozen_http(self):
         self.assertEqual(self.contract["contract_version"], CONTRACT)
-        self.assertEqual(self.contract["status"], "draft_contract_only")
+        self.assertEqual(self.contract["status"], "implemented")
         self.assertEqual(self.contract["exposure"], "trusted_local_only")
-        self.assertFalse(self.contract["runtime_implemented"])
+        self.assertTrue(self.contract["runtime_implemented"])
         self.assertFalse(self.contract["inspected_baseline"]["implements_command"])
         self.assertEqual(set(self.contract["commands"]), {COMMAND})
-        self.assertNotIn(CONTRACT, IMPLEMENTED_CONTRACT_VERSIONS)
-        self.assertNotIn(COMMAND, COMMAND_RUNTIME_CONTRACT_REGISTRY)
+        self.assertIn(CONTRACT, IMPLEMENTED_CONTRACT_VERSIONS)
+        self.assertEqual(
+            list(COMMAND_RUNTIME_CONTRACT_REGISTRY[COMMAND].required_contract_versions),
+            self.contract["commands"][COMMAND]["required_contract_versions"],
+        )
         for path in (
             "contracts/spine.trusted-web-command-registry.v1.json",
             "contracts/spine.trusted-web-facet-registry.v1.json",
@@ -155,7 +158,7 @@ class FacetSchemaRevisionReadbackContractTests(unittest.TestCase):
             },
         )
         self.assertEqual([row["id"] for row in self.contract["runtime_obligations"]], [f"RR-{i:02}" for i in range(1, 12)])
-        self.assertEqual({row["status"] for row in self.contract["runtime_obligations"]}, {"pending_runtime_verification"})
+        self.assertEqual({row["status"] for row in self.contract["runtime_obligations"]}, {"verified_runtime"})
 
     def test_request_precedence_is_explicit_in_the_machine_contract(self):
         self.assertEqual(
@@ -300,7 +303,7 @@ class FacetSchemaRevisionReadbackContractTests(unittest.TestCase):
 
     def test_leaf_spec_marks_fixture_and_implementation_limits(self):
         spec = (ROOT / "specs/facet-schema-revision-readback.md").read_text()
-        self.assertIn("not implemented", spec)
+        self.assertIn("Ratified v1.0.0", spec)
         self.assertIn("trusted-local only", spec)
         self.assertIn("not** completed runtime", spec)
         for row in self.contract["runtime_obligations"]:

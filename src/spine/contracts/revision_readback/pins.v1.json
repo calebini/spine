@@ -1,0 +1,12 @@
+{
+  "contract_version": "spine.local-revision-readback-package-pins.v1",
+  "files": {
+    "facet-schema-revision-readback.v1.json": "3dca53927ac184abda906bbb810b1e1c73d563012b95cabc27c64182e6f8d4b8",
+    "schemas/archetype-facet-types.schema.json": "689163800b0aaa07b87a1fc75a7bea7150bd70f1bcf2fbad901466cdf594dcda",
+    "schemas/facet-schema-revision-show-failure.schema.json": "bd270c411dbb0442d27450f993bfe4ac907d6498f5c5ebc3783d7ddc6910c04f",
+    "schemas/facet-schema-revision-show-request.schema.json": "d46eb34485c64624be347d65ae4d8e309cc8ed20dd59459995d947ef8e4a1d12",
+    "schemas/facet-schema-revision-show-response.schema.json": "48be527872412111b35a964ba172609422465cc7e349693701c420c296a9a2fb",
+    "schemas/notification-profile-types.schema.json": "182353b53719d924cb062d898d7e3cae1f0de9e124bb2b793c26fa6a59ab6b8c",
+    "schemas/notification-types.schema.json": "48507bcf78b6df80a6c9ca8ebf7b0a5fa7e26b8b691befdc1e7353ae63b7b2c1"
+  }
+}

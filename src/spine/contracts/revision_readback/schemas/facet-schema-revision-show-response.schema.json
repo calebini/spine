@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cortext.local/spine/contracts/schemas/facet-schema-revision-show-response.schema.json",
+  "title": "Spine exact facet schema revision show response (v1)",
+  "$comment": "Ratified trusted-local contract; no HTTP exposure. Authority: specs/facet-schema-revision-readback.md. Semantic proof additionally requires requested revision equality, equal root IDs, original hash verification and normalized persistence parity.",
+  "type": "object",
+  "required": [
+    "ok",
+    "command",
+    "response_contract",
+    "root",
+    "revision"
+  ],
+  "properties": {
+    "ok": {
+      "const": true
+    },
+    "command": {
+      "const": "facet_schema.revision.show"
+    },
+    "response_contract": {
+      "const": "spine.facet-schema-revision-readback.v1"
+    },
+    "root": {
+      "$ref": "archetype-facet-types.schema.json#/$defs/root"
+    },
+    "revision": {
+      "$ref": "archetype-facet-types.schema.json#/$defs/revision"
+    },
+    "dry_run": {
+      "const": true
+    }
+  },
+  "additionalProperties": false
+}

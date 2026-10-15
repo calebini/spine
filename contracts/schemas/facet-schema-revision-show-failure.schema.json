@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://cortext.local/spine/contracts/schemas/facet-schema-revision-show-failure.schema.json",
-  "title": "Spine exact facet schema revision show handler failure (draft v1)",
-  "$comment": "Draft trusted-local reservation; not implemented, advertised or exposed through HTTP. Authority: specs/facet-schema-revision-readback.md.",
+  "title": "Spine exact facet schema revision show handler failure (v1)",
+  "$comment": "Ratified trusted-local contract; no HTTP exposure. Authority: specs/facet-schema-revision-readback.md.",
   "type": "object",
   "required": [
     "ok",

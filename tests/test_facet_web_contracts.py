@@ -23,13 +23,17 @@ ROOT = Path(__file__).parents[1]
 class FacetWebContractTests(unittest.TestCase):
     def test_closed_registry_schemas_pins_and_all_canonical_requests(self):
         schemas, _ = bundle()
-        self.assertEqual(len(registry()["commands"]), 11)
+        http_commands = {row["command"] for row in registry()["commands"]}
+        self.assertEqual(len(http_commands), 11)
+        self.assertLess(http_commands, set(CONTRACTS))
+        self.assertNotIn("facet_schema.revision.show", http_commands)
+        self.assertNotIn("facet_schema.revision.show", schemas["trusted-web-facet-request.schema.json"]["$defs"])
         for name, value in schemas.items():
             if name.startswith("trusted-web-facet-") or ".v2.schema" in name and "provisioning" in name:
                 Draft202012Validator.check_schema(value)
         for name, digest in artifact("trusted-web-facet-pins.v1.json")["files"].items():
             self.assertEqual(hashlib.sha256((ROOT / "contracts" / name).read_bytes()).hexdigest(), digest)
-        for command in CONTRACTS:
+        for command in sorted(http_commands):
             with self.subTest(command=command):
                 path = ROOT / "tests/fixtures/archetype_facets/contracts" / ("request_" + command.replace(".", "_") + ".json")
                 body = {"request": json.loads(path.read_text())}

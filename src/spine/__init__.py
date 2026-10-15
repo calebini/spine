@@ -2,7 +2,7 @@
 
 __all__ = ["IMPLEMENTED_CONTRACT_VERSIONS", "IMPLEMENTED_LEDGER_SCHEMA_VERSION", "__version__"]
 
-__version__ = "0.9.1"
+__version__ = "0.10.0"
 
 IMPLEMENTED_LEDGER_SCHEMA_VERSION = 19
 IMPLEMENTED_CONTRACT_VERSIONS = frozenset(
@@ -28,6 +28,7 @@ IMPLEMENTED_CONTRACT_VERSIONS = frozenset(
         "spine.schedule-show.v2",
         "spine.canonical-json.v1",
         "spine.facet-schemas.v1",
+        "spine.facet-schema-revision-readback.v1",
         "spine.archetype-facet-bindings.v1",
         "spine.item-facets.v1",
         "spine.item-facet-query.v1",

@@ -72,10 +72,13 @@ V2 adds `facet_schema` grant targets only, as defined by
 
 ## 2. Authority
 
-The draft [facet revision readback](facet-schema-revision-readback.md) separately
-reserves trusted-local `facet_schema.revision.show`. It has source-only contracts
-and fixtures, not a compiled command/dependency declaration or an HTTP route.
-Existing implemented-command lists and admission registries remain unchanged.
+The ratified [facet revision readback](facet-schema-revision-readback.md) adds
+trusted-local `facet_schema.revision.show` in runtime 0.10.0/schema 19. Its separate
+machine contract and installed local schema closure declare read-only execution and
+exact prerequisites: `spine.facet-schema-revision-readback.v1`,
+`spine.facet-schemas.v1`, `spine.canonical-json.v1`, and
+`spine.notification-rendering-integration.v1`. It requires no cursor configuration
+and adds no HTTP route or changes to the frozen admission registries.
 
 This contract depends on `specs/overview.md`, `specs/architecture.md`, `specs/operational-resilience.md`, `specs/compatibility.md`, `specs/ontology.md`, `specs/recurrence.md`, `specs/notifications.md`, `specs/schedule-create.md`, `specs/schedule-show.md`, `specs/schedule-operator-tools.md`, `specs/schedule-operations.md`, the additive `specs/schedule-primary-location.md` capability, `specs/notification-profiles.md`, and `specs/SPINE_SPEC_VERSIONING_AND_FREEZE_POLICY.md`. If this document conflicts with `specs/ontology.md`, the ontology wins for ledger truth and this document must be corrected.
 
@@ -103,6 +106,7 @@ and `notification_profile.resolve`.
 
 The implemented trusted-local facet commands are `facet_schema.create`,
 `facet_schema.publish`, `facet_schema.retire`, `facet_schema.show`, `facet_schema.list`,
+`facet_schema.revision.show`,
 `item_archetype.facet_binding.set`, `item_archetype.facet_binding.remove`,
 `item_archetype.facet_binding.list`, `item.facets.update`, `item.facets.show`, and
 `item.facets.query`. Their exact families, receipts and bounds are owned by

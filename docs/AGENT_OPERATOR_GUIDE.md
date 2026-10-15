@@ -16,6 +16,13 @@ provisioning and notification retention semantics. The separate permission-enfor
 [facet API](FACET_WEB_API.md) is also available; do not add facet fields to existing
 schedule/agenda payloads. CLI privileges are unchanged.
 
+Runtime 0.10.0/schema 19 adds trusted-local `facet_schema.revision.show`: given an
+exact schema-revision pin from a binding or rendering selection, read its actual
+root and complete immutable definition without root guessing, catalog probing or
+cursor configuration. Follow [exact revision readback](FACET_COMMANDS.md#exact-revision-readback)
+for the two-field request, failure handling and Spine Packs handoff. No HTTP route,
+write, migration or disclosure approval is added.
+
 Runtime 0.8.3/schema 18 additionally freezes canonical location fields once referenced
 by any facet, including historical/non-queryable fields. Correct a location by creating
 a new location ID and explicitly updating the item's facet values in a new version;

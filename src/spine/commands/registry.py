@@ -45,6 +45,7 @@ _READ_COMMANDS = frozenset(
         "notification_rendering_disclosure.list",
         "web_access.plan",
         "facet_schema.show",
+        "facet_schema.revision.show",
         "facet_schema.list",
         "item_archetype.facet_binding.list",
         "item.facets.show",
@@ -83,6 +84,7 @@ _requirements({"web_access.plan", "web_access.apply"}, "spine.trusted-web-provis
 _requirements({"web_access.plan", "web_access.apply"}, "spine.trusted-web-provisioning.v2")
 _requirements({"facet_schema.create", "facet_schema.publish", "facet_schema.retire", "facet_schema.show"}, "spine.facet-schemas.v1")
 _requirements({"facet_schema.list"}, "spine.facet-schemas.v1", "spine.facet-cursor.v1")
+_requirements({"facet_schema.revision.show"}, "spine.facet-schema-revision-readback.v1", "spine.facet-schemas.v1")
 _requirements({"item_archetype.facet_binding.set", "item_archetype.facet_binding.remove"}, "spine.archetype-facet-bindings.v1")
 _requirements({"item_archetype.facet_binding.list"}, "spine.archetype-facet-bindings.v1", "spine.facet-cursor.v1")
 _requirements({"item.facets.update"}, "spine.item-facets.v1", "spine.facet-notification-continuity.v1")

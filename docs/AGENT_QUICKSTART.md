@@ -3,6 +3,11 @@
 Status: executable cold-start path for the current schema-19 runtime
 Audience: an agent with repository access and no prior Spine context
 
+For historical facet-schema pins, runtime 0.10.0/schema 19 provides the read-only
+[exact revision lookup](FACET_COMMANDS.md#exact-revision-readback). It needs neither
+a known root nor cursor configuration; existing authoring/scheduling flows remain
+unchanged.
+
 For typed archetype attributes, use the dedicated trusted-local
 [facet commands](FACET_COMMANDS.md) (runtime 0.8.0/schema 17). Create the archetyped
 item first, then attach values with `item.facets.update`; verify with `item.facets.show`.

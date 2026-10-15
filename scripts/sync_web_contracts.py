@@ -5,7 +5,7 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 
-# Local rendering successors and draft facet revision reads are not part of the frozen web release.
+# Local rendering successors and trusted-local facet revision reads are not part of the frozen web release.
 # Only a separately versioned HTTP admission contract may change this exclusion.
 SOURCE_ONLY_SCHEMAS = frozenset({
     "facet-schema-revision-show-request.schema.json",

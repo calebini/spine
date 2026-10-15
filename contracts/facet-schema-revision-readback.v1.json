@@ -1,9 +1,13 @@
 {
   "contract_version": "spine.facet-schema-revision-readback.v1",
-  "status": "draft_contract_only",
+  "status": "implemented",
   "specification": "specs/facet-schema-revision-readback.md",
   "exposure": "trusted_local_only",
-  "runtime_implemented": false,
+  "runtime_implemented": true,
+  "implemented_release": {
+    "runtime_version": "0.10.0",
+    "ledger_schema": "19"
+  },
   "inspected_baseline": {
     "commit": "57cda1c2d5589360ee8efe7155fd20b503034c2a",
     "runtime_version": "0.9.1",
@@ -56,47 +60,47 @@
   "runtime_obligations": [
     {
       "id": "RR-01",
-      "status": "pending_runtime_verification"
+      "status": "verified_runtime"
     },
     {
       "id": "RR-02",
-      "status": "pending_runtime_verification"
+      "status": "verified_runtime"
     },
     {
       "id": "RR-03",
-      "status": "pending_runtime_verification"
+      "status": "verified_runtime"
     },
     {
       "id": "RR-04",
-      "status": "pending_runtime_verification"
+      "status": "verified_runtime"
     },
     {
       "id": "RR-05",
-      "status": "pending_runtime_verification"
+      "status": "verified_runtime"
     },
     {
       "id": "RR-06",
-      "status": "pending_runtime_verification"
+      "status": "verified_runtime"
     },
     {
       "id": "RR-07",
-      "status": "pending_runtime_verification"
+      "status": "verified_runtime"
     },
     {
       "id": "RR-08",
-      "status": "pending_runtime_verification"
+      "status": "verified_runtime"
     },
     {
       "id": "RR-09",
-      "status": "pending_runtime_verification"
+      "status": "verified_runtime"
     },
     {
       "id": "RR-10",
-      "status": "pending_runtime_verification"
+      "status": "verified_runtime"
     },
     {
       "id": "RR-11",
-      "status": "pending_runtime_verification"
+      "status": "verified_runtime"
     }
   ]
 }

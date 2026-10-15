@@ -1,8 +1,9 @@
 # Facet Schema Revision Readback
 
-Status: Draft v0.1.1 — trusted-local contract and fixtures only; not implemented
+Status: Ratified v1.0.0 — implemented trusted-local in runtime 0.10.0/schema 19
 Created: 2026-10-13
-Proposed wire contract: `spine.facet-schema-revision-readback.v1`
+Ratified: 2026-10-15, by explicit operator authorization after bounded review and manual minor correction
+Wire contract: `spine.facet-schema-revision-readback.v1`
 Baseline inspected: `57cda1c2d5589360ee8efe7155fd20b503034c2a`, runtime 0.9.1/schema 19
 
 ## 1. Purpose and authority
@@ -21,8 +22,9 @@ Spine-wide persistence. This leaf owns only the additive lookup contract. The
 
 The machine companion is
 [facet-schema-revision-readback.v1.json](../contracts/facet-schema-revision-readback.v1.json).
-Its draft registry is separate from implemented facet and HTTP registries. Nothing
-here advertises the command, adds a migration, grants access, or qualifies a runtime.
+Its separate registry does not extend the existing facet or HTTP registries.
+Ratification does not itself advertise the command, add a migration, grant access,
+or qualify a runtime. Runtime activation requires the acceptance proof below.
 
 ## 2. Scope and rationale
 
@@ -48,7 +50,7 @@ executor authentication, and a new authorization or catalog-sharing model.
 ## 3. Request and transport
 
 Canonical command: `facet_schema.revision.show`.
-Future local CLI spelling: `spine-command --db <ledger> --input - facet_schema revision show`.
+Local CLI spelling: `spine-command --db <ledger> --input - facet_schema revision show`.
 
 ```json
 {
@@ -70,8 +72,8 @@ Omitted dry_run is the normal projection; false is not a valid emitted marker.
 
 The request schema is
 [facet-schema-revision-show-request.schema.json](../contracts/schemas/facet-schema-revision-show-request.schema.json).
-Existing compiled dispatch must continue to reject the unimplemented command until
-implementation and release verification explicitly activate it.
+Runtime 0.10.0 registers this as a read-only trusted-local command. Older inspected
+runtimes do not implement it; clients must adopt an exact implemented release pin.
 
 ## 4. Resolution, success and history
 
@@ -88,7 +90,7 @@ entries, receipts, replay records, durable no-op summaries or item-version chang
 are permitted. Repeated reads need no idempotency key.
 
 Success has exactly the normal `ok`, `command`, `response_contract`, `root`, and
-`revision` fields, plus optional `dry_run=true`. The proposed result tag is
+`revision` fields, plus optional `dry_run=true`. The result tag is
 `spine.facet-schema-revision-readback.v1`. Reuse the existing facet v1 representations:
 
 | Field | Meaning |
@@ -157,7 +159,7 @@ These are command error-selection rules, not JSON Schema keyword-order semantics
 | Resource, SQL-step, wall-clock, lock or handler byte budget exhausted | environment_failure | capacity | 7 |
 
 Malformed transport JSON and routine preflight failures retain the existing owning
-contracts; this leaf does not reclassify them as an absent revision. The draft
+contracts; this leaf does not reclassify them as an absent revision. The
 [failure schema](../contracts/schemas/facet-schema-revision-show-failure.schema.json)
 covers normalized command handler outcomes, not all transport diagnostics.
 
@@ -233,5 +235,10 @@ expected code/field/exit facts are normative, not the JSON validator's first err
 | RR-10 | Existing facet commands, closed binding/rendering shapes and frozen HTTP/web/package surfaces are unchanged |
 | RR-11 | Installed package includes deliberate local contract closure; advertised prerequisites exactly match compiled registry |
 
-RR-01–11 runtime proofs remain pending. Protected exposure/authorization tests are
-not part of this trusted-local slice and need a separately approved successor.
+Executable RR-01–11 evidence is recorded in
+[test_facet_schema_revision_readback.py](../tests/test_facet_schema_revision_readback.py)
+and [SPINE-058](../docs/BACKLOG.md#spine-058--deliver-trusted-local-facet-revision-readback).
+The separate pure models above remain offline examples, not runtime proof by
+themselves. Protected exposure/authorization tests are not part of this trusted-local
+slice and need a separately approved successor. Deployment and consumer adoption
+remain separate from local release verification.

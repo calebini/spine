@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cortext.local/spine/contracts/schemas/facet-schema-revision-show-request.schema.json",
+  "title": "Spine exact facet schema revision show request (v1)",
+  "$comment": "Ratified trusted-local contract; no HTTP exposure. Authority: specs/facet-schema-revision-readback.md Section 5. Error selection: smallest extra field first, then smallest missing required field (case-sensitive Unicode code-point ordering); then exact selector, then revision ID validity. Presence is key existence even for null/wrong types. JSON Schema error iteration order is not command error precedence.",
+  "type": "object",
+  "required": [
+    "contract_version",
+    "facet_schema_revision_id"
+  ],
+  "properties": {
+    "contract_version": {
+      "const": "spine.facet-schema-revision-readback.v1"
+    },
+    "facet_schema_revision_id": {
+      "$ref": "archetype-facet-types.schema.json#/$defs/id"
+    }
+  },
+  "additionalProperties": false
+}

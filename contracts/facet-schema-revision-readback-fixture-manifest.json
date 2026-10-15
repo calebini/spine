@@ -1,6 +1,6 @@
 {
   "schema_version": "spine.facet-schema-revision-readback-fixtures.v1",
-  "status": "draft_contract_only",
+  "status": "ratified_contract",
   "registry": "contracts/facet-schema-revision-readback.v1.json",
   "fixtures": [
     {

@@ -22,6 +22,7 @@ from spine.ledger.notification_profiles import load_archetype, require_owner_exi
 from spine.ledger.transactions import LedgerConnection
 
 CONTRACTS = {
+    "facet_schema.revision.show": "spine.facet-schema-revision-readback.v1",
     **dict.fromkeys((f"facet_schema.{s}" for s in ("create", "publish", "retire", "show", "list")), "spine.facet-schemas.v1"),
     **dict.fromkeys((f"item_archetype.facet_binding.{s}" for s in ("set", "remove", "list")), "spine.archetype-facet-bindings.v1"),
     "item.facets.update": "spine.item-facets.v1",
@@ -135,6 +136,10 @@ class _Preview(Exception):
 
 
 def execute(command: str, request: Mapping[str, Any], context: CommandContext) -> dict[str, Any]:
+    if command == "facet_schema.revision.show":
+        from spine.commands.facet_revision_readback import execute as revision_readback
+
+        return revision_readback(request, context)
     db = context.ledger
     if not isinstance(db, LedgerConnection) or db.in_transaction or db._command_transaction:
         failure("environment_failure", "ledger", "facet commands require an idle transaction-aware ledger")

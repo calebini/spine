@@ -1,0 +1,106 @@
+{
+  "contract_version": "spine.facet-schema-revision-readback.v1",
+  "status": "implemented",
+  "specification": "specs/facet-schema-revision-readback.md",
+  "exposure": "trusted_local_only",
+  "runtime_implemented": true,
+  "implemented_release": {
+    "runtime_version": "0.10.0",
+    "ledger_schema": "19"
+  },
+  "inspected_baseline": {
+    "commit": "57cda1c2d5589360ee8efe7155fd20b503034c2a",
+    "runtime_version": "0.9.1",
+    "ledger_schema": "19",
+    "implements_command": false
+  },
+  "commands": {
+    "facet_schema.revision.show": {
+      "contract_version": "spine.facet-schema-revision-readback.v1",
+      "request_schema": "contracts/schemas/facet-schema-revision-show-request.schema.json",
+      "response_schema": "contracts/schemas/facet-schema-revision-show-response.schema.json",
+      "failure_schema": "contracts/schemas/facet-schema-revision-show-failure.schema.json",
+      "mutates": false,
+      "required_contract_versions": [
+        "spine.canonical-json.v1",
+        "spine.facet-schema-revision-readback.v1",
+        "spine.facet-schemas.v1",
+        "spine.notification-rendering-integration.v1"
+      ]
+    }
+  },
+  "request_validation": {
+    "stage_order": [
+      "extra_fields",
+      "missing_required_fields",
+      "contract_version",
+      "facet_schema_revision_id"
+    ],
+    "field_order": "case_sensitive_unicode_code_point_lexicographic",
+    "presence": "key_exists_regardless_of_value",
+    "report": "first_error_only"
+  },
+  "handler_error_exit_codes": {
+    "invalid_request": 2,
+    "unsupported_field": 2,
+    "missing_required_field": 2,
+    "unsupported_contract_version": 2,
+    "referenced_row_not_found": 4,
+    "environment_failure": 7
+  },
+  "limits": {
+    "request_bytes": 1048576,
+    "response_bytes": 4194304,
+    "definition_bytes": 32768,
+    "max_fields": 32,
+    "resolved_resources": 100,
+    "sqlite_vm_steps": 100000,
+    "operation_seconds": 5
+  },
+  "runtime_obligations": [
+    {
+      "id": "RR-01",
+      "status": "verified_runtime"
+    },
+    {
+      "id": "RR-02",
+      "status": "verified_runtime"
+    },
+    {
+      "id": "RR-03",
+      "status": "verified_runtime"
+    },
+    {
+      "id": "RR-04",
+      "status": "verified_runtime"
+    },
+    {
+      "id": "RR-05",
+      "status": "verified_runtime"
+    },
+    {
+      "id": "RR-06",
+      "status": "verified_runtime"
+    },
+    {
+      "id": "RR-07",
+      "status": "verified_runtime"
+    },
+    {
+      "id": "RR-08",
+      "status": "verified_runtime"
+    },
+    {
+      "id": "RR-09",
+      "status": "verified_runtime"
+    },
+    {
+      "id": "RR-10",
+      "status": "verified_runtime"
+    },
+    {
+      "id": "RR-11",
+      "status": "verified_runtime"
+    }
+  ]
+}

@@ -285,6 +285,17 @@ class FacetWebTests(unittest.TestCase):
         self.assertEqual(result.headers["Cache-Control"], "no-store")
         self.assertEqual(client.post("/api/v1/commands/facet_schema.create", headers=headers, json=body).status_code, 404)
         self.assertEqual(client.post("/api/v1/facets/commands/web_access.apply", headers=headers, json=body).status_code, 404)
+        local_only = {"request": {"contract_version": "spine.facet-schema-revision-readback.v1", "facet_schema_revision_id": "unknown"}}
+        self.assertEqual(
+            client.post("/api/v1/facets/commands/facet_schema.revision.show", headers=headers, json=local_only).status_code, 404
+        )
+        self.assertEqual(
+            client.post("/api/v1/commands/facet_schema.revision.show", headers=headers, json=local_only).status_code, 404
+        )
+        with self.assertRaises(WebError) as denied:
+            self.service.execute("facet_schema.revision.show", local_only, self.h.accounts["owner"], "s")
+        self.assertEqual(denied.exception.code, "operation_unavailable")
+        self.assertEqual(len(self.service.registry["commands"]), 11)
         self.assertEqual(
             client.post(
                 "/api/v1/facets/commands/facet_schema.create", headers={**headers, "Origin": "https://evil"}, json=body

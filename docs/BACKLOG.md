@@ -37,12 +37,15 @@ status labels in the same change. Routine task updates do not change spec author
 
 ### SPINE-058 — Deliver trusted-local facet revision readback
 
-**Status:** Ready — bounded delivery plan recorded 2026-10-15; ratification and
-runtime implementation remain separately authorized gates. No runtime work started.
+**Status:** Done — operator-authorized ratification and local implementation verified
+2026-10-15 after planning checkpoint `d8dbc24`. Leaf contract ratified as v1.0.0;
+runtime 0.10.0/schema 19 implements RR-01–11. Included in this authorized
+implementation checkpoint; not pushed or deployed. Consumer adoption remains separate.
 **Dependency:** SPINE-055–057 draft/contracts/fixtures and minor clarification are
 pushed through `3968dfd2beeb08411468494b7cb465471bbc52fd`. The bounded review found
 no blockers or majors; its single minor was manually corrected and verified, not
-re-audited. The design remains draft v0.1.1.
+re-audited. Ratification accepts that corrected v0.1.1 design without changing its
+wire shape or trusted-local boundary.
 **Authority:** [Readback leaf](../specs/facet-schema-revision-readback.md), its
 [machine companion](../contracts/facet-schema-revision-readback.v1.json) and
 [fixture manifest](../contracts/facet-schema-revision-readback-fixture-manifest.json).
@@ -85,9 +88,41 @@ notification behavior changes or Spine Packs edits. Do not revive deferred work.
 selector/request/result/failure contract and schema closure, with RR evidence and
 the A2/B2/B1 example. Packs must explicitly adopt that pin and qualify FR-2 planning;
 neither this plan nor Spine's tests qualify its installer.
-**Next:** Obtain ratification and implementation authorization; no further routine
-Whetstone pass is scheduled for the already corrected minor. Surface any new genuine
-contract ambiguity rather than inventing behavior.
+**Delivered:** Runtime 0.10.0/schema 19 adds the trusted-local command, bounded
+snapshot lookup, stored versioned decoder/parity checks, exact error precedence,
+read-only compiled registration and an eight-resource installed local contract
+closure. No migration or existing wire shape changed. The full-suite run exposed
+an existing coupling between the complete local command set and the frozen facet
+HTTP set; the adapter now checks the reviewed eleven-command resolver set instead.
+The new command remains denied at both HTTP paths and direct protected-service entry.
+Frozen web bytes/pins remain unchanged. Operator guides include progressive-disclosure
+examples and the stop-versus-not-found distinction.
+**Executable evidence:** All following names are methods of
+[`FacetSchemaRevisionReadbackTests`](../tests/test_facet_schema_revision_readback.py)
+unless noted; fixtures/models remain offline examples, not substituted runtime proof.
+
+| Obligation | Evidence |
+| --- | --- |
+| RR-01–03 | `test_public_cli_cross_root_history_retirement_and_zero_writes`: two roots, both advanced, real B1 binding and rendering pin, exact historical/current/retired output, frozen root-addressed show parity |
+| RR-04/06 | `test_cli_combined_error_precedence_missing_opaque_and_dry_run`: all twelve combined-error vectors in both member orders, exact opaque IDs, invalid Unicode/types and dry-run envelope |
+| RR-05 | `test_corrupt_historical_evidence_fails_closed_without_repair`: real damaged disposable definitions/hash/version markers/root links/current pointers and missing/drifted field projections |
+| RR-07 | Public-CLI table snapshots plus `direct` no-write harness; `test_indexed_point_reads_no_deep_checks_no_reference_dereference` additionally denies SQL writes with an authorizer |
+| RR-08 | `test_capacity_byte_sql_time_resource_and_lock_limits`, indexed EXPLAIN plans and LIMIT 33 check; oversized persisted definitions/field counts fail in the stored decoder |
+| RR-09 | `test_concurrent_publish_retire_uses_one_snapshot_and_next_read_observes_change`: independent public-CLI writer connections interleaved with the selected read |
+| RR-10 | Existing facet/rendering/web regressions plus `FacetWebTests.test_http_closed_routes_and_configuration`; unchanged web/schema/migration bytes and contract-sync checks |
+| RR-11 | `test_installed_wheel_public_cli_and_exact_local_schema_closure` builds offline, installs non-editably into an isolated venv, verifies every package pin/dependency and invokes the installed CLI outside the source tree; `test_admission_registry_and_no_cursor_configuration` proves exact required-contract failure and cursor independence |
+
+**Verification:** 119 focused tests, 68 targeted web regressions and three frozen-web
+contract tests passed. Final full discovery: 1,041 tests passed in 167.858s after
+the HTTP-set separation and contract-harness correction. Ruff, all four contract-
+sync checks, schema manifest, compileall, packaged registry parity, 277 local Markdown
+link targets and diff hygiene pass. The default venv lacks setuptools; the wheel test uses an
+existing local prepared build interpreter through `SPINE_WHEEL_BUILD_PYTHON`, with
+network access disabled for build/install. Runtime isolation does not borrow source
+imports or the build environment's dependencies.
+**Next:** Obtain push authorization, then provide the exact-release handoff.
+No automatic deployment, Packs adoption, further
+Whetstone pass or convergence claim.
 
 ### SPINE-057 — Clarify revision-readback request error precedence
 

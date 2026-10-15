@@ -6,6 +6,11 @@ Runtime 0.8.1, ledger schema 17. Implements SPINE-028 on the
 [its storage leaf](../specs/archetype-facet-storage.md), and the
 [command registry](../contracts/archetype-facet-contract-registry.v1.json).
 
+Runtime 0.10.0/schema 19 additionally implements
+[`facet_schema.revision.show`](../specs/facet-schema-revision-readback.md) through
+a separate trusted-local contract; see [exact revision readback](#exact-revision-readback).
+The original eleven-command wire/HTTP family is unchanged.
+
 ## Scope
 
 The CLI and importable shared handlers implement eleven commands. They retain the
@@ -65,6 +70,46 @@ It executes a bounded transaction and touched-set validation, then rolls it back
 it does not copy the ledger, persist any rows or send anything. A preview therefore
 requires a writable connection and briefly acquires the writer lock. It is not a
 reservation. Commit with the same request/ID after reviewing the would-be receipt.
+
+## Exact revision readback
+
+When a binding or rendering selection provides only `facet_schema_revision_id`,
+use the additive trusted-local command; do not guess a root from an archetype key
+or probe all catalog roots. Substitute the exact observed revision ID:
+
+```bash
+spine-command --db /absolute/path/to/spine.sqlite --input - --pretty facet_schema revision show <<'JSON'
+{
+  "contract_version": "spine.facet-schema-revision-readback.v1",
+  "facet_schema_revision_id": "<exact-observed-revision-id>"
+}
+JSON
+```
+
+The result returns `root` (actual root ID, owner, key, current revision and status)
+and `revision` (requested immutable definition, root ID, original ordinal and hash).
+Historical revisions and retired roots remain readable. Root current metadata is
+from the same snapshot but may change on a later read; it is not a whole-catalog
+consistency token. Compare the actual root/owner with the intended installation
+scope. A B1 pin belongs to returned root B even if the desired pack refers to A.
+
+No actor, command ID, limit, cursor secret, approval, write or receipt is needed.
+`--dry-run` only adds `dry_run=true`. This command has no web/MCP route and does not
+grant disclosure or protected catalog access. The old `facet_schema.show` remains
+valid when the root is already known.
+
+Missing revision: `referenced_row_not_found`, field `facet_schema_revision_id`, exit 4.
+Invalid input: exit 2. Corrupt/unsupported stored evidence: `environment_failure`,
+field `facets`, exit 7. Budget exhaustion: same code, field `capacity`, exit 7.
+Stop on preflight/corruption/capacity failures; never suppress them as absence.
+See the leaf's Section 5 for combined-error precedence and transport boundaries.
+
+Installed local schemas and their exact transitive dependencies are under
+`spine.contracts/revision_readback/`, with `pins.v1.json` for byte verification.
+The source registry is
+[facet-schema-revision-readback.v1.json](../contracts/facet-schema-revision-readback.v1.json).
+Spine Packs adoption requires an explicit exact implemented release pin; this guide
+does not qualify or update its installer.
 
 ## Protected cursor configuration
 

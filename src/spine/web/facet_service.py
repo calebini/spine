@@ -23,6 +23,9 @@ from spine.web.service import WebService, _id, _now
 
 API = "spine.trusted-web-facets.v1"
 REGISTRY = "spine.trusted-web-facet-registry.v1"
+# The reviewed resolver set is the closed HTTP family, not all local commands.
+# An additive trusted-local command must neither disable this family nor enter it.
+HTTP_COMMANDS = frozenset(PERMISSION_RESOLVERS)
 
 
 def registry():
@@ -43,7 +46,7 @@ def registry():
     ):
         raise WebError("admission_unavailable")
     entries = {e["command"]: e for e in value["commands"]}
-    if set(entries) != set(facets.CONTRACTS) or len(value["commands"]) != len(entries):
+    if set(entries) != HTTP_COMMANDS or not HTTP_COMMANDS.issubset(facets.CONTRACTS) or len(value["commands"]) != len(entries):
         raise WebError("admission_unavailable")
     for command, e in entries.items():
         expected = {
@@ -141,7 +144,7 @@ class FacetService:
 
     def execute(self, command, body, account, selection):
         started = time.monotonic()
-        if command not in facets.CONTRACTS:
+        if command not in HTTP_COMMANDS:
             raise WebError("operation_unavailable")
         if len(canonical_json_bytes(body)) > 1048576:
             raise WebError("capacity_exceeded")

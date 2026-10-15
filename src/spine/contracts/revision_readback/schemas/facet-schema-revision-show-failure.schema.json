@@ -1,0 +1,122 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cortext.local/spine/contracts/schemas/facet-schema-revision-show-failure.schema.json",
+  "title": "Spine exact facet schema revision show handler failure (v1)",
+  "$comment": "Ratified trusted-local contract; no HTTP exposure. Authority: specs/facet-schema-revision-readback.md.",
+  "type": "object",
+  "required": [
+    "ok",
+    "command",
+    "error"
+  ],
+  "properties": {
+    "ok": {
+      "const": false
+    },
+    "command": {
+      "const": "facet_schema.revision.show"
+    },
+    "error": {
+      "type": "object",
+      "required": [
+        "code",
+        "message",
+        "field"
+      ],
+      "properties": {
+        "code": {
+          "enum": [
+            "invalid_request",
+            "unsupported_field",
+            "missing_required_field",
+            "unsupported_contract_version",
+            "referenced_row_not_found",
+            "environment_failure"
+          ]
+        },
+        "message": {
+          "type": "string",
+          "minLength": 1
+        },
+        "field": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "code": {
+                "const": "referenced_row_not_found"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "field": {
+                "const": "facet_schema_revision_id"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "code": {
+                "const": "unsupported_contract_version"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "field": {
+                "const": "contract_version"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "code": {
+                "const": "invalid_request"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "field": {
+                "const": "facet_schema_revision_id"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "code": {
+                "const": "environment_failure"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "field": {
+                "enum": [
+                  "facets",
+                  "capacity"
+                ]
+              }
+            }
+          }
+        }
+      ]
+    },
+    "dry_run": {
+      "const": true
+    }
+  },
+  "additionalProperties": false
+}

@@ -51,11 +51,16 @@ allowed to quietly become canonical.
 
 ## What Works Today
 
-Spine `0.9.1` is an implemented alpha; its scheduling core is exercised in a staging
+Spine `0.10.0` is an implemented alpha; its scheduling core is exercised in a staging
 agent environment. The current SQLite ledger schema is version `19`. The trusted multi-operator backend is also running in staging on `cortext1`, with
 operator testing through the connected [Kinflow frontend](../kinflow-web-ui/README.md).
 Concrete operator-reported work is tracked in the [backlog](docs/BACKLOG.md);
 this checkout version is not a deployment claim.
+
+Version 0.10.0 adds trusted-local `facet_schema.revision.show`: resolve any exact
+historical schema pin to its actual root and complete immutable definition without
+catalog probing. It adds no HTTP exposure or database migration; schema 19 remains
+unchanged. See [exact revision readback](docs/FACET_COMMANDS.md#exact-revision-readback).
 
 Version 0.9.1 repairs v2 notification-profile listing, including mixed v1/v2 catalogs
 and pagination. It preserves historical decoders, existing cursor semantics and
@@ -395,8 +400,9 @@ Draft work is not advertised as an implemented compatibility promise. See
   [Decision 0004](specs/decisions/0004-versioned-item-facets.md) — typed domain facts,
   schema ownership and versioning; trusted-local commands implemented, web integration pending.
 
-- **Proposed historical schema discovery:** [Facet revision readback](specs/facet-schema-revision-readback.md) —
-  trusted-local revision-to-root lookup contract and fixtures; not yet implemented.
+- **Historical schema discovery:** [Facet revision readback](specs/facet-schema-revision-readback.md) —
+  trusted-local exact revision-to-root and immutable definition lookup, implemented
+  in runtime 0.10.0/schema 19. No catalog probing, cursor setup or HTTP exposure.
 
 Start with the document that matches the job:
 

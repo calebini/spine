@@ -5,15 +5,17 @@ Last updated: 2026-10-15 (trusted-local facet revision readback delivery plan)
 
 This is a non-normative delivery plan. The specifications and machine-readable contracts remain authoritative.
 
-The next bounded delivery is
+The current bounded delivery is
 [SPINE-058](BACKLOG.md#spine-058--deliver-trusted-local-facet-revision-readback):
-ratify, then implement an exact revision-addressed catalog read to unblock historical-
-pin planning in Spine Packs. SPINE-055–057 delivered and pushed the draft, contracts,
+an exact revision-addressed catalog read to unblock historical-pin planning in
+Spine Packs. SPINE-055–057 delivered and pushed the draft, contracts,
 fixtures and manually verified review clarification through `3968dfd`. The review
 had no blockers or majors; its corrected minor has not been re-audited. This plan
-does not ratify the draft or authorize runtime work. Implementation and exact-pin
-consumer adoption follow explicit gates; current runtime/schema and web exposure
-remain unchanged.
+did not itself authorize runtime work. The operator subsequently ratified the
+contract and authorized implementation after planning checkpoint `d8dbc24` on
+2026-10-15. Runtime 0.10.0 adds only the trusted-local read; schema 19 and web
+exposure remain unchanged. Exact-pin consumer adoption and deployment remain
+separately authorized gates; executable evidence is recorded in SPINE-058.
 
 The selected post-release correction is
 [SPINE-054](BACKLOG.md#spine-054--repair-successor-notification-profile-listing).
@@ -77,9 +79,8 @@ binding/rendering projections. The [readback leaf](../specs/facet-schema-revisio
 own behavior. Existing facet logical/storage and command/preflight owners retain
 authority. Current progress and completion evidence belong only in SPINE-058.
 
-Deliver this as one cohesive runtime slice after explicit ratification and
-implementation authorization, with three internal gates rather than separate
-environment deployments:
+The operator authorized this as one cohesive runtime slice on 2026-10-15, with
+three internal gates rather than separate environment deployments:
 
 1. **Contract acceptance:** Ratify draft v0.1.1 and its source-only machine contract
    without treating offline models as runtime proof. No additional routine audit
@@ -105,8 +106,17 @@ registries, packaged web bytes, facet commands and binding/rendering wire shapes
 must remain unchanged; local packaging changes must not leak into the frozen web
 closure. Do not choose a runtime version from this roadmap or claim a schema bump:
 the inspected baseline is 0.9.1/schema 19 and the additive release number is assigned
-with implementation. No Spine Packs changes, live ledgers or notification sends are
-authorized by this plan.
+with implementation (now 0.10.0, schema 19 unchanged). No Spine Packs changes, live
+ledgers or notification sends are authorized by this plan.
+
+**2026-10-15 implementation checkpoint:** The shared local command/registry and
+dedicated installed schema closure now implement the accepted lookup. The facet
+web adapter validates its frozen reviewed command set independently of additive
+local commands; its routes, wire bytes and pins remain unchanged. Runtime/schema
+declarations and operator examples align with the release. Executable RR mappings
+and verification results are in SPINE-058. The implementation is included in the
+authorized checkpoint; push and consumer adoption remain separate. The next handoff
+must name the exact release commit, not a moving HEAD pin.
 
 ## Planned Delivery: Facet-Aware Notification Rendering (SPINE-051–053)
 
