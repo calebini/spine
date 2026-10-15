@@ -1,0 +1,155 @@
+{
+  "schema_version": "spine.facet-schema-revision-validation-witness.v1",
+  "status": "offline_model_only",
+  "runtime_verified": false,
+  "description": "Expected code/field/CLI-exit outcomes for parsed request objects; not JSON Schema error ordering or runtime proof. RR-06 executable enforcement remains pending.",
+  "cases": [
+    {
+      "case_id": "both_required_fields_missing",
+      "request": {},
+      "expected": {
+        "code": "missing_required_field",
+        "field": "contract_version",
+        "cli_exit": 2
+      }
+    },
+    {
+      "case_id": "multiple_extras",
+      "request": {
+        "contract_version": "spine.facet-schema-revision-readback.v1",
+        "facet_schema_revision_id": "facet_schema_revision_B1",
+        "z_extra": null,
+        "a_extra": null
+      },
+      "expected": {
+        "code": "unsupported_field",
+        "field": "a_extra",
+        "cli_exit": 2
+      }
+    },
+    {
+      "case_id": "extras_before_multiple_missing",
+      "request": {
+        "z_extra": null,
+        "a_extra": null
+      },
+      "expected": {
+        "code": "unsupported_field",
+        "field": "a_extra",
+        "cli_exit": 2
+      }
+    },
+    {
+      "case_id": "extra_root_before_missing_revision",
+      "request": {
+        "contract_version": "spine.facet-schema-revision-readback.v1",
+        "facet_schema_id": "facet_schema_A"
+      },
+      "expected": {
+        "code": "unsupported_field",
+        "field": "facet_schema_id",
+        "cli_exit": 2
+      }
+    },
+    {
+      "case_id": "null_id_present_but_selector_missing",
+      "request": {
+        "facet_schema_revision_id": null
+      },
+      "expected": {
+        "code": "missing_required_field",
+        "field": "contract_version",
+        "cli_exit": 2
+      }
+    },
+    {
+      "case_id": "missing_revision_before_bad_selector",
+      "request": {
+        "contract_version": "spine.facet-schemas.v1"
+      },
+      "expected": {
+        "code": "missing_required_field",
+        "field": "facet_schema_revision_id",
+        "cli_exit": 2
+      }
+    },
+    {
+      "case_id": "extras_before_bad_selector_and_id",
+      "request": {
+        "contract_version": "unsupported",
+        "facet_schema_revision_id": null,
+        "z_extra": true,
+        "a_extra": false
+      },
+      "expected": {
+        "code": "unsupported_field",
+        "field": "a_extra",
+        "cli_exit": 2
+      }
+    },
+    {
+      "case_id": "bad_selector_before_invalid_id",
+      "request": {
+        "contract_version": "spine.facet-schemas.v1",
+        "facet_schema_revision_id": null
+      },
+      "expected": {
+        "code": "unsupported_contract_version",
+        "field": "contract_version",
+        "cli_exit": 2
+      }
+    },
+    {
+      "case_id": "present_null_id_is_not_missing",
+      "request": {
+        "contract_version": "spine.facet-schema-revision-readback.v1",
+        "facet_schema_revision_id": null
+      },
+      "expected": {
+        "code": "invalid_request",
+        "field": "facet_schema_revision_id",
+        "cli_exit": 2
+      }
+    },
+    {
+      "case_id": "present_empty_id_is_not_missing",
+      "request": {
+        "contract_version": "spine.facet-schema-revision-readback.v1",
+        "facet_schema_revision_id": ""
+      },
+      "expected": {
+        "code": "invalid_request",
+        "field": "facet_schema_revision_id",
+        "cli_exit": 2
+      }
+    },
+    {
+      "case_id": "case_sensitive_field_tie_break",
+      "request": {
+        "contract_version": "spine.facet-schema-revision-readback.v1",
+        "facet_schema_revision_id": "facet_schema_revision_B1",
+        "a_extra": null,
+        "A_extra": null
+      },
+      "expected": {
+        "code": "unsupported_field",
+        "field": "A_extra",
+        "cli_exit": 2
+      }
+    },
+    {
+      "case_id": "unicode_code_point_not_locale_order",
+      "request": {
+        "contract_version": "spine.facet-schema-revision-readback.v1",
+        "facet_schema_revision_id": "facet_schema_revision_B1",
+        "é_extra": null,
+        "z_extra": null
+      },
+      "expected": {
+        "code": "unsupported_field",
+        "field": "z_extra",
+        "cli_exit": 2
+      }
+    }
+  ]
+}

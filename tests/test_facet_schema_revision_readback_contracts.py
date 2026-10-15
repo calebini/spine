@@ -36,6 +36,22 @@ def definition_hash(definition):
     return hashlib.sha256(canonical_json_bytes({"derivation_version": "spine.facet-definition.v1", "definition": definition})).hexdigest()
 
 
+def validation_precedence_model(request, schema):
+    """Offline oracle for parsed object error selection, not a runtime validator."""
+    extras = set(request) - set(schema["properties"])
+    if extras:
+        return "unsupported_field", min(extras)
+    missing = set(schema["required"]) - set(request)
+    if missing:
+        return "missing_required_field", min(missing)
+    if request["contract_version"] != schema["properties"]["contract_version"]["const"]:
+        return "unsupported_contract_version", "contract_version"
+    identity = request["facet_schema_revision_id"]
+    if not isinstance(identity, str) or not identity or any(0xD800 <= ord(c) <= 0xDFFF for c in identity):
+        return "invalid_request", "facet_schema_revision_id"
+    return None  # Resolution, preflight, budgets and storage are not modeled here.
+
+
 def historical_lookup_model(state, request, exemplar_failures):
     """Pure witness oracle, not an application validator or client workaround.
 
@@ -140,6 +156,54 @@ class FacetSchemaRevisionReadbackContractTests(unittest.TestCase):
         )
         self.assertEqual([row["id"] for row in self.contract["runtime_obligations"]], [f"RR-{i:02}" for i in range(1, 12)])
         self.assertEqual({row["status"] for row in self.contract["runtime_obligations"]}, {"pending_runtime_verification"})
+
+    def test_request_precedence_is_explicit_in_the_machine_contract(self):
+        self.assertEqual(
+            self.contract["request_validation"],
+            {
+                "stage_order": ["extra_fields", "missing_required_fields", "contract_version", "facet_schema_revision_id"],
+                "field_order": "case_sensitive_unicode_code_point_lexicographic",
+                "presence": "key_exists_regardless_of_value",
+                "report": "first_error_only",
+            },
+        )
+        comment = self.schemas["facet-schema-revision-show-request.schema.json"]["$comment"]
+        self.assertIn("extra field first", comment)
+        self.assertIn("then smallest missing", comment)
+        self.assertIn("error iteration order is not command error precedence", comment)
+
+    def test_combined_error_vectors_choose_one_deterministic_outcome(self):
+        witness = load(ROOT / self.manifest["validation_precedence_witness"])
+        self.assertEqual(witness["schema_version"], "spine.facet-schema-revision-validation-witness.v1")
+        self.assertEqual(witness["status"], "offline_model_only")
+        self.assertFalse(witness["runtime_verified"])
+        request_schema = self.schemas["facet-schema-revision-show-request.schema.json"]
+        request_validator = self.validator("facet-schema-revision-show-request.schema.json")
+        failure_validator = self.validator("facet-schema-revision-show-failure.schema.json")
+        ids = set()
+        for case in witness["cases"]:
+            with self.subTest(case=case["case_id"]):
+                self.assertNotIn(case["case_id"], ids)
+                ids.add(case["case_id"])
+                expected = case["expected"]
+                before = copy.deepcopy(case["request"])
+                self.assertFalse(request_validator.is_valid(before))
+                # Error selection must not follow JSON member insertion order.
+                for request in (before, dict(reversed(list(before.items())))):
+                    code, field = validation_precedence_model(request, request_schema)
+                    self.assertEqual((code, field), (expected["code"], expected["field"]))
+                    self.assertEqual(self.contract["handler_error_exit_codes"][code], expected["cli_exit"])
+                    failure_validator.validate(
+                        {
+                            "ok": False,
+                            "command": COMMAND,
+                            "error": {"code": code, "field": field, "message": "Invalid request."},
+                        }
+                    )
+                self.assertEqual(case["request"], before)
+        self.assertEqual(len(ids), 12)
+        valid = load(FIXTURES / "contracts/request_historical.json")
+        self.assertIsNone(validation_precedence_model(valid, request_schema))
 
     def test_response_fixture_hashes_and_identity_semantics(self):
         request = load(FIXTURES / "contracts/request_historical.json")

@@ -1,6 +1,6 @@
 # Facet Schema Revision Readback
 
-Status: Draft v0.1.0 — trusted-local contract and fixtures only; not implemented
+Status: Draft v0.1.1 — trusted-local contract and fixtures only; not implemented
 Created: 2026-10-13
 Proposed wire contract: `spine.facet-schema-revision-readback.v1`
 Baseline inspected: `57cda1c2d5589360ee8efe7155fd20b503034c2a`, runtime 0.9.1/schema 19
@@ -128,6 +128,24 @@ closed request shape, exact selector, ID validity, exact revision resolution,
 root/invariant/definition validation, then complete result release. Capacity checks
 may fail any stage; never reset budgets or retry through alternative roots.
 
+For a parsed request object, shape validation MUST report exactly one error in
+this order, independent of JSON member order or a validator's error iteration:
+
+1. If any key is not an allowed request field, return `unsupported_field` for
+   the lexicographically smallest extra field, **before** checking missing fields.
+2. Otherwise, if a required key is absent, return `missing_required_field` for
+   the lexicographically smallest missing field.
+3. Only after both shape checks pass, check the exact `contract_version`, then
+   the validity of `facet_schema_revision_id`, then perform revision resolution.
+
+Field-name comparison is case-sensitive Unicode code-point lexicographic order;
+do not normalize, case-fold or use locale ordering. Presence means key existence,
+even if the value is null or the wrong type. Thus `{}` reports missing
+`contract_version`; `{unexpected:null}` reports unsupported `unexpected`, not a
+missing field. A missing revision key wins over an invalid selector, while an
+invalid selector wins over an invalid revision ID when both keys are present.
+These are command error-selection rules, not JSON Schema keyword-order semantics.
+
 | Condition | error.code | error.field | CLI exit |
 | --- | --- | --- | --- |
 | Required request field absent | missing_required_field | Missing field | 2 |
@@ -198,6 +216,8 @@ nor qualifies FR-2; it removes the need to design a probing protocol.
 The [fixture manifest](../contracts/facet-schema-revision-readback-fixture-manifest.json)
 indexes structural fixtures and a pure historical-state witness. Contract/model tests
 are offline checks, **not** completed runtime/admission/concurrency proofs.
+It also indexes a pure validation-precedence witness for combined malformed inputs;
+expected code/field/exit facts are normative, not the JSON validator's first error.
 
 | ID | Required proof before implementation is complete |
 | --- | --- |
@@ -206,7 +226,7 @@ are offline checks, **not** completed runtime/admission/concurrency proofs.
 | RR-03 | Retired root remains readable; exact stored definition/hash/ordinal do not change on publish/retire |
 | RR-04 | Missing revision returns the exact not-found field/exit; no current/default fallback |
 | RR-05 | Broken stored root/decoder/hash/projection fails environment, not not-found or partial success |
-| RR-06 | Empty/type/extra/selector failures are deterministic; dry-run adds only the true marker |
+| RR-06 | Empty/type/extra/selector failures, including combined missing/extra/value failures, follow Section 5's exact order and field tie-break; dry-run adds only the true marker |
 | RR-07 | Reads and all failures leave ledger rows, receipts/audits, versions, work and external attempts unchanged |
 | RR-08 | Indexed point lookup and every byte/resource/SQL/time/lock ceiling fail closed; no enumeration/deep scans |
 | RR-09 | Concurrent publish/retire yields a coherent read snapshot while preserving selected immutable evidence |

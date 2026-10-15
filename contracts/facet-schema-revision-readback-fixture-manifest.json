@@ -113,5 +113,6 @@
     }
   ],
   "model_witness": "tests/fixtures/facet_schema_revision_readback/historical_pin_witness.json",
+  "validation_precedence_witness": "tests/fixtures/facet_schema_revision_readback/validation_precedence_witness.json",
   "runtime_verified": false
 }

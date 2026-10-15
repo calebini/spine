@@ -1,6 +1,6 @@
 # Spine Backlog
 
-Last updated: 2026-10-14
+Last updated: 2026-10-15
 
 This is the single work queue for Spine development. The
 [implementation plan](IMPLEMENTATION_PLAN.md) explains roadmap direction and delivery
@@ -34,6 +34,61 @@ record evidence and move it to Completed. Update affected orientation and contra
 status labels in the same change. Routine task updates do not change spec authority.
 
 ## Post-release corrective work
+
+### SPINE-057 — Clarify revision-readback request error precedence
+
+**Status:** Done — targeted manual draft-contract/model patch verified 2026-10-15;
+included in this authorized specification checkpoint; not ratified, implemented,
+pushed or re-audited.
+**Source:** SPINE-056 audit `fb_001` (minor); pass_with_minor_clarification with
+boundary preserved, no blocker or major finding.
+**Scope:** Specify extra-before-missing shape validation and deterministic field
+ordering, retain selector-before-ID validation, and add offline expected code/field/
+exit vectors for combined malformed requests. Keep executable enforcement pending
+under RR-06 and preserve all source-only/runtime/HTTP boundaries.
+**Boundary:** No runtime implementation, old wire/schema change, migration, audit
+rerun, ratification, push, deployment, send or changes to Spine Packs.
+**Delivered:** Leaf draft v0.1.1 Section 5 defines extra-before-missing precedence,
+case-sensitive Unicode code-point field order, key-existence presence, and selector-
+before-ID validation. Machine contract/request-schema commentary mirror the rule.
+The fixture manifest indexes 12 expected code/field/exit vectors; two added offline
+tests verify the rule, reversed member ordering and the frozen failure envelope.
+Executable enforcement remains a pending RR-06 gate; this is not runtime proof.
+**Verification:** 47 focused contract tests passed, plus Ruff, all three contract
+sync checks, schema-object manifest and diff hygiene checks. Runtime source and
+frozen web bundles/pins are unchanged. Prior audit artifacts remain historical;
+the patched bytes have not been reviewed by a second nested Reviewer.
+
+### SPINE-056 — Bounded facet revision readback contract review
+
+**Status:** Done — exact-package send approved and one reviewer-only pass completed
+2026-10-15; pass_with_minor_clarification, boundary preserved.
+**Baseline:** SPINE-055 committed as `a110ea2ae7601cbf0fe6084fa4b0e34fb5135a03`.
+**Mode:** One reviewer-only Whetstone `audit-change`, built-in consistency profile,
+planned GPT-6.1 Sol Reviewer; no Editor, source edits or convergence claim.
+**Scope:** [Audit notes](../whetstone_runs/facet-schema-revision-readback-contract-audit-001/audit-notes.md)
+list exactly 43 source files plus the notes, built-in reviewer/profile context and
+generated audit copies. Local-only prepared-inputs.json pins byte lengths/hashes;
+it is not a reviewer input. Check identity/history, deterministic errors, immutable
+decoding, resource/transaction bounds, trusted-local-only exposure, frozen web
+packaging, fixture/model limits and the historical-pin consumer handoff.
+**Preparation evidence:** 45 focused contract tests, three contract sync checks and
+diff hygiene passed. Every selected source matches the baseline; inventory size is
+474,287 bytes excluding notes/context. Current CLI help and reviewer version checked.
+**Boundary:** Only the approved nested Reviewer pass; no ratification, runtime proof, implementation,
+extra payload, ledger/send, automatic rerun, source patch, commit, push or deployment.
+**Outcome:** GPT-6.1 Sol / built-in consistency; 0 blockers, 0 major, 1 minor,
+0 nits. `fb_001` asks for deterministic shape-validation precedence when multiple
+required fields are missing, multiple extras exist, or missing/extra fields coexist,
+plus offline expected-outcome vectors and retained RR-06 runtime enforcement.
+**Evidence:** [Report](../whetstone_runs/facet-schema-revision-readback-contract-audit-001/change_audit/change_audit_report.md)
+and [feedback](../whetstone_runs/facet-schema-revision-readback-contract-audit-001/change_audit/change_audit_feedback.json).
+Post-run hashes confirm all 43 sources and approved notes unchanged; the actual
+audit manifest exactly matches the approved input inventory. The notes' preparation-
+time pending status is superseded by local authorization.md without changing notes bytes.
+**Next:** The separately authorized manual patch is recorded under SPINE-057.
+This audit itself ran no Editor or source patch; the corrected bytes have not been
+re-audited. No convergence is claimed.
 
 ### SPINE-055 — Specify trusted-local facet revision readback
 

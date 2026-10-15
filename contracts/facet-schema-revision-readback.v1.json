@@ -25,6 +25,17 @@
       ]
     }
   },
+  "request_validation": {
+    "stage_order": [
+      "extra_fields",
+      "missing_required_fields",
+      "contract_version",
+      "facet_schema_revision_id"
+    ],
+    "field_order": "case_sensitive_unicode_code_point_lexicographic",
+    "presence": "key_exists_regardless_of_value",
+    "report": "first_error_only"
+  },
   "handler_error_exit_codes": {
     "invalid_request": 2,
     "unsupported_field": 2,
