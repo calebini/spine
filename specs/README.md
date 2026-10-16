@@ -4,6 +4,8 @@ This directory contains Spine's normative design and compatibility promises.
 
 Current spec surface:
 
+- [people-and-responsibility.md](people-and-responsibility.md): draft participation/assignment, scoped subject selection, person-filtered reads and role-only notification continuity over existing subject-role storage; separate from access ownership/routing, product policies approved, review and machine-contract gates pending; not implemented
+
 - [facet-schema-revision-readback.md](facet-schema-revision-readback.md): ratified trusted-local exact revision-to-root lookup and immutable definition readback; implemented in runtime 0.10.0/schema 19, no HTTP exposure
 
 - `independent-activity-reads.md`: proposed independent authorized web activity/occurrence reads, related-context completeness, disclosure-safe availability, compatibility migration, and test matrix; specification only, not implemented (SPINE-015)

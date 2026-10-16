@@ -7,6 +7,12 @@ Tracking: [SPINE-015](../docs/BACKLOG.md#spine-015--read-authorized-activities-i
 
 ## 1. Outcome, scope, and authority
 
+The draft [people and responsibility leaf](people-and-responsibility.md) proposes
+explicit person/role filters and people projections for later read successors.
+It does not extend the implemented `subject_roles` section, its selected-subject-only
+projection, or frozen request/cursor schemas. New people context must preserve this
+document's independent core/time reads and authorized-only filtering boundaries.
+
 An authorized event MUST remain readable when an inaccessible task follows it. Spine
 supplies canonical dates, times, effective lifecycle, and occurrence identity;
 consumers do not reconstruct missing facts or expand recurrence themselves.

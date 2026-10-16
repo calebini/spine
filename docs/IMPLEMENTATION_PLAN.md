@@ -1,11 +1,22 @@
 # Spine Implementation Plan
 
 Role: Roadmap rationale and delivery history; current task status lives in [BACKLOG.md](BACKLOG.md)
-Last updated: 2026-10-15 (trusted-local facet revision readback delivery plan)
+Last updated: 2026-10-16 (people and responsibility draft)
 
 This is a non-normative delivery plan. The specifications and machine-readable contracts remain authoritative.
 
-The current bounded delivery is
+The selected specification task is
+[SPINE-059](BACKLOG.md#spine-059--draft-people-and-responsibility-contracts),
+the [people and responsibility draft](../specs/people-and-responsibility.md).
+Build on existing subject-role storage, not facets or a second people registry.
+Keep participation, task assignment, resource access and notification routing
+independent. Scoped directory/association-disclosure policies D-01/D-02 were approved
+on 2026-10-16. Next review the draft and codify closed successors plus a dedicated
+role-only work-continuity proof before implementation. Existing self-only web projections and facet-only equality
+are preserved; neither is silently broadened. No runtime, machine-contract, frontend,
+pack or deployment work is authorized by this drafting task.
+
+The preceding bounded delivery is
 [SPINE-058](BACKLOG.md#spine-058--deliver-trusted-local-facet-revision-readback):
 an exact revision-addressed catalog read to unblock historical-pin planning in
 Spine Packs. SPINE-055–057 delivered and pushed the draft, contracts,
@@ -14,8 +25,10 @@ had no blockers or majors; its corrected minor has not been re-audited. This pla
 did not itself authorize runtime work. The operator subsequently ratified the
 contract and authorized implementation after planning checkpoint `d8dbc24` on
 2026-10-15. Runtime 0.10.0 adds only the trusted-local read; schema 19 and web
-exposure remain unchanged. Exact-pin consumer adoption and deployment remain
-separately authorized gates; executable evidence is recorded in SPINE-058.
+exposure remain unchanged. The implementation is committed/pushed as `8f3c50b`;
+exact-pin consumer adoption and deployment remain separately authorized gates.
+Executable evidence is recorded in SPINE-058. This does not block the independent
+Spine Packs FR-3/4 work or silently make people a prerequisite for flight packs.
 
 The selected post-release correction is
 [SPINE-054](BACKLOG.md#spine-054--repair-successor-notification-profile-listing).

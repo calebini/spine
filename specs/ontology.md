@@ -734,6 +734,13 @@ Constraints:
 
 Owns subject roles on coordination items.
 
+The draft [people and responsibility leaf](people-and-responsibility.md) proposes
+event participation, task assignment, scoped discovery and person-filtered reads
+over these same versioned rows. It preserves the separation from access ownership
+and notification routing. It does not alter the implemented role enum, existing
+authoring, protected disclosure, constraints or schema; product and contract gates
+in that leaf precede new runtime behavior.
+
 Minimum contract:
 
 - `item_subject_role_id` (`id`, required) — primary key.

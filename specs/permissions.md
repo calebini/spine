@@ -57,6 +57,13 @@ chat attribution cannot satisfy verified web login in either mode.
 
 ## 3. Resource Ownership
 
+The draft [people and responsibility leaf](people-and-responsibility.md) proposes
+explicit successors for scoped subject choices and item association disclosure.
+Its D-01/D-02 product policies are operator-approved but are not implemented grants
+or changes to current self-only web projection/reference restrictions. Item
+participation and task assignment never grant item access, membership, account
+rights or delivery authorization.
+
 Every item exposed through multi-user coordination access has one explicit owner:
 a subject or a subject group. Existing `item_subject_roles.owner` is not this record.
 Unresolved legacy item ownership requires adoption; it must not become public by default.

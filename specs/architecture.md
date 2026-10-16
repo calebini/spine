@@ -17,6 +17,12 @@ Local agents and dashboards consume Spine truth or propose candidate actions; th
 
 ## 2. Boundary Summary
 
+The draft [people and responsibility leaf](people-and-responsibility.md) builds on
+subject identities, explicit memberships and item-versioned subject roles. Participation,
+task assignment, resource ownership/access and notification routing remain distinct
+Spine facts. The proposal creates no identity registry, daemon, authorization bypass
+or pack-owned people state; runtime and protected-surface changes are not yet accepted.
+
 [Ledger instance identity](ledger-instance-identity.md) is Spine-owned authoritative
 metadata, validated through bounded preflight and exposed by system.info v3.
 Only explicit migration performs logical backfill; workers, adapters and web

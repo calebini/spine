@@ -1,6 +1,6 @@
 # Spine Backlog
 
-Last updated: 2026-10-15
+Last updated: 2026-10-16
 
 This is the single work queue for Spine development. The
 [implementation plan](IMPLEMENTATION_PLAN.md) explains roadmap direction and delivery
@@ -35,12 +35,52 @@ status labels in the same change. Routine task updates do not change spec author
 
 ## Post-release corrective work
 
+### SPINE-059 — Draft people and responsibility contracts
+
+**Status:** Done — first specification draft and consistency amendments verified
+2026-10-16; product policies D-01/D-02 subsequently approved the same day. Review,
+machine contracts and implementation remain pending.
+**Baseline:** `8f3c50b6fd1b4aa534e50925b7417a7a80d19122`, runtime 0.10.0/schema 19.
+**Scope:** One [logical leaf](../specs/people-and-responsibility.md) over existing
+subjects, memberships and versioned subject roles. Specify participation versus
+assignment, preserve access ownership and routing, outline scoped discovery,
+authoring/read/filter successors, role-only work continuity and acceptance fixtures.
+**Boundary:** No runtime/SQL/schema/package changes, machine-contract publication,
+ratification, Whetstone execution, deployment, UI or Spine Packs edits. The operator
+subsequently authorized a local checkpoint and bounded-audit preparation, not a push
+or nested review.
+Do not treat a subject role as a grant, recipient or account; do not relax existing
+web checks or facet-only continuity to implement this feature implicitly.
+**Product decisions:** D-01 approved current group-roster discovery for all active
+member/admin/owner roles, with independent item-create/edit checks and fresh reference
+eligibility restricted to the item's owner scope. Cross-scope assignment remains
+deferred, including private tasks assigned to another shared-group member. D-02
+approved item-read disclosure of association IDs/roles/statuses, with separate current
+authority for directory labels and no private-record access. Both were confirmed on
+2026-10-16; neither changes current runtime permissions. No additional
+family/beneficiary/driver taxonomy is selected.
+**Delivered:** Draft v0.1.1 defines the four independent dimensions; series-level
+event participants and task assignees; replacement/history semantics; unscheduled
+assignment; operator-approved roster/association disclosure policies;
+standalone/composite/read successors; and a separate role-only continuity proof. It explicitly preserves
+current self-only HTTP rules and facet-only equality. Ten acceptance families and
+the physical/cursor/error/package codification gates remain explicit; no machine
+artifacts or runtime readiness is claimed.
+**Verification:** Reviewed existing role schema, task authoring, web reference and
+projection restrictions, access policy and facet continuity. All 10 changed/new
+files are Markdown; 283 local link targets, authority/status/tracking assertions
+and `git diff --check` passed. No runtime tests run for this documentation-only
+draft; no nested review, implementation or deployment occurred.
+**Next:** Stage a separately approved bounded review of the draft and approved policies.
+Machine contracts and implementation are later gates; no automatic work is
+authorized by this entry.
+
 ### SPINE-058 — Deliver trusted-local facet revision readback
 
 **Status:** Done — operator-authorized ratification and local implementation verified
 2026-10-15 after planning checkpoint `d8dbc24`. Leaf contract ratified as v1.0.0;
-runtime 0.10.0/schema 19 implements RR-01–11. Included in this authorized
-implementation checkpoint; not pushed or deployed. Consumer adoption remains separate.
+runtime 0.10.0/schema 19 implements RR-01–11. Committed and pushed as `8f3c50b`;
+deployment is not verified by this task. Consumer adoption remains separate.
 **Dependency:** SPINE-055–057 draft/contracts/fixtures and minor clarification are
 pushed through `3968dfd2beeb08411468494b7cb465471bbc52fd`. The bounded review found
 no blockers or majors; its single minor was manually corrected and verified, not
@@ -120,8 +160,8 @@ link targets and diff hygiene pass. The default venv lacks setuptools; the wheel
 existing local prepared build interpreter through `SPINE_WHEEL_BUILD_PYTHON`, with
 network access disabled for build/install. Runtime isolation does not borrow source
 imports or the build environment's dependencies.
-**Next:** Obtain push authorization, then provide the exact-release handoff.
-No automatic deployment, Packs adoption, further
+**Next:** Exact-release handoff supplied; downstream adoption and staging verification
+belong to their separately authorized tasks. No automatic deployment, Packs adoption, further
 Whetstone pass or convergence claim.
 
 ### SPINE-057 — Clarify revision-readback request error precedence
