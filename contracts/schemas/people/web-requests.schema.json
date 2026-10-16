@@ -1,0 +1,301 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cortext.local/spine/contracts/schemas/people/web-requests.schema.json",
+  "$comment": "Source-only people contract candidate; not advertised by or packaged with the current runtime.",
+  "$defs": {
+    "people.list": {
+      "type": "object",
+      "properties": {
+        "contract_version": {
+          "const": "spine.trusted-web-people.v1"
+        },
+        "request": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/requests.schema.json#/$defs/people.list"
+        },
+        "expected_access_epoch": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/version"
+        }
+      },
+      "required": [
+        "contract_version",
+        "request"
+      ],
+      "additionalProperties": false
+    },
+    "item.people.show": {
+      "type": "object",
+      "properties": {
+        "contract_version": {
+          "const": "spine.trusted-web-people.v1"
+        },
+        "request": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/requests.schema.json#/$defs/item.people.show"
+        },
+        "expected_access_epoch": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/version"
+        }
+      },
+      "required": [
+        "contract_version",
+        "request"
+      ],
+      "additionalProperties": false
+    },
+    "item.people.update": {
+      "type": "object",
+      "properties": {
+        "contract_version": {
+          "const": "spine.trusted-web-people.v1"
+        },
+        "request": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/requests.schema.json#/$defs/item.people.update"
+        },
+        "expected_access_epoch": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/version"
+        }
+      },
+      "required": [
+        "contract_version",
+        "request",
+        "expected_access_epoch"
+      ],
+      "additionalProperties": false
+    },
+    "schedule.create": {
+      "type": "object",
+      "properties": {
+        "contract_version": {
+          "const": "spine.trusted-web-people.v1"
+        },
+        "request": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/schedule-create-request-v4.schema.json"
+        },
+        "expected_access_epoch": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/version"
+        },
+        "create_owner_scope": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/owner"
+        }
+      },
+      "required": [
+        "contract_version",
+        "request",
+        "expected_access_epoch",
+        "create_owner_scope"
+      ],
+      "additionalProperties": false
+    },
+    "schedule.update": {
+      "type": "object",
+      "properties": {
+        "contract_version": {
+          "const": "spine.trusted-web-people.v1"
+        },
+        "request": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/schedule-update-request-v4.schema.json"
+        },
+        "expected_access_epoch": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/version"
+        }
+      },
+      "required": [
+        "contract_version",
+        "request",
+        "expected_access_epoch"
+      ],
+      "additionalProperties": false
+    },
+    "schedule.show": {
+      "type": "object",
+      "properties": {
+        "contract_version": {
+          "const": "spine.trusted-web-people.v1"
+        },
+        "request": {
+          "type": "object",
+          "properties": {
+            "item_id": {
+              "$ref": "https://cortext.local/spine/contracts/schemas/trusted-web-read-schedule-request.schema.json#/properties/request/properties/item_id"
+            },
+            "include": {
+              "type": "array",
+              "uniqueItems": true,
+              "maxItems": 12,
+              "items": {
+                "enum": [
+                  "related_items",
+                  "relations",
+                  "temporal_bindings",
+                  "primary_location",
+                  "notification_profiles",
+                  "policies",
+                  "work",
+                  "attempts",
+                  "delivery_targets",
+                  "subject_roles",
+                  "authoring_receipt",
+                  "people"
+                ]
+              }
+            },
+            "section_limit": {
+              "$ref": "https://cortext.local/spine/contracts/schemas/trusted-web-read-schedule-request.schema.json#/properties/request/properties/section_limit"
+            },
+            "section_cursors": {
+              "$ref": "https://cortext.local/spine/contracts/schemas/trusted-web-read-schedule-request.schema.json#/properties/request/properties/section_cursors"
+            }
+          },
+          "required": [
+            "item_id"
+          ],
+          "additionalProperties": false
+        },
+        "expected_access_epoch": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/trusted-web-read-schedule-request.schema.json#/properties/expected_access_epoch"
+        },
+        "expected_item_version": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/trusted-web-read-schedule-request.schema.json#/properties/expected_item_version"
+        },
+        "expected_recurrence_revision_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/trusted-web-read-schedule-request.schema.json#/properties/expected_recurrence_revision_id"
+        }
+      },
+      "required": [
+        "contract_version",
+        "request"
+      ],
+      "additionalProperties": false
+    },
+    "agenda.show": {
+      "type": "object",
+      "properties": {
+        "contract_version": {
+          "const": "spine.trusted-web-people.v1"
+        },
+        "request": {
+          "type": "object",
+          "properties": {
+            "evaluated_at_utc": {
+              "$ref": "https://cortext.local/spine/contracts/schemas/trusted-web-read-agenda-request.schema.json#/properties/request/properties/evaluated_at_utc"
+            },
+            "range_start_local": {
+              "$ref": "https://cortext.local/spine/contracts/schemas/trusted-web-read-agenda-request.schema.json#/properties/request/properties/range_start_local"
+            },
+            "range_end_local": {
+              "$ref": "https://cortext.local/spine/contracts/schemas/trusted-web-read-agenda-request.schema.json#/properties/request/properties/range_end_local"
+            },
+            "timezone": {
+              "$ref": "https://cortext.local/spine/contracts/schemas/trusted-web-read-agenda-request.schema.json#/properties/request/properties/timezone"
+            },
+            "timezone_database_version": {
+              "$ref": "https://cortext.local/spine/contracts/schemas/trusted-web-read-agenda-request.schema.json#/properties/request/properties/timezone_database_version"
+            },
+            "item_types": {
+              "$ref": "https://cortext.local/spine/contracts/schemas/trusted-web-read-agenda-request.schema.json#/properties/request/properties/item_types"
+            },
+            "item_ids": {
+              "$ref": "https://cortext.local/spine/contracts/schemas/trusted-web-read-agenda-request.schema.json#/properties/request/properties/item_ids"
+            },
+            "include_terminal": {
+              "$ref": "https://cortext.local/spine/contracts/schemas/trusted-web-read-agenda-request.schema.json#/properties/request/properties/include_terminal"
+            },
+            "include": {
+              "type": "array",
+              "uniqueItems": true,
+              "maxItems": 5,
+              "items": {
+                "enum": [
+                  "primary_location",
+                  "policies",
+                  "work",
+                  "attempts",
+                  "people"
+                ]
+              }
+            },
+            "limit": {
+              "$ref": "https://cortext.local/spine/contracts/schemas/trusted-web-read-agenda-request.schema.json#/properties/request/properties/limit"
+            },
+            "cursor": {
+              "$ref": "https://cortext.local/spine/contracts/schemas/trusted-web-read-agenda-request.schema.json#/properties/request/properties/cursor"
+            },
+            "person_filter": {
+              "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/personFilter"
+            }
+          },
+          "required": [
+            "evaluated_at_utc",
+            "range_start_local",
+            "range_end_local",
+            "timezone",
+            "timezone_database_version"
+          ],
+          "additionalProperties": false
+        },
+        "expected_access_epoch": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/trusted-web-read-agenda-request.schema.json#/properties/expected_access_epoch"
+        }
+      },
+      "required": [
+        "contract_version",
+        "request"
+      ],
+      "additionalProperties": false
+    },
+    "item.occurrences": {
+      "type": "object",
+      "properties": {
+        "contract_version": {
+          "const": "spine.trusted-web-people.v1"
+        },
+        "request": {
+          "type": "object",
+          "properties": {
+            "item_id": {
+              "$ref": "https://cortext.local/spine/contracts/schemas/trusted-web-read-occurrences-request.schema.json#/properties/request/properties/item_id"
+            },
+            "range_basis": {
+              "$ref": "https://cortext.local/spine/contracts/schemas/trusted-web-read-occurrences-request.schema.json#/properties/request/properties/range_basis"
+            },
+            "range_start": {
+              "$ref": "https://cortext.local/spine/contracts/schemas/trusted-web-read-occurrences-request.schema.json#/properties/request/properties/range_start"
+            },
+            "range_end": {
+              "$ref": "https://cortext.local/spine/contracts/schemas/trusted-web-read-occurrences-request.schema.json#/properties/request/properties/range_end"
+            },
+            "limit": {
+              "$ref": "https://cortext.local/spine/contracts/schemas/trusted-web-read-occurrences-request.schema.json#/properties/request/properties/limit"
+            },
+            "cursor": {
+              "$ref": "https://cortext.local/spine/contracts/schemas/trusted-web-read-occurrences-request.schema.json#/properties/request/properties/cursor"
+            },
+            "person_filter": {
+              "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/personFilter"
+            }
+          },
+          "required": [
+            "item_id",
+            "range_basis",
+            "range_start",
+            "range_end"
+          ],
+          "additionalProperties": false
+        },
+        "expected_access_epoch": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/trusted-web-read-occurrences-request.schema.json#/properties/expected_access_epoch"
+        },
+        "expected_item_version": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/trusted-web-read-occurrences-request.schema.json#/properties/expected_item_version"
+        },
+        "expected_recurrence_revision_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/trusted-web-read-occurrences-request.schema.json#/properties/expected_recurrence_revision_id"
+        }
+      },
+      "required": [
+        "contract_version",
+        "request"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

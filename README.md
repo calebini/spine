@@ -392,9 +392,10 @@ Draft work is not advertised as an implemented compatibility promise. See
 
 ## Documentation
 
-- **People and responsibility (draft):** [Proposed people contracts](specs/people-and-responsibility.md) —
+- **People and responsibility (accepted design):** [People contracts](specs/people-and-responsibility.md) —
   event participation, task assignment and person-based reads over existing subject roles;
-  access ownership and notification routing stay separate. Not implemented.
+  access ownership and notification routing stay separate. Source-only machine contracts
+  and fixtures await review; not implemented.
 
 - **Ledger identity:** [Ledger instance identity](specs/ledger-instance-identity.md) —
   stable backup-preserved instance ID, schema-14 migration and system.info v3.

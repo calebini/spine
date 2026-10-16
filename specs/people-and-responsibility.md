@@ -1,7 +1,8 @@
 # People and Responsibility
 
-Status: Draft v0.1.1 — operator-approved product policies; contract not ratified or implemented
+Status: Ratified v1.0.0 — logical design accepted; machine codification pending review; not implemented
 Created: 2026-10-16
+Ratified: 2026-10-16, following bounded consistency audit people-and-responsibility-contract-audit-001
 Inspected baseline: `8f3c50b6fd1b4aa534e50925b7417a7a80d19122`, runtime 0.10.0/schema 19
 Scope: Item participation, task assignment, scoped subject selection and person-filtered reads
 
@@ -22,16 +23,17 @@ participant or responsibility identity registry beside them.
 [accounts and attribution](accounts-and-chat-attribution.md) owns caller identity;
 [notifications](notifications.md) owns recipients, policy and delivery eligibility.
 [Storage atomicity](STORAGE_ATOMICITY_SPEC.md) remains the persistence owner.
-This leaf proposes participation/assignment behavior and its public surfaces.
+This leaf owns participation/assignment behavior and its successor public surfaces.
 [Schedule creation](schedule-create.md), [operations](schedule-operations.md),
 [independent reads](independent-activity-reads.md) and
 [relative bindings](relative-temporal-bindings.md) retain their existing authority.
 
-This draft changes no implemented command, schema, registry, permission, package
-version or released pack. Proposed names and examples below are not callable runtime
-contracts. Product decisions D-01/D-02 were approved on 2026-10-16; review and
-Section 12 gates still precede ratification and implementation. This document is
-not an implementation-readiness claim.
+This accepted design changes no implemented command, schema, registry, permission,
+package version or released pack. New names and examples below are not callable
+runtime contracts. Product decisions D-01/D-02 and the reviewed logical design were
+approved on 2026-10-16. The source-only machine companion and schemas codify that
+design; their review and Section 12 runtime gates still precede implementation.
+Ratification is not an implementation-readiness claim.
 
 ## 2. Four independent dimensions
 
@@ -86,7 +88,7 @@ At the inspected baseline:
 - Storage supports `participant|assignee|watcher|owner|recipient`, active/inactive
   role status, immutable `(item_id, version)` sets and unique `(subject_id, role)` pairs.
 - Task authoring/update and schedule task detail accept assignee/owner sets. This
-  draft does not remove or reinterpret those accepted requests or historical rows.
+  contract does not remove or reinterpret those accepted requests or historical rows.
 - `item.show` exposes bounded role rows. Independent web reads have an optional
   `subject_roles` section whose implemented projection is limited to the selected
   subject. The existing web write adapter rejects other-subject role references.
@@ -100,9 +102,10 @@ schedule v3, root reads, compact output and frozen HTTP registries/schemas remai
 unchanged. A new protected family must name its permission and reference checks;
 removing the existing self-only guard globally is not such a family.
 
-## 5. Proposed public operations
+## 5. Successor public operations
 
-These are logical operation reservations, not implemented selectors or routes:
+These are accepted logical operations with source-only machine candidates in
+Section 13, not implemented selectors or routes:
 
 | Proposed operation | Required meaning |
 | --- | --- |
@@ -324,7 +327,7 @@ current-only responsibility table. Reuse the existing subject/status/item/versio
 index as a candidate path, not proof of query cost. Before implementation, EXPLAIN
 and runtime tests must prove both indexed authorized-owner/grant selection and exact
 current-version matching; if an additional index is necessary, specify its versioned
-migration/manifest explicitly. This draft activates no DDL or schema number.
+migration/manifest explicitly. This contract activates no DDL or schema number.
 
 Proposed new-family ceilings are 100 total role rows in a touched item version
 (including copied unmanaged roles) and page limit 1–100, default 25. Existing
@@ -347,7 +350,8 @@ No direct SQLite access is an operator/client workaround for missing surfaces.
 ## 11. Approved product decisions
 
 Both decisions were explicitly approved by the operator on 2026-10-16 for this
-first scope. Approval settles product policy, not ratification or runtime exposure.
+first scope. The logical design was subsequently ratified; neither act activates
+runtime exposure or accepts the not-yet-reviewed machine candidates.
 
 | ID | Decision | Approved first scope |
 | --- | --- | --- |
@@ -362,12 +366,14 @@ needed to settle these two decisions; any such expansion is a separately selecte
 
 ## 12. Next contracts and acceptance evidence
 
-Before implementation: review this draft with approved D-01/D-02; define closed schemas,
-versioned standalone/composite/read projections, compiled/runtime declarations,
-permission/reference/effect mapping, exact cursor/preimage and limit/error rules,
-role-only work-continuity integration, physical/query-plan requirements, operator
-examples and fixtures. Preserve frozen registries and v1/v2/v3 families; do not add
-fields to a released closed envelope or claim machine artifacts already exist.
+The logical v0.1.1 draft passed the bounded consistency review with no findings;
+the operator accepted logical v1.0.0. Section 13 and the source-only machine
+companion now define candidate closed schemas, successors, planned declarations,
+permission/error mappings, cursor rules, continuity requirements and offline
+fixtures. Review this codification before runtime implementation. Compiled
+declarations, executable continuity/query/concurrency proof, installed-package
+closure and public-transport tests are still pending. Preserve frozen registries
+and v1/v2/v3 families; do not add fields to released closed envelopes.
 
 The acceptance corpus must cover:
 
@@ -387,3 +393,251 @@ The acceptance corpus must cover:
 One coherent delivery may span core/CLI and explicit protected successors, but not
 activate a partial contract. First draft, machine contracts, runtime verification,
 frontend adoption, deployment and pack adoption remain distinct claims.
+
+## 13. Machine codification — candidate v0.1.0, pending review
+
+The [machine companion](../contracts/people-and-responsibility.v1.json) owns the
+exact planned registry, selectors, sorted prerequisites, limits, error mappings,
+normalization and identity paths. [Schemas](../contracts/schemas/people/) are a
+source-only namespace, deliberately outside the flat globs used by current web
+packagers. They are not installed runtime declarations or capability discovery.
+The [fixture manifest](../contracts/people-and-responsibility-fixture-manifest.json)
+distinguishes structural fixtures, pure-model witnesses and pending PR-01–16
+runtime obligations. A passing offline test is not proof of authorization,
+transactions, SQLite query cost, worker races or transport implementation.
+
+### 13.1 Explicit surface/version boundary
+
+| Surface | Planned selector / result | Exposure when implemented |
+| --- | --- | --- |
+| `people.list`, `item.people.show`, `item.people.update` | `spine.people-and-responsibility.v1` | Trusted-local and separately registered protected routes |
+| `schedule.create` | `spine.schedule-create.v4` / `spine.schedule-create-response.v4` | Additive local selector and protected successor |
+| `schedule.update` | `spine.schedule-update.v4` / `spine.schedule-update-response.v4` | Additive local selector and protected successor |
+| Protected people/scheduling/read family | `spine.trusted-web-people.v1` | Eight closed operations; `/api/v3/commands/<command>` except `/api/v3/agenda` |
+| Protected `schedule.show`, `agenda.show`, `item.occurrences` | `spine.people-schedule-view.v1`, `spine.people-agenda-view.v1`, `spine.people-occurrences-view.v1` | Independent read successors, not local read selector changes |
+| Cursor / role-only proof | `spine.people-cursor.v1` / `spine.people-notification-continuity.v1` | Internal admitted configuration and shared services |
+
+URL version 3 names a separate route family, not a replacement for every prior web
+API. Existing CLI `schedule.show`, `agenda.show`, compact output and local recurrence
+reads remain unchanged; standalone `item.people.show` supplies local people evidence.
+No MCP route, user/group provisioning, UI or pack installation is added.
+
+Protected outer requests never select an account, subject, grant or trusted-local
+mode. Identity comes from existing admitted self-selection. Writes require the
+existing `expected_access_epoch`; schedule creation additionally requires an explicit
+`create_owner_scope`. Every success echoes the admitted identity/revisions/epoch.
+The inner actor must equal the selected subject under existing web rules; a model-
+authored actor is not authentication. Single-operator mode retains its existing
+deployment-selected full-scope permission exception; it is not a request flag.
+
+`people.list` takes `owner`, optional `subject_status=active|inactive|all` (default
+active), `subject_kind=person|agent|all` (default all), decimal-string `limit`
+(default `"25"`) and optional opaque cursor. A group roster includes only effective
+current memberships, deduplicated by subject; conflicting simultaneous membership
+facts fail closed. Inactive subjects may be listed through the explicit filter but
+are not fresh-selection eligible. Subject scope contains that exact subject only.
+An inactive scope cannot be used for protected directory discovery. Historical
+membership is not offered as a current roster. Eligibility is derived, not stored
+as a second people registry. Local discovery uses the same explicit scope and filters;
+only local exact-ID authoring has the broader reference privilege.
+
+`item.people.show` takes item ID and optional exact positive `version`. Missing
+version selects current. The complete managed projection binds item ID/type and
+selected version, sorted association rows and one subject-label projection per unique
+associated ID. Current version is separate. No role set is truncated; over-budget
+direct reads fail. Tuple sort is `(role, subject_id)`; labels sort by subject ID.
+Only event participants or task assignees are managed. Inactive managed rows appear
+in historical/current show but do not match person filters. Current directory labels
+use a fresh authorized snapshot; they are not historical names or receipt facts.
+
+### 13.2 Authoring, identity and receipts
+
+The standalone update uses `target_version`, `updated_at_utc`, command ID, actor,
+item ID and `people`. It supports open unscheduled tasks. Scheduling v4 adds optional
+top-level `people` on create and `patch.people` on update. Omitted create people
+normalizes to the applicable empty array; omitted update people remains omitted,
+meaning preserve all rows, not clear. Wrong-role arrays fail even when empty.
+
+V4 rejects legacy `task_detail.subject_roles` authoring, including under
+`patch.item.task_detail`, rather than accepting two competing managed-role inputs.
+Existing owner/watcher/recipient rows copy forward unchanged. V3 and older role
+authoring remain supported with their existing semantics; this is not a global
+removal. Authoring those unmanaged roles through v4 is outside this slice.
+
+Canonical arrays sort by Unicode scalar code point before path assignment, after
+rejecting duplicates. IDs are opaque nonempty scalar strings, at most 256 code
+points, without ASCII controls/DEL; no trimming, case folding or Unicode normalization.
+All decimal fields are JSON strings. Ordinary row IDs reuse `spine.command-id.v1`
+and its canonical preimage. The companion enumerates the normalized array paths;
+unchanged omitted rows use the existing `/copy_forward/item_subject_role/<prior_id>`.
+Requested replacements emit new active rows at their normalized array paths,
+including retained subjects. Historical source rows are never updated.
+
+Standalone changed success has `effect=item_people_updated`, one next item version,
+one audit and one receipt. Semantic no-op has `effect=item_people_noop`, unchanged
+version and no audit; a fresh command still records its normal receipt. Compatible
+replay returns `effect=item_people_replay`, the original result's versions, immutable
+association rows, truth_changed and receipt (with original effect), without writes.
+Thus a changed replay reports original `truth_changed=true`, not a new mutation.
+Dry-run marks `dry_run=true` and returns deterministic would-be IDs/effects after
+the same proof, rolling everything back. It is a context flag, never request JSON.
+
+`work_changed=false` always for standalone people edits. V4 schedule effects keep
+their existing changed/reconciled/no-op/replay meanings; `people` joins
+`changed_dimensions`. A people-only v4 patch requires `materialization.mode=none`;
+presentation-only exclusivity remains unchanged. People combined with other existing
+schedule dimensions is one ordinary atomic composite, not two handler commits.
+
+The standalone semantic receipt hash preimage is canonical JSON exactly
+`{derivation_version:"spine.item-people-semantic-facts.v1",
+canonical_json_version:"spine.canonical-json.v1",request:<normalized complete request>}`.
+This includes command ID, actor and action timestamp. A managed role-set hash is
+`{derivation_version:"spine.people-role-set.v1",canonical_json_version:
+"spine.canonical-json.v1",item_type,roles:[{subject_id,role,status}]}` with tuples sorted
+by role/subject/status, excluding physical row IDs and timestamps. It includes
+inactive rows, so removing one is not an active-set no-op. V4 receipts use their
+new receipt selectors and include normalized people in the owning scheduling
+semantic preimage; all other facts/defaults retain v3 normalization. Historical
+receipts are never rehashed. Protected replay first checks initiating identity and
+current receipt/item disclosure, then exact normalized compatibility; it does not
+rerun fresh-add eligibility or require fresh edit authority. Labels are not replayed.
+
+### 13.3 Protected admission, failures and independent reads
+
+The companion's ordered stages and CLI/HTTP mappings are normative for this
+candidate. Shape errors select the smallest extra JSON Pointer, then smallest
+missing pointer, then selector errors, then other schema errors by pointer and
+keyword (code-point order), returning one error. Apply all reference/type/lifecycle
+checks only after root admission; replay precedes fresh expected-version checks.
+Expected-access mismatch precedes target-version mismatch. No missing/private item
+or fresh subject reference may be distinguished by an error message or error field
+containing a hidden ID. A fresh reference error points to the whole people field.
+Protected errors use the closed generic envelope; direct local errors use the
+common command taxonomy and the candidate's safe message classes. Scheduling
+errors outside people validation retain their owning command semantics.
+
+Protected item-only grantees may retain/remove existing associations, but cannot
+enumerate the group's roster or add/reactivate a fresh reference without directory
+authority. A subject-owned item has only its owner subject as a fresh protected
+reference. D-02 allows association IDs/statuses under current item read, not discovery
+of account/contact/other-item facts. Label authority is evaluated for the associated
+subject through self-directory authority or a shared currently readable group roster;
+it is not limited to the item's current owner if ownership changed. If no such
+authority exists, emit only `availability=not_disclosed` for that subject's label.
+Fresh additions still require the target owner's scope under D-01.
+
+New protected read successors preserve every existing independent-read core/time
+and optional-section rule. They add a complete optional `people` section to schedule
+and agenda views; it is available, not_requested or unavailable with a closed
+non-private reason. Never interpret not_disclosed as service failure, or failure
+as ordinary nondisclosure. There is no people-section cursor: the entire managed
+set must fit its 100-row/byte ceiling. Existing subject_roles remains self-only.
+People count/labels cannot remove an otherwise readable activity/time result.
+
+Agenda and occurrence requests may carry `person_filter`; omitted roles default
+to sorted `["assignee","participant"]`. No filter means no people restriction.
+Filtering accepts a syntactically valid ID without subject-existence lookup.
+Authorize candidate items first, then apply current active exact role matching,
+then temporal expansion, output ordering and pagination. Hidden IDs have the same
+empty result as absent IDs when neither matches an authorized item. A nonmatching
+direct occurrence query returns empty complete occurrences while preserving its
+authorized activity/time, unless time itself is unavailable under the independent
+read contract. Recurrence occurrence identity/order is unchanged; roles are series-
+level. Tasks with unavailable time remain in the authorized unplaced stream.
+
+### 13.4 Cursor, snapshot and resource contract
+
+Every budget is request-global, including initial reads, current-authority/release
+fences, role/label queries, proof construction and serialization; do not reset per
+section, person, policy or page. The companion gives exact ceilings. Use the stricter
+owning adapter ceiling. The 1000 authorized-candidate ceiling is not permission to
+resolve 1000 protected resources: the separate 100-resource/access-proof ceilings
+still apply. Fetch at most ceiling+1 for overflow detection; fail rather than
+returning a success with an incompletely computed source snapshot. A 1000+ roster
+may therefore require a later contract, not hidden-offset traversal. Existing
+over-limit item roles remain untouched; do not run startup scans or trim history.
+
+People optional sections share the existing optional SQL/byte budget, cannot consume
+the core reserve, and cannot suppress activity/time on their own overflow. Hard
+outer expiry/SQL limits may still fail the operation. Both first page and continuation
+use one admitted snapshot and a final current-authority/source fence, without automatic
+retry. Reads never write a receipt, cursor row, audit or cache generation.
+
+The cursor token is `pc1.<payload>.<mac>`: unpadded canonical base64url of canonical
+UTF-8 JSON and a 32-byte HMAC-SHA256. MAC input is UTF-8
+`spine.people-cursor.v1`, NUL, then the exact canonical payload bytes. Enforce canonical
+encoding/JSON, constant-time MAC comparison, the exact admitted key ID/generation
+and ledger instance; never accept another cursor family. Configuration is protected
+service context or local `SPINE_PEOPLE_CURSOR_CONFIG`, not request JSON. Missing
+configuration fails closed before listing. No secret is returned or placed in
+fixtures other than clearly marked test-only bytes.
+
+`query_hash` hashes exactly `{derivation_version:"spine.people-query.v1",
+canonical_json_version:"spine.canonical-json.v1",route,request,guards}`. Strip cursor
+and section_cursors; normalize declared defaults/set arrays, bind all limits/includes,
+and represent absent expected access/item/recurrence guards as null. No new server
+authorization time comes from request evaluation timestamps. Empty optional include
+normalizes to `[]`; role omission means both, not an empty role set. Continuations
+retain the original issue/expiry, at most 900 seconds, and authorization validity
+ends at the next relevant grant/membership activation or expiry, even without an
+epoch change. Keys/identity/access/query/source changes invalidate continuation.
+
+`source_hash` hashes `{derivation_version:"spine.people-source.v1",
+canonical_json_version:"spine.canonical-json.v1",route,sources}`. Sources are the
+owning independent read's authorized contributing facts plus role tuples and any
+directory metadata actually used for disclosed labels; roster sources are the
+authorized scope, effective membership evidence and filtered subject ID/status/kind/
+label/update facts, sorted by subject ID. Never hash hidden item graphs or private
+directory facts. A hidden label change alone cannot invalidate a redacted label view.
+For agenda, person-filter mismatches do not contribute source facts. Relevant
+authorized insertions/removals require recomputing bounded candidate selection.
+
+`authorization_hash` hashes `{derivation_version:"spine.people-authorization.v1",
+canonical_json_version:"spine.canonical-json.v1",context}`. Local context is
+`{mode:"trusted_local",ledger_instance_id}`. Protected context is the exact admitted
+realm/recovery/account/subject/selection/revision/access-epoch tuple plus sorted
+scope/item/directory permission proofs actually used and their transition fence;
+it never contains secrets. Recheck that proof at release. Cursor schema additionally
+binds route, stream, required item/range fields and last ordering tuple. Roster order
+is exact subject ID; existing sections/agenda/occurrences reuse v2 ordering tuples
+with new family binding. No people section is pageable.
+
+### 13.5 Role-only continuity and physical verification
+
+The new proof compares every same-item immediate version edge, allowing only the
+normalized requested managed-role delta and documented copy bookkeeping. Everything
+else in the companion's unchanged dimensions must compare equal. All prior policy
+rows, including disabled/ordinary/presentation rows, require a unique immediate
+successor via source_notification_policy_id; compare all existing policy meaning
+fields plus presentation and resolved targets. No intent-only matching, forks,
+cross-item ancestry or nondecreasing links. Source row IDs may change; original
+work/attempt FKs, provider IDs and histories may not.
+
+Mixed facet-only, presentation-only and role-only lineages must validate each edge
+under that edge's own unchanged proof contract. Do not use one enlarged allowlist
+for every edge or weaken facet-only role equality. No persistent proof registry/table
+is introduced. Bound ancestry traversal by 100 edges under the same request budget;
+overflow fails closed as capacity, without mutation or cancellation. A composite
+whose time/route/policy meaning changes follows its ordinary reconciliation instead.
+
+Editing a source event can independently stale a follow_source task's binding by
+existing source-version rules, even when the source change is people-only. This
+proof preserves the edited item's unchanged target binding; it does not bless
+dependent source-version snapshots. Reconcile dependents separately, preserving the
+existing granularity and no implicit role inheritance. No future advisory input
+freshness is relaxed. Started attempts remain immutable, regardless of later edits.
+
+Existing `(item_id,version,subject_id,role)` uniqueness and the subject/status/item/
+version index remain physical authority. Roster reads use group/status/subject
+membership indexing with current membership/subject/scope checks. Item projection
+uses bounded exact `(item_id,version)` reads; person filters use EXISTS against exact
+current-version role tuples after indexed authorized-owner/grant candidate selection.
+Do not rely on an SQLite autoindex's generated spelling. PR-12 must record EXPLAIN
+and candidate/VM-step evidence on sparse/dense authorized and hidden data; a required
+additional index would need its own migration/manifest, not an implicit startup DDL.
+No schema number, migration or physical layout change is allocated by this contract.
+
+Runtime activation requires PR-01–16 in the companion, including public CLI/HTTP
+tests, writer/finalizer inventory, mixed continuity/work state/race tests and exact
+installed dependency closure. Neither this accepted logical spec nor structural/
+pure-model fixture checks establish those completed runtime proofs.

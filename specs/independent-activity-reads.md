@@ -7,8 +7,9 @@ Tracking: [SPINE-015](../docs/BACKLOG.md#spine-015--read-authorized-activities-i
 
 ## 1. Outcome, scope, and authority
 
-The draft [people and responsibility leaf](people-and-responsibility.md) proposes
-explicit person/role filters and people projections for later read successors.
+The ratified logical [people and responsibility leaf](people-and-responsibility.md)
+defines person/role filters and people projections with source-only read-successor
+schemas pending machine-contract review and runtime implementation.
 It does not extend the implemented `subject_roles` section, its selected-subject-only
 projection, or frozen request/cursor schemas. New people context must preserve this
 document's independent core/time reads and authorized-only filtering boundaries.

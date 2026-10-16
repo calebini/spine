@@ -1,0 +1,31 @@
+{
+  "ok": true,
+  "command": "item.people.update",
+  "response_contract": "spine.people-and-responsibility.v1",
+  "effect": "item_people_updated",
+  "command_id": "command_people_update_example",
+  "command_receipt_id": "command_receipt_example",
+  "audit_id": "audit_example",
+  "item_id": "item_example",
+  "item_type": "event",
+  "target_version": "2",
+  "current_version": "3",
+  "truth_changed": true,
+  "work_changed": false,
+  "associations": [
+    {
+      "item_subject_role_id": "item_subject_role_bbc4a3af7a4e73ecd99ff788fe73cf835c26ae218f0d740ace9e77cd624f9698",
+      "subject_id": "subject_lynn",
+      "role": "participant",
+      "status": "active"
+    }
+  ],
+  "receipt": {
+    "receipt_contract": "spine.item-people-receipt.v1",
+    "command_receipt_id": "command_receipt_example",
+    "effect": "item_people_updated",
+    "semantic_facts_hash": "0f2b46e638db1ec99e704516e5fc4c924663e27f505c8e48e4bebf34707f09dc",
+    "created_at_utc": "2035-02-01T12:00:00Z"
+  },
+  "dry_run": true
+}

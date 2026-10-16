@@ -1,20 +1,23 @@
 # Spine Implementation Plan
 
 Role: Roadmap rationale and delivery history; current task status lives in [BACKLOG.md](BACKLOG.md)
-Last updated: 2026-10-16 (people and responsibility draft)
+Last updated: 2026-10-16 (people logical ratification and machine codification)
 
 This is a non-normative delivery plan. The specifications and machine-readable contracts remain authoritative.
 
-The selected specification task is
-[SPINE-059](BACKLOG.md#spine-059--draft-people-and-responsibility-contracts),
-the [people and responsibility draft](../specs/people-and-responsibility.md).
+The selected contract task is
+[SPINE-060](BACKLOG.md#spine-060--ratify-and-codify-people-and-responsibility),
+the [people and responsibility contract](../specs/people-and-responsibility.md).
 Build on existing subject-role storage, not facets or a second people registry.
 Keep participation, task assignment, resource access and notification routing
 independent. Scoped directory/association-disclosure policies D-01/D-02 were approved
-on 2026-10-16. Next review the draft and codify closed successors plus a dedicated
-role-only work-continuity proof before implementation. Existing self-only web projections and facet-only equality
-are preserved; neither is silently broadened. No runtime, machine-contract, frontend,
-pack or deployment work is authorized by this drafting task.
+on 2026-10-16. The logical draft passed bounded consistency review and the operator
+ratified logical v1.0.0. Source-only machine candidates now cover standalone commands,
+explicit scheduling/read successors, a dedicated role-only work-continuity proof,
+exact cursor/error/budget rules and offline fixtures. Review that codification
+before implementing the PR-01–16 runtime obligations. Existing self-only web
+projections and facet-only equality are preserved; neither is silently broadened.
+No runtime, frontend, pack, commit/push or deployment work is authorized by this task.
 
 The preceding bounded delivery is
 [SPINE-058](BACKLOG.md#spine-058--deliver-trusted-local-facet-revision-readback):

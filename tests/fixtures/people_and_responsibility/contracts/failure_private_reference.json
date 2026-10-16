@@ -1,0 +1,9 @@
+{
+  "ok": false,
+  "command": "item.people.update",
+  "error": {
+    "code": "referenced_row_not_found",
+    "field": "people",
+    "message": "People reference unavailable."
+  }
+}

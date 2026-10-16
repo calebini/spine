@@ -1,0 +1,10 @@
+{
+  "contract_version": "spine.people-and-responsibility.v1",
+  "owner": {
+    "owner_kind": "subject_group",
+    "owner_group_id": "group_example"
+  },
+  "limit": "25",
+  "subject_status": "inactive",
+  "subject_kind": "person"
+}

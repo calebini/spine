@@ -1,0 +1,2384 @@
+{
+  "schema_version": "spine.people-model-witnesses.v1",
+  "status": "offline_model_only",
+  "runtime_verified": false,
+  "sets": [
+    {
+      "id": "event_replace_sorted",
+      "item_type": "event",
+      "current": [
+        {
+          "subject_id": "s1",
+          "role": "participant",
+          "status": "active"
+        },
+        {
+          "subject_id": "s2",
+          "role": "watcher",
+          "status": "active"
+        }
+      ],
+      "provided": true,
+      "patch": {
+        "participants": [
+          "s3",
+          "s1"
+        ]
+      },
+      "expected": [
+        {
+          "subject_id": "s1",
+          "role": "participant",
+          "status": "active"
+        },
+        {
+          "subject_id": "s3",
+          "role": "participant",
+          "status": "active"
+        },
+        {
+          "subject_id": "s2",
+          "role": "watcher",
+          "status": "active"
+        }
+      ],
+      "changed": true
+    },
+    {
+      "id": "task_clear_keeps_owner",
+      "item_type": "task",
+      "current": [
+        {
+          "subject_id": "s1",
+          "role": "assignee",
+          "status": "active"
+        },
+        {
+          "subject_id": "s2",
+          "role": "owner",
+          "status": "active"
+        }
+      ],
+      "provided": true,
+      "patch": {
+        "assignees": []
+      },
+      "expected": [
+        {
+          "subject_id": "s2",
+          "role": "owner",
+          "status": "active"
+        }
+      ],
+      "changed": true
+    },
+    {
+      "id": "omitted_preserves_inactive",
+      "item_type": "task",
+      "current": [
+        {
+          "subject_id": "s1",
+          "role": "assignee",
+          "status": "inactive"
+        },
+        {
+          "subject_id": "s2",
+          "role": "recipient",
+          "status": "active"
+        }
+      ],
+      "provided": false,
+      "expected": [
+        {
+          "subject_id": "s1",
+          "role": "assignee",
+          "status": "inactive"
+        },
+        {
+          "subject_id": "s2",
+          "role": "recipient",
+          "status": "active"
+        }
+      ],
+      "changed": false
+    },
+    {
+      "id": "inactive_row_removal_is_change",
+      "item_type": "task",
+      "current": [
+        {
+          "subject_id": "s1",
+          "role": "assignee",
+          "status": "inactive"
+        },
+        {
+          "subject_id": "s2",
+          "role": "assignee",
+          "status": "active"
+        }
+      ],
+      "provided": true,
+      "patch": {
+        "assignees": [
+          "s2"
+        ]
+      },
+      "expected": [
+        {
+          "subject_id": "s2",
+          "role": "assignee",
+          "status": "active"
+        }
+      ],
+      "changed": true
+    },
+    {
+      "id": "permutation_noop",
+      "item_type": "task",
+      "current": [
+        {
+          "subject_id": "s1",
+          "role": "assignee",
+          "status": "active"
+        },
+        {
+          "subject_id": "s2",
+          "role": "assignee",
+          "status": "active"
+        }
+      ],
+      "provided": true,
+      "patch": {
+        "assignees": [
+          "s2",
+          "s1"
+        ]
+      },
+      "expected": [
+        {
+          "subject_id": "s1",
+          "role": "assignee",
+          "status": "active"
+        },
+        {
+          "subject_id": "s2",
+          "role": "assignee",
+          "status": "active"
+        }
+      ],
+      "changed": false
+    },
+    {
+      "id": "empty_set_noop",
+      "item_type": "event",
+      "current": [],
+      "provided": true,
+      "patch": {
+        "participants": []
+      },
+      "expected": [],
+      "changed": false
+    },
+    {
+      "id": "wrong_empty_role",
+      "item_type": "event",
+      "current": [],
+      "provided": true,
+      "patch": {
+        "assignees": []
+      },
+      "error": "wrong_item_type"
+    },
+    {
+      "id": "duplicate",
+      "item_type": "task",
+      "current": [],
+      "provided": true,
+      "patch": {
+        "assignees": [
+          "s1",
+          "s1"
+        ]
+      },
+      "error": "invalid_request"
+    },
+    {
+      "id": "both_roles",
+      "item_type": "task",
+      "current": [],
+      "provided": true,
+      "patch": {
+        "assignees": [],
+        "participants": []
+      },
+      "error": "invalid_request"
+    },
+    {
+      "id": "empty_patch",
+      "item_type": "task",
+      "current": [],
+      "provided": true,
+      "patch": {},
+      "error": "invalid_request"
+    },
+    {
+      "id": "non_managed_capacity",
+      "item_type": "event",
+      "current": [
+        {
+          "subject_id": "watcher_0",
+          "role": "watcher",
+          "status": "active"
+        },
+        {
+          "subject_id": "watcher_1",
+          "role": "watcher",
+          "status": "active"
+        },
+        {
+          "subject_id": "watcher_2",
+          "role": "watcher",
+          "status": "active"
+        },
+        {
+          "subject_id": "watcher_3",
+          "role": "watcher",
+          "status": "active"
+        },
+        {
+          "subject_id": "watcher_4",
+          "role": "watcher",
+          "status": "active"
+        },
+        {
+          "subject_id": "watcher_5",
+          "role": "watcher",
+          "status": "active"
+        },
+        {
+          "subject_id": "watcher_6",
+          "role": "watcher",
+          "status": "active"
+        },
+        {
+          "subject_id": "watcher_7",
+          "role": "watcher",
+          "status": "active"
+        },
+        {
+          "subject_id": "watcher_8",
+          "role": "watcher",
+          "status": "active"
+        },
+        {
+          "subject_id": "watcher_9",
+          "role": "watcher",
+          "status": "active"
+        },
+        {
+          "subject_id": "watcher_10",
+          "role": "watcher",
+          "status": "active"
+        },
+        {
+          "subject_id": "watcher_11",
+          "role": "watcher",
+          "status": "active"
+        },
+        {
+          "subject_id": "watcher_12",
+          "role": "watcher",
+          "status": "active"
+        },
+        {
+          "subject_id": "watcher_13",
+          "role": "watcher",
+          "status": "active"
+        },
+        {
+          "subject_id": "watcher_14",
+          "role": "watcher",
+          "status": "active"
+        },
+        {
+          "subject_id": "watcher_15",
+          "role": "watcher",
+          "status": "active"
+        },
+        {
+          "subject_id": "watcher_16",
+          "role": "watcher",
+          "status": "active"
+        },
+        {
+          "subject_id": "watcher_17",
+          "role": "watcher",
+          "status": "active"
+        },
+        {
+          "subject_id": "watcher_18",
+          "role": "watcher",
+          "status": "active"
+        },
+        {
+          "subject_id": "watcher_19",
+          "role": "watcher",
+          "status": "active"
+        },
+        {
+          "subject_id": "watcher_20",
+          "role": "watcher",
+          "status": "active"
+        },
+        {
+          "subject_id": "watcher_21",
+          "role": "watcher",
+          "status": "active"
+        },
+        {
+          "subject_id": "watcher_22",
+          "role": "watcher",
+          "status": "active"
+        },
+        {
+          "subject_id": "watcher_23",
+          "role": "watcher",
+          "status": "active"
+        },
+        {
+          "subject_id": "watcher_24",
+          "role": "watcher",
+          "status": "active"
+        },
+        {
+          "subject_id": "watcher_25",
+          "role": "watcher",
+          "status": "active"
+        },
+        {
+          "subject_id": "watcher_26",
+          "role": "watcher",
+          "status": "active"
+        },
+        {
+          "subject_id": "watcher_27",
+          "role": "watcher",
+          "status": "active"
+        },
+        {
+          "subject_id": "watcher_28",
+          "role": "watcher",
+          "status": "active"
+        },
+        {
+          "subject_id": "watcher_29",
+          "role": "watcher",
+          "status": "active"
+        },
+        {
+          "subject_id": "watcher_30",
+          "role": "watcher",
+          "status": "active"
+        },
+        {
+          "subject_id": "watcher_31",
+          "role": "watcher",
+          "status": "active"
+        },
+        {
+          "subject_id": "watcher_32",
+          "role": "watcher",
+          "status": "active"
+        },
+        {
+          "subject_id": "watcher_33",
+          "role": "watcher",
+          "status": "active"
+        },
+        {
+          "subject_id": "watcher_34",
+          "role": "watcher",
+          "status": "active"
+        },
+        {
+          "subject_id": "watcher_35",
+          "role": "watcher",
+          "status": "active"
+        },
+        {
+          "subject_id": "watcher_36",
+          "role": "watcher",
+          "status": "active"
+        },
+        {
+          "subject_id": "watcher_37",
+          "role": "watcher",
+          "status": "active"
+        },
+        {
+          "subject_id": "watcher_38",
+          "role": "watcher",
+          "status": "active"
+        },
+        {
+          "subject_id": "watcher_39",
+          "role": "watcher",
+          "status": "active"
+        },
+        {
+          "subject_id": "watcher_40",
+          "role": "watcher",
+          "status": "active"
+        },
+        {
+          "subject_id": "watcher_41",
+          "role": "watcher",
+          "status": "active"
+        },
+        {
+          "subject_id": "watcher_42",
+          "role": "watcher",
+          "status": "active"
+        },
+        {
+          "subject_id": "watcher_43",
+          "role": "watcher",
+          "status": "active"
+        },
+        {
+          "subject_id": "watcher_44",
+          "role": "watcher",
+          "status": "active"
+        },
+        {
+          "subject_id": "watcher_45",
+          "role": "watcher",
+          "status": "active"
+        },
+        {
+          "subject_id": "watcher_46",
+          "role": "watcher",
+          "status": "active"
+        },
+        {
+          "subject_id": "watcher_47",
+          "role": "watcher",
+          "status": "active"
+        },
+        {
+          "subject_id": "watcher_48",
+          "role": "watcher",
+          "status": "active"
+        },
+        {
+          "subject_id": "watcher_49",
+          "role": "watcher",
+          "status": "active"
+        },
+        {
+          "subject_id": "watcher_50",
+          "role": "watcher",
+          "status": "active"
+        },
+        {
+          "subject_id": "watcher_51",
+          "role": "watcher",
+          "status": "active"
+        },
+        {
+          "subject_id": "watcher_52",
+          "role": "watcher",
+          "status": "active"
+        },
+        {
+          "subject_id": "watcher_53",
+          "role": "watcher",
+          "status": "active"
+        },
+        {
+          "subject_id": "watcher_54",
+          "role": "watcher",
+          "status": "active"
+        },
+        {
+          "subject_id": "watcher_55",
+          "role": "watcher",
+          "status": "active"
+        },
+        {
+          "subject_id": "watcher_56",
+          "role": "watcher",
+          "status": "active"
+        },
+        {
+          "subject_id": "watcher_57",
+          "role": "watcher",
+          "status": "active"
+        },
+        {
+          "subject_id": "watcher_58",
+          "role": "watcher",
+          "status": "active"
+        },
+        {
+          "subject_id": "watcher_59",
+          "role": "watcher",
+          "status": "active"
+        },
+        {
+          "subject_id": "watcher_60",
+          "role": "watcher",
+          "status": "active"
+        },
+        {
+          "subject_id": "watcher_61",
+          "role": "watcher",
+          "status": "active"
+        },
+        {
+          "subject_id": "watcher_62",
+          "role": "watcher",
+          "status": "active"
+        },
+        {
+          "subject_id": "watcher_63",
+          "role": "watcher",
+          "status": "active"
+        },
+        {
+          "subject_id": "watcher_64",
+          "role": "watcher",
+          "status": "active"
+        },
+        {
+          "subject_id": "watcher_65",
+          "role": "watcher",
+          "status": "active"
+        },
+        {
+          "subject_id": "watcher_66",
+          "role": "watcher",
+          "status": "active"
+        },
+        {
+          "subject_id": "watcher_67",
+          "role": "watcher",
+          "status": "active"
+        },
+        {
+          "subject_id": "watcher_68",
+          "role": "watcher",
+          "status": "active"
+        },
+        {
+          "subject_id": "watcher_69",
+          "role": "watcher",
+          "status": "active"
+        },
+        {
+          "subject_id": "watcher_70",
+          "role": "watcher",
+          "status": "active"
+        },
+        {
+          "subject_id": "watcher_71",
+          "role": "watcher",
+          "status": "active"
+        },
+        {
+          "subject_id": "watcher_72",
+          "role": "watcher",
+          "status": "active"
+        },
+        {
+          "subject_id": "watcher_73",
+          "role": "watcher",
+          "status": "active"
+        },
+        {
+          "subject_id": "watcher_74",
+          "role": "watcher",
+          "status": "active"
+        },
+        {
+          "subject_id": "watcher_75",
+          "role": "watcher",
+          "status": "active"
+        },
+        {
+          "subject_id": "watcher_76",
+          "role": "watcher",
+          "status": "active"
+        },
+        {
+          "subject_id": "watcher_77",
+          "role": "watcher",
+          "status": "active"
+        },
+        {
+          "subject_id": "watcher_78",
+          "role": "watcher",
+          "status": "active"
+        },
+        {
+          "subject_id": "watcher_79",
+          "role": "watcher",
+          "status": "active"
+        },
+        {
+          "subject_id": "watcher_80",
+          "role": "watcher",
+          "status": "active"
+        },
+        {
+          "subject_id": "watcher_81",
+          "role": "watcher",
+          "status": "active"
+        },
+        {
+          "subject_id": "watcher_82",
+          "role": "watcher",
+          "status": "active"
+        },
+        {
+          "subject_id": "watcher_83",
+          "role": "watcher",
+          "status": "active"
+        },
+        {
+          "subject_id": "watcher_84",
+          "role": "watcher",
+          "status": "active"
+        },
+        {
+          "subject_id": "watcher_85",
+          "role": "watcher",
+          "status": "active"
+        },
+        {
+          "subject_id": "watcher_86",
+          "role": "watcher",
+          "status": "active"
+        },
+        {
+          "subject_id": "watcher_87",
+          "role": "watcher",
+          "status": "active"
+        },
+        {
+          "subject_id": "watcher_88",
+          "role": "watcher",
+          "status": "active"
+        },
+        {
+          "subject_id": "watcher_89",
+          "role": "watcher",
+          "status": "active"
+        },
+        {
+          "subject_id": "watcher_90",
+          "role": "watcher",
+          "status": "active"
+        },
+        {
+          "subject_id": "watcher_91",
+          "role": "watcher",
+          "status": "active"
+        },
+        {
+          "subject_id": "watcher_92",
+          "role": "watcher",
+          "status": "active"
+        },
+        {
+          "subject_id": "watcher_93",
+          "role": "watcher",
+          "status": "active"
+        },
+        {
+          "subject_id": "watcher_94",
+          "role": "watcher",
+          "status": "active"
+        },
+        {
+          "subject_id": "watcher_95",
+          "role": "watcher",
+          "status": "active"
+        },
+        {
+          "subject_id": "watcher_96",
+          "role": "watcher",
+          "status": "active"
+        },
+        {
+          "subject_id": "watcher_97",
+          "role": "watcher",
+          "status": "active"
+        },
+        {
+          "subject_id": "watcher_98",
+          "role": "watcher",
+          "status": "active"
+        },
+        {
+          "subject_id": "watcher_99",
+          "role": "watcher",
+          "status": "active"
+        }
+      ],
+      "provided": true,
+      "patch": {
+        "participants": [
+          "s1"
+        ]
+      },
+      "error": "capacity"
+    }
+  ],
+  "admission": [
+    {
+      "id": "ordinary_member",
+      "mode": "permission_enforced",
+      "scope_kind": "subject_group",
+      "scope_active": true,
+      "scope_subject": "s1",
+      "caller": "s1",
+      "caller_group_role": "member",
+      "item_edit": true,
+      "fresh": true,
+      "target": "s2",
+      "target_active": true,
+      "target_member": true,
+      "allowed": true
+    },
+    {
+      "id": "admin",
+      "mode": "permission_enforced",
+      "scope_kind": "subject_group",
+      "scope_active": true,
+      "scope_subject": "s1",
+      "caller": "s1",
+      "caller_group_role": "admin",
+      "item_edit": true,
+      "fresh": true,
+      "target": "s2",
+      "target_active": true,
+      "target_member": true,
+      "allowed": true
+    },
+    {
+      "id": "owner",
+      "mode": "permission_enforced",
+      "scope_kind": "subject_group",
+      "scope_active": true,
+      "scope_subject": "s1",
+      "caller": "s1",
+      "caller_group_role": "owner",
+      "item_edit": true,
+      "fresh": true,
+      "target": "s2",
+      "target_active": true,
+      "target_member": true,
+      "allowed": true
+    },
+    {
+      "id": "member_without_item_edit",
+      "mode": "permission_enforced",
+      "scope_kind": "subject_group",
+      "scope_active": true,
+      "scope_subject": "s1",
+      "caller": "s1",
+      "caller_group_role": "member",
+      "item_edit": false,
+      "fresh": true,
+      "target": "s2",
+      "target_active": true,
+      "target_member": true,
+      "allowed": false
+    },
+    {
+      "id": "item_grantee_no_roster",
+      "mode": "permission_enforced",
+      "scope_kind": "subject_group",
+      "scope_active": true,
+      "scope_subject": "s1",
+      "caller": "s1",
+      "caller_group_role": null,
+      "item_edit": true,
+      "fresh": true,
+      "target": "s2",
+      "target_active": true,
+      "target_member": true,
+      "allowed": false
+    },
+    {
+      "id": "nonmember_target",
+      "mode": "permission_enforced",
+      "scope_kind": "subject_group",
+      "scope_active": true,
+      "scope_subject": "s1",
+      "caller": "s1",
+      "caller_group_role": "member",
+      "item_edit": true,
+      "fresh": true,
+      "target": "s2",
+      "target_active": true,
+      "target_member": false,
+      "allowed": false
+    },
+    {
+      "id": "inactive_target",
+      "mode": "permission_enforced",
+      "scope_kind": "subject_group",
+      "scope_active": true,
+      "scope_subject": "s1",
+      "caller": "s1",
+      "caller_group_role": "member",
+      "item_edit": true,
+      "fresh": true,
+      "target": "s2",
+      "target_active": false,
+      "target_member": true,
+      "allowed": false
+    },
+    {
+      "id": "missing_target",
+      "mode": "permission_enforced",
+      "scope_kind": "subject_group",
+      "scope_active": true,
+      "scope_subject": "s1",
+      "caller": "s1",
+      "caller_group_role": "member",
+      "item_edit": true,
+      "fresh": true,
+      "target": "s2",
+      "target_active": false,
+      "target_member": false,
+      "allowed": false
+    },
+    {
+      "id": "inactive_scope",
+      "mode": "permission_enforced",
+      "scope_kind": "subject_group",
+      "scope_active": false,
+      "scope_subject": "s1",
+      "caller": "s1",
+      "caller_group_role": "member",
+      "item_edit": true,
+      "fresh": true,
+      "target": "s2",
+      "target_active": true,
+      "target_member": true,
+      "allowed": false
+    },
+    {
+      "id": "subject_self",
+      "mode": "permission_enforced",
+      "scope_kind": "subject",
+      "scope_active": true,
+      "scope_subject": "s1",
+      "caller": "s1",
+      "caller_group_role": "member",
+      "item_edit": true,
+      "fresh": true,
+      "target": "s1",
+      "target_active": true,
+      "target_member": true,
+      "allowed": true
+    },
+    {
+      "id": "private_to_shared_group_member",
+      "mode": "permission_enforced",
+      "scope_kind": "subject",
+      "scope_active": true,
+      "scope_subject": "s1",
+      "caller": "s1",
+      "caller_group_role": "member",
+      "item_edit": true,
+      "fresh": true,
+      "target": "s2",
+      "target_active": true,
+      "target_member": true,
+      "allowed": false
+    },
+    {
+      "id": "local_outsider",
+      "mode": "trusted_local",
+      "scope_kind": "subject_group",
+      "scope_active": true,
+      "scope_subject": "s1",
+      "caller": "s1",
+      "caller_group_role": "member",
+      "item_edit": true,
+      "fresh": true,
+      "target": "s2",
+      "target_active": true,
+      "target_member": false,
+      "allowed": true
+    },
+    {
+      "id": "local_inactive",
+      "mode": "trusted_local",
+      "scope_kind": "subject_group",
+      "scope_active": true,
+      "scope_subject": "s1",
+      "caller": "s1",
+      "caller_group_role": "member",
+      "item_edit": true,
+      "fresh": true,
+      "target": "s2",
+      "target_active": false,
+      "target_member": true,
+      "allowed": false
+    },
+    {
+      "id": "retain_departed_subject",
+      "mode": "permission_enforced",
+      "scope_kind": "subject_group",
+      "scope_active": true,
+      "scope_subject": "s1",
+      "caller": "s1",
+      "caller_group_role": null,
+      "item_edit": true,
+      "fresh": false,
+      "target": "s2",
+      "target_active": false,
+      "target_member": false,
+      "allowed": true
+    }
+  ],
+  "disclosure": [
+    {
+      "id": "member_label",
+      "item_read": true,
+      "may_label": true,
+      "subject": {
+        "subject_id": "s1",
+        "display_name": "Name now",
+        "subject_kind": "person",
+        "status": "active"
+      },
+      "expected": {
+        "availability": "available",
+        "display_name": "Name now",
+        "subject_kind": "person",
+        "status": "active"
+      }
+    },
+    {
+      "id": "grantee_tuple_no_label",
+      "item_read": true,
+      "may_label": false,
+      "subject": {
+        "subject_id": "s1",
+        "display_name": "Private name",
+        "subject_kind": "person",
+        "status": "inactive"
+      },
+      "expected": {
+        "availability": "not_disclosed"
+      }
+    },
+    {
+      "id": "private_item",
+      "item_read": false,
+      "may_label": true,
+      "subject": {
+        "subject_id": "s1",
+        "display_name": "Name now",
+        "subject_kind": "person",
+        "status": "active"
+      },
+      "error": "resource_unavailable"
+    },
+    {
+      "id": "missing_canonical_subject",
+      "item_read": true,
+      "may_label": true,
+      "subject": null,
+      "error": "integrity"
+    }
+  ],
+  "filter_items": [
+    {
+      "id": "visible_event",
+      "authorized": true,
+      "current_version": "2",
+      "roles": [
+        {
+          "version": "1",
+          "subject_id": "s1",
+          "role": "participant",
+          "status": "active"
+        },
+        {
+          "version": "2",
+          "subject_id": "s2",
+          "role": "participant",
+          "status": "active"
+        }
+      ],
+      "time": "available"
+    },
+    {
+      "id": "visible_unplaced_task",
+      "authorized": true,
+      "current_version": "3",
+      "roles": [
+        {
+          "version": "3",
+          "subject_id": "s1",
+          "role": "assignee",
+          "status": "active"
+        }
+      ],
+      "time": "unavailable"
+    },
+    {
+      "id": "private_assigned_task",
+      "authorized": false,
+      "current_version": "1",
+      "roles": [
+        {
+          "version": "1",
+          "subject_id": "s1",
+          "role": "assignee",
+          "status": "active"
+        }
+      ],
+      "time": "available"
+    },
+    {
+      "id": "inactive_role",
+      "authorized": true,
+      "current_version": "1",
+      "roles": [
+        {
+          "version": "1",
+          "subject_id": "s1",
+          "role": "assignee",
+          "status": "inactive"
+        }
+      ],
+      "time": "available"
+    }
+  ],
+  "filters": [
+    {
+      "id": "current_roles_only",
+      "subject_id": "s1",
+      "roles": [
+        "assignee",
+        "participant"
+      ],
+      "expected": [
+        "visible_unplaced_task"
+      ]
+    },
+    {
+      "id": "event_participant",
+      "subject_id": "s2",
+      "roles": [
+        "participant"
+      ],
+      "expected": [
+        "visible_event"
+      ]
+    },
+    {
+      "id": "absent",
+      "subject_id": "absent",
+      "roles": [
+        "assignee",
+        "participant"
+      ],
+      "expected": []
+    },
+    {
+      "id": "undisclosed",
+      "subject_id": "private",
+      "roles": [
+        "assignee",
+        "participant"
+      ],
+      "expected": []
+    }
+  ],
+  "continuity": [
+    {
+      "id": "people_edge",
+      "kind": "people",
+      "before": {
+        "item": {
+          "title": "Appointment",
+          "status": "active"
+        },
+        "details": {
+          "start_anchor_id": "a1"
+        },
+        "roles": [
+          {
+            "subject_id": "s1",
+            "role": "participant",
+            "status": "active"
+          }
+        ],
+        "facets": {
+          "flight_details": "hash1"
+        },
+        "locations": [
+          "location1"
+        ],
+        "access_owner": "group1",
+        "recurrence": "revision1",
+        "binding": "binding1",
+        "presentation": "ordinary",
+        "policies": [
+          {
+            "policy_id": "p1",
+            "source_policy_id": null,
+            "meaning": {
+              "notification_intent_id": "intent1",
+              "intent_created_item_version": "1",
+              "intent_created_by_command_id": "command1",
+              "status": "active",
+              "recipient_kind": "subject",
+              "recipient_subject_id": "recipient",
+              "recipient_group_id": null,
+              "channel": "whatsapp",
+              "delivery_target_id": "route1",
+              "target": {
+                "kind": "item_anchor",
+                "anchor_role": "event_start"
+              },
+              "normalized_notification_schedule_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "late_handling": {
+                "kind": "skip"
+              }
+            }
+          }
+        ]
+      },
+      "after": {
+        "item": {
+          "title": "Appointment",
+          "status": "active"
+        },
+        "details": {
+          "start_anchor_id": "a1"
+        },
+        "roles": [
+          {
+            "subject_id": "s2",
+            "role": "participant",
+            "status": "active"
+          }
+        ],
+        "facets": {
+          "flight_details": "hash1"
+        },
+        "locations": [
+          "location1"
+        ],
+        "access_owner": "group1",
+        "recurrence": "revision1",
+        "binding": "binding1",
+        "presentation": "ordinary",
+        "policies": [
+          {
+            "policy_id": "p2",
+            "source_policy_id": "p1",
+            "meaning": {
+              "notification_intent_id": "intent1",
+              "intent_created_item_version": "1",
+              "intent_created_by_command_id": "command1",
+              "status": "active",
+              "recipient_kind": "subject",
+              "recipient_subject_id": "recipient",
+              "recipient_group_id": null,
+              "channel": "whatsapp",
+              "delivery_target_id": "route1",
+              "target": {
+                "kind": "item_anchor",
+                "anchor_role": "event_start"
+              },
+              "normalized_notification_schedule_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "late_handling": {
+                "kind": "skip"
+              }
+            }
+          }
+        ]
+      },
+      "requested_roles": [
+        {
+          "subject_id": "s2",
+          "role": "participant",
+          "status": "active"
+        }
+      ],
+      "valid": true
+    },
+    {
+      "id": "title_drift",
+      "kind": "people",
+      "before": {
+        "item": {
+          "title": "Appointment",
+          "status": "active"
+        },
+        "details": {
+          "start_anchor_id": "a1"
+        },
+        "roles": [
+          {
+            "subject_id": "s1",
+            "role": "participant",
+            "status": "active"
+          }
+        ],
+        "facets": {
+          "flight_details": "hash1"
+        },
+        "locations": [
+          "location1"
+        ],
+        "access_owner": "group1",
+        "recurrence": "revision1",
+        "binding": "binding1",
+        "presentation": "ordinary",
+        "policies": [
+          {
+            "policy_id": "p1",
+            "source_policy_id": null,
+            "meaning": {
+              "notification_intent_id": "intent1",
+              "intent_created_item_version": "1",
+              "intent_created_by_command_id": "command1",
+              "status": "active",
+              "recipient_kind": "subject",
+              "recipient_subject_id": "recipient",
+              "recipient_group_id": null,
+              "channel": "whatsapp",
+              "delivery_target_id": "route1",
+              "target": {
+                "kind": "item_anchor",
+                "anchor_role": "event_start"
+              },
+              "normalized_notification_schedule_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "late_handling": {
+                "kind": "skip"
+              }
+            }
+          }
+        ]
+      },
+      "after": {
+        "item": {
+          "title": "Changed",
+          "status": "active"
+        },
+        "details": {
+          "start_anchor_id": "a1"
+        },
+        "roles": [
+          {
+            "subject_id": "s2",
+            "role": "participant",
+            "status": "active"
+          }
+        ],
+        "facets": {
+          "flight_details": "hash1"
+        },
+        "locations": [
+          "location1"
+        ],
+        "access_owner": "group1",
+        "recurrence": "revision1",
+        "binding": "binding1",
+        "presentation": "ordinary",
+        "policies": [
+          {
+            "policy_id": "p2",
+            "source_policy_id": "p1",
+            "meaning": {
+              "notification_intent_id": "intent1",
+              "intent_created_item_version": "1",
+              "intent_created_by_command_id": "command1",
+              "status": "active",
+              "recipient_kind": "subject",
+              "recipient_subject_id": "recipient",
+              "recipient_group_id": null,
+              "channel": "whatsapp",
+              "delivery_target_id": "route1",
+              "target": {
+                "kind": "item_anchor",
+                "anchor_role": "event_start"
+              },
+              "normalized_notification_schedule_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "late_handling": {
+                "kind": "skip"
+              }
+            }
+          }
+        ]
+      },
+      "requested_roles": [
+        {
+          "subject_id": "s2",
+          "role": "participant",
+          "status": "active"
+        }
+      ],
+      "valid": false
+    },
+    {
+      "id": "facet_drift",
+      "kind": "people",
+      "before": {
+        "item": {
+          "title": "Appointment",
+          "status": "active"
+        },
+        "details": {
+          "start_anchor_id": "a1"
+        },
+        "roles": [
+          {
+            "subject_id": "s1",
+            "role": "participant",
+            "status": "active"
+          }
+        ],
+        "facets": {
+          "flight_details": "hash1"
+        },
+        "locations": [
+          "location1"
+        ],
+        "access_owner": "group1",
+        "recurrence": "revision1",
+        "binding": "binding1",
+        "presentation": "ordinary",
+        "policies": [
+          {
+            "policy_id": "p1",
+            "source_policy_id": null,
+            "meaning": {
+              "notification_intent_id": "intent1",
+              "intent_created_item_version": "1",
+              "intent_created_by_command_id": "command1",
+              "status": "active",
+              "recipient_kind": "subject",
+              "recipient_subject_id": "recipient",
+              "recipient_group_id": null,
+              "channel": "whatsapp",
+              "delivery_target_id": "route1",
+              "target": {
+                "kind": "item_anchor",
+                "anchor_role": "event_start"
+              },
+              "normalized_notification_schedule_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "late_handling": {
+                "kind": "skip"
+              }
+            }
+          }
+        ]
+      },
+      "after": {
+        "item": {
+          "title": "Appointment",
+          "status": "active"
+        },
+        "details": {
+          "start_anchor_id": "a1"
+        },
+        "roles": [
+          {
+            "subject_id": "s2",
+            "role": "participant",
+            "status": "active"
+          }
+        ],
+        "facets": {
+          "flight_details": "hash2"
+        },
+        "locations": [
+          "location1"
+        ],
+        "access_owner": "group1",
+        "recurrence": "revision1",
+        "binding": "binding1",
+        "presentation": "ordinary",
+        "policies": [
+          {
+            "policy_id": "p2",
+            "source_policy_id": "p1",
+            "meaning": {
+              "notification_intent_id": "intent1",
+              "intent_created_item_version": "1",
+              "intent_created_by_command_id": "command1",
+              "status": "active",
+              "recipient_kind": "subject",
+              "recipient_subject_id": "recipient",
+              "recipient_group_id": null,
+              "channel": "whatsapp",
+              "delivery_target_id": "route1",
+              "target": {
+                "kind": "item_anchor",
+                "anchor_role": "event_start"
+              },
+              "normalized_notification_schedule_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "late_handling": {
+                "kind": "skip"
+              }
+            }
+          }
+        ]
+      },
+      "requested_roles": [
+        {
+          "subject_id": "s2",
+          "role": "participant",
+          "status": "active"
+        }
+      ],
+      "valid": false
+    },
+    {
+      "id": "route_drift",
+      "kind": "people",
+      "before": {
+        "item": {
+          "title": "Appointment",
+          "status": "active"
+        },
+        "details": {
+          "start_anchor_id": "a1"
+        },
+        "roles": [
+          {
+            "subject_id": "s1",
+            "role": "participant",
+            "status": "active"
+          }
+        ],
+        "facets": {
+          "flight_details": "hash1"
+        },
+        "locations": [
+          "location1"
+        ],
+        "access_owner": "group1",
+        "recurrence": "revision1",
+        "binding": "binding1",
+        "presentation": "ordinary",
+        "policies": [
+          {
+            "policy_id": "p1",
+            "source_policy_id": null,
+            "meaning": {
+              "notification_intent_id": "intent1",
+              "intent_created_item_version": "1",
+              "intent_created_by_command_id": "command1",
+              "status": "active",
+              "recipient_kind": "subject",
+              "recipient_subject_id": "recipient",
+              "recipient_group_id": null,
+              "channel": "whatsapp",
+              "delivery_target_id": "route1",
+              "target": {
+                "kind": "item_anchor",
+                "anchor_role": "event_start"
+              },
+              "normalized_notification_schedule_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "late_handling": {
+                "kind": "skip"
+              }
+            }
+          }
+        ]
+      },
+      "after": {
+        "item": {
+          "title": "Appointment",
+          "status": "active"
+        },
+        "details": {
+          "start_anchor_id": "a1"
+        },
+        "roles": [
+          {
+            "subject_id": "s2",
+            "role": "participant",
+            "status": "active"
+          }
+        ],
+        "facets": {
+          "flight_details": "hash1"
+        },
+        "locations": [
+          "location1"
+        ],
+        "access_owner": "group1",
+        "recurrence": "revision1",
+        "binding": "binding1",
+        "presentation": "ordinary",
+        "policies": [
+          {
+            "policy_id": "p2",
+            "source_policy_id": "p1",
+            "meaning": {
+              "notification_intent_id": "intent1",
+              "intent_created_item_version": "1",
+              "intent_created_by_command_id": "command1",
+              "status": "active",
+              "recipient_kind": "subject",
+              "recipient_subject_id": "recipient",
+              "recipient_group_id": null,
+              "channel": "whatsapp",
+              "delivery_target_id": "route2",
+              "target": {
+                "kind": "item_anchor",
+                "anchor_role": "event_start"
+              },
+              "normalized_notification_schedule_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "late_handling": {
+                "kind": "skip"
+              }
+            }
+          }
+        ]
+      },
+      "requested_roles": [
+        {
+          "subject_id": "s2",
+          "role": "participant",
+          "status": "active"
+        }
+      ],
+      "valid": false
+    },
+    {
+      "id": "binding_drift",
+      "kind": "people",
+      "before": {
+        "item": {
+          "title": "Appointment",
+          "status": "active"
+        },
+        "details": {
+          "start_anchor_id": "a1"
+        },
+        "roles": [
+          {
+            "subject_id": "s1",
+            "role": "participant",
+            "status": "active"
+          }
+        ],
+        "facets": {
+          "flight_details": "hash1"
+        },
+        "locations": [
+          "location1"
+        ],
+        "access_owner": "group1",
+        "recurrence": "revision1",
+        "binding": "binding1",
+        "presentation": "ordinary",
+        "policies": [
+          {
+            "policy_id": "p1",
+            "source_policy_id": null,
+            "meaning": {
+              "notification_intent_id": "intent1",
+              "intent_created_item_version": "1",
+              "intent_created_by_command_id": "command1",
+              "status": "active",
+              "recipient_kind": "subject",
+              "recipient_subject_id": "recipient",
+              "recipient_group_id": null,
+              "channel": "whatsapp",
+              "delivery_target_id": "route1",
+              "target": {
+                "kind": "item_anchor",
+                "anchor_role": "event_start"
+              },
+              "normalized_notification_schedule_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "late_handling": {
+                "kind": "skip"
+              }
+            }
+          }
+        ]
+      },
+      "after": {
+        "item": {
+          "title": "Appointment",
+          "status": "active"
+        },
+        "details": {
+          "start_anchor_id": "a1"
+        },
+        "roles": [
+          {
+            "subject_id": "s2",
+            "role": "participant",
+            "status": "active"
+          }
+        ],
+        "facets": {
+          "flight_details": "hash1"
+        },
+        "locations": [
+          "location1"
+        ],
+        "access_owner": "group1",
+        "recurrence": "revision1",
+        "binding": "binding2",
+        "presentation": "ordinary",
+        "policies": [
+          {
+            "policy_id": "p2",
+            "source_policy_id": "p1",
+            "meaning": {
+              "notification_intent_id": "intent1",
+              "intent_created_item_version": "1",
+              "intent_created_by_command_id": "command1",
+              "status": "active",
+              "recipient_kind": "subject",
+              "recipient_subject_id": "recipient",
+              "recipient_group_id": null,
+              "channel": "whatsapp",
+              "delivery_target_id": "route1",
+              "target": {
+                "kind": "item_anchor",
+                "anchor_role": "event_start"
+              },
+              "normalized_notification_schedule_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "late_handling": {
+                "kind": "skip"
+              }
+            }
+          }
+        ]
+      },
+      "requested_roles": [
+        {
+          "subject_id": "s2",
+          "role": "participant",
+          "status": "active"
+        }
+      ],
+      "valid": false
+    },
+    {
+      "id": "presentation_drift",
+      "kind": "people",
+      "before": {
+        "item": {
+          "title": "Appointment",
+          "status": "active"
+        },
+        "details": {
+          "start_anchor_id": "a1"
+        },
+        "roles": [
+          {
+            "subject_id": "s1",
+            "role": "participant",
+            "status": "active"
+          }
+        ],
+        "facets": {
+          "flight_details": "hash1"
+        },
+        "locations": [
+          "location1"
+        ],
+        "access_owner": "group1",
+        "recurrence": "revision1",
+        "binding": "binding1",
+        "presentation": "ordinary",
+        "policies": [
+          {
+            "policy_id": "p1",
+            "source_policy_id": null,
+            "meaning": {
+              "notification_intent_id": "intent1",
+              "intent_created_item_version": "1",
+              "intent_created_by_command_id": "command1",
+              "status": "active",
+              "recipient_kind": "subject",
+              "recipient_subject_id": "recipient",
+              "recipient_group_id": null,
+              "channel": "whatsapp",
+              "delivery_target_id": "route1",
+              "target": {
+                "kind": "item_anchor",
+                "anchor_role": "event_start"
+              },
+              "normalized_notification_schedule_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "late_handling": {
+                "kind": "skip"
+              }
+            }
+          }
+        ]
+      },
+      "after": {
+        "item": {
+          "title": "Appointment",
+          "status": "active"
+        },
+        "details": {
+          "start_anchor_id": "a1"
+        },
+        "roles": [
+          {
+            "subject_id": "s2",
+            "role": "participant",
+            "status": "active"
+          }
+        ],
+        "facets": {
+          "flight_details": "hash1"
+        },
+        "locations": [
+          "location1"
+        ],
+        "access_owner": "group1",
+        "recurrence": "revision1",
+        "binding": "binding1",
+        "presentation": "details",
+        "policies": [
+          {
+            "policy_id": "p2",
+            "source_policy_id": "p1",
+            "meaning": {
+              "notification_intent_id": "intent1",
+              "intent_created_item_version": "1",
+              "intent_created_by_command_id": "command1",
+              "status": "active",
+              "recipient_kind": "subject",
+              "recipient_subject_id": "recipient",
+              "recipient_group_id": null,
+              "channel": "whatsapp",
+              "delivery_target_id": "route1",
+              "target": {
+                "kind": "item_anchor",
+                "anchor_role": "event_start"
+              },
+              "normalized_notification_schedule_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "late_handling": {
+                "kind": "skip"
+              }
+            }
+          }
+        ]
+      },
+      "requested_roles": [
+        {
+          "subject_id": "s2",
+          "role": "participant",
+          "status": "active"
+        }
+      ],
+      "valid": false
+    },
+    {
+      "id": "unrequested_owner_delta",
+      "kind": "people",
+      "before": {
+        "item": {
+          "title": "Appointment",
+          "status": "active"
+        },
+        "details": {
+          "start_anchor_id": "a1"
+        },
+        "roles": [
+          {
+            "subject_id": "s1",
+            "role": "participant",
+            "status": "active"
+          }
+        ],
+        "facets": {
+          "flight_details": "hash1"
+        },
+        "locations": [
+          "location1"
+        ],
+        "access_owner": "group1",
+        "recurrence": "revision1",
+        "binding": "binding1",
+        "presentation": "ordinary",
+        "policies": [
+          {
+            "policy_id": "p1",
+            "source_policy_id": null,
+            "meaning": {
+              "notification_intent_id": "intent1",
+              "intent_created_item_version": "1",
+              "intent_created_by_command_id": "command1",
+              "status": "active",
+              "recipient_kind": "subject",
+              "recipient_subject_id": "recipient",
+              "recipient_group_id": null,
+              "channel": "whatsapp",
+              "delivery_target_id": "route1",
+              "target": {
+                "kind": "item_anchor",
+                "anchor_role": "event_start"
+              },
+              "normalized_notification_schedule_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "late_handling": {
+                "kind": "skip"
+              }
+            }
+          }
+        ]
+      },
+      "after": {
+        "item": {
+          "title": "Appointment",
+          "status": "active"
+        },
+        "details": {
+          "start_anchor_id": "a1"
+        },
+        "roles": [
+          {
+            "subject_id": "s2",
+            "role": "participant",
+            "status": "active"
+          },
+          {
+            "subject_id": "s3",
+            "role": "owner",
+            "status": "active"
+          }
+        ],
+        "facets": {
+          "flight_details": "hash1"
+        },
+        "locations": [
+          "location1"
+        ],
+        "access_owner": "group1",
+        "recurrence": "revision1",
+        "binding": "binding1",
+        "presentation": "ordinary",
+        "policies": [
+          {
+            "policy_id": "p2",
+            "source_policy_id": "p1",
+            "meaning": {
+              "notification_intent_id": "intent1",
+              "intent_created_item_version": "1",
+              "intent_created_by_command_id": "command1",
+              "status": "active",
+              "recipient_kind": "subject",
+              "recipient_subject_id": "recipient",
+              "recipient_group_id": null,
+              "channel": "whatsapp",
+              "delivery_target_id": "route1",
+              "target": {
+                "kind": "item_anchor",
+                "anchor_role": "event_start"
+              },
+              "normalized_notification_schedule_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "late_handling": {
+                "kind": "skip"
+              }
+            }
+          }
+        ]
+      },
+      "requested_roles": [
+        {
+          "subject_id": "s2",
+          "role": "participant",
+          "status": "active"
+        }
+      ],
+      "valid": false
+    },
+    {
+      "id": "policy_fork",
+      "kind": "people",
+      "before": {
+        "item": {
+          "title": "Appointment",
+          "status": "active"
+        },
+        "details": {
+          "start_anchor_id": "a1"
+        },
+        "roles": [
+          {
+            "subject_id": "s1",
+            "role": "participant",
+            "status": "active"
+          }
+        ],
+        "facets": {
+          "flight_details": "hash1"
+        },
+        "locations": [
+          "location1"
+        ],
+        "access_owner": "group1",
+        "recurrence": "revision1",
+        "binding": "binding1",
+        "presentation": "ordinary",
+        "policies": [
+          {
+            "policy_id": "p1",
+            "source_policy_id": null,
+            "meaning": {
+              "notification_intent_id": "intent1",
+              "intent_created_item_version": "1",
+              "intent_created_by_command_id": "command1",
+              "status": "active",
+              "recipient_kind": "subject",
+              "recipient_subject_id": "recipient",
+              "recipient_group_id": null,
+              "channel": "whatsapp",
+              "delivery_target_id": "route1",
+              "target": {
+                "kind": "item_anchor",
+                "anchor_role": "event_start"
+              },
+              "normalized_notification_schedule_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "late_handling": {
+                "kind": "skip"
+              }
+            }
+          }
+        ]
+      },
+      "after": {
+        "item": {
+          "title": "Appointment",
+          "status": "active"
+        },
+        "details": {
+          "start_anchor_id": "a1"
+        },
+        "roles": [
+          {
+            "subject_id": "s2",
+            "role": "participant",
+            "status": "active"
+          }
+        ],
+        "facets": {
+          "flight_details": "hash1"
+        },
+        "locations": [
+          "location1"
+        ],
+        "access_owner": "group1",
+        "recurrence": "revision1",
+        "binding": "binding1",
+        "presentation": "ordinary",
+        "policies": [
+          {
+            "policy_id": "p2",
+            "source_policy_id": "p1",
+            "meaning": {
+              "notification_intent_id": "intent1",
+              "intent_created_item_version": "1",
+              "intent_created_by_command_id": "command1",
+              "status": "active",
+              "recipient_kind": "subject",
+              "recipient_subject_id": "recipient",
+              "recipient_group_id": null,
+              "channel": "whatsapp",
+              "delivery_target_id": "route1",
+              "target": {
+                "kind": "item_anchor",
+                "anchor_role": "event_start"
+              },
+              "normalized_notification_schedule_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "late_handling": {
+                "kind": "skip"
+              }
+            }
+          },
+          {
+            "policy_id": "p3",
+            "source_policy_id": "p1",
+            "meaning": {
+              "notification_intent_id": "intent1",
+              "intent_created_item_version": "1",
+              "intent_created_by_command_id": "command1",
+              "status": "active",
+              "recipient_kind": "subject",
+              "recipient_subject_id": "recipient",
+              "recipient_group_id": null,
+              "channel": "whatsapp",
+              "delivery_target_id": "route1",
+              "target": {
+                "kind": "item_anchor",
+                "anchor_role": "event_start"
+              },
+              "normalized_notification_schedule_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "late_handling": {
+                "kind": "skip"
+              }
+            }
+          }
+        ]
+      },
+      "requested_roles": [
+        {
+          "subject_id": "s2",
+          "role": "participant",
+          "status": "active"
+        }
+      ],
+      "valid": false
+    },
+    {
+      "id": "facet_edge_keeps_roles",
+      "kind": "facet",
+      "before": {
+        "item": {
+          "title": "Appointment",
+          "status": "active"
+        },
+        "details": {
+          "start_anchor_id": "a1"
+        },
+        "roles": [
+          {
+            "subject_id": "s2",
+            "role": "participant",
+            "status": "active"
+          }
+        ],
+        "facets": {
+          "flight_details": "hash1"
+        },
+        "locations": [
+          "location1"
+        ],
+        "access_owner": "group1",
+        "recurrence": "revision1",
+        "binding": "binding1",
+        "presentation": "ordinary",
+        "policies": [
+          {
+            "policy_id": "p2",
+            "source_policy_id": "p1",
+            "meaning": {
+              "notification_intent_id": "intent1",
+              "intent_created_item_version": "1",
+              "intent_created_by_command_id": "command1",
+              "status": "active",
+              "recipient_kind": "subject",
+              "recipient_subject_id": "recipient",
+              "recipient_group_id": null,
+              "channel": "whatsapp",
+              "delivery_target_id": "route1",
+              "target": {
+                "kind": "item_anchor",
+                "anchor_role": "event_start"
+              },
+              "normalized_notification_schedule_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "late_handling": {
+                "kind": "skip"
+              }
+            }
+          }
+        ]
+      },
+      "after": {
+        "item": {
+          "title": "Appointment",
+          "status": "active"
+        },
+        "details": {
+          "start_anchor_id": "a1"
+        },
+        "roles": [
+          {
+            "subject_id": "s2",
+            "role": "participant",
+            "status": "active"
+          }
+        ],
+        "facets": {
+          "flight_details": "hash2"
+        },
+        "locations": [
+          "location1"
+        ],
+        "access_owner": "group1",
+        "recurrence": "revision1",
+        "binding": "binding1",
+        "presentation": "ordinary",
+        "policies": [
+          {
+            "policy_id": "p3",
+            "source_policy_id": "p2",
+            "meaning": {
+              "notification_intent_id": "intent1",
+              "intent_created_item_version": "1",
+              "intent_created_by_command_id": "command1",
+              "status": "active",
+              "recipient_kind": "subject",
+              "recipient_subject_id": "recipient",
+              "recipient_group_id": null,
+              "channel": "whatsapp",
+              "delivery_target_id": "route1",
+              "target": {
+                "kind": "item_anchor",
+                "anchor_role": "event_start"
+              },
+              "normalized_notification_schedule_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "late_handling": {
+                "kind": "skip"
+              }
+            }
+          }
+        ]
+      },
+      "valid": true
+    },
+    {
+      "id": "facet_cannot_allow_people_delta",
+      "kind": "facet",
+      "before": {
+        "item": {
+          "title": "Appointment",
+          "status": "active"
+        },
+        "details": {
+          "start_anchor_id": "a1"
+        },
+        "roles": [
+          {
+            "subject_id": "s2",
+            "role": "participant",
+            "status": "active"
+          }
+        ],
+        "facets": {
+          "flight_details": "hash1"
+        },
+        "locations": [
+          "location1"
+        ],
+        "access_owner": "group1",
+        "recurrence": "revision1",
+        "binding": "binding1",
+        "presentation": "ordinary",
+        "policies": [
+          {
+            "policy_id": "p2",
+            "source_policy_id": "p1",
+            "meaning": {
+              "notification_intent_id": "intent1",
+              "intent_created_item_version": "1",
+              "intent_created_by_command_id": "command1",
+              "status": "active",
+              "recipient_kind": "subject",
+              "recipient_subject_id": "recipient",
+              "recipient_group_id": null,
+              "channel": "whatsapp",
+              "delivery_target_id": "route1",
+              "target": {
+                "kind": "item_anchor",
+                "anchor_role": "event_start"
+              },
+              "normalized_notification_schedule_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "late_handling": {
+                "kind": "skip"
+              }
+            }
+          }
+        ]
+      },
+      "after": {
+        "item": {
+          "title": "Appointment",
+          "status": "active"
+        },
+        "details": {
+          "start_anchor_id": "a1"
+        },
+        "roles": [
+          {
+            "subject_id": "s3",
+            "role": "participant",
+            "status": "active"
+          }
+        ],
+        "facets": {
+          "flight_details": "hash2"
+        },
+        "locations": [
+          "location1"
+        ],
+        "access_owner": "group1",
+        "recurrence": "revision1",
+        "binding": "binding1",
+        "presentation": "ordinary",
+        "policies": [
+          {
+            "policy_id": "p3",
+            "source_policy_id": "p2",
+            "meaning": {
+              "notification_intent_id": "intent1",
+              "intent_created_item_version": "1",
+              "intent_created_by_command_id": "command1",
+              "status": "active",
+              "recipient_kind": "subject",
+              "recipient_subject_id": "recipient",
+              "recipient_group_id": null,
+              "channel": "whatsapp",
+              "delivery_target_id": "route1",
+              "target": {
+                "kind": "item_anchor",
+                "anchor_role": "event_start"
+              },
+              "normalized_notification_schedule_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "late_handling": {
+                "kind": "skip"
+              }
+            }
+          }
+        ]
+      },
+      "valid": false
+    },
+    {
+      "id": "presentation_edge_keeps_people",
+      "kind": "presentation",
+      "before": {
+        "item": {
+          "title": "Appointment",
+          "status": "active"
+        },
+        "details": {
+          "start_anchor_id": "a1"
+        },
+        "roles": [
+          {
+            "subject_id": "s2",
+            "role": "participant",
+            "status": "active"
+          }
+        ],
+        "facets": {
+          "flight_details": "hash2"
+        },
+        "locations": [
+          "location1"
+        ],
+        "access_owner": "group1",
+        "recurrence": "revision1",
+        "binding": "binding1",
+        "presentation": "ordinary",
+        "policies": [
+          {
+            "policy_id": "p3",
+            "source_policy_id": "p2",
+            "meaning": {
+              "notification_intent_id": "intent1",
+              "intent_created_item_version": "1",
+              "intent_created_by_command_id": "command1",
+              "status": "active",
+              "recipient_kind": "subject",
+              "recipient_subject_id": "recipient",
+              "recipient_group_id": null,
+              "channel": "whatsapp",
+              "delivery_target_id": "route1",
+              "target": {
+                "kind": "item_anchor",
+                "anchor_role": "event_start"
+              },
+              "normalized_notification_schedule_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "late_handling": {
+                "kind": "skip"
+              }
+            }
+          }
+        ]
+      },
+      "after": {
+        "item": {
+          "title": "Appointment",
+          "status": "active"
+        },
+        "details": {
+          "start_anchor_id": "a1"
+        },
+        "roles": [
+          {
+            "subject_id": "s2",
+            "role": "participant",
+            "status": "active"
+          }
+        ],
+        "facets": {
+          "flight_details": "hash2"
+        },
+        "locations": [
+          "location1"
+        ],
+        "access_owner": "group1",
+        "recurrence": "revision1",
+        "binding": "binding1",
+        "presentation": "details",
+        "policies": [
+          {
+            "policy_id": "p4",
+            "source_policy_id": "p3",
+            "meaning": {
+              "notification_intent_id": "intent1",
+              "intent_created_item_version": "1",
+              "intent_created_by_command_id": "command1",
+              "status": "active",
+              "recipient_kind": "subject",
+              "recipient_subject_id": "recipient",
+              "recipient_group_id": null,
+              "channel": "whatsapp",
+              "delivery_target_id": "route1",
+              "target": {
+                "kind": "item_anchor",
+                "anchor_role": "event_start"
+              },
+              "normalized_notification_schedule_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "late_handling": {
+                "kind": "skip"
+              }
+            }
+          }
+        ]
+      },
+      "valid": true
+    }
+  ],
+  "work_states": [
+    "eligible_unattempted",
+    "leased_unstarted",
+    "retry",
+    "started",
+    "terminal",
+    "independently_stale",
+    "absent"
+  ],
+  "mixed_lineage_case_ids": [
+    "people_edge",
+    "facet_edge_keeps_roles",
+    "presentation_edge_keeps_people"
+  ]
+}

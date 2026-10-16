@@ -1,0 +1,7 @@
+{
+  "contract_version": "spine.people-cursor-config.v1",
+  "key_id": "fixture_key",
+  "key_generation": "1",
+  "ledger_instance_id": "ledger_fixture",
+  "secret_hex": "abababababababababababababababababababababababababababababababab"
+}

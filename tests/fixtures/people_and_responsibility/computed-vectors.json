@@ -1,0 +1,146 @@
+{
+  "schema_version": "spine.people-computed-vectors.v1",
+  "status": "offline_model_only",
+  "runtime_verified": false,
+  "vectors": [
+    {
+      "id": "roster_query",
+      "preimage": {
+        "derivation_version": "spine.people-query.v1",
+        "canonical_json_version": "spine.canonical-json.v1",
+        "route": "people.list",
+        "request": {
+          "contract_version": "spine.people-and-responsibility.v1",
+          "owner": {
+            "owner_kind": "subject_group",
+            "owner_group_id": "group_example"
+          },
+          "limit": "25",
+          "subject_status": "active",
+          "subject_kind": "all"
+        },
+        "guards": {
+          "expected_access_epoch": null,
+          "expected_item_version": null,
+          "expected_recurrence_revision_id": null
+        }
+      },
+      "canonical_json": "{\"canonical_json_version\":\"spine.canonical-json.v1\",\"derivation_version\":\"spine.people-query.v1\",\"guards\":{\"expected_access_epoch\":null,\"expected_item_version\":null,\"expected_recurrence_revision_id\":null},\"request\":{\"contract_version\":\"spine.people-and-responsibility.v1\",\"limit\":\"25\",\"owner\":{\"owner_group_id\":\"group_example\",\"owner_kind\":\"subject_group\"},\"subject_kind\":\"all\",\"subject_status\":\"active\"},\"route\":\"people.list\"}",
+      "sha256": "95c54a0a36c46a66bb91840de3ea9d0371fe8d30be92e91778c985641d962e5d"
+    },
+    {
+      "id": "update_semantic_facts",
+      "preimage": {
+        "derivation_version": "spine.item-people-semantic-facts.v1",
+        "canonical_json_version": "spine.canonical-json.v1",
+        "request": {
+          "contract_version": "spine.people-and-responsibility.v1",
+          "command_id": "command_people_update_example",
+          "actor_subject_id": "subject_operator",
+          "item_id": "item_example",
+          "target_version": "2",
+          "updated_at_utc": "2035-02-01T12:00:00Z",
+          "people": {
+            "participants": [
+              "subject_lynn"
+            ]
+          }
+        }
+      },
+      "canonical_json": "{\"canonical_json_version\":\"spine.canonical-json.v1\",\"derivation_version\":\"spine.item-people-semantic-facts.v1\",\"request\":{\"actor_subject_id\":\"subject_operator\",\"command_id\":\"command_people_update_example\",\"contract_version\":\"spine.people-and-responsibility.v1\",\"item_id\":\"item_example\",\"people\":{\"participants\":[\"subject_lynn\"]},\"target_version\":\"2\",\"updated_at_utc\":\"2035-02-01T12:00:00Z\"}}",
+      "sha256": "0f2b46e638db1ec99e704516e5fc4c924663e27f505c8e48e4bebf34707f09dc"
+    },
+    {
+      "id": "event_role_set",
+      "preimage": {
+        "derivation_version": "spine.people-role-set.v1",
+        "canonical_json_version": "spine.canonical-json.v1",
+        "item_type": "event",
+        "roles": [
+          {
+            "subject_id": "subject_lynn",
+            "role": "participant",
+            "status": "active"
+          }
+        ]
+      },
+      "canonical_json": "{\"canonical_json_version\":\"spine.canonical-json.v1\",\"derivation_version\":\"spine.people-role-set.v1\",\"item_type\":\"event\",\"roles\":[{\"role\":\"participant\",\"status\":\"active\",\"subject_id\":\"subject_lynn\"}]}",
+      "sha256": "3523ff2bbbb379383966464c1238c745d60a435b2e5a307ab7b8d348435600c2"
+    },
+    {
+      "id": "new_managed_row_id",
+      "preimage": {
+        "derivation_version": "spine.command-id.v1",
+        "command": "item.people.update",
+        "command_id": "command_people_update_example",
+        "row_role": "item_subject_role",
+        "request_path": "/people/participants/0"
+      },
+      "canonical_json": "{\"command\":\"item.people.update\",\"command_id\":\"command_people_update_example\",\"derivation_version\":\"spine.command-id.v1\",\"request_path\":\"/people/participants/0\",\"row_role\":\"item_subject_role\"}",
+      "sha256": "bbc4a3af7a4e73ecd99ff788fe73cf835c26ae218f0d740ace9e77cd624f9698"
+    }
+  ],
+  "cursor_vectors": [
+    {
+      "id": "cursor_trusted_local",
+      "payload": {
+        "contract_version": "spine.people-cursor.v1",
+        "key_id": "fixture_key",
+        "key_generation": "1",
+        "ledger_instance_id": "ledger_fixture",
+        "route": "people.list",
+        "stream": "roster",
+        "query_hash": "95c54a0a36c46a66bb91840de3ea9d0371fe8d30be92e91778c985641d962e5d",
+        "source_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "authorization_hash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "last_key": [
+          "subject_lynn"
+        ],
+        "issued_at_utc": "2035-02-01T12:00:00Z",
+        "expires_at_utc": "2035-02-01T12:15:00Z",
+        "authorization_valid_until_utc": null,
+        "mode": "trusted_local",
+        "owner": {
+          "owner_kind": "subject_group",
+          "owner_group_id": "group_example"
+        }
+      },
+      "token": "pc1.eyJhdXRob3JpemF0aW9uX2hhc2giOiJjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjIiwiYXV0aG9yaXphdGlvbl92YWxpZF91bnRpbF91dGMiOm51bGwsImNvbnRyYWN0X3ZlcnNpb24iOiJzcGluZS5wZW9wbGUtY3Vyc29yLnYxIiwiZXhwaXJlc19hdF91dGMiOiIyMDM1LTAyLTAxVDEyOjE1OjAwWiIsImlzc3VlZF9hdF91dGMiOiIyMDM1LTAyLTAxVDEyOjAwOjAwWiIsImtleV9nZW5lcmF0aW9uIjoiMSIsImtleV9pZCI6ImZpeHR1cmVfa2V5IiwibGFzdF9rZXkiOlsic3ViamVjdF9seW5uIl0sImxlZGdlcl9pbnN0YW5jZV9pZCI6ImxlZGdlcl9maXh0dXJlIiwibW9kZSI6InRydXN0ZWRfbG9jYWwiLCJvd25lciI6eyJvd25lcl9ncm91cF9pZCI6Imdyb3VwX2V4YW1wbGUiLCJvd25lcl9raW5kIjoic3ViamVjdF9ncm91cCJ9LCJxdWVyeV9oYXNoIjoiOTVjNTRhMGEzNmM0NmE2NmJiOTE4NDBkZTNlYTlkMDM3MWZlOGQzMGJlOTJlOTE3NzhjOTg1NjQxZDk2MmU1ZCIsInJvdXRlIjoicGVvcGxlLmxpc3QiLCJzb3VyY2VfaGFzaCI6ImJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmIiLCJzdHJlYW0iOiJyb3N0ZXIifQ.zlUIcbH_OYQOIQ06jwjH5sTNX1XocXN1v0OHfUshV7E"
+    },
+    {
+      "id": "cursor_protected",
+      "payload": {
+        "contract_version": "spine.people-cursor.v1",
+        "key_id": "fixture_key",
+        "key_generation": "1",
+        "ledger_instance_id": "ledger_fixture",
+        "route": "people.list",
+        "stream": "roster",
+        "query_hash": "95c54a0a36c46a66bb91840de3ea9d0371fe8d30be92e91778c985641d962e5d",
+        "source_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "authorization_hash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "last_key": [
+          "subject_lynn"
+        ],
+        "issued_at_utc": "2035-02-01T12:00:00Z",
+        "expires_at_utc": "2035-02-01T12:15:00Z",
+        "authorization_valid_until_utc": null,
+        "mode": "permission_enforced",
+        "realm_id": "realm_example",
+        "recovery_epoch": "1",
+        "account_id": "account_example",
+        "subject_id": "subject_operator",
+        "selection_id": "selection_example",
+        "account_revision": "1",
+        "subject_revision": "1",
+        "account_subject_binding_revision": "1",
+        "access_epoch": "1",
+        "owner": {
+          "owner_kind": "subject_group",
+          "owner_group_id": "group_example"
+        }
+      },
+      "token": "pc1.eyJhY2Nlc3NfZXBvY2giOiIxIiwiYWNjb3VudF9pZCI6ImFjY291bnRfZXhhbXBsZSIsImFjY291bnRfcmV2aXNpb24iOiIxIiwiYWNjb3VudF9zdWJqZWN0X2JpbmRpbmdfcmV2aXNpb24iOiIxIiwiYXV0aG9yaXphdGlvbl9oYXNoIjoiY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjYyIsImF1dGhvcml6YXRpb25fdmFsaWRfdW50aWxfdXRjIjpudWxsLCJjb250cmFjdF92ZXJzaW9uIjoic3BpbmUucGVvcGxlLWN1cnNvci52MSIsImV4cGlyZXNfYXRfdXRjIjoiMjAzNS0wMi0wMVQxMjoxNTowMFoiLCJpc3N1ZWRfYXRfdXRjIjoiMjAzNS0wMi0wMVQxMjowMDowMFoiLCJrZXlfZ2VuZXJhdGlvbiI6IjEiLCJrZXlfaWQiOiJmaXh0dXJlX2tleSIsImxhc3Rfa2V5IjpbInN1YmplY3RfbHlubiJdLCJsZWRnZXJfaW5zdGFuY2VfaWQiOiJsZWRnZXJfZml4dHVyZSIsIm1vZGUiOiJwZXJtaXNzaW9uX2VuZm9yY2VkIiwib3duZXIiOnsib3duZXJfZ3JvdXBfaWQiOiJncm91cF9leGFtcGxlIiwib3duZXJfa2luZCI6InN1YmplY3RfZ3JvdXAifSwicXVlcnlfaGFzaCI6Ijk1YzU0YTBhMzZjNDZhNjZiYjkxODQwZGUzZWE5ZDAzNzFmZThkMzBiZTkyZTkxNzc4Yzk4NTY0MWQ5NjJlNWQiLCJyZWFsbV9pZCI6InJlYWxtX2V4YW1wbGUiLCJyZWNvdmVyeV9lcG9jaCI6IjEiLCJyb3V0ZSI6InBlb3BsZS5saXN0Iiwic2VsZWN0aW9uX2lkIjoic2VsZWN0aW9uX2V4YW1wbGUiLCJzb3VyY2VfaGFzaCI6ImJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmIiLCJzdHJlYW0iOiJyb3N0ZXIiLCJzdWJqZWN0X2lkIjoic3ViamVjdF9vcGVyYXRvciIsInN1YmplY3RfcmV2aXNpb24iOiIxIn0.VCUmaAH-CLqf4C_8zs0pFdtbWu7tpgrJEsTtdR5e8Xc"
+    }
+  ]
+}

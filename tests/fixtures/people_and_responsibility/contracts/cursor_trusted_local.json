@@ -1,0 +1,22 @@
+{
+  "contract_version": "spine.people-cursor.v1",
+  "key_id": "fixture_key",
+  "key_generation": "1",
+  "ledger_instance_id": "ledger_fixture",
+  "route": "people.list",
+  "stream": "roster",
+  "query_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "source_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "authorization_hash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+  "last_key": [
+    "subject_lynn"
+  ],
+  "issued_at_utc": "2035-02-01T12:00:00Z",
+  "expires_at_utc": "2035-02-01T12:15:00Z",
+  "authorization_valid_until_utc": null,
+  "mode": "trusted_local",
+  "owner": {
+    "owner_kind": "subject_group",
+    "owner_group_id": "group_example"
+  }
+}

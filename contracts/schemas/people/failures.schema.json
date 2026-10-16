@@ -1,0 +1,130 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cortext.local/spine/contracts/schemas/people/failures.schema.json",
+  "$comment": "Source-only people contract candidate; not advertised by or packaged with the current runtime.",
+  "$defs": {
+    "local": {
+      "type": "object",
+      "properties": {
+        "ok": {
+          "const": false
+        },
+        "command": {
+          "enum": [
+            "people.list",
+            "item.people.show",
+            "item.people.update"
+          ]
+        },
+        "error": {
+          "type": "object",
+          "properties": {
+            "code": {
+              "enum": [
+                "invalid_request",
+                "unsupported_field",
+                "missing_required_field",
+                "unsupported_contract_version",
+                "wrong_item_type",
+                "invalid_state_transition",
+                "referenced_row_not_found",
+                "stale_version",
+                "stale_cursor",
+                "semantic_conflict",
+                "environment_failure",
+                "runtime_failure"
+              ]
+            },
+            "field": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            "message": {
+              "enum": [
+                "Invalid people request.",
+                "People reference unavailable.",
+                "People version changed.",
+                "People cursor unavailable.",
+                "People command conflicts.",
+                "People operation unavailable."
+              ]
+            }
+          },
+          "required": [
+            "code",
+            "field",
+            "message"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "ok",
+        "command",
+        "error"
+      ],
+      "additionalProperties": false
+    },
+    "protected": {
+      "type": "object",
+      "properties": {
+        "contract_version": {
+          "const": "spine.trusted-web-people.v1"
+        },
+        "ok": {
+          "const": false
+        },
+        "error": {
+          "type": "object",
+          "properties": {
+            "code": {
+              "enum": [
+                "invalid_request",
+                "identity_unavailable",
+                "operation_unavailable",
+                "resource_unavailable",
+                "access_changed",
+                "version_changed",
+                "command_id_unavailable",
+                "domain_conflict",
+                "domain_failure",
+                "capacity_exceeded",
+                "admission_unavailable"
+              ]
+            },
+            "message": {
+              "const": "People operation unavailable."
+            }
+          },
+          "required": [
+            "code",
+            "message"
+          ],
+          "additionalProperties": false
+        },
+        "correlation_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/id"
+        },
+        "selection_id": {
+          "oneOf": [
+            {
+              "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/id"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "contract_version",
+        "ok",
+        "error",
+        "correlation_id",
+        "selection_id"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

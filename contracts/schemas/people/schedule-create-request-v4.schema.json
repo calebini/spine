@@ -1,0 +1,152 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cortext.local/spine/contracts/schemas/people/schedule-create-request-v4.schema.json",
+  "$comment": "Source-only people contract candidate; not advertised by or packaged with the current runtime.",
+  "type": "object",
+  "properties": {
+    "contract_version": {
+      "const": "spine.schedule-create.v4"
+    },
+    "command_id": {
+      "$ref": "https://cortext.local/spine/contracts/schemas/schedule-create-request-v3.schema.json#/properties/command_id"
+    },
+    "actor_subject_id": {
+      "$ref": "https://cortext.local/spine/contracts/schemas/schedule-create-request-v3.schema.json#/properties/actor_subject_id"
+    },
+    "created_at_utc": {
+      "$ref": "https://cortext.local/spine/contracts/schemas/schedule-create-request-v3.schema.json#/properties/created_at_utc"
+    },
+    "item": {
+      "$ref": "https://cortext.local/spine/contracts/schemas/schedule-create-request-v3.schema.json#/properties/item"
+    },
+    "scheduled_time": {
+      "$ref": "https://cortext.local/spine/contracts/schemas/schedule-create-request-v3.schema.json#/properties/scheduled_time"
+    },
+    "delivery": {
+      "$ref": "https://cortext.local/spine/contracts/schemas/schedule-create-request-v3.schema.json#/properties/delivery"
+    },
+    "notification_plan": {
+      "$ref": "https://cortext.local/spine/contracts/schemas/schedule-create-request-v3.schema.json#/properties/notification_plan"
+    },
+    "materialization": {
+      "$ref": "https://cortext.local/spine/contracts/schemas/schedule-create-request-v3.schema.json#/properties/materialization"
+    },
+    "people": {
+      "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/patch"
+    }
+  },
+  "required": [
+    "contract_version",
+    "command_id",
+    "actor_subject_id",
+    "created_at_utc",
+    "item",
+    "scheduled_time",
+    "delivery",
+    "notification_plan",
+    "materialization"
+  ],
+  "additionalProperties": false,
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "notification_plan": {
+            "properties": {
+              "mode": {
+                "const": "archetype_default"
+              }
+            },
+            "required": [
+              "mode"
+            ]
+          }
+        },
+        "required": [
+          "notification_plan"
+        ]
+      },
+      "then": {
+        "properties": {
+          "item": {
+            "required": [
+              "archetype"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "properties": {
+        "item": {
+          "properties": {
+            "task_detail": {
+              "not": {
+                "required": [
+                  "subject_roles"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "item": {
+            "properties": {
+              "item_type": {
+                "const": "event"
+              }
+            }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "people": {
+            "type": "object",
+            "properties": {
+              "participants": {
+                "type": "array",
+                "items": {
+                  "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/id"
+                },
+                "maxItems": 100,
+                "minItems": 0,
+                "uniqueItems": true
+              }
+            },
+            "required": [
+              "participants"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "people": {
+            "type": "object",
+            "properties": {
+              "assignees": {
+                "type": "array",
+                "items": {
+                  "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/id"
+                },
+                "maxItems": 100,
+                "minItems": 0,
+                "uniqueItems": true
+              }
+            },
+            "required": [
+              "assignees"
+            ],
+            "additionalProperties": false
+          }
+        }
+      }
+    }
+  ]
+}

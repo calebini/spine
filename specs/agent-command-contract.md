@@ -72,12 +72,13 @@ V2 adds `facet_schema` grant targets only, as defined by
 
 ## 2. Authority
 
-The draft [people and responsibility leaf](people-and-responsibility.md) reserves
+The ratified logical [people and responsibility leaf](people-and-responsibility.md) defines
 scoped people discovery, item participation/assignment read/update and separately
 versioned authoring/filter projections. These are not implemented commands, selectors
 or HTTP registrations. Existing task-role authoring, self-only web restrictions,
 ownership and notification contracts remain unchanged until explicit successor
-contracts and verification are approved.
+contracts and verification are approved. The source-only people registry and schemas
+are planned declarations, not entries in the implemented-command registry below.
 
 The ratified [facet revision readback](facet-schema-revision-readback.md) adds
 trusted-local `facet_schema.revision.show` in runtime 0.10.0/schema 19. Its separate

@@ -1,0 +1,344 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cortext.local/spine/contracts/schemas/people/schedule-create-response-v4.schema.json",
+  "$comment": "Source-only people contract candidate; not advertised by or packaged with the current runtime.",
+  "type": "object",
+  "properties": {
+    "ok": {
+      "$ref": "https://cortext.local/spine/contracts/schemas/schedule-create-response-v3.schema.json#/$defs/success/properties/ok"
+    },
+    "command": {
+      "$ref": "https://cortext.local/spine/contracts/schemas/schedule-create-response-v3.schema.json#/$defs/success/properties/command"
+    },
+    "response_contract": {
+      "const": "spine.schedule-create-response.v4"
+    },
+    "effect": {
+      "$ref": "https://cortext.local/spine/contracts/schemas/schedule-create-response-v3.schema.json#/$defs/success/properties/effect"
+    },
+    "dry_run": {
+      "$ref": "https://cortext.local/spine/contracts/schemas/schedule-create-response-v3.schema.json#/$defs/success/properties/dry_run"
+    },
+    "command_id": {
+      "$ref": "https://cortext.local/spine/contracts/schemas/schedule-create-response-v3.schema.json#/$defs/success/properties/command_id"
+    },
+    "command_receipt_id": {
+      "$ref": "https://cortext.local/spine/contracts/schemas/schedule-create-response-v3.schema.json#/$defs/success/properties/command_receipt_id"
+    },
+    "audit_id": {
+      "$ref": "https://cortext.local/spine/contracts/schemas/schedule-create-response-v3.schema.json#/$defs/success/properties/audit_id"
+    },
+    "created_at_utc": {
+      "$ref": "https://cortext.local/spine/contracts/schemas/schedule-create-response-v3.schema.json#/$defs/success/properties/created_at_utc"
+    },
+    "item_id": {
+      "$ref": "https://cortext.local/spine/contracts/schemas/schedule-create-response-v3.schema.json#/$defs/success/properties/item_id"
+    },
+    "item_type": {
+      "$ref": "https://cortext.local/spine/contracts/schemas/schedule-create-response-v3.schema.json#/$defs/success/properties/item_type"
+    },
+    "current_version": {
+      "$ref": "https://cortext.local/spine/contracts/schemas/schedule-create-response-v3.schema.json#/$defs/success/properties/current_version"
+    },
+    "title": {
+      "$ref": "https://cortext.local/spine/contracts/schemas/schedule-create-response-v3.schema.json#/$defs/success/properties/title"
+    },
+    "scheduled_time": {
+      "$ref": "https://cortext.local/spine/contracts/schemas/schedule-create-response-v3.schema.json#/$defs/success/properties/scheduled_time"
+    },
+    "primary_location": {
+      "$ref": "https://cortext.local/spine/contracts/schemas/schedule-create-response-v3.schema.json#/$defs/success/properties/primary_location"
+    },
+    "recurrence": {
+      "$ref": "https://cortext.local/spine/contracts/schemas/schedule-create-response-v3.schema.json#/$defs/success/properties/recurrence"
+    },
+    "delivery": {
+      "$ref": "https://cortext.local/spine/contracts/schemas/schedule-create-response-v3.schema.json#/$defs/success/properties/delivery"
+    },
+    "policies": {
+      "$ref": "https://cortext.local/spine/contracts/schemas/schedule-create-response-v3.schema.json#/$defs/success/properties/policies"
+    },
+    "materialization": {
+      "$ref": "https://cortext.local/spine/contracts/schemas/schedule-create-response-v3.schema.json#/$defs/success/properties/materialization"
+    },
+    "phases": {
+      "$ref": "https://cortext.local/spine/contracts/schemas/schedule-create-response-v3.schema.json#/$defs/success/properties/phases"
+    },
+    "receipt": {
+      "type": "object",
+      "properties": {
+        "receipt_contract": {
+          "const": "spine.schedule-create-receipt.v4"
+        },
+        "command_receipt_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/schedule-create-response-v3.schema.json#/$defs/receipt/properties/command_receipt_id"
+        },
+        "effect": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/schedule-create-response-v3.schema.json#/$defs/receipt/properties/effect"
+        },
+        "semantic_facts_hash": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/schedule-create-response-v3.schema.json#/$defs/receipt/properties/semantic_facts_hash"
+        },
+        "created_at_utc": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/schedule-create-response-v3.schema.json#/$defs/receipt/properties/created_at_utc"
+        }
+      },
+      "required": [
+        "receipt_contract",
+        "command_receipt_id",
+        "effect",
+        "semantic_facts_hash",
+        "created_at_utc"
+      ],
+      "additionalProperties": false
+    },
+    "archetype": {
+      "$ref": "https://cortext.local/spine/contracts/schemas/schedule-create-response-v3.schema.json#/$defs/success/properties/archetype"
+    },
+    "notification_profile": {
+      "$ref": "https://cortext.local/spine/contracts/schemas/schedule-create-response-v3.schema.json#/$defs/success/properties/notification_profile"
+    },
+    "people": {
+      "type": "array",
+      "items": {
+        "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/association"
+      },
+      "maxItems": 100,
+      "minItems": 0
+    }
+  },
+  "required": [
+    "ok",
+    "command",
+    "response_contract",
+    "effect",
+    "command_id",
+    "command_receipt_id",
+    "audit_id",
+    "created_at_utc",
+    "item_id",
+    "item_type",
+    "current_version",
+    "title",
+    "scheduled_time",
+    "delivery",
+    "policies",
+    "materialization",
+    "phases",
+    "receipt",
+    "archetype",
+    "notification_profile",
+    "people"
+  ],
+  "additionalProperties": false,
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "materialization": {
+            "properties": {
+              "mode": {
+                "const": "none"
+              }
+            },
+            "required": [
+              "mode"
+            ]
+          }
+        },
+        "required": [
+          "materialization"
+        ]
+      },
+      "then": {
+        "properties": {
+          "phases": {
+            "properties": {
+              "opportunities": {
+                "const": "not_requested"
+              },
+              "work": {
+                "const": "not_requested"
+              }
+            }
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "phases": {
+            "properties": {
+              "opportunities": {
+                "const": "expanded"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "required": [
+          "recurrence"
+        ]
+      },
+      "then": {
+        "if": {
+          "properties": {
+            "materialization": {
+              "properties": {
+                "mode": {
+                  "const": "bounded"
+                }
+              },
+              "required": [
+                "mode"
+              ]
+            }
+          }
+        },
+        "then": {
+          "properties": {
+            "phases": {
+              "properties": {
+                "provenance": {
+                  "const": "regenerated"
+                }
+              }
+            }
+          }
+        },
+        "else": {
+          "properties": {
+            "phases": {
+              "properties": {
+                "provenance": {
+                  "const": "not_requested"
+                }
+              }
+            }
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "phases": {
+            "properties": {
+              "provenance": {
+                "const": "not_applicable"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "materialization": {
+            "properties": {
+              "state": {
+                "const": "materialized"
+              }
+            },
+            "required": [
+              "state"
+            ]
+          }
+        },
+        "required": [
+          "materialization"
+        ]
+      },
+      "then": {
+        "properties": {
+          "phases": {
+            "properties": {
+              "work": {
+                "const": "materialized"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "materialization": {
+            "properties": {
+              "state": {
+                "const": "completed_zero_selected"
+              }
+            },
+            "required": [
+              "state"
+            ]
+          }
+        },
+        "required": [
+          "materialization"
+        ]
+      },
+      "then": {
+        "properties": {
+          "phases": {
+            "properties": {
+              "work": {
+                "const": "completed_zero_selected"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "item_type": {
+            "const": "event"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "people": {
+            "items": {
+              "properties": {
+                "role": {
+                  "const": "participant"
+                }
+              }
+            }
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "people": {
+            "items": {
+              "properties": {
+                "role": {
+                  "const": "assignee"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "properties": {
+        "people": {
+          "items": {
+            "properties": {
+              "status": {
+                "const": "active"
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}

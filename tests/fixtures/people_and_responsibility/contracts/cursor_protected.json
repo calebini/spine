@@ -1,0 +1,31 @@
+{
+  "contract_version": "spine.people-cursor.v1",
+  "key_id": "fixture_key",
+  "key_generation": "1",
+  "ledger_instance_id": "ledger_fixture",
+  "route": "people.list",
+  "stream": "roster",
+  "query_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "source_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "authorization_hash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+  "last_key": [
+    "subject_lynn"
+  ],
+  "issued_at_utc": "2035-02-01T12:00:00Z",
+  "expires_at_utc": "2035-02-01T12:15:00Z",
+  "authorization_valid_until_utc": null,
+  "mode": "permission_enforced",
+  "realm_id": "realm_example",
+  "recovery_epoch": "1",
+  "account_id": "account_example",
+  "subject_id": "subject_operator",
+  "selection_id": "selection_example",
+  "account_revision": "1",
+  "subject_revision": "1",
+  "account_subject_binding_revision": "1",
+  "access_epoch": "1",
+  "owner": {
+    "owner_kind": "subject_group",
+    "owner_group_id": "group_example"
+  }
+}

@@ -4,7 +4,7 @@ This directory contains Spine's normative design and compatibility promises.
 
 Current spec surface:
 
-- [people-and-responsibility.md](people-and-responsibility.md): draft participation/assignment, scoped subject selection, person-filtered reads and role-only notification continuity over existing subject-role storage; separate from access ownership/routing, product policies approved, review and machine-contract gates pending; not implemented
+- [people-and-responsibility.md](people-and-responsibility.md): ratified logical v1.0.0 participation/assignment, scoped subject selection, person-filtered reads and role-only notification continuity; [machine companion](../contracts/people-and-responsibility.v1.json), [source-only schemas](../contracts/schemas/people/) and [fixtures](../contracts/people-and-responsibility-fixture-manifest.json) are pending machine-contract review; not implemented
 
 - [facet-schema-revision-readback.md](facet-schema-revision-readback.md): ratified trusted-local exact revision-to-root lookup and immutable definition readback; implemented in runtime 0.10.0/schema 19, no HTTP exposure
 

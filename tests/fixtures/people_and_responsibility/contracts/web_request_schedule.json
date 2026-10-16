@@ -1,0 +1,9 @@
+{
+  "contract_version": "spine.trusted-web-people.v1",
+  "request": {
+    "item_id": "event-science",
+    "include": [
+      "people"
+    ]
+  }
+}

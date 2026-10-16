@@ -35,11 +35,45 @@ status labels in the same change. Routine task updates do not change spec author
 
 ## Post-release corrective work
 
+### SPINE-060 — Ratify and codify people and responsibility
+
+**Status:** Done — logical v1.0.0 ratified; source-only machine candidate v0.1.0
+and offline evidence codified/verified, 2026-10-16. Machine review and all runtime
+obligations remain pending; no implementation or exposure is claimed.
+**Scope:** Accept logical v1.0.0; define closed standalone and successor authoring/read
+schemas, planned registry, permission/error/cursor/budget and role-only continuity
+rules, offline fixtures and tests. Preserve existing runtime and packaged web pins.
+**Boundary:** No runtime, DDL/migration, live ledger, frontend/Packs, nested review,
+commit, push or deployment. Machine codification requires its own review before
+runtime activation. Approved D-01/D-02 are not reopened by technical encodings.
+**Delivered:** [Accepted logical leaf](../specs/people-and-responsibility.md),
+[planned registry](../contracts/people-and-responsibility.v1.json),
+[fixture manifest](../contracts/people-and-responsibility-fixture-manifest.json),
+12 closed source-only schemas and explicit 24-schema dependency closure. Covers
+three standalone commands, additive scheduling v4 candidates and protected people/
+independent-read successors; current selectors, web registries, compiled declarations,
+physical schema and packaged contracts remain unchanged. Exact request/effect/replay,
+permission/disclosure, identity, error, cursor, budget, proof and indexed-query
+requirements are codified. Role-only continuity is separate from facet-only equality;
+source-event edits retain existing follow_source invalidation semantics.
+**Evidence:** 49 positive/negative wire fixtures; 44 declared pure-model cases;
+four exact canonical preimage/hash vectors and two deterministic test-only cursor
+MAC vectors. The 12 new offline tests and all 202 contract-focused tests passed;
+Ruff, four contract synchronization checks, local links and diff hygiene passed.
+No runtime, existing schema, packaged bundle or dependency change; no live ledger,
+nested review, commit, push or deployment. Fixture/model evidence is explicitly not
+transaction, authorization, query-plan, installed-transport or worker proof.
+**Next:** Checkpoint and obtain approval for a bounded machine-contract review.
+After that gate, plan/implement PR-01–16 with exact runtime declarations and executable
+public CLI/HTTP, writer/finalizer, query/concurrency and work-state evidence. No
+additional product decision is currently identified; D-01/D-02 remain unchanged.
+
 ### SPINE-059 — Draft people and responsibility contracts
 
 **Status:** Done — first specification draft and consistency amendments verified
-2026-10-16; product policies D-01/D-02 subsequently approved the same day. Review,
-machine contracts and implementation remain pending.
+2026-10-16; product policies D-01/D-02 subsequently approved the same day and bounded
+review passed. Ratification/codification is separately tracked by SPINE-060;
+implementation remains pending.
 **Baseline:** `8f3c50b6fd1b4aa534e50925b7417a7a80d19122`, runtime 0.10.0/schema 19.
 **Scope:** One [logical leaf](../specs/people-and-responsibility.md) over existing
 subjects, memberships and versioned subject roles. Specify participation versus
@@ -71,9 +105,26 @@ projection restrictions, access policy and facet continuity. All 10 changed/new
 files are Markdown; 283 local link targets, authority/status/tracking assertions
 and `git diff --check` passed. No runtime tests run for this documentation-only
 draft; no nested review, implementation or deployment occurred.
-**Next:** Stage a separately approved bounded review of the draft and approved policies.
-Machine contracts and implementation are later gates; no automatic work is
-authorized by this entry.
+**Checkpoint:** `d12c16fa1dfad137390eebdeb3a54b73819021b7` (local; not pushed).
+**Review preparation:** Staged [people-and-responsibility-contract-audit-001
+notes](../whetstone_runs/people-and-responsibility-contract-audit-001/audit-notes.md)
+with exactly 16 committed specification inputs, built-in consistency profile and
+proposed Codex `gpt-6.1-sol` reviewer. Local hash inventory binds the checkpoint;
+the operator subsequently approved sending the 16 specifications. The execution
+safety check blocked launch because approval did not explicitly include notes,
+built-in reviewer/profile context and generated audit copies. No reviewer started
+or package was sent on that attempt. The operator then explicitly approved notes,
+built-in reviewer/consistency context and generated copies alongside those sources;
+one reviewer-only audit completed under that complete authorization.
+**Review outcome:** Codex `gpt-6.1-sol`, built-in consistency profile: `pass`,
+`boundary_preserved=true`, no blockers, majors, minors or nits. Inspected the
+[report](../whetstone_runs/people-and-responsibility-contract-audit-001/change_audit/change_audit_report.md)
+and feedback; verified the manifest's exact 16-file inventory/model/profile and
+unchanged source/notes hashes after the run. No Editor, source correction, runtime
+change, ratification or convergence claim. No product decision pressure returned.
+**Next:** Operator authorized ratification and machine codification under SPINE-060.
+Implementation remains a later gate; no additional review is prescribed by this
+logical bounded result.
 
 ### SPINE-058 — Deliver trusted-local facet revision readback
 

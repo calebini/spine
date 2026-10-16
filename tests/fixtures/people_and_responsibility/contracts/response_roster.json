@@ -1,0 +1,22 @@
+{
+  "ok": true,
+  "command": "people.list",
+  "response_contract": "spine.people-and-responsibility.v1",
+  "owner": {
+    "owner_kind": "subject_group",
+    "owner_group_id": "group_example"
+  },
+  "observed_at_utc": "2035-02-01T12:00:00Z",
+  "subjects": [
+    {
+      "subject_id": "subject_lynn",
+      "display_name": "Lynn",
+      "subject_kind": "person",
+      "status": "active",
+      "eligible_for_fresh_selection": true
+    }
+  ],
+  "limit": "25",
+  "has_more": false,
+  "next_cursor": null
+}

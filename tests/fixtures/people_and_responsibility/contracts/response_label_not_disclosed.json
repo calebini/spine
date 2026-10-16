@@ -1,0 +1,27 @@
+{
+  "ok": true,
+  "command": "item.people.show",
+  "response_contract": "spine.people-and-responsibility.v1",
+  "current_version": "3",
+  "people": {
+    "item_id": "item_example",
+    "item_type": "event",
+    "item_version": "1",
+    "associations": [
+      {
+        "item_subject_role_id": "item_subject_role_example",
+        "subject_id": "subject_lynn",
+        "role": "participant",
+        "status": "active"
+      }
+    ],
+    "subjects": [
+      {
+        "subject_id": "subject_lynn",
+        "label": {
+          "availability": "not_disclosed"
+        }
+      }
+    ]
+  }
+}

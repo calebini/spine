@@ -1,0 +1,18 @@
+{
+  "contract_version": "spine.trusted-web-people.v1",
+  "request": {
+    "contract_version": "spine.people-and-responsibility.v1",
+    "command_id": "command_people_update_example",
+    "actor_subject_id": "subject_operator",
+    "item_id": "item_example",
+    "target_version": "2",
+    "updated_at_utc": "2035-02-01T12:00:00Z",
+    "people": {
+      "participants": [
+        "subject_lynn"
+      ]
+    }
+  },
+  "expected_access_epoch": "1",
+  "subject_id": "subject_lynn"
+}

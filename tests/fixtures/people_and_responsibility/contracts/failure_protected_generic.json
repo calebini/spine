@@ -1,0 +1,10 @@
+{
+  "contract_version": "spine.trusted-web-people.v1",
+  "ok": false,
+  "error": {
+    "code": "resource_unavailable",
+    "message": "People operation unavailable."
+  },
+  "correlation_id": "correlation_example",
+  "selection_id": "selection_example"
+}
