@@ -1,6 +1,6 @@
 # Spine Backlog
 
-Last updated: 2026-10-16
+Last updated: 2026-10-17
 
 This is the single work queue for Spine development. The
 [implementation plan](IMPLEMENTATION_PLAN.md) explains roadmap direction and delivery
@@ -34,6 +34,43 @@ record evidence and move it to Completed. Update affected orientation and contra
 status labels in the same change. Routine task updates do not change spec authority.
 
 ## Post-release corrective work
+
+### SPINE-061 — Implement people and responsibility
+
+**Status:** Blocked — operator authorized implementation on 2026-10-17, but the
+accepted leaf Section 12 and SPINE-060 require review of the new machine codification
+before runtime work. The prior clean audit covered the logical draft, not these
+successor schemas/fixtures. Resolve that gate explicitly before starting runtime edits.
+**Baseline:** Source-only machine checkpoint `9ef74c5b10511b1d226dcddf6cbf80a64c288bdc`
+(`Codify people and responsibility contracts`), committed locally; not pushed.
+All 202 contract-focused tests and checkpoint diff hygiene passed again.
+**Intended scope:** Implement the accepted participation/assignment, scoped directory,
+successor authoring/read and role-only continuity contracts with PR-01–16 executable
+evidence; preserve current interfaces and independent ownership/routing semantics.
+No partial capability activation, operator-ledger access, send or deployment.
+**Review preparation:** Operator requested the bounded review on 2026-10-17.
+Staged [people-and-responsibility-machine-contract-audit-001
+notes](../whetstone_runs/people-and-responsibility-machine-contract-audit-001/audit-notes.md)
+against exact checkpoint `9ef74c5`, with 121 inventoried source files, built-in
+consistency profile and proposed Codex `gpt-6.1-sol` reviewer. Includes all new
+schemas, their manifest-declared closure, fixtures/models/test and necessary
+logical/compatibility authorities. No source edit or reviewer invocation occurred.
+**Review execution:** The operator explicitly approved the 121 listed sources,
+notes, built-in reviewer/consistency-profile context and generated audit copies.
+All hashes match checkpoint `9ef74c5`; one reviewer-only audit-change was attempted.
+**Review outcome:** `audit_failed` before substantive review: nested client
+`turn/start` rejected 1,501,016 characters against its 1,048,576-character input
+limit (`input_too_large`, code -32602). No semantic feedback was produced and
+boundary preservation was not assessed. All 121 sources and notes remained
+unchanged. See the retained [execution summary](../whetstone_runs/people-and-responsibility-machine-contract-audit-001/execution-summary.md)
+and original change_audit failure artifacts. No Editor, source correction, automatic
+retry or runtime implementation occurred.
+**Next:** Operator deferred the machine-contract audit on 2026-10-17 until the
+Whetstone runtime distribution/selection setup is complete. After that prerequisite,
+resume preparation of two smaller coherent audits (authoring/replay/continuity and
+discovery/disclosure/reads/cursors) with exact inventories and prompt-size headroom,
+then obtain their sending approvals. Implementation remains held at the review gate;
+no audit launch, runtime work, push or deployment is authorized by this tracking entry.
 
 ### SPINE-060 — Ratify and codify people and responsibility
 
