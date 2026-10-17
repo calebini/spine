@@ -251,10 +251,14 @@
           "properties": {
             "availability": {
               "const": "not_requested"
+            },
+            "scope": {
+              "const": "authorized_only"
             }
           },
           "required": [
-            "availability"
+            "availability",
+            "scope"
           ],
           "additionalProperties": false
         },
@@ -264,15 +268,20 @@
             "availability": {
               "const": "unavailable"
             },
+            "scope": {
+              "const": "authorized_only"
+            },
+            "coverage": {
+              "const": "incomplete"
+            },
             "reason_code": {
-              "enum": [
-                "capacity_exceeded",
-                "section_unavailable"
-              ]
+              "const": "context_unavailable"
             }
           },
           "required": [
             "availability",
+            "scope",
+            "coverage",
             "reason_code"
           ],
           "additionalProperties": false
@@ -283,12 +292,20 @@
             "availability": {
               "const": "available"
             },
+            "scope": {
+              "const": "authorized_only"
+            },
+            "coverage": {
+              "const": "complete"
+            },
             "people": {
               "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/projection"
             }
           },
           "required": [
             "availability",
+            "scope",
+            "coverage",
             "people"
           ],
           "additionalProperties": false

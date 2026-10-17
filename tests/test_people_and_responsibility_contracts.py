@@ -159,8 +159,15 @@ def continuity_model(case):
     for key in before.keys() - {"policies", allowed}:
         if before[key] != after[key]:
             return False
-    if allowed == "roles" and after["roles"] != case["requested_roles"]:
-        return False
+    if allowed == "roles":
+        managed = case["replacement_role"]
+        if managed not in {"participant", "assignee"} or any(row["role"] != managed for row in case["requested_roles"]):
+            return False
+        expected = [row for row in before["roles"] if row["role"] != managed] + case["requested_roles"]
+        def canonical(rows):
+            return sorted((row["role"], row["subject_id"], row["status"]) for row in rows)
+        if canonical(after["roles"]) != canonical(expected):
+            return False
     if len(before["policies"]) != len(after["policies"]):
         return False
     predecessors = {row["policy_id"]: row["meaning"] for row in before["policies"]}
@@ -214,6 +221,78 @@ class PeopleContractTests(unittest.TestCase):
                 errors = list(self.validator(row["schema"]).iter_errors(load(ROOT / row["fixture"])))
                 self.assertEqual(not errors, row["valid"], "\n".join(e.message for e in errors))
         self.assertEqual(paths, {str(p.relative_to(ROOT)) for p in (FIXTURES / "contracts").glob("*.json")})
+
+    def test_people_section_preserves_inherited_singleton_envelope(self):
+        people = self.schemas[BASE + "contracts/schemas/people/types.schema.json"]["$defs"]["section"]
+        inherited = self.schemas[BASE + "contracts/schemas/trusted-web-read-types.schema.json"]["$defs"]["primary_location_section"]
+        inherited_states = {branch["properties"]["availability"]["const"]: branch for branch in inherited["oneOf"]}
+        self.assertEqual({branch["properties"]["availability"]["const"] for branch in people["oneOf"]}, set(inherited_states))
+        for branch in people["oneOf"]:
+            state = branch["properties"]["availability"]["const"]
+            with self.subTest(state=state):
+                expected = inherited_states[state]
+                # Payload names/types are domain-specific; the enclosing rules are inherited.
+                self.assertEqual(
+                    {k: v for k, v in branch["properties"].items() if k != "people"},
+                    {k: v for k, v in expected["properties"].items() if k != "value"},
+                )
+                self.assertEqual(set(branch["required"]) - {"people"}, set(expected["required"]) - {"value"})
+                self.assertIs(branch["additionalProperties"], False)
+
+    def test_people_section_states_are_closed_and_complete(self):
+        validator = self.validator("contracts/schemas/people/types.schema.json#/$defs/section")
+        available = load(FIXTURES / "contracts/web_response_schedule.json")["result"]["sections"]["people"]
+        sections = [available] + [load(FIXTURES / "contracts" / (name + ".json")) for name in
+                                  ("section_people_not_requested", "section_people_unavailable")]
+        for section in sections:
+            state = section["availability"]
+            with self.subTest(state=state):
+                validator.validate(section)
+                for key in section:
+                    with self.subTest(missing=key):
+                        self.assertFalse(validator.is_valid({k: v for k, v in section.items() if k != key}))
+                for key, value in {"scope": "all", "coverage": "partial", "has_more": False, "next_cursor": None,
+                                   "values": [], "has_hidden": True, "withheld_count": 0}.items():
+                    with self.subTest(field=key):
+                        self.assertFalse(validator.is_valid({**section, key: value}))
+                for reason in ("capacity_exceeded", "section_unavailable", "ownership_missing", "hidden_resource"):
+                    with self.subTest(reason=reason):
+                        self.assertFalse(validator.is_valid({**section, "reason_code": reason}))
+        for section in sections[1:]:
+            self.assertFalse(validator.is_valid({**section, "people": available["people"]}))
+        self.assertFalse(validator.is_valid({**sections[1], "coverage": "complete"}))
+        self.assertFalse(validator.is_valid({**available, "coverage": "incomplete"}))
+        self.assertFalse(validator.is_valid({**sections[2], "coverage": "complete"}))
+        self.assertFalse(validator.is_valid({**sections[1], "reason_code": "context_unavailable"}))
+        self.assertFalse(validator.is_valid({**available, "reason_code": "context_unavailable"}))
+        self.assertFalse(validator.is_valid({**available, "people": None}))
+        empty = copy.deepcopy(available)
+        empty["people"]["associations"] = []
+        empty["people"]["subjects"] = []
+        validator.validate(empty)
+        undisclosed = copy.deepcopy(available)
+        undisclosed["people"]["subjects"][0]["label"] = {"availability": "not_disclosed"}
+        validator.validate(undisclosed)
+
+    def test_people_section_states_in_schedule_agenda_and_unplaced_views(self):
+        for command in ("schedule", "agenda"):
+            original = load(FIXTURES / "contracts" / ("web_response_" + command + ".json"))
+            route = "schedule.show" if command == "schedule" else "agenda.show"
+            validator = self.validator("contracts/schemas/people/web-responses.schema.json#/$defs/" + route)
+            for state in ("available", "not_requested", "unavailable"):
+                response = copy.deepcopy(original)
+                result = response["result"]
+                views = [result] if command == "schedule" else result["entries"] + result["unplaced_items"]
+                for view in views:
+                    if state != "available":
+                        view["sections"]["people"] = load(FIXTURES / "contracts" / ("section_people_" + state + ".json"))
+                with self.subTest(command=command, state=state):
+                    validator.validate(response)
+                    for view in views:
+                        section = view["sections"]["people"]
+                        scope = section.pop("scope")
+                        self.assertFalse(validator.is_valid(response))
+                        section["scope"] = scope
 
     def test_schema_references_are_local_offline_and_closed(self):
         def walk(value, base):
@@ -344,6 +423,60 @@ class PeopleContractTests(unittest.TestCase):
             self.assertFalse(work[flag])
         existing = load(ROOT / "contracts/archetype-facet-integration.v1.json")
         self.assertEqual(set(cases["people_edge"]["before"]["policies"][0]["meaning"]), set(existing["work"]["comparison_policy_fields"]))
+
+    def test_people_continuity_preserves_unmanaged_roles(self):
+        baseline = next(row for row in self.models["continuity"] if row["id"] == "people_edge")
+        for role in ("owner", "watcher", "recipient"):
+            with self.subTest(role=role):
+                case = copy.deepcopy(baseline)
+                preserved = {"subject_id": "unmanaged_subject", "role": role, "status": "active"}
+                case["before"]["roles"].append(preserved)
+                case["after"]["roles"].insert(0, copy.deepcopy(preserved))
+                self.assertTrue(continuity_model(case))
+                case["after"]["roles"][0]["status"] = "inactive"
+                self.assertFalse(continuity_model(case))
+                case["after"]["roles"].pop(0)
+                self.assertFalse(continuity_model(case))
+
+    def test_dry_run_failure_marker_is_true_only_and_not_required(self):
+        validator = self.validator("contracts/schemas/people/failures.schema.json#/$defs/local")
+        original = load(FIXTURES / "contracts/failure_private_reference.json")
+        validator.validate(original)
+        validator.validate({**original, "dry_run": True})
+        for invalid in (False, None, "true", 1):
+            with self.subTest(invalid=invalid):
+                self.assertFalse(validator.is_valid({**original, "dry_run": invalid}))
+
+    def test_people_continuity_replaces_only_explicit_role_including_clear(self):
+        baseline = next(row for row in self.models["continuity"] if row["id"] == "people_edge")
+        for managed, other in (("participant", "assignee"), ("assignee", "participant")):
+            for clear in (False, True):
+                with self.subTest(managed=managed, clear=clear):
+                    case = copy.deepcopy(baseline)
+                    case["replacement_role"] = managed
+                    for rows in (case["before"]["roles"], case["after"]["roles"], case["requested_roles"]):
+                        for row in rows:
+                            row["role"] = managed
+                    preserved = {"subject_id": "other_role_subject", "role": other, "status": "active"}
+                    case["before"]["roles"].append(preserved)
+                    if clear:
+                        case["requested_roles"] = []
+                        case["after"]["roles"] = []
+                    case["after"]["roles"].append(copy.deepcopy(preserved))
+                    self.assertTrue(continuity_model(case))
+                    case["after"]["roles"].pop()
+                    self.assertFalse(continuity_model(case))
+
+    def test_v4_mixed_changed_dimensions_follow_declared_order(self):
+        order = ["item", "people", "primary_location", "archetype", "scheduled_time",
+                 "recurrence", "delivery", "notification_profile", "reminders", "policy_presentations"]
+        witness = load(FIXTURES / "changed-dimensions-order.json")
+        self.assertEqual(witness["order"], order)
+        self.assertEqual(witness["mixed"], [dimension for dimension in order if dimension in witness["mixed"]])
+        self.assertEqual(witness["presentation_changed"], ["policy_presentations"])
+        self.assertEqual(witness["presentation_noop"], [])
+        spec = (ROOT / "specs/people-and-responsibility.md").read_text()
+        self.assertIn(", ".join('"' + dimension + '"' for dimension in witness["mixed"]), spec)
 
     def test_normalization_and_computed_hash_vectors(self):
         witness = load(ROOT / self.manifest["computed_witness"])

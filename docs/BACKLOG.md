@@ -1,6 +1,6 @@
 # Spine Backlog
 
-Last updated: 2026-10-17
+Last updated: 2026-10-18
 
 This is the single work queue for Spine development. The
 [implementation plan](IMPLEMENTATION_PLAN.md) explains roadmap direction and delivery
@@ -65,12 +65,81 @@ boundary preservation was not assessed. All 121 sources and notes remained
 unchanged. See the retained [execution summary](../whetstone_runs/people-and-responsibility-machine-contract-audit-001/execution-summary.md)
 and original change_audit failure artifacts. No Editor, source correction, automatic
 retry or runtime implementation occurred.
-**Next:** Operator deferred the machine-contract audit on 2026-10-17 until the
-Whetstone runtime distribution/selection setup is complete. After that prerequisite,
-resume preparation of two smaller coherent audits (authoring/replay/continuity and
-discovery/disclosure/reads/cursors) with exact inventories and prompt-size headroom,
-then obtain their sending approvals. Implementation remains held at the review gate;
-no audit launch, runtime work, push or deployment is authorized by this tracking entry.
+**Runtime prerequisite:** The operator-selected Whetstone stable installation is
+available on 2026-10-17: checkpoint `6e19fe3e72dedda50a372781a43c08e5d7e7480a`,
+reported version `0.1.0`. Spine verified stable resolution and the bounded-audit
+CLI through `whetstone --channel stable`; actual machine paths remain outside Git.
+This satisfies the earlier setup deferral, not the machine-contract review itself.
+**Split review preparation:** Part A is staged locally in
+`whetstone_runs/people-authoring-machine-audit-001/`: 69 unchanged source files plus
+review notes, exact hash inventory and the selected stable runtime's complete prompt
+preview. The prompt is 814,306 characters (814,379 UTF-8 bytes), below the prior
+1,048,576-character limit with approximately 22% headroom. Scope is authoring,
+replay/no-op and role-only continuity; its 25-schema closure and 25 mutation fixtures
+are explicit. Model is `gpt-6.1-sol`, medium reasoning as set by the pinned adapter;
+the machine-local guarded Codex launcher reports `0.163.0-alpha.10.2`.
+**Part A follow-up (2026-10-17):** The authorized first review completed with no
+blockers, one major and two minors (`needs_revision`). The local failure schema
+now permits the required optional true-only dry-run marker; the pure continuity
+witness preserves unmanaged roles; and the logical spec defines the complete v4
+changed-dimension order. All 44 selected people/scheduling/continuity contract
+tests pass. These remain source-only contracts and pure-model evidence, not
+transactional runtime acceptance. The operator requested a full Part A recheck,
+not a findings-only recheck. Its new package under
+`whetstone_runs/people-authoring-machine-audit-002/` contains 71 sources plus
+notes; the rendered prompt is 817,901 characters / 817,974 UTF-8 bytes.
+
+The full Part A recheck completed `pass_with_minor_clarification`, boundary
+preserved, zero blockers/majors and two minors. Both are patched locally: include
+the inherited exclusive `policy_presentations` branch in the complete v4 order;
+bind the continuity witness to one explicit replacement role, preserving the
+opposite role even on clear. All 45 selected contract tests, focused lint and diff
+checks pass. The two minor patches have no separate external recheck; the operator
+requested proceeding to B. Reports and the initial local-access failure remain
+unchanged as evidence.
+
+**Part B preparation:** `whetstone_runs/people-read-machine-audit-001/` stages the
+full discovery/disclosure/reads/cursors and protected-transport boundary: 86 inputs,
+37-schema dependency closure, 25 wire fixtures plus notes. The rendered prompt is
+964,877 characters / 964,922 UTF-8 bytes, below the known 1,048,576-character limit.
+The large agent-command source is included as exact source-hashed named sections;
+omitted write-family/registry-table sections are explicit, not silently reviewed.
+Shared sources include the local A corrections. No B verdict is recorded yet.
+The execution permission layer blocked launch pending explicit approval of the
+exact 86-input package plus notes and its external Codex destination. No reviewer
+was launched; staging remains intact. The operator subsequently explicitly
+approved the exact manifest-bound 86 inputs plus hash-bound notes for external
+Codex `gpt-6.1-sol` at medium reasoning. Pre-launch verification matched all input,
+notes and preview hashes, stable checkpoint and CLI version. The reviewer-only
+audit completed through the normal execution permission mechanism:
+`needs_revision`, boundary not preserved, zero blockers, one major, zero minors.
+The [report](../whetstone_runs/people-read-machine-audit-001/change_audit/change_audit_report.md)
+identifies a confirmed contract mismatch: the people optional-section union omits
+inherited `scope`/`coverage` fields and permits incompatible unavailable reasons.
+All three inherited envelope states fail that schema, while the existing 16 people
+contract tests pass; inherited-envelope regression coverage is missing. Sources
+remain unchanged by this review. See the retained
+[execution summary](../whetstone_runs/people-read-machine-audit-001/execution-summary.md).
+
+**Part B correction:** Applied locally with operator approval. The people-section
+union now requires `scope=authorized_only` in every branch, complete coverage for
+available projections, and incomplete coverage with `context_unavailable` for
+unavailable projections. Not-requested sections have no payload/coverage/reason.
+Schedule/agenda fixtures are aligned; two manifest-declared section-state fixtures
+and three regressions cover inherited-envelope parity, closed states, and nested
+schedule/agenda/unplaced results. New regressions failed before the correction.
+All 48 selected people/scheduling/facet-continuity tests plus 15 independent-read
+contract tests, focused Ruff and diff hygiene pass. Existing A corrections remain
+intact. The original B report is unchanged: this is a verified local patch, not a
+new external pass. See the
+[patch follow-up](../whetstone_runs/people-read-machine-audit-001/patch-followup.md).
+No runtime code, schema migration, audit launch, commit or push.
+
+**Next:** Carry the locally corrected B envelope into the small Part C
+write/read seam review covering roles, historical versions, replay/disclosure and
+mutation/cursor consistency. These are behavioral partitions chosen to fit the
+reviewer limit, not independent claims of whole-bundle closure. Runtime
+implementation remains held at the contract-review gate; no push or deployment.
 
 ### SPINE-060 — Ratify and codify people and responsibility
 

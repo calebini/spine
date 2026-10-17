@@ -1107,6 +1107,7 @@
   "continuity": [
     {
       "id": "people_edge",
+      "replacement_role": "participant",
       "kind": "people",
       "before": {
         "item": {
@@ -1221,6 +1222,7 @@
     },
     {
       "id": "title_drift",
+      "replacement_role": "participant",
       "kind": "people",
       "before": {
         "item": {
@@ -1335,6 +1337,7 @@
     },
     {
       "id": "facet_drift",
+      "replacement_role": "participant",
       "kind": "people",
       "before": {
         "item": {
@@ -1449,6 +1452,7 @@
     },
     {
       "id": "route_drift",
+      "replacement_role": "participant",
       "kind": "people",
       "before": {
         "item": {
@@ -1563,6 +1567,7 @@
     },
     {
       "id": "binding_drift",
+      "replacement_role": "participant",
       "kind": "people",
       "before": {
         "item": {
@@ -1677,6 +1682,7 @@
     },
     {
       "id": "presentation_drift",
+      "replacement_role": "participant",
       "kind": "people",
       "before": {
         "item": {
@@ -1791,6 +1797,7 @@
     },
     {
       "id": "unrequested_owner_delta",
+      "replacement_role": "participant",
       "kind": "people",
       "before": {
         "item": {
@@ -1910,6 +1917,7 @@
     },
     {
       "id": "policy_fork",
+      "replacement_role": "participant",
       "kind": "people",
       "before": {
         "item": {

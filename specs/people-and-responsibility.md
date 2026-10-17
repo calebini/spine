@@ -484,7 +484,16 @@ the same proof, rolling everything back. It is a context flag, never request JSO
 
 `work_changed=false` always for standalone people edits. V4 schedule effects keep
 their existing changed/reconciled/no-op/replay meanings; `people` joins
-`changed_dimensions`. A people-only v4 patch requires `materialization.mode=none`;
+`changed_dimensions`. The complete v4 order is `item`, `people`, `primary_location`,
+`archetype`, `scheduled_time`, `recurrence`, `delivery`, `notification_profile`,
+`reminders`, `policy_presentations`, omitting unchanged dimensions. The inherited
+presentation-only branch still returns only `["policy_presentations"]` when changed
+and `[]` on no-op; its exclusivity prohibits mixing it with any other dimension.
+This retains the inherited relative
+order and places `people` immediately after `item`. For example, a composite
+changing item facts, people, scheduled time and reminders returns
+`["item", "people", "scheduled_time", "reminders"]` in that order.
+A people-only v4 patch requires `materialization.mode=none`;
 presentation-only exclusivity remains unchanged. People combined with other existing
 schedule dimensions is one ordinary atomic composite, not two handler commits.
 

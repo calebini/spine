@@ -20,7 +20,26 @@
   ],
   "model_witness": "tests/fixtures/people_and_responsibility/semantic-witnesses.json",
   "computed_witness": "tests/fixtures/people_and_responsibility/computed-vectors.json",
+  "changed_dimensions_witness": "tests/fixtures/people_and_responsibility/changed-dimensions-order.json",
   "fixtures": [
+    {
+      "fixture_id": "section_people_not_requested",
+      "fixture": "tests/fixtures/people_and_responsibility/contracts/section_people_not_requested.json",
+      "schema": "contracts/schemas/people/types.schema.json#/$defs/section",
+      "valid": true
+    },
+    {
+      "fixture_id": "section_people_unavailable",
+      "fixture": "tests/fixtures/people_and_responsibility/contracts/section_people_unavailable.json",
+      "schema": "contracts/schemas/people/types.schema.json#/$defs/section",
+      "valid": true
+    },
+    {
+      "fixture_id": "failure_dry_run",
+      "fixture": "tests/fixtures/people_and_responsibility/contracts/failure_dry_run.json",
+      "schema": "contracts/schemas/people/failures.schema.json#/$defs/local",
+      "valid": true
+    },
     {
       "fixture_id": "request_roster",
       "fixture": "tests/fixtures/people_and_responsibility/contracts/request_roster.json",

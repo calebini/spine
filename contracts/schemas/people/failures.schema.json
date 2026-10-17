@@ -16,6 +16,9 @@
             "item.people.update"
           ]
         },
+        "dry_run": {
+          "const": true
+        },
         "error": {
           "type": "object",
           "properties": {

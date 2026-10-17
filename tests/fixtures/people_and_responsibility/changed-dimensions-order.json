@@ -1,0 +1,7 @@
+{
+  "runtime_verified": false,
+  "order": ["item", "people", "primary_location", "archetype", "scheduled_time", "recurrence", "delivery", "notification_profile", "reminders", "policy_presentations"],
+  "mixed": ["item", "people", "scheduled_time", "reminders"],
+  "presentation_changed": ["policy_presentations"],
+  "presentation_noop": []
+}

@@ -86,6 +86,8 @@
       },
       "people": {
         "availability": "available",
+        "scope": "authorized_only",
+        "coverage": "complete",
         "people": {
           "item_id": "event-science",
           "item_type": "event",

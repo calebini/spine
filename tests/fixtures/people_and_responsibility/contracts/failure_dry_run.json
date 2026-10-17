@@ -1,0 +1,10 @@
+{
+  "ok": false,
+  "command": "item.people.update",
+  "dry_run": true,
+  "error": {
+    "code": "referenced_row_not_found",
+    "field": "people",
+    "message": "People reference unavailable."
+  }
+}
