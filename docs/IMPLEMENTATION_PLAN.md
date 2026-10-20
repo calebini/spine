@@ -1,12 +1,13 @@
 # Spine Implementation Plan
 
 Role: Roadmap rationale and delivery history; current task status lives in [BACKLOG.md](BACKLOG.md)
-Last updated: 2026-10-16 (people logical ratification and machine codification)
+Last updated: 2026-10-20 (people machine-review acceptance and implementation planning)
 
 This is a non-normative delivery plan. The specifications and machine-readable contracts remain authoritative.
 
-The selected contract task is
-[SPINE-060](BACKLOG.md#spine-060--ratify-and-codify-people-and-responsibility),
+The selected planning task is
+[SPINE-061](BACKLOG.md#spine-061--implement-people-and-responsibility), following
+the completed source-contract task SPINE-060 and
 the [people and responsibility contract](../specs/people-and-responsibility.md).
 Build on existing subject-role storage, not facets or a second people registry.
 Keep participation, task assignment, resource access and notification routing
@@ -14,10 +15,184 @@ independent. Scoped directory/association-disclosure policies D-01/D-02 were app
 on 2026-10-16. The logical draft passed bounded consistency review and the operator
 ratified logical v1.0.0. Source-only machine candidates now cover standalone commands,
 explicit scheduling/read successors, a dedicated role-only work-continuity proof,
-exact cursor/error/budget rules and offline fixtures. Review that codification
-before implementing the PR-01–16 runtime obligations. Existing self-only web
+exact cursor/error/budget rules and offline fixtures. The operator accepted the
+A/B/C machine reviews and verified corrections on 2026-10-20 as sufficient for
+implementation planning, not a fresh independent whole-bundle audit or runtime
+qualification. All PR-01–16 runtime obligations remain pending. Existing self-only web
 projections and facet-only equality are preserved; neither is silently broadened.
-No runtime, frontend, pack, commit/push or deployment work is authorized by this task.
+This planning step makes no runtime, frontend, pack, migration, commit/push or
+deployment changes.
+
+### People delivery sequence
+
+The operator requested this implementation plan on 2026-10-20. The first slice's
+concrete owner mapping and acceptance boundary are below. Reuse current subject-role
+storage, version writers and finalizers; do not introduce a new people registry.
+This is a delivery plan, not completed runtime evidence or an instruction to start
+runtime work, expose a partial capability, migrate or deploy.
+
+1. **Local role transactions and history.** Map all version writers and shared
+   finalizers, then plan the standalone role replacement/read core and atomic
+   scheduling integration together with identity, no-op/replay/dry-run, unmanaged
+   copy-forward and rollback tests (PR-01–04, PR-13). Include scoped reference
+   admission from PR-05, rather than adding it after the write path.
+2. **Permissioned discovery and read projections.** Plan roster and labels,
+   historical associations, authorized filters, snapshot-bound authenticated
+   cursors and bounded indexed queries (PR-05–08, PR-12). Permission and source
+   concurrency evidence from PR-16 belongs with these owners.
+3. **Work continuity and writer parity.** Exercise role-only policy bijection
+   across all work states, mixed edits, recurring/relative-source freshness and
+   every version writer/finalizer (PR-09–11, PR-13, PR-16). Do not silently reuse
+   the facet-only equality proof for people changes.
+4. **Public successors, packaging and complete qualification.** Wire the explicit
+   CLI/protected HTTP successors, installed schema/registry closure and frozen
+   compatibility gates (PR-14–16), carrying forward every prior runtime obligation.
+   Advertise no partial family; runtime evidence and activation are distinct from
+   source contract review. No migration, deployment or operator-ledger work is
+   authorized by this outline.
+
+### People Slice 1 — local role transactions and history
+
+**Goal:** implement the internal foundation for explicit event participant/task
+assignee replacement and exact-version readback. Changed writes produce one
+immutable successor; no-ops preserve existing identities; replay reuses receipt
+facts. Assignment/attendance must not grant access or change notification routing.
+Keep new public selectors unadvertised until the complete family qualifies.
+
+#### Existing owner map
+
+The following are inspected reuse points, not assertions that they already satisfy
+the new people contract:
+
+| Concern | Existing owner | Planned use / compatibility constraint |
+| --- | --- | --- |
+| Physical role facts | `src/spine/ledger/schema.sql`, `item_subject_roles` | Reuse exact item/version/subject/role uniqueness, active/inactive status and existing subject index. No table, column, schema number or migration is allocated. |
+| Role reads and replacement | `src/spine/ledger/supporting.py`: `current_subject_roles`, `copy_forward_supporting_sets`, `replace_item_subject_roles` | Exact-version reads and selected-kind replacement; preserve every other role and all old-version rows. Explicit IDs must replace random helper defaults on new command-owned rows. |
+| Item successor/CAS | `src/spine/ledger/items.py`: `create_item_version_from_draft`, `create_next_item_version`, `_insert_item_version` | Reuse current-version comparison, supporting-set copy, detail preservation, audit and pointer update in one transaction. Avoid allocating a version before detecting a no-op. |
+| Input bundle | `src/spine/ledger/item_drafts.py` | Use existing role replacement operands; no new parallel item writer. |
+| Command transaction | `src/spine/commands/core.py`: `handle`, `_dispatch_atomic`; `src/spine/ledger/transactions.py`: `LedgerConnection._commit_checked` | Receipt, audit, role facts and item pointer commit or roll back together; retain existing finalizer ownership and dry-run failure marking. |
+| Receipt replay | `src/spine/commands/receipts.py`: `command_receipt`, `insert_command_receipt`, `get_command_receipt` | Validate canonical request identity and original stored result; perform the specified fresh/replay permissions separately. No reconstruction from mutable current labels. |
+| Existing task/scheduling callers | `src/spine/commands/core.py`: task create/update and schedule create/update handlers | Existing task role replacement can replace both assignee and owner. Preserve that legacy contract; the new people path replaces only participant for events or assignee for tasks. Add scheduling v4 through explicit successor dispatch, not by loosening released request schemas. |
+| Writer/finalizer coverage | `src/spine/ledger/facet_writer_inventory.v1.json`, `rendering_writer_inventory.v1.json`; `src/spine/ledger/items.py` | Use existing producer lists as starting inventories and reconcile actual allocation call sites. These inventories are not a completed people proof. Include create, update, completion, cancellation, archive and facet-triggered versions. |
+| Unchanged work and policy meaning | `src/spine/ledger/facet_continuity.py`; notification/rendering support | Retain the facet proof's role equality. People-only continuity needs its own edge classification/proof before new writes are publicly usable; do not widen a shared equality allowlist. |
+| Admission/disclosure | `src/spine/web/permissions.py`, existing identity/membership owners and reviewed people companion resolver names | Reuse existing resource ownership/grants and membership sources, while implementing the distinct roster/reference/association/label rules. Existing generic permissions alone are not proof of the new rules. |
+
+#### Internal implementation order
+
+1. **S1a — normalized managed sets and exact-version reader.** Implement focused
+   pure normalization/equality/identity helpers plus bounded ledger projections.
+   Use a small people-specific module only where the existing owner would otherwise
+   mix new and legacy rules. Normalize subject IDs without coercion, distinguish
+   omitted versus explicit empty replacement, reject duplicate/ambiguous/ineligible
+   fresh references as specified, and compare complete managed tuples including
+   inactive rows. Preserve historical IDs and unmanaged roles. Derive new row IDs
+   from the reviewed canonical command/path preimages; no-op reads retain prior IDs.
+   These are private components and tests, not callable new public contracts.
+2. **S1b — transactional role mutation and continuity prerequisite.** Reuse the
+   existing item-version draft, CAS writer, supporting-set copy and finalizers.
+   Add the narrow role-only proof/reconciliation seam needed to prevent unrelated
+   policy/work cancellation; implement its full work-state matrix in Slice 3.
+   If that proof is not available, keep new mutation entry points private rather
+   than shipping a knowingly unsafe temporary path. Inject errors after role,
+   policy/audit and receipt writes to prove outer rollback. No new proof table.
+3. **S1c — local handlers and scheduling successor integration.** Implement
+   `item.people.show`/`item.people.update` handlers and the people portions of
+   schedule create/update v4 behind the unadvertised candidate boundary. Use the
+   same shared core for standalone/composite operations, with one transaction and
+   one version for a composite. Owner-scope admission is part of the write, not
+   deferred post-validation. Show's current-label disclosure shares the Slice 2
+   resolver; do not claim full standalone read acceptance before it exists.
+4. **S1d — parity evidence and checkpoint.** Exercise actual disposable-ledger
+   handlers through the same transaction path as public commands, retaining the
+   unadvertised boundary. Extend the actual writer inventory and regression tests;
+   record which PR obligations have runtime evidence versus remaining dependencies.
+   Do not turn passing internal tests into compiled capability/package activation.
+
+S1a is the first executable sub-slice. It has a bounded code surface, no write
+exposure, and acceptance tests independent of HTTP or deployment. The operator
+subsequently authorized it on 2026-10-20; the checkpoint below records actual
+implementation, not merely a queued background task.
+
+#### Slice 1 acceptance tests
+
+- Event participants and task assignees: omit/preserve, replace, clear, multiple
+  subjects, inactive rows, person/agent/accountless subjects, wrong item type,
+  terminal writes, duplicates and invalid/missing IDs. Preserve an existing
+  opposite role, owner, watcher and recipient; do not infer related-item roles.
+- Changed update: one CAS successor with deterministic IDs, one audit and receipt;
+  complete old version remains readable. An equal current set produces no version
+  or audit, retains the prior association IDs, and records a fresh command receipt.
+- Compatible replay after later edits returns original versions/rows/effect and
+  writes nothing. Conflicting command reuse, stale versions and malformed retained
+  evidence refuse without partial effects. Fresh/replay permission tests use their
+  distinct contract rules, including membership changes and preserved references.
+- Dry-run uses the real admission/transaction path but persists nothing on success
+  or failure. Check the required true-only failure marker and canonical preview IDs.
+- Composite scheduling: create people atomically; people-only update requires no
+  materialization; mixed ordinary dimensions commit once; presentation-only edits
+  remain exclusive. Preserve old local task-role and frozen schedule versions.
+- Rollback/finalization: inject failures after each affected write boundary, and
+  show no orphan version/role/policy, changed pointer, audit or receipt. Observe
+  declared finalizer and allocator ownership rather than bypassing it in tests.
+- Continuity boundary: unchanged routing/access/facet facts, no new attempts/sends,
+  correct pending-work preservation only under a proven role-only edge. Full lease,
+  started/retry/terminal/recurring/source-race acceptance is explicitly still Slice 3.
+
+Add proposed `tests/test_people_core.py` and `tests/test_people_commands.py` only
+when their implementation exists. Extend existing `tests/test_ledger_item_workflows.py`,
+`test_schedule_create_command.py`, `test_schedule_operations_command.py`,
+`test_agent_command_contract_mvp.py`, `test_facet_writers.py`, and
+`test_ledger_transactions.py` where the existing owner is exercised. The offline
+`test_people_and_responsibility_contracts.py` remains a contract witness, never a
+substitute for these runtime tests. Use synthetic temporary ledgers only.
+
+#### Completion and release gates for the whole initiative
+
+| Gate | Required evidence | Not established by Slice 1 |
+| --- | --- | --- |
+| Foundation | S1a–d tests; PR-01–04 and the implemented portions of PR-05/13/16 | Full protected disclosure, cost bounds and complete writer/work races |
+| Read/discovery | Slice 2: PR-05–08/12 and related PR-16 races | Installed public successor parity |
+| Work continuity | Slice 3: PR-09–11/13/16, including mixed edge histories and follow-source invalidation | Deployment or permission to send |
+| Complete family | Slice 4: PR-14–16 plus every earlier pending obligation; installed CLI/HTTP and frozen-bundle checks | Operator-ledger migration, staging/release/push approval |
+
+For code implementation, run focused new tests and affected owner regressions,
+then strict typing/lint and the repository's full regression/synchronization/
+installed-package checks in proportion to the resulting public surface. Record
+actual commands and failures; no full-suite result is claimed by this planning pass.
+Do not select a release/schema number from the plan. Real query-plan evidence may
+identify an index need in Slice 2; that requires a separately specified migration
+and manifest, never startup DDL. No product decision is currently missing; surface
+an actual contract conflict if discovered instead of silently choosing semantics.
+
+**S1a implementation checkpoint (2026-10-20):** private helpers are implemented in
+`src/spine/core/people.py` and `src/spine/ledger/people.py`, tested by
+`tests/test_people_core.py` and `tests/test_people_ledger.py`. The reader is one
+statement over exact item/version roles; its projection has no labels or permission
+decision and remains a private primitive requiring admitted callers and an outer
+request budget. It returns the historical association IDs and selected/current
+versions separately; all-role overflow refuses rather than truncating or repairing.
+Pure admission selection identifies additions/reactivations but does not assert
+subject eligibility or authorization. The shared repository guidance keeps the
+semantic core independent from the ledger adapter; legacy helpers are untouched.
+
+Verification: 17 new tests pass; with existing item workflows, transaction and
+selected people/schedule/continuity/independent-read contracts, 112 tests pass in
+3.925 seconds. Focused Ruff, diff hygiene and strict mypy on the two new modules
+pass. Broad core/ledger typing has the same 36 errors in ten unchanged files with
+or without these modules; it is not reported clean. No full suite, query-cost,
+concurrent permission, write rollback, installed-package or public CLI/HTTP
+qualification is claimed. Runtime/package declarations remain unchanged and all
+whole-feature PR-01–16 obligations stay pending.
+
+**Handoff:** The operator authorized the local S1a checkpoint on 2026-10-20,
+including the plan/acceptance notes. All 112 selected tests passed again in
+3.980 seconds; focused Ruff, new-module strict typing and diff hygiene passed.
+The unrelated pre-existing agent guidance remains outside this checkpoint. Next
+is selection of S1b transactional/continuity implementation.
+No separate background implementation job is running or required to preserve these
+files. No external review, migration, ledger installation, push or deployment
+occurred. This document is the shared durable plan; temporary thread progress does
+not create a second authority.
 
 The preceding bounded delivery is
 [SPINE-058](BACKLOG.md#spine-058--deliver-trusted-local-facet-revision-readback):

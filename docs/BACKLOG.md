@@ -37,10 +37,15 @@ status labels in the same change. Routine task updates do not change spec author
 
 ### SPINE-061 — Implement people and responsibility
 
-**Status:** Blocked — operator authorized implementation on 2026-10-17, but the
-accepted leaf Section 12 and SPINE-060 require review of the new machine codification
-before runtime work. The prior clean audit covered the logical draft, not these
-successor schemas/fixtures. Resolve that gate explicitly before starting runtime edits.
+**Status:** In progress — private S1a foundation implemented and locally verified
+on 2026-10-20; no command/capability activation. The operator accepted the completed A/B/C
+reviews and verified corrections as sufficient to close the machine-contract
+review prerequisite and move into implementation planning. This is a bounded
+acceptance of the review evidence, not an independent whole-bundle re-audit,
+convergence, runtime acceptance or permission for migration/deployment. No runtime
+edits were started under that planning step. The operator subsequently explicitly
+authorized S1a implementation; its evidence and limits are below. The earlier 2026-10-17 implementation
+request and the subsequently imposed review hold remain recorded below.
 **Baseline:** Source-only machine checkpoint `9ef74c5b10511b1d226dcddf6cbf80a64c288bdc`
 (`Codify people and responsibility contracts`), committed locally; not pushed.
 All 202 contract-focused tests and checkpoint diff hygiene passed again.
@@ -184,10 +189,57 @@ All 64 selected contract tests, focused Ruff and diff hygiene were rechecked
 before staging. The unrelated stable-launcher `AGENTS.md` amendment is excluded;
 no push or machine-review gate closure is authorized by this checkpoint.
 
-**Next:** Explicitly resolve the machine-review
-gate with the operator before starting runtime work. A/B/C are
-behavioral partitions, not automatic whole-bundle closure or convergence. Runtime
-implementation remains held at the contract-review gate; no push or deployment.
+**Review acceptance (2026-10-20):** After discussing the limits of the evidence,
+the operator accepted proceeding into implementation planning. Correction checkpoint
+`3399327` contains the no-op identity fixture/vector/test and tracking record.
+A/B/C are behavioral partitions, not automatic whole-bundle closure or convergence;
+the review prerequisite is now explicitly accepted by the operator. All PR-01–16
+runtime obligations remain pending. No further audit, runtime edit, migration,
+deployment or push is started by this acceptance.
+
+**Implementation plan (2026-10-20):** The operator requested the concrete plan.
+The existing implementation-plan document now maps storage, selected-role copy/
+replacement, CAS version writer, transaction/receipt ownership, legacy task-role
+compatibility, scheduling successors, permission owners and distinct people-only
+continuity. It sequences private foundation, transactions/proof, local handlers/
+scheduling and parity evidence, followed by reads/disclosure, full continuity,
+public/installed qualification. S1a (normalization/identity plus bounded exact-version
+reader) is the recommended first executable sub-slice. No migration is allocated;
+every PR-01–16 runtime obligation remains pending. No runtime job has been started.
+
+**S1a foundation implementation (2026-10-20):** Explicitly authorized by the
+operator. `core/people.py` now implements closed role-patch normalization with
+omit/create/clear distinctions, Unicode-scalar opaque IDs and array bounds,
+complete active/inactive managed-set comparison/hash, fresh-add/reactivation
+selection (not permission approval), and existing command-derived replacement IDs.
+`ledger/people.py` adds one-statement bounded exact-version/current readback with
+separate current version, sorted managed associations and an over-limit sentinel
+counting all role kinds. It does not look up labels, change facts, resolve access,
+or activate any public surface. New tests cover Unicode/duplicates/limits,
+inactive and opposite-role semantics, the reviewed ID vector, read-only historical
+identity, terminal/unscheduled items, safe failures and exact/over-limit snapshots.
+
+**Verification:** 17 new tests and the related ledger/transaction plus reviewed
+contract suites pass together: **112 tests, 3.925 seconds**. Focused Ruff and
+`git diff --check` pass. Strict mypy passes both new source files. The broader
+core/ledger mypy command reports 36 errors in ten unchanged files; excluding the
+two new modules yields the same 36 errors (49 existing versus 51 total files).
+No unrelated typing cleanup or full-repository passing claim is included. Public
+registries, package/version declarations, frozen schemas and legacy helpers are
+unchanged. All PR-01–16 whole-feature runtime obligations remain pending; this
+is only private foundation evidence, not implemented public people commands.
+
+**S1a checkpoint authorization (2026-10-20):** The operator requested a local
+checkpoint of the private foundation, its tests and the review-acceptance/planning
+records. All 112 selected tests pass again (3.980 seconds), with focused Ruff,
+strict typing for the two new modules and diff hygiene clean. The separate
+pre-existing `AGENTS.md` launcher guidance is excluded. This checkpoint does not
+authorize a push, public activation, migration or the next implementation slice.
+
+**Next:** Select S1b transactional writes and its role-only continuity prerequisite
+under the existing plan. Keep capability/package activation gated on complete
+applicable runtime evidence. No external review, push, migration, operator-ledger
+access or deployment occurred.
 
 ### SPINE-060 — Ratify and codify people and responsibility
 
