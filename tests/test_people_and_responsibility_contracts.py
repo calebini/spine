@@ -519,6 +519,28 @@ class PeopleContractTests(unittest.TestCase):
         bad["account_id"] = "injected"
         self.assertFalse(self.validator("contracts/schemas/people/cursor.schema.json").is_valid(bad))
 
+    def test_fresh_noop_retains_prior_association_identity(self):
+        computed = load(ROOT / self.manifest["computed_witness"])
+        vectors = {row["id"]: row for row in computed["vectors"]}
+        prior = vectors["existing_managed_row_id"]
+        request = load(FIXTURES / "contracts/request_participants.json")
+        noop = load(FIXTURES / "contracts/response_noop.json")
+        self.assertNotEqual(prior["preimage"]["command_id"], request["command_id"])
+        self.assertEqual(vectors["new_managed_row_id"]["preimage"]["command_id"], request["command_id"])
+        self.assertEqual(noop["command_id"], request["command_id"])
+        self.assertEqual(noop["effect"], "item_people_noop")
+        self.assertEqual(noop["current_version"], noop["target_version"])
+        self.assertFalse(noop["truth_changed"])
+        self.assertEqual(prior["preimage"]["request_path"], "/people/participants/0")
+        retained_id = "item_subject_role_" + digest(prior["preimage"])
+        self.assertEqual(noop["associations"][0], {
+            "item_subject_role_id": retained_id,
+            "subject_id": request["people"]["participants"][0],
+            "role": "participant",
+            "status": "active",
+        })
+        self.assertNotEqual(retained_id, "item_subject_role_" + vectors["new_managed_row_id"]["sha256"])
+
     def test_success_receipt_equality_and_limits(self):
         computed = load(ROOT / self.manifest["computed_witness"])
         hashes = {v["id"]: v["sha256"] for v in computed["vectors"]}
@@ -527,7 +549,11 @@ class PeopleContractTests(unittest.TestCase):
             self.assertEqual(value["command_receipt_id"], value["receipt"]["command_receipt_id"])
             self.assertFalse(value["work_changed"])
             self.assertEqual(value["receipt"]["semantic_facts_hash"], hashes["update_semantic_facts"])
-            self.assertEqual(value["associations"][0]["item_subject_role_id"], "item_subject_role_" + hashes["new_managed_row_id"])
+            if value["effect"] == "item_people_noop":
+                self.assertEqual(value["associations"][0]["item_subject_role_id"], "item_subject_role_" + hashes["existing_managed_row_id"])
+            else:
+                # Changed success, its replay, and changed dry-run use replacement-path IDs.
+                self.assertEqual(value["associations"][0]["item_subject_role_id"], "item_subject_role_" + hashes["new_managed_row_id"])
             changed = value["receipt"]["effect"] == "item_people_updated"
             self.assertEqual(int(value["current_version"]), int(value["target_version"]) + int(changed))
             self.assertEqual(value["truth_changed"], changed)

@@ -78,6 +78,18 @@
       },
       "canonical_json": "{\"command\":\"item.people.update\",\"command_id\":\"command_people_update_example\",\"derivation_version\":\"spine.command-id.v1\",\"request_path\":\"/people/participants/0\",\"row_role\":\"item_subject_role\"}",
       "sha256": "bbc4a3af7a4e73ecd99ff788fe73cf835c26ae218f0d740ace9e77cd624f9698"
+    },
+    {
+      "id": "existing_managed_row_id",
+      "preimage": {
+        "derivation_version": "spine.command-id.v1",
+        "command": "item.people.update",
+        "command_id": "command_people_prior_assignment_example",
+        "row_role": "item_subject_role",
+        "request_path": "/people/participants/0"
+      },
+      "canonical_json": "{\"command\":\"item.people.update\",\"command_id\":\"command_people_prior_assignment_example\",\"derivation_version\":\"spine.command-id.v1\",\"request_path\":\"/people/participants/0\",\"row_role\":\"item_subject_role\"}",
+      "sha256": "db6414633e36e787557c17a2eaa44ad52488df15ed203d2bbcef7b044cae63d9"
     }
   ],
   "cursor_vectors": [

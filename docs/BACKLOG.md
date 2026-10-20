@@ -1,6 +1,6 @@
 # Spine Backlog
 
-Last updated: 2026-10-18
+Last updated: 2026-10-20
 
 This is the single work queue for Spine development. The
 [implementation plan](IMPLEMENTATION_PLAN.md) explains roadmap direction and delivery
@@ -135,10 +135,58 @@ new external pass. See the
 [patch follow-up](../whetstone_runs/people-read-machine-audit-001/patch-followup.md).
 No runtime code, schema migration, audit launch, commit or push.
 
-**Next:** Carry the locally corrected B envelope into the small Part C
-write/read seam review covering roles, historical versions, replay/disclosure and
-mutation/cursor consistency. These are behavioral partitions chosen to fit the
-reviewer limit, not independent claims of whole-bundle closure. Runtime
+**Checkpoint (2026-10-18):** A/B source corrections, fixtures/tests and tracking are
+committed as `7260cbb90255d130883e5fa5fb10f0589510c775`
+(`Align people contracts with authoring and read invariants`). All 63 selected
+offline tests, focused Ruff and diff hygiene passed again. No push. The separate
+pre-existing `AGENTS.md` stable-launcher amendment remains uncommitted and preserved.
+
+**Part C preparation:** Staged the focused integration review in
+`whetstone_runs/people-integration-machine-audit-001/` at that checkpoint. The
+[notes](../whetstone_runs/people-integration-machine-audit-001/audit-notes.md) and
+SHA-256-bound inventory enumerate 68 inputs: 36 complete schema documents/dependency
+closure, 17 selected wire fixtures, exact source-hashed replay/protected-web section
+context, logical authorities, witnesses/tests and the prior finding/follow-up evidence.
+The rendered prompt is 762,773 characters / 762,814 UTF-8 bytes. Scope is written/read
+role projections, current/history, replay/disclosure and mutation/cursor consistency,
+including the two corrected A minors and B's corrected optional-section envelope.
+This is not a full A/B re-audit. Stable checkpoint `6e19fe3`, Codex CLI
+`0.163.0-alpha.10.2`, `gpt-6.1-sol`, medium reasoning and consistency profile are pinned.
+The operator explicitly approved those 68 inputs, notes, consistency context and
+generated copies on 2026-10-18. All payload/section-source hashes, prompt preview,
+source checkpoint, stable runtime and CLI version matched. The reviewer-only audit
+completed through the normal execution permission mechanism:
+`pass_with_minor_clarification`, boundary preserved, zero blockers/majors, one minor.
+The [report](../whetstone_runs/people-integration-machine-audit-001/change_audit/change_audit_report.md)
+identifies a confirmed offline no-op identity mismatch: the positive no-op fixture
+and shared success assertion require a row ID derived from the current command,
+instead of retaining the prior persisted association ID at the unchanged version.
+The narrow correction is a distinct prior-command vector/ID for no-op and separate
+identity assertions for no-op versus changed success/replay. No source patch was
+made; prior corrected A/B findings were not re-raised. See the
+[execution summary](../whetstone_runs/people-integration-machine-audit-001/execution-summary.md).
+
+**Part C correction (2026-10-19):** Applied locally with operator approval. Added
+`existing_managed_row_id` with a distinct prior command and exact canonical bytes/
+digest; the no-op fixture retains that association ID. The shared receipt check now
+separates no-op retention from changed/replayed/preview replacement derivation.
+A dedicated regression failed against the old fixture, then passed after correction.
+All 64 selected people/scheduling/facet-continuity/independent-read contract tests,
+focused Ruff and diff hygiene pass. See the
+[patch follow-up](../whetstone_runs/people-integration-machine-audit-001/patch-followup.md).
+Logical/schema/runtime semantics and original review artifacts remain unchanged.
+This is local verification, not a new external review or implementation acceptance.
+No runtime edit, migration, reviewer invocation, commit or push.
+
+**Checkpoint authorization (2026-10-20):** The operator authorized a local commit
+of the narrow no-op fixture/vector/test correction and its tracking evidence.
+All 64 selected contract tests, focused Ruff and diff hygiene were rechecked
+before staging. The unrelated stable-launcher `AGENTS.md` amendment is excluded;
+no push or machine-review gate closure is authorized by this checkpoint.
+
+**Next:** Explicitly resolve the machine-review
+gate with the operator before starting runtime work. A/B/C are
+behavioral partitions, not automatic whole-bundle closure or convergence. Runtime
 implementation remains held at the contract-review gate; no push or deployment.
 
 ### SPINE-060 — Ratify and codify people and responsibility
