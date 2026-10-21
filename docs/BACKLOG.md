@@ -1,6 +1,6 @@
 # Spine Backlog
 
-Last updated: 2026-10-20
+Last updated: 2026-10-22
 
 This is the single work queue for Spine development. The
 [implementation plan](IMPLEMENTATION_PLAN.md) explains roadmap direction and delivery
@@ -34,6 +34,43 @@ record evidence and move it to Completed. Update affected orientation and contra
 status labels in the same change. Routine task updates do not change spec authority.
 
 ## Post-release corrective work
+
+### SPINE-062 — Preserve timezone resolution across verified compatible tzdb upgrades
+
+**Status:** Needs decision — automatic per-zone byte-identity policy accepted and
+specification updated 2026-10-22; machine design/backport scope remain pending.
+Incident investigation and reference evidence prepared 2026-10-21. No runtime
+implementation or production change.
+The operator reports production 0.6.0/schema 15 agendas fail after host tzdb 2026c
+was replaced by 2026e. Current mainline reproduces the exact-version rejection.
+The [accepted logical decision](../specs/decisions/0006-evidence-bound-timezone-compatibility.md)
+admits any runtime release automatically when the exact zone's complete TZif bytes
+match a trusted authored-release reference. No release-pair allowlist or per-upgrade
+approval is required. Baseline provenance/retention, a shared resolver, preserved
+canonical pins and observable diagnostics are required. Different bytes or missing
+trusted references fail cross-release admission. Logical specification alignment
+is complete; closed machine schemas and runtime activation are still pending.
+**Evidence:** Official 2026c/2026e archives produce byte-identical Paris and Chicago
+TZif files with the recorded compiler in both fat/slim formats; 18 historical,
+gap/fold and future probes agree across four release/format combinations. Both
+current-code mismatch reproductions fail as reported. See the
+[evidence note](TZDB_COMPATIBILITY_EVIDENCE.md) for hashes, method and limits.
+**Specification verification:** Reviewed affected authorities for consistency and
+checked local links and diff hygiene; README still links the authoritative spec index.
+**Bounded audit (2026-10-22):** Completed after explicit approval of the seven-file
+Codex payload. Stable Whetstone 0.1.0/checkpoint `6e19fe3`, `audit-change` consistency
+profile: `pass_with_minor_clarification`, boundary preserved, zero blockers/majors,
+one minor. The minor responsibility-matrix wording was corrected to admit exact
+authored data or a Decision 0006 byte-identical resolver. Local review also clarified
+captured-fingerprint precedence and ambiguous legacy-build refusal before the audit.
+Source links, policy consistency and diff hygiene pass after the correction. See
+the [audit record](TZDB_COMPATIBILITY_AUDIT.md) and retained raw feedback/input hashes.
+This is bounded logical-policy review, not convergence or runtime qualification.
+**Remaining:** Select mainline/backport scope; define the baseline storage/ingestion
+and machine schema; identify the deployed wrapper and exact 0.6.0 source;
+implement/version/test after clarification and verify on a disposable production
+backup. Mainline is 0.10.0/schema 19; it is not a drop-in schema-15 hotfix. This
+concrete incident does not reactivate deferred SPINE-004–007/010 initiatives.
 
 ### SPINE-061 — Implement people and responsibility
 

@@ -1,6 +1,7 @@
 # Spine Operational Schedule Lifecycle
 
 Status: Implemented on current schema 12; agenda/cancel v1 and update v2
+Timezone policy amendment: Decision 0006 v1.0.0 accepted 2026-10-22; automatic byte-identity resolution is not yet implemented
 Scope: Cross-item agenda readback, atomic whole-schedule mutation, terminal cancellation, and notification-work reconciliation
 Created: 2026-08-16
 
@@ -107,6 +108,17 @@ Non-recurring point anchors are selected when their expressed instant lies in th
 Recurring primary anchors expand through `specs/recurrence.md` using expressed-time selection. Exdates remain omitted, moved occurrences are selected by expressed time, duplicate collapse remains canonical, and occurrence lifecycle/detail overlays are applied before agenda actionability. The entry returns current `recurrence_revision_id` and `occurrence_key`; agenda projection does not create occurrence provenance.
 
 A stored local instant MUST resolve using its own pinned timezone and timezone-database version before conversion to the agenda view. An unavailable required pinned version fails closed; the command MUST NOT resolve using different timezone data or silently omit the entry. Recurrence nonexistent-time omission and deterministic ambiguous-time selection remain governed by `specs/recurrence.md` and may emit diagnostics.
+
+The accepted [Decision 0006](decisions/0006-evidence-bound-timezone-compatibility.md)
+policy makes byte-identical zone data an available equivalent resolver: compare
+actual complete candidate bytes with the trusted reference for the stored authored
+version and exact zone, and admit matching data from any runtime release without
+a release-pair allowlist or per-upgrade approval. Keep authored pins unchanged and
+expose the runtime substitution in diagnostics. Apply the shared decision before
+range conversion or expansion, including update reconciliation. Unmatched data
+or missing trusted references still fail cross-release admission. This amendment
+is not yet implemented; it neither changes agenda response/cursor schemas nor
+authorizes silent omission or whole-agenda failure isolation.
 
 Items without a primary scheduled anchor are omitted. When diagnostics are requested, each omission emits `agenda_item_unscheduled` with `item_id` and `field=primary_schedule`. Other closed agenda diagnostics are `agenda_recurrence_candidate_omitted` with `field=recurrence` and `agenda_terminal_excluded` with `field=detail_status`. Every diagnostic requires `field`. Diagnostics are ordered by code, item ID, optional occurrence key, then field, with an absent occurrence key sorting before a present value.
 

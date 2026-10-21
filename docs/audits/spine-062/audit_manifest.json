@@ -1,0 +1,42 @@
+{
+  "audit_notes_hash": "2e7f6c68839b52fc9e9d1f87b42ac5d7efec9c93ad5d180fefb6eada144629eb",
+  "audit_notes_path": "whetstone_runs/tzdb-compatibility-audit-002/audit-notes.md",
+  "client": {
+    "model": "unspecified",
+    "name": "codex",
+    "version": "unknown"
+  },
+  "generated_at": "2026-10-21T22:43:19.074750+00:00",
+  "profile": "consistency",
+  "schema_version": "change-audit-manifest-v1",
+  "specs": [
+    {
+      "hash": "cab6fb4359c716a67259ba616f3ba2cfa5bf01b183c1250c58631177c10eb1a6",
+      "path": "whetstone_runs/tzdb-compatibility-audit-002/inputs/specs/decisions/0006-evidence-bound-timezone-compatibility.md"
+    },
+    {
+      "hash": "b83dc40fef3f4c2f27ea9c3f5f639a477247831e37221a6c2629bc1798e60194",
+      "path": "whetstone_runs/tzdb-compatibility-audit-002/inputs/specs/recurrence.md"
+    },
+    {
+      "hash": "11424977f04f0b3bb7d8382c488669a1375b4fd678a350e767d4d1cd9102841e",
+      "path": "whetstone_runs/tzdb-compatibility-audit-002/inputs/specs/notification-rendering.md"
+    },
+    {
+      "hash": "3d37ee152ebd6462b0b2c759d0d23fa92f02c16ab5f5d41b7ba0080fa3ca6bed",
+      "path": "whetstone_runs/tzdb-compatibility-audit-002/inputs/specs/schedule-create.md"
+    },
+    {
+      "hash": "ff1b85871e5a7828d38aa8ae0da9daceefbca09135f25e1e2e6a1d8cdf778184",
+      "path": "whetstone_runs/tzdb-compatibility-audit-002/inputs/specs/schedule-operations.md"
+    },
+    {
+      "hash": "e7722f4cd357750b83dafcdadd7f491554d56e2e1ce8500ec528adb76ee2f739",
+      "path": "whetstone_runs/tzdb-compatibility-audit-002/inputs/specs/operational-resilience.md"
+    },
+    {
+      "hash": "df744a680869ec05f0bf79700839eadecc1c4dca99882722ba408164611ba2c3",
+      "path": "whetstone_runs/tzdb-compatibility-audit-002/inputs/docs/TZDB_COMPATIBILITY_EVIDENCE.md"
+    }
+  ]
+}

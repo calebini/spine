@@ -4,6 +4,8 @@ This directory contains Spine's normative design and compatibility promises.
 
 Current spec surface:
 
+- [decisions/0006-evidence-bound-timezone-compatibility.md](decisions/0006-evidence-bound-timezone-compatibility.md): accepted logical v1.0.0 automatic per-zone byte-identity admission against trusted authored-release references; no release-pair allowlist or per-upgrade approval; SPINE-062, machine schema/runtime pending
+
 - [people-and-responsibility.md](people-and-responsibility.md): ratified logical v1.0.0 participation/assignment, scoped subject selection, person-filtered reads and role-only notification continuity; [machine companion](../contracts/people-and-responsibility.v1.json), [source-only schemas](../contracts/schemas/people/) and [fixtures](../contracts/people-and-responsibility-fixture-manifest.json) are pending machine-contract review; not implemented
 
 - [facet-schema-revision-readback.md](facet-schema-revision-readback.md): ratified trusted-local exact revision-to-root lookup and immutable definition readback; implemented in runtime 0.10.0/schema 19, no HTTP exposure

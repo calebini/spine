@@ -1,9 +1,28 @@
 # Spine Implementation Plan
 
 Role: Roadmap rationale and delivery history; current task status lives in [BACKLOG.md](BACKLOG.md)
-Last updated: 2026-10-20 (people machine-review acceptance and implementation planning)
+Last updated: 2026-10-22 (automatic timezone compatibility policy; people implementation planning retained)
 
 This is a non-normative delivery plan. The specifications and machine-readable contracts remain authoritative.
+
+Timezone incident planning (2026-10-22): SPINE-062 records the operator's
+2026c-to-2026e resolution failure. The operator selected
+[automatic per-zone byte-identity admission](../specs/decisions/0006-evidence-bound-timezone-compatibility.md):
+retain a trusted authored-release zone reference and admit matching actual bytes
+from any runtime release without a release-pair allowlist or per-upgrade approval.
+Reference Paris/Chicago TZif bytes match across the incident releases; deployed
+provider verification and runtime acceptance remain outstanding. The specification
+now covers baseline trust/retention, canonical pin preservation and diagnostics.
+Codify storage/ingestion and the machine schema before runtime work, and select
+mainline versus a separate 0.6.0/schema-15 backport. This does not replace the people
+delivery sequence or activate the deferred resilience roadmap.
+
+The operator-requested bounded consistency audit completed on 2026-10-22 using
+stable Whetstone 0.1.0/checkpoint `6e19fe3` and the explicitly approved seven-file
+Codex payload. It returned `pass_with_minor_clarification`, with zero blockers or
+majors and one responsibility-matrix wording issue, now corrected. The
+[audit record](TZDB_COMPATIBILITY_AUDIT.md) preserves findings, disposition and
+input hashes; no convergence or runtime acceptance is claimed.
 
 The selected planning task is
 [SPINE-061](BACKLOG.md#spine-061--implement-people-and-responsibility), following

@@ -1,6 +1,7 @@
 # Spine Atomic Schedule Creation
 
 Status: Implemented v2 on current ledger schema 12
+Timezone policy amendment: Decision 0006 v1.0.0 accepted 2026-10-22; automatic byte-identity resolution is not yet implemented
 Scope: One atomic operator-facing command for creating a scheduled event or task with notification policies and optional bounded work materialization
 Created: 2026-08-12
 
@@ -113,6 +114,17 @@ The command creates the item shell, common version `1`, and matching event or ta
   - `{"kind":"system_current"}`.
 
 For `explicit`, the named version MUST be available to the executing runtime and is the persisted version. For `system_current`, the handler reads the exact version reported by the same runtime authority as `system.info.timezone_database_version`, resolves it once before mutation, and persists that string everywhere a local schedule requires it. The directive object remains part of the request semantic facts; the resolved string is part of normalized facts and the receipt.
+
+Under the accepted [Decision 0006](decisions/0006-evidence-bound-timezone-compatibility.md)
+policy, an explicit authored version is also available when the exact zone's actual
+resolver bytes match its trusted authored-release reference. Admission is automatic
+for any runtime release, with no release-pair allowlist or per-upgrade approval.
+Persist the explicit authored version and emit separate substitution diagnostics;
+do not replace it with the runtime version. `system_current` still records the
+actual selected provider release. Trusted reference capture/retention must preserve
+evidence for that authored zone before a later provider upgrade; it must not enroll
+untrusted references or rewrite existing receipts. This amendment is not yet
+implemented and does not alter initial gap/fold rejection or request/receipt shapes.
 
 A fresh command MUST resolve the initial local datetime to exactly one UTC instant. A nonexistent or ambiguous initial local datetime fails closed. Version 2 does not silently choose an offset for the initial anchor. The responsible fields are `scheduled_time.local_date` or `scheduled_time.local_time` after timezone and pinned-data validation.
 

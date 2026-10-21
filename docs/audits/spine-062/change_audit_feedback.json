@@ -1,0 +1,34 @@
+{
+  "draft_hash": "d1dc29974f24dc1f6a2b5303fc6e1dfb6e062d115a42147191502135d188d7b8",
+  "feedback": [
+    {
+      "affected_sections": [
+        "specs/operational-resilience.md \u00a73 Responsibility Matrix",
+        "specs/operational-resilience.md \u00a78.2 Timezone data"
+      ],
+      "authority_impact": null,
+      "baseline_severity": "minor",
+      "claim": "The responsibility matrix still requires exact timezone releases to be available, contradicting the accepted byte-identical substitute strategy.",
+      "determinism_impact": null,
+      "evidence": "Section 3 specifies \u201cExact versions available before affected work runs\u201d for timezone-data installation and release compatibility. Section 8.2 instead permits automatic per-zone byte-identity resolution as one of three deployment strategies, including an unseen runtime release without the authored release installed.",
+      "feedback_id": "fb_001",
+      "in_scope": true,
+      "invariant_violated": null,
+      "issue_fingerprint": "13f9752b484a659f5271391f75000f112ab3ed3455df2650630371a550e107e1",
+      "issue_id": "iss_13f9752b484a659f",
+      "issue_type": "terminology_consistency",
+      "normalized_severity": "minor",
+      "oscillation_key": null,
+      "recommended_change": "Change the matrix boundary to require exact authored-version data or a byte-identical resolver admitted under Decision 0006 before affected work runs.",
+      "rubric_impact": null,
+      "severity_rationale": "This is a localized wording contradiction in the amended policy's deployment requirements. The detailed admission rule is clear, so a small alignment fix suffices."
+    }
+  ],
+  "profile": "consistency",
+  "reviewer": {
+    "model": "gpt-6",
+    "name": "Codex",
+    "version": "1.0"
+  },
+  "round_number": 1
+}

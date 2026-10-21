@@ -1,6 +1,7 @@
 # Spine Schedule-Based Recurrence
 
 Status: Draft v0.4.0; executable v1 contract family implemented
+Timezone policy amendment: Decision 0006 v1.0.0 accepted 2026-10-22; automatic byte-identity resolution is not yet implemented
 Scope: Canonical recurrence-set model, deterministic expansion, occurrence mutation, command alignment, and downstream provenance
 Authority: Normative flexible-recurrence target; runtime conformance requires matching persistence, command, fixture, and implementation declarations
 
@@ -117,7 +118,18 @@ Detail patch objects are normalized by preserving only legal fields, sorting obj
 
 ## 4. Time Semantics
 
-Timezone-bearing recurrence persists an IANA timezone and exact `timezone_database_version`. Unknown zones fail with `invalid_request`, `field=timezone`; unavailable pinned data fails with `environment_failure`, `field=timezone_database_version`. Replay MUST NOT substitute host timezone data.
+Timezone-bearing recurrence persists an IANA timezone and exact `timezone_database_version`. Unknown zones fail with `invalid_request`, `field=timezone`; unavailable pinned data without an admitted byte-identical resolver fails with `environment_failure`, `field=timezone_database_version`. Replay MUST NOT substitute unverified host timezone data or rewrite the authored version.
+
+The accepted [Decision 0006](decisions/0006-evidence-bound-timezone-compatibility.md)
+policy permits automatic resolution with any identifiable runtime release whose
+complete zone bytes match a trusted reference for the authored version and exact
+zone. No release-pair allowlist or per-upgrade approval is needed. The canonical
+version, occurrence identities and provenance remain authored facts; the actual
+resolver is exposed separately in diagnostics. Different bytes or missing trusted
+references fail cross-release admission. This amendment requires the shared
+resolver for gap enumeration and range conversions as well as candidate resolution;
+it leaves gap omission, COUNT and earliest-UTC fold selection unchanged. Current
+runtime still enforces version equality until SPINE-062 is implemented.
 
 Canonical scheduled facts are strings with exactly these encodings: `local_date` uses `YYYY-MM-DD`; `local_instant` uses `YYYY-MM-DDTHH:MM:SS` without offset or fractional seconds; `instant_utc` uses `YYYY-MM-DDTHH:MM:SSZ`. Years use four digits `0001..9999`. All components are zero-padded and MUST form a valid proleptic-Gregorian date and time. Lexicographic ordering is therefore chronological within one time basis. Cross-basis comparison is forbidden.
 

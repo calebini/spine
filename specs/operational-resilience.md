@@ -1,6 +1,6 @@
 # Spine Operational Resilience and Boundedness Contract
 
-Status: Draft v0.1.1; post-audit requirements baseline, not an implementation declaration
+Status: Draft v0.2.0; includes accepted Decision 0006 timezone policy, not an implementation declaration
 Scope: Cross-cutting resource bounds, failure containment, recovery, dependency admission, and operational proof
 Authority: Normative resilience target for Spine runtime, worker, adapter, and host integration
 
@@ -62,7 +62,7 @@ This specification does not:
 | Runtime cadence, ownership, health, readiness, event emission | Tickerd | Versioned capability consumed by Spine |
 | Provider request mapping, idempotency support, outcome classification | Adapter | No hidden retry or evidence store |
 | Process restart, filesystem quota, reserved capacity, external log rotation | Host or supervisor | Cannot redefine Spine lifecycle |
-| Timezone-data installation and release compatibility | Deployment boundary | Exact versions available before affected work runs |
+| Timezone-data installation and release compatibility | Deployment boundary | Exact authored-version data or a byte-identical resolver admitted under Decision 0006 available before affected work runs |
 | Ledger archival or compaction | Future Spine lifecycle contract | Explicit, verified, never inferred from low disk |
 
 Spine MUST declare the exact Tickerd runtime contract or capability family it requires.
@@ -367,11 +367,22 @@ capability id.
 ### 8.2 Timezone data
 
 Every actionable local schedule remains bound to its concrete timezone-database
-version. A deployment MUST either:
+version. A deployment MUST provide one or more of:
 
-- run against an immutable pinned timezone-data release for the ledger; or
-- provide side-by-side resolution for every version still referenced by actionable
-  work and schedules.
+- an immutable pinned timezone-data release for the ledger;
+- side-by-side resolution for every version still referenced by actionable work
+  and schedules; or
+- automatic per-zone byte-identity resolution under
+  [Decision 0006](decisions/0006-evidence-bound-timezone-compatibility.md), using
+  retained trusted references for the exact authored version/zone and the actual
+  candidate TZif bytes. No release-pair registration or per-upgrade approval is
+  required for a match, including for a previously unseen runtime release.
+
+Different bytes or missing trusted references do not permit substitution. An
+upgrade must preserve baseline evidence and original data needed by unmatched
+zones. Authored pins remain unchanged and substitutions are observable. This
+2026-10-22 logical-policy amendment is not yet implemented; it does not declare
+existing deployments conformant or reactivate deferred resilience initiatives.
 
 Installing a new system timezone database MUST NOT silently make old canonical schedule
 facts unresolvable. Deployment admission MUST prove availability through a bounded
@@ -424,8 +435,10 @@ boundary while waiting for later work.
 
 Before the Recovery slice, an accepted architecture decision MUST settle operation-level
 idempotency, ambiguous attempt outcome, work lease ownership/expiry, and operator
-reconciliation. Before the timezone strategy changes, an accepted decision MUST settle
-immutable single-version deployment versus side-by-side timezone bundles.
+reconciliation. Decision 0006 accepts automatic per-zone byte identity as a third
+timezone strategy alongside immutable single-version data and side-by-side bundles.
+Machine schema, baseline provisioning and runtime implementation remain pending;
+this decision does not authorize deployment or unrestricted version substitution.
 
 ## 11. Required Failure and Soak Vectors
 
@@ -477,8 +490,9 @@ of sustained boundedness.
    at the critical threshold without deleting canonical evidence.
 9. WAL growth, telemetry growth, backlog, retry exhaustion, and in-progress age are
    visible through supported operational readback or metrics.
-10. Tickerd and timezone-data compatibility are exact, visible admission facts rather
-    than deployment assumptions.
+10. Tickerd's exact contract match and timezone data's pinned or directly proven
+    byte-identical resolution are visible admission facts rather than deployment
+    assumptions.
 11. Existing transaction, foreign-key, replay, stale-work, provenance, and pre-write
     attempt gates remain intact.
 12. The full failure and soak corpus in Section 11 passes before production conformance

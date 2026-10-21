@@ -1,6 +1,7 @@
 # Spine Deterministic Notification Rendering
 
 Status: Implemented v1 (introduced on schema 9; active on schema 12)
+Timezone policy amendment: Decision 0006 v1.0.0 accepted 2026-10-22; automatic byte-identity resolution is not yet implemented
 Scope: Deterministic, concise, natural-language rendering of ordinary notification-reminder work at attempt start
 Authority: Normative design target for notification prose and its per-attempt evidence; scheduling, work, delivery, and item truth remain owned by their existing contracts
 
@@ -137,9 +138,16 @@ primary location's timezone and never in an adapter-local timezone.
   `timezone_database_version=null`.
 
 The target and `attempted_at_utc` are converted into `display_timezone` before local
-date comparisons. A named timezone conversion MUST use the pinned database version;
-the runtime MUST NOT silently substitute its current system version. Unavailable
-pinned timezone data fails closed.
+date comparisons. A named timezone conversion MUST use the pinned database version
+or a byte-identical resolver admitted under
+[Decision 0006](decisions/0006-evidence-bound-timezone-compatibility.md). The accepted
+policy automatically admits matching complete zone bytes against a trusted
+authored-release reference, without release-pair allowlists or per-upgrade approval.
+The runtime MUST NOT silently substitute its current system version: any admitted
+substitution emits the required diagnostic while canonical input, rendering hashes
+and receipt evidence retain the authored version. Missing trusted references or
+different candidate bytes fail cross-release admission. This policy amendment
+is not yet implemented and does not change existing rendering wire formats.
 
 `today`, `tomorrow`, and `yesterday` compare local calendar dates. They do not mean
 elapsed 24-hour periods. This keeps wording stable across daylight-saving transitions.

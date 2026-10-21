@@ -1,0 +1,22 @@
+{
+  "audit_brief_hash": "d1dc29974f24dc1f6a2b5303fc6e1dfb6e062d115a42147191502135d188d7b8",
+  "audit_manifest_path": "whetstone_runs/tzdb-compatibility-audit-002/change_audit/audit_manifest.json",
+  "boundary_preserved": true,
+  "failure_reason": null,
+  "feedback_counts": {
+    "blocker": 0,
+    "major": 0,
+    "minor": 1,
+    "nit": 0
+  },
+  "generated_at": "2026-10-21T22:43:37.966816+00:00",
+  "in_scope_feedback_ids": [
+    "fb_001"
+  ],
+  "out_of_scope_feedback_ids": [],
+  "profile": "consistency",
+  "recommended_next_action": "manual_patch",
+  "schema_version": "change-audit-report-v1",
+  "source_feedback_path": "whetstone_runs/tzdb-compatibility-audit-002/change_audit/change_audit_feedback.json",
+  "verdict": "pass_with_minor_clarification"
+}
