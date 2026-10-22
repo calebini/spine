@@ -1,5 +1,10 @@
 # Spine Operational Schedule Lifecycle
 
+Timezone compatibility amendment (2026-10-22): exact authored-release resolution
+is augmented by the [timezone compatibility runtime contract](timezone-compatibility.md).
+It admits only verified complete byte-identical zones, preserving authored pins,
+canonical envelopes and identities; this overrides exact-version-only statements below.
+
 Status: Implemented on current schema 12; agenda/cancel v1 and update v2
 Scope: Cross-item agenda readback, atomic whole-schedule mutation, terminal cancellation, and notification-work reconciliation
 Created: 2026-08-16

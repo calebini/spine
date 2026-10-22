@@ -1,5 +1,13 @@
 # Spine Implementation Plan
 
+SPINE-062 implementation (2026-10-22): operator selected two isolated patches,
+mainline 0.10.1/schema 19 and maintenance 0.6.0+tzdb.1/schema 15 from confirmed
+production `a28bdf0e20cdb671e4a3862572d85c952f354056`. Both use the same verified-zone
+resolver, baseline catalog and regression corpus. No schema migration, unrelated
+capability backport or deployment is included. Full repository suites and isolated wheel checks pass;
+see [validation](TZDB_COMPATIBILITY_VALIDATION.md) and [operations](TZDB_COMPATIBILITY_OPERATIONS.md).
+
+
 Role: Roadmap rationale and delivery history; current task status lives in [BACKLOG.md](BACKLOG.md)
 Last updated: 2026-09-19 (independent activity read clean-room validation)
 

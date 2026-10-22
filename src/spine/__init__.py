@@ -2,11 +2,12 @@
 
 __all__ = ["IMPLEMENTED_CONTRACT_VERSIONS", "IMPLEMENTED_LEDGER_SCHEMA_VERSION", "__version__"]
 
-__version__ = "0.6.0"
+__version__ = "0.6.0+tzdb.1"
 
 IMPLEMENTED_LEDGER_SCHEMA_VERSION = 15
 IMPLEMENTED_CONTRACT_VERSIONS = frozenset(
     {
+        "spine.timezone-compatibility.v1",
         "spine.canonical-json.v1",
         "spine.trusted-web-api.v1",
         "spine.trusted-web-api.v2",

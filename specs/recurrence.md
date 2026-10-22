@@ -1,5 +1,10 @@
 # Spine Schedule-Based Recurrence
 
+Timezone compatibility amendment (2026-10-22): exact authored-release resolution
+is augmented by the [timezone compatibility runtime contract](timezone-compatibility.md).
+It admits only verified complete byte-identical zones, preserving authored pins,
+canonical envelopes and identities; this overrides exact-version-only statements below.
+
 Status: Draft v0.4.0; executable v1 contract family implemented
 Scope: Canonical recurrence-set model, deterministic expansion, occurrence mutation, command alignment, and downstream provenance
 Authority: Normative flexible-recurrence target; runtime conformance requires matching persistence, command, fixture, and implementation declarations

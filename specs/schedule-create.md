@@ -1,5 +1,10 @@
 # Spine Atomic Schedule Creation
 
+Timezone compatibility amendment (2026-10-22): exact authored-release resolution
+is augmented by the [timezone compatibility runtime contract](timezone-compatibility.md).
+It admits only verified complete byte-identical zones, preserving authored pins,
+canonical envelopes and identities; this overrides exact-version-only statements below.
+
 Status: Implemented v2 on current ledger schema 12
 Scope: One atomic operator-facing command for creating a scheduled event or task with notification policies and optional bounded work materialization
 Created: 2026-08-12

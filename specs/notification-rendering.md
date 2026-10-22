@@ -1,5 +1,10 @@
 # Spine Deterministic Notification Rendering
 
+Timezone compatibility amendment (2026-10-22): exact authored-release resolution
+is augmented by the [timezone compatibility runtime contract](timezone-compatibility.md).
+It admits only verified complete byte-identical zones, preserving authored pins,
+canonical envelopes and identities; this overrides exact-version-only statements below.
+
 Status: Implemented v1 (introduced on schema 9; active on schema 12)
 Scope: Deterministic, concise, natural-language rendering of ordinary notification-reminder work at attempt start
 Authority: Normative design target for notification prose and its per-attempt evidence; scheduling, work, delivery, and item truth remain owned by their existing contracts

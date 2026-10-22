@@ -88,6 +88,12 @@ Require equal `implemented_ledger_schema_version` and `ledger_schema_version`. B
 
 For `schedule.create`, prefer the request directive `"timezone_database_version":{"kind":"system_current"}`. Spine resolves it once during fresh execution, stores the concrete installed version, and returns that concrete value in receipts and readback. A compatible replay returns the original resolved version even if the host later installs newer timezone data. Operators may instead use `{"kind":"explicit","version":"<exact-version>"}`. Omission is invalid; Spine never chooses timezone data through a hidden default. For lower-level local-time commands that require the concrete string directly, use the value returned by `system.info`. Never copy a version from an example or another machine.
 
+For pinned schedules after a host tzdata upgrade, configure a trusted authored-zone
+baseline catalog as described in [timezone compatibility operations](TZDB_COMPATIBILITY_OPERATIONS.md).
+The runtime automatically accepts byte-identical zone data and logs the actual
+resolver version; it preserves authored pins and rejects missing or mismatched evidence.
+
+
 Before using notification profiles, require `spine.item-archetypes.v1`,
 `spine.notification-profiles.v1`,
 `spine.notification-profile-metadata-update.v1`,

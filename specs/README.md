@@ -4,6 +4,8 @@ This directory contains Spine's normative design and compatibility promises.
 
 Current spec surface:
 
+- [timezone-compatibility.md](timezone-compatibility.md): implemented automatic per-zone byte identity, trusted baseline schema/provisioning and coherent provider capture; no ledger migration
+
 - `independent-activity-reads.md`: proposed independent authorized web activity/occurrence reads, related-context completeness, disclosure-safe availability, compatibility migration, and test matrix; specification only, not implemented (SPINE-015)
 
 - `ledger-instance-identity.md`: implemented schema-14 immutable ledger identity, deterministic migration, bounded validation, system.info v3 and restore semantics

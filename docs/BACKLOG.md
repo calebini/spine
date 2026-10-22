@@ -35,6 +35,24 @@ status labels in the same change. Routine task updates do not change spec author
 
 ## Next work
 
+### SPINE-062 — Preserve timezone resolution across compatible tzdb upgrades
+
+**Status:** Implemented and locally verified — production acceptance pending.
+Operator authorized both runtime patches on 2026-10-22.
+Mainline 0.10.1 retains schema 19; maintenance 0.6.0+tzdb.1 retains schema 15 and is
+based on confirmed production commit `a28bdf0e20cdb671e4a3862572d85c952f354056`.
+The shared resolver and closed baseline catalog implement automatic full-TZif byte
+identity against the original trusted authored version/zone reference, with coherent
+provider capture, immutable provisioning and substitution diagnostics. Pins, receipts,
+identities and ledger schemas are preserved. Full suites pass (mainline: 1117 tests; maintenance: 689 tests); each isolated wheel
+passes 42 focused checks. See [validation evidence](TZDB_COMPATIBILITY_VALIDATION.md).
+See [runtime contract](../specs/timezone-compatibility.md) and
+[operator setup](TZDB_COMPATIBILITY_OPERATIONS.md).
+**Remaining operational acceptance:** Provision authenticated original Ubuntu
+fingerprints and verify both route agendas on a disposable production backup.
+The external agenda wrapper location remains unknown. No production changes made.
+This task does not activate the deferred resilience roadmap.
+
 ### SPINE-015 — Read authorized activities independently of unavailable linked resources
 
 **Current checkpoint:** Spine 0.6.0 HTTP/package/capability integration is committed

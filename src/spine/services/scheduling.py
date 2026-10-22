@@ -7,7 +7,6 @@ from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from typing import Any
-from zoneinfo import ZoneInfo
 
 from spine.commands import CommandContext, handle
 from spine.core.errors import SpineValidationError
@@ -21,6 +20,7 @@ from spine.ledger.notifications import (
     notification_work_stale_reason,
 )
 from spine.ledger.recurrence import load_current_recurrence_set
+from spine.timezones import timezone_for_version
 
 _SCHEDULER_SCAN_MINIMUM = 100
 _SCHEDULER_SCAN_MULTIPLIER = 10
@@ -741,7 +741,7 @@ def _recurrence_source_range(
     basis = str(recurrence["time_basis"])
     if basis == "instant_utc":
         return _utc_text(target_start), _utc_text(target_end)
-    zone = ZoneInfo(str(recurrence["timezone"]))
+    zone = timezone_for_version(str(recurrence["timezone"]), str(recurrence["timezone_database_version"]))
     local_start = target_start.astimezone(zone)
     local_end = target_end.astimezone(zone)
     if basis == "local_date":
