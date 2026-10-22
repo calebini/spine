@@ -1,7 +1,8 @@
 # Decision 0006: Evidence-bound timezone compatibility
 
-Status: Accepted logical policy v1.0.0 — automatic per-zone byte-identity admission;
-machine schema and runtime implementation pending (SPINE-062)
+Status: Accepted logical policy v1.0.0 — implemented by SPINE-062 in runtime
+0.10.1/schema 19 and maintenance 0.6.0+tzdb.1/schema 15.
+Machine contract: [timezone-compatibility.md](../timezone-compatibility.md).
 Date: 2026-10-21
 Accepted policy: 2026-10-22
 
@@ -9,13 +10,13 @@ Accepted policy: 2026-10-22
 
 The operator reports production runtime 0.6.0/schema 15 failing agenda resolution
 after host tzdata changed from 2026c to 2026e. Authored pins remain intact.
-Current mainline also rejects the mismatch in `resolve_local_instant`, recurrence
+The inspected 0.10.0 mainline baseline also rejects the mismatch in `resolve_local_instant`, recurrence
 timezone-context validation, and notification rendering's `_display_zone`.
 Changing only an agenda adapter would leave other resolution paths inconsistent.
 
 The reported incident is distinct from the deferred SPINE-004–007/010 work. This
-decision neither activates those initiatives nor authorizes deployment. Mainline
-is currently runtime 0.10.0/schema 19 with unrelated people-authoring work in
+decision neither activates those initiatives nor authorizes deployment. The inspected mainline baseline
+was runtime 0.10.0/schema 19 with unrelated people-authoring work in
 progress; installing mainline is not a schema-15 hotfix.
 
 ## Accepted policy: automatic per-zone equivalence
@@ -90,13 +91,14 @@ and the applicable reference cannot be established, fail cross-release admission
 do not choose whichever artifact happens to match the new installed bytes. Adding
 another catalog build must not silently replace an existing schedule's baseline.
 Baseline ingestion is a trusted operation, not manual approval of every subsequent
-database release. Its exact storage and ingestion interfaces remain machine-design
-work; no runtime loader or ledger migration is introduced by this specification.
+database release. The [runtime contract](../timezone-compatibility.md) implements one immutable build
+per authored version/zone in a deployment catalog. Multiple builds for the same
+key are rejected; no ledger migration is introduced.
 
-## Candidate machine agreement
+## Machine agreement
 
-Proposed contract identifier: `spine.timezone-compatibility.v1`. Before runtime
-activation, define and validate a closed schema for the trusted baseline catalog.
+Contract identifier: `spine.timezone-compatibility.v1`. The closed schema and trusted
+ingestion interface are defined by [the runtime contract](../timezone-compatibility.md).
 The catalog contains authored-zone references, not approved requested/runtime
 version pairs. It is a resolver trust input, not environment free text or a cache
 automatically populated from the current provider during reads.
@@ -166,8 +168,8 @@ The accepted recurrence and rendering contracts promise pinned-version semantics
 Rendering prohibits silent system-version substitution. The 2026-10-22 policy
 amendments to recurrence, schedule creation/operations, rendering and the draft
 operational-resilience Sections 8.2/10 recognize this equivalent-resolution path
-and the required diagnostic. Their existing runtime/contract declarations do not
-claim that it is implemented. Immutable pinned and side-by-side deployments remain
+and the required diagnostic. The runtime contract declares implementation in the two maintenance lines; existing
+canonical envelopes and identity contracts remain unchanged. Immutable pinned and side-by-side deployments remain
 valid strategies; this decision does not claim side-by-side support is implemented.
 
 Version the runtime independently on mainline and any production backport. No ledger
@@ -223,12 +225,12 @@ agenda reads must not be rendered as a successful agenda or successful cron run.
 Test those cases against the actual wrapper; do not add a replacement wrapper to
 Spine without identifying the deployed integration.
 
-## Remaining implementation choices
+## Remaining deployment work
 
-- Codify baseline storage, trusted ingestion and closed machine schema against the
-  accepted automatic-admission policy; define bounded resolver/cache diagnostics.
-- Select mainline only or mainline plus a separately verified production backport.
-- Identify the deployed agenda wrapper and the exact production runtime source.
+- Authenticate and provision the original production build fingerprints.
+- Verify both route agendas on an approved disposable production backup.
+- Identify and correct the deployed agenda wrapper. The operator confirmed production
+  source `a28bdf0e20cdb671e4a3862572d85c952f354056`; both patch lines are selected.
 
 Side-by-side immutable bundles remain an alternative for zones that differ and for
 stronger historical reproducibility. Restoring access to the exact authored release

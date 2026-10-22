@@ -9,7 +9,6 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from typing import Any
-from zoneinfo import ZoneInfo
 
 from spine.commands.core import (
     _agenda_ordering_tuple,
@@ -23,6 +22,7 @@ from spine.core.errors import SpineValidationError
 from spine.core.occurrences import expand_recurrence_set
 from spine.core.schedule import validate_range, validate_timezone_context
 from spine.ledger.recurrence import load_current_recurrence_set
+from spine.timezones import timezone_for_version
 from spine.web.read_context import ReadSnapshot
 from spine.web.read_contracts import READ_API, read_error
 from spine.web.read_projection import UNAVAILABLE_TIME, candidate_ids, core, project_anchor
@@ -151,7 +151,8 @@ def _entry(snapshot, activity, occurrence, all_day, start, end, request):
         if end_value is None:
             raise ValueError("unresolved end")
         end_at = end_value["start_at_utc"]
-    view = datetime.fromisoformat(resolved["start_at_utc"]).astimezone(ZoneInfo(request["timezone"]))
+    zone = timezone_for_version(request["timezone"], request["timezone_database_version"])
+    view = datetime.fromisoformat(resolved["start_at_utc"]).astimezone(zone)
     return {
         "activity": activity,
         "occurrence": occurrence,

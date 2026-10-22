@@ -1,7 +1,7 @@
 # Spine Schedule-Based Recurrence
 
 Status: Draft v0.4.0; executable v1 contract family implemented
-Timezone policy amendment: Decision 0006 v1.0.0 accepted 2026-10-22; automatic byte-identity resolution is not yet implemented
+Timezone policy amendment: Decision 0006 v1.0.0 accepted 2026-10-22; automatic byte-identity resolution is implemented by the timezone-compatibility runtime contract
 Scope: Canonical recurrence-set model, deterministic expansion, occurrence mutation, command alignment, and downstream provenance
 Authority: Normative flexible-recurrence target; runtime conformance requires matching persistence, command, fixture, and implementation declarations
 
@@ -128,8 +128,7 @@ version, occurrence identities and provenance remain authored facts; the actual
 resolver is exposed separately in diagnostics. Different bytes or missing trusted
 references fail cross-release admission. This amendment requires the shared
 resolver for gap enumeration and range conversions as well as candidate resolution;
-it leaves gap omission, COUNT and earliest-UTC fold selection unchanged. Current
-runtime still enforces version equality until SPINE-062 is implemented.
+it leaves gap omission, COUNT and earliest-UTC fold selection unchanged. The runtime implementation is specified in [timezone compatibility](timezone-compatibility.md).
 
 Canonical scheduled facts are strings with exactly these encodings: `local_date` uses `YYYY-MM-DD`; `local_instant` uses `YYYY-MM-DDTHH:MM:SS` without offset or fractional seconds; `instant_utc` uses `YYYY-MM-DDTHH:MM:SSZ`. Years use four digits `0001..9999`. All components are zero-padded and MUST form a valid proleptic-Gregorian date and time. Lexicographic ordering is therefore chronological within one time basis. Cross-basis comparison is forbidden.
 

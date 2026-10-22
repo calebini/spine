@@ -9,11 +9,12 @@ from dataclasses import dataclass
 from datetime import UTC, date, datetime, time, timedelta
 from functools import lru_cache
 from math import gcd
-from pathlib import Path
 from typing import Any, NoReturn
-from zoneinfo import TZPATH, ZoneInfo, ZoneInfoNotFoundError
+from zoneinfo import ZoneInfo
 
 from spine.core.errors import SpineValidationError
+from spine.timezones import resolve_timezone, timezone_for_version
+from spine.timezones import system_timezone_database_version as system_timezone_database_version
 
 RECURRENCE_CONTRACT_VERSION = "spine.recurrence.contract.v1"
 RECURRENCE_NORMALIZATION_VERSION = "spine.recurrence.normalization.v1"
@@ -260,6 +261,7 @@ def expand_rule(
         end=seek_bound,
         time_basis=time_basis,
         timezone=timezone,
+        timezone_database_version=timezone_database_version,
     )
     if normalized.count is not None and local_index >= normalized.count:
         return ExpandedRule(candidates=(), omitted_local_candidates=())
@@ -320,6 +322,7 @@ def _valid_candidate_count_between(
     end: str,
     time_basis: str,
     timezone: str | None,
+    timezone_database_version: str | None,
 ) -> int:
     """Count prior rule candidates without walking prior recurrence periods."""
 
@@ -328,9 +331,9 @@ def _valid_candidate_count_between(
     nominal = _raw_nominal_count_before(rule, end, time_basis) - _raw_nominal_count_before(rule, start, time_basis)
     if time_basis != "local_instant":
         return nominal
-    assert timezone is not None
+    assert timezone is not None and timezone_database_version is not None
     omitted = 0
-    for gap_start, gap_end in _nonexistent_local_ranges(timezone, start=start, end=end):
+    for gap_start, gap_end in _nonexistent_local_ranges(timezone, timezone_database_version, start=start, end=end):
         overlap_start = max(start, gap_start)
         overlap_end = min(end, gap_end)
         if overlap_start < overlap_end:
@@ -445,9 +448,10 @@ def _rule_time_basis(seed: str) -> str:
     return "local_instant" if "T" in seed else "local_date"
 
 
-def _nonexistent_local_ranges(timezone: str, *, start: str, end: str) -> tuple[tuple[str, str], ...]:
-    zone = _timezone(timezone)
-    explicit, has_future_rules = _tzif_transition_data(timezone)
+def _nonexistent_local_ranges(timezone: str, timezone_database_version: str, *, start: str, end: str) -> tuple[tuple[str, str], ...]:
+    captured = resolve_timezone(timezone, timezone_database_version)
+    zone = captured.zone
+    explicit, has_future_rules = _parse_tzif_transition_data(captured.data)
     if not explicit and not has_future_rules:
         return ()
     parsed_start = parse_scheduled_fact(start, time_basis="local_instant", field="start")
@@ -482,20 +486,6 @@ def _nonexistent_local_ranges(timezone: str, *, start: str, end: str) -> tuple[t
 
 
 @lru_cache(maxsize=256)
-def _tzif_transition_data(timezone: str) -> tuple[tuple[int, ...], bool]:
-    for root in TZPATH:
-        path = Path(root) / timezone
-        try:
-            data = path.read_bytes()
-        except OSError:
-            continue
-        return _parse_tzif_transition_data(data)
-    # ZoneInfo may have resolved the name from a package resource. In that
-    # uncommon environment, bounded probing remains exact for installed
-    # future rules and avoids making persistence depend on package internals.
-    return (), True
-
-
 def _parse_tzif_transition_data(data: bytes) -> tuple[tuple[int, ...], bool]:
     def header(offset: int) -> tuple[int, tuple[int, int, int, int, int, int], int]:
         if data[offset : offset + 4] != b"TZif" or len(data) < offset + 44:
@@ -630,13 +620,7 @@ def resolve_local_instant(
 
     parsed = parse_scheduled_fact(local_datetime, time_basis="local_instant", field="local_datetime")
     assert isinstance(parsed, datetime)
-    zone = _timezone(timezone)
-    installed_version = system_timezone_database_version()
-    if installed_version != timezone_database_version:
-        raise SpineValidationError(
-            "environment_failure:timezone_database_version",
-            f"requested timezone database {timezone_database_version!r}; installed {installed_version!r}",
-        )
+    zone = timezone_for_version(timezone, timezone_database_version)
 
     valid: dict[datetime, datetime] = {}
     for fold in (0, 1):
@@ -664,24 +648,6 @@ def resolve_local_instant(
         local_datetime=local_datetime,
         utc_instant=selected_utc.strftime("%Y-%m-%dT%H:%M:%SZ"),
         offset_seconds=str(int(offset.total_seconds())),
-    )
-
-
-@lru_cache(maxsize=1)
-def system_timezone_database_version() -> str:
-    """Return the exact IANA version advertised by the installed TZif database."""
-
-    for root in TZPATH:
-        version_file = Path(root) / "tzdata.zi"
-        try:
-            first_line = version_file.read_text(encoding="utf-8").splitlines()[0]
-        except (OSError, IndexError, UnicodeError):
-            continue
-        if first_line.startswith("# version "):
-            return first_line.removeprefix("# version ").strip()
-    raise SpineValidationError(
-        "environment_failure:timezone_database_version",
-        "installed timezone database does not expose an exact IANA version",
     )
 
 
@@ -909,20 +875,7 @@ def _validate_timezone_context(
         _invalid("timezone", "local recurrence requires timezone")
     if not isinstance(timezone_database_version, str) or not timezone_database_version:
         _invalid("timezone_database_version", "local recurrence requires timezone database version")
-    _timezone(timezone)
-    installed = system_timezone_database_version()
-    if installed != timezone_database_version:
-        raise SpineValidationError(
-            "environment_failure:timezone_database_version",
-            f"requested timezone database {timezone_database_version!r}; installed {installed!r}",
-        )
-
-
-def _timezone(value: str) -> ZoneInfo:
-    try:
-        return ZoneInfo(value)
-    except ZoneInfoNotFoundError as exc:
-        raise SpineValidationError("invalid_request:timezone", f"unknown IANA timezone: {value}") from exc
+    timezone_for_version(timezone, timezone_database_version)
 
 
 def _require_time_basis(value: str) -> None:

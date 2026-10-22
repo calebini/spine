@@ -367,7 +367,7 @@ entry = COMMAND_RUNTIME_CONTRACT_REGISTRY['facet_schema.revision.show']
 print(json.dumps({'version': __version__, 'schema': IMPLEMENTED_LEDGER_SCHEMA_VERSION,
                  'requirements': entry.required_contract_versions, 'files': sorted(pins['files'])}))
 """))
-            self.assertEqual((facts["version"], facts["schema"]), ("0.10.0", 19))
+            self.assertEqual((facts["version"], facts["schema"]), ("0.10.1", 19))
             self.assertEqual(facts["requirements"], list(COMMAND_RUNTIME_CONTRACT_REGISTRY[COMMAND].required_contract_versions))
             self.assertEqual(set(facts["files"]), {
                 "facet-schema-revision-readback.v1.json",

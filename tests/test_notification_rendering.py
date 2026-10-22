@@ -12,7 +12,7 @@ from spine.core.notification_rendering import render_notification
 class NotificationRenderingTests(unittest.TestCase):
     def test_golf_examples_use_natural_deterministic_phrases(self) -> None:
         with patch(
-            "spine.core.notification_rendering.system_timezone_database_version",
+            "spine.timezones._version",
             return_value="2026a",
         ):
             tomorrow = render_notification(
@@ -57,7 +57,7 @@ class NotificationRenderingTests(unittest.TestCase):
         task = render_notification({**self._utc_source(3600), "item_type": "task", "anchor_role": "task_due"})
         self.assertEqual(task.body_text, "Reminder: Tee time is due in 1 hour")
         with patch(
-            "spine.core.notification_rendering.system_timezone_database_version",
+            "spine.timezones._version",
             return_value="2026a",
         ):
             local_date = render_notification(
@@ -119,7 +119,7 @@ class NotificationRenderingTests(unittest.TestCase):
     def test_unavailable_timezone_and_oversized_output_fail_closed(self) -> None:
         with (
             patch(
-                "spine.core.notification_rendering.system_timezone_database_version",
+                "spine.timezones._version",
                 return_value="2026b",
             ),
             self.assertRaisesRegex(SpineValidationError, "notification_rendering_timezone_database_unavailable"),

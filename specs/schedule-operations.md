@@ -1,7 +1,7 @@
 # Spine Operational Schedule Lifecycle
 
 Status: Implemented on current schema 12; agenda/cancel v1 and update v2
-Timezone policy amendment: Decision 0006 v1.0.0 accepted 2026-10-22; automatic byte-identity resolution is not yet implemented
+Timezone policy amendment: Decision 0006 v1.0.0 accepted 2026-10-22; automatic byte-identity resolution is implemented by the timezone-compatibility runtime contract
 Scope: Cross-item agenda readback, atomic whole-schedule mutation, terminal cancellation, and notification-work reconciliation
 Created: 2026-08-16
 
@@ -117,7 +117,7 @@ a release-pair allowlist or per-upgrade approval. Keep authored pins unchanged a
 expose the runtime substitution in diagnostics. Apply the shared decision before
 range conversion or expansion, including update reconciliation. Unmatched data
 or missing trusted references still fail cross-release admission. This amendment
-is not yet implemented; it neither changes agenda response/cursor schemas nor
+is implemented by [timezone compatibility](timezone-compatibility.md); it neither changes agenda response/cursor schemas nor
 authorizes silent omission or whole-agenda failure isolation.
 
 Items without a primary scheduled anchor are omitted. When diagnostics are requested, each omission emits `agenda_item_unscheduled` with `item_id` and `field=primary_schedule`. Other closed agenda diagnostics are `agenda_recurrence_candidate_omitted` with `field=recurrence` and `agenda_terminal_excluded` with `field=detail_status`. Every diagnostic requires `field`. Diagnostics are ordered by code, item ID, optional occurrence key, then field, with an absent occurrence key sorting before a present value.
