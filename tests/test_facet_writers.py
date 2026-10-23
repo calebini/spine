@@ -17,6 +17,7 @@ from tests.facet_storage_support import seeded_snapshot
 ROOT = Path(__file__).parents[1]
 INVENTORY = json.loads((ROOT / "src/spine/ledger/facet_writer_inventory.v1.json").read_text())
 CASES = [
+    ("test_people_authoring", "PeopleAuthoringTests", "test_changed_replacement_one_version_preserves_history_and_other_roles"),
     ("test_agent_command_contract_mvp", "AgentCommandContractMvpTests", "test_event_and_task_create_show_list_update_and_replay"),
     ("test_agent_command_contract_mvp", "AgentCommandContractMvpTests", "test_event_reschedule_and_lifecycle_archive_immutability"),
     ("test_agent_command_contract_mvp", "AgentCommandContractMvpTests", "test_task_complete_cancel_duplicate_and_dry_run_no_persistence"),

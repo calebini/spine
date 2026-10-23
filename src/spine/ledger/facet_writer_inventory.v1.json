@@ -21,6 +21,13 @@
   ],
   "producers": [
     {
+      "producer_key": "src/spine/ledger/people_authoring.py:replace_people",
+      "entrypoint": "private people replacement (outer command transaction required)",
+      "allocation_calls": ["create_item_version_from_draft"],
+      "finalizer": "spine.ledger.facets.finalize",
+      "test_ids": ["tests/test_people_authoring.py::PeopleAuthoringTests::test_changed_replacement_one_version_preserves_history_and_other_roles"]
+    },
+    {
       "producer_key": "src/spine/commands/facets.py:item_write",
       "entrypoint": "item.facets.update",
       "allocation_calls": ["create_item_version_from_draft"],

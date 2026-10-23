@@ -1,7 +1,7 @@
 # Spine Implementation Plan
 
 Role: Roadmap rationale and delivery history; current task status lives in [BACKLOG.md](BACKLOG.md)
-Last updated: 2026-10-22 (automatic timezone compatibility policy; people implementation planning retained)
+Last updated: 2026-10-23 (private people transactional/continuity prerequisite; timezone work separate)
 
 This is a non-normative delivery plan. The specifications and machine-readable contracts remain authoritative.
 
@@ -207,11 +207,82 @@ whole-feature PR-01–16 obligations stay pending.
 including the plan/acceptance notes. All 112 selected tests passed again in
 3.980 seconds; focused Ruff, new-module strict typing and diff hygiene passed.
 The unrelated pre-existing agent guidance remains outside this checkpoint. Next
-is selection of S1b transactional/continuity implementation.
+is S1b transactional/continuity implementation, explicitly authorized below.
 No separate background implementation job is running or required to preserve these
 files. No external review, migration, ledger installation, push or deployment
 occurred. This document is the shared durable plan; temporary thread progress does
 not create a second authority.
+
+**S1b implementation in progress (2026-10-21):** The operator explicitly
+authorized this slice, including repeated confirmation to begin; no additional
+start approval is required. `ledger/people_authoring.py` now contains a private
+role-only successor primitive using the existing CAS draft writer inside an
+already-owned outer command transaction. It validates lifecycle/version/patch,
+delegates fresh-addition admission through a mandatory caller callback, detects
+no-op before allocation, preserves unmanaged roles, and verifies deterministic
+replacement rows. Its separate role-edge check reuses strict unchanged-fact and
+policy-bijection comparison without relaxing facet-only role equality; it adds
+facet snapshot and policy-presentation meaning checks. The allocator inventory
+and existing empty/eight-facet producer regression now include this path.
+
+This is not a new public command or complete S1b acceptance. Canonical command
+receipt/replay and protected admission handlers, the worker/scheduler per-edge
+classification and complete continuity state/race matrix remain unfinished.
+Tests exercise real outer rollback, including a receipt inserted by a test caller;
+that does not claim a production people receipt handler or public dry-run path.
+Existing public capabilities, version/schema declarations and frozen contracts
+are unchanged. No commit, push, migration, deployment or operator-ledger access
+is authorized by this implementation step. Spine Packs work is paused separately;
+there is no hidden background implementation job.
+
+**S1b first-increment verification:** 12 new authoring tests and affected existing
+people, item/transaction, schedule/continuity contracts, facet writer inventory
+and rendering-storage regressions pass together: **185 tests, 29.548 seconds**.
+Focused Ruff and strict mypy on the new source module pass. This is selected
+regression evidence, not the full suite or whole-feature/public qualification.
+
+**S1b completion work (2026-10-23):** The operator confirmed production is stable
+and requested resuming the people sequence. The private writer now has additional
+outer-rollback coverage for deferred foreign keys, finalizer failure, capacity
+overflow and a lost-version race. It still delegates fresh-reference admission to
+its caller; command receipts/replay and public dry-run envelopes belong to S1c.
+
+The shared policy resolver used by worker freshness and scheduler reconciliation
+now rechecks declared people edges using existing version-bound audit facts,
+deterministic managed IDs, exact historical policies and a complete policy bijection.
+Mixed facet/presentation edges use their own proof: facets retain role/presentation
+equality; presentation-only edits retain role/facet equality. Existing indexed audit
+IDs/receipt facts select those owners; no proof table or durable cache is added.
+Ancestry is bounded at 100 item-version edges, including skipped-version gaps;
+invalid/over-capacity evidence fails closed without work cancellation or rebinding.
+Ordinary legacy edits retain their existing reconciliation path. Exact-version
+policy capture replaces an incorrect implicit use of the current policy set when
+reconstructing historical proofs. Existing facet-only equality remains strict.
+
+Runtime tests cover scheduler no-op planning, unchanged work/attempt rows, mixed
+role/facet/presentation history, intermediate drift, no-op IDs, start/retry/terminal
+retention, independently stale routes, follow-source invalidation, and the ancestry
+boundary. The initial full-suite run exposed an unnecessary facet-content read on
+revoked-rendering fallback; classification was corrected to avoid content reads
+on legacy paths, and that existing disclosure regression passes again.
+
+**Current verification:** 247 selected tests passed before the final read-order
+correction; afterward 39 focused people/lineage/revocation checks pass. Focused
+Ruff, strict typing of the new module and diff hygiene pass. The corrected full-suite
+rerun passes: **1,102 tests, one skipped, 166.853 seconds**, including all 24 private
+authoring/continuity tests. Checking both modified shared modules reports one pre-existing typing
+error on the unchanged `_rendering_pending` access in notifications.py; no unrelated
+typing cleanup or all-module typing pass is claimed.
+
+This finishes the verified private S1b prerequisite, not the
+complete public feature or full work-state/concurrency qualification. S1c next owns
+actual handlers, fresh/replay admission, receipts/dry-run and atomic scheduling v4
+integration; Slice 2 owns directory/label disclosure; Slice 3 retains the full
+state/race matrix. PR-01–16 are not globally closed. Public selectors, package
+capabilities, runtime/schema versions and frozen wire schemas remain unchanged.
+No operator ledger, new migration, real delivery, external audit, push or deployment.
+The operator selected checkpointing this completed step before S1c. Keep the separate
+pre-existing `AGENTS.md` amendment outside the cohesive S1b commit.
 
 The preceding bounded delivery is
 [SPINE-058](BACKLOG.md#spine-058--deliver-trusted-local-facet-revision-readback):

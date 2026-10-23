@@ -1,6 +1,6 @@
 # Spine Backlog
 
-Last updated: 2026-10-22
+Last updated: 2026-10-23
 
 This is the single work queue for Spine development. The
 [implementation plan](IMPLEMENTATION_PLAN.md) explains roadmap direction and delivery
@@ -74,8 +74,8 @@ concrete incident does not reactivate deferred SPINE-004–007/010 initiatives.
 
 ### SPINE-061 — Implement people and responsibility
 
-**Status:** In progress — private S1a foundation implemented and locally verified
-on 2026-10-20; no command/capability activation. The operator accepted the completed A/B/C
+**Status:** In progress — private S1a and S1b foundations implemented and locally
+verified (S1b completed 2026-10-23); no command/capability activation. The operator accepted the completed A/B/C
 reviews and verified corrections as sufficient to close the machine-contract
 review prerequisite and move into implementation planning. This is a bounded
 acceptance of the review evidence, not an independent whole-bundle re-audit,
@@ -273,8 +273,56 @@ strict typing for the two new modules and diff hygiene clean. The separate
 pre-existing `AGENTS.md` launcher guidance is excluded. This checkpoint does not
 authorize a push, public activation, migration or the next implementation slice.
 
-**Next:** Select S1b transactional writes and its role-only continuity prerequisite
-under the existing plan. Keep capability/package activation gated on complete
+**S1b started (2026-10-21):** The operator authorized transactional implementation;
+this is now actual source work, not a queued job. A private outer-transaction-only
+role writer uses the existing CAS allocator, deterministic managed rows, no-op
+detection and mandatory fresh-addition admission callback. A separate role-only
+proof preserves strict facet equality and checks unchanged facets, policy meaning,
+immediate policy bijection and presentations. The writer inventory and existing
+empty/eight-facet producer tests include the new path. No public commands are wired.
+Disposable-ledger tests exercise replacement/history, unmanaged-role retention,
+ineligible retained references, lifecycle/stale refusal and rollback after policy,
+audit and test-caller receipt writes. Repeated event role edits preserve stored
+facets, eligible reminder work and attempt history. Full worker/scheduler edge
+classification, command receipt/replay/admission integration and the remaining
+continuity matrix are not yet complete. Changes remain local and uncommitted.
+
+**S1b first-increment checks:** 185 selected tests pass (29.548 seconds), including
+12 new private authoring tests and existing writer/rendering-storage regressions.
+Focused Ruff and strict typing of the new module pass. No full-suite or public
+acceptance claim is made.
+
+**S1b resumed (2026-10-23):** Operator confirmed production is stable and selected
+continuing people implementation. Finish the private transactional/continuity seam
+and verify before checkpointing; keep timezone compatibility separate. No public
+activation or deployment. Existing working-tree changes are preserved.
+
+**S1b verification checkpoint (2026-10-23):** The private transaction/continuity
+prerequisite is implemented and verified. The shared worker/
+scheduler policy resolver now validates people-only edges and mixed facet/presentation
+edges under distinct unchanged-fact proofs, with exact historical policy capture,
+deterministic IDs, policy bijection and a 100-version ancestry bound. Unsafe/skipped
+people edges or capacity failure refuse without cancellation or work/attempt rewrites.
+Existing ordinary mutations keep their owning reconciliation rules. The tests now
+include actual outer rollback/finalization, scheduler no-op/read-only behavior,
+intermediate-history drift, mixed proofs, work states, route staleness and follow-source
+freshness. No durable proof table/cache or schema change was introduced.
+247 selected tests passed before a full-suite regression revealed needless facet
+reads on revoked-rendering fallback. That classification read was removed; all 39
+focused people/lineage/revocation tests pass, as do Ruff, new-module strict mypy
+and diff hygiene. The corrected full suite passes: **1,102 tests, one skipped,
+166.853 seconds**. The shared-module typing check has
+one unchanged pre-existing `_rendering_pending` diagnostic; it is not hidden as a pass.
+The original 12 authoring tests plus 12 added transaction/continuity checks are
+included in that full run. Public command wiring, actual people receipt/replay/admission and dry-run handlers
+remain S1c work; full protected disclosure and race matrices remain later slices.
+
+**S1b checkpoint:** The operator selected finishing/checkpointing S1b before S1c.
+Checkpoint the eight cohesive implementation/test/tracking files; preserve the
+separate pre-existing `AGENTS.md` edit. No push or public activation.
+
+**Next:** Proceed to S1c handlers
+under the selected sequence. Keep capability/package activation gated on complete
 applicable runtime evidence. No external review, push, migration, operator-ledger
 access or deployment occurred.
 

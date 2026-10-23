@@ -7,7 +7,7 @@ import sqlite3
 from typing import Any
 
 from spine.core.errors import SpineValidationError
-from spine.ledger.notifications import load_current_notification_policies
+from spine.ledger.notifications import _load_policy
 
 POLICY_FIELDS = (
     "notification_intent_id",
@@ -78,7 +78,12 @@ def capture(db: sqlite3.Connection, item_id: str, version: int) -> dict[str, Any
     ]
     if len(proof["profile_policies"]) > 100:
         raise SpineValidationError("environment_failure:capacity", "facet continuity capacity exceeded")
-    policies = load_current_notification_policies(db, item_id=item_id)
+    # The proof may be reconstructed after later item versions exist. Never
+    # substitute the current policy set for the exact historical edge endpoint.
+    policies = [_load_policy(db, row) for row in db.execute(
+        "SELECT * FROM notification_policies WHERE item_id=? AND version=? ORDER BY policy_id LIMIT 101",
+        (item_id, version),
+    )]
     if len(policies) > 100:
         raise SpineValidationError("environment_failure:capacity", "facet continuity capacity exceeded")
     proof["policies"] = [

@@ -32,6 +32,8 @@ class NotificationPolicyResolver:
         self.policies = policies
         self._history: dict[str, Mapping[str, Any] | None] = {}
         self._resolved: dict[str, Mapping[str, object] | None] = {}
+        self._verified_edges: dict[tuple[str, int, int], str] = {}
+        self._checked_copy_edges: set[tuple[str, int, int]] = set()
 
     def _load(self, policy_id: str) -> Mapping[str, Any] | None:
         if policy_id not in self._history:
@@ -56,17 +58,47 @@ class NotificationPolicyResolver:
                 identity = str(policy["notification_policy_id"])
                 version = int(str(policy["item_version"]))
                 source = policy.get("source_notification_policy_id")
+                edges = 0
+                lineage = []
                 while identity != policy_id and version > original["version"] and source is not None:
+                    if edges >= 100:
+                        raise SpineValidationError("environment_failure:capacity", "notification policy ancestry capacity exceeded")
                     predecessor = self._load(str(source))
                     if (predecessor is None
                             or predecessor["item_id"] != original["item_id"]
                             or predecessor["notification_intent_id"] != original["notification_intent_id"]
                             or predecessor["version"] >= version):
                         raise SpineValidationError("environment_failure:notification_policy_id", "invalid notification policy lineage")
+                    span = version - int(predecessor["version"])
+                    if edges + span > 100:
+                        raise SpineValidationError("environment_failure:capacity", "notification policy ancestry capacity exceeded")
+                    edge = (str(original["item_id"]), int(predecessor["version"]), version)
+                    if edge not in self._verified_edges:
+                        from spine.ledger.people_authoring import verify_retained_version_edge
+
+                        # Legacy ancestry may skip versions without policies. It
+                        # must not jump over a declared people-preservation edge.
+                        for skipped in range(edge[1] + 1, version):
+                            if verify_retained_version_edge(self.connection, item_id=edge[0],
+                                    previous_version=skipped - 1, version=skipped) == 'people':
+                                raise SpineValidationError("environment_failure:people", "policy ancestry skips a people edge")
+                        self._verified_edges[edge] = verify_retained_version_edge(
+                            self.connection, item_id=edge[0], previous_version=edge[1], version=edge[2],
+                        )
+                    lineage.append(edge)
                     identity = str(predecessor["policy_id"])
                     version = predecessor["version"]
                     source = predecessor["source_notification_policy_id"]
+                    edges += span
                 if identity == policy_id:
+                    if any(self._verified_edges[e] == 'people' for e in lineage):
+                        for edge in lineage:
+                            if self._verified_edges[edge] in {'facets', 'presentations'} and edge not in self._checked_copy_edges:
+                                from spine.ledger.people_authoring import verify_retained_version_edge
+
+                                verify_retained_version_edge(self.connection, item_id=edge[0],
+                                    previous_version=edge[1], version=edge[2], verify_copy_edge=True)
+                                self._checked_copy_edges.add(edge)
                     if match is not None:
                         raise SpineValidationError("environment_failure:notification_policy_id", "ambiguous notification policy lineage")
                     match = policy
