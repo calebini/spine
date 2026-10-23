@@ -1,7 +1,7 @@
 # Spine Implementation Plan
 
 Role: Roadmap rationale and delivery history; current task status lives in [BACKLOG.md](BACKLOG.md)
-Last updated: 2026-10-23 (private local people handlers and scheduling v4; timezone work separate)
+Last updated: 2026-10-24 (S1d private people checkpoint; timezone work separate)
 
 This is a non-normative delivery plan. The specifications and machine-readable contracts remain authoritative.
 
@@ -331,6 +331,44 @@ covered by the 26-test focused rerun. This is the verified private local S1c
 increment; protected admission/read acceptance remains explicitly pending.
 S1d must reconcile remaining PR obligations rather than claim whole-family closure.
 No audit, commit, push, operator ledger, send, migration or deployment.
+
+**S1c checkpoint and S1d (2026-10-23):** At the operator's request, S1c was
+committed as `d050ca3`, excluding the pre-existing `AGENTS.md` edit. S1d then ran
+the actual writer/handler parity work, not a new external review. The existing
+25-producer inventory remains authoritative and now links the people evidence;
+there is no new allocator or parallel people inventory. A runtime observer exercises
+each producer and validates complete role copies/replacements, old-version row
+immutability and successful transaction completion. Selected legacy cases carry
+active/inactive fixtures for all five roles to avoid empty-set proofs.
+
+That work reproduced a missed S1c identity rule: omitted roles used legacy
+`prior-id-vN` IDs instead of the reviewed command-derived copy path. An explicit
+private draft operand now opts the new people/scheduling-v4 paths into canonical
+copy IDs. Legacy writers keep their default identities; neither old rows nor
+no-op IDs are rewritten. Missing/unsupported owning command identity refuses
+before allocation. The logical spec's inaccurate "existing" wording was clarified
+without changing hash domains, paths, schemas or compatibility. Exact regressions
+cover standalone unmanaged-role copies, v4 omission and legacy-default preservation.
+
+The [runtime evidence map](PEOPLE_RUNTIME_EVIDENCE.md) separates local evidence
+from remaining PR-01–16 dependencies. S1d additionally verifies that real adopted
+ownership, access state, membership, delivery routes, work and attempts do not
+change when people change, and that active agents/accountless people can be
+selected without account provisioning. No whole PR obligation, protected runtime
+or complete Slice 1 acceptance is claimed. Protected owner-scope admission and
+replay/label permissions remain explicit Slice 2 dependencies; full work/race
+and installed/public parity remain Slices 3/4.
+
+S1d's selected regression run passes **198 tests, 41.860 seconds**. Focused Ruff,
+strict typing of the six touched runtime owners and all 214 local link targets in
+the affected specifications/tracking/evidence documents pass. Full regression:
+**1,133 tests, one skipped, 186.307 seconds; passed**. The private S1d increment is
+verified; it does not close every Slice 1 acceptance item or any whole-family PR
+obligation. On 2026-10-24 the operator authorized its focused checkpoint. All 31
+people command/writer-parity tests, focused Ruff, strict typing of six runtime
+owners and staged diff hygiene were rechecked. Keep the separate `AGENTS.md` edit
+outside the commit. Public activation, push and deployment remain unauthorized.
+Next planned delivery is Slice 2; this checkpoint does not start it.
 
 The preceding bounded delivery is
 [SPINE-058](BACKLOG.md#spine-058--deliver-trusted-local-facet-revision-readback):

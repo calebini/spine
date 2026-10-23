@@ -231,6 +231,7 @@ def replace_people(
         subject_roles=tuple(ItemSubjectRoleInput(subject_id=r.subject_id, role=r.role,
             status=r.status, item_subject_role_id=r.item_subject_role_id) for r in rows),
         subject_role_replacement_roles=(role,), audit_action='item_people_updated',
+        subject_role_copy_command='item.people.update',
         reason_code='item_people_updated',
     ), supporting_command_id=command_id)
     result = read_people_snapshot(db, item_id=item_id)

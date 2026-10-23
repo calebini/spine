@@ -254,6 +254,29 @@ class PeopleCommandsTests(_PeopleCommandSupport, unittest.TestCase):
         self.assertEqual(people_candidate.semantic_facts(request), vector['preimage'])
         self.assertEqual(hash_canonical_json(people_candidate.semantic_facts(request)), vector['sha256'])
 
+    def test_standalone_copy_forward_ids_are_canonical_for_every_omitted_role(self):
+        self.task(tuple(ItemSubjectRoleInput(subject_id=f's{i}', role=role, item_subject_role_id=f'prior-{role}',
+            status='inactive' if role == 'watcher' else 'active')
+            for i, role in enumerate(('owner', 'participant', 'watcher', 'recipient'), 3)))
+        result = self.run_command('item.people.update', self.request(people={'assignees': ['s1']}))
+        rows = self.db.execute("SELECT * FROM item_subject_roles WHERE item_id='task' AND version=2 AND role!='assignee'").fetchall()
+        self.assertEqual(len(rows), 4)
+        for row in rows:
+            self.assertEqual(row['item_subject_role_id'], command_derived_id(prefix='item_subject_role',
+                command='item.people.update', command_id=result['command_id'], row_role='item_subject_role',
+                request_path='/copy_forward/item_subject_role/prior-' + row['role']))
+        self.assertEqual(self.db.execute("SELECT status FROM item_subject_roles WHERE version=2 AND role='watcher'").fetchone()[0],
+                         'inactive')
+
+    def test_active_agent_and_accountless_person_selection_needs_no_accounts(self):
+        self.task()
+        with self.db:
+            self.db.execute("UPDATE subjects SET subject_kind='agent' WHERE subject_id='s2'")
+        result = self.run_command('item.people.update', self.request())
+        self.assertEqual([r['subject_id'] for r in result['associations']], ['s1', 's2'])
+        self.assertEqual([s['label']['subject_kind'] for s in self.show()['people']['subjects']], ['person', 'agent'])
+        self.assertEqual(self.db.execute('SELECT COUNT(*) FROM login_accounts').fetchone()[0], 0)
+
 
 def sqlite_error():
     import sqlite3
@@ -362,7 +385,9 @@ class PeopleScheduleTests(_PeopleCommandSupport, unittest.TestCase):
         copied = self.schedule('schedule.update', self.update(item, {'item': {'title': 'Changed'}}, command_id='copy-people'))
         self.assertEqual(copied['changed_dimensions'], ['item'])
         self.assertEqual(copied['people'][0]['subject_id'], 'alice')
-        self.assertNotEqual(copied['people'][0]['item_subject_role_id'], item['people'][0]['item_subject_role_id'])
+        self.assertEqual(copied['people'][0]['item_subject_role_id'], command_derived_id(prefix='item_subject_role',
+            command='schedule.update', command_id='copy-people', row_role='item_subject_role',
+            request_path='/copy_forward/item_subject_role/' + item['people'][0]['item_subject_role_id']))
 
     def test_equal_people_in_changed_composite_uses_replacement_not_copy_paths(self):
         item = self.schedule('schedule.create', self.create(people={'participants': ['alice']}, materialize=False))
@@ -508,4 +533,36 @@ class PeopleScheduleTests(_PeopleCommandSupport, unittest.TestCase):
         finally:
             fixture.tearDown()
 
+    def test_role_changes_do_not_change_ownership_membership_routing_or_deliver(self):
+        from spine.ledger.notifications import load_current_notification_policies
+        from spine.web.provisioning import apply, plan
 
+        item = self.schedule('schedule.create', self.create(people={'participants': ['alice']}))
+        state = self.db.execute('SELECT access_epoch FROM ledger_access_state').fetchone()
+        epoch = str(state[0]) if state else '0'
+        proposed = plan(self.db, {'contract_version': 'spine.trusted-web-provisioning.v1', 'ledger_id': 'test-ledger',
+            'expected_access_epoch': epoch, 'item_adoptions': [{'operation': 'create', 'item_id': item['item_id'],
+                'owner_scope': {'owner_kind': 'subject', 'owner_subject_id': 'owner'}, 'expected_item_version': '1'}]})
+        self.assertTrue(proposed['can_apply'], proposed)
+        adopted = apply(self.db, {'contract_version': 'spine.trusted-web-provisioning.v1', 'command_id': 'adopt-people-parity',
+            'actor_subject_id': 'owner', 'action_timestamp_utc': NOW, 'expected_access_epoch': epoch, 'plan': proposed})
+        self.assertTrue(adopted['ok'], adopted)
+        tables = ('item_access_owners', 'access_grants', 'subjects', 'subject_groups', 'subject_memberships',
+                  'delivery_targets', 'ledger_access_state', 'work_instances', 'side_effect_attempts')
+
+        def independent():
+            return {table: sorted(tuple(row) for row in self.db.execute(f'SELECT * FROM {table}')) for table in tables}
+
+        before = independent()
+        self.assertTrue(before['item_access_owners'])
+        self.assertTrue(before['work_instances'])
+        policy_before = load_current_notification_policies(self.db, item_id=item['item_id'])
+        changed = people_candidate.execute('item.people.update', {'contract_version': people_candidate.CONTRACT,
+            'command_id': 'standalone-participants', 'actor_subject_id': 'owner', 'item_id': item['item_id'],
+            'target_version': '1', 'updated_at_utc': NOW, 'people': {'participants': ['bob']}}, self.context)
+        self.assertTrue(changed['ok'], changed)
+        self.schedule('schedule.update', self.update(changed, {'people': {'participants': []}}))
+        self.assertEqual(independent(), before)
+        policy_after = load_current_notification_policies(self.db, item_id=item['item_id'])
+        self.assertEqual([p['notification_intent_id'] for p in policy_after], [p['notification_intent_id'] for p in policy_before])
+        self.assertEqual([p['recipient_subject_id'] for p in policy_after], ['owner'])

@@ -2933,6 +2933,7 @@ def _handle_schedule_update(request: Mapping[str, Any], context: CommandContext)
                 if people and subject_roles is not None else
                 ("assignee", "owner") if subject_roles is not None else ()
             ),
+            subject_role_copy_command="schedule.update" if people else None,
             audit_action="schedule_updated",
             reason_code="schedule_updated",
             audit_payload={

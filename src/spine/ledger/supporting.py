@@ -6,6 +6,7 @@ import sqlite3
 from dataclasses import dataclass
 
 from spine.core import SpineValidationError
+from spine.core.hashing import command_derived_id
 from spine.ledger.common import (
     copy_id,
     enum_value,
@@ -125,6 +126,7 @@ def copy_forward_supporting_sets(
     next_version: int,
     created_at_utc: str,
     created_by_command_id: str,
+    subject_role_copy_command: str | None = None,
 ) -> None:
     require_utc_z("created_at_utc", created_at_utc)
     for row in connection.execute(
@@ -170,7 +172,10 @@ def copy_forward_supporting_sets(
             VALUES (?, ?, ?, ?, ?, ?, ?)
             """,
             (
-                copy_id(row["item_subject_role_id"], next_version),
+                (command_derived_id(prefix="item_subject_role", command=subject_role_copy_command,
+                    command_id=created_by_command_id, row_role="item_subject_role",
+                    request_path=f"/copy_forward/item_subject_role/{row['item_subject_role_id']}")
+                 if subject_role_copy_command is not None else copy_id(row["item_subject_role_id"], next_version)),
                 item_id,
                 next_version,
                 row["subject_id"],

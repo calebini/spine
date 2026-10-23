@@ -352,6 +352,10 @@ def create_item_version_from_draft(
     require_non_empty("created_by_subject_id", draft.created_by_subject_id)
     if draft.target_version < 1:
         raise SpineValidationError("stale_item_version", "target_version must be greater than or equal to 1")
+    if draft.subject_role_copy_command is not None and (
+        draft.subject_role_copy_command not in {"item.people.update", "schedule.update"} or not supporting_command_id
+    ):
+        raise SpineValidationError("environment_failure:people", "Canonical role copy requires its owning command identity.")
 
     try:
         with _item_transaction(connection):
@@ -408,6 +412,7 @@ def create_item_version_from_draft(
                 next_version=next_version,
                 created_at_utc=draft.created_at_utc,
                 created_by_command_id=supporting_command_id or audit_id,
+                subject_role_copy_command=draft.subject_role_copy_command,
             )
             if draft.subject_roles is not _UNSET:
                 replace_item_subject_roles(
@@ -470,6 +475,7 @@ def create_next_item_version(
     task_detail: dict[str, object] | None = None,
     subject_roles: tuple[ItemSubjectRoleInput, ...] | object = _UNSET,
     subject_role_replacement_roles: tuple[str, ...] = (),
+    subject_role_copy_command: str | None = None,
     audit_action: str = "version_created",
     reason_code: str = "item_version_created",
     audit_payload: dict[str, object] | None = None,
@@ -494,6 +500,7 @@ def create_next_item_version(
             task_detail=task_detail,
             subject_roles=subject_roles,
             subject_role_replacement_roles=subject_role_replacement_roles,
+            subject_role_copy_command=subject_role_copy_command,
             audit_action=audit_action,
             reason_code=reason_code,
             audit_payload=audit_payload,

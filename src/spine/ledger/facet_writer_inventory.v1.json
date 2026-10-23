@@ -15,10 +15,26 @@
   "transaction_entrypoints": [
     "spine.commands.facets.execute",
     "spine.commands.core._dispatch_atomic",
+    "spine.commands.people_candidate.execute",
+    "spine.commands.rendering_candidate.execute",
     "spine.ledger.items._item_transaction",
     "spine.web.service.WebService.execute",
     "spine.web.facet_service.FacetService.execute"
   ],
+  "people_parity": {
+    "activation": "private_candidate_only",
+    "producer_authority": "same complete producers list; no parallel allocator",
+    "successor_copy_commands": ["item.people.update", "schedule.update"],
+    "successor_copy_path": "/copy_forward/item_subject_role/{prior_id}",
+    "legacy_default": "unchanged copy_id(prior_id, next_version)",
+    "test_ids": [
+      "tests/test_people_writer_parity.py::PeopleWriterParityTests::test_existing_inventory_and_every_successor_use_real_role_copy_or_replacement",
+      "tests/test_people_writer_parity.py::PeopleWriterParityTests::test_canonical_copy_requires_explicit_owner_and_legacy_default_is_unchanged",
+      "tests/test_people_commands.py::PeopleCommandsTests::test_standalone_copy_forward_ids_are_canonical_for_every_omitted_role",
+      "tests/test_people_commands.py::PeopleScheduleTests::test_omitted_update_copies_people_but_equal_patch_noop_keeps_prior_ids"
+    ],
+    "qualification": "Local writer parity only; PR-01 through PR-16 are not globally closed."
+  },
   "producers": [
     {
       "producer_key": "src/spine/ledger/people_authoring.py:replace_people",

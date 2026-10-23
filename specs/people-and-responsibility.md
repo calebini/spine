@@ -469,7 +469,9 @@ rejecting duplicates. IDs are opaque nonempty scalar strings, at most 256 code
 points, without ASCII controls/DEL; no trimming, case folding or Unicode normalization.
 All decimal fields are JSON strings. Ordinary row IDs reuse `spine.command-id.v1`
 and its canonical preimage. The companion enumerates the normalized array paths;
-unchanged omitted rows use the existing `/copy_forward/item_subject_role/<prior_id>`.
+unchanged omitted rows on these successors use
+`/copy_forward/item_subject_role/<prior_id>` with the owning command identity.
+Older command families retain their existing copy-identity behavior.
 Requested replacements emit new active rows at their normalized array paths,
 including retained subjects. Historical source rows are never updated.
 

@@ -1,6 +1,6 @@
 # Spine Backlog
 
-Last updated: 2026-10-23
+Last updated: 2026-10-24
 
 This is the single work queue for Spine development. The
 [implementation plan](IMPLEMENTATION_PLAN.md) explains roadmap direction and delivery
@@ -74,8 +74,9 @@ concrete incident does not reactivate deferred SPINE-004–007/010 initiatives.
 
 ### SPINE-061 — Implement people and responsibility
 
-**Status:** In progress — private S1a/b foundations and trusted-local S1c handlers
-implemented and locally verified (2026-10-23). No public
+**Status:** In progress — private S1a/b/c implemented and verified; S1c checkpoint
+`d050ca3` committed. S1d writer parity/evidence reconciliation is locally verified
+and checkpoint authorized (2026-10-24). No public
 command/capability activation. The operator accepted the completed A/B/C
 reviews and verified corrections as sufficient to close the machine-contract
 review prerequisite and move into implementation planning. This is a bounded
@@ -342,11 +343,43 @@ are unchanged. 26 new handler tests, 193 selected regressions, focused Ruff, str
 typing of the three people modules and diff hygiene pass. The full suite passes:
 **1,128 tests, one skipped, 178.820 seconds**. The final defensive receipt-type
 check also passes the focused 26-test rerun. This verifies the private local
-increment, not protected admission or whole-family acceptance. Changes remain
-uncommitted; the separate pre-existing `AGENTS.md` change is preserved.
+increment, not protected admission or whole-family acceptance. The changes were
+uncommitted at that verification; the authorized checkpoint is recorded below.
+The separate pre-existing `AGENTS.md` change is preserved.
 
-**Next:** S1d parity/obligation reconciliation
-under the selected sequence. Keep capability/package activation gated on complete
+**S1c checkpoint / S1d started (2026-10-23):** Operator authorized committing S1c
+and proceeding with S1d. Checkpoint `d050ca3` contains only the twelve cohesive
+implementation/test/tracking files; the existing `AGENTS.md` edit remains outside
+it. Rechecked 26 handler tests, focused Ruff and staged scope; no push. S1d now
+reconciles actual role-copy/replacement identities, version producers, transaction
+parity and per-PR remaining dependencies on disposable ledgers. Keep all successor
+capability and package activation gated. No new external review or deployment.
+
+**S1d current result:** A real-allocator observer exercises all 25 existing version
+producers, checking complete role copy/replacement, immutable old rows and actual
+transactions/finalizers. The same inventory now links those people-specific tests.
+This exposed a canonical copy-ID mismatch in S1c; the exact regression failed
+against the checkpoint, then passed with an explicit people-successor copy operand.
+Legacy callers retain their copy IDs. No old data, schema or frozen contract changed;
+one inaccurate "existing" word in the logical spec is clarified. New tests also
+check all unmanaged roles, active agents/accountless people and nonempty adopted
+ownership/routing/work preservation. See the
+[PR-01–16 evidence map](PEOPLE_RUNTIME_EVIDENCE.md) for precise partial evidence
+versus pending admission, disclosure, filtering/cursors, work/race and installed
+public gates. **198 selected tests pass (41.860 seconds)**, as do focused Ruff,
+strict typing of six runtime owners, 214 local link targets and diff hygiene.
+The full suite passes: **1,133 tests, one skipped, 186.307 seconds**. This closes the private S1d
+evidence increment, not protected admission, every Slice 1 acceptance item or
+whole-family PR qualification. The pre-existing `AGENTS.md` edit is untouched.
+
+**S1d checkpoint authorization (2026-10-24):** Operator requested the focused
+commit. Rechecked all 31 people command/writer-parity tests, focused Ruff, strict
+typing of six runtime owners and staged diff hygiene. Exclude the separate
+`AGENTS.md` edit; no push or next-slice implementation is authorized by this request.
+
+**Next:** Slice 2 scoped
+discovery/admission/label/filter/cursor work under the selected sequence.
+Keep capability/package activation gated on complete
 applicable runtime evidence. No external review, push, migration, operator-ledger
 access or deployment occurred.
 

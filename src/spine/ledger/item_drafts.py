@@ -77,3 +77,5 @@ class ItemVersionDraft:
     # Internal storage primitive only. None copies the prior complete snapshot;
     # an explicit empty tuple removes all facets. No public command accepts this.
     facet_entries: tuple[dict[str, Any], ...] | None = None
+    # Explicit people successors only; None preserves legacy copy identities.
+    subject_role_copy_command: str | None = None
