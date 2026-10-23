@@ -1,7 +1,7 @@
 # Spine Implementation Plan
 
 Role: Roadmap rationale and delivery history; current task status lives in [BACKLOG.md](BACKLOG.md)
-Last updated: 2026-10-24 (S1d private people checkpoint; timezone work separate)
+Last updated: 2026-10-24 (Slice 2 directory/standalone foundation; timezone work separate)
 
 This is a non-normative delivery plan. The specifications and machine-readable contracts remain authoritative.
 
@@ -369,6 +369,36 @@ people command/writer-parity tests, focused Ruff, strict typing of six runtime
 owners and staged diff hygiene were rechecked. Keep the separate `AGENTS.md` edit
 outside the commit. Public activation, push and deployment remain unauthorized.
 Next planned delivery is Slice 2; this checkpoint does not start it.
+
+### People Slice 2 — private directory and protected standalone increment
+
+The operator authorized starting Slice 2 on 2026-10-24 from `e7c1a41`. Its first
+executable increment shares scoped roster/fresh-reference admission and current-label
+disclosure between local/protected paths, with a separate authenticated people cursor
+codec matching reviewed vectors. The private protected standalone service reuses
+current identity/item ownership/grant predicates and the same canonical mutation body;
+it does not route protected callers through trusted-local admission. Current item
+permission exposes role IDs/history, while self/shared-roster authority separately
+controls names. Missing authority yields closed nondisclosure; missing FK/capacity does
+not. Fresh owner eligibility is inside the write, and receipt replay checks initiating
+identity/current disclosure rather than fresh edit/reference permission.
+
+Real local/protected roster paging binds query/source/identity/access, ledger instance,
+key generation and relevant future membership transitions. Read-only assembly and fresh
+release share one bounded budget and write no durable evidence/cache. Failed protected
+write release rolls back version, roles, audit, receipt and private attribution link.
+Existing schema/indexes suffice for this increment; no migration or new persistence.
+
+This is **partial Slice 2**, not its acceptance or public activation. The remaining
+cohesive read-integration increment must wire the shared resolver into protected
+scheduling-v4 authoring and independent reads: optional people sections, authorized
+person filters before temporal expansion, source/authority proof integration and
+successor agenda/occurrence/section cursor streams. Carry forward optional core-reserve
+degradation, dense/hidden bounded query evidence and actual race matrices. Preserve
+frozen independent reads and self-only `subject_roles`. Full continuity/installed
+qualification remain Slices 3/4. The [runtime evidence map](PEOPLE_RUNTIME_EVIDENCE.md)
+separates current partial tests from whole PR obligations. No external audit, public
+selector, package/schema version, commit/push, live ledger or deployment is authorized.
 
 The preceding bounded delivery is
 [SPINE-058](BACKLOG.md#spine-058--deliver-trusted-local-facet-revision-readback):

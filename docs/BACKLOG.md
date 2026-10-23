@@ -383,6 +383,47 @@ Keep capability/package activation gated on complete
 applicable runtime evidence. No external review, push, migration, operator-ledger
 access or deployment occurred.
 
+**Slice 2 started (2026-10-24):** Operator explicitly authorized implementation
+from S1d checkpoint `e7c1a41`. Build shared roster/reference/label authority and
+bounded cursor-backed discovery, then integrate protected people projections and
+person filtering with the existing independent-read owners. Preserve D-01/D-02,
+legacy self-only views, private candidate gates and all existing worktree changes.
+No public activation, audit, commit, push, migration, operator ledger or deployment
+is authorized by this request. Verification uses disposable ledgers only.
+
+**Slice 2 private foundation result (2026-10-24):** Shared scoped roster/reference
+and current-label authority, local/protected `pc1` roster paging, and protected
+standalone show/update/replay now execute on disposable ledgers. Item grants do not
+grant roster/fresh-reference access; existing references can be retained/removed.
+Historical role IDs and current directory labels remain separate. Protected reads
+are query-only and use fresh source/authority/identity release fences; failed write
+release rolls back version/role/audit/receipt/attribution-link facts. Cursor vectors,
+canonical encoding, key generation, future membership transitions without epoch bumps,
+resource limits and hidden-label noninterference are tested. No persistence/schema
+change or public/packaged activation. The existing transaction inventory records the
+new private protected outer entrypoint; no new allocator or parallel role registry.
+
+**Verification:** 126 selected people tests passed (16.361 seconds); the full run
+passed **1,167 tests, one skipped (202.126 seconds)**. After the last two added
+key-rotation/actor tests and defensive refinements, the final focused run passes
+**69 tests (29.042 seconds)**. Focused Ruff, strict typing of six runtime owners,
+local documentation link targets and diff hygiene pass. This is partial runtime
+evidence, not completion of Slice 2 or whole PR-05–08/12/16 acceptance. The unrelated
+`AGENTS.md` edit is unchanged; no commit/push/audit/live ledger/deployment.
+
+**Next within Slice 2:** Protected scheduling-v4 fresh/replay admission and the
+independent-read integration: optional people sections, authorized person filtering
+before temporal expansion, successor read cursors/source/authority proofs, optional
+core-reserve degradation and complete cost/race matrices. Keep frozen/self-only
+surfaces unchanged. [Evidence and remaining gates](PEOPLE_RUNTIME_EVIDENCE.md).
+
+**Checkpoint / integration authorization (2026-10-24):** Operator authorized
+committing this private directory/standalone increment and proceeding with remaining
+Slice 2 integration. Exclude the pre-existing `AGENTS.md` edit. Recheck the focused
+69-test group, lint and staged diff hygiene before checkpointing. Continue protected
+scheduling admission and the independent-read integration without public activation,
+external review, push, migration, deployment or operator-ledger access.
+
 ### SPINE-060 — Ratify and codify people and responsibility
 
 **Status:** Done — logical v1.0.0 ratified; source-only machine candidate v0.1.0

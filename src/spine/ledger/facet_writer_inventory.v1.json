@@ -19,7 +19,8 @@
     "spine.commands.rendering_candidate.execute",
     "spine.ledger.items._item_transaction",
     "spine.web.service.WebService.execute",
-    "spine.web.facet_service.FacetService.execute"
+    "spine.web.facet_service.FacetService.execute",
+    "spine.web.people_service.PeopleService.execute"
   ],
   "people_parity": {
     "activation": "private_candidate_only",

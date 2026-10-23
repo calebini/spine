@@ -11,6 +11,7 @@ import copy
 import json
 import re
 import sqlite3
+from collections.abc import Callable
 from dataclasses import asdict, replace
 from typing import Any, NoReturn
 
@@ -21,17 +22,19 @@ from spine.commands.receipts import command_receipt, get_command_receipt, insert
 from spine.core.canonical_json import canonical_json_bytes
 from spine.core.errors import SpineValidationError
 from spine.core.hashing import audit_log_payload_hash, hash_canonical_json
-from spine.core.people import managed_facts, normalize_people, people_id, replacement_is_noop, replacement_rows
+from spine.core.people import normalize_people, people_id, replacement_is_noop, replacement_rows
 from spine.ledger.common import require_utc_z
 from spine.ledger.items import mutation_audit_payload
 from spine.ledger.people import PeopleSnapshot, read_people_snapshot
 from spine.ledger.people_authoring import replace_people
 from spine.ledger.transactions import LedgerConnection
 from spine.services.people_authoring import PeopleAuthoring
+from spine.services.people_directory import PeopleDirectory
 from spine.services.rendering_authoring import RenderingAuthoring
 
 CONTRACT = 'spine.people-and-responsibility.v1'
 _FIELDS = {
+    'people.list': {'contract_version', 'owner', 'subject_status', 'subject_kind', 'limit', 'cursor'},
     'item.people.show': {'contract_version', 'item_id', 'version'},
     'item.people.update': {'contract_version', 'command_id', 'actor_subject_id', 'item_id',
                            'target_version', 'updated_at_utc', 'people'},
@@ -72,7 +75,8 @@ def normalize_request(command: str, request: Any) -> dict[str, Any]:
         if isinstance(value.get('people'), dict):
             extras += ['people.' + key for key in set(value['people']) - {'participants', 'assignees'}]
             extras.sort(key=lambda field: '/' + field.replace('.', '/'))
-        required = _FIELDS[command] - ({'version'} if command.endswith('.show') else set())
+        required = ({'contract_version', 'owner'} if command == 'people.list' else
+                    _FIELDS[command] - ({'version'} if command.endswith('.show') else set()))
         missing = sorted(required - set(value))
         if extras:
             fail('unsupported_field', extras[0])
@@ -93,6 +97,26 @@ def normalize_request(command: str, request: Any) -> dict[str, Any]:
             require_utc_z('updated_at_utc', value['updated_at_utc'])
         if 'people' in value:
             value['people'] = _people(value['people'], 'people')
+        if command == 'people.list':
+            owner = value['owner']
+            if not isinstance(owner, dict) or owner.get('owner_kind') not in {'subject', 'subject_group'}:
+                fail('invalid_request', 'owner')
+            key = 'owner_subject_id' if owner['owner_kind'] == 'subject' else 'owner_group_id'
+            if set(owner) - {'owner_kind', key}:
+                fail('unsupported_field', 'owner.' + sorted(set(owner) - {'owner_kind', key})[0])
+            if key not in owner:
+                fail('missing_required_field', 'owner.' + key)
+            people_id(owner[key])
+            value.setdefault('subject_status', 'active')
+            value.setdefault('subject_kind', 'all')
+            value.setdefault('limit', '25')
+            if (value['subject_status'] not in {'active', 'inactive', 'all'} or
+                    value['subject_kind'] not in {'person', 'agent', 'all'} or
+                    not isinstance(value['limit'], str) or re.fullmatch(r'[1-9][0-9]{0,2}', value['limit']) is None or
+                    int(value['limit']) > 100):
+                fail('invalid_request', 'request')
+            if 'cursor' in value and (not isinstance(value['cursor'], str) or len(value['cursor']) > 8192):
+                fail('invalid_request', 'cursor')
         return value
     if command not in {'schedule.create', 'schedule.update'}:
         fail('invalid_request', 'command')
@@ -129,27 +153,19 @@ def normalize_request(command: str, request: Any) -> dict[str, Any]:
     return result
 
 
-def admit_subjects(db: LedgerConnection, subjects: tuple[str, ...]) -> None:
+def admit_subjects(db: LedgerConnection, subjects: tuple[str, ...], budget: FacetBudget | None = None) -> None:
     """Trusted-local reference authority: exact active IDs, not inferred owners."""
-    for subject in subjects:
-        row = db.execute('SELECT status FROM subjects WHERE subject_id=?', (subject,)).fetchone()
-        if row is None or row['status'] != 'active':
-            fail('referenced_row_not_found', 'people')
+    from spine.commands.facet_runtime import utc_now, wire_time
+
+    PeopleDirectory(db, budget if budget is not None else FacetBudget(),
+                    observed_at_utc=wire_time(utc_now())).admit(subjects)
 
 
 def local_projection(db: LedgerConnection, snapshot: PeopleSnapshot, budget: FacetBudget) -> dict[str, Any]:
-    """Current local labels; Slice 2 supplies protected per-subject disclosure."""
-    subjects = []
-    managed_facts(snapshot.item_type, snapshot.associations)  # Reject corrupt stored semantics.
-    for subject in sorted({row.subject_id for row in snapshot.associations}):
-        budget.resolve('subject', subject)
-        row = db.execute('SELECT display_name,subject_kind,status FROM subjects WHERE subject_id=?', (subject,)).fetchone()
-        if (row is None or not isinstance(row['display_name'], str) or not 1 <= len(row['display_name']) <= 512
-                or row['subject_kind'] not in {'person', 'agent'} or row['status'] not in {'active', 'inactive'}):
-            fail('environment_failure', 'people')
-        subjects.append({'subject_id': subject, 'label': {'availability': 'available', **dict(row)}})
-    return {'item_id': snapshot.item_id, 'item_type': snapshot.item_type, 'item_version': str(snapshot.item_version),
-            'associations': [asdict(row) for row in snapshot.associations], 'subjects': subjects}
+    """Current labels through the same resolver as protected readback."""
+    from spine.commands.facet_runtime import utc_now, wire_time
+
+    return PeopleDirectory(db, budget, observed_at_utc=wire_time(utc_now())).projection(snapshot)
 
 
 def semantic_facts(request: dict[str, Any]) -> dict[str, Any]:
@@ -247,12 +263,19 @@ def _verify_retained(db: LedgerConnection, command: str, request: dict[str, Any]
             fail('environment_failure', 'receipt')
 
 
-def _update(db: LedgerConnection, request: dict[str, Any]) -> dict[str, Any]:
+def _update(db: LedgerConnection, request: dict[str, Any], *,
+            admit_additions: Callable[[tuple[str, ...]], None] | None = None,
+            before_replay: Callable[[dict[str, Any]], None] | None = None,
+            before_fresh: Callable[[], None] | None = None) -> dict[str, Any]:
     command = 'item.people.update'
     existing = _stored_receipt(db, request['command_id'])
     if existing:
+        if before_replay is not None:
+            before_replay(existing)
         _verify_receipt(db, command, request, existing)
         return _response(existing, replay=True)
+    if before_fresh is not None:
+        before_fresh()
     # Actor is an audit reference, not a fresh managed selection. Preserve the
     # ordinary local actor-existence rule without inventing an active-actor rule.
     if db.execute('SELECT 1 FROM subjects WHERE subject_id=?', (request['actor_subject_id'],)).fetchone() is None:
@@ -260,7 +283,7 @@ def _update(db: LedgerConnection, request: dict[str, Any]) -> dict[str, Any]:
     result = replace_people(db, item_id=request['item_id'], target_version=int(request['target_version']),
         people=request['people'], command_id=request['command_id'], actor_subject_id=request['actor_subject_id'],
         updated_at_utc=request['updated_at_utc'], audit_id=core._derived_id(command, request['command_id'], 'audit', '/audit'),
-        admit_additions=lambda subjects: admit_subjects(db, subjects))
+        admit_additions=admit_additions if admit_additions is not None else (lambda subjects: admit_subjects(db, subjects)))
     facts = {'command_id': request['command_id'], 'command_receipt_id': core._receipt_id(command, request['command_id']),
              'item_id': request['item_id'], 'item_type': result.snapshot.item_type,
              'target_version': request['target_version'], 'current_version': str(result.snapshot.item_version),
@@ -282,7 +305,8 @@ class _Preview(Exception):
         self.result = result
 
 
-def execute(command: str, request: Any, context: CommandContext) -> dict[str, Any]:
+def execute(command: str, request: Any, context: CommandContext, *, contracts: Any = None,
+            now: Callable[[], str] | None = None, before_release: Callable[[], None] | None = None) -> dict[str, Any]:
     """Execute a private local candidate, preserving actual transaction ownership."""
     db, budget, old_timeout = context.ledger, FacetBudget(), None
     try:
@@ -292,6 +316,9 @@ def execute(command: str, request: Any, context: CommandContext) -> dict[str, An
         value = normalize_request(command, request)
         old_timeout = install_budget(db, budget)
         result: dict[str, Any]
+        if command == 'people.list':
+            result = _roster(db, value, context, budget, contracts=contracts, now=now, before_release=before_release)
+            return result
         with db.atomic_command(write=command != 'item.people.show'):
             if command == 'item.people.show':
                 snapshot = read_people_snapshot(db, item_id=value['item_id'],
@@ -299,12 +326,12 @@ def execute(command: str, request: Any, context: CommandContext) -> dict[str, An
                 result = {'ok': True, 'command': command, 'response_contract': CONTRACT,
                           'current_version': str(snapshot.current_version), 'people': local_projection(db, snapshot, budget)}
             elif command == 'item.people.update':
-                result = _update(db, value)
+                result = _update(db, value, admit_additions=lambda subjects: admit_subjects(db, subjects, budget))
             else:
                 # No protected adapter is wired to this private local path. The
                 # successor protected service must supply its own owner/receipt
                 # admission and release fences before activation.
-                authoring = PeopleAuthoring(db, command, value, lambda subjects: admit_subjects(db, subjects))
+                authoring = PeopleAuthoring(db, command, value, lambda subjects: admit_subjects(db, subjects, budget))
                 rendering = RenderingAuthoring(db, command, value, None, budget)
                 handler = core._handle_schedule_create if command == 'schedule.create' else core._handle_schedule_update
                 prior = _stored_receipt(db, value['command_id'])
@@ -338,7 +365,7 @@ def execute(command: str, request: Any, context: CommandContext) -> dict[str, An
             code, field = 'invalid_request', 'request'
         if code not in {'invalid_request', 'unsupported_field', 'missing_required_field', 'unsupported_contract_version',
                         'wrong_item_type', 'invalid_state_transition', 'referenced_row_not_found', 'stale_version',
-                        'semantic_conflict', 'environment_failure', 'runtime_failure'}:
+                        'semantic_conflict', 'environment_failure', 'runtime_failure', 'stale_cursor'}:
             code = 'invalid_request'
         message = {'invalid_request': 'Invalid people request.', 'unsupported_field': 'Invalid people request.',
                    'missing_required_field': 'Invalid people request.', 'unsupported_contract_version': 'Invalid people request.',
@@ -351,3 +378,45 @@ def execute(command: str, request: Any, context: CommandContext) -> dict[str, An
             assert isinstance(db, LedgerConnection)
             db.set_progress_handler(None, 0)
             db.execute(f'PRAGMA busy_timeout={old_timeout}')
+
+
+def _roster(db: LedgerConnection, request: dict[str, Any], context: CommandContext, budget: FacetBudget, *,
+            contracts: Any, now: Callable[[], str] | None, before_release: Callable[[], None] | None) -> dict[str, Any]:
+    from spine.commands.facet_runtime import utc_now, wire_time
+    from spine.commands.people_runtime import PeopleContracts, PeopleCursorCodec, PeopleCursorConfig
+    from spine.services.people_reads import assemble, authorization, ledger_instance, page_roster
+
+    if not isinstance(contracts, PeopleContracts) or not isinstance(context.people_cursor_config, PeopleCursorConfig):
+        fail('environment_failure', 'cursor_config')
+    clock = now or (lambda: wire_time(utc_now()))
+    codec = PeopleCursorCodec(contracts, context.people_cursor_config)
+    with db.atomic_command(write=False):
+        directory = PeopleDirectory(db, budget, observed_at_utc=clock())
+        if ledger_instance(directory) != codec.config.ledger_instance_id:
+            fail('environment_failure', 'cursor_config')
+        previous = codec.decode(request['cursor'], now=directory.now) if 'cursor' in request else None
+        result, source = assemble('people.list', request, directory)
+        access, deadline = authorization(directory)
+        result = page_roster(result, codec=codec, request=request, source_hash=source, authorization_hash=access,
+                             valid_until=deadline, previous=previous)
+        contracts.validate('responses', result, definition='people.list', output=True)
+        if len(canonical_json_bytes(result)) > 4194304:
+            fail('environment_failure', 'capacity')
+    if before_release:
+        before_release()
+    with db.atomic_command(write=False):
+        fresh = PeopleDirectory(db, budget, observed_at_utc=clock())
+        try:
+            _, fresh_source = assemble('people.list', request, fresh)
+            fresh_access, fresh_deadline = authorization(fresh)
+        except SpineValidationError as exc:
+            if exc.code.startswith('referenced_row_not_found:'):
+                fail('environment_failure', 'source')
+            raise
+        if (fresh.now < directory.now or source != fresh_source or access != fresh_access or deadline != fresh_deadline
+                or deadline is not None and fresh.now >= deadline):
+            fail('environment_failure', 'source')
+        if previous is not None:
+            codec.times(previous, fresh.now)
+        budget.check()
+    return result

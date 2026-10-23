@@ -1,6 +1,6 @@
-# People and responsibility — private Slice 1 evidence
+# People and responsibility — private runtime evidence
 
-Updated: 2026-10-24. S1d follows S1c checkpoint `d050ca3`.
+Updated: 2026-10-24. Slice 2 begins from S1d checkpoint `e7c1a41`.
 
 This is implementation evidence, not a specification or public capability declaration.
 The [logical spec](../specs/people-and-responsibility.md) and
@@ -21,9 +21,53 @@ trusted local. No package/runtime/schema version or migration is introduced.
 Trusted-local fresh references require exact active subject IDs. Existing active
 associations can be retained or removed without readmission; inactive rows count
 in equality and replacing them is a change. This is the already-approved local
-full-ledger policy, not protected owner-scope admission. Protected reference and
-replay permissions, directory label disclosure, admission/release fences and
-public successor routing are still required before activation.
+full-ledger policy, not a protected bypass. Slice 2's standalone protected
+candidate now supplies owner-scoped fresh reference and replay/disclosure checks.
+Protected scheduling successors, independent read integration and public routing
+are still required before activation.
+
+## Slice 2 — directory and standalone protected foundation
+
+This first Slice 2 increment is private executable behavior, not completion of
+Slice 2 or a compiled/packaged capability. The shared
+[directory resolver](../src/spine/services/people_directory.py) implements approved
+D-01/D-02 from current subject/group/membership facts. Every active member role can
+read its own current group roster; item grants never substitute for directory
+authority. Fresh references use the actual item owner, not a supplied unrelated
+group. A subject-owned private item cannot acquire another assignee just because
+both people share a group. Exact retained references and removals bypass fresh-add
+admission, preserving item-grantee use without private roster probing.
+
+The private [protected service](../src/spine/web/people_service.py) reuses existing
+account/selection, ownership/grant checks and the canonical standalone mutation's
+transaction body. Fresh writes require item-edit authority and expected access
+evidence; compatible replay requires the initiating account/subject and current
+item/receipt disclosure, not fresh edit/selection eligibility. All role/version,
+audit, receipt and protected receipt-link facts commit or roll back together. The
+existing transaction inventory records this additional outer entrypoint, not a
+new allocator. It is not registered in HTTP or either public command registry.
+
+Historical role identities remain immutable; current labels are resolved separately
+through self or a shared current roster. Labels never enter receipts. Otherwise the
+projection is exactly `not_disclosed`, without a reason. Hidden label metadata is
+not read into source/proof facts, and its rename does not break a redacted read.
+Integrity/capacity failures are not converted into label nondisclosure. Old self-only
+`subject_roles` and all released read handlers are unchanged.
+
+Private local and protected `people.list` implement authenticated `pc1` paging with
+explicit protected cursor configuration. The codec matches the reviewed MAC vectors,
+binds ledger instance/key generation/query/source/identity/access and the next relevant
+membership transition, preserves original issue/expiry across pages, and rejects
+noncanonical JSON/base64, cross-family tokens and tampering. Reads recompute the full
+bounded authorized source and fence it in a fresh read transaction before release;
+no receipt, cursor row, audit or durable cache is written. A single SQL/time/resource
+budget spans assembly and release. Protected read transactions are query-only.
+
+**Still within Slice 2:** integrate this shared authority/label resolver into protected
+scheduling-v4 composites; implement the people optional section, person filtering
+before temporal expansion, successor agenda/occurrence paging and its source/authority
+proofs, optional core-reserve degradation, dense/hidden cost matrices and remaining
+concurrent-writer cases. No whole PR-05–08/12/16 acceptance is claimed by this foundation.
 
 ## Writer parity and the identity correction
 
@@ -67,20 +111,20 @@ the offline contract witnesses remain separate.
 | --- | --- | --- |
 | PR-01 — independent dimensions | Partial: standalone and v4 role changes preserve adopted ownership, access state, memberships, routes, work and attempts; notification intents/recipients do not change. | Protected admission/noninterference and complete-family parity; Slices 2/4. |
 | PR-02 — event/task sets | Local foundation: omission, replacement, clear, multiple roles, inactive facts, wrong-role refusal, unscheduled tasks, active agents and accountless people. | Admitted protected create/update/read parity; Slices 2/4. |
-| PR-03 — atomic version/copy/rollback | Local: one-version composites; all-role identity/copy matrix; policy/audit/receipt/finalizer failures and CAS/FK rollback. | Protected service's outer admission/release transaction and actual races; Slices 2/4. |
-| PR-04 — no-op/replay/preview/identity | Local: exact canonical vectors, original no-op IDs, changed replay after later edits, no readmission, conflict/corrupt evidence refusal, real preview rollback and deterministic IDs. | Same initiating account/subject and current receipt/item disclosure, permission changes and installed parity; Slices 2/4. |
-| PR-05 — roster/fresh-reference privacy | Only local active-ID admission and mandatory fresh-add callback are implemented. | Owner-scope eligibility, scoped directory authority, hidden-reference indistinguishability and access checks inside the write; Slice 2. |
-| PR-06 — history/current labels | Local: exact old associations and current catalog metadata; labels never enter receipts. | Shared protected self/roster label resolver, closed nondisclosure, current permission/release fences; Slice 2. |
+| PR-03 — atomic version/copy/rollback | Partial: local one-version composites/writer matrix plus private protected standalone version/role/audit/receipt/link rollback on failed release. | Protected composites and complete concurrent-writer coverage; Slices 2/4. |
+| PR-04 — no-op/replay/preview/identity | Partial: local canonical receipts/real preview; protected standalone replay checks initiator and current disclosure, succeeds after edit/reference eligibility is lost, and refuses after read revocation. | Protected composite/preview and installed parity; Slices 2/4. |
+| PR-05 — roster/fresh-reference privacy | Partial: shared current-roster admission, exact owner eligibility in standalone writes, all member roles, inactive/ended/future cases, private-scope and item-grantee denials, retention/removal without readmission. | Protected scheduling integration, complete cost/noninterference/race matrices; Slice 2. |
+| PR-06 — history/current labels | Partial: shared protected self/roster labels, closed nondisclosure, immutable historical IDs/current names, hidden-label rename noninterference and direct release checks. | Optional independent-read people sections/core reserve and full race matrix; Slice 2. |
 | PR-07 — authorized person filters | Not implemented. | Authorize before filter/expansion, hidden-row noninterference, unavailable/unplaced cases; Slice 2. |
-| PR-08 — cursors/release races | Not implemented. | MAC-bound source/access snapshots, stale cursors, identity/access/source release races; Slice 2. |
+| PR-08 — cursors/release races | Partial: real local/protected roster pages, exact MAC vectors, source/query/identity/key/expiry binding, membership transition without epoch bump and fresh source/identity/access release refusal. | Successor independent-read streams, optional sections and full concurrent coverage; Slice 2. |
 | PR-09 — continuity/mixed edges | Partial: distinct role proof, exact immediate policy bijection, strict facet/presentation proofs, mixed histories, tampered/skipped-edge refusal and 100-version limit. | Full mixed lifecycle/ordinary-edit/lease race acceptance; Slice 3. |
 | PR-10 — work states | Partial: actual queued/start/retry/terminal/attempt-history preservation and independently stale-route refusal. | Complete queued/leased/retry/started/terminal/absent cross-product and races; Slice 3. |
 | PR-11 — recurring/relative freshness | Partial: recurring authoring, target binding retention and source-event people edits invalidating follow-source snapshots. | Full recurrence occurrence/provenance and relative-source race matrix; Slice 3. |
-| PR-12 — bounded indexed reads | Partial: exact-version over-limit sentinel, 100 total role-row cap and no truncated people set. | Full roster/filter plans, sparse/dense/hidden EXPLAIN/VM/byte/resource budgets and release checks; Slice 2. |
+| PR-12 — bounded indexed reads | Partial: exact-version/roster sentinels, global SQL/time/resource caps, stricter configured SQL ceiling, selected indexed membership equality plans and refusal without truncated source. | Full filter/roster sparse/dense/hidden plan/VM/byte matrices, optional reserves; Slice 2. |
 | PR-13 — writers/finalizers | Local: all 25 inventoried producers exercised, exact role copy/replacement and historical rows checked, shared facet/rendering finalizer paths and failures tested. | Protected service writer parity, full work matrix and installed successor execution; Slices 3/4. |
 | PR-14 — installed closure | Activation guard only: source contracts remain unadvertised. | Installed schema/registry synchronization, frozen bundle, package/capability declarations; Slice 4. |
 | PR-15 — public equivalence | Not implemented; public dispatch intentionally rejects this candidate family. | CLI and protected HTTP successor parity; Slice 4. |
-| PR-16 — concurrency | Partial: local CAS-loss rollback and freshness/proof failure cases. | Actual writer, identity/access, roster, lease and temporal-source concurrent races; Slices 2–4. |
+| PR-16 — concurrency | Partial: local CAS rollback, source/membership/identity changes between private protected evaluation and fresh release, failed in-transaction fresh-reference release rollback. | Complete simultaneous writers, lease/temporal-source races and independent-read integration; Slices 2–4. |
 
 Primary evidence:
 
@@ -89,6 +133,9 @@ Primary evidence:
 - [Private authoring tests](../tests/test_people_authoring.py): transaction rollback and shared continuity/freshness.
 - [Actual command tests](../tests/test_people_commands.py): standalone/v4 receipts, preview, identity and independence.
 - [Writer parity tests](../tests/test_people_writer_parity.py): actual inventory and copy/replacement verification.
+- [Directory tests](../tests/test_people_directory.py): scoped discovery/fresh admission, labels, lifecycle, integrity/capacity and indexed probes.
+- [Cursor tests](../tests/test_people_cursors.py): reviewed vectors, protected files, tampering, local paging/source/release/transition fences.
+- [Protected standalone tests](../tests/test_people_web.py): real file-ledger admission, labels, mutation/replay, paging and transactional release rollback.
 
 ## Verification and next gate
 
@@ -126,3 +173,27 @@ protected permission/release evidence; the local-only implementation cannot subs
 for it. Slice 3 retains the full work-state/race matrix and Slice 4 public/installed
 activation. No external audit, operator ledger, notification send, migration,
 deployment or push is part of S1d.
+
+### Slice 2 foundation verification (2026-10-24)
+
+The initial people-focused run passes **126 tests (16.361 seconds)**. The broader
+full regression run passes **1,167 tests, one skipped (202.126 seconds)**. After two
+additional key-rotation/actor guards and final defensive refinements, the focused
+directory/cursor/protected service, existing people command/writer and facet-writer
+run passes **69 tests (29.042 seconds)**. Focused Ruff, strict typing of six runtime
+owners, local documentation link validation and diff hygiene pass. No broader
+project-wide strict typing or installed public-family acceptance is claimed.
+
+```sh
+PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests .venv/bin/python -m unittest \
+  test_people_directory test_people_cursors test_people_web \
+  test_people_commands test_people_writer_parity test_facet_writers -q
+.venv/bin/python -m mypy --strict --follow-imports=silent \
+  src/spine/commands/people_candidate.py src/spine/commands/people_runtime.py \
+  src/spine/services/people_directory.py src/spine/services/people_reads.py \
+  src/spine/ledger/people_authoring.py src/spine/services/people_authoring.py
+```
+
+All working changes remain uncommitted. The pre-existing `AGENTS.md` change is
+preserved. Slice 2 remains in progress with the integration work enumerated above;
+no audit, push, migration, deployment, operator-ledger access or send occurred.
