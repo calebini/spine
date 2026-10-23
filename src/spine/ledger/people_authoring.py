@@ -110,10 +110,10 @@ def verify_retained_version_edge(
     declarations = [a['action'] for a in audits if (
         a['action'] == 'item_people_updated' and expected.get(a['payload_hash']) == a['action']
         or a['action'] == 'item_facets_updated' and a['audit_id'] == facet_audit)]
-    if not declarations and len(commands) == 1 and _presentation_edge(
-        db, commands[0][0], item_id, previous_version, version,
-    ):
-        declarations = ['policy_presentations']
+    schedule_edge = (_schedule_edge(db, commands[0][0], item_id, previous_version, version)
+                     if not declarations and len(commands) == 1 else None)
+    if schedule_edge:
+        declarations = [schedule_edge]
     if not declarations:
         return 'ordinary'
     if len(declarations) != 1 or previous_version != version - 1:
@@ -123,12 +123,12 @@ def verify_retained_version_edge(
         return kind
     before = capture_role_edge(db, item_id, previous_version)
     after = capture_role_edge(db, item_id, version)
-    if declarations[0] == 'item_people_updated':
+    if kind == 'people':
         if commands:
             current = read_people_snapshot(db, item_id=item_id, version=version)
             rows = replacement_rows(item_type=current.item_type,
                 subjects=tuple(r.subject_id for r in current.associations),
-                command='item.people.update', command_id=commands[0][0])
+                command='schedule.update' if schedule_edge == 'people' else 'item.people.update', command_id=commands[0][0])
             if len(commands) != 1 or current.associations != rows:
                 raise SpineValidationError('environment_failure:people', 'Invalid retained people replacement identity.')
         verify_role_edge(before, after, role=managed_role(row['item_type']))
@@ -155,14 +155,14 @@ def verify_retained_version_edge(
     return kind
 
 
-def _presentation_edge(db: sqlite3.Connection, command_id: str, item_id: str, previous_version: int, version: int) -> bool:
-    """Existing indexed receipt evidence selects the exclusive presentation proof."""
+def _schedule_edge(db: sqlite3.Connection, command_id: str, item_id: str, previous_version: int, version: int) -> str | None:
+    """Existing indexed receipt evidence selects an exclusive schedule proof."""
     row = db.execute(
         "SELECT item_id,target_version,result_identity_facts_json,semantic_facts_json,semantic_facts_hash "
         "FROM command_receipts WHERE command_id=? AND command='schedule.update'", (command_id,),
     ).fetchone()
     if row is None:
-        return False
+        return None
     raw = (row['result_identity_facts_json'], row['semantic_facts_json'])
     if any(len(value.encode()) > 1_048_576 for value in raw):
         raise SpineValidationError('environment_failure:capacity', 'People lineage receipt capacity exceeded.')
@@ -170,16 +170,19 @@ def _presentation_edge(db: sqlite3.Connection, command_id: str, item_id: str, pr
         facts, semantic = (json.loads(value) for value in raw)
         if not isinstance(facts, dict) or not isinstance(semantic, dict):
             raise ValueError('invalid receipt object')
-        if facts.get('changed_dimensions') != ['policy_presentations']:
-            return False
+        dimensions = facts.get('changed_dimensions')
+        if dimensions != ['policy_presentations'] and not (
+            dimensions == ['people'] and semantic.get('contract_version') == 'spine.schedule-update.v4'
+        ):
+            return None
         if (row['item_id'] != item_id or row['target_version'] != str(previous_version)
                 or facts.get('item_id') != item_id or facts.get('current_version') != str(version)
                 or semantic.get('normalized_result') != facts
                 or hash_canonical_json(semantic) != row['semantic_facts_hash']):
-            raise ValueError('invalid presentation edge receipt')
+            raise ValueError('invalid schedule edge receipt')
     except (ValueError, TypeError) as exc:
-        raise SpineValidationError('environment_failure:people', 'Invalid presentation edge evidence.') from exc
-    return True
+        raise SpineValidationError('environment_failure:people', 'Invalid schedule edge evidence.') from exc
+    return 'people' if dimensions == ['people'] else 'policy_presentations'
 
 
 def replace_people(
@@ -210,7 +213,7 @@ def replace_people(
     detail = db.execute(f'SELECT {status} FROM {table} WHERE item_id=? AND version=?',
                         (item_id, target_version)).fetchone()
     if shell is None or shell['status'] != 'active' or detail is None or detail[status] != expected:
-        raise SpineValidationError('semantic_conflict:people', 'People require an active nonterminal item.')
+        raise SpineValidationError('invalid_state_transition:people', 'People require an active nonterminal item.')
     subjects = normalize_people(item_type=snapshot.item_type, value=people)
     assert subjects is not None
     if replacement_is_noop(snapshot.item_type, snapshot.associations, subjects):

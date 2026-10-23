@@ -1441,6 +1441,7 @@ def _handle_task_create(request: Mapping[str, Any], context: CommandContext) -> 
 def _handle_schedule_create(request: Mapping[str, Any], context: CommandContext) -> dict[str, Any]:
     command = "schedule.create"
     rendering = context.rendering_authoring
+    people = context.people_authoring
     allowed = {
         "contract_version",
         "command_id",
@@ -1452,9 +1453,12 @@ def _handle_schedule_create(request: Mapping[str, Any], context: CommandContext)
         "notification_plan",
         "materialization",
     }
+    if people:
+        allowed.add("people")
     _check_fields(command, request, allowed)
     contract_version = request.get("contract_version")
-    if contract_version != ("spine.schedule-create.v3" if rendering else "spine.schedule-create.v2"):
+    expected_contract = "spine.schedule-create.v4" if people else "spine.schedule-create.v3" if rendering else "spine.schedule-create.v2"
+    if contract_version != expected_contract:
         raise SpineValidationError(
             "invalid_request:contract_version",
             "contract_version must be spine.schedule-create.v2",
@@ -1658,6 +1662,8 @@ def _handle_schedule_create(request: Mapping[str, Any], context: CommandContext)
             field="item.task_detail.subject_roles",
             request_path="/item/task_detail/subject_roles",
         )
+    if people:
+        subject_roles = people.create(item_type)
 
     normalized_policies = _schedule_normalize_policies(
         reminders_value,
@@ -1951,6 +1957,8 @@ def _handle_schedule_create(request: Mapping[str, Any], context: CommandContext)
             }
         if rendering:
             rendering.augment(result_facts, item_id, 1)
+        if people:
+            people.augment(result_facts, item_id, 1)
         receipt = _make_receipt(
             command=command,
             command_id=command_id,
@@ -2007,6 +2015,7 @@ def _handle_schedule_create(request: Mapping[str, Any], context: CommandContext)
             item_locations=item_locations,
             all_day=False,
             start_anchor=anchor,
+            subject_roles=subject_roles,
             visibility=_nested_optional_str(event_detail, "visibility", "item.event_detail.visibility"),
             attendance_policy_ref=_nested_optional_str(
                 event_detail,
@@ -2173,6 +2182,7 @@ def _handle_schedule_cancel(request: Mapping[str, Any], context: CommandContext)
 def _handle_schedule_update(request: Mapping[str, Any], context: CommandContext) -> dict[str, Any]:
     command = "schedule.update"
     rendering = context.rendering_authoring
+    people = context.people_authoring
     allowed = {
         "contract_version",
         "command_id",
@@ -2185,7 +2195,8 @@ def _handle_schedule_update(request: Mapping[str, Any], context: CommandContext)
     }
     _check_fields(command, request, allowed)
     contract_version = request.get("contract_version")
-    if contract_version != ("spine.schedule-update.v3" if rendering else "spine.schedule-update.v2"):
+    expected_contract = "spine.schedule-update.v4" if people else "spine.schedule-update.v3" if rendering else "spine.schedule-update.v2"
+    if contract_version != expected_contract:
         raise SpineValidationError(
             "invalid_request:contract_version",
             "contract_version must be spine.schedule-update.v2",
@@ -2205,7 +2216,8 @@ def _handle_schedule_update(request: Mapping[str, Any], context: CommandContext)
             "archetype",
             "notification_plan",
         }
-        | ({"policy_presentations"} if rendering else set()),
+        | ({"policy_presentations"} if rendering else set())
+        | ({"people"} if people else set()),
         "patch",
     )
     if not patch:
@@ -2319,6 +2331,8 @@ def _handle_schedule_update(request: Mapping[str, Any], context: CommandContext)
         command_id=command_id,
         value=patch.get("item"),
     )
+    if people:
+        subject_roles = people.update(item)
     from spine.services.primary_locations import (
         canonical_location_facts,
         current_primary_location,
@@ -2510,6 +2524,8 @@ def _handle_schedule_update(request: Mapping[str, Any], context: CommandContext)
     changed_dimensions: list[str] = []
     if item_patch["changed"]:
         changed_dimensions.append("item")
+    if people and people.changed:
+        changed_dimensions.append("people")
     if primary_location_changed:
         changed_dimensions.append("primary_location")
     if (
@@ -2534,6 +2550,7 @@ def _handle_schedule_update(request: Mapping[str, Any], context: CommandContext)
         value
         for value in (
             "item",
+            "people",
             "primary_location",
             "archetype",
             "scheduled_time",
@@ -2613,7 +2630,7 @@ def _handle_schedule_update(request: Mapping[str, Any], context: CommandContext)
         ),
         target_changed="scheduled_time" in changed_dimensions,
         recurrence_changed="recurrence" in changed_dimensions,
-    )
+    ) if not (people and people.role_only) else ([], [], [], {})
     work_changed = bool(cancelled_ids)
     created_ids: list[str] = []
     opportunity_work: list[dict[str, object]] = []
@@ -2834,6 +2851,8 @@ def _handle_schedule_update(request: Mapping[str, Any], context: CommandContext)
             result_facts["audit_id"] = audit_id
         if rendering:
             rendering.augment(result_facts, item_id, next_version)
+        if people:
+            people.augment(result_facts, item_id, next_version)
         receipt = _make_receipt(
             command=command,
             command_id=command_id,
@@ -2909,7 +2928,11 @@ def _handle_schedule_update(request: Mapping[str, Any], context: CommandContext)
             event_detail=event_detail,
             task_detail=task_detail,
             subject_roles=subject_roles if subject_roles is not None else _UNSET,
-            subject_role_replacement_roles=("assignee", "owner") if subject_roles is not None else (),
+            subject_role_replacement_roles=(
+                (("participant",) if item["item_type"] == "event" else ("assignee",))
+                if people and subject_roles is not None else
+                ("assignee", "owner") if subject_roles is not None else ()
+            ),
             audit_action="schedule_updated",
             reason_code="schedule_updated",
             audit_payload={
@@ -6808,15 +6831,11 @@ def _schedule_update_response(receipt: Mapping[str, Any], *, response_effect: st
     return {
         "ok": True,
         "command": "schedule.update",
-        "response_contract": "spine.schedule-update-response.v3"
-        if receipt["semantic_facts"].get("contract_version") == "spine.schedule-update.v3"
-        else "spine.schedule-update-response.v2",
+        "response_contract": f"spine.schedule-update-response.{_schedule_receipt_version(receipt)}",
         "effect": response_effect,
         **dict(facts),
         "receipt": {
-            "receipt_contract": "spine.schedule-update-receipt.v3"
-            if receipt["semantic_facts"].get("contract_version") == "spine.schedule-update.v3"
-            else "spine.schedule-update-receipt.v2",
+            "receipt_contract": f"spine.schedule-update-receipt.{_schedule_receipt_version(receipt)}",
             "command_receipt_id": receipt["command_receipt_id"],
             "effect": receipt["effect"],
             "semantic_facts_hash": receipt["semantic_facts_hash"],
@@ -7698,6 +7717,12 @@ def _schedule_fail_if_requested(context: CommandContext, phase: str) -> None:
         )
 
 
+def _schedule_receipt_version(receipt: Mapping[str, Any]) -> str:
+    selector = receipt["semantic_facts"].get("contract_version")
+    return {f"spine.{command}.{version}": version for command in ("schedule-create", "schedule-update")
+            for version in ("v3", "v4")}.get(selector, "v2")
+
+
 def _schedule_create_response(receipt: Mapping[str, Any], *, response_effect: str) -> dict[str, Any]:
     facts = receipt.get("result_identity_facts")
     if not isinstance(facts, Mapping):
@@ -7705,15 +7730,11 @@ def _schedule_create_response(receipt: Mapping[str, Any], *, response_effect: st
     return {
         "ok": True,
         "command": "schedule.create",
-        "response_contract": "spine.schedule-create-response.v3"
-        if receipt["semantic_facts"].get("contract_version") == "spine.schedule-create.v3"
-        else "spine.schedule-create-response.v2",
+        "response_contract": f"spine.schedule-create-response.{_schedule_receipt_version(receipt)}",
         "effect": response_effect,
         **dict(facts),
         "receipt": {
-            "receipt_contract": "spine.schedule-create-receipt.v3"
-            if receipt["semantic_facts"].get("contract_version") == "spine.schedule-create.v3"
-            else "spine.schedule-create-receipt.v2",
+            "receipt_contract": f"spine.schedule-create-receipt.{_schedule_receipt_version(receipt)}",
             "command_receipt_id": receipt["command_receipt_id"],
             "effect": "schedule_created",
             "semantic_facts_hash": receipt["semantic_facts_hash"],

@@ -156,27 +156,32 @@ class LedgerConnection(sqlite3.Connection):
             self._facet_bindings.clear()
             self._facet_definitions.clear()
 
+    def _finalize_pending(self) -> None:
+        """Validate touched state without granting commit (also used by previews)."""
+        if getattr(self, "_renderings_enabled", False):
+            from spine.ledger.rendering_definitions import finalize as finalize_renderings
+
+            finalize_renderings(self)
+        if getattr(self, "_facets_enabled", False):
+            from spine.ledger.facets import finalize
+
+            if not self._facet_allocations <= self._facet_versions:
+                raise SpineValidationError("environment_failure:facets", "unfinalized item version")
+            expected = (
+                frozenset(self._facet_versions),
+                frozenset(self._facet_items),
+                frozenset(self._facet_roots),
+                frozenset(self._facet_bindings),
+                frozenset(self._facet_definitions),
+            )
+            proof = finalize(self, *expected)
+            if proof != expected:
+                raise SpineValidationError("environment_failure:facets", "facet finalization incomplete")
+
     def _commit_checked(self) -> None:
         try:
-            if getattr(self, "_renderings_enabled", False):
-                from spine.ledger.rendering_definitions import finalize as finalize_renderings
-
-                finalize_renderings(self)
+            self._finalize_pending()
             if getattr(self, "_facets_enabled", False):
-                from spine.ledger.facets import finalize
-
-                if not self._facet_allocations <= self._facet_versions:
-                    raise SpineValidationError("environment_failure:facets", "unfinalized item version")
-                expected = (
-                    frozenset(self._facet_versions),
-                    frozenset(self._facet_items),
-                    frozenset(self._facet_roots),
-                    frozenset(self._facet_bindings),
-                    frozenset(self._facet_definitions),
-                )
-                proof = finalize(self, *expected)
-                if proof != expected:
-                    raise SpineValidationError("environment_failure:facets", "facet finalization incomplete")
                 self._allow_commit = True
                 self.set_authorizer(self._authorize_commit)
             super().commit()

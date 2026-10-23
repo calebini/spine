@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
+from typing import Any
 
 from spine.core import rendering_definitions as codec
 from spine.ledger import facet_continuity
@@ -174,7 +175,7 @@ def application_projection(db, item_id, version):
 class RenderingAuthoring:
     """Private context hook; never construct from CLI/web request fields."""
 
-    def __init__(self, db, command, request, permissions, budget):
+    def __init__(self, db: Any, command: str, request: Any, permissions: Any, budget: Any) -> None:
         self.db, self.command, self.request, self.permissions, self.budget = db, command, request, permissions, budget
         self.pending = {}
         self.changes = []
@@ -359,7 +360,7 @@ class RenderingAuthoring:
                 if change["source_policy_id"] == source:
                     change["policy_id"] = identity
 
-    def verify_successor(self, item_id, version):
+    def verify_successor(self, item_id: str, version: int) -> None:
         # The item allocator advances its current pointer after the extension
         # callback returns. Verify against the committed-in-transaction successor,
         # not the still-current predecessor seen inside persist().

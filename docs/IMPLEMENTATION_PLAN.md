@@ -1,7 +1,7 @@
 # Spine Implementation Plan
 
 Role: Roadmap rationale and delivery history; current task status lives in [BACKLOG.md](BACKLOG.md)
-Last updated: 2026-10-23 (private people transactional/continuity prerequisite; timezone work separate)
+Last updated: 2026-10-23 (private local people handlers and scheduling v4; timezone work separate)
 
 This is a non-normative delivery plan. The specifications and machine-readable contracts remain authoritative.
 
@@ -283,6 +283,54 @@ capabilities, runtime/schema versions and frozen wire schemas remain unchanged.
 No operator ledger, new migration, real delivery, external audit, push or deployment.
 The operator selected checkpointing this completed step before S1c. Keep the separate
 pre-existing `AGENTS.md` amendment outside the cohesive S1b commit.
+
+**S1c private local implementation (2026-10-23):** The operator authorized the
+next leg from checkpoint `c80faaf`. `commands/people_candidate.py` now executes
+trusted-local `item.people.show` and `item.people.update` using the actual outer
+command transaction. Readback binds exact historical associations to current local
+catalog labels without storing labels in receipts. Standalone changed/no-op receipts
+use the reviewed canonical semantic preimage, preserve prior IDs on no-op, and
+validate immutable original result/audit evidence on replay before fresh version or
+reference eligibility checks. Malformed retained evidence refuses without repair.
+Dry-run performs real writes and the same touched-state finalizers, then rolls the
+outer transaction back; it never commits or reserves preview identities. Ordinary
+commit still owns deferred SQLite FK enforcement.
+
+The private `PeopleAuthoring` hook joins scheduling v4 to existing create/update
+handlers and rendering hooks. People and ordinary schedule dimensions commit one
+version/audit/receipt, not a second people command. Replacement touches only the
+item-type-managed role; omitted people copy forward, explicit equal replacement in
+an otherwise changed composite uses replacement paths, and whole-command no-op
+retains prior IDs. People-only updates require no materialization, do not reconcile
+work, and verify the separate role-only edge. The shared freshness resolver selects
+those v4 edges from exact indexed receipt evidence. Mixed presentation histories
+retain their strict distinct proof. Old selectors and task-role authoring are
+unchanged.
+
+**Scope limits:** This is an unadvertised trusted-local candidate, not an admitted
+web implementation. It refuses transport metadata rather than allowing protected
+callers to select local authority. Active-ID admission runs inside the write under
+the existing trusted-local full-ledger policy; no item ownership is adopted or
+changed. Protected owner-scoped admission, initiating-account/receipt disclosure,
+access-release fences and the shared current-label disclosure resolver remain
+Slice 2/protected-successor dependencies, not passing claims. Roster discovery and
+pagination, full PR work/race matrices and installed/public activation remain gated.
+No schema, package version, compiled declaration or frozen wire contract changes.
+
+**Verification:** 26 new real-ledger handler/composite tests pass, including canonical
+vector agreement, fresh/no-op/replay distinctions, current labels/exact history,
+malformed receipts/audits, fail-closed private admission, preview/finalizer rollback,
+one-version mixed edits, replacement/copy identity, existing role writers, selected
+rendering retention and actual worker freshness across mixed exclusive edges. The
+existing empty/eight-facet writer matrix includes these handlers. The selected
+regression run passes 193 tests; the subsequent defensive receipt-type check is
+covered by the rerun of all 26 handler tests. Focused Ruff, strict mypy on the three
+people modules and diff hygiene pass. The full suite passes: **1,128 tests, one
+skipped, 178.820 seconds**. The final defensive receipt-type correction is also
+covered by the 26-test focused rerun. This is the verified private local S1c
+increment; protected admission/read acceptance remains explicitly pending.
+S1d must reconcile remaining PR obligations rather than claim whole-family closure.
+No audit, commit, push, operator ledger, send, migration or deployment.
 
 The preceding bounded delivery is
 [SPINE-058](BACKLOG.md#spine-058--deliver-trusted-local-facet-revision-readback):

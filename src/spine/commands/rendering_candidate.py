@@ -7,7 +7,9 @@ from __future__ import annotations
 
 import copy
 import sqlite3
+from collections.abc import Mapping
 from dataclasses import replace
+from typing import Any
 
 from spine.commands import core, rendering_catalog, rendering_profiles
 from spine.commands.facet_runtime import FacetBudget, install_budget, utc_now, wire_time
@@ -36,7 +38,7 @@ def accepts(command, request):
     return False
 
 
-def normalized_request(command, request):
+def normalized_request(command: str, request: Mapping[str, Any]) -> dict[str, Any]:
     value = copy.deepcopy(dict(request))
     codec.bounded(value, 32768, "request")
     if command in {"notification_profile.create", "notification_profile.revise"}:

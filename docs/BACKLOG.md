@@ -74,8 +74,9 @@ concrete incident does not reactivate deferred SPINE-004–007/010 initiatives.
 
 ### SPINE-061 — Implement people and responsibility
 
-**Status:** In progress — private S1a and S1b foundations implemented and locally
-verified (S1b completed 2026-10-23); no command/capability activation. The operator accepted the completed A/B/C
+**Status:** In progress — private S1a/b foundations and trusted-local S1c handlers
+implemented and locally verified (2026-10-23). No public
+command/capability activation. The operator accepted the completed A/B/C
 reviews and verified corrections as sufficient to close the machine-contract
 review prerequisite and move into implementation planning. This is a bounded
 acceptance of the review evidence, not an independent whole-bundle re-audit,
@@ -321,7 +322,30 @@ remain S1c work; full protected disclosure and race matrices remain later slices
 Checkpoint the eight cohesive implementation/test/tracking files; preserve the
 separate pre-existing `AGENTS.md` edit. No push or public activation.
 
-**Next:** Proceed to S1c handlers
+**S1c started (2026-10-23):** The operator selected private local handlers,
+canonical receipt/replay/dry-run integration and atomic scheduling-v4 people
+authoring. Reuse the S1a/b shared normalization, writer and continuity proof; do
+not expose a partial public family. Directory pagination, protected transport and
+complete release/race evidence remain later slices. Preserve the existing
+`AGENTS.md` edit. No audit, commit, push, migration or deployment is authorized.
+
+**S1c local result:** The private candidate now supplies standalone show/update,
+canonical changed/no-op/replay receipts, deterministic previews with real transaction
+rollback and existing finalizers, and atomic scheduling-v4 people integration.
+Mixed composites produce one version; selected-role replacement preserves unmanaged
+roles and old interfaces. People-only v4 edges use indexed receipt evidence and
+the distinct role proof, without cancellation/materialization. Current local labels
+are read, never stored in receipts. Protected contexts cannot enter this local path;
+owner-scoped protected admission, replay disclosure and shared label/release checks
+are explicitly pending rather than bypassed. Public family/registries and schema
+are unchanged. 26 new handler tests, 193 selected regressions, focused Ruff, strict
+typing of the three people modules and diff hygiene pass. The full suite passes:
+**1,128 tests, one skipped, 178.820 seconds**. The final defensive receipt-type
+check also passes the focused 26-test rerun. This verifies the private local
+increment, not protected admission or whole-family acceptance. Changes remain
+uncommitted; the separate pre-existing `AGENTS.md` change is preserved.
+
+**Next:** S1d parity/obligation reconciliation
 under the selected sequence. Keep capability/package activation gated on complete
 applicable runtime evidence. No external review, push, migration, operator-ledger
 access or deployment occurred.
