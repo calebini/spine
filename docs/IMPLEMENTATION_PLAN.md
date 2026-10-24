@@ -1,7 +1,7 @@
 # Spine Implementation Plan
 
 Role: Roadmap rationale and delivery history; current task status lives in [BACKLOG.md](BACKLOG.md)
-Last updated: 2026-10-24 (Slice 2 private scheduling/read integration; timezone work separate)
+Last updated: 2026-10-24 (Slice 3 private work-state/race evidence; timezone work separate)
 
 This is a non-normative delivery plan. The specifications and machine-readable contracts remain authoritative.
 
@@ -434,6 +434,52 @@ full work-state/lease/mixed-lineage and temporal-source race matrix. Retain any 
 cost/concurrency qualification explicitly; installed CLI/HTTP/frozen-bundle qualification
 and public activation remain Slice 4. No second commit/push, audit, migration or deployment
 is authorized by the integration work.
+
+### Slice 3 — work-state and freshness integration
+
+The operator authorized committing Slice 2 and starting Slice 3 on 2026-10-24.
+Checkpoint `1e5abf9` contains the fourteen Slice 2 integration/test/evidence files;
+the pre-existing `AGENTS.md` edit remains separate and no push occurred. Its final
+71-test people integration/protected/contract check passed before commit.
+
+Use the existing worker, policy-lineage resolver, people/facet/presentation proofs,
+temporal-binding resolver and durable attempt gate. Do not add a lease table:
+Tickerd supplies a selected immutable work item and Spine persists `in_progress`;
+exercise both actual boundaries. Verify exact queued/in-progress/retry/started and
+terminal work, original payload/rendering history, logical provider identity and
+absence of implicit materialization/cancellation. Shared-intent sibling policies
+must retain their own ordinary/definition presentations and disabled state through
+a policy bijection, not an intent-keyed collapse.
+
+Race evidence uses deterministic owner hooks and actual independent file-ledger
+connections. Test competing version writes and the attempt-start write lock, then
+stale retries without partial receipt/version evidence. A prebuilt body is still
+subject to the normal source-version fence after people edits; already-started
+evidence is replayed exactly without permission for a second external write.
+
+Recurring role-only/facet edges preserve occurrence work/provenance. Actual recurrence
+edits still use ordinary semantic reconciliation and stale-work fences. Source people
+edits invalidate `follow_source` dependents, including selected-occurrence sources;
+target people edits cannot refresh that source pin. Explicit binding reconciliation
+may refresh an unchanged due time without allocating a target version. Snapshot
+bindings remain non-governing. No people labels are added to outgoing messages.
+
+New state/race tests and their affected owners run first, then full regression and
+focused lint/typing. Record exact outcomes and remaining per-PR gates in
+[runtime evidence](PEOPLE_RUNTIME_EVIDENCE.md). This work does not authorize public
+activation, package/schema changes, new storage, Whetstone, operator-ledger access,
+real sends, migration, deployment, another commit or push. No runtime correction is
+assumed merely because additional tests are being added.
+
+**Local outcome:** Twenty-four new real-ledger work/freshness/access-race tests
+exercise the selected cases without requiring runtime corrections. The affected
+168-test owner run, full 1,224-test discovery (one skip), and final 86-test group
+including the last four permission-race cases pass. Exact results and limitations
+are in the backlog/evidence map. The operator subsequently authorized its focused
+private checkpoint, excluding `AGENTS.md`; all 24 new tests passed again before commit.
+Slice 4 retains installed transport/package/frozen compatibility and all remaining
+cost/concurrency qualification before whole-family activation. No feature is
+advertised merely because these internal tests pass.
 
 The preceding bounded delivery is
 [SPINE-058](BACKLOG.md#spine-058--deliver-trusted-local-facet-revision-readback):

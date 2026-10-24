@@ -75,8 +75,9 @@ concrete incident does not reactivate deferred SPINE-004–007/010 initiatives.
 ### SPINE-061 — Implement people and responsibility
 
 **Status:** In progress — private Slice 1 through S1d committed (`e7c1a41`), followed
-by the scoped directory/standalone foundation at `c937661`. Remaining Slice 2
-integration is implemented and locally verified (2026-10-24). No public
+by the scoped directory/standalone foundation at `c937661` and Slice 2 integration
+at `1e5abf9`. Slice 3's private work-state/race increment is locally verified
+(2026-10-24); its focused checkpoint is operator-authorized. No public
 command/capability activation. The operator accepted the completed A/B/C
 reviews and verified corrections as sufficient to close the machine-contract
 review prerequisite and move into implementation planning. This is a bounded
@@ -469,6 +470,45 @@ group passes **71 tests (17.328 seconds)**; focused Ruff and diff hygiene pass.
 Exclude the preserved `AGENTS.md` change. No push or public activation. Slice 3
 will exercise the shared work-state, lease/mixed-lineage and temporal-source
 freshness contracts on disposable ledgers, preserving the remaining Slice 4 gates.
+
+**Slice 3 started (2026-10-24):** Checkpoint `1e5abf9` includes fourteen cohesive
+Slice 2 integration/test/tracking files; the unrelated `AGENTS.md` edit remains
+excluded and nothing was pushed. Implement and verify PR-09–11/13/16 work-state,
+mixed-edge, recurring/relative-source and writer/lease/attempt race cases through
+the existing owners. Preserve exact work/attempt evidence under valid people-only
+edges; independently stale or invalid continuity must fail closed, not silently
+cancel/resend. No public family activation, new persistence, Whetstone, operator
+ledger, send, migration, deployment, further commit or push is authorized.
+
+**Slice 3 result:** Twenty-four new real-ledger regressions exercise exact
+eligible/selected/in-progress/retry/started/terminal/absent work, same-intent
+ordinary/definition siblings and disabled policy bijection, unchanged attempt
+payload/history/provider identity, actual two-connection version/attempt/roster
+writer exclusion, stale retries, and prepared-versus-started rendering fences.
+Recurring provenance, actual recurrence replacement, item/selected-occurrence
+follow-source invalidation and explicit unchanged-time refresh are covered;
+snapshot bindings remain non-governing. Exact people-family permission races
+cover external grant revoke, timed grant expiry/activation without epoch writes,
+and initiating replay after edit/roster loss but not after read revocation.
+No runtime defect was confirmed: the existing owners satisfy these exercised
+contracts, so no production logic, persistence, schema or package change is made.
+
+**Slice 3 verification:** The affected owner group passes **168 tests (30.921
+seconds)**. Full discovery passes **1,224 tests, one skipped (221.161 seconds)**;
+the final **86-test** group, including the four permission-race tests added after
+full discovery began, passes in **29.380 seconds**. Focused Ruff, strict typing of
+six unchanged people runtime owners, 223 local link targets and diff hygiene pass.
+See the [per-PR evidence map](PEOPLE_RUNTIME_EVIDENCE.md). At verification the Slice 3
+tests/tracking were uncommitted and `AGENTS.md` remained preserved. No push, audit, migration,
+operator ledger, send or deployment. Slice 4 retains installed CLI/HTTP/frozen
+qualification and every remaining cost/concurrency/complete-family gate before
+activation; none is waived by this private verification.
+
+**Slice 3 checkpoint authorization (2026-10-24):** Operator requested the focused
+commit. All 24 new regressions pass again (7.442 seconds), with focused Ruff and
+diff hygiene. Include only the three new test modules and their backlog/plan/
+evidence updates; exclude the pre-existing `AGENTS.md` change. No push, Slice 4
+implementation, public activation, migration or deployment is authorized here.
 
 ### SPINE-060 — Ratify and codify people and responsibility
 

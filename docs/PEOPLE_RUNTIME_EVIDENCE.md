@@ -1,6 +1,6 @@
 # People and responsibility — private runtime evidence
 
-Updated: 2026-10-24. Slice 2 integration follows directory/standalone checkpoint `c937661`.
+Updated: 2026-10-24. Slice 3 follows private Slice 2 checkpoint `1e5abf9`.
 
 This is implementation evidence, not a specification or public capability declaration.
 The [logical spec](../specs/people-and-responsibility.md) and
@@ -150,20 +150,20 @@ the offline contract witnesses remain separate.
 | --- | --- | --- |
 | PR-01 — independent dimensions | Partial: standalone and v4 role changes preserve adopted ownership, access state, memberships, routes, work and attempts; notification intents/recipients do not change. | Protected admission/noninterference and complete-family parity; Slices 2/4. |
 | PR-02 — event/task sets | Private local/protected event and task authoring plus protected read integration: omission, replacement, clear, no-op, inactive facts, wrong-role refusal, unscheduled tasks and accountless subjects. | Complete installed parity/remaining matrix qualification; Slice 4. |
-| PR-03 — atomic version/copy/rollback | Partial: local one-version composites/writer matrix plus private protected standalone/composite version/role/owner/audit/receipt/link rollback on failed release or owner persistence. | Complete concurrent-writer coverage and installed parity; Slices 3/4. |
+| PR-03 — atomic version/copy/rollback | Partial: local one-version composites/writer matrix, private protected rollback, and actual two-connection writer exclusion/stale retry without loser version/receipt. | Remaining complete-family/installed parity; Slice 4. |
 | PR-04 — no-op/replay/preview/identity | Partial: local canonical receipts/real preview; private protected standalone/composite replay checks initiator and current disclosure, retains original IDs after newer versions/reference inactivity, and refuses after read revocation. | Complete preview/permission matrix and installed parity; Slice 4. |
 | PR-05 — roster/fresh-reference privacy | Partial private evidence now includes protected scheduling-v4 owner admission, atomic owner/people creation and rollback in addition to standalone selection/retention/removal. | Complete cost/noninterference/race and installed qualification; Slices 3/4. |
 | PR-06 — history/current labels | Partial private evidence: shared protected labels/history, closed nondisclosure, optional independent-read sections with SQL/byte/resource degradation, hidden-label noninterference and release checks. | Remaining concurrent/installed qualification; Slices 3/4. |
 | PR-07 — authorized person filters | Private implementation: authority before exact current role filter, no person lookup, OR roles, inactive-subject active-row match, before-expansion nonmatch, unrelated-role edit/source exclusion, unavailable/unplaced cases. | Complete matrix and public/installed parity; Slice 4. |
-| PR-08 — cursors/release races | Private roster/read successors: MAC vectors, source/query/identity/key/expiry, both occurrence bases, section/agenda paging, membership transitions without epoch write and fresh release checks. | Complete concurrent/timed-grant matrix and installed parity; Slices 3/4. |
-| PR-09 — continuity/mixed edges | Partial: distinct role proof, exact immediate policy bijection, strict facet/presentation proofs, mixed histories, tampered/skipped-edge refusal and 100-version limit. | Full mixed lifecycle/ordinary-edit/lease race acceptance; Slice 3. |
-| PR-10 — work states | Partial: actual queued/start/retry/terminal/attempt-history preservation and independently stale-route refusal. | Complete queued/leased/retry/started/terminal/absent cross-product and races; Slice 3. |
-| PR-11 — recurring/relative freshness | Partial: recurring authoring, target binding retention and source-event people edits invalidating follow-source snapshots. | Full recurrence occurrence/provenance and relative-source race matrix; Slice 3. |
+| PR-08 — cursors/release races | Private roster/read successors: MAC/source/query/identity/key/expiry, both occurrence bases, section/agenda paging, membership and timed item-grant transitions without epoch writes, real external revocation and fresh release checks. | Remaining complete-family/installed parity; Slice 4. |
+| PR-09 — continuity/mixed edges | Distinct role proof, exact immediate policy bijection, strict facet/presentation proofs, mixed histories, tampered/skipped-edge refusal and 100-version limit; same-intent ordinary/definition siblings and disabled policies, real semantic recurrence edits and stale-route distinction. | Complete installed/frozen successor parity; Slice 4. |
+| PR-10 — work states | Actual eligible/selected/in-progress-unstarted/retry/started/succeeded/failed/cancelled/absent cases; exact rows/history/backoff/provider identity, no reopening/materialization, old Tickerd selection processes, attempt lock and prebuilt-render fence. | Complete installed/frozen successor parity; Slice 4. |
+| PR-11 — recurring/relative freshness | Exact recurring work/provenance retained across role/facet edges; actual recurrence change invalidates old work. Item and selected-occurrence source people edits stale follow-source targets, target roles do not refresh pins, explicit unchanged-time reconciliation and snapshot independence execute. | Complete installed/frozen successor parity; Slice 4. |
 | PR-12 — bounded indexed reads | Partial: exact-version/roster/candidate sentinels, request-global SQL/time/byte/resource caps, actual indexed selection plans, hidden dense growth and optional SQL/byte/resource degradation while retaining core/time. | Remaining sparse/dense/grant plan/VM matrices and concurrency/installed qualification; Slices 3/4. |
-| PR-13 — writers/finalizers | Local: all 25 inventoried producers exercised, exact role copy/replacement and historical rows checked, shared facet/rendering finalizer paths and failures tested. | Protected service writer parity, full work matrix and installed successor execution; Slices 3/4. |
+| PR-13 — writers/finalizers | All 25 inventoried producers exercised, exact role copy/replacement/history, shared finalizer failures, protected composites/rollback and selected full work-state/race owners tested. | Installed successor execution/complete-family parity; Slice 4. |
 | PR-14 — installed closure | Activation guard only: source contracts remain unadvertised. | Installed schema/registry synchronization, frozen bundle, package/capability declarations; Slice 4. |
 | PR-15 — public equivalence | Not implemented; public dispatch intentionally rejects this candidate family. | CLI and protected HTTP successor parity; Slice 4. |
-| PR-16 — concurrency | Partial: local CAS rollback, source/membership/identity changes between private protected evaluation and fresh release, failed in-transaction fresh-reference release rollback, read-successor label/role/source/selection fences. | Complete simultaneous writers, lease/temporal-source races and installed parity; Slices 3/4. |
+| PR-16 — concurrency | Partial: actual two-connection version/attempt/roster-writer exclusion, stale retry, private read source/label/role/selection/external grant fences, timed grants without epoch write, replay after edit/roster loss but not read revocation, recurring/relative-source changes before attempt. | Remaining cost/concurrency complete-family and installed parity; Slice 4. |
 
 Primary evidence:
 
@@ -177,6 +177,9 @@ Primary evidence:
 - [Protected standalone tests](../tests/test_people_web.py): real file-ledger admission, labels, mutation/replay, paging and transactional release rollback.
 - [Protected scheduling integration](../tests/test_people_schedule_integration.py): event/task composites, ordinary/definition presentation, owner/people rollback, no-op/replay and work preservation.
 - [Read integration](../tests/test_people_read_integration.py): filters, optional people sections, source/privacy/cursor fences, bounded degradation and actual selection plans.
+- [Work states](../tests/test_people_work_states.py): real selected/in-progress/retry/attempt/terminal/absent evidence and shared-intent presentation bijection.
+- [Continuity races](../tests/test_people_continuity_races.py): actual independent SQLite writers, prepared/started attempt fences and recurring/relative-source freshness.
+- [Protected release races](../tests/test_people_release_races.py): exact successor external grant, timed access and roster/replay transitions.
 
 ## Verification and next gate
 
@@ -267,9 +270,74 @@ PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests .venv/bin/python \
   src/spine/web/people_read_service.py src/spine/web/people_schedule_service.py
 ```
 
-Private scheduling/read integration is implemented and locally verified, not
-publicly activated. It remains uncommitted; the unrelated `AGENTS.md` edit is
-preserved. Slice 3 retains work/lease/mixed-lineage/temporal-source races and
-remaining cost/concurrency qualification; Slice 4 retains installed/frozen/public
-activation. No audit, push, migration, deployment, operator-ledger access or send
-occurred.
+Private scheduling/read integration was implemented and locally verified, not
+publicly activated. It was subsequently committed as `1e5abf9` after 71 focused
+tests passed (17.328 seconds), with lint and staged hygiene. The unrelated
+`AGENTS.md` edit is preserved. No push occurred.
+
+### Slice 3 work-state and race verification
+
+The new [work-state tests](../tests/test_people_work_states.py) exercise real
+private standalone/composite people commands, policy resolution, scheduler and
+attempt owners across eligible, selected, in-progress/unstarted, retry, started,
+succeeded, failed, cancelled and absent work. Selection-to-processing uses the
+actual Tickerd adapter with a deterministic in-process no-send processor, not a
+fabricated lease store or real sender. Exact work/attempt/rendering rows, retry
+backoff/count, provider idempotency and immutable started replay are compared.
+Same-intent sibling policies deliberately have different ordinary/definition
+presentations, plus a disabled policy, before the people-only bijection is tested.
+
+The new [freshness/race tests](../tests/test_people_continuity_races.py) use actual
+independent SQLite connections to compete for the version writer and attempt-start
+transaction. The loser has no partial version/receipt, and retry after the winner
+commits is stale. A prepared rendering after an item-version change must be rebuilt;
+its body can remain the same but input evidence changes. Already-started evidence
+remains replay-only and exact.
+
+Recurring work/provenance stays byte-identical through role/facet edges; real
+recurrence changes invalidate old work independently. Item-level and selected-
+occurrence `follow_source` tasks go stale after source people changes. Target
+people edits do not refresh that source pin; explicit binding reconciliation can
+refresh it without changing the due time or allocating another target version.
+Snapshot bindings remain independent. Tests use disposable ledgers only, never
+operator data or external sends.
+
+The [protected release races](../tests/test_people_release_races.py) add real
+second-connection item-grant revocation between read snapshots, grant expiry and
+future activation at cursor deadlines without access-epoch writes, and roster
+revocation ordered after the atomic people transaction. Loss of fresh edit/roster
+eligibility still permits exact initiating replay with retained read; revoking
+that read permission refuses replay. No weaker replay bypass or implicit roster
+authority is added.
+
+The **168-test** work/authoring/writer/rendering/temporal/worker owner run passes in
+**30.921 seconds**. Full discovery passes **1,224 tests, one skipped (221.161
+seconds)**. The final **86-test** people work/race/protected/read/scheduling/writer/
+documentation/declaration group passes in **29.380 seconds**. That final group includes
+the four permission-race cases added after full discovery began; these are not
+included in the recorded full-suite count. There are **24 new Slice 3 regressions**
+across the three new modules.
+
+Focused Ruff, strict typing of six unchanged people runtime owners, all **223 local
+link targets** and diff hygiene pass. No new runtime code was required: the selected
+cases confirm the existing owners' behavior rather than masking a known defect.
+No project-wide strict-typing or installed public-family claim is made. Remaining
+cost/concurrency matrices and installed/frozen/public qualification are explicit
+Slice 4 gates, not globally closed by this selected evidence. At verification,
+Slice 3 was uncommitted; the existing `AGENTS.md` edit was preserved. No audit, push, migration, deployment,
+operator-ledger access or external send occurred.
+
+The operator subsequently authorized a focused Slice 3 checkpoint. All 24 new
+work-state/continuity/release-race tests passed again in **7.442 seconds**, with
+focused Ruff and diff hygiene. The checkpoint excludes `AGENTS.md`; no push or
+Slice 4 implementation is part of this authorization.
+
+```sh
+PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests .venv/bin/python -m unittest \
+  test_people_work_states test_people_continuity_races test_people_release_races \
+  test_people_read_integration test_people_schedule_integration test_people_web \
+  test_people_writer_parity test_agent_documentation \
+  test_implemented_contract_declarations -q
+PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests .venv/bin/python \
+  -m unittest discover -s tests -q
+```
