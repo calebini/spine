@@ -16,7 +16,8 @@ from spine.web.read_contracts import read_error
 UNAVAILABLE_TIME = {"availability": "unavailable", "reason_code": "temporal_facts_unavailable"}
 
 
-def candidate_ids(snapshot: ReadSnapshot, request: dict[str, Any]) -> list[str]:
+def candidate_ids(snapshot: ReadSnapshot, request: dict[str, Any], *, maximum: int | None = None,
+                  admit_candidates: bool = False) -> list[str]:
     """Select authorized roots before type/lifecycle filtering or time expansion.
 
     This is the full bounded candidate set, not a page; caller applies the v2 stream
@@ -40,6 +41,7 @@ def candidate_ids(snapshot: ReadSnapshot, request: dict[str, Any]) -> list[str]:
               AND EXISTS (SELECT 1 FROM access_grant_operations o
                 WHERE o.grant_id=g.grant_id AND o.revision=g.current_revision AND o.operation IN ('item.read','item.edit'))
         """
+        ceiling = '' if maximum is None else ' LIMIT ?'
         identities = [row[0] for row in db.execute(
             f"""SELECT item_id FROM item_access_owners WHERE owner_subject_id=?
             UNION SELECT item_id FROM item_access_owners WHERE owner_group_id IN ({marks})
@@ -47,13 +49,18 @@ def candidate_ids(snapshot: ReadSnapshot, request: dict[str, Any]) -> list[str]:
               {grant_tail} AND g.grantee_subject_id=?
             UNION SELECT g.resource_id FROM access_grants g INDEXED BY access_grants_group
               {grant_tail} AND g.grantee_group_id IN ({marks})
-            ORDER BY item_id""",
-            (p.subject, *groups, p.now, p.now, p.subject, p.now, p.now, *groups),
+            ORDER BY item_id""" + ceiling,
+            (p.subject, *groups, p.now, p.now, p.subject, p.now, p.now, *groups,
+             *((maximum + 1,) if maximum is not None else ())),
         )]
         p.discovered = tuple(identities)
+    if maximum is not None and len(identities) > maximum:
+        raise read_error('capacity_exceeded')
     selected = []
     for identity in identities:
         snapshot.budget.check()
+        if admit_candidates:
+            p.item(identity)
         row = db.execute(
             """SELECT i.item_type,i.status,e.event_status,t.task_status FROM coordination_items i
             LEFT JOIN event_details e ON e.item_id=i.item_id AND e.version=i.current_version

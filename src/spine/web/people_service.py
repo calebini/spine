@@ -55,11 +55,26 @@ def permission_proof(db, p, budget):
     """Only resources actually consulted; never hash other people's metadata."""
     checks, grants, groups = [], [], set()
     for kind, identity, operation in sorted(p.checked):
-        if kind != 'item':
+        tables = {'item': ('item_access_owners', 'item_id'), 'route': ('delivery_targets', 'delivery_target_id'),
+                  'item_archetype': ('item_archetypes', 'item_archetype_id'),
+                  'notification_profile': ('notification_profiles', 'notification_profile_id'),
+                  'facet_schema': ('facet_schemas', 'facet_schema_id'),
+                  'notification_rendering_definition': ('notification_rendering_definitions', 'notification_rendering_definition_id')}
+        if kind not in tables:
             raise WebError('admission_unavailable')
-        row = dict(db.execute('SELECT * FROM item_access_owners WHERE item_id=?', (identity,)).fetchone())
-        budget.resolve('item', identity)
-        checks.append({'item_id': identity, 'operation': operation, 'owner': row})
+        table, key = tables[kind]
+        stored = db.execute(f'SELECT * FROM {table} WHERE {key}=?', (identity,)).fetchone()
+        if stored is None:
+            raise WebError('domain_failure')
+        row = dict(stored)
+        budget.resolve(kind, identity)
+        fact = {'kind': kind, 'resource_id': identity, 'operation': operation, 'row': row}
+        if kind == 'route':
+            security = db.execute('SELECT revision FROM route_security_revisions WHERE delivery_target_id=?', (identity,)).fetchone()
+            approval = db.execute('SELECT * FROM route_member_use_approvals WHERE delivery_target_id=?', (identity,)).fetchone()
+            fact.update(security_revision=None if security is None else security[0],
+                        member_approval=None if approval is None else dict(approval))
+        checks.append(fact)
         if row['owner_kind'] == 'subject_group' and row['owner_group_id'] in p.groups:
             groups.add(row['owner_group_id'])
     for identity in sorted(p.matched_grants):
@@ -125,6 +140,17 @@ class PeopleService:
         return value
 
     def execute(self, command, body, account, selection, *, current_selection=None):
+        if command in {'schedule.show', 'agenda.show', 'item.occurrences'}:
+            from spine.web.people_read_service import PeopleReadService
+
+            reader = PeopleReadService(self.config, contracts=self.contracts, cursor_config=self.cursor_config, now=self.now,
+                before_release=(lambda: self.before_release(None)) if self.before_release else None)
+            selected = current_selection if current_selection is not None else (lambda: (account, selection))
+            return reader.read(command, body, selection=selected)
+        if command in {'schedule.create', 'schedule.update'}:
+            from spine.web.people_schedule_service import execute_schedule
+
+            return execute_schedule(self, command, body, account, selection, current_selection=current_selection)
         if command not in COMMANDS:
             raise WebError('operation_unavailable')
         budget = PeopleBudget(maximum_steps=self.config.sql_steps, maximum_seconds=self.config.request_seconds)

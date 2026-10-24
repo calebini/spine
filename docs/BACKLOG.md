@@ -74,9 +74,9 @@ concrete incident does not reactivate deferred SPINE-004–007/010 initiatives.
 
 ### SPINE-061 — Implement people and responsibility
 
-**Status:** In progress — private S1a/b/c implemented and verified; S1c checkpoint
-`d050ca3` committed. S1d writer parity/evidence reconciliation is locally verified
-and checkpoint authorized (2026-10-24). No public
+**Status:** In progress — private Slice 1 through S1d committed (`e7c1a41`), followed
+by the scoped directory/standalone foundation at `c937661`. Remaining Slice 2
+integration is implemented and locally verified (2026-10-24). No public
 command/capability activation. The operator accepted the completed A/B/C
 reviews and verified corrections as sufficient to close the machine-contract
 review prerequisite and move into implementation planning. This is a bounded
@@ -423,6 +423,52 @@ Slice 2 integration. Exclude the pre-existing `AGENTS.md` edit. Recheck the focu
 69-test group, lint and staged diff hygiene before checkpointing. Continue protected
 scheduling admission and the independent-read integration without public activation,
 external review, push, migration, deployment or operator-ledger access.
+
+**Checkpoint result:** `c937661` contains the thirteen cohesive directory/standalone
+implementation, test, inventory and tracking files. The focused 69 tests pass again
+(28.962 seconds), with lint and staged diff hygiene; the pre-existing `AGENTS.md`
+change is excluded. No push. Remaining Slice 2 integration began from this checkpoint.
+
+**Slice 2 integration result:** Private protected scheduling-v4 now reuses the real
+people/rendering hooks, version allocator, route/catalog/reference permission owners,
+normal creation ownership/history and atomic receipt attribution. Event participants
+and task assignees create, preserve, replace and clear in the composite transaction;
+equal replacements keep original IDs. Owner scope is explicit on creation, and
+fresh references use that scope, never model-authored identity or unrelated groups.
+The exact prospective create owner is admitted internally and persisted after the
+item exists but before presentation selection, so approved definition rendering can
+compose without an unowned intermediate commit or implicit disclosure grant.
+
+Private schedule/agenda/occurrence successors reuse existing temporal, optional
+evidence and ordering owners. People labels are a separate complete optional section;
+frozen self-only `subject_roles` is unchanged. Current active role predicates run
+after item authority and before temporal expansion. Nonmatching/hidden person IDs
+do not trigger identity lookup, nonmatching agenda roots do not enter source facts,
+and unavailable-time matching tasks remain unplaced. Stateless `pc1` pages cover
+existing section/occurrence and resolved/unplaced streams, with fresh identity,
+authority/source/assembly fences and one request-global SQL/time/byte/resource budget.
+Only the new private family selects the bounded candidate/projection seams; released
+read defaults and public registries/assets are unchanged. No schema/migration.
+
+**Integration verification:** 206 cross-feature tests passed (79.066 seconds), then
+the full regression run passed **1,203 tests, one skipped (211.483 seconds)**. The
+final focused run, including the subsequently added future label-roster membership
+transition case, passed **35 tests (13.822 seconds)**. Focused lint/diff hygiene and
+strict typing of six people owners pass. A structural check of both new orchestration modules passes
+with untyped definitions/calls/globals allowed; broader strict web/rendering typing
+is not clean and is not claimed. See [current evidence](PEOPLE_RUNTIME_EVIDENCE.md).
+No whole-family PR qualification or public activation is inferred from these checks.
+The integration remains uncommitted; checkpoint `c937661` is not pushed and the
+pre-existing `AGENTS.md` edit remains preserved. Next planned slice: full work-state,
+lease/mixed-lineage and temporal-source race coverage, retaining remaining read
+cost/concurrency matrices and installed/public activation gates explicitly.
+
+**Slice 2 checkpoint authorization (2026-10-24):** Operator requested this focused
+commit followed by Slice 3. The final people read/scheduling/protected/contract
+group passes **71 tests (17.328 seconds)**; focused Ruff and diff hygiene pass.
+Exclude the preserved `AGENTS.md` change. No push or public activation. Slice 3
+will exercise the shared work-state, lease/mixed-lineage and temporal-source
+freshness contracts on disposable ledgers, preserving the remaining Slice 4 gates.
 
 ### SPINE-060 — Ratify and codify people and responsibility
 

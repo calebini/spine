@@ -1,7 +1,7 @@
 # Spine Implementation Plan
 
 Role: Roadmap rationale and delivery history; current task status lives in [BACKLOG.md](BACKLOG.md)
-Last updated: 2026-10-24 (Slice 2 directory/standalone foundation; timezone work separate)
+Last updated: 2026-10-24 (Slice 2 private scheduling/read integration; timezone work separate)
 
 This is a non-normative delivery plan. The specifications and machine-readable contracts remain authoritative.
 
@@ -399,6 +399,41 @@ frozen independent reads and self-only `subject_roles`. Full continuity/installe
 qualification remain Slices 3/4. The [runtime evidence map](PEOPLE_RUNTIME_EVIDENCE.md)
 separates current partial tests from whole PR obligations. No external audit, public
 selector, package/schema version, commit/push, live ledger or deployment is authorized.
+
+### Slice 2 integration following checkpoint `c937661`
+
+The operator authorized checkpointing the directory/standalone increment and proceeding
+with its remaining integration. The checkpoint excludes `AGENTS.md` and was not pushed.
+The private protected family now includes scheduling-v4 creation/update and successor
+schedule/agenda/occurrence reads. It still has no public route or compiled activation.
+
+Protected scheduling passes the admitted actual owner scope into the shared people
+hook, retaining existing route/catalog/bound-item permission checks. Ownership creation
+uses the existing access-owner/history pattern within the same canonical transaction;
+an internal prospective-owner resolver lets definition rendering validate that exact
+explicit scope before item insertion, and persistence precedes presentation selection.
+It cannot invent disclosure approval, assign by route, or grant access by participation.
+Replay uses initiating identity/current disclosure, not fresh reference admission.
+
+Read integration selects authorized candidates before role predicates, then calls the
+existing temporal assembly with that explicit selection. This avoids a second recurrence
+engine or post-pagination filtering. The complete optional people section uses the shared
+label authority, preserving legacy self-only roles and independent core/time availability.
+The new stateless cursor family carries reviewed query/source/authority bindings and
+existing ordering tuples; no durable cursor/cache is introduced. Both snapshots and
+proof/serialization share one bounded budget. The frozen owner's default behavior and
+versioned artifacts remain unchanged; new internal seams are adapter-selected, not JSON.
+
+Local evidence covers protected event/task composites and rollback, definition rendering,
+current-label disclosure, filter noninterference, unavailable/unplaced time, section and
+occurrence paging, hidden dense growth, indexed selection, optional resource/SQL/byte
+degradation and outer expiry. Full regression/final evidence are recorded in the backlog
+and [runtime map](PEOPLE_RUNTIME_EVIDENCE.md). This does not claim whole PR-01–16 closure.
+After the private Slice 2 verification, the next planned implementation owner is Slice 3's
+full work-state/lease/mixed-lineage and temporal-source race matrix. Retain any remaining
+cost/concurrency qualification explicitly; installed CLI/HTTP/frozen-bundle qualification
+and public activation remain Slice 4. No second commit/push, audit, migration or deployment
+is authorized by the integration work.
 
 The preceding bounded delivery is
 [SPINE-058](BACKLOG.md#spine-058--deliver-trusted-local-facet-revision-readback):

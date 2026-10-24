@@ -78,6 +78,11 @@ def resolve(db, selection, *, policy, item_type, origin, permissions=None, budge
     ):
         codec.fail("rendering_definition_invalid", "presentation.definition")
     owner = db.execute("SELECT * FROM item_access_owners WHERE item_id=?", (policy["item_id"],)).fetchone()
+    if owner is None and permissions is not None and hasattr(permissions, 'prospective_owner_for'):
+        # A protected create can admit its exact command-derived item owner
+        # before insertion. This is service context, never a request-mode bypass;
+        # the adapter must persist that same owner in the canonical transaction.
+        owner = permissions.prospective_owner_for(policy['item_id'])
     if owner is None:
         codec.fail("rendering_disclosure_unavailable", "presentation", "explicit item owner adoption is required before detail selection")
     own = root_owner(owner)

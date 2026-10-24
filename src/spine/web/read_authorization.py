@@ -52,6 +52,10 @@ def authorization_identity(snapshot, selection):
 
 
 def authorization_evidence(snapshot, probes, core_keys):
+    return hash_canonical_json(authorization_facts(snapshot, probes, core_keys))
+
+
+def authorization_facts(snapshot, probes, core_keys):
     """Recheck exactly the supplied probes under this transaction's current clock.
 
     This object is private. Neither it nor its digest belongs in a public cursor.
@@ -102,7 +106,7 @@ def authorization_evidence(snapshot, probes, core_keys):
         WHERE m.subject_id=? AND m.status='active' AND m.starts_at_utc<=? ORDER BY m.membership_id""",
         (original.subject, original.now),
     )]
-    return hash_canonical_json(_decimal_facts({"checks": result, "grants": grants, "memberships": memberships}))
+    return _decimal_facts({"checks": result, "grants": grants, "memberships": memberships})
 
 
 def authorization_deadline(snapshot):

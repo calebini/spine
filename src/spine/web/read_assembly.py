@@ -107,7 +107,8 @@ def _expanded(snapshot, activity, recurrence, start, end, basis):
     return values
 
 
-def assemble_occurrences(snapshot: ReadSnapshot, request: dict[str, Any], *, guards=None) -> OccurrenceAssembly:
+def assemble_occurrences(snapshot: ReadSnapshot, request: dict[str, Any], *, guards=None,
+                         selected: bool = True) -> OccurrenceAssembly:
     request = _request(snapshot, "item.occurrences", request)
     activity = core(snapshot, request["item_id"], guards=guards)
     if activity["recurrence"] is None:
@@ -119,6 +120,8 @@ def assemble_occurrences(snapshot: ReadSnapshot, request: dict[str, Any], *, gua
         raise read_error("invalid_request") from exc
     if activity["time"]["availability"] != "available":
         return OccurrenceAssembly(activity, [], "incomplete")
+    if not selected:
+        return OccurrenceAssembly(activity, [], 'complete')
     try:
         values = _expanded(snapshot, activity, recurrence, request["range_start"], request["range_end"], request["range_basis"])
     except (SpineValidationError, ValueError, KeyError, TypeError):
@@ -165,10 +168,11 @@ def _entry(snapshot, activity, occurrence, all_day, start, end, request):
     }
 
 
-def assemble_agenda(snapshot: ReadSnapshot, request: dict[str, Any]) -> AgendaAssembly:
+def assemble_agenda(snapshot: ReadSnapshot, request: dict[str, Any], *, selected_ids: list[str] | None = None) -> AgendaAssembly:
     request = _request(snapshot, "agenda", request)
     # Explicit root admission precedes optional work, range resolution or expansion.
-    activities = [core(snapshot, identity) for identity in candidate_ids(snapshot, request)]
+    identities = candidate_ids(snapshot, request) if selected_ids is None else selected_ids
+    activities = [core(snapshot, identity) for identity in identities]
     try:
         validate_timezone_context(
             time_basis="local_instant", timezone=request["timezone"], timezone_database_version=request["timezone_database_version"]

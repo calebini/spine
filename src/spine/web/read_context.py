@@ -165,7 +165,7 @@ def optional_snapshot(snapshot: ReadSnapshot) -> Iterator[ReadSnapshot]:
     # Reuse the frozen admitted identity, but optional permission traversal cannot
     # spend the root's resource reserve. Retain all successful checks for the later
     # release service; do not treat this merge as a release authorization fence.
-    permissions = object.__new__(_OptionalPermissions)
+    permissions = object.__new__(getattr(snapshot.permissions, 'optional_permissions_type', _OptionalPermissions))
     permissions.__dict__ = copy.copy(snapshot.permissions.__dict__)
     permissions.visited, permissions.checked, permissions.matched_grants = set(), set(), set()
     permissions.release_scopes = {}
@@ -193,11 +193,14 @@ def read_snapshot(
     config: WebConfig, contracts: ReadContracts, account_id: str, *, evaluated_at_utc: str,
     clock: Callable[[], float] = time.monotonic,
     budget: ReadBudget | None = None, collect_proof: bool = False,
+    permissions_factory: Callable[..., ReadPermissions] = ReadPermissions,
 ) -> Iterator[ReadSnapshot]:
     """Open a private assembly snapshot, never a public response/release boundary.
 
     Evaluation time comes from the service clock, not the request's agenda timestamp.
     A dedicated read-only connection avoids writes and nested transaction ownership.
+    permissions_factory is a trusted internal adapter seam; request JSON cannot
+    choose the permission implementation. The released default remains unchanged.
     """
     try:
         if not utc_datetime(evaluated_at_utc) or not isinstance(evaluated_at_utc, str):
@@ -225,7 +228,7 @@ def read_snapshot(
             if (state is None or state["ledger_id"] != config.ledger_id or state["realm_id"] != config.realm_id
                     or state["mode"] != "multi_user" or state["identity_mode"] != "trusted_identity"):
                 raise read_error("admission_unavailable")
-            permissions = ReadPermissions(db, account_id, evaluated_at_utc)
+            permissions = permissions_factory(db, account_id, evaluated_at_utc)
             yield ReadSnapshot(db, permissions, contracts, budget, evaluated_at_utc, SourceFacts() if collect_proof else None)
     except WebError as exc:
         # Reused v1 permission helpers must not leak v1's 429 capacity mapping or details.
