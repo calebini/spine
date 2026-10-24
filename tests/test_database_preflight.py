@@ -62,10 +62,11 @@ class CommandRuntimeContractRegistryTests(unittest.TestCase):
         from spine.commands.facets import CONTRACTS as FACET_COMMANDS
         from spine.commands.rendering_catalog import COMMANDS as RENDERING_COMMANDS
 
-        self.assertEqual(len(COMMAND_RUNTIME_CONTRACT_REGISTRY), 76)
+        self.assertEqual(len(COMMAND_RUNTIME_CONTRACT_REGISTRY), 79)
         self.assertEqual(
             set(COMMAND_RUNTIME_CONTRACT_REGISTRY),
-            _dispatch_commands() | set(PROFILE_COMMANDS) | set(FACET_COMMANDS) | set(RENDERING_COMMANDS),
+            _dispatch_commands() | set(PROFILE_COMMANDS) | set(FACET_COMMANDS) | set(RENDERING_COMMANDS)
+            | {"people.list", "item.people.show", "item.people.update"},
         )
         expected_read_commands = {
             "agenda.show",
@@ -96,6 +97,8 @@ class CommandRuntimeContractRegistryTests(unittest.TestCase):
             "notification_rendering_definition.list",
             "notification_rendering_disclosure.show",
             "notification_rendering_disclosure.list",
+            "people.list",
+            "item.people.show",
         }
         self.assertEqual(
             {command for command, entry in COMMAND_RUNTIME_CONTRACT_REGISTRY.items() if entry.access_mode == "read"},

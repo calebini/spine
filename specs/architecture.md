@@ -20,9 +20,11 @@ Local agents and dashboards consume Spine truth or propose candidate actions; th
 The ratified logical [people and responsibility leaf](people-and-responsibility.md) builds on
 subject identities, explicit memberships and item-versioned subject roles. Participation,
 task assignment, resource ownership/access and notification routing remain distinct
-Spine facts. The proposal creates no identity registry, daemon, authorization bypass
-or pack-owned people state; its machine codification is source-only pending review,
-with no runtime or protected-surface activation.
+Spine facts. Runtime 0.11.0 implements the complete local/protected successor family
+without a new identity registry, daemon, authorization bypass, pack-owned people
+state or schema-19 migration. A separately pinned people schema closure preserves
+the frozen web bundles. The CLI remains trusted local; v3 HTTP uses existing
+admitted identity and scoped directory/item permissions, not model-authored identity.
 
 [Ledger instance identity](ledger-instance-identity.md) is Spine-owned authoritative
 metadata, validated through bounded preflight and exposed by system.info v3.

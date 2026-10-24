@@ -1,6 +1,6 @@
 # People and Responsibility
 
-Status: Ratified v1.0.0 — logical design accepted; machine codification pending review; not implemented
+Status: Ratified v1.0.0 — implemented in runtime 0.11.0/schema 19; deployment remains separate
 Created: 2026-10-16
 Ratified: 2026-10-16, following bounded consistency audit people-and-responsibility-contract-audit-001
 Inspected baseline: `8f3c50b6fd1b4aa534e50925b7417a7a80d19122`, runtime 0.10.0/schema 19
@@ -28,12 +28,13 @@ This leaf owns participation/assignment behavior and its successor public surfac
 [independent reads](independent-activity-reads.md) and
 [relative bindings](relative-temporal-bindings.md) retain their existing authority.
 
-This accepted design changes no implemented command, schema, registry, permission,
-package version or released pack. New names and examples below are not callable
-runtime contracts. Product decisions D-01/D-02 and the reviewed logical design were
-approved on 2026-10-16. The source-only machine companion and schemas codify that
-design; their review and Section 12 runtime gates still precede implementation.
-Ratification is not an implementation-readiness claim.
+Product decisions D-01/D-02 and the reviewed logical design were approved on
+2026-10-16. The accepted A/B/C machine reviews and verified corrections preceded
+implementation. Runtime 0.11.0 adds the complete explicit local/protected successor
+family below on existing schema 19; no DDL or migration is introduced. The machine
+companion, separately packaged schema closure and Section 12 runtime evidence
+define that implemented boundary. Existing families remain valid. Deployment,
+frontend adoption and pack adoption are separate from implementation.
 
 ## 2. Four independent dimensions
 
@@ -104,10 +105,9 @@ removing the existing self-only guard globally is not such a family.
 
 ## 5. Successor public operations
 
-These are accepted logical operations with source-only machine candidates in
-Section 13, not implemented selectors or routes:
+These operations are implemented through the exact Section 13 selectors and routes:
 
-| Proposed operation | Required meaning |
+| Operation | Required meaning |
 | --- | --- |
 | `people.list` | Bounded subject choices in one explicit subject/group owner scope; separate eligibility from granted item access |
 | `item.people.show` | Current or exact historical participation/assignment snapshot for one readable item |
@@ -329,7 +329,7 @@ and runtime tests must prove both indexed authorized-owner/grant selection and e
 current-version matching; if an additional index is necessary, specify its versioned
 migration/manifest explicitly. This contract activates no DDL or schema number.
 
-Proposed new-family ceilings are 100 total role rows in a touched item version
+New-family ceilings are 100 total role rows in a touched item version
 (including copied unmanaged roles) and page limit 1–100, default 25. Existing
 over-limit data is preserved, not trimmed or scanned at startup. New operations fail
 capacity instead of silently replacing/truncating a partial role set. Codification
@@ -350,8 +350,9 @@ No direct SQLite access is an operator/client workaround for missing surfaces.
 ## 11. Approved product decisions
 
 Both decisions were explicitly approved by the operator on 2026-10-16 for this
-first scope. The logical design was subsequently ratified; neither act activates
-runtime exposure or accepts the not-yet-reviewed machine candidates.
+first scope. The logical design was subsequently ratified; neither act alone
+activated runtime exposure. Accepted machine reviews and executable delivery
+preceded the separately implemented runtime 0.11.0 family.
 
 | ID | Decision | Approved first scope |
 | --- | --- | --- |
@@ -366,14 +367,14 @@ needed to settle these two decisions; any such expansion is a separately selecte
 
 ## 12. Next contracts and acceptance evidence
 
-The logical v0.1.1 draft passed the bounded consistency review with no findings;
-the operator accepted logical v1.0.0. Section 13 and the source-only machine
-companion now define candidate closed schemas, successors, planned declarations,
-permission/error mappings, cursor rules, continuity requirements and offline
-fixtures. Review this codification before runtime implementation. Compiled
-declarations, executable continuity/query/concurrency proof, installed-package
-closure and public-transport tests are still pending. Preserve frozen registries
-and v1/v2/v3 families; do not add fields to released closed envelopes.
+The logical v0.1.1 draft passed bounded consistency review; the operator accepted
+logical v1.0.0 and the subsequent A/B/C machine reviews and verified corrections.
+Section 13 and the machine companion define closed schemas, successors, exact
+declarations, permission/error mappings, cursor rules, continuity and offline
+fixtures. Runtime 0.11.0 implements that family; executable evidence is mapped in
+[the runtime record](../docs/PEOPLE_RUNTIME_EVIDENCE.md). Frozen registries and
+existing v1/v2/v3 families remain unchanged; no released closed envelope gains fields.
+Runtime evidence does not claim deployment, real-send or consumer adoption.
 
 The acceptance corpus must cover:
 
@@ -394,21 +395,23 @@ One coherent delivery may span core/CLI and explicit protected successors, but n
 activate a partial contract. First draft, machine contracts, runtime verification,
 frontend adoption, deployment and pack adoption remain distinct claims.
 
-## 13. Machine codification — candidate v0.1.0, pending review
+## 13. Machine contract and runtime activation
 
 The [machine companion](../contracts/people-and-responsibility.v1.json) owns the
-exact planned registry, selectors, sorted prerequisites, limits, error mappings,
+exact registry, selectors, sorted prerequisites, limits, error mappings,
 normalization and identity paths. [Schemas](../contracts/schemas/people/) are a
-source-only namespace, deliberately outside the flat globs used by current web
-packagers. They are not installed runtime declarations or capability discovery.
+dedicated namespace, deliberately outside the flat globs used by frozen web
+packagers. Their entire declared dependency closure is separately packaged under
+`spine.contracts/people`, with source parity, per-file hashes and a compiled pin.
+No source-tree fallback or remote schema retrieval is permitted at runtime.
 The [fixture manifest](../contracts/people-and-responsibility-fixture-manifest.json)
-distinguishes structural fixtures, pure-model witnesses and pending PR-01–16
-runtime obligations. A passing offline test is not proof of authorization,
+distinguishes structural fixtures and pure-model witnesses from PR-01–16
+runtime obligations and their executable evidence. A passing offline test is not proof of authorization,
 transactions, SQLite query cost, worker races or transport implementation.
 
 ### 13.1 Explicit surface/version boundary
 
-| Surface | Planned selector / result | Exposure when implemented |
+| Surface | Selector / result | Implemented exposure |
 | --- | --- | --- |
 | `people.list`, `item.people.show`, `item.people.update` | `spine.people-and-responsibility.v1` | Trusted-local and separately registered protected routes |
 | `schedule.create` | `spine.schedule-create.v4` / `spine.schedule-create-response.v4` | Additive local selector and protected successor |
@@ -516,7 +519,7 @@ rerun fresh-add eligibility or require fresh edit authority. Labels are not repl
 ### 13.3 Protected admission, failures and independent reads
 
 The companion's ordered stages and CLI/HTTP mappings are normative for this
-candidate. Shape errors select the smallest extra JSON Pointer, then smallest
+family. Shape errors select the smallest extra JSON Pointer, then smallest
 missing pointer, then selector errors, then other schema errors by pointer and
 keyword (code-point order), returning one error. Apply all reference/type/lifecycle
 checks only after root admission; replay precedes fresh expected-version checks.
@@ -524,7 +527,7 @@ Expected-access mismatch precedes target-version mismatch. No missing/private it
 or fresh subject reference may be distinguished by an error message or error field
 containing a hidden ID. A fresh reference error points to the whole people field.
 Protected errors use the closed generic envelope; direct local errors use the
-common command taxonomy and the candidate's safe message classes. Scheduling
+common command taxonomy and the family's safe message classes. Scheduling
 errors outside people validation retain their owning command semantics.
 
 Protected item-only grantees may retain/remove existing associations, but cannot

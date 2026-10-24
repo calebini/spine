@@ -317,27 +317,33 @@ class PeopleContractTests(unittest.TestCase):
             schema = load(ROOT / path)
             walk(schema, schema["$id"])
 
-    def test_registry_is_source_only_not_runtime_capability(self):
-        self.assertFalse(self.contract["runtime_implemented"])
-        self.assertFalse(self.contract["runtime_activation"])
-        self.assertNotIn(self.contract["contract_version"], IMPLEMENTED_CONTRACT_VERSIONS)
+    def test_complete_registry_is_implemented_without_extending_frozen_families(self):
+        self.assertTrue(self.contract["runtime_implemented"])
+        self.assertTrue(self.contract["runtime_activation"])
+        self.assertIn(self.contract["contract_version"], IMPLEMENTED_CONTRACT_VERSIONS)
         for row in self.contract["commands"].values():
-            self.assertFalse(row["runtime_implemented"])
+            self.assertTrue(row["runtime_implemented"])
             versions = row["required_contract_versions"]
             self.assertEqual(versions, sorted(set(versions)))
             self.assertIn(self.contract["contract_version"], versions)
             web_versions = row["http"]["required_contract_versions"]
             self.assertEqual(web_versions, sorted(set(versions) | {self.contract["web_api_contract"]}))
+            self.assertTrue(set(web_versions) <= IMPLEMENTED_CONTRACT_VERSIONS)
             for key in ("request_schema", "response_schema", "web_request_schema", "web_response_schema"):
                 if key in row:
                     path, fragment = urldefrag(row[key])
                     self.assertTrue((ROOT / path).exists())
                     self.resources.resolver().lookup(BASE + path + ("#" + fragment if fragment else ""))
         for command in ("people.list", "item.people.show", "item.people.update"):
-            self.assertNotIn(command, COMMAND_RUNTIME_CONTRACT_REGISTRY)
+            self.assertIn(command, COMMAND_RUNTIME_CONTRACT_REGISTRY)
+        for command, row in self.contract["commands"].items():
+            if row["local"]:
+                self.assertEqual(list(COMMAND_RUNTIME_CONTRACT_REGISTRY[command].required_contract_versions),
+                                 row["required_contract_versions"])
         self.assertEqual(len(self.contract["commands"]), 8)
         self.assertEqual(set(self.contract["runtime_obligations"]), {f"PR-{i:02}" for i in range(1, 17)})
-        self.assertEqual({v["status"] for v in self.contract["runtime_obligations"].values()}, {"pending_runtime"})
+        self.assertEqual({v["status"] for v in self.contract["runtime_obligations"].values()}, {"verified_runtime"})
+        self.assertEqual(self.contract["implemented_runtime"], {"version": "0.11.0", "ledger_schema": "19"})
         self.assertFalse(self.manifest["runtime_verified"])
         self.assertFalse(self.models["runtime_verified"])
         self.assertEqual(len({v["http"]["path"] for v in self.contract["commands"].values()}), 8)

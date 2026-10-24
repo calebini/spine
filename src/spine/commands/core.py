@@ -122,6 +122,9 @@ def handle(command: str, request: Mapping[str, Any], context: CommandContext) ->
     if context.ledger is None:
         return _error(command, "invalid_request", f"{command} requires CommandContext.ledger", "ledger")
     try:
+        from spine.commands import people_candidate
+        if people_candidate.accepts(command, request):
+            return people_candidate.execute_public(command, request, context)
         from spine.commands import rendering_candidate
         if rendering_candidate.accepts(command, request):
             return rendering_candidate.execute(command, request, context, cursor_config=context.rendering_cursor_config)

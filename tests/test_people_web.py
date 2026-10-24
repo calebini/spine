@@ -218,7 +218,7 @@ class PeopleWebTests(unittest.TestCase):
             self.db.execute("UPDATE subjects SET display_name='New source' WHERE subject_id='other'")
         self.denied('access_changed', 'people.list', continued)
 
-    def test_service_budget_missing_key_and_no_partial_public_activation(self):
+    def test_service_budget_missing_key_and_complete_public_activation(self):
         body = self.body('people.list', owner={'owner_kind': 'subject', 'owner_subject_id': 'owner'})
         self.denied('admission_unavailable', 'people.list', body, service=PeopleService(self.config,
             contracts=self.contracts, now=lambda: AT))
@@ -226,9 +226,9 @@ class PeopleWebTests(unittest.TestCase):
             replace(self.config, sql_steps=10), contracts=self.contracts, cursor_config=self.cursor, now=lambda: AT))
         from spine import IMPLEMENTED_CONTRACT_VERSIONS
         from spine.commands.registry import MVP_COMMANDS
-        self.assertNotIn(CONTRACT, IMPLEMENTED_CONTRACT_VERSIONS)
-        self.assertNotIn('people.list', MVP_COMMANDS)
-        self.assertNotIn('item.people.show', MVP_COMMANDS)
+        self.assertIn(CONTRACT, IMPLEMENTED_CONTRACT_VERSIONS)
+        self.assertIn('people.list', MVP_COMMANDS)
+        self.assertIn('item.people.show', MVP_COMMANDS)
 
     def test_failed_write_release_rolls_back_version_roles_audit_receipt_and_link(self):
         self.group()

@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cortext.local/spine/contracts/schemas/trusted-web-read-occurrences-request.schema.json",
+  "type": "object",
+  "properties": {
+    "contract_version": {
+      "const": "spine.trusted-web-api.v2"
+    },
+    "request": {
+      "type": "object",
+      "properties": {
+        "item_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^[^\\u0000-\\u001f\\u007f]+$"
+        },
+        "range_basis": {
+          "enum": [
+            "original_schedule",
+            "expressed_time"
+          ]
+        },
+        "range_start": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/scheduled_fact"
+        },
+        "range_end": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/scheduled_fact"
+        },
+        "limit": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/limit"
+        },
+        "cursor": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/cursor"
+        }
+      },
+      "required": [
+        "item_id",
+        "range_basis",
+        "range_start",
+        "range_end"
+      ],
+      "additionalProperties": false
+    },
+    "expected_access_epoch": {
+      "$ref": "trusted-web-read-types.schema.json#/$defs/version"
+    },
+    "expected_item_version": {
+      "$ref": "trusted-web-read-types.schema.json#/$defs/version"
+    },
+    "expected_recurrence_revision_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256,
+      "pattern": "^[^\\u0000-\\u001f\\u007f]+$"
+    }
+  },
+  "required": [
+    "contract_version",
+    "request"
+  ],
+  "additionalProperties": false
+}

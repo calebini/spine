@@ -22,5 +22,5 @@ class CommandContext:
     facet_cursor_config: Any = None  # Protected adapter configuration, never request JSON.
     rendering_cursor_config: Any = None  # Separate protected rendering cursor key configuration.
     rendering_authoring: Any = None  # Internal candidate hook; public adapters do not populate it.
-    people_authoring: Any = None  # Private people successor hook; never request-selectable.
-    people_cursor_config: Any = None  # Private adapter-only cursor context; no public activation.
+    people_authoring: Any = None  # Internal people successor hook; never request-selectable.
+    people_cursor_config: Any = None  # Protected adapter-only people cursor key configuration.

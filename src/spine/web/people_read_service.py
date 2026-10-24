@@ -1,7 +1,7 @@
-"""Private people successors over the existing independent temporal/read owners.
+"""People successors over the existing independent temporal/read owners.
 
-No HTTP registration, public selector or durable cursor/proof cache. Each page is
-fully reassembled and fenced in a fresh read-only snapshot under one shared budget.
+Each page is fully reassembled and fenced in a fresh read-only snapshot under one
+shared budget, without a durable cursor or proof cache.
 """
 
 from __future__ import annotations
@@ -275,10 +275,12 @@ class PeopleReadService:
         self.contracts.validate('web-responses', response, definition=command, output=True)
         return response
 
-    def read(self, command, body, *, selection, encode=None):
+    def read(self, command, body, *, selection, encode=None, started=None):
         if command not in RESULTS:
             raise WebError('operation_unavailable')
         budget = PeopleReadBudget(self.reads, clock=self.clock, config=self.config)
+        if started is not None:
+            budget.deadline = min(budget.deadline, started + self.config.request_seconds)
         try:
             request, guards = self.normalize(command, body)
             budget.check()

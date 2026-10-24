@@ -1,0 +1,365 @@
+{
+  "schema_version": "spine.people-fixtures.v1",
+  "status": "implemented_structural_fixtures",
+  "runtime_verified": false,
+  "logical_spec_version": "1.0.0",
+  "registry": "contracts/people-and-responsibility.v1.json",
+  "schemas": [
+    "contracts/schemas/people/types.schema.json",
+    "contracts/schemas/people/requests.schema.json",
+    "contracts/schemas/people/responses.schema.json",
+    "contracts/schemas/people/failures.schema.json",
+    "contracts/schemas/people/schedule-create-request-v4.schema.json",
+    "contracts/schemas/people/schedule-update-request-v4.schema.json",
+    "contracts/schemas/people/schedule-create-response-v4.schema.json",
+    "contracts/schemas/people/schedule-update-response-v4.schema.json",
+    "contracts/schemas/people/web-requests.schema.json",
+    "contracts/schemas/people/web-responses.schema.json",
+    "contracts/schemas/people/cursor.schema.json",
+    "contracts/schemas/people/cursor-config.schema.json"
+  ],
+  "model_witness": "tests/fixtures/people_and_responsibility/semantic-witnesses.json",
+  "computed_witness": "tests/fixtures/people_and_responsibility/computed-vectors.json",
+  "changed_dimensions_witness": "tests/fixtures/people_and_responsibility/changed-dimensions-order.json",
+  "fixtures": [
+    {
+      "fixture_id": "section_people_not_requested",
+      "fixture": "tests/fixtures/people_and_responsibility/contracts/section_people_not_requested.json",
+      "schema": "contracts/schemas/people/types.schema.json#/$defs/section",
+      "valid": true
+    },
+    {
+      "fixture_id": "section_people_unavailable",
+      "fixture": "tests/fixtures/people_and_responsibility/contracts/section_people_unavailable.json",
+      "schema": "contracts/schemas/people/types.schema.json#/$defs/section",
+      "valid": true
+    },
+    {
+      "fixture_id": "failure_dry_run",
+      "fixture": "tests/fixtures/people_and_responsibility/contracts/failure_dry_run.json",
+      "schema": "contracts/schemas/people/failures.schema.json#/$defs/local",
+      "valid": true
+    },
+    {
+      "fixture_id": "request_roster",
+      "fixture": "tests/fixtures/people_and_responsibility/contracts/request_roster.json",
+      "schema": "contracts/schemas/people/requests.schema.json#/$defs/people.list",
+      "valid": true
+    },
+    {
+      "fixture_id": "request_inactive_roster",
+      "fixture": "tests/fixtures/people_and_responsibility/contracts/request_inactive_roster.json",
+      "schema": "contracts/schemas/people/requests.schema.json#/$defs/people.list",
+      "valid": true
+    },
+    {
+      "fixture_id": "request_historical",
+      "fixture": "tests/fixtures/people_and_responsibility/contracts/request_historical.json",
+      "schema": "contracts/schemas/people/requests.schema.json#/$defs/item.people.show",
+      "valid": true
+    },
+    {
+      "fixture_id": "request_participants",
+      "fixture": "tests/fixtures/people_and_responsibility/contracts/request_participants.json",
+      "schema": "contracts/schemas/people/requests.schema.json#/$defs/item.people.update",
+      "valid": true
+    },
+    {
+      "fixture_id": "request_clear",
+      "fixture": "tests/fixtures/people_and_responsibility/contracts/request_clear.json",
+      "schema": "contracts/schemas/people/requests.schema.json#/$defs/item.people.update",
+      "valid": true
+    },
+    {
+      "fixture_id": "request_assignees",
+      "fixture": "tests/fixtures/people_and_responsibility/contracts/request_assignees.json",
+      "schema": "contracts/schemas/people/requests.schema.json#/$defs/item.people.update",
+      "valid": true
+    },
+    {
+      "fixture_id": "invalid_people_null",
+      "fixture": "tests/fixtures/people_and_responsibility/contracts/invalid_people_null.json",
+      "schema": "contracts/schemas/people/requests.schema.json#/$defs/item.people.update",
+      "valid": false
+    },
+    {
+      "fixture_id": "invalid_people_empty",
+      "fixture": "tests/fixtures/people_and_responsibility/contracts/invalid_people_empty.json",
+      "schema": "contracts/schemas/people/requests.schema.json#/$defs/item.people.update",
+      "valid": false
+    },
+    {
+      "fixture_id": "invalid_people_duplicates",
+      "fixture": "tests/fixtures/people_and_responsibility/contracts/invalid_people_duplicates.json",
+      "schema": "contracts/schemas/people/requests.schema.json#/$defs/item.people.update",
+      "valid": false
+    },
+    {
+      "fixture_id": "invalid_people_mixed",
+      "fixture": "tests/fixtures/people_and_responsibility/contracts/invalid_people_mixed.json",
+      "schema": "contracts/schemas/people/requests.schema.json#/$defs/item.people.update",
+      "valid": false
+    },
+    {
+      "fixture_id": "invalid_people_number",
+      "fixture": "tests/fixtures/people_and_responsibility/contracts/invalid_people_number.json",
+      "schema": "contracts/schemas/people/requests.schema.json#/$defs/item.people.update",
+      "valid": false
+    },
+    {
+      "fixture_id": "invalid_people_blank_id",
+      "fixture": "tests/fixtures/people_and_responsibility/contracts/invalid_people_blank_id.json",
+      "schema": "contracts/schemas/people/requests.schema.json#/$defs/item.people.update",
+      "valid": false
+    },
+    {
+      "fixture_id": "invalid_people_over_limit",
+      "fixture": "tests/fixtures/people_and_responsibility/contracts/invalid_people_over_limit.json",
+      "schema": "contracts/schemas/people/requests.schema.json#/$defs/item.people.update",
+      "valid": false
+    },
+    {
+      "fixture_id": "invalid_actor_in_read",
+      "fixture": "tests/fixtures/people_and_responsibility/contracts/invalid_actor_in_read.json",
+      "schema": "contracts/schemas/people/requests.schema.json#/$defs/item.people.show",
+      "valid": false
+    },
+    {
+      "fixture_id": "invalid_zero_version",
+      "fixture": "tests/fixtures/people_and_responsibility/contracts/invalid_zero_version.json",
+      "schema": "contracts/schemas/people/requests.schema.json#/$defs/item.people.show",
+      "valid": false
+    },
+    {
+      "fixture_id": "invalid_roster_system_scope",
+      "fixture": "tests/fixtures/people_and_responsibility/contracts/invalid_roster_system_scope.json",
+      "schema": "contracts/schemas/people/requests.schema.json#/$defs/people.list",
+      "valid": false
+    },
+    {
+      "fixture_id": "invalid_numeric_limit",
+      "fixture": "tests/fixtures/people_and_responsibility/contracts/invalid_numeric_limit.json",
+      "schema": "contracts/schemas/people/requests.schema.json#/$defs/people.list",
+      "valid": false
+    },
+    {
+      "fixture_id": "response_roster",
+      "fixture": "tests/fixtures/people_and_responsibility/contracts/response_roster.json",
+      "schema": "contracts/schemas/people/responses.schema.json#/$defs/people.list",
+      "valid": true
+    },
+    {
+      "fixture_id": "response_historical",
+      "fixture": "tests/fixtures/people_and_responsibility/contracts/response_historical.json",
+      "schema": "contracts/schemas/people/responses.schema.json#/$defs/item.people.show",
+      "valid": true
+    },
+    {
+      "fixture_id": "response_label_not_disclosed",
+      "fixture": "tests/fixtures/people_and_responsibility/contracts/response_label_not_disclosed.json",
+      "schema": "contracts/schemas/people/responses.schema.json#/$defs/item.people.show",
+      "valid": true
+    },
+    {
+      "fixture_id": "invalid_label_reason",
+      "fixture": "tests/fixtures/people_and_responsibility/contracts/invalid_label_reason.json",
+      "schema": "contracts/schemas/people/responses.schema.json#/$defs/item.people.show",
+      "valid": false
+    },
+    {
+      "fixture_id": "response_updated",
+      "fixture": "tests/fixtures/people_and_responsibility/contracts/response_updated.json",
+      "schema": "contracts/schemas/people/responses.schema.json#/$defs/item.people.update",
+      "valid": true
+    },
+    {
+      "fixture_id": "response_noop",
+      "fixture": "tests/fixtures/people_and_responsibility/contracts/response_noop.json",
+      "schema": "contracts/schemas/people/responses.schema.json#/$defs/item.people.update",
+      "valid": true
+    },
+    {
+      "fixture_id": "response_replay",
+      "fixture": "tests/fixtures/people_and_responsibility/contracts/response_replay.json",
+      "schema": "contracts/schemas/people/responses.schema.json#/$defs/item.people.update",
+      "valid": true
+    },
+    {
+      "fixture_id": "response_dry_run",
+      "fixture": "tests/fixtures/people_and_responsibility/contracts/response_dry_run.json",
+      "schema": "contracts/schemas/people/responses.schema.json#/$defs/item.people.update",
+      "valid": true
+    },
+    {
+      "fixture_id": "invalid_people_work_change",
+      "fixture": "tests/fixtures/people_and_responsibility/contracts/invalid_people_work_change.json",
+      "schema": "contracts/schemas/people/responses.schema.json#/$defs/item.people.update",
+      "valid": false
+    },
+    {
+      "fixture_id": "request_schedule_create",
+      "fixture": "tests/fixtures/people_and_responsibility/contracts/request_schedule_create.json",
+      "schema": "contracts/schemas/people/schedule-create-request-v4.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "invalid_create_task_role",
+      "fixture": "tests/fixtures/people_and_responsibility/contracts/invalid_create_task_role.json",
+      "schema": "contracts/schemas/people/schedule-create-request-v4.schema.json",
+      "valid": false
+    },
+    {
+      "fixture_id": "request_schedule_task",
+      "fixture": "tests/fixtures/people_and_responsibility/contracts/request_schedule_task.json",
+      "schema": "contracts/schemas/people/schedule-create-request-v4.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "invalid_parallel_legacy_roles",
+      "fixture": "tests/fixtures/people_and_responsibility/contracts/invalid_parallel_legacy_roles.json",
+      "schema": "contracts/schemas/people/schedule-create-request-v4.schema.json",
+      "valid": false
+    },
+    {
+      "fixture_id": "response_schedule_create",
+      "fixture": "tests/fixtures/people_and_responsibility/contracts/response_schedule_create.json",
+      "schema": "contracts/schemas/people/schedule-create-response-v4.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "response_schedule_update",
+      "fixture": "tests/fixtures/people_and_responsibility/contracts/response_schedule_update.json",
+      "schema": "contracts/schemas/people/schedule-update-response-v4.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "request_schedule_people_only",
+      "fixture": "tests/fixtures/people_and_responsibility/contracts/request_schedule_people_only.json",
+      "schema": "contracts/schemas/people/schedule-update-request-v4.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "invalid_people_plus_presentation",
+      "fixture": "tests/fixtures/people_and_responsibility/contracts/invalid_people_plus_presentation.json",
+      "schema": "contracts/schemas/people/schedule-update-request-v4.schema.json",
+      "valid": false
+    },
+    {
+      "fixture_id": "web_request_update",
+      "fixture": "tests/fixtures/people_and_responsibility/contracts/web_request_update.json",
+      "schema": "contracts/schemas/people/web-requests.schema.json#/$defs/item.people.update",
+      "valid": true
+    },
+    {
+      "fixture_id": "invalid_web_forged_identity",
+      "fixture": "tests/fixtures/people_and_responsibility/contracts/invalid_web_forged_identity.json",
+      "schema": "contracts/schemas/people/web-requests.schema.json#/$defs/item.people.update",
+      "valid": false
+    },
+    {
+      "fixture_id": "invalid_web_missing_epoch",
+      "fixture": "tests/fixtures/people_and_responsibility/contracts/invalid_web_missing_epoch.json",
+      "schema": "contracts/schemas/people/web-requests.schema.json#/$defs/item.people.update",
+      "valid": false
+    },
+    {
+      "fixture_id": "web_request_create",
+      "fixture": "tests/fixtures/people_and_responsibility/contracts/web_request_create.json",
+      "schema": "contracts/schemas/people/web-requests.schema.json#/$defs/schedule.create",
+      "valid": true
+    },
+    {
+      "fixture_id": "web_request_schedule",
+      "fixture": "tests/fixtures/people_and_responsibility/contracts/web_request_schedule.json",
+      "schema": "contracts/schemas/people/web-requests.schema.json#/$defs/schedule.show",
+      "valid": true
+    },
+    {
+      "fixture_id": "web_response_schedule",
+      "fixture": "tests/fixtures/people_and_responsibility/contracts/web_response_schedule.json",
+      "schema": "contracts/schemas/people/web-responses.schema.json#/$defs/schedule.show",
+      "valid": true
+    },
+    {
+      "fixture_id": "web_request_agenda",
+      "fixture": "tests/fixtures/people_and_responsibility/contracts/web_request_agenda.json",
+      "schema": "contracts/schemas/people/web-requests.schema.json#/$defs/agenda.show",
+      "valid": true
+    },
+    {
+      "fixture_id": "web_response_agenda",
+      "fixture": "tests/fixtures/people_and_responsibility/contracts/web_response_agenda.json",
+      "schema": "contracts/schemas/people/web-responses.schema.json#/$defs/agenda.show",
+      "valid": true
+    },
+    {
+      "fixture_id": "web_request_occurrences",
+      "fixture": "tests/fixtures/people_and_responsibility/contracts/web_request_occurrences.json",
+      "schema": "contracts/schemas/people/web-requests.schema.json#/$defs/item.occurrences",
+      "valid": true
+    },
+    {
+      "fixture_id": "web_response_occurrences",
+      "fixture": "tests/fixtures/people_and_responsibility/contracts/web_response_occurrences.json",
+      "schema": "contracts/schemas/people/web-responses.schema.json#/$defs/item.occurrences",
+      "valid": true
+    },
+    {
+      "fixture_id": "failure_private_reference",
+      "fixture": "tests/fixtures/people_and_responsibility/contracts/failure_private_reference.json",
+      "schema": "contracts/schemas/people/failures.schema.json#/$defs/local",
+      "valid": true
+    },
+    {
+      "fixture_id": "failure_protected_generic",
+      "fixture": "tests/fixtures/people_and_responsibility/contracts/failure_protected_generic.json",
+      "schema": "contracts/schemas/people/failures.schema.json#/$defs/protected",
+      "valid": true
+    },
+    {
+      "fixture_id": "cursor_trusted_local",
+      "fixture": "tests/fixtures/people_and_responsibility/contracts/cursor_trusted_local.json",
+      "schema": "contracts/schemas/people/cursor.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "cursor_protected",
+      "fixture": "tests/fixtures/people_and_responsibility/contracts/cursor_protected.json",
+      "schema": "contracts/schemas/people/cursor.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "cursor_config_test_only",
+      "fixture": "tests/fixtures/people_and_responsibility/contracts/cursor_config_test_only.json",
+      "schema": "contracts/schemas/people/cursor-config.schema.json",
+      "valid": true
+    }
+  ],
+  "runtime_evidence": "Structural/model fixtures remain offline evidence, not runtime proofs. See the companion runtime_obligations and docs/PEOPLE_RUNTIME_EVIDENCE.md for executable PR-01 through PR-16 evidence.",
+  "schema_dependencies": [
+    "contracts/schemas/notification-profile-application-v2.schema.json",
+    "contracts/schemas/notification-profile-types-v2.schema.json",
+    "contracts/schemas/notification-profile-types.schema.json",
+    "contracts/schemas/notification-rendering-definition-types.schema.json",
+    "contracts/schemas/notification-rendering-integration-failure.schema.json",
+    "contracts/schemas/notification-rendering-integration-types.schema.json",
+    "contracts/schemas/notification-types.schema.json",
+    "contracts/schemas/recurrence-types.schema.json",
+    "contracts/schemas/schedule-create-request-v3.schema.json",
+    "contracts/schemas/schedule-create-request.schema.json",
+    "contracts/schemas/schedule-create-response-v3.schema.json",
+    "contracts/schemas/schedule-create-response.schema.json",
+    "contracts/schemas/schedule-operations-types.schema.json",
+    "contracts/schemas/schedule-primary-location-types.schema.json",
+    "contracts/schemas/schedule-update-request-v3.schema.json",
+    "contracts/schemas/schedule-update-response-v3.schema.json",
+    "contracts/schemas/trusted-web-read-agenda-request.schema.json",
+    "contracts/schemas/trusted-web-read-agenda-response.schema.json",
+    "contracts/schemas/trusted-web-read-occurrences-request.schema.json",
+    "contracts/schemas/trusted-web-read-occurrences-response.schema.json",
+    "contracts/schemas/trusted-web-read-schedule-request.schema.json",
+    "contracts/schemas/trusted-web-read-schedule-response.schema.json",
+    "contracts/schemas/trusted-web-read-types.schema.json",
+    "contracts/schemas/trusted-web-types.schema.json"
+  ]
+}

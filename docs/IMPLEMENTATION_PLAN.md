@@ -1,7 +1,7 @@
 # Spine Implementation Plan
 
 Role: Roadmap rationale and delivery history; current task status lives in [BACKLOG.md](BACKLOG.md)
-Last updated: 2026-10-24 (Slice 3 private work-state/race evidence; timezone work separate)
+Last updated: 2026-10-24 (Slice 4 public people family and installed-package evidence; timezone work separate)
 
 This is a non-normative delivery plan. The specifications and machine-readable contracts remain authoritative.
 
@@ -24,7 +24,7 @@ majors and one responsibility-matrix wording issue, now corrected. The
 [audit record](TZDB_COMPATIBILITY_AUDIT.md) preserves findings, disposition and
 input hashes; no convergence or runtime acceptance is claimed.
 
-The selected planning task is
+The selected implementation task is
 [SPINE-061](BACKLOG.md#spine-061--implement-people-and-responsibility), following
 the completed source-contract task SPINE-060 and
 the [people and responsibility contract](../specs/people-and-responsibility.md).
@@ -32,23 +32,26 @@ Build on existing subject-role storage, not facets or a second people registry.
 Keep participation, task assignment, resource access and notification routing
 independent. Scoped directory/association-disclosure policies D-01/D-02 were approved
 on 2026-10-16. The logical draft passed bounded consistency review and the operator
-ratified logical v1.0.0. Source-only machine candidates now cover standalone commands,
+ratified logical v1.0.0. The reviewed machine contracts cover standalone commands,
 explicit scheduling/read successors, a dedicated role-only work-continuity proof,
 exact cursor/error/budget rules and offline fixtures. The operator accepted the
 A/B/C machine reviews and verified corrections on 2026-10-20 as sufficient for
 implementation planning, not a fresh independent whole-bundle audit or runtime
-qualification. All PR-01–16 runtime obligations remain pending. Existing self-only web
-projections and facet-only equality are preserved; neither is silently broadened.
-This planning step makes no runtime, frontend, pack, migration, commit/push or
-deployment changes.
+qualification. The subsequently authorized four implementation slices now provide
+the bounded PR-01–16 evidence in the [runtime map](PEOPLE_RUNTIME_EVIDENCE.md#pr-obligation-map).
+Runtime 0.11.0 exposes the complete family on existing schema 19; no migration is
+introduced. Existing self-only web projections and facet-only equality are preserved;
+neither is silently broadened. Staging, frontend/Packs adoption, commit and push are
+separate operator decisions, not implied by local implementation verification.
 
 ### People delivery sequence
 
 The operator requested this implementation plan on 2026-10-20. The first slice's
 concrete owner mapping and acceptance boundary are below. Reuse current subject-role
 storage, version writers and finalizers; do not introduce a new people registry.
-This is a delivery plan, not completed runtime evidence or an instruction to start
-runtime work, expose a partial capability, migrate or deploy.
+The sequence and private checkpoints below retain the historical delivery boundaries.
+Current completion evidence is recorded under Slice 4, not inferred from this outline.
+The plan itself does not authorize deployment or partial capability exposure.
 
 1. **Local role transactions and history.** Map all version writers and shared
    finalizers, then plan the standalone role replacement/read core and atomic
@@ -480,6 +483,48 @@ private checkpoint, excluding `AGENTS.md`; all 24 new tests passed again before 
 Slice 4 retains installed transport/package/frozen compatibility and all remaining
 cost/concurrency qualification before whole-family activation. No feature is
 advertised merely because these internal tests pass.
+
+### Slice 4 — complete public people family
+
+The operator selected the cohesive final slice after checkpoint `17b3d3e` on
+2026-10-24. Runtime 0.11.0 adds the three standalone local commands, additive
+schedule create/update v4 and exactly eight protected HTTP v3 operations. It reuses
+the verified role, transaction, permission, freshness and worker owners from the
+preceding slices. The separate people package contains the complete 36-schema
+closure, exact registry and compiled/file pins; it does not broaden the frozen web,
+rendering or revision-readback bundles. Schema 19 and the Tickerd pin are unchanged.
+
+The final cost/privacy matrix verifies all-role and candidate/roster sentinels,
+actual indexed owner/grant/role probes, request-global budgets across snapshots,
+and equal work/output with 3,000 additional hidden roots and unrelated grants.
+Public transport tests cover identity, admission, errors, mutation/replay result
+parity, serialization rollback and a deadline spanning transport through release.
+No additional runtime correction was needed in the underlying bounded-query owners.
+
+Installed verification builds a noneditable wheel and runs outside the checkout
+with no source-path injection. It exercises public CLI and all eight HTTP routes,
+history/no-op/replay/dry-run, roster and occurrence pagination, frozen interfaces,
+and explicit deep verification of a disposable ledger. See
+[runtime evidence](PEOPLE_RUNTIME_EVIDENCE.md) for exact commands, hashes, test
+results and the unrelated full-suite installed-test skip.
+
+[People operator documentation](PEOPLE_COMMANDS.md) is progressive disclosure from
+the existing quickstart/operator guide. Participation, assignment, ownership and
+delivery remain independent. Protected cursor configuration is a separate,
+operator-owned secret: local roster discovery reads `SPINE_PEOPLE_CURSOR_CONFIG`,
+and web startup requires `--people-cursor-config`. Missing/bad web configuration
+disables all v3 operations without disabling valid frozen v1/v2 interfaces. It is
+not a new authentication mechanism or a change to trusted-local privileges.
+
+This completes the planned local implementation sequence and its bounded acceptance
+map, not deployment or consumer adoption. The pre-existing `AGENTS.md` amendment
+remains separate. No Whetstone run, live ledger, migration, external send, commit,
+push or deployment is part of this slice. A focused checkpoint and staging rollout
+require separate operator authorization; no retained roadmap task starts automatically.
+
+The operator subsequently authorized the focused Slice 4 local checkpoint on
+2026-10-24, excluding the unrelated `AGENTS.md` change. Push, staging rollout
+and consumer adoption remain separate; no retained roadmap item is selected.
 
 The preceding bounded delivery is
 [SPINE-058](BACKLOG.md#spine-058--deliver-trusted-local-facet-revision-readback):

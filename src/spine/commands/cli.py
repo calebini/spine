@@ -128,7 +128,9 @@ def main(argv: Sequence[str] | None = None) -> int:
         request = (
             {}
             if args.input == "-" and (command == "system.info" or direct_schedule_show)
-            else _load_request(args.input, facet=command in FACET_COMMANDS, rendering=command in RENDERING_COMMANDS)
+            else _load_request(args.input, facet=command in FACET_COMMANDS, rendering=command in RENDERING_COMMANDS,
+                               people=command in {"people.list", "item.people.show", "item.people.update",
+                                                  "schedule.create", "schedule.update"})
         )
         if args.item_id is not None:
             if "item_id" in request:
@@ -173,11 +175,18 @@ def main(argv: Sequence[str] | None = None) -> int:
             from spine.commands.rendering_runtime import load_cursor_config as load_rendering_config
 
             rendering_cursor_config = load_rendering_config(os.environ.get("SPINE_RENDERING_CURSOR_CONFIG", ""))
+        people_cursor_config = None
+        if command == "people.list":
+            from spine.commands.people_runtime import load_cursor_config as load_people_config
+
+            people_cursor_config = load_people_config(os.environ.get("SPINE_PEOPLE_CURSOR_CONFIG", ""))
+        from spine.commands.people_candidate import accepts as people_request
         from spine.commands.rendering_candidate import accepts as rendering_request
 
         connection = _open_ledger(
             args.db,
-            writable=command in WRITE_COMMANDS and (not args.dry_run or command in FACET_WRITES or rendering_request(command, request)),
+            writable=command in WRITE_COMMANDS and (
+                not args.dry_run or command in FACET_WRITES or rendering_request(command, request) or people_request(command, request)),
         )
     except SpineValidationError as exc:
         code, _, field = exc.code.partition(":")
@@ -212,6 +221,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             delivery_target_defaults=delivery_target_defaults,
             facet_cursor_config=cursor_config,
             rendering_cursor_config=rendering_cursor_config,
+            people_cursor_config=people_cursor_config,
         )
         response = handle(command, request, context)
         if args.compact and response.get("ok") is True:
@@ -244,6 +254,9 @@ def _parser() -> argparse.ArgumentParser:
             "notification_rendering_disclosure provision/revoke/show/list. Select spine.schedule-show.v2, "
             "spine.schedule-create.v3, spine.schedule-update.v3 or spine.notification-profiles.v2 in request contract_version. "
             "Catalog list commands require protected SPINE_RENDERING_CURSOR_CONFIG."
+            " People: people list, item people show/update; scheduling people use spine.schedule-create.v4 or "
+            "spine.schedule-update.v4. People listing requires protected SPINE_PEOPLE_CURSOR_CONFIG. "
+            "Existing local schedule/agenda/occurrence reads and compact projections are unchanged."
         ),
     )
     parser.add_argument("command_words", nargs="*")
@@ -318,11 +331,11 @@ def _schedule_show_include(value: str) -> list[str]:
     return values
 
 
-def _load_request(input_ref: str, *, facet: bool = False, rendering: bool = False) -> dict[str, Any]:
+def _load_request(input_ref: str, *, facet: bool = False, rendering: bool = False, people: bool = False) -> dict[str, Any]:
     try:
-        if facet or rendering:
+        if facet or rendering or people:
             maximum = 32768 if rendering else 1024 * 1024
-            family = "rendering" if rendering else "facet"
+            family = "rendering" if rendering else "people" if people else "facet"
             if input_ref == "-":
                 text = sys.stdin.read(maximum + 1)
             else:

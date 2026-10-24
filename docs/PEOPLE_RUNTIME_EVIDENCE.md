@@ -1,15 +1,32 @@
-# People and responsibility — private runtime evidence
+# People and responsibility — runtime evidence
 
-Updated: 2026-10-24. Slice 3 follows private Slice 2 checkpoint `1e5abf9`.
+Updated: 2026-10-24. Runtime 0.11.0/schema 19 public family follows Slice 3 checkpoint `17b3d3e`.
 
 This is implementation evidence, not a specification or public capability declaration.
 The [logical spec](../specs/people-and-responsibility.md) and
 [machine companion](../contracts/people-and-responsibility.v1.json) remain authoritative.
-The companion's `pending_runtime` obligations remain whole-feature gates; none is
-globally closed by the partial evidence below. The accepted A/B/C review is not
-reopened. Operator production is stable; this work does not touch it.
+The accepted A/B/C machine reviews are not reopened. The current acceptance map
+combines the foundation evidence below with public transport, bounded-query,
+installed-artifact and frozen-compatibility checks. This is not a deployment,
+consumer adoption or general production qualification claim. Operator production
+is stable; this work does not touch it.
 
 ## Executed boundary
+
+Runtime 0.11.0 registers the three standalone local commands, additive local
+scheduling v4 and exactly eight protected v3 operations. All use the existing
+transaction/version/receipt owners below. The complete 36-schema people closure
+is separately packaged with file hashes and a compiled pin; missing/tampered
+assets/declarations fail closed without source fallback. New v3 cursor configuration
+is protected context, never request JSON; absent/bad configuration disables the
+whole v3 family but leaves valid frozen v1/v2 interfaces usable. No DDL or migration
+is introduced, and Tickerd's exact dependency remains unchanged.
+
+The following foundation/integration sections retain historical private-checkpoint
+evidence. Their former unadvertised boundary was deliberate; the final public
+delivery is qualified separately in the Slice 4 record below.
+
+### Initial private foundation
 
 The private candidate executes standalone people reads/writes and scheduling v4
 directly through the same `LedgerConnection.atomic_command`, item allocator,
@@ -142,28 +159,29 @@ compatibility promises did not change. No existing row is rewritten.
 
 ## PR obligation map
 
-"Partial" means executable evidence for the named private/local portion, not
-acceptance of the complete obligation. Test files below contain real-ledger tests;
-the offline contract witnesses remain separate.
+Current family acceptance combines real-ledger foundation tests with the public
+CLI/HTTP and installed-wheel evidence. Offline witnesses remain separate and do
+not independently close a runtime obligation. "Verified" is bounded to the specified
+0.11.0 family, not arbitrary production load, deployment or consumer adoption.
 
-| Obligation | Current runtime evidence | Still required / owner |
+| Obligation | Current runtime evidence | Acceptance boundary |
 | --- | --- | --- |
-| PR-01 — independent dimensions | Partial: standalone and v4 role changes preserve adopted ownership, access state, memberships, routes, work and attempts; notification intents/recipients do not change. | Protected admission/noninterference and complete-family parity; Slices 2/4. |
-| PR-02 — event/task sets | Private local/protected event and task authoring plus protected read integration: omission, replacement, clear, no-op, inactive facts, wrong-role refusal, unscheduled tasks and accountless subjects. | Complete installed parity/remaining matrix qualification; Slice 4. |
-| PR-03 — atomic version/copy/rollback | Partial: local one-version composites/writer matrix, private protected rollback, and actual two-connection writer exclusion/stale retry without loser version/receipt. | Remaining complete-family/installed parity; Slice 4. |
-| PR-04 — no-op/replay/preview/identity | Partial: local canonical receipts/real preview; private protected standalone/composite replay checks initiator and current disclosure, retains original IDs after newer versions/reference inactivity, and refuses after read revocation. | Complete preview/permission matrix and installed parity; Slice 4. |
-| PR-05 — roster/fresh-reference privacy | Partial private evidence now includes protected scheduling-v4 owner admission, atomic owner/people creation and rollback in addition to standalone selection/retention/removal. | Complete cost/noninterference/race and installed qualification; Slices 3/4. |
-| PR-06 — history/current labels | Partial private evidence: shared protected labels/history, closed nondisclosure, optional independent-read sections with SQL/byte/resource degradation, hidden-label noninterference and release checks. | Remaining concurrent/installed qualification; Slices 3/4. |
-| PR-07 — authorized person filters | Private implementation: authority before exact current role filter, no person lookup, OR roles, inactive-subject active-row match, before-expansion nonmatch, unrelated-role edit/source exclusion, unavailable/unplaced cases. | Complete matrix and public/installed parity; Slice 4. |
-| PR-08 — cursors/release races | Private roster/read successors: MAC/source/query/identity/key/expiry, both occurrence bases, section/agenda paging, membership and timed item-grant transitions without epoch writes, real external revocation and fresh release checks. | Remaining complete-family/installed parity; Slice 4. |
-| PR-09 — continuity/mixed edges | Distinct role proof, exact immediate policy bijection, strict facet/presentation proofs, mixed histories, tampered/skipped-edge refusal and 100-version limit; same-intent ordinary/definition siblings and disabled policies, real semantic recurrence edits and stale-route distinction. | Complete installed/frozen successor parity; Slice 4. |
-| PR-10 — work states | Actual eligible/selected/in-progress-unstarted/retry/started/succeeded/failed/cancelled/absent cases; exact rows/history/backoff/provider identity, no reopening/materialization, old Tickerd selection processes, attempt lock and prebuilt-render fence. | Complete installed/frozen successor parity; Slice 4. |
-| PR-11 — recurring/relative freshness | Exact recurring work/provenance retained across role/facet edges; actual recurrence change invalidates old work. Item and selected-occurrence source people edits stale follow-source targets, target roles do not refresh pins, explicit unchanged-time reconciliation and snapshot independence execute. | Complete installed/frozen successor parity; Slice 4. |
-| PR-12 — bounded indexed reads | Partial: exact-version/roster/candidate sentinels, request-global SQL/time/byte/resource caps, actual indexed selection plans, hidden dense growth and optional SQL/byte/resource degradation while retaining core/time. | Remaining sparse/dense/grant plan/VM matrices and concurrency/installed qualification; Slices 3/4. |
-| PR-13 — writers/finalizers | All 25 inventoried producers exercised, exact role copy/replacement/history, shared finalizer failures, protected composites/rollback and selected full work-state/race owners tested. | Installed successor execution/complete-family parity; Slice 4. |
-| PR-14 — installed closure | Activation guard only: source contracts remain unadvertised. | Installed schema/registry synchronization, frozen bundle, package/capability declarations; Slice 4. |
-| PR-15 — public equivalence | Not implemented; public dispatch intentionally rejects this candidate family. | CLI and protected HTTP successor parity; Slice 4. |
-| PR-16 — concurrency | Partial: actual two-connection version/attempt/roster-writer exclusion, stale retry, private read source/label/role/selection/external grant fences, timed grants without epoch write, replay after edit/roster loss but not read revocation, recurring/relative-source changes before attempt. | Remaining cost/concurrency complete-family and installed parity; Slice 4. |
+| PR-01 — independent dimensions | Standalone/v4 edits retain ownership, memberships, policies, routes, work and attempts; public transport/installed paths share those owners. | Verified; no implicit access or delivery. |
+| PR-02 — event/task sets | Omit/replace/clear/no-op, inactive/opposite/unmanaged roles, wrong types, unscheduled tasks, agents/accountless people and terminal refusal; public/installed history. | Verified managed-set semantics. |
+| PR-03 — atomic version/copy/rollback | All-writer matrix, protected composite/owner/link rollback, public serialization failure rollback and real two-connection loser exclusion. | Verified existing atomic boundary; no second writer. |
+| PR-04 — no-op/replay/preview/identity | Actual local/installed previews, exact canonical IDs and original replay; protected initiator/current-read checks after edit/reference eligibility loss. | Verified; replay is not a fresh edit. |
+| PR-05 — roster/fresh-reference privacy | D-01 scope/member versus item-grantee admission, no fresh outsider probing, retention/removal, public denied errors and roster/resource caps. | Verified; no implicit grant/provisioning. |
+| PR-06 — history/current labels | D-02 tuples versus current authorized labels, closed nondisclosure, optional fallback, hidden-label changes, release fences and public/installed history. | Verified; labels never enter receipts. |
+| PR-07 — authorized person filters | Authority then exact active-role predicate before expansion/page; no subject lookup, hidden/nonmatch source exclusion, inactive-subject matches and unavailable/unplaced time; public routes. | Verified; series-level only. |
+| PR-08 — cursors/release races | MAC/canonical vectors, query/source/identity/key/ledger bindings, both occurrence bases, roster/section/agenda pages, timed grants/membership and fresh release; installed roster/occurrence pagination. | Verified; no durable read cache. |
+| PR-09 — continuity/mixed edges | Separate role/facet/presentation edge proofs, immediate policy bijection, same-intent distinct presentations/disabled siblings, invalid/skipped-edge refusal and 100-edge cap. | Verified; ordinary semantic changes not blessed. |
+| PR-10 — work states | Eligible/selected/in-progress/retry/started/succeeded/failed/cancelled/absent matrix, exact evidence/provider/backoff, no reopening/materialization, old Tickerd selection and real attempt lock. | Verified; no real-send qualification inferred. |
+| PR-11 — recurring/relative freshness | Exact recurring provenance retained; real recurrence edits stale old work; item/selected-occurrence follow-source invalidation and explicit refresh, target people non-refresh and snapshot independence. | Verified existing temporal owner. |
+| PR-12 — bounded indexed reads | Exact 100/101 roles, 1000/1001 candidate/roster sentinels; actual owner/group/grant/role plans and VM costs, optional fallback/global limits across snapshots; +3000 hidden roots/grants leaves cost/output unchanged. | Verified bounded matrices, not sustained-load qualification. |
+| PR-13 — writers/finalizers | All 25 actual producers, exact role/history copy, shared finalizer failures, protected/public composites and installed successor execution. | Verified; inventory guard remains active. |
+| PR-14 — installed closure | Separate 36-schema/39-asset pinned closure, missing/tampered/declaration failures, synchronization, actual noneditable wheel, deep disposable verify and unchanged frozen bundles. | Verified package boundary; no migration. |
+| PR-15 — public equivalence | Three standalone and v4 local selectors, all eight HTTP routes; decoded mutation/replay result parity, correct errors/identity, installed CLI/HTTP and old v2/v3/read/compact behavior. | Verified; no new local person-filtered read selector. |
+| PR-16 — concurrency | Real version/attempt/roster writer exclusion, source/access/label/selection fences, timed access without epoch writes, edit-loss versus read-loss replay, source change before attempt and request-global transport deadlines. | Verified selected concurrency contracts, not general resilience campaigns. |
 
 Primary evidence:
 
@@ -180,6 +198,10 @@ Primary evidence:
 - [Work states](../tests/test_people_work_states.py): real selected/in-progress/retry/attempt/terminal/absent evidence and shared-intent presentation bijection.
 - [Continuity races](../tests/test_people_continuity_races.py): actual independent SQLite writers, prepared/started attempt fences and recurring/relative-source freshness.
 - [Protected release races](../tests/test_people_release_races.py): exact successor external grant, timed access and roster/replay transitions.
+- [Public CLI/package tests](../tests/test_people_public_cli.py): exact public selectors, previews, local history/pagination, complete pinned closure and fault injection.
+- [Public HTTP tests](../tests/test_people_http.py): all eight routes, privacy, atomic buffering/deadlines, decoded CLI/HTTP parity and frozen route preservation.
+- [Capacity tests](../tests/test_people_read_capacity.py): actual sparse/dense/hidden VM costs, index plans, sentinels and optional/hard budget distinctions.
+- [Installed-wheel exercise](../scripts/verify_people_wheel.py): isolated public CLI and all eight Flask routes on disposable data; no source imports or sends.
 
 ## Verification and next gate
 
@@ -210,6 +232,116 @@ PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests .venv/bin/python -m unittest \
 PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests .venv/bin/python \
   -m unittest discover -s tests -q
 ```
+
+### Slice 4 — public transport, package and bounded-read completion
+
+The operator authorized the cohesive final implementation after `17b3d3e`.
+Runtime 0.11.0 exposes the complete family on schema 19 without DDL, a migration,
+or Tickerd changes. The standalone local commands and explicit schedule v4 selectors
+reuse the same core as the eight protected HTTP operations. Local schedule/agenda/
+occurrence reads, older selectors, compact projections and frozen self-only
+readbacks retain their existing behavior. The public request/result decoders use
+the installed package, not source-tree paths. `jsonschema>=4.23` is consequently a
+declared base runtime dependency; web dependencies remain optional extras.
+
+The [public CLI/package tests](../tests/test_people_public_cli.py) cover public
+registration, current/history/preview/no-op/replay, scheduling v4, roster paging,
+legacy selectors/compact output, exact manifest pins and missing/corrupt assets
+or required response declarations. The [HTTP tests](../tests/test_people_http.py)
+exercise all eight real Flask routes, trusted identity/Host/Origin/headers, closed
+errors and envelopes, history and filtering. They verify serialized-result and
+request-global deadline failures roll back protected mutations before commit,
+and compare decoded inner CLI/HTTP result objects rather than transport whitespace.
+The HTTP timer includes parsing, normalization, encoding and release fences.
+
+The [capacity matrix](../tests/test_people_read_capacity.py) verifies exact 100/101
+all-role limits (including inactive/unmanaged rows), 1,000/1,001 candidate and roster
+sentinels, bounded indexed owner/group/grant/role queries, one request budget across
+both snapshots, optional disclosure fallback versus hard limits, and filtering
+before expansion/page selection without subject existence probes. A candidate
+allowance does not promise every allowed candidate can be fully expanded: the
+separate resource/VM/deadline limits still apply and refuse rather than truncate.
+Measured sparse four-root work is 25,800 VM steps/four resources; dense sixteen-root
+work is 44,800/sixteen. Adding 3,000 hidden roots and 3,000 unrelated grants leaves
+the latter cost, decoded output and cursor unchanged. These are bounded matrices,
+not a general production-load or resilience qualification.
+
+All four package synchronization checks pass. Frozen web, rendering and
+revision-readback bundle bytes are unchanged. The new people package contains
+39 JSON assets including the complete 36-schema closure. Its compiled pin-manifest
+SHA-256 is
+`739c10fe26b17e0c684c2b37a36e655138a90e548a1758d098911c9795210d76`.
+All PR-01–16 obligations above now have bounded runtime evidence, without treating
+offline fixture/model witnesses as runtime proof.
+
+#### Installed artifact
+
+A prepared temporary build environment produced a noneditable
+`spine_ledger-0.11.0-py3-none-any.whl` with SHA-256
+`9be0c0b5411d8851ad7fc785ef2747899c587e562ee026e406ad628c054e6a96`.
+A separate fresh runtime installed that wheel, declared web dependencies and the
+cached exact Tickerd 0.2.0 wheel. `pip check` passes; the runtime capability/descriptor
+pin is verified. No package was published. Temporary build directories are not
+durable externally available release artifacts.
+
+[Installed verifier](../scripts/verify_people_wheel.py) runs with isolated Python,
+no `PYTHONPATH`, and an installed-path assertion outside the checkout. Only public
+CLI provisioning/commands and actual Flask routes operate on synthetic temporary
+ledgers. It verifies history/no-op/replay/dry-run, schedule v4, `pc1` roster/occurrence
+pagination, all eight HTTP routes, frozen interfaces and explicit deep verification.
+It returns `PASS`, version `0.11.0`, schema `19`, 36 packaged schema documents and
+`real_sends=0`. No HTTP listener or delivery processor is started.
+
+```sh
+env -u PYTHONPATH /tmp/spine-people-release.ZPVOz8/runtime/bin/python -I \
+  /Users/Shared/Agent-Workspace/repos/personal/cortext1/spine/scripts/verify_people_wheel.py
+```
+
+#### Final verification and handoff
+
+Final full discovery passes **1,263 tests, one skipped (260.364 seconds)**. The
+existing revision-readback wheel test skips because the repository interpreter
+lacks setuptools; that test is not claimed as executed. The separately prepared
+installed-artifact check above supplies actual installed public-family evidence.
+The earlier full run had only two stale runtime-0.10.0 assertions, corrected before
+the final run. The final selected public/contract/documentation group passes
+**67 tests (39.635 seconds)**. Focused Ruff, strict typing of six people runtime
+owners, all four synchronization checks, 371 local documentation link targets and
+diff hygiene pass. A final documentation/declaration/scaffold check passes 12 tests
+(0.252 seconds). No project-wide strict-typing claim is made.
+
+```sh
+PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests .venv/bin/python \
+  -m unittest discover -s tests -q
+PYTHONDONTWRITEBYTECODE=1 .venv/bin/python scripts/sync_people_contracts.py --check
+PYTHONDONTWRITEBYTECODE=1 .venv/bin/python scripts/sync_web_contracts.py --check
+PYTHONDONTWRITEBYTECODE=1 .venv/bin/python scripts/sync_rendering_contracts.py --check
+PYTHONDONTWRITEBYTECODE=1 .venv/bin/python scripts/sync_revision_readback_contracts.py --check
+```
+
+The [operator leaf](PEOPLE_COMMANDS.md) covers exact commands, managed replacement,
+disclosure and paging, keeping access, participation, assignment and routing
+separate. Local roster discovery needs protected `SPINE_PEOPLE_CURSOR_CONFIG`;
+web startup explicitly takes `--people-cursor-config`. Bad/missing web cursor
+configuration disables all v3 operations while valid v1/v2 remain usable. Packaged
+contract corruption is a separate fail-closed application-construction error.
+No secret, config path or identity override belongs in request JSON.
+
+This closes local implementation acceptance, not deployment, staging/UI/Packs
+adoption or permission to send. Slice 4 remains uncommitted; the unrelated
+pre-existing `AGENTS.md` amendment is preserved. No Whetstone review, operator ledger,
+migration, external send, commit, push or deployment occurred.
+
+The operator subsequently authorized the focused Slice 4 local checkpoint on
+2026-10-24. The unrelated `AGENTS.md` amendment remains excluded. This checkpoint
+does not authorize a push, deployment, operator-ledger operation or consumer adoption.
+
+Checkpoint revalidation: 58 selected public CLI/HTTP, read-capacity, contract and
+scaffold tests pass (38.403 seconds). All four package synchronization checks,
+focused Ruff, strict typing of the six existing people authoring owners and
+staged diff hygiene pass. This is a focused rerun, not a new full-suite or
+installed-wheel qualification run; the recorded complete results above remain
+the basis for those claims.
 
 After this private checkpoint, Slice 2 is scoped discovery, protected reference
 admission, shared label disclosure, filtering and cursors. It must supply actual

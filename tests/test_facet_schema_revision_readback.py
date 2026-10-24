@@ -18,7 +18,7 @@ from unittest.mock import patch
 from jsonschema import Draft202012Validator
 from referencing import Registry, Resource
 
-from spine import IMPLEMENTED_CONTRACT_VERSIONS
+from spine import IMPLEMENTED_CONTRACT_VERSIONS, __version__
 from spine.commands import CommandContext, handle
 from spine.commands import facet_revision_readback as readback
 from spine.commands.cli import main
@@ -367,7 +367,7 @@ entry = COMMAND_RUNTIME_CONTRACT_REGISTRY['facet_schema.revision.show']
 print(json.dumps({'version': __version__, 'schema': IMPLEMENTED_LEDGER_SCHEMA_VERSION,
                  'requirements': entry.required_contract_versions, 'files': sorted(pins['files'])}))
 """))
-            self.assertEqual((facts["version"], facts["schema"]), ("0.10.0", 19))
+            self.assertEqual((facts["version"], facts["schema"]), (__version__, 19))
             self.assertEqual(facts["requirements"], list(COMMAND_RUNTIME_CONTRACT_REGISTRY[COMMAND].required_contract_versions))
             self.assertEqual(set(facts["files"]), {
                 "facet-schema-revision-readback.v1.json",

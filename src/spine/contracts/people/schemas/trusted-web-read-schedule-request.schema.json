@@ -1,0 +1,99 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cortext.local/spine/contracts/schemas/trusted-web-read-schedule-request.schema.json",
+  "type": "object",
+  "properties": {
+    "contract_version": {
+      "const": "spine.trusted-web-api.v2"
+    },
+    "request": {
+      "type": "object",
+      "properties": {
+        "item_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^[^\\u0000-\\u001f\\u007f]+$"
+        },
+        "include": {
+          "type": "array",
+          "uniqueItems": true,
+          "maxItems": 11,
+          "items": {
+            "enum": [
+              "related_items",
+              "relations",
+              "temporal_bindings",
+              "primary_location",
+              "notification_profiles",
+              "policies",
+              "work",
+              "attempts",
+              "delivery_targets",
+              "subject_roles",
+              "authoring_receipt"
+            ]
+          }
+        },
+        "section_limit": {
+          "$ref": "trusted-web-read-types.schema.json#/$defs/limit"
+        },
+        "section_cursors": {
+          "type": "object",
+          "properties": {
+            "related_items": {
+              "$ref": "trusted-web-read-types.schema.json#/$defs/cursor"
+            },
+            "relations": {
+              "$ref": "trusted-web-read-types.schema.json#/$defs/cursor"
+            },
+            "temporal_bindings": {
+              "$ref": "trusted-web-read-types.schema.json#/$defs/cursor"
+            },
+            "notification_profiles": {
+              "$ref": "trusted-web-read-types.schema.json#/$defs/cursor"
+            },
+            "policies": {
+              "$ref": "trusted-web-read-types.schema.json#/$defs/cursor"
+            },
+            "work": {
+              "$ref": "trusted-web-read-types.schema.json#/$defs/cursor"
+            },
+            "attempts": {
+              "$ref": "trusted-web-read-types.schema.json#/$defs/cursor"
+            },
+            "delivery_targets": {
+              "$ref": "trusted-web-read-types.schema.json#/$defs/cursor"
+            },
+            "subject_roles": {
+              "$ref": "trusted-web-read-types.schema.json#/$defs/cursor"
+            }
+          },
+          "required": [],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "item_id"
+      ],
+      "additionalProperties": false
+    },
+    "expected_access_epoch": {
+      "$ref": "trusted-web-read-types.schema.json#/$defs/version"
+    },
+    "expected_item_version": {
+      "$ref": "trusted-web-read-types.schema.json#/$defs/version"
+    },
+    "expected_recurrence_revision_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256,
+      "pattern": "^[^\\u0000-\\u001f\\u007f]+$"
+    }
+  },
+  "required": [
+    "contract_version",
+    "request"
+  ],
+  "additionalProperties": false
+}

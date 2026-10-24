@@ -58,10 +58,10 @@ chat attribution cannot satisfy verified web login in either mode.
 ## 3. Resource Ownership
 
 The ratified logical [people and responsibility leaf](people-and-responsibility.md)
-defines successors for scoped subject choices and item association disclosure;
-its source-only machine codification is pending review and is not implemented.
-Its D-01/D-02 product policies are operator-approved but are not implemented grants
-or changes to current self-only web projection/reference restrictions. Item
+defines implemented 0.11.0 successors for scoped subject choices and item association
+disclosure under operator-approved D-01/D-02. Existing self-only web projections
+remain unchanged; the separate v3 family admits directory authority and readable
+association tuples without inventing a new grant kind. Item
 participation and task assignment never grant item access, membership, account
 rights or delivery authorization.
 

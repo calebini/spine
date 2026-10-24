@@ -74,11 +74,15 @@ concrete incident does not reactivate deferred SPINE-004–007/010 initiatives.
 
 ### SPINE-061 — Implement people and responsibility
 
-**Status:** In progress — private Slice 1 through S1d committed (`e7c1a41`), followed
+**Status:** Done locally — complete runtime 0.11.0 family verified on schema 19
+(2026-10-24); Slice 4 is selected for the operator-authorized local checkpoint
+below and remains undeployed. Private Slice 1 through S1d committed (`e7c1a41`), followed
 by the scoped directory/standalone foundation at `c937661` and Slice 2 integration
 at `1e5abf9`. Slice 3's private work-state/race increment is locally verified
-(2026-10-24); its focused checkpoint is operator-authorized. No public
-command/capability activation. The operator accepted the completed A/B/C
+(2026-10-24) and committed at `17b3d3e`. Slice 4's cohesive public successor/package
+implementation closes the bounded PR-01–16 runtime map below; no published release,
+deployment or consumer adoption is claimed.
+The operator accepted the completed A/B/C
 reviews and verified corrections as sufficient to close the machine-contract
 review prerequisite and move into implementation planning. This is a bounded
 acceptance of the review evidence, not an independent whole-bundle re-audit,
@@ -509,6 +513,63 @@ commit. All 24 new regressions pass again (7.442 seconds), with focused Ruff and
 diff hygiene. Include only the three new test modules and their backlog/plan/
 evidence updates; exclude the pre-existing `AGENTS.md` change. No push, Slice 4
 implementation, public activation, migration or deployment is authorized here.
+
+**Slice 4 started (2026-10-24):** Operator explicitly selected the cohesive final
+implementation slice: remaining bounded/privacy/access evidence, exact local and
+protected HTTP successors, complete installed schema/registry closure, public
+CLI/HTTP parity, frozen compatibility and operator documentation. Preserve all
+existing command versions, self-only read contracts and the `AGENTS.md` edit.
+Implementation may declare the complete verified runtime family, but not advertise
+partial capability or infer staging/Packs/UI adoption. No push, Whetstone, live
+ledger, migration, external send, deployment or further commit is authorized.
+
+**Slice 4 result (2026-10-24):** Runtime 0.11.0 activates the complete reviewed
+family: three standalone local people commands, additive schedule create/update
+v4, and exactly eight protected HTTP v3 operations. The independently pinned
+39-asset package contains all 36 schema documents; missing/tampered assets or
+required declarations fail closed without source fallback. The frozen web,
+rendering and revision-readback bundles are unchanged. Schema 19, physical storage,
+Tickerd requirements, existing command versions, compact receipts and self-only
+read projections are preserved. `jsonschema` is now a declared base dependency
+because local public commands validate the installed contracts.
+
+The remaining capacity/privacy tests verify exact role/candidate/roster sentinels,
+indexed owner/group/grant/role probes, shared snapshot budgets and filtering before
+expansion/pagination. Adding 3,000 hidden roots and 3,000 unrelated grants leaves
+the dense authorized response/cursor and measured 44,800 VM-step cost unchanged.
+Transport coverage verifies all routes, selected identity, permission failures,
+decoded inner-result parity, deadlines and serialization rollback. A real
+noneditable installed wheel passes public CLI/HTTP, history/no-op/replay/dry-run,
+roster/occurrence pagination, frozen interfaces and deep disposable verification.
+
+**Slice 4 verification:** Final full discovery passes **1,263 tests, one skipped
+(260.364 seconds)**. The skip is the pre-existing revision-readback wheel harness
+without local setuptools; it is not represented as executed. The separate prepared
+installed-wheel verification returns `PASS` with eight HTTP routes, 36 packaged
+schemas and zero real sends; `pip check` passes. The final selected public/contract/
+documentation group passes **67 tests (39.635 seconds)**. Focused Ruff, strict
+typing of six people owners, all four package sync checks, 371 local documentation
+link targets and diff hygiene pass. The final documentation/declaration/scaffold
+check passes 12 tests (0.252 seconds).
+The preceding full run had only two stale 0.10.0 version assertions; both were
+corrected to 0.11.0 before the final full run. Exact hashes, commands and acceptance
+limits are in [runtime evidence](PEOPLE_RUNTIME_EVIDENCE.md#slice-4--public-transport-package-and-bounded-read-completion).
+
+[Operator instructions](PEOPLE_COMMANDS.md) are linked progressively from the
+quickstart/guide. A separate protected people cursor file enables roster paging
+and the whole v3 web family (`SPINE_PEOPLE_CURSOR_CONFIG` locally;
+`--people-cursor-config` for web). Bad/missing web configuration disables v3, not
+valid older families. This is not stronger authentication, a new grant, or routing.
+The unrelated `AGENTS.md` edit is preserved. No Whetstone run, operator ledger,
+migration, external send, commit, push or deployment occurred. The next operational
+step is an explicitly authorized focused checkpoint, followed by a separately
+authorized rollout and consumer adoption; no retained roadmap item is selected.
+
+**Slice 4 checkpoint authorization (2026-10-24):** The operator requested the
+focused local implementation commit after reviewing the Specification chat's
+completion report. Include the cohesive 0.11.0 runtime, packaged contracts,
+tests and operator/delivery records. Preserve the unrelated `AGENTS.md` change.
+This authorization includes neither pushing nor deployment or consumer adoption.
 
 ### SPINE-060 — Ratify and codify people and responsibility
 

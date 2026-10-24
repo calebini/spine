@@ -50,6 +50,8 @@ _READ_COMMANDS = frozenset(
         "item_archetype.facet_binding.list",
         "item.facets.show",
         "item.facets.query",
+        "people.list",
+        "item.people.show",
     }
 )
 
@@ -326,6 +328,22 @@ for _command, _versions in _SUCCESSOR_REQUIREMENTS.items():
 for _command in _ADDITIONAL_REQUIREMENTS:
     _ADDITIONAL_REQUIREMENTS[_command] += ("spine.notification-rendering-integration.v1",)
 
+# Additive local successors. Frozen web families continue to use their original
+# exact prerequisites rather than inheriting these separately reviewed pins.
+_PEOPLE_SUCCESSOR_REQUIREMENTS = {
+    "schedule.create": ("spine.people-and-responsibility.v1", "spine.schedule-create.v4",
+                        "spine.schedule-create-response.v4", "spine.schedule-create-receipt.v4"),
+    "schedule.update": ("spine.people-and-responsibility.v1", "spine.people-notification-continuity.v1",
+                        "spine.schedule-update.v4", "spine.schedule-update-response.v4", "spine.schedule-update-receipt.v4"),
+}
+for _command, _versions in _PEOPLE_SUCCESSOR_REQUIREMENTS.items():
+    _ADDITIONAL_REQUIREMENTS[_command] += _versions
+_requirements({"people.list"}, "spine.people-and-responsibility.v1", "spine.people-cursor.v1")
+_requirements({"item.people.show"}, "spine.people-and-responsibility.v1")
+_requirements({"item.people.update"}, "spine.people-and-responsibility.v1", "spine.item-people-receipt.v1",
+              "spine.people-notification-continuity.v1", "spine.facet-notification-continuity.v1",
+              "spine.notification-rendering-integration.v1")
+
 
 def _entry(command: str, additional: tuple[str, ...]) -> CommandContractEntry:
     return CommandContractEntry(
@@ -341,7 +359,8 @@ def frozen_web_required_contract_versions(command: str) -> tuple[str, ...]:
     Only this release's explicitly local additions are subtracted. A changed
     prerequisite outside that closed set still invalidates the frozen registry.
     """
-    local = {"spine.notification-rendering-integration.v1", *_SUCCESSOR_REQUIREMENTS.get(command, ())}
+    local = {"spine.notification-rendering-integration.v1", *_SUCCESSOR_REQUIREMENTS.get(command, ()),
+             *_PEOPLE_SUCCESSOR_REQUIREMENTS.get(command, ())}
     return tuple(v for v in COMMAND_RUNTIME_CONTRACT_REGISTRY[command].required_contract_versions if v not in local)
 
 

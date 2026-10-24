@@ -1,0 +1,149 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cortext.local/spine/contracts/schemas/people/schedule-update-request-v4.schema.json",
+  "$comment": "Source-only people contract candidate; not advertised by or packaged with the current runtime.",
+  "type": "object",
+  "properties": {
+    "contract_version": {
+      "const": "spine.schedule-update.v4"
+    },
+    "command_id": {
+      "$ref": "https://cortext.local/spine/contracts/schemas/schedule-update-request-v3.schema.json#/properties/command_id"
+    },
+    "actor_subject_id": {
+      "$ref": "https://cortext.local/spine/contracts/schemas/schedule-update-request-v3.schema.json#/properties/actor_subject_id"
+    },
+    "item_id": {
+      "$ref": "https://cortext.local/spine/contracts/schemas/schedule-update-request-v3.schema.json#/properties/item_id"
+    },
+    "target_version": {
+      "$ref": "https://cortext.local/spine/contracts/schemas/schedule-update-request-v3.schema.json#/properties/target_version"
+    },
+    "updated_at_utc": {
+      "$ref": "https://cortext.local/spine/contracts/schemas/schedule-update-request-v3.schema.json#/properties/updated_at_utc"
+    },
+    "patch": {
+      "type": "object",
+      "properties": {
+        "item": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/schedule-update-request-v3.schema.json#/properties/patch/properties/item"
+        },
+        "primary_location": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/schedule-update-request-v3.schema.json#/properties/patch/properties/primary_location"
+        },
+        "scheduled_time": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/schedule-update-request-v3.schema.json#/properties/patch/properties/scheduled_time"
+        },
+        "recurrence": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/schedule-update-request-v3.schema.json#/properties/patch/properties/recurrence"
+        },
+        "delivery": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/schedule-update-request-v3.schema.json#/properties/patch/properties/delivery"
+        },
+        "archetype": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/schedule-update-request-v3.schema.json#/properties/patch/properties/archetype"
+        },
+        "notification_plan": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/schedule-update-request-v3.schema.json#/properties/patch/properties/notification_plan"
+        },
+        "policy_presentations": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/schedule-update-request-v3.schema.json#/properties/patch/properties/policy_presentations"
+        },
+        "people": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/patch"
+        }
+      },
+      "required": [],
+      "additionalProperties": false,
+      "minProperties": 1
+    },
+    "materialization": {
+      "$ref": "https://cortext.local/spine/contracts/schemas/schedule-update-request-v3.schema.json#/properties/materialization"
+    }
+  },
+  "required": [
+    "contract_version",
+    "command_id",
+    "actor_subject_id",
+    "item_id",
+    "target_version",
+    "updated_at_utc",
+    "patch",
+    "materialization"
+  ],
+  "additionalProperties": false,
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "patch": {
+            "required": [
+              "policy_presentations"
+            ]
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "patch": {
+            "maxProperties": 1
+          },
+          "materialization": {
+            "properties": {
+              "mode": {
+                "const": "none"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "properties": {
+        "patch": {
+          "properties": {
+            "item": {
+              "properties": {
+                "task_detail": {
+                  "not": {
+                    "required": [
+                      "subject_roles"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "patch": {
+            "required": [
+              "people"
+            ],
+            "maxProperties": 1
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "materialization": {
+            "type": "object",
+            "properties": {
+              "mode": {
+                "const": "none"
+              }
+            },
+            "required": [
+              "mode"
+            ],
+            "additionalProperties": false
+          }
+        }
+      }
+    }
+  ]
+}

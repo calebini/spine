@@ -13,28 +13,62 @@ from urllib.parse import urlsplit
 from flask import Flask, jsonify, request
 from werkzeug.exceptions import HTTPException
 
+from spine.commands.people_runtime import API as PEOPLE_API
+from spine.commands.people_runtime import PeopleContracts, PeopleCursorConfig
+from spine.core.errors import SpineValidationError
 from spine.web.contracts import API, json_object, validate
 from spine.web.errors import WebError
 from spine.web.facet_service import API as FACET_API
 from spine.web.facet_service import FacetService
+from spine.web.people_service import PeopleService
 from spine.web.read_contracts import READ_API, read_error
 from spine.web.read_service import ReadService
 from spine.web.service import WebConfig, WebService, _id
 
+PEOPLE_PATHS = {
+    'people.list': '/api/v3/commands/people.list',
+    'item.people.show': '/api/v3/commands/item.people.show',
+    'item.people.update': '/api/v3/commands/item.people.update',
+    'schedule.create': '/api/v3/commands/schedule.create',
+    'schedule.update': '/api/v3/commands/schedule.update',
+    'schedule.show': '/api/v3/commands/schedule.show',
+    'agenda.show': '/api/v3/agenda',
+    'item.occurrences': '/api/v3/commands/item.occurrences',
+}
 
-def create_app(config: WebConfig, *, cursor_key: str | None = None, facet_cursor_config=None) -> Flask:
+
+def create_app(config: WebConfig, *, cursor_key: str | None = None, facet_cursor_config=None, people_cursor_config=None) -> Flask:
     service = WebService(config, cursor_key=cursor_key)
     reads = ReadService(config)
     facets = FacetService(config, cursor_config=facet_cursor_config)
+    people_contracts = PeopleContracts.packaged()
+    if set(people_contracts.companion['commands']) != set(PEOPLE_PATHS) or any(
+        row['http']['method'] != 'POST' or row['http']['path'] != PEOPLE_PATHS[command]
+        for command, row in people_contracts.companion['commands'].items()
+    ):
+        raise WebError('admission_unavailable')
+    people = PeopleService(config, contracts=people_contracts, cursor_config=people_cursor_config, require_cursor_context=True)
     app = Flask(__name__)
     app.config.update(MAX_CONTENT_LENGTH=1048576, PROPAGATE_EXCEPTIONS=False)
     app.extensions["spine_service"] = service
     app.extensions["spine_read_service"] = reads
     app.extensions["spine_facet_service"] = facets
+    app.extensions["spine_people_service"] = people
     slots = threading.BoundedSemaphore(4)
 
     def failure(error: WebError):
         selection = request.headers.get("X-Spine-Selection-ID")
+        if request.path.startswith('/api/v3/'):
+            failure_schema = people_contracts.schemas['contracts/schemas/people/failures.schema.json']['$defs']['protected']
+            codes = failure_schema['properties']['error']['properties']['code']['enum']
+            code = error.code if error.code in codes else 'admission_unavailable'
+            value = {
+                'contract_version': PEOPLE_API, 'ok': False,
+                'error': {'code': code, 'message': 'People operation unavailable.'},
+                'correlation_id': secrets.token_hex(16), 'selection_id': selection if _id(selection) else None,
+            }
+            people_contracts.validate('failures', value, definition='protected', output=True)
+            return jsonify(value), error.status if code == error.code else 503
         if request.path.startswith("/api/v1/facets/"):
             return jsonify(
                 {
@@ -228,6 +262,37 @@ def create_app(config: WebConfig, *, cursor_key: str | None = None, facet_cursor
     def read_agenda():
         return selected_read("agenda")
 
+    def selected_people(command):
+        # Configuration is service-owned. Missing it disables the complete v3
+        # family, not the existing v1/v2 interfaces or just its pageable routes.
+        try:
+            if not isinstance(people.cursor_config, PeopleCursorConfig):
+                raise ValueError('cursor configuration')
+            people.cursor_config.validate()
+        except (ValueError, TypeError, SpineValidationError) as exc:
+            raise WebError('admission_unavailable') from exc
+        if not slots.acquire(blocking=False):
+            raise WebError('capacity_exceeded')
+        try:
+            started = time.monotonic()
+            account, selected = selection()
+            encoded = people.execute(command, json_object(request.get_data(cache=False)), account, selected,
+                                     current_selection=selection, encode=encode_read, started=started)
+            if time.monotonic() - started >= config.request_seconds:
+                raise WebError('capacity_exceeded')
+            return app.response_class(encoded, mimetype='application/json')
+        finally:
+            slots.release()
+
+    for command_name, path in PEOPLE_PATHS.items():
+        app.add_url_rule(path, endpoint='people_' + command_name,
+                         view_func=lambda command=command_name: selected_people(command), methods=['POST'])
+
+    actual_people = {(rule.rule, method) for rule in app.url_map.iter_rules() if rule.rule.startswith('/api/v3/')
+                     for method in rule.methods - {'HEAD', 'OPTIONS'}}
+    if actual_people != {(path, 'POST') for path in PEOPLE_PATHS.values()}:
+        raise WebError('admission_unavailable')
+
     registry = reads.contracts.artifacts["spine.trusted-web-read-registry.v1.json"]
     expected = {(e["path"], e["method"]) for e in [*registry["commands"], registry["agenda"], registry["discovery"]]}
     actual = {
@@ -253,6 +318,7 @@ def main() -> int:
     parser.add_argument("--timezone", default="UTC")
     parser.add_argument("--trusted-network-confirmed", action="store_true")
     parser.add_argument("--facet-cursor-config", help="protected persistent facet cursor JSON configuration file")
+    parser.add_argument("--people-cursor-config", help="protected persistent people cursor JSON configuration file")
     args = parser.parse_args()
     origin = urlsplit(args.origin)
     local = ipaddress.ip_address(args.listen).is_loopback
@@ -265,8 +331,18 @@ def main() -> int:
     from spine.commands.facet_runtime import load_cursor_config
 
     cursor_config = load_cursor_config(args.facet_cursor_config) if args.facet_cursor_config else None
+    from spine.commands.people_runtime import load_cursor_config as load_people_cursor_config
+
+    try:
+        people_config = load_people_cursor_config(args.people_cursor_config) if args.people_cursor_config else None
+    except SpineValidationError:
+        # No secret/path/exception details reach logs. A broken successor config
+        # must not disable the still-valid older route families.
+        logging.getLogger(__name__).warning('People route family unavailable: invalid protected cursor configuration')
+        people_config = None
     app = create_app(
-        WebConfig(args.db, args.ledger_id, args.realm_id, args.host, args.origin, args.timezone), facet_cursor_config=cursor_config
+        WebConfig(args.db, args.ledger_id, args.realm_id, args.host, args.origin, args.timezone), facet_cursor_config=cursor_config,
+        people_cursor_config=people_config,
     )
     app.extensions["spine_service"].public("ready")
     from waitress import serve

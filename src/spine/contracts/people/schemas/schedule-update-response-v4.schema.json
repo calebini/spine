@@ -1,0 +1,235 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cortext.local/spine/contracts/schemas/people/schedule-update-response-v4.schema.json",
+  "$comment": "Source-only people contract candidate; not advertised by or packaged with the current runtime.",
+  "type": "object",
+  "properties": {
+    "ok": {
+      "$ref": "https://cortext.local/spine/contracts/schemas/schedule-update-response-v3.schema.json#/properties/ok"
+    },
+    "command": {
+      "$ref": "https://cortext.local/spine/contracts/schemas/schedule-update-response-v3.schema.json#/properties/command"
+    },
+    "response_contract": {
+      "const": "spine.schedule-update-response.v4"
+    },
+    "effect": {
+      "$ref": "https://cortext.local/spine/contracts/schemas/schedule-update-response-v3.schema.json#/properties/effect"
+    },
+    "command_id": {
+      "$ref": "https://cortext.local/spine/contracts/schemas/schedule-update-response-v3.schema.json#/properties/command_id"
+    },
+    "command_receipt_id": {
+      "$ref": "https://cortext.local/spine/contracts/schemas/schedule-update-response-v3.schema.json#/properties/command_receipt_id"
+    },
+    "audit_id": {
+      "$ref": "https://cortext.local/spine/contracts/schemas/schedule-update-response-v3.schema.json#/properties/audit_id"
+    },
+    "item_id": {
+      "$ref": "https://cortext.local/spine/contracts/schemas/schedule-update-response-v3.schema.json#/properties/item_id"
+    },
+    "item_type": {
+      "$ref": "https://cortext.local/spine/contracts/schemas/schedule-update-response-v3.schema.json#/properties/item_type"
+    },
+    "target_version": {
+      "$ref": "https://cortext.local/spine/contracts/schemas/schedule-update-response-v3.schema.json#/properties/target_version"
+    },
+    "current_version": {
+      "$ref": "https://cortext.local/spine/contracts/schemas/schedule-update-response-v3.schema.json#/properties/current_version"
+    },
+    "truth_changed": {
+      "$ref": "https://cortext.local/spine/contracts/schemas/schedule-update-response-v3.schema.json#/properties/truth_changed"
+    },
+    "work_changed": {
+      "$ref": "https://cortext.local/spine/contracts/schemas/schedule-update-response-v3.schema.json#/properties/work_changed"
+    },
+    "changed_dimensions": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "enum": [
+          "item",
+          "primary_location",
+          "scheduled_time",
+          "recurrence",
+          "delivery",
+          "reminders",
+          "archetype",
+          "notification_profile",
+          "policy_presentations",
+          "people"
+        ]
+      }
+    },
+    "scheduled_time": {
+      "$ref": "https://cortext.local/spine/contracts/schemas/schedule-update-response-v3.schema.json#/properties/scheduled_time"
+    },
+    "primary_location_change": {
+      "$ref": "https://cortext.local/spine/contracts/schemas/schedule-update-response-v3.schema.json#/properties/primary_location_change"
+    },
+    "recurrence": {
+      "$ref": "https://cortext.local/spine/contracts/schemas/schedule-update-response-v3.schema.json#/properties/recurrence"
+    },
+    "policies": {
+      "$ref": "https://cortext.local/spine/contracts/schemas/schedule-update-response-v3.schema.json#/properties/policies"
+    },
+    "disabled_notification_intent_ids": {
+      "$ref": "https://cortext.local/spine/contracts/schemas/schedule-update-response-v3.schema.json#/properties/disabled_notification_intent_ids"
+    },
+    "work_reconciliation": {
+      "$ref": "https://cortext.local/spine/contracts/schemas/schedule-update-response-v3.schema.json#/properties/work_reconciliation"
+    },
+    "materialization": {
+      "$ref": "https://cortext.local/spine/contracts/schemas/schedule-update-response-v3.schema.json#/properties/materialization"
+    },
+    "phases": {
+      "$ref": "https://cortext.local/spine/contracts/schemas/schedule-update-response-v3.schema.json#/properties/phases"
+    },
+    "receipt": {
+      "type": "object",
+      "properties": {
+        "receipt_contract": {
+          "const": "spine.schedule-update-receipt.v4"
+        },
+        "command_receipt_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/schedule-update-response-v3.schema.json#/$defs/receipt/properties/command_receipt_id"
+        },
+        "effect": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/schedule-update-response-v3.schema.json#/$defs/receipt/properties/effect"
+        },
+        "semantic_facts_hash": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/schedule-update-response-v3.schema.json#/$defs/receipt/properties/semantic_facts_hash"
+        },
+        "created_at_utc": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/schedule-update-response-v3.schema.json#/$defs/receipt/properties/created_at_utc"
+        }
+      },
+      "required": [
+        "receipt_contract",
+        "command_receipt_id",
+        "effect",
+        "semantic_facts_hash",
+        "created_at_utc"
+      ],
+      "additionalProperties": false
+    },
+    "dry_run": {
+      "$ref": "https://cortext.local/spine/contracts/schemas/schedule-update-response-v3.schema.json#/properties/dry_run"
+    },
+    "archetype_action": {
+      "$ref": "https://cortext.local/spine/contracts/schemas/schedule-update-response-v3.schema.json#/properties/archetype_action"
+    },
+    "notification_profile_action": {
+      "$ref": "https://cortext.local/spine/contracts/schemas/schedule-update-response-v3.schema.json#/properties/notification_profile_action"
+    },
+    "notification_profile": {
+      "$ref": "https://cortext.local/spine/contracts/schemas/schedule-update-response-v3.schema.json#/properties/notification_profile"
+    },
+    "presentation_changes": {
+      "$ref": "https://cortext.local/spine/contracts/schemas/schedule-update-response-v3.schema.json#/properties/presentation_changes"
+    },
+    "people": {
+      "type": "array",
+      "items": {
+        "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/association"
+      },
+      "maxItems": 100,
+      "minItems": 0
+    }
+  },
+  "required": [
+    "ok",
+    "command",
+    "response_contract",
+    "effect",
+    "command_id",
+    "command_receipt_id",
+    "item_id",
+    "item_type",
+    "target_version",
+    "current_version",
+    "truth_changed",
+    "work_changed",
+    "changed_dimensions",
+    "scheduled_time",
+    "policies",
+    "disabled_notification_intent_ids",
+    "work_reconciliation",
+    "materialization",
+    "phases",
+    "receipt",
+    "archetype_action",
+    "notification_profile_action",
+    "presentation_changes",
+    "people"
+  ],
+  "additionalProperties": false,
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "receipt": {
+            "properties": {
+              "effect": {
+                "const": "schedule_update_noop"
+              }
+            },
+            "required": [
+              "effect"
+            ]
+          }
+        },
+        "required": [
+          "receipt"
+        ]
+      },
+      "then": {
+        "not": {
+          "required": [
+            "audit_id"
+          ]
+        }
+      },
+      "else": {
+        "required": [
+          "audit_id"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "item_type": {
+            "const": "event"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "people": {
+            "items": {
+              "properties": {
+                "role": {
+                  "const": "participant"
+                }
+              }
+            }
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "people": {
+            "items": {
+              "properties": {
+                "role": {
+                  "const": "assignee"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}

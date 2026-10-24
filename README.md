@@ -51,11 +51,17 @@ allowed to quietly become canonical.
 
 ## What Works Today
 
-Spine `0.10.0` is an implemented alpha; its scheduling core is exercised in a staging
+Spine `0.11.0` is an implemented alpha; its scheduling core is exercised in a staging
 agent environment. The current SQLite ledger schema is version `19`. The trusted multi-operator backend is also running in staging on `cortext1`, with
 operator testing through the connected [Kinflow frontend](../kinflow-web-ui/README.md).
 Concrete operator-reported work is tracked in the [backlog](docs/BACKLOG.md);
 this checkout version is not a deployment claim.
+
+Version 0.11.0 adds explicit event participants and task assignees, scoped people
+discovery, historical role readback, atomic scheduling v4 and permissioned
+people-aware reads. Attendance, responsibility, access ownership and reminder
+routing remain independent. Existing command versions and web routes stay valid;
+schema 19 needs no new migration. See [people commands](docs/PEOPLE_COMMANDS.md).
 
 Version 0.10.0 adds trusted-local `facet_schema.revision.show`: resolve any exact
 historical schema pin to its actual root and complete immutable definition without
@@ -392,10 +398,10 @@ Draft work is not advertised as an implemented compatibility promise. See
 
 ## Documentation
 
-- **People and responsibility (accepted design):** [People contracts](specs/people-and-responsibility.md) —
+- **People and responsibility:** [People contracts](specs/people-and-responsibility.md) —
   event participation, task assignment and person-based reads over existing subject roles;
-  access ownership and notification routing stay separate. Source-only machine contracts
-  and fixtures await review; not implemented.
+  access ownership and notification routing stay separate. Implemented local and
+  protected successors, separately pinned schemas, and [operator examples](docs/PEOPLE_COMMANDS.md).
 
 - **Ledger identity:** [Ledger instance identity](specs/ledger-instance-identity.md) —
   stable backup-preserved instance ID, schema-14 migration and system.info v3.

@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cortext.local/spine/contracts/schemas/notification-rendering-integration-failure.schema.json",
+  "title": "Rendering integration standard command failure (source only)",
+  "type": "object",
+  "required": [
+    "ok",
+    "command",
+    "error"
+  ],
+  "properties": {
+    "ok": {
+      "const": false
+    },
+    "command": {
+      "enum": [
+        "notification_profile.create",
+        "notification_profile.revise",
+        "notification_profile.show",
+        "notification_profile.list",
+        "schedule.create",
+        "schedule.update",
+        "schedule.show",
+        "reminder.create",
+        "reminder.edit"
+      ]
+    },
+    "dry_run": {
+      "const": true
+    },
+    "error": {
+      "type": "object",
+      "required": [
+        "code",
+        "message"
+      ],
+      "properties": {
+        "code": {
+          "enum": [
+            "invalid_request",
+            "unsupported_field",
+            "missing_required_field",
+            "invalid_timestamp",
+            "referenced_row_not_found",
+            "semantic_conflict",
+            "stale_version",
+            "stale_cursor",
+            "permission_denied",
+            "environment_failure",
+            "runtime_failure",
+            "rendering_definition_invalid",
+            "rendering_definition_retired",
+            "rendering_disclosure_unavailable",
+            "rendering_disclosure_ambiguous",
+            "rendering_disclosure_scope_mismatch"
+          ]
+        },
+        "message": {
+          "type": "string",
+          "minLength": 1
+        },
+        "field": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

@@ -1,4 +1,4 @@
-"""Private local handlers on disposable ledgers; no public family activation."""
+"""Shared local people handlers on disposable ledgers and additive activation."""
 
 import copy
 import json
@@ -200,11 +200,10 @@ class PeopleCommandsTests(_PeopleCommandSupport, unittest.TestCase):
             self.run_command('item.people.update', self.request(people=patch_value), ok=False)
         self.assertEqual(statements, [])
 
-    def test_candidate_not_public_and_protected_context_cannot_use_local_path(self):
+    def test_public_registration_does_not_allow_protected_context_on_local_path(self):
         self.task()
-        self.assertNotIn('item.people.update', MVP_COMMANDS)
-        self.assertNotIn(people_candidate.CONTRACT, IMPLEMENTED_CONTRACT_VERSIONS)
-        self.assertFalse(handle('item.people.update', self.request(), self.context)['ok'])
+        self.assertIn('item.people.update', MVP_COMMANDS)
+        self.assertIn(people_candidate.CONTRACT, IMPLEMENTED_CONTRACT_VERSIONS)
         before = self.state()
         failed = self.run_command('item.people.update', self.request(),
             context=replace(self.context, transport_metadata={'mode': 'permission_enforced'}), ok=False)
@@ -485,11 +484,9 @@ class PeopleScheduleTests(_PeopleCommandSupport, unittest.TestCase):
         self.assertEqual(result['changed_dimensions'], [])
         self.assertEqual(result['people'], item['people'])
 
-    def test_v4_not_accepted_by_public_dispatch_and_v2_task_roles_still_work(self):
+    def test_additive_v4_public_dispatch_and_v2_task_roles_still_work(self):
         request = self.create(people={'participants': ['alice']})
-        before = self.state()
-        self.assertFalse(handle('schedule.create', request, self.context)['ok'])
-        self.assertEqual(self.state(), before)
+        self.assertTrue(handle('schedule.create', request, self.context)['ok'])
         old = self.fixture.task_request('legacy-task')
         old['item']['task_detail']['subject_roles'] = [{'subject_id': 'owner', 'role': 'assignee'}]
         created = handle('schedule.create', old, self.context)

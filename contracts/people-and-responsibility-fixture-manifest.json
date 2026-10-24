@@ -1,6 +1,6 @@
 {
   "schema_version": "spine.people-fixtures.v1",
-  "status": "source_only_pending_machine_review",
+  "status": "implemented_structural_fixtures",
   "runtime_verified": false,
   "logical_spec_version": "1.0.0",
   "registry": "contracts/people-and-responsibility.v1.json",
@@ -335,7 +335,7 @@
       "valid": true
     }
   ],
-  "runtime_evidence": "All PR-01 through PR-16 remain pending; model and schema tests do not prove runtime properties.",
+  "runtime_evidence": "Structural/model fixtures remain offline evidence, not runtime proofs. See the companion runtime_obligations and docs/PEOPLE_RUNTIME_EVIDENCE.md for executable PR-01 through PR-16 evidence.",
   "schema_dependencies": [
     "contracts/schemas/notification-profile-application-v2.schema.json",
     "contracts/schemas/notification-profile-types-v2.schema.json",

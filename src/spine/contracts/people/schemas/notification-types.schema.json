@@ -1,0 +1,269 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cortext.local/spine/contracts/schemas/notification-types.schema.json",
+  "title": "Spine Notification Scheduling Shared Types",
+  "$defs": {
+    "id": { "type": "string", "minLength": 1 },
+    "decimalPositive": { "type": "string", "pattern": "^[1-9][0-9]*$" },
+    "decimalNonNegative": { "type": "string", "pattern": "^(0|[1-9][0-9]*)$" },
+    "signedDecimal": { "type": "string", "pattern": "^(0|-?[1-9][0-9]*)$" },
+    "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "utcTimestamp": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$"
+    },
+    "localDate": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$" },
+    "localTime": { "type": "string", "pattern": "^[0-9]{2}:[0-9]{2}:[0-9]{2}$" },
+    "weekday": { "enum": ["MO", "TU", "WE", "TH", "FR", "SA", "SU"] },
+    "target": {
+      "type": "object",
+      "required": ["anchor_role", "application_scope"],
+      "properties": {
+        "anchor_role": { "enum": ["event_start", "task_due"] },
+        "application_scope": { "enum": ["item", "each_occurrence", "selected_occurrence"] },
+        "target_occurrence_key": { "$ref": "#/$defs/id" },
+        "target_occurrence_selector": { "type": "object", "minProperties": 1 }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": { "application_scope": { "const": "selected_occurrence" } },
+            "required": ["application_scope"]
+          },
+          "then": { "required": ["target_occurrence_key"] },
+          "else": {
+            "not": {
+              "anyOf": [
+                { "required": ["target_occurrence_key"] },
+                { "required": ["target_occurrence_selector"] }
+              ]
+            }
+          }
+        },
+        {
+          "if": { "required": ["target_occurrence_selector"] },
+          "then": {
+            "properties": { "application_scope": { "const": "selected_occurrence" } },
+            "required": ["application_scope", "target_occurrence_key"]
+          }
+        }
+      ],
+      "additionalProperties": false
+    },
+    "absoluteBoundary": {
+      "type": "object",
+      "required": ["kind", "at_utc"],
+      "properties": {
+        "kind": { "const": "absolute_utc" },
+        "at_utc": { "$ref": "#/$defs/utcTimestamp" }
+      },
+      "additionalProperties": false
+    },
+    "elapsedTargetOffset": {
+      "type": "object",
+      "required": ["kind", "offset_basis", "offset_seconds"],
+      "properties": {
+        "kind": { "const": "target_offset" },
+        "offset_basis": { "const": "elapsed" },
+        "offset_seconds": { "$ref": "#/$defs/signedDecimal" }
+      },
+      "additionalProperties": false
+    },
+    "calendarTargetOffset": {
+      "type": "object",
+      "required": ["kind", "offset_basis", "offset_days", "local_time"],
+      "properties": {
+        "kind": { "const": "target_offset" },
+        "offset_basis": { "const": "calendar_days" },
+        "offset_days": { "$ref": "#/$defs/signedDecimal" },
+        "local_time": { "$ref": "#/$defs/localTime" },
+        "timezone": { "type": "string", "minLength": 1 },
+        "timezone_database_version": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": false
+    },
+    "targetOffset": {
+      "oneOf": [
+        { "$ref": "#/$defs/elapsedTargetOffset" },
+        { "$ref": "#/$defs/calendarTargetOffset" }
+      ]
+    },
+    "boundary": {
+      "oneOf": [
+        { "$ref": "#/$defs/absoluteBoundary" },
+        { "$ref": "#/$defs/targetOffset" }
+      ]
+    },
+    "fixedElapsedCadence": {
+      "type": "object",
+      "required": ["kind", "interval_seconds"],
+      "properties": {
+        "kind": { "const": "fixed_elapsed" },
+        "interval_seconds": { "$ref": "#/$defs/decimalPositive" }
+      },
+      "additionalProperties": false
+    },
+    "localCalendarCadence": {
+      "type": "object",
+      "required": ["kind", "frequency", "seed_local_date", "local_time", "timezone", "timezone_database_version"],
+      "properties": {
+        "kind": { "const": "local_calendar" },
+        "frequency": { "enum": ["DAILY", "WEEKLY", "MONTHLY", "YEARLY"] },
+        "interval": { "$ref": "#/$defs/decimalPositive" },
+        "seed_local_date": { "$ref": "#/$defs/localDate" },
+        "local_time": { "$ref": "#/$defs/localTime" },
+        "timezone": { "type": "string", "minLength": 1 },
+        "timezone_database_version": { "type": "string", "minLength": 1 },
+        "by_month": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "type": "string", "pattern": "^([1-9]|1[0-2])$" }
+        },
+        "by_month_day": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "type": "string", "pattern": "^-?([1-9]|[12][0-9]|3[01])$" }
+        },
+        "by_weekday": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/weekday" }
+        },
+        "by_set_position": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "type": "string", "pattern": "^-?([1-9]|[1-9][0-9]|[12][0-9]{2}|3[0-5][0-9]|36[0-6])$" }
+        },
+        "week_start": { "$ref": "#/$defs/weekday" }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": { "frequency": { "enum": ["MONTHLY", "YEARLY"] } },
+            "required": ["frequency"]
+          },
+          "then": {
+            "not": { "required": ["by_month_day", "by_weekday"] }
+          }
+        },
+        {
+          "if": { "required": ["by_set_position"] },
+          "then": { "required": ["by_weekday"] }
+        },
+        {
+          "if": { "properties": { "frequency": { "const": "DAILY" } }, "required": ["frequency"] },
+          "then": {
+            "not": {
+              "anyOf": [
+                { "required": ["by_month"] },
+                { "required": ["by_month_day"] },
+                { "required": ["by_weekday"] },
+                { "required": ["by_set_position"] },
+                { "required": ["week_start"] }
+              ]
+            }
+          }
+        },
+        {
+          "if": { "properties": { "frequency": { "const": "WEEKLY" } }, "required": ["frequency"] },
+          "then": {
+            "not": {
+              "anyOf": [
+                { "required": ["by_month"] },
+                { "required": ["by_month_day"] },
+                { "required": ["by_set_position"] }
+              ]
+            }
+          }
+        },
+        {
+          "if": { "properties": { "frequency": { "const": "MONTHLY" } }, "required": ["frequency"] },
+          "then": {
+            "not": {
+              "anyOf": [
+                { "required": ["by_month"] },
+                { "required": ["week_start"] }
+              ]
+            }
+          }
+        },
+        {
+          "if": { "properties": { "frequency": { "const": "YEARLY" } }, "required": ["frequency"] },
+          "then": { "not": { "required": ["week_start"] } }
+        }
+      ],
+      "additionalProperties": false
+    },
+    "cadence": {
+      "oneOf": [
+        { "$ref": "#/$defs/fixedElapsedCadence" },
+        { "$ref": "#/$defs/localCalendarCadence" }
+      ]
+    },
+    "onceSchedule": {
+      "type": "object",
+      "required": ["kind", "at"],
+      "properties": {
+        "kind": { "const": "once" },
+        "at": { "$ref": "#/$defs/boundary" }
+      },
+      "additionalProperties": false
+    },
+    "offsetsSchedule": {
+      "type": "object",
+      "required": ["kind", "at"],
+      "properties": {
+        "kind": { "const": "offsets" },
+        "at": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/targetOffset" }
+        }
+      },
+      "additionalProperties": false
+    },
+    "repeatWindowSchedule": {
+      "type": "object",
+      "required": ["kind", "start", "stop", "stop_inclusive", "cadence"],
+      "properties": {
+        "kind": { "const": "repeat_window" },
+        "start": { "$ref": "#/$defs/boundary" },
+        "stop": { "$ref": "#/$defs/boundary" },
+        "stop_inclusive": { "type": "boolean" },
+        "cadence": { "$ref": "#/$defs/cadence" }
+      },
+      "additionalProperties": false
+    },
+    "schedule": {
+      "oneOf": [
+        { "$ref": "#/$defs/onceSchedule" },
+        { "$ref": "#/$defs/offsetsSchedule" },
+        { "$ref": "#/$defs/repeatWindowSchedule" }
+      ]
+    },
+    "lateHandling": {
+      "oneOf": [
+        {
+          "type": "object",
+          "required": ["kind"],
+          "properties": { "kind": { "const": "skip" } },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": ["kind", "grace_seconds"],
+          "properties": {
+            "kind": { "const": "deliver_within" },
+            "grace_seconds": { "$ref": "#/$defs/decimalNonNegative" }
+          },
+          "additionalProperties": false
+        }
+      ]
+    }
+  }
+}

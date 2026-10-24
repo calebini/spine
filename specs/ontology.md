@@ -737,9 +737,11 @@ Owns subject roles on coordination items.
 The ratified logical [people and responsibility leaf](people-and-responsibility.md) defines
 event participation, task assignment, scoped discovery and person-filtered reads
 over these same versioned rows. It preserves the separation from access ownership
-and notification routing. It does not alter the implemented role enum, existing
-authoring, protected disclosure, constraints or schema; machine-contract review and
-executable implementation gates in that leaf precede new runtime behavior.
+and notification routing. Runtime 0.11.0's explicit successors operate on these
+existing immutable rows without changing the role enum, constraints or schema 19.
+Existing authoring and self-only web projections remain frozen. The new projection
+discloses authorized association tuples separately from current directory labels,
+under that leaf's approved D-01/D-02 rules; it does not grant item access or routing.
 
 Minimum contract:
 

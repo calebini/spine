@@ -1,0 +1,1799 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cortext.local/spine/contracts/schemas/people/cursor.schema.json",
+  "$comment": "Source-only people contract candidate; not advertised by or packaged with the current runtime.",
+  "oneOf": [
+    {
+      "type": "object",
+      "properties": {
+        "contract_version": {
+          "const": "spine.people-cursor.v1"
+        },
+        "key_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/id"
+        },
+        "key_generation": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/id"
+        },
+        "ledger_instance_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/id"
+        },
+        "route": {
+          "const": "people.list"
+        },
+        "stream": {
+          "const": "roster"
+        },
+        "query_hash": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/hash"
+        },
+        "source_hash": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/hash"
+        },
+        "authorization_hash": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/hash"
+        },
+        "last_key": {
+          "type": "array",
+          "items": {
+            "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/id"
+          },
+          "maxItems": 1,
+          "minItems": 1
+        },
+        "issued_at_utc": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/utc"
+        },
+        "expires_at_utc": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/utc"
+        },
+        "authorization_valid_until_utc": {
+          "oneOf": [
+            {
+              "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/utc"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "mode": {
+          "const": "trusted_local"
+        },
+        "owner": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/owner"
+        }
+      },
+      "required": [
+        "contract_version",
+        "key_id",
+        "key_generation",
+        "ledger_instance_id",
+        "route",
+        "stream",
+        "query_hash",
+        "source_hash",
+        "authorization_hash",
+        "last_key",
+        "issued_at_utc",
+        "expires_at_utc",
+        "authorization_valid_until_utc",
+        "mode",
+        "owner"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "contract_version": {
+          "const": "spine.people-cursor.v1"
+        },
+        "key_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/id"
+        },
+        "key_generation": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/id"
+        },
+        "ledger_instance_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/id"
+        },
+        "route": {
+          "const": "people.list"
+        },
+        "stream": {
+          "const": "roster"
+        },
+        "query_hash": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/hash"
+        },
+        "source_hash": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/hash"
+        },
+        "authorization_hash": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/hash"
+        },
+        "last_key": {
+          "type": "array",
+          "items": {
+            "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/id"
+          },
+          "maxItems": 1,
+          "minItems": 1
+        },
+        "issued_at_utc": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/utc"
+        },
+        "expires_at_utc": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/utc"
+        },
+        "authorization_valid_until_utc": {
+          "oneOf": [
+            {
+              "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/utc"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "mode": {
+          "const": "permission_enforced"
+        },
+        "realm_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/id"
+        },
+        "recovery_epoch": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/version"
+        },
+        "account_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/id"
+        },
+        "subject_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/id"
+        },
+        "selection_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/id"
+        },
+        "account_revision": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/version"
+        },
+        "subject_revision": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/version"
+        },
+        "account_subject_binding_revision": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/version"
+        },
+        "access_epoch": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/version"
+        },
+        "owner": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/trusted-web-types.schema.json#/$defs/owner"
+        }
+      },
+      "required": [
+        "contract_version",
+        "key_id",
+        "key_generation",
+        "ledger_instance_id",
+        "route",
+        "stream",
+        "query_hash",
+        "source_hash",
+        "authorization_hash",
+        "last_key",
+        "issued_at_utc",
+        "expires_at_utc",
+        "authorization_valid_until_utc",
+        "mode",
+        "realm_id",
+        "recovery_epoch",
+        "account_id",
+        "subject_id",
+        "selection_id",
+        "account_revision",
+        "subject_revision",
+        "account_subject_binding_revision",
+        "access_epoch",
+        "owner"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "contract_version": {
+          "const": "spine.people-cursor.v1"
+        },
+        "key_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/id"
+        },
+        "key_generation": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/id"
+        },
+        "ledger_instance_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/id"
+        },
+        "route": {
+          "const": "schedule.show"
+        },
+        "stream": {
+          "const": "related_items"
+        },
+        "query_hash": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/hash"
+        },
+        "source_hash": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/hash"
+        },
+        "authorization_hash": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/hash"
+        },
+        "last_key": {
+          "type": "array",
+          "prefixItems": [
+            {
+              "$ref": "https://cortext.local/spine/contracts/schemas/trusted-web-read-types.schema.json#/$defs/id"
+            }
+          ],
+          "items": false,
+          "minItems": 1,
+          "maxItems": 1
+        },
+        "issued_at_utc": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/utc"
+        },
+        "expires_at_utc": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/utc"
+        },
+        "authorization_valid_until_utc": {
+          "oneOf": [
+            {
+              "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/utc"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "mode": {
+          "const": "permission_enforced"
+        },
+        "realm_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/id"
+        },
+        "recovery_epoch": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/version"
+        },
+        "account_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/id"
+        },
+        "subject_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/id"
+        },
+        "selection_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/id"
+        },
+        "account_revision": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/version"
+        },
+        "subject_revision": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/version"
+        },
+        "account_subject_binding_revision": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/version"
+        },
+        "access_epoch": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/version"
+        },
+        "item_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/trusted-web-read-types.schema.json#/$defs/id"
+        }
+      },
+      "required": [
+        "contract_version",
+        "key_id",
+        "key_generation",
+        "ledger_instance_id",
+        "route",
+        "stream",
+        "query_hash",
+        "source_hash",
+        "authorization_hash",
+        "last_key",
+        "issued_at_utc",
+        "expires_at_utc",
+        "authorization_valid_until_utc",
+        "mode",
+        "realm_id",
+        "recovery_epoch",
+        "account_id",
+        "subject_id",
+        "selection_id",
+        "account_revision",
+        "subject_revision",
+        "account_subject_binding_revision",
+        "access_epoch",
+        "item_id"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "contract_version": {
+          "const": "spine.people-cursor.v1"
+        },
+        "key_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/id"
+        },
+        "key_generation": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/id"
+        },
+        "ledger_instance_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/id"
+        },
+        "route": {
+          "const": "schedule.show"
+        },
+        "stream": {
+          "const": "relations"
+        },
+        "query_hash": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/hash"
+        },
+        "source_hash": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/hash"
+        },
+        "authorization_hash": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/hash"
+        },
+        "last_key": {
+          "type": "array",
+          "prefixItems": [
+            {
+              "$ref": "https://cortext.local/spine/contracts/schemas/trusted-web-read-types.schema.json#/$defs/id"
+            }
+          ],
+          "items": false,
+          "minItems": 1,
+          "maxItems": 1
+        },
+        "issued_at_utc": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/utc"
+        },
+        "expires_at_utc": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/utc"
+        },
+        "authorization_valid_until_utc": {
+          "oneOf": [
+            {
+              "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/utc"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "mode": {
+          "const": "permission_enforced"
+        },
+        "realm_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/id"
+        },
+        "recovery_epoch": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/version"
+        },
+        "account_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/id"
+        },
+        "subject_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/id"
+        },
+        "selection_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/id"
+        },
+        "account_revision": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/version"
+        },
+        "subject_revision": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/version"
+        },
+        "account_subject_binding_revision": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/version"
+        },
+        "access_epoch": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/version"
+        },
+        "item_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/trusted-web-read-types.schema.json#/$defs/id"
+        }
+      },
+      "required": [
+        "contract_version",
+        "key_id",
+        "key_generation",
+        "ledger_instance_id",
+        "route",
+        "stream",
+        "query_hash",
+        "source_hash",
+        "authorization_hash",
+        "last_key",
+        "issued_at_utc",
+        "expires_at_utc",
+        "authorization_valid_until_utc",
+        "mode",
+        "realm_id",
+        "recovery_epoch",
+        "account_id",
+        "subject_id",
+        "selection_id",
+        "account_revision",
+        "subject_revision",
+        "account_subject_binding_revision",
+        "access_epoch",
+        "item_id"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "contract_version": {
+          "const": "spine.people-cursor.v1"
+        },
+        "key_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/id"
+        },
+        "key_generation": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/id"
+        },
+        "ledger_instance_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/id"
+        },
+        "route": {
+          "const": "schedule.show"
+        },
+        "stream": {
+          "const": "temporal_bindings"
+        },
+        "query_hash": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/hash"
+        },
+        "source_hash": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/hash"
+        },
+        "authorization_hash": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/hash"
+        },
+        "last_key": {
+          "type": "array",
+          "prefixItems": [
+            {
+              "$ref": "https://cortext.local/spine/contracts/schemas/trusted-web-read-types.schema.json#/$defs/id"
+            }
+          ],
+          "items": false,
+          "minItems": 1,
+          "maxItems": 1
+        },
+        "issued_at_utc": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/utc"
+        },
+        "expires_at_utc": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/utc"
+        },
+        "authorization_valid_until_utc": {
+          "oneOf": [
+            {
+              "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/utc"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "mode": {
+          "const": "permission_enforced"
+        },
+        "realm_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/id"
+        },
+        "recovery_epoch": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/version"
+        },
+        "account_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/id"
+        },
+        "subject_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/id"
+        },
+        "selection_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/id"
+        },
+        "account_revision": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/version"
+        },
+        "subject_revision": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/version"
+        },
+        "account_subject_binding_revision": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/version"
+        },
+        "access_epoch": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/version"
+        },
+        "item_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/trusted-web-read-types.schema.json#/$defs/id"
+        }
+      },
+      "required": [
+        "contract_version",
+        "key_id",
+        "key_generation",
+        "ledger_instance_id",
+        "route",
+        "stream",
+        "query_hash",
+        "source_hash",
+        "authorization_hash",
+        "last_key",
+        "issued_at_utc",
+        "expires_at_utc",
+        "authorization_valid_until_utc",
+        "mode",
+        "realm_id",
+        "recovery_epoch",
+        "account_id",
+        "subject_id",
+        "selection_id",
+        "account_revision",
+        "subject_revision",
+        "account_subject_binding_revision",
+        "access_epoch",
+        "item_id"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "contract_version": {
+          "const": "spine.people-cursor.v1"
+        },
+        "key_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/id"
+        },
+        "key_generation": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/id"
+        },
+        "ledger_instance_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/id"
+        },
+        "route": {
+          "const": "schedule.show"
+        },
+        "stream": {
+          "const": "notification_profiles"
+        },
+        "query_hash": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/hash"
+        },
+        "source_hash": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/hash"
+        },
+        "authorization_hash": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/hash"
+        },
+        "last_key": {
+          "type": "array",
+          "prefixItems": [
+            {
+              "$ref": "https://cortext.local/spine/contracts/schemas/trusted-web-read-types.schema.json#/$defs/id"
+            },
+            {
+              "$ref": "https://cortext.local/spine/contracts/schemas/trusted-web-read-types.schema.json#/$defs/id"
+            }
+          ],
+          "items": false,
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "issued_at_utc": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/utc"
+        },
+        "expires_at_utc": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/utc"
+        },
+        "authorization_valid_until_utc": {
+          "oneOf": [
+            {
+              "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/utc"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "mode": {
+          "const": "permission_enforced"
+        },
+        "realm_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/id"
+        },
+        "recovery_epoch": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/version"
+        },
+        "account_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/id"
+        },
+        "subject_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/id"
+        },
+        "selection_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/id"
+        },
+        "account_revision": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/version"
+        },
+        "subject_revision": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/version"
+        },
+        "account_subject_binding_revision": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/version"
+        },
+        "access_epoch": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/version"
+        },
+        "item_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/trusted-web-read-types.schema.json#/$defs/id"
+        }
+      },
+      "required": [
+        "contract_version",
+        "key_id",
+        "key_generation",
+        "ledger_instance_id",
+        "route",
+        "stream",
+        "query_hash",
+        "source_hash",
+        "authorization_hash",
+        "last_key",
+        "issued_at_utc",
+        "expires_at_utc",
+        "authorization_valid_until_utc",
+        "mode",
+        "realm_id",
+        "recovery_epoch",
+        "account_id",
+        "subject_id",
+        "selection_id",
+        "account_revision",
+        "subject_revision",
+        "account_subject_binding_revision",
+        "access_epoch",
+        "item_id"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "contract_version": {
+          "const": "spine.people-cursor.v1"
+        },
+        "key_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/id"
+        },
+        "key_generation": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/id"
+        },
+        "ledger_instance_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/id"
+        },
+        "route": {
+          "const": "schedule.show"
+        },
+        "stream": {
+          "const": "policies"
+        },
+        "query_hash": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/hash"
+        },
+        "source_hash": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/hash"
+        },
+        "authorization_hash": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/hash"
+        },
+        "last_key": {
+          "type": "array",
+          "prefixItems": [
+            {
+              "$ref": "https://cortext.local/spine/contracts/schemas/trusted-web-read-types.schema.json#/$defs/id"
+            }
+          ],
+          "items": false,
+          "minItems": 1,
+          "maxItems": 1
+        },
+        "issued_at_utc": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/utc"
+        },
+        "expires_at_utc": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/utc"
+        },
+        "authorization_valid_until_utc": {
+          "oneOf": [
+            {
+              "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/utc"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "mode": {
+          "const": "permission_enforced"
+        },
+        "realm_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/id"
+        },
+        "recovery_epoch": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/version"
+        },
+        "account_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/id"
+        },
+        "subject_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/id"
+        },
+        "selection_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/id"
+        },
+        "account_revision": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/version"
+        },
+        "subject_revision": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/version"
+        },
+        "account_subject_binding_revision": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/version"
+        },
+        "access_epoch": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/version"
+        },
+        "item_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/trusted-web-read-types.schema.json#/$defs/id"
+        }
+      },
+      "required": [
+        "contract_version",
+        "key_id",
+        "key_generation",
+        "ledger_instance_id",
+        "route",
+        "stream",
+        "query_hash",
+        "source_hash",
+        "authorization_hash",
+        "last_key",
+        "issued_at_utc",
+        "expires_at_utc",
+        "authorization_valid_until_utc",
+        "mode",
+        "realm_id",
+        "recovery_epoch",
+        "account_id",
+        "subject_id",
+        "selection_id",
+        "account_revision",
+        "subject_revision",
+        "account_subject_binding_revision",
+        "access_epoch",
+        "item_id"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "contract_version": {
+          "const": "spine.people-cursor.v1"
+        },
+        "key_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/id"
+        },
+        "key_generation": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/id"
+        },
+        "ledger_instance_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/id"
+        },
+        "route": {
+          "const": "schedule.show"
+        },
+        "stream": {
+          "const": "work"
+        },
+        "query_hash": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/hash"
+        },
+        "source_hash": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/hash"
+        },
+        "authorization_hash": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/hash"
+        },
+        "last_key": {
+          "type": "array",
+          "prefixItems": [
+            {
+              "$ref": "https://cortext.local/spine/contracts/schemas/trusted-web-read-types.schema.json#/$defs/id"
+            }
+          ],
+          "items": false,
+          "minItems": 1,
+          "maxItems": 1
+        },
+        "issued_at_utc": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/utc"
+        },
+        "expires_at_utc": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/utc"
+        },
+        "authorization_valid_until_utc": {
+          "oneOf": [
+            {
+              "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/utc"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "mode": {
+          "const": "permission_enforced"
+        },
+        "realm_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/id"
+        },
+        "recovery_epoch": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/version"
+        },
+        "account_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/id"
+        },
+        "subject_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/id"
+        },
+        "selection_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/id"
+        },
+        "account_revision": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/version"
+        },
+        "subject_revision": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/version"
+        },
+        "account_subject_binding_revision": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/version"
+        },
+        "access_epoch": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/version"
+        },
+        "item_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/trusted-web-read-types.schema.json#/$defs/id"
+        }
+      },
+      "required": [
+        "contract_version",
+        "key_id",
+        "key_generation",
+        "ledger_instance_id",
+        "route",
+        "stream",
+        "query_hash",
+        "source_hash",
+        "authorization_hash",
+        "last_key",
+        "issued_at_utc",
+        "expires_at_utc",
+        "authorization_valid_until_utc",
+        "mode",
+        "realm_id",
+        "recovery_epoch",
+        "account_id",
+        "subject_id",
+        "selection_id",
+        "account_revision",
+        "subject_revision",
+        "account_subject_binding_revision",
+        "access_epoch",
+        "item_id"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "contract_version": {
+          "const": "spine.people-cursor.v1"
+        },
+        "key_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/id"
+        },
+        "key_generation": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/id"
+        },
+        "ledger_instance_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/id"
+        },
+        "route": {
+          "const": "schedule.show"
+        },
+        "stream": {
+          "const": "attempts"
+        },
+        "query_hash": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/hash"
+        },
+        "source_hash": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/hash"
+        },
+        "authorization_hash": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/hash"
+        },
+        "last_key": {
+          "type": "array",
+          "prefixItems": [
+            {
+              "$ref": "https://cortext.local/spine/contracts/schemas/trusted-web-read-types.schema.json#/$defs/id"
+            }
+          ],
+          "items": false,
+          "minItems": 1,
+          "maxItems": 1
+        },
+        "issued_at_utc": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/utc"
+        },
+        "expires_at_utc": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/utc"
+        },
+        "authorization_valid_until_utc": {
+          "oneOf": [
+            {
+              "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/utc"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "mode": {
+          "const": "permission_enforced"
+        },
+        "realm_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/id"
+        },
+        "recovery_epoch": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/version"
+        },
+        "account_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/id"
+        },
+        "subject_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/id"
+        },
+        "selection_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/id"
+        },
+        "account_revision": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/version"
+        },
+        "subject_revision": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/version"
+        },
+        "account_subject_binding_revision": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/version"
+        },
+        "access_epoch": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/version"
+        },
+        "item_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/trusted-web-read-types.schema.json#/$defs/id"
+        }
+      },
+      "required": [
+        "contract_version",
+        "key_id",
+        "key_generation",
+        "ledger_instance_id",
+        "route",
+        "stream",
+        "query_hash",
+        "source_hash",
+        "authorization_hash",
+        "last_key",
+        "issued_at_utc",
+        "expires_at_utc",
+        "authorization_valid_until_utc",
+        "mode",
+        "realm_id",
+        "recovery_epoch",
+        "account_id",
+        "subject_id",
+        "selection_id",
+        "account_revision",
+        "subject_revision",
+        "account_subject_binding_revision",
+        "access_epoch",
+        "item_id"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "contract_version": {
+          "const": "spine.people-cursor.v1"
+        },
+        "key_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/id"
+        },
+        "key_generation": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/id"
+        },
+        "ledger_instance_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/id"
+        },
+        "route": {
+          "const": "schedule.show"
+        },
+        "stream": {
+          "const": "delivery_targets"
+        },
+        "query_hash": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/hash"
+        },
+        "source_hash": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/hash"
+        },
+        "authorization_hash": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/hash"
+        },
+        "last_key": {
+          "type": "array",
+          "prefixItems": [
+            {
+              "$ref": "https://cortext.local/spine/contracts/schemas/trusted-web-read-types.schema.json#/$defs/id"
+            }
+          ],
+          "items": false,
+          "minItems": 1,
+          "maxItems": 1
+        },
+        "issued_at_utc": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/utc"
+        },
+        "expires_at_utc": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/utc"
+        },
+        "authorization_valid_until_utc": {
+          "oneOf": [
+            {
+              "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/utc"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "mode": {
+          "const": "permission_enforced"
+        },
+        "realm_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/id"
+        },
+        "recovery_epoch": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/version"
+        },
+        "account_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/id"
+        },
+        "subject_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/id"
+        },
+        "selection_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/id"
+        },
+        "account_revision": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/version"
+        },
+        "subject_revision": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/version"
+        },
+        "account_subject_binding_revision": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/version"
+        },
+        "access_epoch": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/version"
+        },
+        "item_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/trusted-web-read-types.schema.json#/$defs/id"
+        }
+      },
+      "required": [
+        "contract_version",
+        "key_id",
+        "key_generation",
+        "ledger_instance_id",
+        "route",
+        "stream",
+        "query_hash",
+        "source_hash",
+        "authorization_hash",
+        "last_key",
+        "issued_at_utc",
+        "expires_at_utc",
+        "authorization_valid_until_utc",
+        "mode",
+        "realm_id",
+        "recovery_epoch",
+        "account_id",
+        "subject_id",
+        "selection_id",
+        "account_revision",
+        "subject_revision",
+        "account_subject_binding_revision",
+        "access_epoch",
+        "item_id"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "contract_version": {
+          "const": "spine.people-cursor.v1"
+        },
+        "key_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/id"
+        },
+        "key_generation": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/id"
+        },
+        "ledger_instance_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/id"
+        },
+        "route": {
+          "const": "schedule.show"
+        },
+        "stream": {
+          "const": "subject_roles"
+        },
+        "query_hash": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/hash"
+        },
+        "source_hash": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/hash"
+        },
+        "authorization_hash": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/hash"
+        },
+        "last_key": {
+          "type": "array",
+          "prefixItems": [
+            {
+              "$ref": "https://cortext.local/spine/contracts/schemas/trusted-web-read-types.schema.json#/$defs/id"
+            },
+            {
+              "$ref": "https://cortext.local/spine/contracts/schemas/trusted-web-read-types.schema.json#/$defs/id"
+            }
+          ],
+          "items": false,
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "issued_at_utc": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/utc"
+        },
+        "expires_at_utc": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/utc"
+        },
+        "authorization_valid_until_utc": {
+          "oneOf": [
+            {
+              "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/utc"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "mode": {
+          "const": "permission_enforced"
+        },
+        "realm_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/id"
+        },
+        "recovery_epoch": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/version"
+        },
+        "account_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/id"
+        },
+        "subject_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/id"
+        },
+        "selection_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/id"
+        },
+        "account_revision": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/version"
+        },
+        "subject_revision": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/version"
+        },
+        "account_subject_binding_revision": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/version"
+        },
+        "access_epoch": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/version"
+        },
+        "item_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/trusted-web-read-types.schema.json#/$defs/id"
+        }
+      },
+      "required": [
+        "contract_version",
+        "key_id",
+        "key_generation",
+        "ledger_instance_id",
+        "route",
+        "stream",
+        "query_hash",
+        "source_hash",
+        "authorization_hash",
+        "last_key",
+        "issued_at_utc",
+        "expires_at_utc",
+        "authorization_valid_until_utc",
+        "mode",
+        "realm_id",
+        "recovery_epoch",
+        "account_id",
+        "subject_id",
+        "selection_id",
+        "account_revision",
+        "subject_revision",
+        "account_subject_binding_revision",
+        "access_epoch",
+        "item_id"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "contract_version": {
+          "const": "spine.people-cursor.v1"
+        },
+        "key_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/id"
+        },
+        "key_generation": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/id"
+        },
+        "ledger_instance_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/id"
+        },
+        "route": {
+          "const": "item.occurrences"
+        },
+        "stream": {
+          "const": "occurrences"
+        },
+        "query_hash": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/hash"
+        },
+        "source_hash": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/hash"
+        },
+        "authorization_hash": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/hash"
+        },
+        "last_key": {
+          "type": "array",
+          "prefixItems": [
+            {
+              "$ref": "https://cortext.local/spine/contracts/schemas/trusted-web-read-types.schema.json#/$defs/scheduled_fact"
+            },
+            {
+              "$ref": "https://cortext.local/spine/contracts/schemas/trusted-web-read-types.schema.json#/$defs/canonical_occurrence_key"
+            },
+            {
+              "$ref": "https://cortext.local/spine/contracts/schemas/trusted-web-read-types.schema.json#/$defs/id"
+            }
+          ],
+          "items": false,
+          "minItems": 3,
+          "maxItems": 3
+        },
+        "issued_at_utc": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/utc"
+        },
+        "expires_at_utc": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/utc"
+        },
+        "authorization_valid_until_utc": {
+          "oneOf": [
+            {
+              "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/utc"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "mode": {
+          "const": "permission_enforced"
+        },
+        "realm_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/id"
+        },
+        "recovery_epoch": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/version"
+        },
+        "account_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/id"
+        },
+        "subject_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/id"
+        },
+        "selection_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/id"
+        },
+        "account_revision": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/version"
+        },
+        "subject_revision": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/version"
+        },
+        "account_subject_binding_revision": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/version"
+        },
+        "access_epoch": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/version"
+        },
+        "item_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/trusted-web-read-types.schema.json#/$defs/id"
+        },
+        "range_basis": {
+          "const": "original_schedule"
+        }
+      },
+      "required": [
+        "contract_version",
+        "key_id",
+        "key_generation",
+        "ledger_instance_id",
+        "route",
+        "stream",
+        "query_hash",
+        "source_hash",
+        "authorization_hash",
+        "last_key",
+        "issued_at_utc",
+        "expires_at_utc",
+        "authorization_valid_until_utc",
+        "mode",
+        "realm_id",
+        "recovery_epoch",
+        "account_id",
+        "subject_id",
+        "selection_id",
+        "account_revision",
+        "subject_revision",
+        "account_subject_binding_revision",
+        "access_epoch",
+        "item_id",
+        "range_basis"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "contract_version": {
+          "const": "spine.people-cursor.v1"
+        },
+        "key_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/id"
+        },
+        "key_generation": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/id"
+        },
+        "ledger_instance_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/id"
+        },
+        "route": {
+          "const": "item.occurrences"
+        },
+        "stream": {
+          "const": "occurrences"
+        },
+        "query_hash": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/hash"
+        },
+        "source_hash": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/hash"
+        },
+        "authorization_hash": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/hash"
+        },
+        "last_key": {
+          "type": "array",
+          "prefixItems": [
+            {
+              "$ref": "https://cortext.local/spine/contracts/schemas/trusted-web-read-types.schema.json#/$defs/scheduled_fact"
+            },
+            {
+              "$ref": "https://cortext.local/spine/contracts/schemas/trusted-web-read-types.schema.json#/$defs/canonical_occurrence_key"
+            },
+            {
+              "$ref": "https://cortext.local/spine/contracts/schemas/trusted-web-read-types.schema.json#/$defs/canonical_occurrence_key"
+            },
+            {
+              "$ref": "https://cortext.local/spine/contracts/schemas/trusted-web-read-types.schema.json#/$defs/id"
+            }
+          ],
+          "items": false,
+          "minItems": 4,
+          "maxItems": 4
+        },
+        "issued_at_utc": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/utc"
+        },
+        "expires_at_utc": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/utc"
+        },
+        "authorization_valid_until_utc": {
+          "oneOf": [
+            {
+              "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/utc"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "mode": {
+          "const": "permission_enforced"
+        },
+        "realm_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/id"
+        },
+        "recovery_epoch": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/version"
+        },
+        "account_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/id"
+        },
+        "subject_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/id"
+        },
+        "selection_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/id"
+        },
+        "account_revision": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/version"
+        },
+        "subject_revision": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/version"
+        },
+        "account_subject_binding_revision": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/version"
+        },
+        "access_epoch": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/version"
+        },
+        "item_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/trusted-web-read-types.schema.json#/$defs/id"
+        },
+        "range_basis": {
+          "const": "expressed_time"
+        }
+      },
+      "required": [
+        "contract_version",
+        "key_id",
+        "key_generation",
+        "ledger_instance_id",
+        "route",
+        "stream",
+        "query_hash",
+        "source_hash",
+        "authorization_hash",
+        "last_key",
+        "issued_at_utc",
+        "expires_at_utc",
+        "authorization_valid_until_utc",
+        "mode",
+        "realm_id",
+        "recovery_epoch",
+        "account_id",
+        "subject_id",
+        "selection_id",
+        "account_revision",
+        "subject_revision",
+        "account_subject_binding_revision",
+        "access_epoch",
+        "item_id",
+        "range_basis"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "contract_version": {
+          "const": "spine.people-cursor.v1"
+        },
+        "key_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/id"
+        },
+        "key_generation": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/id"
+        },
+        "ledger_instance_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/id"
+        },
+        "route": {
+          "const": "agenda.show"
+        },
+        "stream": {
+          "const": "resolved"
+        },
+        "query_hash": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/hash"
+        },
+        "source_hash": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/hash"
+        },
+        "authorization_hash": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/hash"
+        },
+        "last_key": {
+          "type": "array",
+          "prefixItems": [
+            {
+              "$ref": "https://cortext.local/spine/contracts/schemas/trusted-web-read-types.schema.json#/$defs/date"
+            },
+            {
+              "enum": [
+                "0",
+                "1"
+              ]
+            },
+            {
+              "$ref": "https://cortext.local/spine/contracts/schemas/trusted-web-read-types.schema.json#/$defs/utc"
+            },
+            {
+              "enum": [
+                "event_start",
+                "task_due"
+              ]
+            },
+            {
+              "$ref": "https://cortext.local/spine/contracts/schemas/trusted-web-read-types.schema.json#/$defs/id"
+            },
+            {
+              "oneOf": [
+                {
+                  "const": ""
+                },
+                {
+                  "$ref": "https://cortext.local/spine/contracts/schemas/trusted-web-read-types.schema.json#/$defs/canonical_occurrence_key"
+                }
+              ]
+            }
+          ],
+          "items": false,
+          "minItems": 6,
+          "maxItems": 6
+        },
+        "issued_at_utc": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/utc"
+        },
+        "expires_at_utc": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/utc"
+        },
+        "authorization_valid_until_utc": {
+          "oneOf": [
+            {
+              "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/utc"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "mode": {
+          "const": "permission_enforced"
+        },
+        "realm_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/id"
+        },
+        "recovery_epoch": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/version"
+        },
+        "account_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/id"
+        },
+        "subject_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/id"
+        },
+        "selection_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/id"
+        },
+        "account_revision": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/version"
+        },
+        "subject_revision": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/version"
+        },
+        "account_subject_binding_revision": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/version"
+        },
+        "access_epoch": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/version"
+        }
+      },
+      "required": [
+        "contract_version",
+        "key_id",
+        "key_generation",
+        "ledger_instance_id",
+        "route",
+        "stream",
+        "query_hash",
+        "source_hash",
+        "authorization_hash",
+        "last_key",
+        "issued_at_utc",
+        "expires_at_utc",
+        "authorization_valid_until_utc",
+        "mode",
+        "realm_id",
+        "recovery_epoch",
+        "account_id",
+        "subject_id",
+        "selection_id",
+        "account_revision",
+        "subject_revision",
+        "account_subject_binding_revision",
+        "access_epoch"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "contract_version": {
+          "const": "spine.people-cursor.v1"
+        },
+        "key_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/id"
+        },
+        "key_generation": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/id"
+        },
+        "ledger_instance_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/id"
+        },
+        "route": {
+          "const": "agenda.show"
+        },
+        "stream": {
+          "const": "unplaced"
+        },
+        "query_hash": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/hash"
+        },
+        "source_hash": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/hash"
+        },
+        "authorization_hash": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/hash"
+        },
+        "last_key": {
+          "type": "array",
+          "prefixItems": [
+            {
+              "$ref": "https://cortext.local/spine/contracts/schemas/trusted-web-read-types.schema.json#/$defs/id"
+            }
+          ],
+          "items": false,
+          "minItems": 1,
+          "maxItems": 1
+        },
+        "issued_at_utc": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/utc"
+        },
+        "expires_at_utc": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/utc"
+        },
+        "authorization_valid_until_utc": {
+          "oneOf": [
+            {
+              "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/utc"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "mode": {
+          "const": "permission_enforced"
+        },
+        "realm_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/id"
+        },
+        "recovery_epoch": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/version"
+        },
+        "account_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/id"
+        },
+        "subject_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/id"
+        },
+        "selection_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/id"
+        },
+        "account_revision": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/version"
+        },
+        "subject_revision": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/version"
+        },
+        "account_subject_binding_revision": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/version"
+        },
+        "access_epoch": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/version"
+        }
+      },
+      "required": [
+        "contract_version",
+        "key_id",
+        "key_generation",
+        "ledger_instance_id",
+        "route",
+        "stream",
+        "query_hash",
+        "source_hash",
+        "authorization_hash",
+        "last_key",
+        "issued_at_utc",
+        "expires_at_utc",
+        "authorization_valid_until_utc",
+        "mode",
+        "realm_id",
+        "recovery_epoch",
+        "account_id",
+        "subject_id",
+        "selection_id",
+        "account_revision",
+        "subject_revision",
+        "account_subject_binding_revision",
+        "access_epoch"
+      ],
+      "additionalProperties": false
+    }
+  ]
+}

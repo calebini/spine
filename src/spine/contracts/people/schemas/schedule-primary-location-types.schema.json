@@ -1,0 +1,134 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cortext.local/spine/contracts/schemas/schedule-primary-location-types.schema.json",
+  "title": "Spine Schedule Primary Location Types v1",
+  "$defs": {
+    "latitude": {
+      "type": "string",
+      "pattern": "^(?:0|0\\.[0-9]+|(?:[1-9]|[1-8][0-9])(?:\\.[0-9]+)?|90(?:\\.0+)?|-(?:0\\.[0-9]*[1-9][0-9]*|(?:[1-9]|[1-8][0-9])(?:\\.[0-9]+)?|90(?:\\.0+)?))$"
+    },
+    "longitude": {
+      "type": "string",
+      "pattern": "^(?:0|0\\.[0-9]+|(?:[1-9]|[1-9][0-9]|1[0-7][0-9])(?:\\.[0-9]+)?|180(?:\\.0+)?|-(?:0\\.[0-9]*[1-9][0-9]*|(?:[1-9]|[1-9][0-9]|1[0-7][0-9])(?:\\.[0-9]+)?|180(?:\\.0+)?))$"
+    },
+    "inlineCreate": {
+      "type": "object",
+      "required": ["mode", "label", "kind"],
+      "properties": {
+        "mode": { "const": "create" },
+        "label": { "type": "string", "minLength": 1, "pattern": ".*\\S.*" },
+        "kind": { "enum": ["address", "place", "virtual", "relative", "unknown"] },
+        "address_text": { "type": "string", "minLength": 1, "pattern": ".*\\S.*" },
+        "latitude": { "$ref": "#/$defs/latitude" },
+        "longitude": { "$ref": "#/$defs/longitude" },
+        "timezone": { "type": "string", "minLength": 1, "pattern": ".*\\S.*" },
+        "provider_ref": { "type": "string", "minLength": 1, "pattern": ".*\\S.*" }
+      },
+      "dependentRequired": {
+        "latitude": ["longitude"],
+        "longitude": ["latitude"]
+      },
+      "additionalProperties": false
+    },
+    "reference": {
+      "type": "object",
+      "required": ["mode", "location_id"],
+      "properties": {
+        "mode": { "const": "reference" },
+        "location_id": { "$ref": "notification-types.schema.json#/$defs/id" }
+      },
+      "additionalProperties": false
+    },
+    "authoring": {
+      "oneOf": [
+        { "$ref": "#/$defs/inlineCreate" },
+        { "$ref": "#/$defs/reference" }
+      ]
+    },
+    "view": {
+      "type": "object",
+      "required": [
+        "location_contract", "view_contract", "location_id", "item_location_id",
+        "role", "label", "kind", "item_location_created_at_utc",
+        "location_created_at_utc", "location_updated_at_utc"
+      ],
+      "properties": {
+        "location_contract": { "const": "spine.schedule-primary-location.v1" },
+        "view_contract": { "const": "spine.schedule-primary-location-view.v1" },
+        "location_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+        "item_location_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+        "role": { "const": "primary" },
+        "label": { "type": "string", "minLength": 1, "pattern": ".*\\S.*" },
+        "kind": { "enum": ["address", "place", "virtual", "relative", "unknown"] },
+        "address_text": { "type": "string", "minLength": 1, "pattern": ".*\\S.*" },
+        "latitude": { "$ref": "#/$defs/latitude" },
+        "longitude": { "$ref": "#/$defs/longitude" },
+        "timezone": { "type": "string", "minLength": 1, "pattern": ".*\\S.*" },
+        "provider_ref": { "type": "string", "minLength": 1, "pattern": ".*\\S.*" },
+        "item_location_created_at_utc": { "$ref": "notification-types.schema.json#/$defs/utcTimestamp" },
+        "location_created_at_utc": { "$ref": "notification-types.schema.json#/$defs/utcTimestamp" },
+        "location_updated_at_utc": { "$ref": "notification-types.schema.json#/$defs/utcTimestamp" }
+      },
+      "dependentRequired": {
+        "latitude": ["longitude"],
+        "longitude": ["latitude"]
+      },
+      "additionalProperties": false
+    },
+    "updateChange": {
+      "type": "object",
+      "required": ["effect", "requested_mode", "previous_location_id", "current"],
+      "properties": {
+        "effect": { "enum": ["created", "replaced", "cleared", "retained"] },
+        "requested_mode": { "enum": ["create", "reference", "clear"] },
+        "previous_location_id": {
+          "oneOf": [
+            { "$ref": "notification-types.schema.json#/$defs/id" },
+            { "type": "null" }
+          ]
+        },
+        "current": {
+          "oneOf": [
+            { "$ref": "#/$defs/view" },
+            { "type": "null" }
+          ]
+        }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "effect": { "const": "created" } }, "required": ["effect"] },
+          "then": {
+            "properties": {
+              "previous_location_id": { "type": "null" },
+              "current": { "$ref": "#/$defs/view" }
+            }
+          }
+        },
+        {
+          "if": { "properties": { "effect": { "const": "replaced" } }, "required": ["effect"] },
+          "then": {
+            "properties": {
+              "previous_location_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+              "current": { "$ref": "#/$defs/view" }
+            }
+          }
+        },
+        {
+          "if": { "properties": { "effect": { "const": "cleared" } }, "required": ["effect"] },
+          "then": {
+            "properties": {
+              "previous_location_id": { "$ref": "notification-types.schema.json#/$defs/id" },
+              "current": { "type": "null" },
+              "requested_mode": { "const": "clear" }
+            }
+          }
+        },
+        {
+          "if": { "properties": { "requested_mode": { "const": "clear" } }, "required": ["requested_mode"] },
+          "then": { "properties": { "effect": { "enum": ["cleared", "retained"] } } }
+        }
+      ],
+      "additionalProperties": false
+    }
+  }
+}

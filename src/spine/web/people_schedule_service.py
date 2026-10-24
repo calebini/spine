@@ -1,4 +1,4 @@
-"""Private atomic scheduling-v4 adapter with scoped people/rendering admission."""
+"""Atomic protected scheduling-v4 with scoped people/rendering admission."""
 
 from __future__ import annotations
 
@@ -105,8 +105,10 @@ def _recheck(db, original, account, now, budget):
     return fresh
 
 
-def execute_schedule(service, command, body, account, selection, *, current_selection=None):
+def execute_schedule(service, command, body, account, selection, *, current_selection=None, encode=None, started=None):
     budget = PeopleBudget(maximum_steps=service.config.sql_steps, maximum_seconds=service.config.request_seconds)
+    if started is not None:
+        budget.started = min(budget.started, started)
     db, timeout = None, None
     selected = current_selection if current_selection is not None else (lambda: (account, selection))
     try:
@@ -121,6 +123,7 @@ def execute_schedule(service, command, body, account, selection, *, current_sele
         db.set_progress_handler(budget.progress, min(100, budget.maximum_steps))
         with db.atomic_command(write=True):
             service.base.preflight(db)
+            service.cursor_context(db, budget)
             p = PeopleSchedulePermissions(db, account, service.now(), budget)
             directory = PeopleDirectory(db, budget, observed_at_utc=p.now, subject=p.subject)
             prior = people_candidate._stored_receipt(db, request['command_id'])
@@ -193,6 +196,11 @@ def execute_schedule(service, command, body, account, selection, *, current_sele
             service.contracts.validate('web-responses', response, definition=command, output=True)
             if len(canonical_json_bytes(response)) > 4194304:
                 raise WebError('capacity_exceeded')
+            if encode is not None:
+                response = encode(response)
+                if not isinstance(response, bytes) or len(response) > 4194304:
+                    raise WebError('capacity_exceeded')
+            budget.check()
             if service.before_release:
                 service.before_release(db)
             if selected() != (account, selection):

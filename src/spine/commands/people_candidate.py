@@ -1,8 +1,7 @@
-"""Unadvertised trusted-local people handlers and scheduling-v4 candidate.
+"""Trusted-local people handlers and exact scheduling-v4 selectors.
 
-Not called by the dispatcher or web adapters. Protected admission, directory
-pagination and public activation remain separate delivery gates. A caller must
-already hold the trusted-local ledger authority; JSON cannot select that mode.
+A caller already holds trusted-local ledger authority. Protected adapters use
+their separate permissioned service; request JSON cannot select this privilege.
 """
 
 from __future__ import annotations
@@ -39,6 +38,27 @@ _FIELDS = {
     'item.people.update': {'contract_version', 'command_id', 'actor_subject_id', 'item_id',
                            'target_version', 'updated_at_utc', 'people'},
 }
+
+
+def accepts(command: str, request: Any) -> bool:
+    """Standalone commands are closed; scheduling successors require exact pins."""
+    return command in _FIELDS or isinstance(request, dict) and (
+        command == 'schedule.create' and request.get('contract_version') == 'spine.schedule-create.v4'
+        or command == 'schedule.update' and request.get('contract_version') == 'spine.schedule-update.v4'
+    )
+
+
+def execute_public(command: str, request: Any, context: CommandContext) -> dict[str, Any]:
+    """Admit the complete installed family before any local operation executes."""
+    from spine.commands.people_runtime import PeopleContracts
+
+    try:
+        contracts = PeopleContracts.packaged()
+    except SpineValidationError:
+        return {'ok': False, 'command': command,
+                'error': {'code': 'environment_failure', 'field': 'runtime_contracts', 'message': 'People operation unavailable.'},
+                **({'dry_run': True} if context.dry_run else {})}
+    return execute(command, request, context, contracts=contracts)
 
 
 def fail(code: str, field: str = 'people') -> NoReturn:
@@ -307,13 +327,18 @@ class _Preview(Exception):
 
 def execute(command: str, request: Any, context: CommandContext, *, contracts: Any = None,
             now: Callable[[], str] | None = None, before_release: Callable[[], None] | None = None) -> dict[str, Any]:
-    """Execute a private local candidate, preserving actual transaction ownership."""
+    """Execute a local handler, preserving actual transaction ownership."""
     db, budget, old_timeout = context.ledger, FacetBudget(), None
     try:
         if (not isinstance(db, LedgerConnection) or not getattr(db, '_renderings_enabled', False)
-                or db.in_transaction or context.transport_metadata or context.people_authoring):
+                or db.in_transaction or context.transport_metadata not in ({}, {'adapter': 'cli'}) or context.people_authoring):
             fail('environment_failure', 'admission')
         value = normalize_request(command, request)
+        if contracts is not None:
+            if command in _FIELDS:
+                contracts.validate('requests', value, definition=command)
+            else:
+                contracts.validate('schedule-create-request-v4' if command.endswith('create') else 'schedule-update-request-v4', value)
         old_timeout = install_budget(db, budget)
         result: dict[str, Any]
         if command == 'people.list':
@@ -328,9 +353,8 @@ def execute(command: str, request: Any, context: CommandContext, *, contracts: A
             elif command == 'item.people.update':
                 result = _update(db, value, admit_additions=lambda subjects: admit_subjects(db, subjects, budget))
             else:
-                # No protected adapter is wired to this private local path. The
-                # successor protected service must supply its own owner/receipt
-                # admission and release fences before activation.
+                # Protected callers use the separate owner/receipt admission and
+                # release fences, never this trusted-local reference privilege.
                 authoring = PeopleAuthoring(db, command, value, lambda subjects: admit_subjects(db, subjects, budget))
                 rendering = RenderingAuthoring(db, command, value, None, budget)
                 handler = core._handle_schedule_create if command == 'schedule.create' else core._handle_schedule_update
@@ -346,6 +370,12 @@ def execute(command: str, request: Any, context: CommandContext, *, contracts: A
             budget.check()
             if len(canonical_json_bytes(result)) > 4194304:
                 fail('environment_failure', 'capacity')
+            if contracts is not None:
+                if command in _FIELDS:
+                    contracts.validate('responses', result, definition=command, output=True)
+                else:
+                    contracts.validate('schedule-create-response-v4' if command.endswith('create') else 'schedule-update-response-v4',
+                                       result, output=True)
             if context.dry_run and command != 'item.people.show':
                 db._finalize_pending()
                 raise _Preview(result)

@@ -1,16 +1,21 @@
 {
   "contract_version": "spine.people-and-responsibility.v1",
-  "status": "source_only_pending_machine_review",
+  "status": "implemented",
   "logical_specification": "specs/people-and-responsibility.md",
   "logical_spec_version": "1.0.0",
-  "runtime_implemented": false,
-  "runtime_activation": false,
+  "runtime_implemented": true,
+  "runtime_activation": true,
   "inspected_runtime": {
     "commit": "8f3c50b6fd1b4aa534e50925b7417a7a80d19122",
     "version": "0.10.0",
     "ledger_schema": "19"
   },
-  "machine_revision": "0.1.0",
+  "machine_revision": "1.0.0",
+  "implemented_runtime": {
+    "version": "0.11.0",
+    "ledger_schema": "19"
+  },
+  "runtime_evidence": "docs/PEOPLE_RUNTIME_EVIDENCE.md#pr-obligation-map",
   "web_api_contract": "spine.trusted-web-people.v1",
   "commands": {
     "people.list": {
@@ -41,7 +46,7 @@
         "owner.roster_read_current"
       ],
       "replay_permission_resolvers": [],
-      "runtime_implemented": false
+      "runtime_implemented": true
     },
     "item.people.show": {
       "selector": "spine.people-and-responsibility.v1",
@@ -70,7 +75,7 @@
         "labels.directory_read_current"
       ],
       "replay_permission_resolvers": [],
-      "runtime_implemented": false
+      "runtime_implemented": true
     },
     "item.people.update": {
       "selector": "spine.people-and-responsibility.v1",
@@ -112,7 +117,7 @@
         "receipt.item.read_current",
         "receipt.disclose_current"
       ],
-      "runtime_implemented": false
+      "runtime_implemented": true
     },
     "schedule.create": {
       "selector": "spine.schedule-create.v4",
@@ -201,7 +206,7 @@
         "receipt.item.read_current",
         "receipt.disclose_current"
       ],
-      "runtime_implemented": false
+      "runtime_implemented": true
     },
     "schedule.update": {
       "selector": "spine.schedule-update.v4",
@@ -294,7 +299,7 @@
         "receipt.item.read_current",
         "receipt.disclose_current"
       ],
-      "runtime_implemented": false
+      "runtime_implemented": true
     },
     "schedule.show": {
       "selector": "spine.trusted-web-people.v1",
@@ -348,7 +353,7 @@
         "returned_people.labels_directory_read_current"
       ],
       "replay_permission_resolvers": [],
-      "runtime_implemented": false
+      "runtime_implemented": true
     },
     "agenda.show": {
       "selector": "spine.trusted-web-people.v1",
@@ -392,7 +397,7 @@
         "returned_people.labels_directory_read_current"
       ],
       "replay_permission_resolvers": [],
-      "runtime_implemented": false
+      "runtime_implemented": true
     },
     "item.occurrences": {
       "selector": "spine.trusted-web-people.v1",
@@ -428,7 +433,7 @@
         "returned_people.labels_directory_read_current"
       ],
       "replay_permission_resolvers": [],
-      "runtime_implemented": false
+      "runtime_implemented": true
     }
   },
   "errors": {
@@ -747,67 +752,67 @@
   },
   "runtime_obligations": {
     "PR-01": {
-      "status": "pending_runtime",
+      "status": "verified_runtime",
       "description": "four_independent_dimensions_and_no_implicit_effects"
     },
     "PR-02": {
-      "status": "pending_runtime",
+      "status": "verified_runtime",
       "description": "event_task_sets_and_unscheduled_assignment"
     },
     "PR-03": {
-      "status": "pending_runtime",
+      "status": "verified_runtime",
       "description": "atomic_version_copy_forward_and_rollback"
     },
     "PR-04": {
-      "status": "pending_runtime",
+      "status": "verified_runtime",
       "description": "no_op_replay_dry_run_and_canonical_identity"
     },
     "PR-05": {
-      "status": "pending_runtime",
+      "status": "verified_runtime",
       "description": "current_roster_authority_and_fresh_reference_privacy"
     },
     "PR-06": {
-      "status": "pending_runtime",
+      "status": "verified_runtime",
       "description": "association_history_and_current_label_disclosure"
     },
     "PR-07": {
-      "status": "pending_runtime",
+      "status": "verified_runtime",
       "description": "authorized_person_filters_and_hidden_row_noninterference"
     },
     "PR-08": {
-      "status": "pending_runtime",
+      "status": "verified_runtime",
       "description": "authenticated_cursors_and_release_races"
     },
     "PR-09": {
-      "status": "pending_runtime",
+      "status": "verified_runtime",
       "description": "role_only_policy_bijection_and_mixed_edit_lineage"
     },
     "PR-10": {
-      "status": "pending_runtime",
+      "status": "verified_runtime",
       "description": "queued_leased_retry_started_terminal_absent_work_matrix"
     },
     "PR-11": {
-      "status": "pending_runtime",
+      "status": "verified_runtime",
       "description": "recurring_and_relative_source_freshness"
     },
     "PR-12": {
-      "status": "pending_runtime",
+      "status": "verified_runtime",
       "description": "indexed_bounded_queries_and_overlimit_preservation"
     },
     "PR-13": {
-      "status": "pending_runtime",
+      "status": "verified_runtime",
       "description": "all_version_writers_and_shared_finalizer_parity"
     },
     "PR-14": {
-      "status": "pending_runtime",
+      "status": "verified_runtime",
       "description": "installed_schemas_registry_and_frozen_bundle_preservation"
     },
     "PR-15": {
-      "status": "pending_runtime",
+      "status": "verified_runtime",
       "description": "public_cli_and_http_successor_equivalence"
     },
     "PR-16": {
-      "status": "pending_runtime",
+      "status": "verified_runtime",
       "description": "identity_access_source_and_write_concurrency"
     }
   }

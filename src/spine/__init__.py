@@ -2,11 +2,26 @@
 
 __all__ = ["IMPLEMENTED_CONTRACT_VERSIONS", "IMPLEMENTED_LEDGER_SCHEMA_VERSION", "__version__"]
 
-__version__ = "0.10.0"
+__version__ = "0.11.0"
 
 IMPLEMENTED_LEDGER_SCHEMA_VERSION = 19
 IMPLEMENTED_CONTRACT_VERSIONS = frozenset(
     {
+        "spine.people-and-responsibility.v1",
+        "spine.item-people-receipt.v1",
+        "spine.people-notification-continuity.v1",
+        "spine.people-cursor.v1",
+        "spine.people-cursor-config.v1",
+        "spine.trusted-web-people.v1",
+        "spine.people-schedule-view.v1",
+        "spine.people-agenda-view.v1",
+        "spine.people-occurrences-view.v1",
+        "spine.schedule-create.v4",
+        "spine.schedule-create-response.v4",
+        "spine.schedule-create-receipt.v4",
+        "spine.schedule-update.v4",
+        "spine.schedule-update-response.v4",
+        "spine.schedule-update-receipt.v4",
         "spine.notification-rendering-definitions.v1",
         "spine.notification-rendering-disclosures.v1",
         "spine.notification-rendering-details-evidence.v1",

@@ -1,0 +1,819 @@
+{
+  "contract_version": "spine.people-and-responsibility.v1",
+  "status": "implemented",
+  "logical_specification": "specs/people-and-responsibility.md",
+  "logical_spec_version": "1.0.0",
+  "runtime_implemented": true,
+  "runtime_activation": true,
+  "inspected_runtime": {
+    "commit": "8f3c50b6fd1b4aa534e50925b7417a7a80d19122",
+    "version": "0.10.0",
+    "ledger_schema": "19"
+  },
+  "machine_revision": "1.0.0",
+  "implemented_runtime": {
+    "version": "0.11.0",
+    "ledger_schema": "19"
+  },
+  "runtime_evidence": "docs/PEOPLE_RUNTIME_EVIDENCE.md#pr-obligation-map",
+  "web_api_contract": "spine.trusted-web-people.v1",
+  "commands": {
+    "people.list": {
+      "selector": "spine.people-and-responsibility.v1",
+      "response_contract": "spine.people-and-responsibility.v1",
+      "mutates": false,
+      "local": true,
+      "http": {
+        "method": "POST",
+        "path": "/api/v3/commands/people.list",
+        "required_contract_versions": [
+          "spine.canonical-json.v1",
+          "spine.people-and-responsibility.v1",
+          "spine.people-cursor.v1",
+          "spine.trusted-web-people.v1"
+        ]
+      },
+      "request_schema": "contracts/schemas/people/requests.schema.json#/$defs/people.list",
+      "response_schema": "contracts/schemas/people/responses.schema.json#/$defs/people.list",
+      "web_request_schema": "contracts/schemas/people/web-requests.schema.json#/$defs/people.list",
+      "web_response_schema": "contracts/schemas/people/web-responses.schema.json#/$defs/people.list",
+      "required_contract_versions": [
+        "spine.canonical-json.v1",
+        "spine.people-and-responsibility.v1",
+        "spine.people-cursor.v1"
+      ],
+      "fresh_permission_resolvers": [
+        "owner.roster_read_current"
+      ],
+      "replay_permission_resolvers": [],
+      "runtime_implemented": true
+    },
+    "item.people.show": {
+      "selector": "spine.people-and-responsibility.v1",
+      "response_contract": "spine.people-and-responsibility.v1",
+      "mutates": false,
+      "local": true,
+      "http": {
+        "method": "POST",
+        "path": "/api/v3/commands/item.people.show",
+        "required_contract_versions": [
+          "spine.canonical-json.v1",
+          "spine.people-and-responsibility.v1",
+          "spine.trusted-web-people.v1"
+        ]
+      },
+      "request_schema": "contracts/schemas/people/requests.schema.json#/$defs/item.people.show",
+      "response_schema": "contracts/schemas/people/responses.schema.json#/$defs/item.people.show",
+      "web_request_schema": "contracts/schemas/people/web-requests.schema.json#/$defs/item.people.show",
+      "web_response_schema": "contracts/schemas/people/web-responses.schema.json#/$defs/item.people.show",
+      "required_contract_versions": [
+        "spine.canonical-json.v1",
+        "spine.people-and-responsibility.v1"
+      ],
+      "fresh_permission_resolvers": [
+        "item.read_current",
+        "labels.directory_read_current"
+      ],
+      "replay_permission_resolvers": [],
+      "runtime_implemented": true
+    },
+    "item.people.update": {
+      "selector": "spine.people-and-responsibility.v1",
+      "response_contract": "spine.people-and-responsibility.v1",
+      "mutates": true,
+      "local": true,
+      "http": {
+        "method": "POST",
+        "path": "/api/v3/commands/item.people.update",
+        "required_contract_versions": [
+          "spine.canonical-json.v1",
+          "spine.facet-notification-continuity.v1",
+          "spine.item-people-receipt.v1",
+          "spine.notification-rendering-integration.v1",
+          "spine.people-and-responsibility.v1",
+          "spine.people-notification-continuity.v1",
+          "spine.trusted-web-people.v1"
+        ]
+      },
+      "request_schema": "contracts/schemas/people/requests.schema.json#/$defs/item.people.update",
+      "response_schema": "contracts/schemas/people/responses.schema.json#/$defs/item.people.update",
+      "web_request_schema": "contracts/schemas/people/web-requests.schema.json#/$defs/item.people.update",
+      "web_response_schema": "contracts/schemas/people/web-responses.schema.json#/$defs/item.people.update",
+      "required_contract_versions": [
+        "spine.canonical-json.v1",
+        "spine.facet-notification-continuity.v1",
+        "spine.item-people-receipt.v1",
+        "spine.notification-rendering-integration.v1",
+        "spine.people-and-responsibility.v1",
+        "spine.people-notification-continuity.v1"
+      ],
+      "fresh_permission_resolvers": [
+        "item.edit_current",
+        "fresh_references.owner_scope_eligible",
+        "fresh_references.directory_read_current"
+      ],
+      "replay_permission_resolvers": [
+        "same_initiating_account_and_subject",
+        "receipt.item.read_current",
+        "receipt.disclose_current"
+      ],
+      "runtime_implemented": true
+    },
+    "schedule.create": {
+      "selector": "spine.schedule-create.v4",
+      "response_contract": "spine.schedule-create-response.v4",
+      "mutates": true,
+      "local": true,
+      "http": {
+        "method": "POST",
+        "path": "/api/v3/commands/schedule.create",
+        "required_contract_versions": [
+          "spine.canonical-json.v1",
+          "spine.item-archetypes.v1",
+          "spine.notification-opportunities.v1",
+          "spine.notification-profile-application.v1",
+          "spine.notification-profile-application.v2",
+          "spine.notification-profile-bindings.v1",
+          "spine.notification-profiles.v1",
+          "spine.notification-rendering-integration.v1",
+          "spine.notification-schedule-authoring.v1",
+          "spine.notification-schedule.contract.v1",
+          "spine.notification-schedule.normalization.v1",
+          "spine.people-and-responsibility.v1",
+          "spine.recurrence-authoring.v1",
+          "spine.recurrence.contract.v1",
+          "spine.recurrence.normalization.v1",
+          "spine.schedule-create-normalization.v1",
+          "spine.schedule-create-receipt.v2",
+          "spine.schedule-create-receipt.v3",
+          "spine.schedule-create-receipt.v4",
+          "spine.schedule-create-response.v2",
+          "spine.schedule-create-response.v3",
+          "spine.schedule-create-response.v4",
+          "spine.schedule-create.v2",
+          "spine.schedule-create.v3",
+          "spine.schedule-create.v4",
+          "spine.schedule-primary-location-authoring.v1",
+          "spine.schedule-primary-location-normalization.v1",
+          "spine.schedule-primary-location-view.v1",
+          "spine.schedule-primary-location.v1",
+          "spine.trusted-web-people.v1"
+        ]
+      },
+      "request_schema": "contracts/schemas/people/schedule-create-request-v4.schema.json",
+      "response_schema": "contracts/schemas/people/schedule-create-response-v4.schema.json",
+      "web_request_schema": "contracts/schemas/people/web-requests.schema.json#/$defs/schedule.create",
+      "web_response_schema": "contracts/schemas/people/web-responses.schema.json#/$defs/schedule.create",
+      "required_contract_versions": [
+        "spine.canonical-json.v1",
+        "spine.item-archetypes.v1",
+        "spine.notification-opportunities.v1",
+        "spine.notification-profile-application.v1",
+        "spine.notification-profile-application.v2",
+        "spine.notification-profile-bindings.v1",
+        "spine.notification-profiles.v1",
+        "spine.notification-rendering-integration.v1",
+        "spine.notification-schedule-authoring.v1",
+        "spine.notification-schedule.contract.v1",
+        "spine.notification-schedule.normalization.v1",
+        "spine.people-and-responsibility.v1",
+        "spine.recurrence-authoring.v1",
+        "spine.recurrence.contract.v1",
+        "spine.recurrence.normalization.v1",
+        "spine.schedule-create-normalization.v1",
+        "spine.schedule-create-receipt.v2",
+        "spine.schedule-create-receipt.v3",
+        "spine.schedule-create-receipt.v4",
+        "spine.schedule-create-response.v2",
+        "spine.schedule-create-response.v3",
+        "spine.schedule-create-response.v4",
+        "spine.schedule-create.v2",
+        "spine.schedule-create.v3",
+        "spine.schedule-create.v4",
+        "spine.schedule-primary-location-authoring.v1",
+        "spine.schedule-primary-location-normalization.v1",
+        "spine.schedule-primary-location-view.v1",
+        "spine.schedule-primary-location.v1"
+      ],
+      "fresh_permission_resolvers": [
+        "create_owner_scope.create",
+        "existing_schedule_references_and_release",
+        "fresh_people.owner_scope_eligible",
+        "fresh_people.directory_read_current"
+      ],
+      "replay_permission_resolvers": [
+        "same_initiating_account_and_subject",
+        "receipt.item.read_current",
+        "receipt.disclose_current"
+      ],
+      "runtime_implemented": true
+    },
+    "schedule.update": {
+      "selector": "spine.schedule-update.v4",
+      "response_contract": "spine.schedule-update-response.v4",
+      "mutates": true,
+      "local": true,
+      "http": {
+        "method": "POST",
+        "path": "/api/v3/commands/schedule.update",
+        "required_contract_versions": [
+          "spine.canonical-json.v1",
+          "spine.item-archetypes.v1",
+          "spine.notification-opportunities.v1",
+          "spine.notification-profile-application.v1",
+          "spine.notification-profile-application.v2",
+          "spine.notification-profile-bindings.v1",
+          "spine.notification-profiles.v1",
+          "spine.notification-rendering-integration.v1",
+          "spine.notification-schedule-authoring.v1",
+          "spine.notification-schedule.contract.v1",
+          "spine.notification-schedule.normalization.v1",
+          "spine.people-and-responsibility.v1",
+          "spine.people-notification-continuity.v1",
+          "spine.recurrence-authoring.v1",
+          "spine.recurrence.contract.v1",
+          "spine.recurrence.normalization.v1",
+          "spine.relative-temporal-binding.v1",
+          "spine.schedule-operations-normalization.v1",
+          "spine.schedule-primary-location-authoring.v1",
+          "spine.schedule-primary-location-normalization.v1",
+          "spine.schedule-primary-location-view.v1",
+          "spine.schedule-primary-location.v1",
+          "spine.schedule-update-receipt.v2",
+          "spine.schedule-update-receipt.v3",
+          "spine.schedule-update-receipt.v4",
+          "spine.schedule-update-response.v2",
+          "spine.schedule-update-response.v3",
+          "spine.schedule-update-response.v4",
+          "spine.schedule-update.v2",
+          "spine.schedule-update.v3",
+          "spine.schedule-update.v4",
+          "spine.trusted-web-people.v1"
+        ]
+      },
+      "request_schema": "contracts/schemas/people/schedule-update-request-v4.schema.json",
+      "response_schema": "contracts/schemas/people/schedule-update-response-v4.schema.json",
+      "web_request_schema": "contracts/schemas/people/web-requests.schema.json#/$defs/schedule.update",
+      "web_response_schema": "contracts/schemas/people/web-responses.schema.json#/$defs/schedule.update",
+      "required_contract_versions": [
+        "spine.canonical-json.v1",
+        "spine.item-archetypes.v1",
+        "spine.notification-opportunities.v1",
+        "spine.notification-profile-application.v1",
+        "spine.notification-profile-application.v2",
+        "spine.notification-profile-bindings.v1",
+        "spine.notification-profiles.v1",
+        "spine.notification-rendering-integration.v1",
+        "spine.notification-schedule-authoring.v1",
+        "spine.notification-schedule.contract.v1",
+        "spine.notification-schedule.normalization.v1",
+        "spine.people-and-responsibility.v1",
+        "spine.people-notification-continuity.v1",
+        "spine.recurrence-authoring.v1",
+        "spine.recurrence.contract.v1",
+        "spine.recurrence.normalization.v1",
+        "spine.relative-temporal-binding.v1",
+        "spine.schedule-operations-normalization.v1",
+        "spine.schedule-primary-location-authoring.v1",
+        "spine.schedule-primary-location-normalization.v1",
+        "spine.schedule-primary-location-view.v1",
+        "spine.schedule-primary-location.v1",
+        "spine.schedule-update-receipt.v2",
+        "spine.schedule-update-receipt.v3",
+        "spine.schedule-update-receipt.v4",
+        "spine.schedule-update-response.v2",
+        "spine.schedule-update-response.v3",
+        "spine.schedule-update-response.v4",
+        "spine.schedule-update.v2",
+        "spine.schedule-update.v3",
+        "spine.schedule-update.v4"
+      ],
+      "fresh_permission_resolvers": [
+        "item.edit_current",
+        "existing_schedule_references_and_release",
+        "fresh_people.owner_scope_eligible",
+        "fresh_people.directory_read_current"
+      ],
+      "replay_permission_resolvers": [
+        "same_initiating_account_and_subject",
+        "receipt.item.read_current",
+        "receipt.disclose_current"
+      ],
+      "runtime_implemented": true
+    },
+    "schedule.show": {
+      "selector": "spine.trusted-web-people.v1",
+      "response_contract": "spine.people-schedule-view.v1",
+      "mutates": false,
+      "local": false,
+      "http": {
+        "method": "POST",
+        "path": "/api/v3/commands/schedule.show",
+        "required_contract_versions": [
+          "spine.canonical-json.v1",
+          "spine.notification-profile-readback.v2",
+          "spine.notification-rendering-input.v1",
+          "spine.notification-rendering-integration.v1",
+          "spine.notification-rendering.concise-en-ca.v1",
+          "spine.notification-rendering.v1",
+          "spine.notification-rendering.v2",
+          "spine.people-and-responsibility.v1",
+          "spine.people-cursor.v1",
+          "spine.relative-temporal-binding.v1",
+          "spine.schedule-compact.v1",
+          "spine.schedule-primary-location-view.v1",
+          "spine.schedule-primary-location.v1",
+          "spine.schedule-show.v1",
+          "spine.schedule-show.v2",
+          "spine.trusted-web-people.v1"
+        ]
+      },
+      "web_request_schema": "contracts/schemas/people/web-requests.schema.json#/$defs/schedule.show",
+      "web_response_schema": "contracts/schemas/people/web-responses.schema.json#/$defs/schedule.show",
+      "required_contract_versions": [
+        "spine.canonical-json.v1",
+        "spine.notification-profile-readback.v2",
+        "spine.notification-rendering-input.v1",
+        "spine.notification-rendering-integration.v1",
+        "spine.notification-rendering.concise-en-ca.v1",
+        "spine.notification-rendering.v1",
+        "spine.notification-rendering.v2",
+        "spine.people-and-responsibility.v1",
+        "spine.people-cursor.v1",
+        "spine.relative-temporal-binding.v1",
+        "spine.schedule-compact.v1",
+        "spine.schedule-primary-location-view.v1",
+        "spine.schedule-primary-location.v1",
+        "spine.schedule-show.v1",
+        "spine.schedule-show.v2",
+        "spine.trusted-web-people.v1"
+      ],
+      "fresh_permission_resolvers": [
+        "item.read_and_required_temporal_sources",
+        "returned_people.labels_directory_read_current"
+      ],
+      "replay_permission_resolvers": [],
+      "runtime_implemented": true
+    },
+    "agenda.show": {
+      "selector": "spine.trusted-web-people.v1",
+      "response_contract": "spine.people-agenda-view.v1",
+      "mutates": false,
+      "local": false,
+      "http": {
+        "method": "POST",
+        "path": "/api/v3/agenda",
+        "required_contract_versions": [
+          "spine.canonical-json.v1",
+          "spine.notification-rendering-integration.v1",
+          "spine.people-and-responsibility.v1",
+          "spine.people-cursor.v1",
+          "spine.relative-temporal-binding.v1",
+          "spine.schedule-agenda-response.v1",
+          "spine.schedule-agenda.v1",
+          "spine.schedule-operations-normalization.v1",
+          "spine.schedule-primary-location-view.v1",
+          "spine.schedule-primary-location.v1",
+          "spine.trusted-web-people.v1"
+        ]
+      },
+      "web_request_schema": "contracts/schemas/people/web-requests.schema.json#/$defs/agenda.show",
+      "web_response_schema": "contracts/schemas/people/web-responses.schema.json#/$defs/agenda.show",
+      "required_contract_versions": [
+        "spine.canonical-json.v1",
+        "spine.notification-rendering-integration.v1",
+        "spine.people-and-responsibility.v1",
+        "spine.people-cursor.v1",
+        "spine.relative-temporal-binding.v1",
+        "spine.schedule-agenda-response.v1",
+        "spine.schedule-agenda.v1",
+        "spine.schedule-operations-normalization.v1",
+        "spine.schedule-primary-location-view.v1",
+        "spine.schedule-primary-location.v1",
+        "spine.trusted-web-people.v1"
+      ],
+      "fresh_permission_resolvers": [
+        "authorized_candidates.before_filter_and_expansion",
+        "returned_people.labels_directory_read_current"
+      ],
+      "replay_permission_resolvers": [],
+      "runtime_implemented": true
+    },
+    "item.occurrences": {
+      "selector": "spine.trusted-web-people.v1",
+      "response_contract": "spine.people-occurrences-view.v1",
+      "mutates": false,
+      "local": false,
+      "http": {
+        "method": "POST",
+        "path": "/api/v3/commands/item.occurrences",
+        "required_contract_versions": [
+          "spine.canonical-json.v1",
+          "spine.item-occurrences.recurrence.v1",
+          "spine.notification-rendering-integration.v1",
+          "spine.people-and-responsibility.v1",
+          "spine.people-cursor.v1",
+          "spine.recurrence.contract.v1",
+          "spine.trusted-web-people.v1"
+        ]
+      },
+      "web_request_schema": "contracts/schemas/people/web-requests.schema.json#/$defs/item.occurrences",
+      "web_response_schema": "contracts/schemas/people/web-responses.schema.json#/$defs/item.occurrences",
+      "required_contract_versions": [
+        "spine.canonical-json.v1",
+        "spine.item-occurrences.recurrence.v1",
+        "spine.notification-rendering-integration.v1",
+        "spine.people-and-responsibility.v1",
+        "spine.people-cursor.v1",
+        "spine.recurrence.contract.v1",
+        "spine.trusted-web-people.v1"
+      ],
+      "fresh_permission_resolvers": [
+        "item.read_and_required_temporal_sources",
+        "returned_people.labels_directory_read_current"
+      ],
+      "replay_permission_resolvers": [],
+      "runtime_implemented": true
+    }
+  },
+  "errors": {
+    "local_schema": "contracts/schemas/people/failures.schema.json#/$defs/local",
+    "web_schema": "contracts/schemas/people/failures.schema.json#/$defs/protected",
+    "mapping": {
+      "invalid_request": {
+        "cli_code": "invalid_request",
+        "cli_exit": 2,
+        "web_code": "invalid_request",
+        "http": 400
+      },
+      "unsupported_field": {
+        "cli_code": "unsupported_field",
+        "cli_exit": 2,
+        "web_code": "invalid_request",
+        "http": 400
+      },
+      "missing_required_field": {
+        "cli_code": "missing_required_field",
+        "cli_exit": 2,
+        "web_code": "invalid_request",
+        "http": 400
+      },
+      "unsupported_contract_version": {
+        "cli_code": "unsupported_contract_version",
+        "cli_exit": 2,
+        "web_code": "invalid_request",
+        "http": 400
+      },
+      "wrong_item_type": {
+        "cli_code": "wrong_item_type",
+        "cli_exit": 2,
+        "web_code": "domain_failure",
+        "http": 422
+      },
+      "invalid_state_transition": {
+        "cli_code": "invalid_state_transition",
+        "cli_exit": 2,
+        "web_code": "domain_failure",
+        "http": 422
+      },
+      "unavailable_reference": {
+        "cli_code": "referenced_row_not_found",
+        "cli_exit": 4,
+        "web_code": "resource_unavailable",
+        "http": 404
+      },
+      "stale_version": {
+        "cli_code": "stale_version",
+        "cli_exit": 5,
+        "web_code": "version_changed",
+        "http": 409
+      },
+      "stale_cursor": {
+        "cli_code": "stale_cursor",
+        "cli_exit": 6,
+        "web_code": "access_changed",
+        "http": 409
+      },
+      "semantic_conflict": {
+        "cli_code": "semantic_conflict",
+        "cli_exit": 6,
+        "web_code": "domain_conflict",
+        "http": 409
+      },
+      "capacity": {
+        "cli_code": "environment_failure",
+        "cli_exit": 7,
+        "web_code": "capacity_exceeded",
+        "http": 429
+      },
+      "integrity": {
+        "cli_code": "environment_failure",
+        "cli_exit": 7,
+        "web_code": "domain_failure",
+        "http": 422
+      },
+      "missing_cursor_context": {
+        "cli_code": "environment_failure",
+        "cli_exit": 7,
+        "web_code": "admission_unavailable",
+        "http": 503
+      },
+      "release_access_changed": {
+        "cli_code": "environment_failure",
+        "cli_exit": 7,
+        "web_code": "access_changed",
+        "http": 409
+      }
+    },
+    "validation_precedence": [
+      "bounded_transport_and_runtime_preflight",
+      "closed_shape_and_selector",
+      "protected_identity_and_operation_admission",
+      "private_command_receipt_lookup",
+      "replay_identity_disclosure_and_compatibility",
+      "root_authority_or_directory_scope",
+      "expected_access_and_target_version",
+      "item_type_and_lifecycle",
+      "fresh_reference_eligibility",
+      "semantic_capacity_and_continuity",
+      "transaction_finalization",
+      "release_fence"
+    ],
+    "shape_order": [
+      "extra_fields_lexicographic_json_pointer",
+      "missing_fields_lexicographic_json_pointer",
+      "contract_version",
+      "remaining_schema_errors_lexicographic_json_pointer"
+    ],
+    "first_error_only": true,
+    "local_schema_applies_to": [
+      "people.list",
+      "item.people.show",
+      "item.people.update"
+    ],
+    "scheduling_error_authority": "existing_schedule_command_taxonomies_outside_people_validation"
+  },
+  "normalization": {
+    "canonical_json": "spine.canonical-json.v1",
+    "id_normalization": "none_unicode_scalar_only",
+    "set_arrays": [
+      "people.participants",
+      "people.assignees",
+      "patch.people.participants",
+      "patch.people.assignees",
+      "person_filter.roles",
+      "include",
+      "item_ids",
+      "item_types"
+    ],
+    "order": "unicode_code_point",
+    "duplicates": "reject",
+    "people_list_defaults": {
+      "subject_status": "active",
+      "subject_kind": "all",
+      "limit": "25"
+    },
+    "person_filter_roles_default": [
+      "assignee",
+      "participant"
+    ],
+    "pagination_defaults": {
+      "limit": "25",
+      "section_limit": "25"
+    },
+    "omitted_people_create": {
+      "event": {
+        "participants": []
+      },
+      "task": {
+        "assignees": []
+      }
+    },
+    "omitted_people_update": "preserve_all_rows",
+    "invalid": [
+      "people=null",
+      "people={}",
+      "mixed_participants_and_assignees",
+      "wrong_role_for_item_type_even_empty"
+    ],
+    "replay_semantic_fields": [
+      "command",
+      "contract_version",
+      "actor_subject_id",
+      "item_id",
+      "target_version",
+      "updated_at_utc",
+      "people"
+    ],
+    "no_op": "complete_semantic_managed_role_set_including_inactive_rows",
+    "compatibility": "existing_envelopes_unchanged"
+  },
+  "identity": {
+    "derivation_version": "spine.command-id.v1",
+    "new_managed_row_role": "item_subject_role",
+    "new_managed_prefix": "item_subject_role",
+    "path_templates": {
+      "standalone": "/people/{participants|assignees}/{canonical_index}",
+      "create": "/people/{participants|assignees}/{canonical_index}",
+      "update": "/patch/people/{participants|assignees}/{canonical_index}",
+      "copy": "/copy_forward/item_subject_role/{prior_id}",
+      "audit": "/audit",
+      "command_receipt": "/"
+    },
+    "index_base": "0",
+    "retained_replacement_rows": "derived_from_replacement_array_path",
+    "omitted_rows": "existing_copy_forward_contract",
+    "role_set_hash_domain": "spine.people-role-set.v1",
+    "receipt_hash_domain": "spine.item-people-semantic-facts.v1"
+  },
+  "limits": {
+    "request_bytes": 1048576,
+    "response_bytes": 4194304,
+    "total_role_rows_per_item_version": 100,
+    "page_limit_max": 100,
+    "page_limit_default": 25,
+    "resolved_resources": 100,
+    "authorized_candidate_rows": 1000,
+    "access_proof_rows": 100,
+    "sqlite_vm_steps": 100000,
+    "operation_milliseconds": 5000,
+    "busy_milliseconds": 2000,
+    "cursor_seconds": 900,
+    "optional_people_bytes": 65536,
+    "optional_total_bytes": 1048576,
+    "core_reserved_bytes": 2097152,
+    "authorized_core_vm_steps": 75000,
+    "optional_vm_steps": 25000,
+    "max_policy_lineage_hops": 100,
+    "strictest_adapter_budget_wins": true
+  },
+  "cursor": {
+    "contract_version": "spine.people-cursor.v1",
+    "schema": "contracts/schemas/people/cursor.schema.json",
+    "configuration_schema": "contracts/schemas/people/cursor-config.schema.json",
+    "prefix": "pc1",
+    "algorithm": "HMAC-SHA256",
+    "encoding": "unpadded_canonical_base64url",
+    "mac_domain": "spine.people-cursor.v1",
+    "separator": "NUL",
+    "max_token_bytes": 8192,
+    "ttl_seconds": 900,
+    "query_domain": "spine.people-query.v1",
+    "source_domain": "spine.people-source.v1",
+    "authorization_domain": "spine.people-authorization.v1",
+    "context_key": "people_cursor_config",
+    "local_environment_variable": "SPINE_PEOPLE_CURSOR_CONFIG",
+    "protected_configuration": "service_owned_not_request_json",
+    "whole_ledger_generation": false,
+    "durable_reads": false,
+    "query_fields": [
+      "derivation_version",
+      "canonical_json_version",
+      "route",
+      "request",
+      "guards"
+    ],
+    "strip_request_fields": [
+      "cursor",
+      "section_cursors"
+    ],
+    "original_expiry_preserved": true,
+    "continuation_changes": "stale_cursor_local_access_changed_web"
+  },
+  "continuity": {
+    "contract_version": "spine.people-notification-continuity.v1",
+    "policy_fields_authority": "contracts/archetype-facet-integration.v1.json#/work/comparison_policy_fields",
+    "policy_ancestry": "unique_bijective_immediate_source_notification_policy_id_same_item_and_intent_decreasing_versions",
+    "excluded_bookkeeping": [
+      "item.current_version",
+      "item.updated_at_utc",
+      "item_version.version",
+      "item_version.created_at_utc",
+      "item_version.created_by_subject_id",
+      "copied_supporting_row_ids_and_timestamps",
+      "copied_policy_ids_versions_and_source_policy_ids"
+    ],
+    "allowed_semantic_delta": "exact_normalized_requested_managed_role_replacement_only",
+    "unchanged_dimensions": [
+      "item_nonversion_facts",
+      "detail_nonversion_facts",
+      "access_owner",
+      "unmanaged_and_omitted_roles",
+      "locations",
+      "anchors",
+      "archetype",
+      "facet_values_and_pinned_schemas",
+      "profile_application_meaning",
+      "policy_comparison_fields",
+      "policy_presentation",
+      "recurrence_revision",
+      "target_temporal_binding_freshness",
+      "resolved_target_snapshots"
+    ],
+    "states": {
+      "eligible_unattempted": "retain",
+      "leased_unstarted": "retain_lease_and_fresh_fence",
+      "retry": "retain_retry_and_provider_key",
+      "started": "immutable_body_evidence_and_attempt",
+      "terminal": "preserve_no_resend",
+      "independently_stale": "existing_handling",
+      "absent": "do_not_materialize"
+    },
+    "mixed_lineage": "dispatch_each_edge_by_its_own_verified_contract_never_one_relaxed_proof",
+    "source_item_edit": "follow_source_dependents_stale_under_existing_source_version_rules_reconcile_separately",
+    "materialize": false,
+    "cancel": false,
+    "send": false,
+    "new_attempt": false,
+    "durable_proof_table": false,
+    "failure": "rollback_authoring_environment_failure"
+  },
+  "persistence": {
+    "authority": "item_subject_roles",
+    "new_tables": [],
+    "new_columns": [],
+    "migration": "none_declared",
+    "schema_number_reserved": false,
+    "query_indexes": [
+      "item_subject_roles_subject_idx",
+      "subject_memberships_group_status_idx",
+      "subject_memberships_subject_status_idx"
+    ],
+    "actual_index_identity": "validate_deployed_schema_manifest_not_generated_autoindex_spelling",
+    "runtime_evidence_required": true,
+    "existing_key_constraints": [
+      [
+        "item_id",
+        "version",
+        "subject_id",
+        "role"
+      ]
+    ]
+  },
+  "runtime_obligations": {
+    "PR-01": {
+      "status": "verified_runtime",
+      "description": "four_independent_dimensions_and_no_implicit_effects"
+    },
+    "PR-02": {
+      "status": "verified_runtime",
+      "description": "event_task_sets_and_unscheduled_assignment"
+    },
+    "PR-03": {
+      "status": "verified_runtime",
+      "description": "atomic_version_copy_forward_and_rollback"
+    },
+    "PR-04": {
+      "status": "verified_runtime",
+      "description": "no_op_replay_dry_run_and_canonical_identity"
+    },
+    "PR-05": {
+      "status": "verified_runtime",
+      "description": "current_roster_authority_and_fresh_reference_privacy"
+    },
+    "PR-06": {
+      "status": "verified_runtime",
+      "description": "association_history_and_current_label_disclosure"
+    },
+    "PR-07": {
+      "status": "verified_runtime",
+      "description": "authorized_person_filters_and_hidden_row_noninterference"
+    },
+    "PR-08": {
+      "status": "verified_runtime",
+      "description": "authenticated_cursors_and_release_races"
+    },
+    "PR-09": {
+      "status": "verified_runtime",
+      "description": "role_only_policy_bijection_and_mixed_edit_lineage"
+    },
+    "PR-10": {
+      "status": "verified_runtime",
+      "description": "queued_leased_retry_started_terminal_absent_work_matrix"
+    },
+    "PR-11": {
+      "status": "verified_runtime",
+      "description": "recurring_and_relative_source_freshness"
+    },
+    "PR-12": {
+      "status": "verified_runtime",
+      "description": "indexed_bounded_queries_and_overlimit_preservation"
+    },
+    "PR-13": {
+      "status": "verified_runtime",
+      "description": "all_version_writers_and_shared_finalizer_parity"
+    },
+    "PR-14": {
+      "status": "verified_runtime",
+      "description": "installed_schemas_registry_and_frozen_bundle_preservation"
+    },
+    "PR-15": {
+      "status": "verified_runtime",
+      "description": "public_cli_and_http_successor_equivalence"
+    },
+    "PR-16": {
+      "status": "verified_runtime",
+      "description": "identity_access_source_and_write_concurrency"
+    }
+  }
+}

@@ -1,0 +1,387 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cortext.local/spine/contracts/schemas/people/responses.schema.json",
+  "$comment": "Source-only people contract candidate; not advertised by or packaged with the current runtime.",
+  "$defs": {
+    "people.list": {
+      "type": "object",
+      "properties": {
+        "ok": {
+          "const": true
+        },
+        "command": {
+          "const": "people.list"
+        },
+        "response_contract": {
+          "const": "spine.people-and-responsibility.v1"
+        },
+        "owner": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/owner"
+        },
+        "observed_at_utc": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/utc"
+        },
+        "subjects": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "subject_id": {
+                "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/id"
+              },
+              "display_name": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 512
+              },
+              "subject_kind": {
+                "enum": [
+                  "person",
+                  "agent"
+                ]
+              },
+              "status": {
+                "enum": [
+                  "active",
+                  "inactive"
+                ]
+              },
+              "eligible_for_fresh_selection": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "subject_id",
+              "display_name",
+              "subject_kind",
+              "status",
+              "eligible_for_fresh_selection"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 100,
+          "minItems": 0
+        },
+        "limit": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/limit"
+        },
+        "has_more": {
+          "type": "boolean"
+        },
+        "next_cursor": {
+          "oneOf": [
+            {
+              "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/cursorToken"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "ok",
+        "command",
+        "response_contract",
+        "owner",
+        "observed_at_utc",
+        "subjects",
+        "limit",
+        "has_more",
+        "next_cursor"
+      ],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "has_more": {
+                "const": true
+              }
+            },
+            "required": [
+              "has_more"
+            ]
+          },
+          "then": {
+            "properties": {
+              "next_cursor": {
+                "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/cursorToken"
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "next_cursor": {
+                "type": "null"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "item.people.show": {
+      "type": "object",
+      "properties": {
+        "ok": {
+          "const": true
+        },
+        "command": {
+          "const": "item.people.show"
+        },
+        "response_contract": {
+          "const": "spine.people-and-responsibility.v1"
+        },
+        "current_version": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/version"
+        },
+        "people": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/projection"
+        }
+      },
+      "required": [
+        "ok",
+        "command",
+        "response_contract",
+        "current_version",
+        "people"
+      ],
+      "additionalProperties": false
+    },
+    "item.people.update": {
+      "type": "object",
+      "properties": {
+        "ok": {
+          "const": true
+        },
+        "command": {
+          "const": "item.people.update"
+        },
+        "response_contract": {
+          "const": "spine.people-and-responsibility.v1"
+        },
+        "effect": {
+          "enum": [
+            "item_people_updated",
+            "item_people_noop",
+            "item_people_replay"
+          ]
+        },
+        "command_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/id"
+        },
+        "command_receipt_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/id"
+        },
+        "audit_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/id"
+        },
+        "item_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/id"
+        },
+        "item_type": {
+          "enum": [
+            "event",
+            "task"
+          ]
+        },
+        "target_version": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/version"
+        },
+        "current_version": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/version"
+        },
+        "truth_changed": {
+          "type": "boolean"
+        },
+        "work_changed": {
+          "const": false
+        },
+        "associations": {
+          "type": "array",
+          "items": {
+            "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/association"
+          },
+          "maxItems": 100,
+          "minItems": 0
+        },
+        "receipt": {
+          "type": "object",
+          "properties": {
+            "receipt_contract": {
+              "const": "spine.item-people-receipt.v1"
+            },
+            "command_receipt_id": {
+              "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/id"
+            },
+            "effect": {
+              "enum": [
+                "item_people_updated",
+                "item_people_noop"
+              ]
+            },
+            "semantic_facts_hash": {
+              "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/hash"
+            },
+            "created_at_utc": {
+              "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/utc"
+            }
+          },
+          "required": [
+            "receipt_contract",
+            "command_receipt_id",
+            "effect",
+            "semantic_facts_hash",
+            "created_at_utc"
+          ],
+          "additionalProperties": false
+        },
+        "dry_run": {
+          "const": true
+        }
+      },
+      "required": [
+        "ok",
+        "command",
+        "response_contract",
+        "effect",
+        "command_id",
+        "command_receipt_id",
+        "item_id",
+        "item_type",
+        "target_version",
+        "current_version",
+        "truth_changed",
+        "work_changed",
+        "associations",
+        "receipt"
+      ],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "receipt": {
+                "properties": {
+                  "effect": {
+                    "const": "item_people_updated"
+                  }
+                }
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "audit_id"
+            ],
+            "properties": {
+              "truth_changed": {
+                "const": true
+              }
+            }
+          },
+          "else": {
+            "not": {
+              "required": [
+                "audit_id"
+              ]
+            },
+            "properties": {
+              "truth_changed": {
+                "const": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "effect": {
+                "const": "item_people_updated"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "receipt": {
+                "properties": {
+                  "effect": {
+                    "const": "item_people_updated"
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "effect": {
+                "const": "item_people_noop"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "receipt": {
+                "properties": {
+                  "effect": {
+                    "const": "item_people_noop"
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "item_type": {
+                "const": "event"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "associations": {
+                "items": {
+                  "properties": {
+                    "role": {
+                      "const": "participant"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "associations": {
+                "items": {
+                  "properties": {
+                    "role": {
+                      "const": "assignee"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "properties": {
+            "associations": {
+              "items": {
+                "properties": {
+                  "status": {
+                    "const": "active"
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

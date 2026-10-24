@@ -74,11 +74,14 @@ V2 adds `facet_schema` grant targets only, as defined by
 
 The ratified logical [people and responsibility leaf](people-and-responsibility.md) defines
 scoped people discovery, item participation/assignment read/update and separately
-versioned authoring/filter projections. These are not implemented commands, selectors
-or HTTP registrations. Existing task-role authoring, self-only web restrictions,
-ownership and notification contracts remain unchanged until explicit successor
-contracts and verification are approved. The source-only people registry and schemas
-are planned declarations, not entries in the implemented-command registry below.
+versioned authoring/filter projections. Runtime 0.11.0/schema 19 implements
+`people.list`, `item.people.show`, `item.people.update`, additive scheduling v4
+and the eight separately registered protected people routes. Its exact machine
+companion and separately pinned installed closure own prerequisites and wire shapes.
+Existing local reads, compact output, task-role authoring, frozen self-only web
+projections, ownership and notification routing remain unchanged. People authoring
+does not grant access or select reminder recipients. See the
+[operator guide](../docs/PEOPLE_COMMANDS.md).
 
 The ratified [facet revision readback](facet-schema-revision-readback.md) adds
 trusted-local `facet_schema.revision.show` in runtime 0.10.0/schema 19. Its separate
@@ -93,6 +96,12 @@ This contract depends on `specs/overview.md`, `specs/architecture.md`, `specs/op
 Spine is the canonical coordination ledger and planning fabric. External tools are projections or side-effect targets. The authoring commands in this contract do not send externally.
 
 ## 3. Command Core Shape
+
+Runtime 0.11.0 additionally registers `people.list`, `item.people.show` and
+`item.people.update` through the exact people companion. Scheduling v4 is an
+additive selector on `schedule.create`/`schedule.update`, not a rename. The three
+people read successors are separately protected HTTP operations, not extensions
+to frozen local schedule/agenda/occurrence read shapes.
 
 The stable command core lives behind the importable Python handler signature `spine.commands.handle(command: str, request: Mapping, context: CommandContext) -> Mapping`. The canonical command identifier is the dotted `resource.verb` value. Currently implemented contract command identifiers are `system.info`, `subject.upsert`, `subject_group.upsert`, `delivery_target.upsert`, `item.show`, `item.list`, `item.occurrences`, `item.archive`, `event.create`, `event.update`, `event.reschedule`, `event.cancel`, `task.create`, `schedule.build`, `schedule.create`, `schedule.show`, `agenda.show`, `schedule.update`, `schedule.cancel`, `schedule.related_task.create`, `schedule.binding.list`, `schedule.binding.reconcile`, `task.update`, `task.complete`, `task.cancel`, `relation.create`, `relation.list`, `reminder.create`, `reminder.edit`, `reminder.disable`, `notification.opportunities`, `notification_work.materialize`, `recurrence.instance.add`, `recurrence.instance.remove`, `recurrence.instance.override`, `recurrence.series.edit`, `occurrence_provenance.regenerate`, `owner_scope.list`, `web_access.plan`, and `web_access.apply`.
 

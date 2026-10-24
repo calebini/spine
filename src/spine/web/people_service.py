@@ -1,8 +1,4 @@
-"""Private protected people candidate; deliberately absent from HTTP/registries.
-
-Uses the canonical local mutation's transaction body, but never its trusted-local
-admission path. Source-only contracts must be explicitly supplied by the caller.
-"""
+"""Protected people service, sharing canonical mutations but not local admission."""
 
 from __future__ import annotations
 
@@ -105,13 +101,29 @@ def permission_proof(db, p, budget):
 
 class PeopleService:
     def __init__(self, config, *, contracts: PeopleContracts, cursor_config=None,
-                 now=None, before_release=None):
+                 now=None, before_release=None, require_cursor_context=False):
         self.base, self.config, self.contracts = WebService(config), config, contracts
         self.cursor_config, self.now = cursor_config, now or (lambda: wire_time(utc_now()))
         self.before_release = before_release
+        self.require_cursor_context = require_cursor_context
+
+    def cursor_context(self, db, budget):
+        """A public family is all-or-nothing, including its protected cursor pin."""
+        if not self.require_cursor_context:
+            return
+        try:
+            if not isinstance(self.cursor_config, PeopleCursorConfig):
+                raise ValueError('cursor context')
+            self.cursor_config.validate()
+            directory = PeopleDirectory(db, budget, observed_at_utc=self.now())
+            if ledger_instance(directory) != self.cursor_config.ledger_instance_id:
+                raise ValueError('ledger instance')
+        except (ValueError, SpineValidationError) as exc:
+            raise WebError('admission_unavailable') from exc
 
     def admit(self, db, account, selection, budget):
         self.base.preflight(db)
+        self.cursor_context(db, budget)
         p = ReadPermissions(db, account, self.now())
         directory = PeopleDirectory(db, budget, observed_at_utc=p.now, subject=p.subject)
         identity = principal(db, p, selection)
@@ -128,7 +140,7 @@ class PeopleService:
             raise WebError('capacity_exceeded')
         return authorization(directory, identity, permission_proofs=facts, valid_until=deadline)
 
-    def response(self, command, result, identity, budget):
+    def response(self, command, result, identity, budget, *, encode=None):
         value = {'contract_version': API, 'ok': True, 'identity_basis': 'self_selected',
                  **{k: identity[k] for k in ('account_id', 'subject_id', 'selection_id', 'account_revision',
                                             'subject_revision', 'account_subject_binding_revision', 'access_epoch')},
@@ -136,24 +148,31 @@ class PeopleService:
         self.contracts.validate('web-responses', value, definition=command, output=True)
         if len(canonical_json_bytes(value)) > 4194304:
             raise WebError('capacity_exceeded')
+        if encode is not None:
+            value = encode(value)
+            if not isinstance(value, bytes) or len(value) > 4194304:
+                raise WebError('capacity_exceeded')
         budget.check()
         return value
 
-    def execute(self, command, body, account, selection, *, current_selection=None):
+    def execute(self, command, body, account, selection, *, current_selection=None, encode=None, started=None):
         if command in {'schedule.show', 'agenda.show', 'item.occurrences'}:
             from spine.web.people_read_service import PeopleReadService
 
             reader = PeopleReadService(self.config, contracts=self.contracts, cursor_config=self.cursor_config, now=self.now,
                 before_release=(lambda: self.before_release(None)) if self.before_release else None)
             selected = current_selection if current_selection is not None else (lambda: (account, selection))
-            return reader.read(command, body, selection=selected)
+            return reader.read(command, body, selection=selected, encode=encode, started=started)
         if command in {'schedule.create', 'schedule.update'}:
             from spine.web.people_schedule_service import execute_schedule
 
-            return execute_schedule(self, command, body, account, selection, current_selection=current_selection)
+            return execute_schedule(self, command, body, account, selection, current_selection=current_selection,
+                                    encode=encode, started=started)
         if command not in COMMANDS:
             raise WebError('operation_unavailable')
         budget = PeopleBudget(maximum_steps=self.config.sql_steps, maximum_seconds=self.config.request_seconds)
+        if started is not None:
+            budget.started = min(budget.started, started)
         db = None
         timeout = None
         try:
@@ -172,7 +191,7 @@ class PeopleService:
             timeout = install_budget(db, budget)
             db.set_progress_handler(budget.progress, min(100, budget.maximum_steps))
             if command == 'item.people.update':
-                return self.write(db, request, body, account, selection, selected, budget)
+                return self.write(db, request, body, account, selection, selected, budget, encode=encode)
             # Both evaluation and release are read-only transactions. The fresh
             # transaction is not permitted to retry and silently choose new facts.
             db.execute('PRAGMA query_only=ON')
@@ -198,7 +217,7 @@ class PeopleService:
                     result = page_roster(result, codec=codec, request=request, source_hash=source, authorization_hash=access,
                                          valid_until=deadline, identity=identity,
                                          guards=body, previous=previous)
-                response = self.response(command, result, identity, budget)
+                response = self.response(command, result, identity, budget, encode=encode)
             if self.before_release:
                 self.before_release(db)
             if selected() != (account, selection):
@@ -244,7 +263,7 @@ class PeopleService:
                     db.execute(f'PRAGMA busy_timeout={timeout}')
                 db.close()
 
-    def write(self, db, request, body, account, selection, selected, budget):
+    def write(self, db, request, body, account, selection, selected, budget, *, encode=None):
         with db.atomic_command(write=True):
             p, directory, identity = self.admit(db, account, selection, budget)
             admitted, replayed, target = [], False, None
@@ -284,7 +303,7 @@ class PeopleService:
                     p.identity['binding_id'], p.identity['binding_revision'], p.identity['access_epoch'], API, CONTRACT,
                     hash_canonical_json({'api_version': API, 'request': request, 'account_id': account, 'subject_id': p.subject}),
                 ))
-            response = self.response('item.people.update', result, identity, budget)
+            response = self.response('item.people.update', result, identity, budget, encode=encode)
             if self.before_release:
                 self.before_release(db)
             if selected() != (account, selection):

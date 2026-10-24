@@ -3,6 +3,11 @@
 Status: executable cold-start path for the current schema-19 runtime
 Audience: an agent with repository access and no prior Spine context
 
+For event attendance and task responsibility, use [People commands](PEOPLE_COMMANDS.md)
+(runtime 0.11.0/schema 19). Discover exact IDs in an explicit scope; participants,
+assignees, access owners and reminder recipients are separate. Existing scheduling
+requests remain valid; scheduling v4 adds atomic people authoring without new DDL.
+
 For historical facet-schema pins, runtime 0.10.0/schema 19 provides the read-only
 [exact revision lookup](FACET_COMMANDS.md#exact-revision-readback). It needs neither
 a known root nor cursor configuration; existing authoring/scheduling flows remain
@@ -78,7 +83,7 @@ Do not continue to worker commands until that import succeeds.
 
 ### New disposable ledger
 
-Create a unique directory and initialize a new schema-12 ledger:
+Create a unique directory and initialize a ledger at the installed current schema:
 
 ```bash
 export SPINE_DEMO_ROOT="$(mktemp -d /tmp/spine-agent-quickstart.XXXXXX)"

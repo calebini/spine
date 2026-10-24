@@ -15,6 +15,14 @@ migration. Existing v1 response contracts and authorization semantics are unchan
 
 ## 1. Purpose
 
+Runtime 0.11.0 adds the complete [people successor family](people-and-responsibility.md)
+on schema 19. Existing local selectors, compact projections and frozen v1/v2 web
+bundles remain unchanged; v3 routes use a separately pinned closure and protected
+people cursor configuration. Missing/bad v3 configuration cannot turn a request
+into trusted-local mode and does not disable otherwise valid older families.
+The new local commands require the declared core JSON Schema dependency; web
+startup still requires the web extra. Tickerd's exact dependency pin is unchanged.
+
 The ratified [facet revision readback](facet-schema-revision-readback.md) is an
 additive trusted-local read in runtime 0.10.0 with a separate installed contract
 closure. It is not supported by runtime 0.9.1 or commit `57cda1c`; adoption needs

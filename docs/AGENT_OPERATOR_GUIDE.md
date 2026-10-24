@@ -3,6 +3,12 @@
 Status: operational contract for current runtime surfaces
 Audience: local agents and agent operators integrating with Spine
 
+Runtime 0.11.0/schema 19 adds explicit event participants/task assignees and scoped
+people reads. Start with [People commands](PEOPLE_COMMANDS.md) for exact local/v3
+surfaces, full-set replacement, historical readback, roster privacy, protected cursor
+setup and unchanged reminder behavior. Existing command versions and web routes
+remain valid; this feature introduces no schema-19 migration or implicit access grant.
+
 For approved facet details in reminders, use
 [Facet-aware notification rendering](NOTIFICATION_RENDERING_GUIDE.md). It covers
 the schema-19 local selectors, scoped disclosure, explicit item adoption, safe

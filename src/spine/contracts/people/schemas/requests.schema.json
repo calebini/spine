@@ -1,0 +1,98 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cortext.local/spine/contracts/schemas/people/requests.schema.json",
+  "$comment": "Source-only people contract candidate; not advertised by or packaged with the current runtime.",
+  "$defs": {
+    "people.list": {
+      "type": "object",
+      "properties": {
+        "contract_version": {
+          "const": "spine.people-and-responsibility.v1"
+        },
+        "owner": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/owner"
+        },
+        "subject_status": {
+          "enum": [
+            "active",
+            "inactive",
+            "all"
+          ]
+        },
+        "subject_kind": {
+          "enum": [
+            "person",
+            "agent",
+            "all"
+          ]
+        },
+        "limit": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/limit"
+        },
+        "cursor": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/cursorToken"
+        }
+      },
+      "required": [
+        "contract_version",
+        "owner"
+      ],
+      "additionalProperties": false
+    },
+    "item.people.show": {
+      "type": "object",
+      "properties": {
+        "contract_version": {
+          "const": "spine.people-and-responsibility.v1"
+        },
+        "item_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/id"
+        },
+        "version": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/version"
+        }
+      },
+      "required": [
+        "contract_version",
+        "item_id"
+      ],
+      "additionalProperties": false
+    },
+    "item.people.update": {
+      "type": "object",
+      "properties": {
+        "contract_version": {
+          "const": "spine.people-and-responsibility.v1"
+        },
+        "command_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/id"
+        },
+        "actor_subject_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/id"
+        },
+        "item_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/id"
+        },
+        "target_version": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/version"
+        },
+        "updated_at_utc": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/utc"
+        },
+        "people": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/people/types.schema.json#/$defs/patch"
+        }
+      },
+      "required": [
+        "contract_version",
+        "command_id",
+        "actor_subject_id",
+        "item_id",
+        "target_version",
+        "updated_at_utc",
+        "people"
+      ],
+      "additionalProperties": false
+    }
+  }
+}
