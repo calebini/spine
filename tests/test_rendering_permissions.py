@@ -8,11 +8,11 @@ from spine.commands import handle, rendering_candidate
 from spine.commands.facet_runtime import parse_time, wire_time
 from spine.commands.rendering_runtime import RenderingAdmission
 from spine.web.provisioning import apply, plan
+from tests import test_rendering_authoring_foundation as foundation
 from tests.facet_storage_support import DEFINITION, NOW
-from tests.test_rendering_authoring_foundation import RenderingFoundationTests
 
 
-class RenderingPermissionTests(RenderingFoundationTests):
+class RenderingPermissionTests(foundation.RenderingFoundationTests):
     def setUp(self):
         super().setUp()
         for command, fields in (

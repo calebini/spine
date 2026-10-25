@@ -29,14 +29,14 @@ from spine.ledger.work import assert_work_instance_not_stale
 from spine.services.attempts import prepare_work_attempt, record_attempt_failure, record_attempt_success
 from spine.services.scheduling import materialize_notification_horizon
 from spine.services.work import retry_work, start_work, succeed_work
+from tests import test_rendering_successor_authoring as successor
 from tests.facet_storage_support import DEFINITION, NOW
 from tests.openclaw_helpers import IdempotentGatewayRunner
-from tests.test_rendering_successor_authoring import RenderingSuccessorTests
 
 ROOT = Path(__file__).parents[1]
 
 
-class RenderingDeliveryTests(RenderingSuccessorTests):
+class RenderingDeliveryTests(successor.RenderingSuccessorTests):
     def setUp(self):
         super().setUp()
         self.archetype = self.command(

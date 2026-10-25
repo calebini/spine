@@ -11,13 +11,13 @@ from spine.commands import handle, rendering_candidate
 from spine.core import rendering_definitions as codec
 from spine.ledger.rendering_definitions import load_presentation, verify_deep
 from spine.web.provisioning import apply, plan
+from tests import test_rendering_authoring_foundation as foundation
 from tests.facet_storage_support import NOW
-from tests.test_rendering_authoring_foundation import RenderingFoundationTests
 
 ROOT = Path(__file__).parents[1]
 
 
-class RenderingSuccessorTests(RenderingFoundationTests):
+class RenderingSuccessorTests(foundation.RenderingFoundationTests):
     def test_direct_v2_selector_noop_selection_and_retired_pin_retention(self):
         root = self.create()["record"]
         event = self.candidate(

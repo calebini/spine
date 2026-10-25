@@ -15,9 +15,9 @@ from tests import test_notification_policy_lineage as lineage
 from tests import test_notification_profile_commands as profiles
 from tests import test_openclaw_adapter as adapters
 from tests import test_relative_temporal_bindings_command as bindings
+from tests import test_rendering_authoring_foundation as foundation
 from tests import test_schedule_create_command as creation
 from tests import test_schedule_operations_command as operations
-from tests.test_rendering_authoring_foundation import RenderingFoundationTests
 
 ROOT = Path(__file__).parents[1]
 
@@ -52,7 +52,7 @@ class ExistingBindingWriters(CandidateWriters, bindings.RelativeTemporalBindingC
     pass
 
 
-class RenderingStorageTests(RenderingFoundationTests):
+class RenderingStorageTests(foundation.RenderingFoundationTests):
     def test_migration_preserves_v1_profile_hashes_and_stored_attempt_bytes(self):
         profile_case = profiles.NotificationProfileCommandTests()
         profile_case.setUp()

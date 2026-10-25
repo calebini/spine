@@ -20,19 +20,19 @@ from spine.ledger.migrate import migrate_schema, verify_schema
 from spine.ledger.preflight import verify_runtime_schema
 from spine.ledger.rendering_definitions import verify_deep
 from spine.ledger.rendering_migration import install_rendering_storage
+from tests import test_rendering_delivery as delivery
+from tests import test_schedule_operations_command as operations
 from tests import test_trusted_web_runtime as web_helpers
 from tests.facet_storage_support import NOW, all_rows
-from tests.test_rendering_delivery import RenderingDeliveryTests
-from tests.test_schedule_operations_command import ScheduleOperationsCommandTests
 
 
 class RenderingReleaseTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        RenderingDeliveryTests.setUpClass()
+        delivery.RenderingDeliveryTests.setUpClass()
 
     def setUp(self):
-        self.h = RenderingDeliveryTests()
+        self.h = delivery.RenderingDeliveryTests()
         self.h.setUp()
         self.addCleanup(self.h.tearDown)
 
@@ -222,7 +222,7 @@ class RenderingReleaseTests(unittest.TestCase):
     def test_populated_migration_faults_and_backup_restore(self):
         for stage in ("preflight", "ddl", "backfill", "verified", "activation", None):
             with self.subTest(stage=stage):
-                h = ScheduleOperationsCommandTests()
+                h = operations.ScheduleOperationsCommandTests()
                 with patch("spine.ledger.rendering_migration.install_rendering_storage"):
                     h.setUp()
                 try:

@@ -1,6 +1,6 @@
 # Spine Backlog
 
-Last updated: 2026-10-24
+Last updated: 2026-10-25
 
 This is the single work queue for Spine development. The
 [implementation plan](IMPLEMENTATION_PLAN.md) explains roadmap direction and delivery
@@ -3021,6 +3021,27 @@ never authorizes deletion of canonical evidence.
 **Source:** [Storage lifecycle horizon](IMPLEMENTATION_PLAN.md#future-horizon-bounded-ledger-storage-lifecycle).
 
 ## Completed
+
+### SPINE-063 — Remove duplicate test discovery from imported test classes
+
+**Status:** Done locally (2026-10-25), operator-selected cleanup.
+**Change:** Replaced six direct test-class imports in five rendering test modules
+with module imports and qualified references. Preserved every test body, fixture,
+and inherited variant; no runtime, contract, or test-selection policy changes.
+**Verification:** Compared discovery before/after by defining class source file,
+class name, and method name: 1,263 executions became 1,178, preserving all 1,178
+distinct cases exactly once. Removed 44 delivery, 21 foundation, 14 successor, and
+6 schedule-operation repetitions. Python 3.14.6: documented
+`.venv/bin/python -m unittest discover -s tests` passed **1,178 tests in 253.027s,
+one skipped**. With `PYTHONPATH=src:tests`, `.venv/bin/python -m pytest -o addopts='' -q
+-p no:cacheprovider` passed **1,177 tests and 1,889 subtests, one skipped, in
+254.35s**. Both used `PYTHONDONTWRITEBYTECODE=1`; the existing skip requires a
+prepared wheel-build interpreter. Repository-wide Ruff and `git diff --check`
+passed. Pre-existing local `AGENTS.md` changes were preserved byte-for-byte.
+**Separate harness limitation:** Without the explicit test import path, pytest
+has five collection errors in the people authoring, commands, cursors, directory,
+and public CLI modules due to top-level test-module imports. Reproduced the same
+errors with unmodified HEAD test files; left this separate repair out of scope.
 
 ### SPINE-026 — Keep OpenClaw delivery idempotency stable across retries
 
