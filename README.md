@@ -51,7 +51,12 @@ allowed to quietly become canonical.
 
 ## What Works Today
 
-Spine `0.11.0` is an implemented alpha; its scheduling core is exercised in a staging
+Runtime 0.11.1 combines people and responsibility with automatic, evidence-bound
+timezone compatibility without a
+ledger migration. See [timezone baseline setup and validation](docs/TZDB_COMPATIBILITY_OPERATIONS.md)
+and the [runtime contract](specs/timezone-compatibility.md).
+
+Spine `0.11.1` is an implemented alpha; its scheduling core is exercised in a staging
 agent environment. The current SQLite ledger schema is version `19`. The trusted multi-operator backend is also running in staging on `cortext1`, with
 operator testing through the connected [Kinflow frontend](../kinflow-web-ui/README.md).
 Concrete operator-reported work is tracked in the [backlog](docs/BACKLOG.md);

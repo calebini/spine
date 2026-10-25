@@ -44,7 +44,7 @@ class NotificationRenderingContractFixtureTests(unittest.TestCase):
     def test_vector_pins_exact_body_hashes_identity_and_preimage_bytes(self) -> None:
         vector = self._load(ROOT / "tests/fixtures/notification_rendering/vectors/event_tomorrow_physical.json")
         with patch(
-            "spine.core.notification_rendering.system_timezone_database_version",
+            "spine.timezones._version",
             return_value="2026a",
         ):
             rendered = render_notification(vector["source_input"])

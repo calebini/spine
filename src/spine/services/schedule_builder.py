@@ -5,7 +5,8 @@ from __future__ import annotations
 from collections.abc import Mapping
 from datetime import UTC, datetime, timedelta
 from typing import Any
-from zoneinfo import ZoneInfo
+
+from spine.timezones import timezone_for_version
 
 
 def build_relative_event_countdown(
@@ -30,7 +31,7 @@ def build_relative_event_countdown(
     """Compile relative intent into a fully pinned schedule.create request."""
 
     event_at = reference_time.astimezone(UTC) + timedelta(seconds=event_delay_seconds)
-    local = event_at.astimezone(ZoneInfo(timezone))
+    local = event_at.astimezone(timezone_for_version(timezone, timezone_database_version))
     item: dict[str, Any] = {
         "item_type": "event",
         "title": title,

@@ -3,6 +3,12 @@
 Status: operational contract for current runtime surfaces
 Audience: local agents and agent operators integrating with Spine
 
+Combined runtime 0.11.1/schema 19 retains the complete people family and integrates
+the timezone compatibility fix. Preserve `SPINE_TIMEZONE_BASELINES` for agent commands,
+web, worker and agenda jobs separately from the people cursor configuration. See
+[timezone operations](TZDB_COMPATIBILITY_OPERATIONS.md); no schema-19 migration or
+canonical timezone-pin rewrite is required.
+
 Runtime 0.11.0/schema 19 adds explicit event participants/task assignees and scoped
 people reads. Start with [People commands](PEOPLE_COMMANDS.md) for exact local/v3
 surfaces, full-set replacement, historical readback, roster privacy, protected cursor
@@ -120,6 +126,11 @@ Do not require current-schema verification before an intended migration; an olde
 Require equal `implemented_ledger_schema_version` and `ledger_schema_version`. Before using the atomic and operator surfaces, also require `implemented_contract_versions` to include `spine.schedule-create.v2`, `spine.schedule-update.v2`, `spine.schedule-show.v1`, the complete agenda/cancel family, the item-archetype and notification-profile families, `spine.schedule-compact.v1`, and the countdown-builder family. Before authoring or reading primary locations, require `spine.schedule-primary-location.v1`, `spine.schedule-primary-location-authoring.v1`, `spine.schedule-primary-location-view.v1`, and `spine.schedule-primary-location-normalization.v1`. Before using related tasks, additionally require `spine.relative-temporal-binding.v1`, `spine.schedule-related-task-create.v1`, and both `spine.schedule-binding-list.v1` and `spine.schedule-binding-reconcile.v1` with their response/receipt/cursor versions.
 
 For `schedule.create`, prefer the request directive `"timezone_database_version":{"kind":"system_current"}`. Spine resolves it once during fresh execution, stores the concrete installed version, and returns that concrete value in receipts and readback. A compatible replay returns the original resolved version even if the host later installs newer timezone data. Operators may instead use `{"kind":"explicit","version":"<exact-version>"}`. Omission is invalid; Spine never chooses timezone data through a hidden default. For lower-level local-time commands that require the concrete string directly, use the value returned by `system.info`. Never copy a version from an example or another machine.
+
+For pinned schedules after a host tzdata upgrade, configure a trusted authored-zone
+baseline catalog as described in [timezone compatibility operations](TZDB_COMPATIBILITY_OPERATIONS.md).
+The runtime automatically accepts byte-identical zone data and logs the actual
+resolver version; it preserves authored pins and rejects missing or mismatched evidence.
 
 Before using notification profiles, require `spine.item-archetypes.v1`,
 `spine.notification-profiles.v1`,

@@ -99,6 +99,7 @@ from spine.ledger.supporting import (
 )
 from spine.ledger.transactions import LedgerConnection
 from spine.ledger.work import assert_work_instance_not_stale, cancel_work_instance, create_work_instance
+from spine.timezones import timezone_for_version
 
 # Preserve command helper imports while core and ledger own the shared implementation.
 _decorate_occurrence = occurrence_details.decorate_occurrence
@@ -931,6 +932,7 @@ def _handle_agenda_show(
                 range_start=range_start,
                 range_end=range_end,
                 view_timezone=view_timezone,
+                view_timezone_version=concrete_timezone_version,
                 included=included,
             )
             if entry is not None:
@@ -6077,7 +6079,7 @@ def _schedule_recurrence_source_range(
     basis = str(recurrence["time_basis"])
     if basis == "instant_utc":
         return _schedule_utc_text(target_start), _schedule_utc_text(target_end)
-    zone = ZoneInfo(str(recurrence["timezone"]))
+    zone = timezone_for_version(str(recurrence["timezone"]), str(recurrence["timezone_database_version"]))
     local_start = target_start.astimezone(zone)
     local_end = target_end.astimezone(zone)
     if basis == "local_date":
@@ -7204,10 +7206,7 @@ def _agenda_recurrence_range(
     if basis == "instant_utc":
         return _schedule_utc_text(range_start), _schedule_utc_text(range_end)
     timezone = str(recurrence["timezone"])
-    try:
-        zone = ZoneInfo(timezone)
-    except ZoneInfoNotFoundError as exc:
-        raise SpineValidationError("invalid_request:primary_schedule.timezone", "stored timezone is unavailable") from exc
+    zone = timezone_for_version(timezone, str(recurrence["timezone_database_version"]))
     local_start = range_start.astimezone(zone)
     local_end = range_end.astimezone(zone)
     if basis == "local_date":
@@ -7260,6 +7259,7 @@ def _agenda_single_entry(
         summary_range_start=_schedule_utc_text(range_start),
         summary_range_end=_schedule_utc_text(range_end),
         view_timezone=view_timezone,
+        view_timezone_version=view_timezone_version,
         included=included,
     )
     if anchor.get("timezone") is not None:
@@ -7295,6 +7295,7 @@ def _agenda_recurring_entry(
     range_start: datetime,
     range_end: datetime,
     view_timezone: str,
+    view_timezone_version: str,
     included: Sequence[str],
 ) -> dict[str, Any] | None:
     expressed = str(occurrence["expressed_scheduled_fact"])
@@ -7322,7 +7323,7 @@ def _agenda_recurring_entry(
         start = _agenda_local_midnight(
             expressed,
             timezone=view_timezone,
-            timezone_database_version=str(recurrence["timezone_database_version"]),
+            timezone_database_version=view_timezone_version,
         )
     if not range_start <= start < range_end:
         return None
@@ -7336,7 +7337,7 @@ def _agenda_recurring_entry(
                 range_start=datetime.min.replace(tzinfo=UTC),
                 range_end=datetime.max.replace(tzinfo=UTC),
                 view_timezone=view_timezone,
-                view_timezone_version=str(recurrence.get("timezone_database_version", "")),
+                view_timezone_version=view_timezone_version,
                 require_overlap=False,
             )
             if end_resolved is not None:
@@ -7362,6 +7363,7 @@ def _agenda_recurring_entry(
         summary_range_start=_schedule_utc_text(range_start),
         summary_range_end=_schedule_utc_text(range_end),
         view_timezone=view_timezone,
+        view_timezone_version=view_timezone_version,
         included=included,
     )
     entry["recurrence_revision_id"] = recurrence["recurrence_revision_id"]
@@ -7480,10 +7482,11 @@ def _agenda_entry_base(
     summary_range_start: str,
     summary_range_end: str,
     view_timezone: str,
+    view_timezone_version: str,
     included: Sequence[str],
 ) -> dict[str, Any]:
     start = _parse_utc_datetime(start_at_utc)
-    view = start.astimezone(ZoneInfo(view_timezone))
+    view = start.astimezone(timezone_for_version(view_timezone, view_timezone_version))
     entry: dict[str, Any] = {
         "item_id": item["item_id"],
         "current_version": str(item["current_version"]),

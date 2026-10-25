@@ -1,6 +1,8 @@
 # People and responsibility
 
-Runtime: Spine 0.11.0, ledger schema 19. No new migration for an existing schema-19 ledger.
+Runtime: Spine 0.11.1, ledger schema 19. People commands were introduced in 0.11.0;
+0.11.1 also integrates the timezone compatibility fix. No new migration for an
+existing schema-19 ledger.
 Authority: [logical contract](../specs/people-and-responsibility.md),
 [exact machine registry](../contracts/people-and-responsibility.v1.json),
 [runtime evidence](PEOPLE_RUNTIME_EVIDENCE.md).
@@ -119,6 +121,11 @@ merely because they share a group. A readable tuple can disclose its subject ID 
 its current label is only `not_disclosed`; this does not hide or delete the tuple.
 
 ## Protected cursor setup
+
+Timezone baseline evidence is separate configuration: preserve
+`SPINE_TIMEZONE_BASELINES` for agent CLI commands, web, worker and agenda jobs.
+It is not supplied by the people cursor file. See
+[timezone operations](TZDB_COMPATIBILITY_OPERATIONS.md).
 
 Provision one operator-owned, persistent secret file outside Git, for this ledger
 instance. This is separate from facet cursor configuration. Its exact schema is

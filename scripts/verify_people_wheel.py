@@ -1,4 +1,4 @@
-"""Verify an installed 0.11.0 wheel outside the checkout, using disposable data only.
+"""Verify an installed 0.11.1 wheel outside the checkout, using disposable data only.
 
 Run with a fresh virtual environment's installed-wheel Python and no PYTHONPATH:
     /absolute/venv/bin/python -I /absolute/checkout/scripts/verify_people_wheel.py
@@ -176,7 +176,7 @@ def main():
     require("PYTHONPATH" not in os.environ, "Unset PYTHONPATH before installed-wheel verification")
     require(Path(spine.__file__).resolve().is_relative_to(Path(sys.prefix).resolve()),
             "Spine is not imported from this installed environment")
-    require(spine.__version__ == metadata.version("spine-ledger") == "0.11.0", "Expected exact installed release 0.11.0")
+    require(spine.__version__ == metadata.version("spine-ledger") == "0.11.1", "Expected exact installed release 0.11.1")
     dependency = resolve_tickerd_compatibility()
     require(dependency.descriptor_sha256 == "215f9aa6b54e6c0e6186796a55d78e1c5a270adc9b3ccefb433df5a3bb87b58b",
             "Tickerd does not match the pinned capability descriptor")

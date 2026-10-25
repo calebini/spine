@@ -1,0 +1,89 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://spine.cortext.dev/schemas/timezone-compatibility.schema.json",
+  "title": "Trusted authored-zone fingerprints",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contract_version",
+    "baselines"
+  ],
+  "properties": {
+    "contract_version": {
+      "const": "spine.timezone-compatibility.v1"
+    },
+    "baselines": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 4096,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "authored_version",
+          "timezone",
+          "build_id",
+          "evidence_id",
+          "method",
+          "origin",
+          "artifact_sha256",
+          "metadata_sha256",
+          "tzif_sha256",
+          "tzif_size"
+        ],
+        "properties": {
+          "authored_version": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._+-]{0,127}$"
+          },
+          "timezone": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255,
+            "pattern": "^[A-Za-z0-9_+-]+(?:/[A-Za-z0-9_+-]+)*$"
+          },
+          "build_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2048,
+            "pattern": "^[^\\u0000-\\u001f]*[^\\s\\u0000-\\u001f][^\\u0000-\\u001f]*$"
+          },
+          "evidence_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2048,
+            "pattern": "^[^\\u0000-\\u001f]*[^\\s\\u0000-\\u001f][^\\u0000-\\u001f]*$"
+          },
+          "method": {
+            "const": "identical_tzif_bytes.v1"
+          },
+          "origin": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2048,
+            "pattern": "^[^\\u0000-\\u001f]*[^\\s\\u0000-\\u001f][^\\u0000-\\u001f]*$"
+          },
+          "artifact_sha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "metadata_sha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "tzif_sha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "tzif_size": {
+            "type": "integer",
+            "minimum": 44,
+            "maximum": 1048576
+          }
+        }
+      }
+    }
+  }
+}

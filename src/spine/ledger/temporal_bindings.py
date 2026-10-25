@@ -5,7 +5,6 @@ from __future__ import annotations
 import sqlite3
 from collections.abc import Mapping
 from datetime import UTC, datetime
-from zoneinfo import ZoneInfo
 
 from spine.core.errors import SpineValidationError
 from spine.core.occurrence_details import decorate_occurrence, next_scheduled_fact
@@ -13,6 +12,7 @@ from spine.core.occurrences import expand_recurrence_set
 from spine.core.schedule import resolve_local_instant, system_timezone_database_version
 from spine.ledger.item_reads import hydrated_item_at_version
 from spine.ledger.recurrence import load_current_recurrence_set, load_target_occurrence_selector
+from spine.timezones import timezone_for_version
 
 BINDING_STATES = (
     "retired",
@@ -440,7 +440,7 @@ def target_from_source(source: Mapping[str, object], offset_seconds: int) -> dic
 
     target_utc = source_utc + timedelta(seconds=offset_seconds)
     timezone = str(source["timezone"])
-    local = target_utc.astimezone(ZoneInfo(timezone))
+    local = target_utc.astimezone(timezone_for_version(timezone, str(source["timezone_database_version"])))
     return {
         "local_date": local.date().isoformat(),
         "local_time": local.strftime("%H:%M:%S"),

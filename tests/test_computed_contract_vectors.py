@@ -86,7 +86,7 @@ class ComputedContractVectorTests(unittest.TestCase):
             [canonical_json_text(value) for value in normalized.rdate_id_preimages],
             preimages["rdate_ids"],
         )
-        with patch("spine.core.schedule.system_timezone_database_version", return_value="2026a"):
+        with patch("spine.timezones._version", return_value="2026a"):
             expanded = expand_recurrence_set(
                 normalized.value,
                 range_start="2026-08-03T00:00:00",

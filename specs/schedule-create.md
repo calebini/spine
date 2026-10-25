@@ -1,7 +1,7 @@
 # Spine Atomic Schedule Creation
 
 Status: Implemented v2 on current ledger schema 12
-Timezone policy amendment: Decision 0006 v1.0.0 accepted 2026-10-22; automatic byte-identity resolution is not yet implemented
+Timezone policy amendment: Decision 0006 v1.0.0 accepted 2026-10-22; automatic byte-identity resolution is implemented by the timezone-compatibility runtime contract
 Scope: One atomic operator-facing command for creating a scheduled event or task with notification policies and optional bounded work materialization
 Created: 2026-08-12
 
@@ -123,8 +123,8 @@ Persist the explicit authored version and emit separate substitution diagnostics
 do not replace it with the runtime version. `system_current` still records the
 actual selected provider release. Trusted reference capture/retention must preserve
 evidence for that authored zone before a later provider upgrade; it must not enroll
-untrusted references or rewrite existing receipts. This amendment is not yet
-implemented and does not alter initial gap/fold rejection or request/receipt shapes.
+untrusted references or rewrite existing receipts. This amendment is implemented by [timezone compatibility](timezone-compatibility.md)
+and does not alter initial gap/fold rejection or request/receipt shapes.
 
 A fresh command MUST resolve the initial local datetime to exactly one UTC instant. A nonexistent or ambiguous initial local datetime fails closed. Version 2 does not silently choose an offset for the initial anchor. The responsible fields are `scheduled_time.local_date` or `scheduled_time.local_time` after timezone and pinned-data validation.
 

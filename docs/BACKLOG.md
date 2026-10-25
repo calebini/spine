@@ -35,42 +35,67 @@ status labels in the same change. Routine task updates do not change spec author
 
 ## Post-release corrective work
 
-### SPINE-062 — Preserve timezone resolution across verified compatible tzdb upgrades
+### SPINE-064 — Add coordination-level acceptance stories
 
-**Status:** Needs decision — automatic per-zone byte-identity policy accepted and
-specification updated 2026-10-22; machine design/backport scope remain pending.
-Incident investigation and reference evidence prepared 2026-10-21. No runtime
-implementation or production change.
-The operator reports production 0.6.0/schema 15 agendas fail after host tzdb 2026c
-was replaced by 2026e. Current mainline reproduces the exact-version rejection.
-The [accepted logical decision](../specs/decisions/0006-evidence-bound-timezone-compatibility.md)
-admits any runtime release automatically when the exact zone's complete TZif bytes
-match a trusted authored-release reference. No release-pair allowlist or per-upgrade
-approval is required. Baseline provenance/retention, a shared resolver, preserved
-canonical pins and observable diagnostics are required. Different bytes or missing
-trusted references fail cross-release admission. Logical specification alignment
-is complete; closed machine schemas and runtime activation are still pending.
-**Evidence:** Official 2026c/2026e archives produce byte-identical Paris and Chicago
-TZif files with the recorded compiler in both fat/slim formats; 18 historical,
-gap/fold and future probes agree across four release/format combinations. Both
-current-code mismatch reproductions fail as reported. See the
-[evidence note](TZDB_COMPATIBILITY_EVIDENCE.md) for hashes, method and limits.
-**Specification verification:** Reviewed affected authorities for consistency and
-checked local links and diff hygiene; README still links the authoritative spec index.
-**Bounded audit (2026-10-22):** Completed after explicit approval of the seven-file
-Codex payload. Stable Whetstone 0.1.0/checkpoint `6e19fe3`, `audit-change` consistency
-profile: `pass_with_minor_clarification`, boundary preserved, zero blockers/majors,
-one minor. The minor responsibility-matrix wording was corrected to admit exact
-authored data or a Decision 0006 byte-identical resolver. Local review also clarified
-captured-fingerprint precedence and ambiguous legacy-build refusal before the audit.
-Source links, policy consistency and diff hygiene pass after the correction. See
-the [audit record](TZDB_COMPATIBILITY_AUDIT.md) and retained raw feedback/input hashes.
-This is bounded logical-policy review, not convergence or runtime qualification.
-**Remaining:** Select mainline/backport scope; define the baseline storage/ingestion
-and machine schema; identify the deployed wrapper and exact 0.6.0 source;
-implement/version/test after clarification and verify on a disposable production
-backup. Mainline is 0.10.0/schema 19; it is not a drop-in schema-15 hotfix. This
-concrete incident does not reactivate deferred SPINE-004–007/010 initiatives.
+**Status:** In progress (2026-10-25), operator-selected top-down test addition.
+**Scope:** Public-command stories for fresh-process plan handoff, coherent
+rescheduling, independent people/access/delivery, lost-response replay, and honest
+delivery history. Disposable SQLite ledgers, explicit clocks, and fake transport;
+no external services, daemon, real ledger, or new dependency. Preserve concurrent
+timezone integration and all existing staged work. Generated sequence testing and
+the deferred resilience qualification campaign are outside this slice.
+**Acceptance:** Independent expected outcomes across the composed capabilities;
+standalone unittest/pytest execution, full regression runs, and Ruff verification.
+
+### SPINE-062 — Preserve timezone resolution across compatible tzdb upgrades
+
+**Status:** Done locally — combined runtime 0.11.1/schema 19 is verified for the
+operator-authorized merge of the timezone branch into people-enabled main on
+2026-10-25. No deployment or push is authorized. The independent
+runtime fix was implemented and locally verified on 2026-10-22; production
+acceptance is separate.
+Operator authorized both runtime patches on 2026-10-22.
+Mainline 0.10.1 retains schema 19; maintenance 0.6.0+tzdb.1 retains schema 15 and is
+based on confirmed production commit `a28bdf0e20cdb671e4a3862572d85c952f354056`.
+The shared resolver and closed baseline catalog implement automatic full-TZif byte
+identity against the original trusted authored version/zone reference, with coherent
+provider capture, immutable provisioning and substitution diagnostics. Pins, receipts,
+identities and ledger schemas are preserved. Full suites pass (mainline: 1117 tests; maintenance: 689 tests); each isolated wheel
+passes 42 focused checks. See [validation evidence](TZDB_COMPATIBILITY_VALIDATION.md).
+See [runtime contract](../specs/timezone-compatibility.md) and
+[operator setup](TZDB_COMPATIBILITY_OPERATIONS.md).
+**Integration correction (2026-10-25):** Commit `160547d` was pushed on
+`fix/spine-062-mainline`, but not merged into the people release `83d1a96`.
+Their common ancestor `ca9ea72` contains the specification only. Do not deploy
+`83d1a96` as a replacement for an environment depending on the runtime fix.
+Merge onto main checkpoint `75a4b95`, retain people v4/protected filters and all
+existing packaged family pins, add cross-feature regressions and installed-wheel
+verification, and preserve the unrelated `AGENTS.md` amendment. No production
+backport changes, new schema, operator ledgers, real sends or external audit.
+**Combined verification:** Full pytest passes **1,220 tests and 1,889 subtests,
+one skipped, one warning (259.82 seconds)**. Pytest is required here: the 39
+timezone cases are function-based and do not run under unittest discovery.
+The selected timezone/people group passes 107 tests/14 subtests; four new cross-feature
+HTTP regressions pass. A fresh noneditable 0.11.1 wheel passes the installed people
+verifier (all eight HTTP routes and public CLI) and 43 installed timezone/integration
+cases; `pip check` passes. Focused Ruff, strict typing of eight owners, all four
+contract sync checks, 344 local link targets and diff hygiene pass. The skip is
+the existing revision-readback build harness without setuptools. The warning is
+an unraisable deadline-guard exception in a passing synthetic serialization-timeout
+test; it reproduces in the merged focused case but not the exported pre-merge
+31-test module. That guard/test are unchanged by the merge; no warning suppression
+or broader timeout refactor is included. See the
+[combined evidence](TZDB_COMPATIBILITY_VALIDATION.md#combined-peopletimezone-integration--2026-10-25).
+The source companion's first-implementation version and all frozen package pins
+remain unchanged; only the combined application version advances. Preserve both
+timezone baseline and people cursor configuration at the separately authorized
+rollout. The existing `AGENTS.md` amendment and concurrently created, unrelated
+`tests/test_coordination_acceptance.py` are excluded from the local merge. The
+recorded full-suite collection predates that unrelated test's appearance.
+**Remaining operational acceptance:** Provision authenticated original Ubuntu
+fingerprints and verify both route agendas on a disposable production backup.
+The external agenda wrapper location remains unknown. No production changes made.
+This task does not activate the deferred resilience roadmap.
 
 ### SPINE-061 — Implement people and responsibility
 

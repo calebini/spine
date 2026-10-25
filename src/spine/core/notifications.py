@@ -5,7 +5,6 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import UTC, date, datetime, timedelta
 from typing import Any, NoReturn
-from zoneinfo import ZoneInfo
 
 from spine.core.canonical_json import canonical_json_bytes
 from spine.core.errors import SpineValidationError
@@ -17,6 +16,7 @@ from spine.core.schedule import (
     resolve_local_instant,
     validate_timezone_context,
 )
+from spine.timezones import timezone_for_version
 
 NOTIFICATION_CONTRACT_VERSION = "spine.notification-schedule.contract.v1"
 NOTIFICATION_NORMALIZATION_VERSION = "spine.notification-schedule.normalization.v1"
@@ -611,7 +611,7 @@ def _schedule_candidates(
             current += interval
         return candidates, omitted
     timezone = str(cadence["timezone"])
-    zone = ZoneInfo(timezone)
+    zone = timezone_for_version(timezone, str(cadence["timezone_database_version"]))
     bounded_start = max(start, range_start)
     bounded_end = min(stop, range_end)
     if bounded_end < bounded_start or (bounded_end == bounded_start and (not inclusive or bounded_end == range_end)):
@@ -685,7 +685,7 @@ def _resolve_boundary(boundary: dict[str, Any], target: dict[str, object]) -> da
     local_date_value = target.get("target_local_date")
     if local_date_value is None:
         target_utc = _utc(str(target["target_utc_instant"]), "target.target_utc_instant")
-        local_date_value = target_utc.astimezone(ZoneInfo(timezone)).date().isoformat()
+        local_date_value = target_utc.astimezone(timezone_for_version(timezone, version)).date().isoformat()
     parsed_date = parse_scheduled_fact(str(local_date_value), time_basis="local_date", field="target_local_date")
     assert isinstance(parsed_date, date)
     scheduled = f"{(parsed_date + timedelta(days=int(str(boundary['offset_days'])))).isoformat()}T{boundary['local_time']}"

@@ -200,7 +200,7 @@ class RenderingReleaseTests(unittest.TestCase):
             self.assertEqual(error["error"]["field"], "cursor_config")
 
     def test_registry_and_bounded_preflight_have_no_domain_scan(self):
-        self.assertEqual(__version__, "0.11.0")
+        self.assertEqual(__version__, "0.11.1")
         self.assertIn("spine.notification-rendering-integration.v1", IMPLEMENTED_CONTRACT_VERSIONS)
         traced = []
         self.h.db.set_trace_callback(traced.append)

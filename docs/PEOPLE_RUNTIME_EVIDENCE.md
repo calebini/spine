@@ -1,5 +1,11 @@
 # People and responsibility — runtime evidence
 
+Follow-on integration: runtime 0.11.1 combines the people release with timezone fix
+`160547d`, without changing the people contract/package pins or ledger schema 19.
+See [combined-release verification](TZDB_COMPATIBILITY_VALIDATION.md#combined-peopletimezone-integration--2026-10-25).
+The 0.11.0 results and artifact hashes below are retained historical evidence, not
+relabeled as 0.11.1 results.
+
 Updated: 2026-10-24. Runtime 0.11.0/schema 19 public family follows Slice 3 checkpoint `17b3d3e`.
 
 This is implementation evidence, not a specification or public capability declaration.

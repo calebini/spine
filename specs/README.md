@@ -4,7 +4,9 @@ This directory contains Spine's normative design and compatibility promises.
 
 Current spec surface:
 
-- [decisions/0006-evidence-bound-timezone-compatibility.md](decisions/0006-evidence-bound-timezone-compatibility.md): accepted logical v1.0.0 automatic per-zone byte-identity admission against trusted authored-release references; no release-pair allowlist or per-upgrade approval; SPINE-062, machine schema/runtime pending
+- [timezone-compatibility.md](timezone-compatibility.md): implemented automatic per-zone byte identity, trusted baseline schema/provisioning and coherent provider capture; no ledger migration
+
+- [decisions/0006-evidence-bound-timezone-compatibility.md](decisions/0006-evidence-bound-timezone-compatibility.md): accepted logical v1.0.0 automatic per-zone byte-identity admission against trusted authored-release references; no release-pair allowlist or per-upgrade approval; SPINE-062 implemented by the timezone runtime contract
 
 - [people-and-responsibility.md](people-and-responsibility.md): implemented in 0.11.0/schema 19; participation/assignment, scoped subject selection, person-filtered protected reads and role-only notification continuity; exact [machine companion](../contracts/people-and-responsibility.v1.json), separately packaged [schemas](../contracts/schemas/people/), [fixtures](../contracts/people-and-responsibility-fixture-manifest.json), and [operator guide](../docs/PEOPLE_COMMANDS.md). Existing interfaces remain valid; deployment/consumer adoption separate.
 

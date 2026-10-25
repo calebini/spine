@@ -8,6 +8,10 @@ For event attendance and task responsibility, use [People commands](PEOPLE_COMMA
 assignees, access owners and reminder recipients are separate. Existing scheduling
 requests remain valid; scheduling v4 adds atomic people authoring without new DDL.
 
+Combined release 0.11.1 also includes [timezone compatibility](TZDB_COMPATIBILITY_OPERATIONS.md).
+Retain the existing trusted `SPINE_TIMEZONE_BASELINES` catalog configuration when
+upgrading; it is independent of the new people cursor configuration.
+
 For historical facet-schema pins, runtime 0.10.0/schema 19 provides the read-only
 [exact revision lookup](FACET_COMMANDS.md#exact-revision-readback). It needs neither
 a known root nor cursor configuration; existing authoring/scheduling flows remain

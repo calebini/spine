@@ -7,12 +7,12 @@ import unicodedata
 from dataclasses import dataclass
 from datetime import UTC, date, datetime, tzinfo
 from typing import Any, NoReturn
-from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
+from zoneinfo import ZoneInfo
 
 from spine.core.canonical_json import canonical_json_text
 from spine.core.errors import SpineValidationError
 from spine.core.hashing import hash_canonical_json
-from spine.core.schedule import system_timezone_database_version
+from spine.timezones import timezone_for_version
 
 RENDERING_CONTRACT = "spine.notification-rendering.v1"
 RENDERING_PROFILE = "spine.notification-rendering.concise-en-ca.v1"
@@ -421,17 +421,12 @@ def _normalized_text(value: object, field: str) -> str:
 
 
 def _display_zone(timezone: str, version: str) -> ZoneInfo:
-    if system_timezone_database_version() != version:
-        raise SpineValidationError(
-            "notification_rendering_timezone_database_unavailable",
-            f"pinned timezone database is unavailable: {version}",
-        )
     try:
-        return ZoneInfo(timezone)
-    except ZoneInfoNotFoundError as exc:
+        return timezone_for_version(timezone, version)
+    except SpineValidationError as exc:
         raise SpineValidationError(
             "notification_rendering_timezone_database_unavailable",
-            f"display timezone is unavailable: {timezone}",
+            f"display timezone cannot resolve authored version {version}: {exc.message}",
         ) from exc
 
 

@@ -1,9 +1,30 @@
 # Spine Implementation Plan
 
+SPINE-062 implementation (2026-10-22): operator selected two isolated patches,
+mainline 0.10.1/schema 19 and maintenance 0.6.0+tzdb.1/schema 15 from confirmed
+production `a28bdf0e20cdb671e4a3862572d85c952f354056`. Both use the same verified-zone
+resolver, baseline catalog and regression corpus. No schema migration, unrelated
+capability backport or deployment is included. Full repository suites and isolated wheel checks pass;
+see [validation](TZDB_COMPATIBILITY_VALIDATION.md) and [operations](TZDB_COMPATIBILITY_OPERATIONS.md).
+
+
 Role: Roadmap rationale and delivery history; current task status lives in [BACKLOG.md](BACKLOG.md)
-Last updated: 2026-10-24 (Slice 4 public people family and installed-package evidence; timezone work separate)
+Last updated: 2026-10-25 (timezone/people branch integration selected)
 
 This is a non-normative delivery plan. The specifications and machine-readable contracts remain authoritative.
+
+**Selected integration (2026-10-25):** The operator authorized merging timezone fix
+`160547d` into people-enabled main `75a4b95`. The original fix was on a separate
+branch and is absent from people-only release `83d1a96`; the shared specification
+ancestor is not proof of runtime inclusion. Combined runtime 0.11.1 retains schema
+19, every people/frozen bundle pin and all existing timezone baseline configuration.
+Both feature families now pass combined verification, including person-filtered reads
+across a compatible provider change. Full pytest passes 1,220 tests/1,889 subtests
+with one skip and one warning; the installed wheel passes the public people verifier
+and all 43 timezone/integration cases. Detailed evidence and the deadline-warning
+boundary are in [combined validation](TZDB_COMPATIBILITY_VALIDATION.md#combined-peopletimezone-integration--2026-10-25).
+Complete the operator-authorized local merge checkpoint while preserving `AGENTS.md`;
+no push, deployment, production backport change, live ledger or real send is included.
 
 Timezone incident planning (2026-10-22): SPINE-062 records the operator's
 2026c-to-2026e resolution failure. The operator selected
@@ -13,8 +34,8 @@ from any runtime release without a release-pair allowlist or per-upgrade approva
 Reference Paris/Chicago TZif bytes match across the incident releases; deployed
 provider verification and runtime acceptance remain outstanding. The specification
 now covers baseline trust/retention, canonical pin preservation and diagnostics.
-Codify storage/ingestion and the machine schema before runtime work, and select
-mainline versus a separate 0.6.0/schema-15 backport. This does not replace the people
+Storage/ingestion and the machine schema are now codified; the operator selected
+mainline plus the separate schema-15 maintenance branch. This does not replace the people
 delivery sequence or activate the deferred resilience roadmap.
 
 The operator-requested bounded consistency audit completed on 2026-10-22 using
