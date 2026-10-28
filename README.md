@@ -51,12 +51,15 @@ allowed to quietly become canonical.
 
 ## What Works Today
 
-Runtime 0.11.1 combines people and responsibility with automatic, evidence-bound
-timezone compatibility without a
-ledger migration. See [timezone baseline setup and validation](docs/TZDB_COMPATIBILITY_OPERATIONS.md)
-and the [runtime contract](specs/timezone-compatibility.md).
+Runtime 0.11.2 repairs bounded reminder materialization when a follow-source task
+is reconciled to a new due time. Replacement work uses the successor time and
+policy version in the same transaction. The people and timezone capabilities from
+0.11.1 are retained, with no ledger migration. See
+[related-task operations](docs/AGENT_OPERATOR_GUIDE.md#atomic-related-tasks-and-temporal-bindings),
+[timezone baseline setup](docs/TZDB_COMPATIBILITY_OPERATIONS.md), and the
+[timezone contract](specs/timezone-compatibility.md).
 
-Spine `0.11.1` is an implemented alpha; its scheduling core is exercised in a staging
+Spine `0.11.2` is an implemented alpha; its scheduling core is exercised in a staging
 agent environment. The current SQLite ledger schema is version `19`. The trusted multi-operator backend is also running in staging on `cortext1`, with
 operator testing through the connected [Kinflow frontend](../kinflow-web-ui/README.md).
 Concrete operator-reported work is tracked in the [backlog](docs/BACKLOG.md);

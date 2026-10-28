@@ -9,9 +9,35 @@ see [validation](TZDB_COMPATIBILITY_VALIDATION.md) and [operations](TZDB_COMPATI
 
 
 Role: Roadmap rationale and delivery history; current task status lives in [BACKLOG.md](BACKLOG.md)
-Last updated: 2026-10-25 (timezone/people branch integration selected)
+Last updated: 2026-10-28 (SPINE-065 follow-source materialization repair)
 
 This is a non-normative delivery plan. The specifications and machine-readable contracts remain authoritative.
+
+**Selected correction (2026-10-28):** The operator reported 0.11.1 deployed in
+staging and authorized SPINE-065. Its composed acceptance story exposes bounded
+reconciliation using the previous target time, leaving a rescheduled follow-source
+task without replacement reminders. Runtime 0.11.2 derives the selected successor
+before normalizing its materialization range and reads copied policies by exact
+successor version inside the existing version transaction, before the current item
+pointer advances. No trigger relaxation, new schema/contract, unconditional backfill,
+or changed replay/detach/terminal policy is introduced. Existing receipt history remains
+exact; a missing-work repair uses a new bounded current-state command. Preserve the
+pre-existing acceptance module and `AGENTS.md` edit. Verification and completion
+live in [SPINE-065](BACKLOG.md#spine-065--materialize-follow-source-reminders-against-successor-time).
+The initial repair did not authorize a commit, push, live-ledger access, real send
+or deployment; the subsequently requested local checkpoint is recorded below.
+
+**Local correction outcome:** The original five coordination stories pass unchanged,
+with 14 new successor-materialization regressions. Full unittest discovery passes
+1,201 tests with one skip; pytest passes 1,239 tests/1,892 subtests with one skip and
+the recorded deadline warning. A noneditable installed wheel passes 72 selected
+binding/acceptance/timezone cases and the eight-route public people verifier.
+Ruff, compilation and package sync pass. Existing mypy failures are reproduced on
+the exact pre-fix baseline, not relabeled clean. SPINE-065 records counts, hashes,
+commands, preservation and scope. The fix is locally complete. The operator
+subsequently authorized its focused local checkpoint, including the unchanged
+acceptance module and new regressions; push and rollout remain separate next
+steps. Exclude the unrelated `AGENTS.md` edit.
 
 **Selected integration (2026-10-25):** The operator authorized merging timezone fix
 `160547d` into people-enabled main `75a4b95`. The original fix was on a separate

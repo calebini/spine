@@ -1,8 +1,8 @@
 # People and responsibility
 
-Runtime: Spine 0.11.1, ledger schema 19. People commands were introduced in 0.11.0;
-0.11.1 also integrates the timezone compatibility fix. No new migration for an
-existing schema-19 ledger.
+Runtime: Spine 0.11.2, ledger schema 19. People commands were introduced in 0.11.0;
+0.11.1 integrates timezone compatibility and 0.11.2 corrects bounded follow-source
+reminder reconciliation. No new migration for an existing schema-19 ledger.
 Authority: [logical contract](../specs/people-and-responsibility.md),
 [exact machine registry](../contracts/people-and-responsibility.v1.json),
 [runtime evidence](PEOPLE_RUNTIME_EVIDENCE.md).

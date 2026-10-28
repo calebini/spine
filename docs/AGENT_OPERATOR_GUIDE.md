@@ -3,6 +3,10 @@
 Status: operational contract for current runtime surfaces
 Audience: local agents and agent operators integrating with Spine
 
+Runtime 0.11.2 corrects bounded replacement work for rescheduled follow-source tasks.
+Use the [related-task workflow](#atomic-related-tasks-and-temporal-bindings) below;
+existing receipts are not rewritten or automatically backfilled by an upgrade.
+
 Combined runtime 0.11.1/schema 19 retains the complete people family and integrates
 the timezone compatibility fix. Preserve `SPINE_TIMEZONE_BASELINES` for agent commands,
 web, worker and agenda jobs separately from the people cursor configuration. See
@@ -334,6 +338,20 @@ For follow-source operation, discover bounded state and use the exact returned `
 ```
 
 `automatic_reconcile_eligible=true` is safe for the configured bounded scheduler loop. `operator_decision_required=true` requires an explicit supported resolution; do not repeatedly submit no-op decision receipts. A stale follow binding leaves the task visible but makes `agenda.show.schedule_actionable=false` and blocks schedule-dependent notification work before any attempt starts. Direct `schedule.update` replacement of its due time fails until the binding is explicitly detached. Snapshot and retired bindings do not add that freshness gate.
+
+From runtime 0.11.2, bounded reconciliation uses the resulting task due time for
+`item_relative` materialization and the resulting task timezone/version for a
+`local_range`. Its replacement work references the copied successor policies.
+Verify both the updated task time and the created/retained work evidence; a moved
+due time alone is not proof that a replacement reminder exists.
+
+An older reconcile may already have left the binding current but without the
+expected work. Upgrading does not rewrite that receipt. Replaying its original
+command ID returns its original evidence, not a repair. To repair eligible missing
+work, read fresh `reconcile_inputs` and submit a new bounded current-state reconcile
+with a new command ID and the intended range. A work-only repair need not create
+another task version. Check the response and `schedule.show`; never repair with SQL
+or cancel/reopen attempted history. No command in this flow sends a notification.
 
 ## Operational Schedule Lifecycle
 

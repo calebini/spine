@@ -1,6 +1,6 @@
 # Spine Backlog
 
-Last updated: 2026-10-25
+Last updated: 2026-10-28
 
 This is the single work queue for Spine development. The
 [implementation plan](IMPLEMENTATION_PLAN.md) explains roadmap direction and delivery
@@ -35,17 +35,126 @@ status labels in the same change. Routine task updates do not change spec author
 
 ## Post-release corrective work
 
-### SPINE-064 — Add coordination-level acceptance stories
+### SPINE-065 — Materialize follow-source reminders against successor time
 
-**Status:** In progress (2026-10-25), operator-selected top-down test addition.
-**Scope:** Public-command stories for fresh-process plan handoff, coherent
-rescheduling, independent people/access/delivery, lost-response replay, and honest
-delivery history. Disposable SQLite ledgers, explicit clocks, and fake transport;
-no external services, daemon, real ledger, or new dependency. Preserve concurrent
-timezone integration and all existing staged work. Generated sequence testing and
-the deferred resilience qualification campaign are outside this slice.
-**Acceptance:** Independent expected outcomes across the composed capabilities;
-standalone unittest/pytest execution, full regression runs, and Ruff verification.
+**Status:** Done locally (2026-10-28) — the narrow runtime fix is implemented and
+verified as 0.11.2/schema 19, selected for the operator-authorized local checkpoint
+below; not deployed.
+The earlier SPINE-064 delivery remains test-only; its acceptance module and the
+existing `AGENTS.md` edit are preserved without changes. Reproduced the reported
+missing replacement on `233656c` before editing. Runtime 0.11.2 retains schema 19
+and all public contract selectors/pins. Push and deployment remain separate.
+**Problem:** A bounded `schedule.binding.reconcile` moves a follow-source task and
+cancels old work, but computes the `item_relative` materialization window from the
+old due time. Moving the source by a day can therefore produce no replacement
+reminder. [Relative bindings §7.6](../specs/relative-temporal-bindings.md#76-notification-work-reconciliation)
+requires bounded materialization against successor truth.
+**Baseline checkout:** Inspected main checkpoint `233656c` (runtime 0.11.1/schema
+19). The [acceptance module](../tests/test_coordination_acceptance.py) was uncommitted
+at the original handoff and is absent from that baseline commit. The new authorized
+checkpoint includes its unchanged bytes with the fix, so a fresh checkout can run
+the reproducer. Preserve the unrelated `AGENTS.md` edit; do not reset or stage it.
+**Reproduce from repository root:**
+
+```sh
+PYTHONDONTWRITEBYTECODE=1 .venv/bin/python -m unittest tests.test_coordination_acceptance.CoordinationAcceptanceTests.test_rescheduling_changes_followers_but_preserves_snapshots_and_delivery_history -v
+```
+
+The scenario creates an event at 2026-08-22 14:00 UTC, a follow-source task due one
+hour earlier, and a snapshot task. It records one fake event delivery, moves the
+event to the next day, and reconciles the follower with bounded `item_relative`
+materialization. Event replacement reminders exist; snapshot work and prior
+delivery evidence remain unchanged. The follower moves to 2026-08-23 13:00 UTC,
+but the assertion expects its replacement work at 12:30 UTC and receives `[]`.
+**Implementation starting point:**
+`src/spine/commands/temporal_bindings.py:handle_binding_reconcile` normalizes
+materialization using `_scheduled_for_target(target_current)` before the stale
+branch derives `target_from_source(...)`. `_versioned_reconcile` then uses that
+already-normalized window against successor policies. The same old-time
+calculation is present in pre-integration main `75a4b95`; UTC reproduction does
+not depend on the timezone compatibility change.
+**Repair boundary:** Resolve the materialization window against the time belonging
+to the selected reconciliation outcome. Preserve current/no-op, explicit detach,
+terminal/unresolved, and snapshot semantics; keep command replay, atomic rollback,
+policy lineage, and attempted-work history intact. Do not weaken the new assertion,
+skip the scenario, widen its range to hide the defect, or introduce unconditional
+extra materialization. Add focused coverage for affected branches, including dry
+run/replay and relative versus explicit ranges where the fix changes resolution.
+**Acceptance:** All five new stories pass, alongside the existing relative-binding
+tests and complete documented unittest suite. Run full pytest with the existing
+`PYTHONPATH=src:tests` workaround, Ruff, strict core/ledger mypy, and applicable
+compilation/contract checks. Record exact results and any unrelated failures.
+Use only disposable ledgers and fake delivery. No real sends, deployment, real
+ledger access, unrelated refactoring, commit, or push is authorized by this handoff.
+**Baseline evidence:** SPINE-064 records full-suite results: one failure in each
+runner, both this regression; four other acceptance stories pass. No new test
+dependency, running daemon, external service, or network access is required.
+**Implementation (2026-10-28):** The stale-follow branch derives its target once
+before materialization normalization; current/manual detach and other outcomes
+retain their existing target basis. This also makes `local_range` use the resulting
+timezone and pin. The corrected range exposed a second same-path defect: the
+version writer copies policies before invoking the canonical extension, but updates
+the current pointer afterward. Loading "current" policies in that extension chose
+predecessor IDs, and the unchanged work-policy trigger correctly rejected successor
+work. An exact-version ledger reader now supplies copied successor policies without
+moving the pointer early or weakening constraints. Existing policy lineage,
+transaction finalizers, work classifications and attempted history remain intact.
+The unchanged acceptance story passes; 14 new regressions in
+[successor materialization tests](../tests/test_binding_successor_materialization.py)
+cover earlier/later moves, relative/local ranges, timezone changes, current repair/
+no-op, equal-time refresh, dry run, replay, rollback, detach, snapshot refusal,
+terminal targets and unresolved selected occurrences. The 27-test selected
+acceptance/relative/new-regression run passes (3 subtests, 18.34 seconds); the final
+14-test module passes independently (1.528 seconds).
+**Verification:** Full documented unittest discovery passes **1,201 tests, one
+skipped (289.244 seconds)**. Full pytest passes **1,239 tests and 1,892 subtests,
+one skipped, one warning (292.53 seconds)**. All five existing acceptance stories
+now pass without modifying their test file. The skip is the existing revision-
+readback build harness without repository-local setuptools. The repeated warning
+is the previously recorded synthetic serialization-deadline trace exception, not
+a failed assertion; it remains outside this repair.
+
+A fresh noneditable 0.11.2 wheel passes **72 installed binding/acceptance/timezone
+tests and three subtests (28.80 seconds)** outside the checkout, plus the public
+people verifier: eight HTTP routes, CLI, replay/history/dry-run, cursor paging,
+frozen interfaces and deep disposable verification. `pip check` passes. The wheel
+SHA-256 is `a70e8312f7389cc79d5121548a8d23f37100a279636df8f4d21e90f1a7a42aab`;
+temporary artifacts are under `/tmp/spine-0112-hotfix.boz20i/`, not published or
+durable external release storage. These checks use synthetic ledgers, TZif fixtures
+and fake delivery only, not staging data or a provider-qualification claim.
+
+Repository-wide Ruff, compilation (`src tests examples scripts`), all four package
+sync checks, 277 local documentation link targets and diff hygiene pass. The final
+documentation/declaration/scaffold check passes 12 tests (0.285 seconds). Strict
+mypy is **not clean**: exact pre-fix `233656c` has the same 36 core/ledger errors in
+10 files (52 checked), 37 focused temporal-binding errors, and one focused ledger-
+notification `_rendering_pending` attribute error. Same-interpreter comparisons
+match after line-shift normalization; neither addition introduces a diagnostic.
+Unrelated typing/timeout repairs and the pre-existing bounded-terminal validation
+discrepancy are not folded into this change. Legal `mode=none` branch controls pass.
+
+No source schema, migration, machine contract, compiled family pin, Tickerd pin or
+timezone-baseline policy changes. Existing receipts remain immutable: replaying an
+older zero-work receipt does not repair it; fresh bounded current-state reconciliation
+with a new command ID can repair eligible missing work. See the
+[operator workflow](AGENT_OPERATOR_GUIDE.md#atomic-related-tasks-and-temporal-bindings).
+The existing `AGENTS.md` and acceptance-module bytes are unchanged, and earlier
+tracking is preserved. At verification, no staging/production ledger, external
+send, Whetstone run, Git staging, commit, push or deployment had occurred.
+
+```sh
+PYTHONDONTWRITEBYTECODE=1 .venv/bin/python -m unittest discover -s tests
+PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests .venv/bin/python \
+  -m pytest -o addopts='' -p no:cacheprovider -q tests
+```
+
+**Checkpoint authorization (2026-10-28):** The operator requested the focused
+0.11.2 commit. Include the runtime repair, unchanged coordination acceptance
+module that exposed it, fourteen new regression cases, version assertions,
+installed verifier and operator/backlog/plan documentation. Exclude `AGENTS.md`.
+Final selected binding/acceptance/version verification passes 32 tests and three
+subtests (17.92 seconds). This authorizes a local checkpoint only, not a push or
+deployment.
 
 ### SPINE-062 — Preserve timezone resolution across compatible tzdb upgrades
 
@@ -3046,6 +3155,47 @@ never authorizes deletion of canonical evidence.
 **Source:** [Storage lifecycle horizon](IMPLEMENTATION_PLAN.md#future-horizon-bounded-ledger-storage-lifecycle).
 
 ## Completed
+
+### SPINE-064 — Add coordination-level acceptance stories
+
+**Status:** Done — test-only delivery (2026-10-25). The operator selected a separate
+implementation handoff for the exposed defect, tracked as SPINE-065. At the
+test-only delivery, four stories passed and one intentionally remained a failing
+regression, without a skip or expected-failure marker. The subsequent SPINE-065
+runtime repair makes all five pass without editing this module; the original
+failure evidence below is retained rather than relabeled as a green baseline.
+**Scope:** Public-command stories for fresh-process plan handoff, coherent
+rescheduling, independent people/access/delivery, lost-response replay, and honest
+delivery history. Disposable SQLite ledgers, explicit clocks, and fake transport;
+no external services, daemon, real ledger, or new dependency. Preserve concurrent
+timezone integration and all existing staged work. Generated sequence testing and
+the deferred resilience qualification campaign are outside this slice.
+**Acceptance:** Independent expected outcomes across the composed capabilities;
+standalone unittest/pytest execution, full regression runs, Ruff verification,
+and an actionable defect handoff. Operator decision keeps runtime repair separate.
+**Evidence:** [Acceptance module](../tests/test_coordination_acceptance.py) runs
+without importing other test classes. It uses real CLI subprocesses for handoff
+and replay, public commands for authoring, protected people reads for access,
+and a second SQLite connection to verify committed evidence before fake transport.
+**Defect found:** Move an event from 2026-08-22 14:00 UTC to the next day, then
+reconcile its follow-source task with bounded `item_relative` materialization.
+The task moves to 2026-08-23 13:00 UTC and its old reminder is cancelled, but the
+expected replacement at 12:30 UTC is absent. In
+`src/spine/commands/temporal_bindings.py`, `handle_binding_reconcile` normalizes the
+materialization window against the old target before deriving the successor time.
+The same calculation exists in committed pre-integration HEAD. Section 7.6 of
+[relative bindings](../specs/relative-temporal-bindings.md#76-notification-work-reconciliation)
+requires bounded materialization against successor truth. No runtime repair made.
+**Verification:** With `PYTHONDONTWRITEBYTECODE=1`, documented unittest discovery
+ran **1,187 tests in 284.972s: one failure, one skip**. Full pytest with
+`PYTHONPATH=src:tests .venv/bin/python -m pytest -o addopts='' -q -p no:cacheprovider`
+reported **1,224 passed, one failed, one skipped, 1,889 subtests passed in 287.60s**.
+Both fail only the new rescheduling story. Pytest also reports one existing
+deadline-test unraisable-exception warning; pytest-only timezone tests account
+for the discovery-count difference. The other four new stories passed standalone
+pytest in 12.06s. Repository-wide Ruff and diff checks pass. The unrelated pytest
+import-path limitation remains unchanged. The concurrent timezone integration was
+committed as `233656c` during validation; this task performed no staging or commit.
 
 ### SPINE-063 — Remove duplicate test discovery from imported test classes
 

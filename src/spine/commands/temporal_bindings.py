@@ -16,7 +16,11 @@ from spine.core.provenance import DerivedOccurrenceProvenance, derive_occurrence
 from spine.core.temporal_bindings import binding_revision_preimage
 from spine.ledger.common import TemporalAnchorInput, insert_temporal_anchor
 from spine.ledger.items import create_next_item_version, create_task_v1
-from spine.ledger.notifications import insert_notification_schedule_policy, load_current_notification_policies
+from spine.ledger.notifications import (
+    insert_notification_schedule_policy,
+    load_current_notification_policies,
+    load_notification_policies_at_version,
+)
 from spine.ledger.provenance import active_provenance_for_slot, insert_occurrence_provenance, supersede_occurrence_provenance
 from spine.ledger.recurrence import load_current_recurrence_set
 from spine.ledger.relations import create_item_relation
@@ -565,7 +569,15 @@ def handle_binding_reconcile(request: Mapping[str, Any], context: CommandContext
         raise SpineValidationError("invalid_request:operator_resolution", "cancel_target is not legal for this state")
     if state == "target_diverged" and operator != "detach_at_current_target":
         raise SpineValidationError("semantic_conflict:operator_resolution", "target divergence requires explicit detach")
-    materialization = c._schedule_normalize_materialization(request["materialization"], scheduled=_scheduled_for_target(target_current))
+    current_target = _scheduled_for_target(target_current)
+    target = current_target
+    # Normal following uses successor truth for both relative offsets and local
+    # range boundaries. Explicit detach instead retains the current task time.
+    if state == "stale" and operator != "detach_at_current_target":
+        if source is None:
+            raise SpineValidationError("runtime_failure:source", "stale binding source did not resolve")
+        target = target_from_source(source, int(revision["offset_seconds"]))
+    materialization = c._schedule_normalize_materialization(request["materialization"], scheduled=target)
 
     if operator == "detach_at_current_target":
         return _manual_reconcile(
@@ -602,10 +614,6 @@ def handle_binding_reconcile(request: Mapping[str, Any], context: CommandContext
             False,
         )
     if state == "stale":
-        if source is None:
-            raise SpineValidationError("runtime_failure:source", "stale binding source did not resolve")
-        target = target_from_source(source, int(revision["offset_seconds"]))
-        current_target = _scheduled_for_target(target_current)
         if all(
             current_target.get(k) == target.get(k)
             for k in ("local_date", "local_time", "timezone", "timezone_database_version", "utc_instant")
@@ -945,7 +953,12 @@ def _versioned_reconcile(
                 connection, temporal_binding_id=str(binding["temporal_binding_id"]), command_id=command_id, retired_at_utc=at
             )
         increment_binding_catalog_generation(connection)
-        policies = [p for p in load_current_notification_policies(connection, item_id=item_id) if p["status"] == "active"]
+        # The allocator advances the current pointer after this extension. Its
+        # already-copied successor policies, not the still-current predecessor,
+        # must own any replacement work inserted for this version.
+        policies = [p for p in load_notification_policies_at_version(
+            connection, item_id=item_id, item_version=version
+        ) if p["status"] == "active"]
         cancelled, retained, protected, reasons = c._schedule_reconcile_work_plan(
             connection,
             item_id=item_id,

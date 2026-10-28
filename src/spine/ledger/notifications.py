@@ -241,6 +241,22 @@ def insert_notification_schedule_policy(connection: sqlite3.Connection, *, norma
     stage_policy(connection, value)
 
 
+def load_notification_policies_at_version(
+    connection: sqlite3.Connection, *, item_id: str, item_version: int
+) -> list[dict[str, object]]:
+    """Read immutable policies without consulting the current-version pointer."""
+
+    rows = connection.execute(
+        """
+        SELECT p.* FROM notification_policies AS p
+        WHERE p.item_id = ? AND p.version = ?
+        ORDER BY p.notification_intent_id, p.policy_id
+        """,
+        (item_id, item_version),
+    ).fetchall()
+    return [_load_policy(connection, row) for row in rows]
+
+
 def load_current_notification_policies(
     connection: sqlite3.Connection, *, item_id: str, notification_intent_id: str | None = None
 ) -> list[dict[str, object]]:
