@@ -1,0 +1,13 @@
+{
+  "interface": "contextual-notification-experiment",
+  "version": "impetus.local.v1",
+  "ledger_instance_id": "synthetic:tests",
+  "work_id": "one",
+  "request_sha256": "5b590a34127c615f244f431dfb7c7c6b638ec00b3a732157dca6d94564d6f6a1",
+  "expected": {
+    "status": "succeeded",
+    "kind": "addendum",
+    "basis": "provided_context",
+    "sources": []
+  }
+}

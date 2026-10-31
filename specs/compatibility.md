@@ -4,6 +4,18 @@ Status: Implemented v0.1.0 on Spine runtime 0.2.0
 Scope: Exact cross-repository runtime admission and generic safety-stop mapping
 Authority: Normative Spine consumer requirements for supported Tickerd installations
 
+Separate synthetic capture integration (2026-10-29):
+[The adopted experiment subset](contextual-notification-capture.md) implements
+`spine.contextual-notification-capture.v1` against the independent deterministic
+Impetus `impetus.local.v1` command boundary. The exact schema and byte fixture copies
+in `contracts/contextual_notification/` match the installed package and Impetus's
+owning contract. This is a synthetic-only local module/demo, not a new registered
+Spine command, live provider, message inclusion or production compatibility claim.
+Source/capture uses a separately initialized ledger-bound experiment sidecar; canonical
+schema 19, runtime release, public command registry, Tickerd and governed advisory
+pins remain unchanged. The larger [experiment proposal](contextual-notification-experiment.md)
+is still draft. Tests check independent processes and matching machine contracts.
+
 Separate proposed web-consumer change:
 [independent activity read compatibility](independent-activity-reads.md#9-compatibility-and-migration-assessment)
 assesses new read schemas, registry/versioning, v1 complete-or-deny preservation, and

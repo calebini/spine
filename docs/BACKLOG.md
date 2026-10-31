@@ -1,6 +1,6 @@
 # Spine Backlog
 
-Last updated: 2026-10-28
+Last updated: 2026-10-31
 
 This is the single work queue for Spine development. The
 [implementation plan](IMPLEMENTATION_PLAN.md) explains roadmap direction and delivery
@@ -3022,6 +3022,11 @@ planning outcome; each needs decomposition before executable work is selected.
 
 ### SPINE-011 — Prepare notification-activated contextual advisories
 
+The separately selected direct experiment is documented by completed SPINE-066 and
+[its rough design](../specs/contextual-notification-experiment.md). It explores useful
+or personable additions without governance and does not implement or ratify this
+governed horizon. The existing advisory profile's requirements remain unchanged.
+
 The narrow protection-amendment drafting task is completed separately as SPINE-017.
 Its proposed decision and manual checklist do not close this horizon's remaining
 native mapping, machine-contract, or implementation decisions.
@@ -3155,6 +3160,167 @@ never authorizes deletion of canonical evidence.
 **Source:** [Storage lifecycle horizon](IMPLEMENTATION_PLAN.md#future-horizon-bounded-ledger-storage-lifecycle).
 
 ## Completed
+
+### SPINE-067 — Connect synthetic Spine export to deterministic Impetus capture
+
+**Status:** Done locally (2026-10-29, Codex), synthetic connected proof.
+**Scope:** Adopt the smallest local schema/byte binding with Impetus; export a real
+synthetic event, explicitly permitted context and ordinary preview; invoke an
+independent worker once and retain non-sending capture/readback. Preserve the
+pre-existing AGENTS.md and design edits, existing schema/runtime pins and reminders.
+**Delivery:** [Contract](../specs/contextual-notification-capture.md),
+[operations/demo](CONTEXTUAL_NOTIFICATION_CAPTURE.md), independent process/contract
+fixtures and source/capture tests. Separate owner stores; no live provider, source
+ledger migration, real-send path or staging change.
+**Verification:** 74 scoped pytest cases and 49 subtests pass, including 12 connected
+capture tests, one standalone shared-contract test and existing ordinary-rendering,
+scheduling and delivery regressions. The independent Impetus suite passes 20 cases
+with schema validation enabled. Ruff on all new Python modules passes; both working
+trees pass diff whitespace checks; Impetus's scaffold verifier passes. A real demo
+in a disposable local directory created a source event and captured a context-only
+proposal with selected/sent false. Source export/capture tests assert
+no canonical ledger writes or side-effect attempts. Wheel qualification was attempted
+but the local environment lacks the setuptools build backend; installed-wheel behavior
+is not claimed. Full Spine regression, live providers, real data, staging, release,
+commit and push were outside this task. SPINE-066 remains design-only history.
+
+**Regression follow-up (2026-10-31):** Completed operator-authorized validation
+of the local synthetic capture boundary on Spine `b376d97` plus the pre-existing
+local slice. Independent Impetus `eba6578` was available; its pre-existing
+documentation edits were preserved. Python 3.14.6, pytest 9.1.1, Ruff 0.16.2,
+mypy 2.3.0 and jsonschema 4.26.0. No implementation, test or contract changes.
+
+**Results** (wall durations unless a runner duration is stated):
+
+| Check | Outcome | Duration |
+| --- | --- | --- |
+| Full Spine pytest | 1,252 passed; 1,897 subtests passed; one skip; one existing warning | 306.58s runner / 307.289s wall |
+| Full documented unittest discovery | All 1,214 tests passed; no skips | 303.069s runner / 303.912s wall |
+| Installed capture/contract boundary | All 13 unchanged tests passed; no skips | 5.415s runner / 5.590s wall |
+| Independent Impetus unittest, including mocked provider tests | All 55 passed; no skips | 4.006s runner / 4.327s wall |
+| Repository-wide Ruff | Passed | 0.347s |
+| Strict core/ledger mypy | Failed: 36 existing errors in 10 files, 52 files checked | 2.925s |
+| Same mypy command against exported committed HEAD | Same 36 diagnostics, exactly equal | 1.262s |
+| Contract sync: web / facet-web / rendering / revision-readback / people | All five passed | 0.129 / 0.197 / 0.099 / 0.074 / 0.109s |
+| Shared contextual schema/request/vector byte parity | All copies identical, including independent Impetus | 0.002s |
+| Compile src/tests/examples/scripts | Passed; bytecode outside checkout | 0.761s |
+| Documentation packaging tests | Both passed; no skips | 0.547s |
+| Impetus scaffold verifier | Passed (structure only) | 0.094s |
+
+The full suites include all 12 connected capture tests and the standalone
+schema/vector test; no Impetus-dependent test was skipped. Pytest's sole skip was
+`test_installed_wheel_public_cli_and_exact_local_schema_closure`: Spine's own
+interpreter lacks setuptools. It passed in full unittest with
+`SPINE_WHEEL_BUILD_PYTHON` set to the existing prepared Threshold interpreter.
+
+**Pre-existing issues:** Strict mypy remains red. All 10 diagnostic files are
+byte-identical to HEAD and a separate committed-source export produced exactly
+the same 36 diagnostic lines. Pytest repeated the already-recorded
+`PytestUnraisableExceptionWarning` in
+`IndependentReadPageTests.test_page_serialization_is_inside_the_shared_deadline`
+(`WebError: capacity_exceeded` from the synthetic deadline trace). Neither is a
+new capture regression; neither was fixed or suppressed. Unittest emitted the
+same existing deadline-trace exception. No failed Spine test assertions were observed.
+
+**Installed-wheel qualification succeeded for this boundary.** An offline scratch
+copy built `spine_ledger-0.11.2-py3-none-any.whl` using the existing sibling
+Threshold setuptools 80.9.0 backend (1.724s); installation of only this wheel into
+a fresh venv used `--no-index --no-deps` (1.013s). Existing validation dependencies
+were exposed by a plain dependency-directory `.pth`, without downloading or
+installing dependencies. From outside the checkout, `python -I` asserted that
+Spine, all three capture modules and the packaged schema resolve under the fresh
+runtime prefix, with checkout `src` absent, then ran the 13 unchanged tests against
+the independent deterministic worker. Wheel SHA-256:
+`d9426e71097a255b0badf5ffdaac5fd5876fd734495f5d38357eaf77de604d6a`.
+This is local capture-boundary qualification, not a whole-package release claim.
+The first scratch harness run had 12 passes and one missing-fixture error
+(5.447s wall): the source-layout JSON copy used by a parity assertion was absent.
+Copying only that JSON fixture into scratch resolved it; source/tests were unchanged.
+The initial error and successful rerun logs are both retained.
+
+**Commands and local evidence:** Logs, exact argv, durations, wheel, copied tests,
+qualification bootstrap and before/after byte manifests were retained outside the
+checkout as temporary local evidence, not published release storage. Session-specific
+scratch locations are omitted from this checkpoint. The `run.py` wrapper writes stdout/stderr and JSON
+exit/duration records, sets `PYTHONDONTWRITEBYTECODE=1`, and puts `TMPDIR` under
+that directory. The equivalent check commands from the Spine root were:
+
+```sh
+RUN=/path/to/disposable-validation-workspace
+export PYTHONDONTWRITEBYTECODE=1 TMPDIR="$RUN/tmp"
+export IMPETUS_SRC="$PWD/../impetus/src"
+PYTHONPATH=src:tests .venv/bin/python -m pytest -o addopts='' -p no:cacheprovider -q -ra tests
+PYTHONPATH=src:tests SPINE_WHEEL_BUILD_PYTHON="$PWD/../threshold/.venv/bin/python" \
+  .venv/bin/python -m unittest discover -s tests -v
+.venv/bin/ruff check . --no-cache
+.venv/bin/mypy --strict --no-incremental --cache-dir "$RUN/mypy-cache" src/spine/core src/spine/ledger
+for family in web facet_web rendering revision_readback people; do
+  PYTHONPATH=src .venv/bin/python "scripts/sync_${family}_contracts.py" --check
+done
+PYTHONPYCACHEPREFIX="$RUN/bytecode" .venv/bin/python -m compileall -q src tests examples scripts
+node --test docs/site/build-pages.test.mjs
+# Run the sibling checks from its checkout:
+(
+  cd ../impetus
+  PYTHONPATH=src ../spine/.venv/bin/python -W error::ResourceWarning -m unittest discover -s tests -v
+  ../spine/.venv/bin/python scripts/verify_repo.py
+)
+# Build from the scratch source copy, then install only the resulting Spine wheel:
+../threshold/.venv/bin/python -m pip --isolated wheel --no-index --no-deps \
+  --no-build-isolation --no-cache-dir --disable-pip-version-check -w "$RUN/wheels" "$RUN/wheel-source"
+.venv/bin/python -m venv --without-pip "$RUN/runtime"
+.venv/bin/python -m pip --isolated --python "$RUN/runtime/bin/python" install \
+  --no-index --no-deps --no-cache-dir --disable-pip-version-check "$RUN/wheels/spine_ledger-0.11.2-py3-none-any.whl"
+env -u PYTHONPATH -u PYTHONHOME "$RUN/runtime/bin/python" -I "$RUN/installed-checks/qualify.py"
+git diff --check
+```
+
+Final byte comparison: only `docs/BACKLOG.md` changed during validation; all
+pre-existing Spine and Impetus edits retained. Final `git diff --check` passes.
+All tests used disposable ledgers and deterministic/fake or mocked providers. No network/dependency acquisition, real
+provider calls, notifications, user-ledger writes, staging/production access,
+feature activation, external review, commit, push or deployment occurred.
+
+**Local checkpoint selection (2026-10-31):** The operator approved a bounded local
+commit of SPINE-067, directly supporting design/operations documentation, fixtures
+and this validation evidence. All mixed-file hunks were inspected. The unrelated
+`AGENTS.md` guidance and the independent Impetus working tree are excluded and
+preserved. Validation code/contracts match the checked snapshot; only documentation
+was adjusted to omit session-specific scratch locations and record this selection.
+Existing typing/deadline issues remain separate work. No push, deployment, live
+provider, notification or feature activation is authorized by this checkpoint.
+
+
+### SPINE-066 — Draft a direct advisory experiment and Impetus handoff
+
+**Status:** Done (2026-10-29, Codex), rough design and examples only.
+**Selected scope:** The operator requested a small Spine-owned design and Impetus
+handoff, then selected a broader experiment across frequent opted-in event reminders.
+Archetype, permitted facets, ordinary reminder text and relative timing inform a
+useful or personable addition. No addition is valid and tools are optional. The
+first milestone captures proposals for review without changing delivered content.
+**Delivery:** [Versioned rough design](../specs/contextual-notification-experiment.md),
+[Impetus owner handoff](CONTEXTUAL_NOTIFICATION_EXPERIMENT_HANDOFF.md), and concrete
+[request](../examples/contextual-notification-experiment.request.json)/
+[result](../examples/contextual-notification-experiment.result.json) examples.
+The flight example demonstrates a context-only personable line, not a mandatory
+travel workflow or provider capability. The design covers original-byte binding,
+claim/readback, no automatic research retries, cutoff/fallback, source freshness,
+capture evaluation and later one-notification selection/delivery. README, spec
+index, compatibility notes and roadmap rationale link the proposed boundary.
+**Owner boundary:** No governance service in this experiment; the existing governed
+advisory profile and Impetus Light-first decision remain separate. Experimental-mode
+adoption, exact schemas, disclosure/storage mappings, process/provider/tool limits
+and timing configuration remain explicit owner decisions before runtime. Existing
+source specifications, runtime, ledger schema and sibling repositories are unchanged.
+**Verification:** Both JSON examples parse and their work/version binding, raw-byte
+SHA-256, call/output limits, relative event/notification timing and execution/cutoff
+ordering agree. All 10 local links in the new design/handoff resolve, including
+anchors; `git diff --check` passes. Manually reviewed the proposal against the
+existing source/disclosure, fallback, replay and attempt-ownership requirements.
+These checks validate design/example consistency, not runtime conformance. No runtime
+tests, external audit, provider calls, real sends, staging changes, commit or push
+were performed. The pre-existing `AGENTS.md` edit is preserved.
 
 ### SPINE-064 — Add coordination-level acceptance stories
 

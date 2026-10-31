@@ -1,0 +1,49 @@
+{
+  "interface": "contextual-notification-experiment",
+  "version": "0.1.0-draft.1",
+  "work_id": "example:flight:week-before:1",
+  "source_refs": {
+    "ledger_instance_id": "example:ledger",
+    "item_id": "example:flight",
+    "item_version": 1,
+    "notification_opportunity_id": "example:flight:week-before",
+    "notification_policy_id": "example:notification-policy:1",
+    "rendering_definition_revision": "example:flight-reminder:1",
+    "experiment_definition_revision": "example:helpful-or-personable:1",
+    "disclosure_revision": "example:experiment-disclosure:1"
+  },
+  "captured_at_utc": "2026-11-02T07:59:30Z",
+  "context": {
+    "archetype": "flight",
+    "event": {
+      "title": "Flight to Lyon",
+      "starts_at_utc": "2026-11-09T08:00:00Z",
+      "timezone": "Europe/Paris",
+      "primary_location": {
+        "label": "Departure airport"
+      }
+    },
+    "facets": [
+      {
+        "schema_revision": "example:flight-details:1",
+        "values": {
+          "destination": "Lyon"
+        }
+      }
+    ],
+    "notification": {
+      "eligible_at_utc": "2026-11-02T08:00:00Z",
+      "seconds_before_event": 604800,
+      "ordinary_text": "Your flight to Lyon departs in one week, on 9 November at 09:00 Europe/Paris."
+    }
+  },
+  "objective": "Make this reminder more helpful or more personable. Add a brief, relevant line when worthwhile; avoid repeating the reminder. Use an available read-only tool only when it could add practical value. Do not invent facts, imply unperformed checks, or infer personal preferences. Returning no addition is fine.",
+  "allowed_tools": [],
+  "limits": {
+    "model_calls": 2,
+    "tool_calls": 1,
+    "elapsed_seconds": 30,
+    "addendum_utf8_bytes": 512
+  },
+  "selection_cutoff_utc": "2026-11-02T08:00:00Z"
+}

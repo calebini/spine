@@ -51,6 +51,13 @@ allowed to quietly become canonical.
 
 ## What Works Today
 
+An isolated [contextual notification capture demo](docs/CONTEXTUAL_NOTIFICATION_CAPTURE.md)
+now connects real synthetic Spine event export to the independent deterministic
+Impetus worker and retained, non-sending review. It supports optional fixture tools,
+context-only wording and no addition, with separate states for failures and late work.
+It does not enable real-reminder sampling or generated notification content.
+
+
 Runtime 0.11.2 repairs bounded reminder materialization when a follow-source task
 is reconciled to a new due time. Replacement work uses the successor time and
 policy version in the same transaction. The people and timezone capabilities from
@@ -432,6 +439,11 @@ Start with the document that matches the job:
 - **Understand the product:** [`specs/overview.md`](specs/overview.md)
 - **Understand ownership and boundaries:**
   [`specs/architecture.md`](specs/architecture.md)
+- **Review the contextual notification experiment:**
+  [rough design](specs/contextual-notification-experiment.md) and
+  [Impetus handoff](docs/CONTEXTUAL_NOTIFICATION_EXPERIMENT_HANDOFF.md) — opted-in
+  reminder context and timing for useful or personable additions; a separate
+  experiment without governance, capture-only first, not implemented.
 - **Review the proposed shared execution architecture:**
   [`specs/cross-system-execution.md`](specs/cross-system-execution.md) — versioned
   coordination, governance, execution and result-consumption boundaries; draft,

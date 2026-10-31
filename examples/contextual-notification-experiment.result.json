@@ -1,0 +1,22 @@
+{
+  "interface": "contextual-notification-experiment",
+  "version": "0.1.0-draft.1",
+  "work_id": "example:flight:week-before:1",
+  "request_sha256": "50b9d6eb179101b306a81384e2e60d7b57518345914312be8762b3f410cc0edf",
+  "execution": {
+    "status": "succeeded",
+    "configuration_revision": "example:deterministic-backend:1",
+    "prompt_revision": "example:helpful-or-personable:1",
+    "started_at_utc": "2026-11-02T07:59:31Z",
+    "completed_at_utc": "2026-11-02T07:59:33Z",
+    "model_calls": 1,
+    "tool_calls": []
+  },
+  "proposal": {
+    "kind": "addendum",
+    "text": "A week to go—perhaps a good moment to start your packing list.",
+    "basis": "provided_context",
+    "sources": []
+  },
+  "review_note": "A context-only preparation suggestion; no external information was checked."
+}

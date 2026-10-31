@@ -9,9 +9,33 @@ see [validation](TZDB_COMPATIBILITY_VALIDATION.md) and [operations](TZDB_COMPATI
 
 
 Role: Roadmap rationale and delivery history; current task status lives in [BACKLOG.md](BACKLOG.md)
-Last updated: 2026-10-28 (SPINE-065 follow-source materialization repair)
+Last updated: 2026-10-29 (SPINE-067 synthetic capture integration)
 
 This is a non-normative delivery plan. The specifications and machine-readable contracts remain authoritative.
+
+
+**Selected connected proof (2026-10-29):** SPINE-067 adopts the small local
+`impetus.local.v1` boundary with explicit schemas/byte vectors, actual synthetic
+Spine authoring and ordinary rendering, independent worker execution and non-sending
+capture. The [implemented subset](../specs/contextual-notification-capture.md) uses a
+Spine-owned experiment sidecar and once-only launch marker, preserving source-ledger
+schema 19 and existing delivery paths. Real reminders/providers and generated-content
+inclusion remain separate work. See [operations](CONTEXTUAL_NOTIFICATION_CAPTURE.md)
+and SPINE-067 in the backlog for current evidence.
+
+**Selected experiment direction (2026-10-29), historical design step:** The operator chose a small direct
+Spine-to-Impetus experiment to learn whether archetype, permitted facets, ordinary
+reminder content and relative timing enable useful or personable additions across
+frequent real reminders. Tool use is optional; no addition is valid. Capture and
+review precede inclusion in notifications. The
+[rough design](../specs/contextual-notification-experiment.md), JSON examples and
+[Impetus handoff](CONTEXTUAL_NOTIFICATION_EXPERIMENT_HANDOFF.md) distinguish this
+ungoverned experimental mode from the existing governed advisory draft. Impetus
+must explicitly adopt its own experimental execution direction; the Light-first
+decision is not changed here. Full Threshold remains a later integration direction
+informed by the experiment. This delivery is design and handoff only; concrete
+schemas, storage, execution and live-provider choices remain owner work. Current
+status and completion evidence belong to [SPINE-066](BACKLOG.md#spine-066--draft-a-direct-advisory-experiment-and-impetus-handoff).
 
 **Selected correction (2026-10-28):** The operator reported 0.11.1 deployed in
 staging and authorized SPINE-065. Its composed acceptance story exposes bounded

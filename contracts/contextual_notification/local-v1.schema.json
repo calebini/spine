@@ -1,0 +1,703 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cortext.local/impetus/contextual-notification-local-v1.schema.json",
+  "$defs": {
+    "request": {
+      "type": "object",
+      "properties": {
+        "interface": {
+          "const": "contextual-notification-experiment"
+        },
+        "version": {
+          "const": "impetus.local.v1"
+        },
+        "work_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "source_refs": {
+          "type": "object",
+          "properties": {
+            "ledger_instance_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            "item_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            "notification_opportunity_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            "notification_policy_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            "rendering_definition_revision": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            "experiment_definition_revision": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            "disclosure_revision": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            "item_version": {
+              "type": "integer",
+              "minimum": 1
+            }
+          },
+          "required": [
+            "ledger_instance_id",
+            "item_id",
+            "notification_opportunity_id",
+            "notification_policy_id",
+            "rendering_definition_revision",
+            "experiment_definition_revision",
+            "disclosure_revision",
+            "item_version"
+          ],
+          "additionalProperties": false
+        },
+        "captured_at_utc": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d\\d-\\d\\dT\\d\\d:\\d\\d:\\d\\d(?:\\.\\d+)?Z$"
+        },
+        "context": {
+          "type": "object",
+          "properties": {
+            "archetype": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            "event": {
+              "type": "object",
+              "properties": {
+                "title": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 8192
+                },
+                "starts_at_utc": {
+                  "type": "string",
+                  "pattern": "^\\d{4}-\\d\\d-\\d\\dT\\d\\d:\\d\\d:\\d\\d(?:\\.\\d+)?Z$"
+                },
+                "timezone": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 256
+                },
+                "primary_location": {
+                  "type": "object",
+                  "properties": {
+                    "label": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 8192
+                    }
+                  },
+                  "required": [
+                    "label"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "title",
+                "starts_at_utc",
+                "timezone"
+              ],
+              "additionalProperties": false
+            },
+            "facets": {
+              "type": "array",
+              "maxItems": 16,
+              "items": {
+                "type": "object",
+                "properties": {
+                  "schema_revision": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 256
+                  },
+                  "values": {
+                    "type": "object"
+                  }
+                },
+                "required": [
+                  "schema_revision",
+                  "values"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "notification": {
+              "type": "object",
+              "properties": {
+                "eligible_at_utc": {
+                  "type": "string",
+                  "pattern": "^\\d{4}-\\d\\d-\\d\\dT\\d\\d:\\d\\d:\\d\\d(?:\\.\\d+)?Z$"
+                },
+                "seconds_before_event": {
+                  "type": "integer"
+                },
+                "ordinary_text": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 8192
+                }
+              },
+              "required": [
+                "eligible_at_utc",
+                "seconds_before_event",
+                "ordinary_text"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "archetype",
+            "event",
+            "facets",
+            "notification"
+          ],
+          "additionalProperties": false
+        },
+        "objective": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 8192
+        },
+        "allowed_tools": {
+          "enum": [
+            [],
+            [
+              "fixture.lookup.v1"
+            ]
+          ]
+        },
+        "limits": {
+          "type": "object",
+          "properties": {
+            "model_calls": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2
+            },
+            "tool_calls": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "elapsed_seconds": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 30
+            },
+            "addendum_utf8_bytes": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 512
+            }
+          },
+          "required": [
+            "model_calls",
+            "tool_calls",
+            "elapsed_seconds",
+            "addendum_utf8_bytes"
+          ],
+          "additionalProperties": false
+        },
+        "selection_cutoff_utc": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d\\d-\\d\\dT\\d\\d:\\d\\d:\\d\\d(?:\\.\\d+)?Z$"
+        },
+        "request_expires_at_utc": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d\\d-\\d\\dT\\d\\d:\\d\\d:\\d\\d(?:\\.\\d+)?Z$"
+        }
+      },
+      "required": [
+        "interface",
+        "version",
+        "work_id",
+        "source_refs",
+        "captured_at_utc",
+        "context",
+        "objective",
+        "allowed_tools",
+        "limits",
+        "selection_cutoff_utc",
+        "request_expires_at_utc"
+      ],
+      "additionalProperties": false
+    },
+    "read": {
+      "type": "object",
+      "properties": {
+        "interface": {
+          "const": "contextual-notification-experiment"
+        },
+        "version": {
+          "const": "impetus.local.v1"
+        },
+        "ledger_instance_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "work_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "request_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      },
+      "required": [
+        "interface",
+        "version",
+        "ledger_instance_id",
+        "work_id",
+        "request_sha256"
+      ],
+      "additionalProperties": false
+    },
+    "response": {
+      "type": "object",
+      "properties": {
+        "interface": {
+          "const": "contextual-notification-experiment"
+        },
+        "version": {
+          "const": "impetus.local.v1"
+        },
+        "ledger_instance_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "work_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "request_sha256": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "disposition": {
+          "enum": [
+            "new",
+            "existing",
+            "rejected",
+            "conflict",
+            "unresolved",
+            "found",
+            "absent",
+            "unavailable"
+          ]
+        },
+        "execution": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "enum": [
+                    "admitted",
+                    "running",
+                    "succeeded",
+                    "failed",
+                    "interrupted",
+                    "uncertain"
+                  ]
+                },
+                "configuration_revision": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 256
+                },
+                "prompt_revision": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 256
+                },
+                "started_at_utc": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "pattern": "^\\d{4}-\\d\\d-\\d\\dT\\d\\d:\\d\\d:\\d\\d(?:\\.\\d+)?Z$"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "completed_at_utc": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "pattern": "^\\d{4}-\\d\\d-\\d\\dT\\d\\d:\\d\\d:\\d\\d(?:\\.\\d+)?Z$"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "calls": {
+                  "type": "array",
+                  "maxItems": 3,
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "ordinal": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 3
+                      },
+                      "operation": {
+                        "enum": [
+                          "fixture.model.v1",
+                          "fixture.lookup.v1"
+                        ]
+                      },
+                      "possible_entry_at_utc": {
+                        "type": "string",
+                        "pattern": "^\\d{4}-\\d\\d-\\d\\dT\\d\\d:\\d\\d:\\d\\d(?:\\.\\d+)?Z$"
+                      },
+                      "certainty": {
+                        "enum": [
+                          "complete",
+                          "uncertain"
+                        ]
+                      },
+                      "usage": {
+                        "anyOf": [
+                          {
+                            "type": "object",
+                            "properties": {
+                              "unit": {
+                                "const": "synthetic_units"
+                              },
+                              "amount": {
+                                "type": "integer",
+                                "minimum": 0
+                              }
+                            },
+                            "required": [
+                              "unit",
+                              "amount"
+                            ],
+                            "additionalProperties": false
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "reserve": {
+                        "type": "object",
+                        "properties": {
+                          "unit": {
+                            "const": "synthetic_units"
+                          },
+                          "amount": {
+                            "type": "integer",
+                            "minimum": 0
+                          }
+                        },
+                        "required": [
+                          "unit",
+                          "amount"
+                        ],
+                        "additionalProperties": false
+                      },
+                      "completed_at_utc": {
+                        "type": "string",
+                        "pattern": "^\\d{4}-\\d\\d-\\d\\dT\\d\\d:\\d\\d:\\d\\d(?:\\.\\d+)?Z$"
+                      }
+                    },
+                    "required": [
+                      "ordinal",
+                      "operation",
+                      "possible_entry_at_utc",
+                      "certainty",
+                      "usage",
+                      "reserve"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "result": {
+                  "anyOf": [
+                    {
+                      "oneOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "kind": {
+                              "const": "no_addition"
+                            },
+                            "review_note": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 8192
+                            }
+                          },
+                          "required": [
+                            "kind",
+                            "review_note"
+                          ],
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "kind": {
+                              "const": "addendum"
+                            },
+                            "text": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 8192
+                            },
+                            "basis": {
+                              "enum": [
+                                "provided_context",
+                                "retrieved",
+                                "mixed"
+                              ]
+                            },
+                            "sources": {
+                              "type": "array",
+                              "maxItems": 4,
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "observation_ordinal": {
+                                    "type": "integer",
+                                    "minimum": 1
+                                  },
+                                  "reference": {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "maxLength": 256
+                                  },
+                                  "retrieved_at_utc": {
+                                    "type": "string",
+                                    "pattern": "^\\d{4}-\\d\\d-\\d\\dT\\d\\d:\\d\\d:\\d\\d(?:\\.\\d+)?Z$"
+                                  },
+                                  "valid_until_utc": {
+                                    "anyOf": [
+                                      {
+                                        "type": "string",
+                                        "pattern": "^\\d{4}-\\d\\d-\\d\\dT\\d\\d:\\d\\d:\\d\\d(?:\\.\\d+)?Z$"
+                                      },
+                                      {
+                                        "type": "null"
+                                      }
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "observation_ordinal",
+                                  "reference",
+                                  "retrieved_at_utc",
+                                  "valid_until_utc"
+                                ],
+                                "additionalProperties": false
+                              }
+                            },
+                            "review_note": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 8192
+                            }
+                          },
+                          "required": [
+                            "kind",
+                            "text",
+                            "basis",
+                            "sources",
+                            "review_note"
+                          ],
+                          "additionalProperties": false
+                        }
+                      ]
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "reason": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 256
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "observations": {
+                  "type": "array",
+                  "maxItems": 32,
+                  "items": {
+                    "oneOf": [
+                      {
+                        "type": "object",
+                        "properties": {
+                          "call_ordinal": {
+                            "type": "integer",
+                            "minimum": 1
+                          },
+                          "observed_at_utc": {
+                            "type": "string",
+                            "pattern": "^\\d{4}-\\d\\d-\\d\\dT\\d\\d:\\d\\d:\\d\\d(?:\\.\\d+)?Z$"
+                          },
+                          "kind": {
+                            "const": "late_response"
+                          },
+                          "response": {
+                            "type": "object"
+                          }
+                        },
+                        "required": [
+                          "call_ordinal",
+                          "observed_at_utc",
+                          "kind",
+                          "response"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "receipt_id": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 256
+                          },
+                          "call_ordinal": {
+                            "type": "integer",
+                            "minimum": 1
+                          },
+                          "observed_at_utc": {
+                            "type": "string",
+                            "pattern": "^\\d{4}-\\d\\d-\\d\\dT\\d\\d:\\d\\d:\\d\\d(?:\\.\\d+)?Z$"
+                          },
+                          "usage": {
+                            "type": "object",
+                            "properties": {
+                              "unit": {
+                                "const": "synthetic_units"
+                              },
+                              "amount": {
+                                "type": "integer",
+                                "minimum": 0
+                              }
+                            },
+                            "required": [
+                              "unit",
+                              "amount"
+                            ],
+                            "additionalProperties": false
+                          }
+                        },
+                        "required": [
+                          "receipt_id",
+                          "call_ordinal",
+                          "observed_at_utc",
+                          "usage"
+                        ],
+                        "additionalProperties": false
+                      }
+                    ]
+                  }
+                }
+              },
+              "required": [
+                "status",
+                "configuration_revision",
+                "prompt_revision",
+                "started_at_utc",
+                "completed_at_utc",
+                "calls",
+                "result",
+                "reason",
+                "observations"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "reason": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "interface",
+        "version",
+        "ledger_instance_id",
+        "work_id",
+        "request_sha256",
+        "disposition",
+        "execution",
+        "reason"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

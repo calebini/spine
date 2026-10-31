@@ -1,0 +1,40 @@
+{
+  "interface": "contextual-notification-experiment",
+  "version": "impetus.local.v1",
+  "work_id": "one",
+  "source_refs": {
+    "ledger_instance_id": "synthetic:tests",
+    "item_id": "item:lesson",
+    "item_version": 1,
+    "notification_opportunity_id": "notice:one",
+    "notification_policy_id": "policy:1",
+    "rendering_definition_revision": "render:1",
+    "experiment_definition_revision": "experiment:1",
+    "disclosure_revision": "disclosure:1"
+  },
+  "captured_at_utc": "2026-01-01T00:00:00Z",
+  "request_expires_at_utc": "2099-01-01T00:00:00Z",
+  "selection_cutoff_utc": "2099-01-01T00:00:00Z",
+  "context": {
+    "archetype": "lesson",
+    "event": {
+      "title": "Piano lesson",
+      "starts_at_utc": "2099-01-02T00:00:00Z",
+      "timezone": "UTC"
+    },
+    "facets": [],
+    "notification": {
+      "eligible_at_utc": "2099-01-01T00:00:00Z",
+      "seconds_before_event": 86400,
+      "ordinary_text": "Your lesson is tomorrow."
+    }
+  },
+  "objective": "Add a helpful or personable line if worthwhile.",
+  "allowed_tools": [],
+  "limits": {
+    "model_calls": 2,
+    "tool_calls": 1,
+    "elapsed_seconds": 30,
+    "addendum_utf8_bytes": 512
+  }
+}
