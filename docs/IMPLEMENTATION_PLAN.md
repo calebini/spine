@@ -9,9 +9,32 @@ see [validation](TZDB_COMPATIBILITY_VALIDATION.md) and [operations](TZDB_COMPATI
 
 
 Role: Roadmap rationale and delivery history; current task status lives in [BACKLOG.md](BACKLOG.md)
-Last updated: 2026-10-29 (SPINE-067 synthetic capture integration)
+Last updated: 2026-11-03 (SPINE-069 offline live-profile capture)
 
 This is a non-normative delivery plan. The specifications and machine-readable contracts remain authoritative.
+
+**Selected offline implementation (2026-11-03):** SPINE-069 adopts the corrected
+Impetus `5ff3c0c` schema for the separate counting-capable synthetic consumer.
+The [implemented contract](../specs/contextual-notification-live-capture.md) uses
+a new format-2 sidecar, immutable original bytes/source and execution pins,
+launch-once/readback and explicit non-sending capture. The deterministic profile
+and all canonical schema/release/command pins remain unchanged. Independent
+worker-process tests use fake clocks and mocked provider transport; the
+[operations note](CONTEXTUAL_NOTIFICATION_LIVE_CAPTURE.md) separates that offline
+support from a separately authorized real trial and real-reminder disclosure.
+[Decision 0007](../specs/decisions/0007-offline-live-capture-profile.md) records the
+Spine-owned choices. SPINE-069 in the backlog holds final verification evidence.
+
+**Selected next boundary (2026-11-02):** Following the validated SPINE-067 local
+checkpoint, the operator selected the live-profile contract and ownership design.
+The [consumer proposal](../specs/contextual-notification-live-capture.md) narrows
+the first path to a fresh synthetic ledger, token count plus one generation, zero
+tools and non-sending capture with durable execution pins. A reproduced late-call
+ordinal mismatch needs an Impetus-owned schema correction before adoption; the
+[handoff](CONTEXTUAL_NOTIFICATION_LIVE_CAPTURE_HANDOFF.md) makes that correction
+and offline implementation sequence concrete. No runtime or Impetus files change
+in this design step. A real trial and real-reminder disclosure remain separate
+actions. Current evidence and task status live in SPINE-068 in the backlog.
 
 
 **Selected connected proof (2026-10-29):** SPINE-067 adopts the small local

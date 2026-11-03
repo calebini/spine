@@ -1,6 +1,6 @@
 # Spine Backlog
 
-Last updated: 2026-10-31
+Last updated: 2026-11-03
 
 This is the single work queue for Spine development. The
 [implementation plan](IMPLEMENTATION_PLAN.md) explains roadmap direction and delivery
@@ -3160,6 +3160,174 @@ never authorizes deletion of canonical evidence.
 **Source:** [Storage lifecycle horizon](IMPLEMENTATION_PLAN.md#future-horizon-bounded-ledger-storage-lifecycle).
 
 ## Completed
+
+### SPINE-069 — Implement offline live-profile synthetic capture
+
+**Status:** Done locally (2026-11-03, Codex), reviewed offline implementation;
+selected for the operator-authorized local checkpoint below. SPINE-068's design
+is adopted for this slice; provider execution and deployment remain separate.
+**Scope and decisions:** Separate live-profile service/launcher and fresh format-2
+sidecar with exact request bytes, source/disclosure/config fingerprints, complete
+owner schema pin, insertion-order configuration encoding/revision and prompt pin.
+Count is mandatory, generation is one, tools are zero. Marker commit precedes
+invocation; lost responses, restart and absent/unavailable reads never re-invoke.
+Credential-free/config-file-free readback uses the original stored bindings.
+Expected configuration drift makes the proposal unusable without erasing the
+original execution. All captures are selected=false/sent=false. Sidecar triggers
+preserve original exports/markers and append-only captures. Source/store namespace
+must match. Format 1, deterministic work, ordinary reminders and canonical schema
+19/release 0.11.2 remain unchanged. No registered public command is added.
+**Delivery:** [Implemented contract](../specs/contextual-notification-live-capture.md),
+[Spine decision 0007](../specs/decisions/0007-offline-live-capture-profile.md),
+[operations](CONTEXTUAL_NOTIFICATION_LIVE_CAPTURE.md), exact source/package schema
+closure, independent request/read/late-response byte vectors, and independent
+mock-worker subprocess tests. The earlier handoff is retained as design history
+with an explicit owner-correction/adoption update.
+**Adopted owner inputs:** Impetus checkpoint
+`5ff3c0c4530fe07e81cc9067eddadd967a90acc4`, interface
+`contextual-notification-experiment`, unchanged wire version `impetus.openai.v1`.
+The complete corrected schema is byte-identical to that commit, SHA-256
+`bf3d132392c41ab21e9f7bf44f765aa79799a8dd41f8666d1d39ad646c442c4b`.
+Installed resource/fixture closure is pinned by
+`contracts/contextual_notification/live-pins.v1.json`. Spine requires counting;
+the complete owner schema still supports non-counting work for other consumers.
+
+**Verification** (test-runner duration followed by wall time where available):
+
+| Check | Result | Duration |
+| --- | --- | --- |
+| Full Spine pytest | 1,275 passed; 1,928 subtests passed; one known skip and warning | 287.41s / 288.020s |
+| Final reviewed full unittest | 1,237 passed; no skips | 286.347s / 287.006s |
+| Focused live/deterministic/reminder regression | 97 passed; 80 subtests passed | 20.55s / 20.820s |
+| Reviewed installed-wheel capture/contracts | All 36 passed, no skips, outside checkout | 11.320s / 11.474s |
+| Independent Impetus suite | All 57 passed, no skips | 2.800s / 2.987s |
+| Repository Ruff / compilation / documentation packaging | Passed; two packaging tests | 0.318s / 0.713s / 0.401s wall |
+| Five package contract sync checks | All passed: web, facet-web, rendering, revision-readback, people | 0.147 / 0.269 / 0.123 / 0.094 / 0.130s wall |
+| Configured strict core/ledger mypy | 36 pre-existing errors in 10 unchanged files, 52 checked | 1.384s wall |
+
+Connected proofs cover context-only addendum/no-addition, uncertain count,
+over-limit count, count/generation mismatch, unknown generation usage, schema-valid
+late generation at ordinal 2 and retained readback, negative observation references,
+malformed execution/configuration/prompt/model/token/reserve facts, lost response,
+actual worker death during count, after completed count and during generation,
+readback without credentials/config file/live flags, config/source drift and late
+capture. Source dumps remain unchanged during capture and notification attempts
+remain zero. Fake clocks/transport and disposable ledgers/stores were used throughout.
+
+**Check limits and pre-existing issues:** Pytest's one skip is the existing
+revision-readback wheel harness because Spine's interpreter lacks setuptools.
+That check passes in final unittest using the existing prepared Threshold build
+interpreter. The existing synthetic serialization-deadline trace exception appears
+as one pytest warning and a unittest ignored exception; it is not a failed assertion.
+Strict mypy remains red with the documented 36 diagnostics; all 10 files are
+byte-identical to HEAD. No typing repair or suppression is included. Initial
+implementation tests exposed and fixed a new timedelta comparison error. Full pytest
+preceded final command-option/namespace guard review; the full unittest and installed
+capture checks validate the final reviewed code snapshot, including those guards.
+
+**Installed package:** An offline scratch source copy built a noneditable 0.11.2
+wheel with existing setuptools 80.9.0 (1.303s); only that wheel was installed with
+`--no-index --no-deps` into a fresh venv (0.898s). Existing validation dependencies
+were exposed through a plain dependency-directory `.pth`, without downloading or
+installing dependencies. `python -I` asserted module/resource paths under the fresh
+runtime prefix with checkout `src` absent, then ran unchanged copied tests against
+the independent Impetus source worker. Wheel SHA-256:
+`ee752914fc195f26dea6488201b7db4a4506d825f02943b5954f583cfd922d9f`.
+This qualifies the capture boundary with existing dependencies, not a whole-release
+or independent Impetus installed-wheel qualification.
+
+**Commands:** All test commands used `PYTHONDONTWRITEBYTECODE=1`, disposable
+`TMPDIR`, `IMPETUS_SRC="$PWD/../impetus/src"` and, for Spine tests,
+`PYTHONPATH=src:tests`. Exact command/exit/duration logs, wheel and reviewed byte
+manifests are retained in external temporary validation storage; no runtime state
+or host-specific scratch path is added to the repository.
+
+```sh
+.venv/bin/python -m pytest -o addopts='' -p no:cacheprovider -q -ra tests
+SPINE_WHEEL_BUILD_PYTHON="$PWD/../threshold/.venv/bin/python" \
+  .venv/bin/python -m unittest discover -s tests -v
+# Focused command is listed in CONTEXTUAL_NOTIFICATION_LIVE_CAPTURE.md.
+.venv/bin/ruff check . --no-cache
+.venv/bin/mypy --strict --no-incremental --cache-dir "$RUN/mypy-cache" src/spine/core src/spine/ledger
+for family in web facet_web rendering revision_readback people; do
+  PYTHONPATH=src .venv/bin/python "scripts/sync_${family}_contracts.py" --check
+done
+PYTHONPYCACHEPREFIX="$RUN/bytecode" .venv/bin/python -m compileall -q src tests examples scripts
+node --test docs/site/build-pages.test.mjs
+# From the Impetus checkout, using the existing Spine interpreter:
+(
+  cd ../impetus
+  PYTHONPATH=src ../spine/.venv/bin/python -m unittest discover -s tests
+)
+# RUN is the selected external scratch directory; source/tests were copied there:
+../threshold/.venv/bin/python -m pip --isolated wheel --no-index --no-deps \
+  --no-build-isolation --no-cache-dir --disable-pip-version-check -w "$RUN/wheels-reviewed" "$RUN/wheel-source"
+.venv/bin/python -m venv --without-pip "$RUN/runtime-reviewed"
+.venv/bin/python -m pip --isolated --python "$RUN/runtime-reviewed/bin/python" install \
+  --no-index --no-deps --no-cache-dir --disable-pip-version-check "$RUN/wheels-reviewed/spine_ledger-0.11.2-py3-none-any.whl"
+env -u PYTHONPATH -u PYTHONHOME "$RUN/runtime-reviewed/bin/python" -I "$RUN/installed-checks/qualify.py"
+git diff --check
+```
+
+**Preservation and remaining action:** Pre-existing AGENTS.md guidance and all
+pre-existing runtime/test/contract/example bytes, including deterministic profile
+and package declarations, are unchanged. The selected design documents are promoted
+with their historical handoff/backlog evidence retained. All Impetus files, its
+existing local edits and checkpoint remain unchanged. At implementation verification,
+nothing had been staged or committed.
+A separately authorized single synthetic real-provider trial still needs its exact
+request, qualified non-secret model/rate/counting configuration, admitted exposure,
+source cutoff, fresh stores/namespace and explicit trusted launcher opt-in. Credentials
+remain worker-owned outside the checkout/captures. No real provider/credential access,
+network request, user-ledger write, notification, deployment or dependency acquisition
+occurred. Real reminders and generated delivery remain separate work.
+
+**Checkpoint authorization (2026-11-03):** The operator selected the focused local
+SPINE-069 checkpoint after completed validation. Include the implementation,
+corrected schema/resource closure, synthetic vectors, connected tests, supporting
+SPINE-068 design history, decision, operations and recorded evidence. Exclude and
+preserve `AGENTS.md`; leave Impetus untouched. The current tree matches the validated
+snapshot apart from this checkpoint note, so reuse completed regression/wheel
+evidence and perform staged scope/content/whitespace checks. This authorizes a
+local commit only; no push, deployment, provider call, notification or activation.
+
+### SPINE-068 — Define Spine adoption of the live Impetus capture profile
+
+**Status:** Done locally (2026-11-02, Codex), proposed consumer contract and owner
+handoff only. Runtime adoption and bilateral compatibility are not claimed.
+**Selected scope:** Following SPINE-067 checkpoint `c0a7b13`, define the first live
+consumer as a fresh synthetic ledger, count plus one generation, zero tools and
+non-sending capture. Specify durable execution pins, a separate new sidecar format,
+exact-byte identity/readback, source freshness, deadlines and honest USD usage and
+reserves. Existing deterministic opportunities cannot become replacement live work.
+**Delivery:** [Consumer proposal](../specs/contextual-notification-live-capture.md)
+and [owner/implementation handoff](CONTEXTUAL_NOTIFICATION_LIVE_CAPTURE_HANDOFF.md),
+linked from orientation, spec index, compatibility and delivery rationale. No runtime,
+machine-schema copy, public registry or package-version declaration changes.
+**Owner finding:** At Impetus `eba6578`, the inspected live schema is identical to
+the committed file, SHA-256
+`5de8e9de0a4052e91091e3f641215daae1dae8b087cc51adfc02865cf76b6b57`.
+A fake-transport/fake-clock reproduction produces a failed/deadline execution with
+late generation at ordinal 2 after count ordinal 1; the owner's schema rejects its
+late observation because that field is fixed to 1. An in-memory range-only control
+validates the same envelope. Impetus must correct the owner schema and add invoke/
+readback coverage, then provide an exact corrected checkpoint/hash before Spine
+declares adoption. No owner files were changed or compatibility inferred by proxy.
+**Verification:** Offline reproduction passed its mismatch/control assertions in
+0.013 seconds, with one fake count and one fake generation, zero real requests and
+a disposable worker store. New/changed documentation file links and the exact
+owner schema pin were checked; internal review distinguishes the proposal from
+implemented deterministic contracts and separates count from generation/usage.
+Byte comparisons preserve all runtime, tests, contracts, examples, `pyproject.toml`,
+the pre-existing `AGENTS.md` edit and the entire Impetus working tree. Diff whitespace
+checks pass. Full behavioral suites were not rerun for this documentation-only
+task; SPINE-067's earlier regression/wheel evidence remains historical evidence
+for its implemented boundary, not validation of a live consumer.
+**Next concrete action:** Impetus-owned late-observation schema correction and
+regression, followed by selection of its exact pin and the scoped offline Spine
+implementation in the handoff. A real trial, real-reminder opt-in/disclosure,
+commit, push, deployment and feature activation remain separate actions. No
+provider calls, notifications, credential access or user-ledger writes occurred.
 
 ### SPINE-067 — Connect synthetic Spine export to deterministic Impetus capture
 

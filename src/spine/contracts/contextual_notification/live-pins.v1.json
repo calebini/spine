@@ -1,0 +1,13 @@
+{
+  "contract": "spine.contextual-notification-live-capture.v1",
+  "owner_checkpoint": "5ff3c0c4530fe07e81cc9067eddadd967a90acc4",
+  "wire_version": "impetus.openai.v1",
+  "files": {
+    "openai-v1.schema.json": "bf3d132392c41ab21e9f7bf44f765aa79799a8dd41f8666d1d39ad646c442c4b",
+    "live-configuration.json": "d001b437ddc52e10fd4db320595880bec87e0d4d9abcab24d61f076391b9c6a6",
+    "live-request.json": "87dfd89b3f4cdae2112b7242ae53b1c964a51e3b10f5f45a677b87294887d10c",
+    "live-read.json": "b699e49be835d2b2325715758019821c96564a1e4d1f207f1ac3c353e75bd303",
+    "live-late-response.json": "00c1e7d5d89a49294a644503186ef6851eddbc468e88de56321bd18323e0088e",
+    "live-vector.json": "3662e32f5e46ad4c0195c7a4f5f14b6d66ef4f94ed6e3269cc09433f63c7d7f0"
+  }
+}

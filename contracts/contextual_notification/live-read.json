@@ -1,0 +1,7 @@
+{
+  "interface": "contextual-notification-experiment",
+  "version": "impetus.openai.v1",
+  "ledger_instance_id": "synthetic:live-ledger",
+  "work_id": "synthetic:live:one",
+  "request_sha256": "87dfd89b3f4cdae2112b7242ae53b1c964a51e3b10f5f45a677b87294887d10c"
+}

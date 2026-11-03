@@ -1,0 +1,16 @@
+{
+  "request_sha256": "87dfd89b3f4cdae2112b7242ae53b1c964a51e3b10f5f45a677b87294887d10c",
+  "read_sha256": "b699e49be835d2b2325715758019821c96564a1e4d1f207f1ac3c353e75bd303",
+  "response_sha256": "00c1e7d5d89a49294a644503186ef6851eddbc468e88de56321bd18323e0088e",
+  "configuration_revision": "openai.responses.v1:14db6a7d9522ea9e001d14329341e683390ae269b9a2375fac59b432bb0d18dd",
+  "expected": {
+    "status": "failed",
+    "reason": "deadline",
+    "observation_ordinal": 2,
+    "authorized_nanodollars": 14004800,
+    "selected": false,
+    "sent": false
+  },
+  "source_config_sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+  "disclosure_sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+}

@@ -57,6 +57,12 @@ Impetus worker and retained, non-sending review. It supports optional fixture to
 context-only wording and no addition, with separate states for failures and late work.
 It does not enable real-reminder sampling or generated notification content.
 
+The separate [live-profile capture](specs/contextual-notification-live-capture.md)
+now supports synthetic source export to Impetus's counting-capable live profile,
+with fresh format-2 bindings and retained non-sending readback. Its
+[offline proof and operations](docs/CONTEXTUAL_NOTIFICATION_LIVE_CAPTURE.md) use
+mocked providers; live calls and real-reminder disclosure remain separate work.
+
 
 Runtime 0.11.2 repairs bounded reminder materialization when a follow-source task
 is reconciled to a new due time. Replacement work uses the successor time and

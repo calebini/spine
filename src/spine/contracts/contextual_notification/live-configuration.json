@@ -1,0 +1,11 @@
+{
+  "model": "fixture-model-2026-01-01",
+  "max_output_tokens": 512,
+  "input_token_upper_bound": 128000,
+  "input_nanodollars_per_million": 100000000,
+  "output_nanodollars_per_million": 400000000,
+  "qualification_reference": "synthetic-fixture-only.v1",
+  "token_counting": {
+    "charge_bound_nanodollars": 1000000
+  }
+}

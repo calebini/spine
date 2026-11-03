@@ -1,0 +1,86 @@
+{
+  "interface": "contextual-notification-experiment",
+  "version": "impetus.openai.v1",
+  "ledger_instance_id": "synthetic:live-ledger",
+  "work_id": "synthetic:live:one",
+  "request_sha256": "87dfd89b3f4cdae2112b7242ae53b1c964a51e3b10f5f45a677b87294887d10c",
+  "disposition": "found",
+  "execution": {
+    "status": "failed",
+    "configuration_revision": "openai.responses.v1:14db6a7d9522ea9e001d14329341e683390ae269b9a2375fac59b432bb0d18dd",
+    "prompt_revision": "helpful-personable-openai.v1",
+    "started_at_utc": "2060-01-01T10:00:00Z",
+    "completed_at_utc": "2060-01-01T10:00:21Z",
+    "calls": [
+      {
+        "ordinal": 1,
+        "operation": "openai.responses.input_tokens.v1",
+        "possible_entry_at_utc": "2060-01-01T10:00:00Z",
+        "certainty": "complete",
+        "usage": null,
+        "tokens": null,
+        "reserve": {
+          "unit": "usd_nanodollars",
+          "amount": 1000000
+        },
+        "request_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "generation_request_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "completed_at_utc": "2060-01-01T10:00:00Z",
+        "counted_input_tokens": 50
+      },
+      {
+        "ordinal": 2,
+        "operation": "openai.responses.v1",
+        "possible_entry_at_utc": "2060-01-01T10:00:00Z",
+        "certainty": "complete",
+        "usage": {
+          "unit": "usd_nanodollars",
+          "amount": 17000
+        },
+        "tokens": {
+          "input_tokens": 50,
+          "output_tokens": 30,
+          "total_tokens": 80,
+          "reasoning_tokens": null
+        },
+        "reserve": {
+          "unit": "usd_nanodollars",
+          "amount": 12987800
+        },
+        "request_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "count_call_ordinal": 1,
+        "completed_at_utc": "2060-01-01T10:00:21Z",
+        "provider_response_id": "response_synthetic",
+        "provider_model": "fixture-model-2026-01-01"
+      }
+    ],
+    "result": null,
+    "reason": "deadline",
+    "observations": [
+      {
+        "kind": "late_response",
+        "call_ordinal": 2,
+        "observed_at_utc": "2060-01-01T10:00:21Z",
+        "response": {
+          "kind": "no_addition",
+          "review_note": "Synthetic late result."
+        }
+      }
+    ],
+    "interface_version": "impetus.openai.v1",
+    "live_day": "2060-01-01",
+    "authorized_nanodollars": 14004800,
+    "provider_configuration": {
+      "model": "fixture-model-2026-01-01",
+      "max_output_tokens": 512,
+      "input_token_upper_bound": 128000,
+      "input_nanodollars_per_million": 100000000,
+      "output_nanodollars_per_million": 400000000,
+      "qualification_reference": "synthetic-fixture-only.v1",
+      "token_counting": {
+        "charge_bound_nanodollars": 1000000
+      }
+    }
+  },
+  "reason": null
+}

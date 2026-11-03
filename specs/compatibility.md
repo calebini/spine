@@ -16,6 +16,20 @@ schema 19, runtime release, public command registry, Tickerd and governed adviso
 pins remain unchanged. The larger [experiment proposal](contextual-notification-experiment.md)
 is still draft. Tests check independent processes and matching machine contracts.
 
+Separate offline live-profile consumer (SPINE-069):
+[Live synthetic capture](contextual-notification-live-capture.md) adopts interface
+`contextual-notification-experiment`, version `impetus.openai.v1`, from Impetus
+`5ff3c0c4530fe07e81cc9067eddadd967a90acc4`. Exact complete schema SHA-256:
+`bf3d132392c41ab21e9f7bf44f765aa79799a8dd41f8666d1d39ad646c442c4b`.
+The source and installed resource copies plus independent byte vectors are pinned
+in `contracts/contextual_notification/live-pins.v1.json`. This includes corrected
+late-generation observation references at ordinal 2. Spine requires counting,
+one generation and zero tools, with a separate format-2 capture contract
+`spine.contextual-notification-live-capture.v1`. Format-1 deterministic stores and
+schema bytes remain unchanged. Runtime release 0.11.2/schema 19 and registered
+command/Tickerd pins are preserved; this experimental module adds no public
+command or live-provider, real-reminder, deployment or message-inclusion claim.
+
 Separate proposed web-consumer change:
 [independent activity read compatibility](independent-activity-reads.md#9-compatibility-and-migration-assessment)
 assesses new read schemas, registry/versioning, v1 complete-or-deny preservation, and

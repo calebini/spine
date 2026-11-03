@@ -1,0 +1,40 @@
+{
+  "interface": "contextual-notification-experiment",
+  "version": "impetus.openai.v1",
+  "work_id": "synthetic:live:one",
+  "source_refs": {
+    "ledger_instance_id": "synthetic:live-ledger",
+    "item_id": "synthetic:lesson",
+    "item_version": 1,
+    "notification_opportunity_id": "synthetic:opportunity",
+    "notification_policy_id": "synthetic:policy",
+    "rendering_definition_revision": "synthetic:rendering",
+    "experiment_definition_revision": "synthetic:context",
+    "disclosure_revision": "synthetic:disclosure"
+  },
+  "captured_at_utc": "2060-01-01T10:00:00Z",
+  "request_expires_at_utc": "2060-01-01T10:02:00Z",
+  "selection_cutoff_utc": "2060-01-01T10:02:00Z",
+  "context": {
+    "archetype": "lesson",
+    "event": {
+      "title": "Synthetic lesson",
+      "starts_at_utc": "2060-01-01T11:02:00Z",
+      "timezone": "UTC"
+    },
+    "facets": [],
+    "notification": {
+      "eligible_at_utc": "2060-01-01T10:02:00Z",
+      "seconds_before_event": 3600,
+      "ordinary_text": "Your synthetic lesson is in one hour."
+    }
+  },
+  "objective": "Add a brief context-only line if worthwhile.",
+  "allowed_tools": [],
+  "limits": {
+    "model_calls": 1,
+    "tool_calls": 0,
+    "elapsed_seconds": 20,
+    "addendum_utf8_bytes": 512
+  }
+}

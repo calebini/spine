@@ -50,3 +50,7 @@ Spine-owned selection, fallback and attempt protection.
 
 See [operations and validation](../docs/CONTEXTUAL_NOTIFICATION_CAPTURE.md).
 No live providers, real event sampling, public API or staging deployment is enabled.
+
+The [offline live-profile consumer](contextual-notification-live-capture.md)
+is a separate implemented experimental profile. It does not expand this implemented deterministic version
+or reinterpret its stored opportunities and captures.
