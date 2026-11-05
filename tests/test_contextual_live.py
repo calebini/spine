@@ -54,7 +54,8 @@ class LiveCaptureTests(unittest.TestCase):
         self.tmp.cleanup()
 
     def command(self, scenario="context"):
-        return [sys.executable, str(FIXTURE), "--state", str(self.state), "--now", utc(self.now), "--scenario", scenario]
+        return [sys.executable, str(FIXTURE), "--state", str(self.state),
+                "--now", self.now.isoformat().replace("+00:00", "Z"), "--scenario", scenario]
 
     def launcher(self, scenario="context", enabled=True, environment=None):
         return LiveLauncher(self.command(scenario), provider_configuration_path=self.config_path if enabled else None,
@@ -94,6 +95,52 @@ class LiveCaptureTests(unittest.TestCase):
         _, _, record = self.run_scenario("no-addition")
         self.assertEqual(record["reason"], "succeeded", record)
         self.assertEqual(record["execution"]["result"]["kind"], "no_addition")
+
+    def test_same_second_completion_is_usable_on_invoke_and_reopened_readback(self):
+        before = list(self.db.iterdump())
+        self.now += timedelta(microseconds=278000)
+        self.observed = self.now + timedelta(microseconds=123)
+        opportunity, exported, record = self.run_scenario("no-addition")
+        self.assertEqual(record["execution"]["completed_at_utc"], "2060-01-01T10:00:00.278Z")
+        self.assertTrue(record["usable_for_hypothetical_selection"], record)
+        self.assertEqual(record["observed_at_utc"], "2060-01-01T10:00:00.278123Z")
+        self.store.close()
+        self.store = LiveCaptureStore(self.folder / "capture.sqlite3", self.source.namespace)
+        self.experiment = self.make_experiment(launcher=self.launcher(enabled=False))
+        again = self.experiment.run(opportunity)
+        self.assertEqual(again["exchange"], "read")
+        self.assertEqual(again["observed_at_utc"], record["observed_at_utc"])
+        self.assertEqual(again["execution"], record["execution"])
+        self.assertTrue(again["usable_for_hypothetical_selection"], again)
+        original = self.store.get(opportunity)
+        self.assertEqual(original["request"], exported["request"])
+        self.assertTrue(original["launched"])
+        self.assertEqual(list(self.db.iterdump()), before)
+        self.assertTrue(all(not r["selected"] and not r["sent"] for r in self.store.history(opportunity)))
+
+    def test_fractional_observation_preserves_completion_and_cutoff_boundaries(self):
+        self.now += timedelta(microseconds=278000)
+        self.observed = self.now
+        opportunity, exported, original = self.run_scenario("context")
+        cutoff = datetime.fromisoformat(json.loads(exported["request"])["selection_cutoff_utc"].replace("Z", "+00:00"))
+        for observed, usable in (
+            (self.now - timedelta(microseconds=1), False),
+            (self.now, True),
+            (cutoff - timedelta(microseconds=1), True),
+            (cutoff, True),
+            (cutoff + timedelta(microseconds=1), False),
+        ):
+            with self.subTest(observed=observed.isoformat()):
+                self.observed = observed
+                record = self.experiment.readback(opportunity)
+                self.assertEqual(record["usable_for_hypothetical_selection"], usable, record)
+                self.assertEqual(record["observed_at_utc"], observed.isoformat().replace("+00:00", "Z"))
+                self.assertEqual(record["execution"], original["execution"])
+                self.assertFalse(record["selected"] or record["sent"])
+        # An explicitly supplied coarse observation stays exact and conservative.
+        explicit = self.experiment.readback(opportunity, utc(self.now))
+        self.assertEqual(explicit["observed_at_utc"], utc(self.now))
+        self.assertFalse(explicit["usable_for_hypothetical_selection"])
 
     def test_count_failure_retains_uncertainty_without_generation(self):
         _, _, record = self.run_scenario("count-failure")

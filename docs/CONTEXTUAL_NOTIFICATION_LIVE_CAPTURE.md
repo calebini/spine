@@ -50,6 +50,12 @@ lead time, empty allowed tools and optional `provider_configuration_json`.
 Unknown config fields are refused. New export needs the configuration JSON; retained
 readback may omit it and use the export's durable bindings.
 
+Clock-derived invoke/readback observations preserve subsecond precision in UTC.
+SPINE-072 corrects the same-second false-negative seen in the first synthetic
+trial and prevents rounding an observation after cutoff back onto that cutoff.
+Explicit supplied observation strings remain exact; no extra tolerance is added.
+Original request bytes, stored history and deterministic formatting are unchanged.
+
 `LiveLauncher` accepts a trusted worker command, optional non-secret provider-config
 path, environment and `enabled=False` by default. Keep provider invocation flags out
 of the base command. Its invoker adds the configured path/enablement flags only to
@@ -73,8 +79,20 @@ All captures explicitly say selected=false and sent=false, with no notification 
 
 ## Separately authorized single live trial
 
-Offline support does not authorize the following action. Before selecting one real
-provider invocation through Spine:
+Offline support does not authorize a real provider invocation through Spine.
+
+The [single-trial preparation](CONTEXTUAL_NOTIFICATION_SINGLE_TRIAL_PLAN.md)
+records the proposed carried-forward candidate, exact exposure, offline recipes,
+review specimen and remaining account/tariff assumptions. Its preparation does
+not authorize provider execution.
+
+The subsequently authorized [first through-Spine trial](CONTEXTUAL_NOTIFICATION_SINGLE_TRIAL_REVIEW.md)
+succeeded with no_addition and credential-free readback. Its observation timestamp
+precision limitation and one-case qualification boundary are recorded there. The
+single invocation authorization is fulfilled; these instructions grant no new call.
+
+Any future selected invocation needs its own authorization and the following
+preparation:
 
 1. Select and review the exact synthetic request and a non-secret, counting-enabled
    model/configuration artifact, including token bounds, qualified rates, counting
@@ -96,8 +114,10 @@ real-reminder opt-in/disclosure and delivered content require separate work.
 
 ## Validation record
 
-SPINE-069 in [the backlog](BACKLOG.md) records exact final commands, totals,
-durations, known repository issues and installed-wheel results. Initial development
+SPINE-069 in [the backlog](BACKLOG.md) records exact original implementation commands,
+totals, durations, known repository issues and installed-wheel results. SPINE-072
+records subsequent offline verification of the observation-precision correction.
+Initial development
 checks found and corrected a timedelta comparison in the new consumer; that issue
 is separate from the pre-existing strict-mypy errors and deadline-trace warning.
 No live provider, real credential, network, notification, deployment or dependency

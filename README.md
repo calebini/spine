@@ -61,7 +61,11 @@ The separate [live-profile capture](specs/contextual-notification-live-capture.m
 now supports synthetic source export to Impetus's counting-capable live profile,
 with fresh format-2 bindings and retained non-sending readback. Its
 [offline proof and operations](docs/CONTEXTUAL_NOTIFICATION_LIVE_CAPTURE.md) use
-mocked providers; live calls and real-reminder disclosure remain separate work.
+mocked providers. One separately authorized
+[synthetic provider trial](docs/CONTEXTUAL_NOTIFICATION_SINGLE_TRIAL_REVIEW.md)
+succeeded with no_addition and retained readback. The local SPINE-072 correction
+preserves subsecond observation precision. Real-reminder disclosure and generated delivery remain
+separate work.
 
 
 Runtime 0.11.2 repairs bounded reminder materialization when a follow-source task

@@ -166,6 +166,15 @@ current source/disclosure/config and valid execution pins. Late results, includi
 late-response observations within failed executions, remain review evidence and
 never a new proposal. `selected=false` and `sent=false` are mandatory on all captures.
 
+SPINE-072's observation-precision correction preserves all available datetime
+fractions when formatting clock-derived invoke/readback observations in UTC.
+Do not truncate or round observations into a different completion/cutoff ordering:
+same-second completion can already be usable, while even one microsecond after
+cutoff is unusable. Explicit caller-supplied observation timestamps retain their
+exact precision and conservative interpretation. This is a compatible correction
+within capture v1/format 2; request/export formatting, deterministic profile bytes,
+schema pins, original exports and historical capture records remain unchanged.
+
 ## 6. Execution, count binding and accounting
 
 Validate the agreed closed owner schema first, then these stricter consumer

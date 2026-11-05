@@ -84,6 +84,10 @@ class LiveExperiment(Experiment):
         require(type(self.config["lead_seconds"]) is int and 1 <= self.config["lead_seconds"] <= 300, "lead_seconds")
         self.clock = clock or (lambda: datetime.now(UTC))
 
+    def _observed_at_utc(self):
+        # Completion and cutoff comparisons must retain the clock's fractions.
+        return self.clock().astimezone(UTC).isoformat().replace("+00:00", "Z")
+
     @staticmethod
     def validate_binding(binding):
         expected = configuration_binding(binding["configuration_encoding"])
@@ -165,7 +169,7 @@ class LiveExperiment(Experiment):
         self.client.prepare(exported["binding"])
         if self.store.mark_launched(opportunity):
             response = self.client.exchange("invoke", exported["request"])
-            return self.capture(opportunity, response, utc(self.clock()), "invoke")
+            return self.capture(opportunity, response, self._observed_at_utc(), "invoke")
         return self.readback(opportunity, now_utc)
 
     def readback(self, opportunity, now_utc=None):
@@ -176,7 +180,7 @@ class LiveExperiment(Experiment):
         read = dict(interface=INTERFACE, version=exported["binding"]["wire_version"], ledger_instance_id=self.source.namespace,
                     work_id=request["work_id"], request_sha256=hashlib.sha256(exported["request"]).hexdigest())
         response = self.client.exchange("read", dump(read))
-        return self.capture(opportunity, response, now_utc or utc(self.clock()), "read")
+        return self.capture(opportunity, response, now_utc or self._observed_at_utc(), "read")
 
     def capture(self, opportunity, response, now_utc, channel):
         exported = self.store.get(opportunity)

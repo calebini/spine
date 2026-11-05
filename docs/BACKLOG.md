@@ -1,6 +1,6 @@
 # Spine Backlog
 
-Last updated: 2026-11-03
+Last updated: 2026-11-05
 
 This is the single work queue for Spine development. The
 [implementation plan](IMPLEMENTATION_PLAN.md) explains roadmap direction and delivery
@@ -3160,6 +3160,290 @@ never authorizes deletion of canonical evidence.
 **Source:** [Storage lifecycle horizon](IMPLEMENTATION_PLAN.md#future-horizon-bounded-ledger-storage-lifecycle).
 
 ## Completed
+
+### SPINE-072 — Preserve live capture observation precision
+
+**Status:** Done locally (2026-11-05, Codex), selected for the operator-authorized
+checkpoint below; operator-selected fix for the
+SPINE-071 same-second capture issue. Preserve subsecond precision for live
+invoke/readback clock observations; do not change deterministic formatting,
+original request bytes, launch-once semantics, historical trial records or
+cutoff/freshness requirements. Add offline same-second and cutoff-edge
+regressions with fake clocks/providers and disposable ledgers only.
+**Scope:** Narrow Spine consumer correction, specifications/operations and
+recorded verification. Preserve all existing edits and Impetus. No credentials,
+network, paid trial, real source ledger, notification, dependency acquisition,
+commit, push, deployment or feature activation.
+**Implementation and compatibility:** The live service has a private observation
+formatter that normalizes the injected/default datetime to UTC without dropping
+fractions. Only post-invoke and implicit readback observations use it; explicit
+caller-supplied strings retain their exact precision. The existing completion,
+cutoff and freshness comparisons are unchanged, with no tolerance added. Whole-
+second observations retain their old encoding. The deterministic formatter,
+export/prelaunch formatting, original bytes, format-2 storage, schema/resources,
+wire/capture v1 declarations, canonical schema 19 and package 0.11.2 are unchanged.
+No migration, re-export or rewriting of historical captures is required.
+**Regression evidence:** Both new test methods fail against the old consumer
+(five failures in 1.057s / 1.239s wall). Fake provider completion at `.278Z` and
+observation at `.278123Z` then pass on original invoke and reopened credential-free
+readback after the correction. Tests preserve source data, request bytes and the
+launch marker, with no selected/sent capture or repeated generation. Boundary
+subtests check one microsecond before completion, exact completion, one microsecond
+before cutoff, exact cutoff and one microsecond after cutoff. Explicit coarse
+caller observations remain conservative rather than being reinterpreted.
+**Verification:** Full documented unittest completes 1,239 tests in 284.561s
+(285.336s wall): 1,238 passed and one environment-related wheel check skipped.
+The harness had resolved the prepared builder's Python symlink to its base
+interpreter, losing the existing setuptools environment. The single skipped
+revision-readback wheel/CLI/schema check then passes independently with the
+unresolved prepared-venv interpreter path (3.562s / 3.773s wall); no coverage
+remains blocked. No dependency installation was needed. The existing ignored
+serialization-deadline trace exception appears in its passing timeout test.
+Focused live/deterministic/reminder pytest passes 99 tests
+and 85 subtests (20.26s / 20.551s wall). Isolated installed-wheel capture/contracts
+pass all 38 tests with no skips (12.393s / 12.565s wall), including both new methods.
+Repository Ruff passes (0.318s), compilation of `src tests examples scripts` passes
+with external bytecode (0.774s), docs packaging passes both tests (0.344s wall),
+and all five contract sync checks pass (web 0.126s, facet-web 0.158s, rendering
+0.088s, revision-readback 0.068s, people 0.104s). All 311 affected local documentation
+file targets resolve. Full pytest was not repeated: the documented full unittest
+run plus the focused pytest and installed capture checks exercise this correction.
+**Known issues:** Strict configured core/ledger mypy still reports the same
+36 pre-existing errors in ten files, 52 checked (1.381s wall). All ten diagnostic
+owners are byte-identical to HEAD; no repair or suppression is included. The
+previous synthetic deadline-trace warning is outside this correction.
+**Installed package:** Built the own noneditable 0.11.2 wheel offline with the
+existing prepared Threshold setuptools environment (1.322s); installed only that
+wheel into a fresh venv with `--no-index --no-deps` (1.026s). Existing validation
+dependencies are exposed through a plain dependency-directory `.pth`; editable
+loader files are not loaded. `python -I` asserts installed-prefix modules/resources,
+with checkout `src` absent, then runs unchanged copied tests from the external
+test directory against the independent mocked Impetus subprocess. Package code/
+resources are byte-compared with the reviewed source. Wheel SHA-256:
+`66ddf099d4972faa3520c898dd35ed612040f7254c1aed239772ae4665260c37`.
+Initial scratch preparation incorrectly expected a LICENSE file, leaving the
+first scratch build without `src`; another harness pass lacked a source resource
+comparison mirror (one installed-test error). Both were external harness setup
+errors, corrected only in scratch storage. Final build and all 38 installed checks
+pass; failed logs are retained separately and no repository build fix was needed.
+**Commands and preservation:** All tests used disposable stores, fake clocks/
+providers and a credential-stripped environment with `PYTHONDONTWRITEBYTECODE=1`,
+`TMPDIR="$RUN/tmp"`, `PYTHONPATH=src:tests` and `IMPETUS_SRC="$PWD/../impetus/src"`.
+`RUN` is fresh external scratch storage holding exact command/exit/duration logs,
+reviewed source/test hashes, wheel, isolated runtime and preservation manifests.
+The focused command is listed in the operations note; it now includes the two
+new test methods. The full run originally saw the resolved base interpreter;
+the single-check rerun below uses the corrected builder setting, preserving its
+venv path:
+
+```sh
+.venv/bin/python -m unittest discover -s tests -v
+SPINE_WHEEL_BUILD_PYTHON="$PWD/../threshold/.venv/bin/python" \
+.venv/bin/python -m unittest \
+  tests.test_facet_schema_revision_readback.FacetSchemaRevisionReadbackTests.test_installed_wheel_public_cli_and_exact_local_schema_closure -v
+.venv/bin/ruff check . --no-cache
+.venv/bin/mypy --strict --no-incremental --cache-dir "$RUN/mypy-cache" src/spine/core src/spine/ledger
+for family in web facet_web rendering revision_readback people; do
+  .venv/bin/python "scripts/sync_${family}_contracts.py" --check
+done
+PYTHONPYCACHEPREFIX="$RUN/bytecode" .venv/bin/python -m compileall -q src tests examples scripts
+node --test docs/site/build-pages.test.mjs
+../threshold/.venv/bin/python -m pip --isolated wheel --no-index --no-deps \
+  --no-build-isolation --no-cache-dir --disable-pip-version-check \
+  -w "$RUN/wheels-reviewed" "$RUN/wheel-source-reviewed"
+.venv/bin/python -m venv --without-pip "$RUN/runtime"
+.venv/bin/python -m pip --isolated --python "$RUN/runtime/bin/python" install \
+  --no-index --no-deps --no-cache-dir --disable-pip-version-check \
+  "$RUN/wheels-reviewed/spine_ledger-0.11.2-py3-none-any.whl"
+"$RUN/runtime/bin/python" -I "$RUN/installed-checks/qualify.py"
+git diff --check
+```
+
+Only the live consumer and its existing test module change executable bytes.
+Pre-existing documentation edits are preserved with scoped follow-up updates.
+AGENTS.md, the entire Impetus checkout and all retained SPINE-071 trial-evidence
+bytes remain unchanged. No original trial read/recovery/invocation was performed,
+and no credentials or live provider were accessed. At fix verification, the index
+and HEAD remained unchanged and no commit or push had been made.
+
+**Checkpoint authorization (2026-11-05):** The operator requested the local
+checkpoint after completed validation. Include the SPINE-072 precision correction,
+two offline regressions and supporting specification; SPINE-070 preparation and
+SPINE-071 trial review; and their directly supporting README, operations, delivery
+history and backlog evidence. All executable/test bytes match the validated
+snapshot, so reuse completed regression/installed-wheel evidence and perform
+staged scope/content/whitespace checks. Exclude the unrelated AGENTS.md guidance,
+preserve all retained external trial/scratch artifacts, and leave Impetus unchanged.
+This authorizes only the focused local commit, not a push, deployment, further
+provider invocation, notification or feature activation.
+
+### SPINE-071 — Run one synthetic provider capture through Spine
+
+**Status:** Done locally with the observation-precision limitation below
+(2026-11-04, Codex). The operator's “OK proceed” after
+the completed SPINE-070 plan authorizes its one original synthetic invocation:
+one count, at most one generation, zero tools/retries/notifications, retained
+credential-free readback. Candidate revision and USD 0.004584 local admission
+remain exactly as reviewed; the counting allowance is not a verified fee or
+guaranteed upstream billing cap. No second opportunity follows uncertain work.
+**Preflight:** Current official model/pricing pages were opened on 2026-11-04;
+published Standard short-input base rates remain USD 0.10 input / USD 0.50
+output per million, below configured conservative USD 0.40 / USD 0.60. The
+counting guide does not establish a fee. Prior owner trial supplies historical
+access evidence; current account access/final charges are not inferred from it.
+The documented worker-owned credential file passes metadata-only ownership/
+permissions checks; the worker alone may read its contents on original entry.
+Exact reviewed recipe and all owner/source/package schema pins match. Runtime,
+tests, contracts and both checkpoints are unchanged; existing edits are preserved.
+**Scope:** Execute the [single-trial plan](CONTEXTUAL_NOTIFICATION_SINGLE_TRIAL_PLAN.md),
+retain original bytes/bindings/marker, classify the actual result, read it without
+credentials, verify unchanged source and zero notification attempts. No source
+repair, Impetus edits, dependency acquisition, commit, push or deployment.
+**Outcome:** [Trial review](CONTEXTUAL_NOTIFICATION_SINGLE_TRIAL_REVIEW.md).
+One actual count and one generation succeeded with no_addition in **4.422s**
+(**4.935s** including fresh preparation, invocation and immediate readback).
+Count and generation input tokens match at **244**; output **92**, total **336**,
+including **48** reasoning tokens within output. At configured conservative rates,
+generation usage is **USD 0.0001528**; remaining generation reserve **USD 0.0034312**
+plus unknown counting contingency **USD 0.001** retains the original **USD 0.004584**
+admission. Computed usage is not an invoice. One owner run and the launch marker
+remain retained; no counting, generation or notification was repeated.
+**Newly observed limitation:** Invoke capture and immediate readback both observed
+`2026-11-03T23:58:39Z`, while owner completion was `23:58:39.278Z`. Spine's
+seconds-only observation formatter conservatively made usability=false. An actual
+credential-free read at `23:58:56Z`, before cutoff `2026-11-04T00:00:34Z`, retained
+the same execution and correctly made usability=true. All three original records
+remain selected=false/sent=false. This is a same-second timestamp precision issue
+in the checkpointed code, distinct from provider failure, stale source and the
+previously recorded mypy/deadline-test issues. No source fix was made.
+**Post-run verification:** Passed complete request/read/response schema and
+consumer semantic checks, both stores' exact request bytes/digest, immutable
+bindings/marker, one run/two operations, count/body ordinal and digest linkage,
+config/prompt/model identity, token arithmetic, usage/reserve conservation, unchanged
+canonical-source logical dump and zero `side_effect_attempts` (0.194s wall).
+An additional independent credential-free CLI read matched the execution and
+left owner state unchanged. The later Spine readback took 0.206s wall and did
+not reopen provider configuration or credentials. Original request SHA-256:
+`105081cf36f52503d679756d12b1bc4a330f4260e8873f67e252d4b9074c3980`.
+Exact recipe, single-entry wrapper, authorization/prelaunch manifests, source/
+sidecar/worker stores, all capture JSON, independent readback and verification
+report are preserved together outside both checkouts. The wrapper refuses any
+new invocation when its trial directory exists; reruns can only read.
+**Commands:** The reviewed plan's `prepare`, `invoke` and `read` operations were
+orchestrated once by the external single-entry wrapper using the existing Spine
+interpreter and actual independent Impetus CLI. The original invocation received
+ordinary sandbox network approval; only Impetus opened its existing credential
+file. Later reads used the plan's `env -i ... trial_driver.py read` command and
+an independent `python -m impetus --state <trial>/worker read` with the stored
+`read.json`, no credential/live/configuration flags. No secret or resolved locator
+was printed or retained in capture/report evidence.
+Documentation packaging passed both tests (107.861ms runner); 311 local
+documentation file targets, exact recipe parity, diff hygiene and final
+preservation checks passed. The external single-entry wrapper passed Ruff before
+execution. All six changed files are documentation; AGENTS.md and all Impetus
+files remain byte-identical to the pre-trial snapshots, with HEAD unchanged and
+the index empty.
+**Qualification limit and next action:** The authorized one-case trial is
+complete; general immediate-capture qualification retains the precision issue.
+This proves neither live addendum usefulness, live failure/restart behavior,
+real-reminder disclosure, final billing nor generated delivery. Next consider a
+separately selected observation-precision fix with an offline same-second
+completion regression; no additional paid trial is needed to reproduce it.
+Executable bytes are unchanged, so full regression/wheel suites were not repeated;
+SPINE-069 retains that evidence. No commit, push, deployment, dependency acquisition,
+real-ledger access or notification occurred. Prior documentation and AGENTS.md
+edits are preserved; Impetus checkout is unchanged.
+
+### SPINE-070 — Prepare one synthetic real-provider capture trial
+
+**Status:** Done locally (2026-11-04, Codex), offline preparation only. The
+operator selected this concrete preparation following the SPINE-069 checkpoint
+`1f7947d`; at preparation completion provider execution and account/tariff
+qualification awaited separate resolution and authorization. The later selected
+single trial is recorded separately in SPINE-071 above.
+**Scope:** Review the carried-forward Impetus candidate, exact synthetic export,
+fresh store/namespace layout, launcher and credential-free readback recipe,
+admission arithmetic, acceptance criteria and remaining account/tariff assumptions.
+Use existing tooling, disposable synthetic stores and mocked transports only.
+Preserve AGENTS.md and all Impetus edits. No source/contract changes, credential
+access, network, dependency acquisition, notification, commit or deployment.
+**Acceptance:** A concrete reviewable trial plan with checked offline recipes,
+exact pins and exposure, explicit limits and the separate authorization needed
+before a single count plus at most one generation. Preparation completion does
+not claim that the live trial or account qualification succeeded.
+**Delivery:** [Single-trial plan](CONTEXTUAL_NOTIFICATION_SINGLE_TRIAL_PLAN.md)
+includes the exact synthetic review request/digest, non-secret candidate bytes
+and insertion-order revision, all pins, local admission arithmetic, checked
+preparation/invocation/readback recipe, fresh store/namespace layout, evidence and
+acceptance criteria, and the precise separate execution authorization. Operations
+and delivery history link it. Source specifications/contracts remain unchanged.
+**Candidate and limitations:** Carry forward the exact Impetus checkpoint
+candidate `examples/openai-gpt-6-luna.candidate.json`, raw SHA-256
+`6e93379ed73a5dafccafdd7286e6aed126203eb01ee466c1b6ffa051bdaba2be`;
+configuration revision
+`openai.responses.v1:88ad7139cd591f01ceb017b46b491525554aa377be257aa2c64434dd6cdb8e12`.
+One count plus at most one generation, gpt-6-luna/low, 8,192 input/512 output
+tokens, zero tools/retries. Generation reserves 3,584,000 nanodollars plus an
+unknown counting contingency of 1,000,000: **USD 0.004584 local admission**.
+This is conditional accounting, not a guaranteed upstream billing cap. The
+owner's locally edited prior-trial notes are dated evidence, not new verification
+of account access/terms, current prices or counting charges. No network refresh
+or private prior-trial store inspection was performed. The mutable alias and
+counting allowance remain explicit operator decisions before execution.
+
+**Offline verification:**
+
+| Check | Result | Duration |
+| --- | --- | --- |
+| Unmodified preparation recipe, clean environment | Fresh synthetic ledger/format-2 export/independent worker initialization; marker remains zero; zero attempts | 0.470s |
+| Final reviewed recipe: context addendum | Mocked invoke, actual owner CLI readback, repeated Spine run reads only | 0.602s |
+| Final reviewed recipe: no_addition | Same retained two-call execution across read/replay | 0.568s |
+| Final reviewed recipe: late generation | Failed/unusable; schema-valid observation references generation ordinal 2 | 0.517s |
+| Final reviewed recipe: lost response | Missing invoke execution recovered by readback; repeated run reads only | 0.508s |
+| Complete live contract/resource/vector suite | All 4 test methods passed; no skips | 0.032s / 0.194s wall |
+| Documentation packaging | Both tests passed; no skips | 112.068ms runner |
+| Extracted recipe AST/Ruff, 248 local documentation file targets and diff hygiene | Passed | Routine checks |
+
+The four recipe rehearsals use fake clocks, the existing independent mocked
+Impetus subprocess fixture and disposable stores. Parent and fixture socket
+creation are forbidden. An explicit fake locator is never opened; the fixture
+uses its fixed fake key. Read/replay uses the unmodified independent owner CLI
+with an allowlisted environment and no credentials/live/configuration flags.
+Each rehearsal retains three captures and exactly two operation records; source
+dump checks and zero notification attempts pass. Guarded parent reads prove that
+read/replay never open the provider configuration file. An additional owner-only
+offline projection check uses a fake key and forbidden transport to construct
+the review count/generation bodies, confirming exact input projection, matching
+configuration revision and 4,584,000-nanodollar reservation with zero provider I/O.
+Body byte counts/digests and the exact request are recorded in the plan. External
+temporary evidence retains the extracted final recipe, request/bindings/stores,
+projection bytes and rehearsal outcome JSON; none is staged as runtime state.
+
+**Commands:** Recipe preparation uses the plan's clean-environment command.
+Rehearsal extracts its Python block and substitutes only fake clocks, the existing
+`tests/fixtures/contextual_live_worker.py` command and simulated lost stdout;
+read/replay then switches to the actual sibling `python -m impetus` CLI.
+
+```sh
+env -i PATH=/usr/bin:/bin PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests \
+  IMPETUS_SRC="$PWD/../impetus/src" .venv/bin/python \
+  -m unittest tests.test_contextual_live_contract -v
+.venv/bin/ruff check --no-cache "$EVIDENCE/trial_driver-reviewed.py"
+node --test docs/site/build-pages.test.mjs
+git diff --check
+```
+
+**Preservation and next action at preparation completion:** All runtime, tests, contracts, package resources
+and pre-existing AGENTS.md bytes remain unchanged. Impetus HEAD and all its
+pre-existing local edits are preserved. No staging/commit or provider execution.
+Full regressions and installed-wheel qualification were not repeated for these
+documentation-only changes: SPINE-069 records the validated identical executable
+snapshot, including 1,237 final unittest cases and 36 installed-wheel capture
+checks. Its 36 pre-existing mypy errors and deadline warning remain documented;
+this preparation claims no repair. Final live stores have not been created; the
+expired review specimen must never be invoked. Next resolve account/charge/data
+assumptions, obtain the stated single-trial authorization, then prepare one new
+time-sensitive original export and invoke/read it without retries or sends.
 
 ### SPINE-069 — Implement offline live-profile synthetic capture
 

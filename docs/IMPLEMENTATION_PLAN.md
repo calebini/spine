@@ -9,9 +9,43 @@ see [validation](TZDB_COMPATIBILITY_VALIDATION.md) and [operations](TZDB_COMPATI
 
 
 Role: Roadmap rationale and delivery history; current task status lives in [BACKLOG.md](BACKLOG.md)
-Last updated: 2026-11-03 (SPINE-069 offline live-profile capture)
+Last updated: 2026-11-05 (SPINE-072 live capture observation precision)
 
 This is a non-normative delivery plan. The specifications and machine-readable contracts remain authoritative.
+
+**Selected precision correction (2026-11-05):** The operator selected the concrete
+SPINE-071 observation issue for an offline fix. SPINE-072 preserves full datetime
+precision only for live invoke/readback clock observations, retaining exact
+caller-supplied timestamps, deterministic formatting, original export bytes and
+strict completion/cutoff comparisons. New connected fake-clock/provider tests
+cover same-second completion, reopened launch-once readback and microsecond cutoff
+edges. No paid trial or credential access is needed. Capture v1, format 2, owner
+schema pins, canonical schema 19 and release 0.11.2 remain unchanged. Current task
+status and verification evidence live in SPINE-072 in the backlog.
+
+**Selected single trial (2026-11-04):** After approving the prepared SPINE-070
+invocation and admission assumptions, the operator authorized one count plus
+one possible generation through Spine. SPINE-071 completed with no_addition,
+matching 244 input tokens, zero notification attempts and credential-free
+readback. The [trial review](CONTEXTUAL_NOTIFICATION_SINGLE_TRIAL_REVIEW.md)
+records actual timing/accounting and a newly observed same-second observation
+precision limitation: initial captures were conservatively unusable, while a
+later actual read before cutoff was usable with the identical execution.
+All records are preserved; no source fix or second provider invocation occurred.
+The single-trial authorization is fulfilled. A precision correction is a concrete
+next candidate requiring separate selection; real reminders and generated delivery
+remain separate work. Current status and evidence live in SPINE-071 in the backlog.
+
+**Selected trial preparation (2026-11-04):** After checkpointing SPINE-069 at
+`1f7947d`, the operator selected offline preparation of one synthetic provider
+invocation through Spine. The [single-trial plan](CONTEXTUAL_NOTIFICATION_SINGLE_TRIAL_PLAN.md)
+carries forward the owner's candidate configuration, fixes the admission at
+USD 0.004584, and provides fresh-source/export, original invocation and
+credential-free readback recipes with a concrete review specimen. Current
+account/tariff assumptions and provider execution require separate resolution
+and authorization. This preparation makes no runtime/contract changes and grants
+no provider or notification permission. SPINE-070 in the backlog owns its status
+and verification evidence.
 
 **Selected offline implementation (2026-11-03):** SPINE-069 adopts the corrected
 Impetus `5ff3c0c` schema for the separate counting-capable synthetic consumer.
