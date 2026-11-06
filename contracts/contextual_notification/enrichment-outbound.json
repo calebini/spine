@@ -1,0 +1,17 @@
+{
+  "payload_version": "spine.openclaw.outbound.v3",
+  "delivery_id": "work:fictional",
+  "attempt_id": "attempt:fictional",
+  "trace_id": "trace:fictional",
+  "causation_id": "ROOT:fictional",
+  "channel_hint": "whatsapp",
+  "target_ref": "fictional@example.invalid",
+  "body_text": "Reminder: Fictional practice in 1 hour\n\nEnjoy your practice.",
+  "dedupe_key": "openclaw:work:fictional:1",
+  "provider_idempotency_key": "openclaw-delivery:work:fictional",
+  "created_at_utc": "2060-01-01T10:02:00Z",
+  "notification_rendering_id": "rendering:fictional",
+  "ordinary_rendered_content_hash": "4444444444444444444444444444444444444444444444444444444444444444",
+  "enrichment_selection": "{\"addendum\":\"Enjoy your practice.\",\"capture_sha256\":\"3333333333333333333333333333333333333333333333333333333333333333\",\"contract\":\"spine.notification-enrichment-choice.v1\",\"kind\":\"enriched\",\"opportunity_id\":\"opportunity:fictional\",\"reason\":\"ready\",\"request_sha256\":\"1111111111111111111111111111111111111111111111111111111111111111\",\"source_fingerprint\":\"2222222222222222222222222222222222222222222222222222222222222222\",\"work_instance_id\":\"work:fictional\"}",
+  "enriched_content_sha256": "9c53dd0eb5525fdc7f9f0ebd008f89012336a3215e6d759d4e87893f9e4cc361"
+}

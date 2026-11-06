@@ -30,6 +30,21 @@ schema bytes remain unchanged. Runtime release 0.11.2/schema 19 and registered
 command/Tickerd pins are preserved; this experimental module adds no public
 command or live-provider, real-reminder, deployment or message-inclusion claim.
 
+Separate opt-in enriched delivery (SPINE-074):
+[Enrichment v1](notification-enrichment-delivery.md) reuses the same corrected
+owner checkpoint/schema and mandatory counting wire above. The separate
+`spine.notification-enrichment.v1` profile adds explicit approved-source configuration,
+immutable choices, prepared envelopes and hash-correlated delivery evidence. Closed
+schemas and fictional vectors are pinned in `enrichment-pins.v1.json`, identically
+packaged under `spine.contracts`. Enriched messages use the additive
+`spine.openclaw.outbound.v3` envelope; ordinary messages retain their existing v1/v2
+envelopes and rendering records. Capture formats 1/2 and synthetic guards remain.
+This is optional injected library/worker behavior, default off, qualified offline;
+there is no new CLI/HTTP capability, release, canonical schema migration or Tickerd
+pin. Existing public rendering readback remains ordinary-base readback; composed
+content uses private `spine.notification-enrichment-evidence.v1` readback. Real
+provider/data and notification qualification are not claimed.
+
 Separate proposed web-consumer change:
 [independent activity read compatibility](independent-activity-reads.md#9-compatibility-and-migration-assessment)
 assesses new read schemas, registry/versioning, v1 complete-or-deny preservation, and

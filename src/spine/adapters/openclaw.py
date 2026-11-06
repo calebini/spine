@@ -225,16 +225,25 @@ class OpenClawNotificationProcessor:
 
     sender: OpenClawSender
     channel_hint: str = DEFAULT_OPENCLAW_CHANNEL
+    enrichment: Any = None
 
     def __call__(self, connection: sqlite3.Connection, work_row: Mapping[str, object], envelope: Any) -> WorkProcessingOutcome:
+        def build(
+            request_connection: sqlite3.Connection,
+            request_work_row: Mapping[str, object],
+            request_envelope: Any,
+        ) -> AttemptBackedSideEffectRequest[OpenClawOutboundMessage]:
+            if self.enrichment is not None:
+                from spine.adapters.enriched_notifications import build_enriched_request
+
+                return build_enriched_request(request_connection, request_work_row, request_envelope,
+                                              self.channel_hint, self.enrichment)
+            return build_openclaw_side_effect_request(request_connection, work_row=request_work_row,
+                                                     envelope=request_envelope, channel_hint=self.channel_hint)
+
         processor: AttemptBackedSideEffectProcessor[OpenClawOutboundMessage] = AttemptBackedSideEffectProcessor(
             adapter_name=OPENCLAW_ADAPTER_NAME,
-            build_request=lambda request_connection, request_work_row, request_envelope: build_openclaw_side_effect_request(
-                request_connection,
-                work_row=request_work_row,
-                envelope=request_envelope,
-                channel_hint=self.channel_hint,
-            ),
+            build_request=build,
             sender=lambda outbound: normalize_openclaw_result(self.sender(outbound)),
             binding_error_type=OpenClawBindingError,
             binding_failure_reason_code="openclaw_binding_failed",
@@ -244,6 +253,8 @@ class OpenClawNotificationProcessor:
         try:
             return processor(connection, work_row, envelope)
         except SpineValidationError as exc:
+            if exc.code == "notification_enrichment_stale" and self.enrichment is not None:
+                return OpenClawNotificationProcessor(sender=self.sender, channel_hint=self.channel_hint)(connection, work_row, envelope)
             if exc.code.startswith("notification_rendering_"):
                 return WorkProcessingOutcome.failed(exc.code)
             raise

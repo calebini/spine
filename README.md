@@ -67,6 +67,15 @@ succeeded with no_addition and retained readback. The local SPINE-072 correction
 preserves subsecond observation precision. Real-reminder disclosure and generated delivery remain
 separate work.
 
+The optional [enriched reminder path](specs/notification-enrichment-delivery.md)
+connects explicitly approved event context, pre-reminder research and one ordinary
+message with a validated addendum. Missing, failed, stale or late research takes
+ordinary fallback; it cannot create a late second message. This library integration
+is tested offline and disabled by default. See [operations and limits](docs/NOTIFICATION_ENRICHMENT_DELIVERY.md).
+The earlier [capture-only pilot](specs/contextual-notification-real-capture-pilot.md)
+is retained as superseded design history. Real-data access, providers and actual
+delivery still require explicit configuration and authorization.
+
 
 Runtime 0.11.2 repairs bounded reminder materialization when a follow-source task
 is reconciled to a new due time. Replacement work uses the successor time and

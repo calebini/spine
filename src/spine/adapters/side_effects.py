@@ -41,6 +41,7 @@ class AttemptBackedSideEffectRequest(Generic[TMessage]):  # noqa: UP046 -- publi
     request_envelope: Mapping[str, object]
     attempted_at_utc: str
     notification_rendering: NotificationRendering | None = None
+    pre_write_check: Callable[[sqlite3.Connection], None] | None = None
 
 
 @dataclass(frozen=True)
@@ -107,6 +108,7 @@ class AttemptBackedSideEffectProcessor(Generic[TMessage]):  # noqa: UP046 -- pub
             request_envelope=request.request_envelope,
             attempted_at_utc=request.attempted_at_utc,
             notification_rendering=request.notification_rendering,
+            pre_write_check=request.pre_write_check,
         )
         if not gate.may_start_external_write:
             return WorkProcessingOutcome.failed("side_effect_attempt_replay_suppressed")

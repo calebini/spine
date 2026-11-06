@@ -109,6 +109,7 @@ def run_spine_worker(
     storage_critical_free_bytes: int = 536_870_912,
     storage_reserve_bytes: int = 268_435_456,
     critical_storage_action: str = "exit_nonzero",
+    enrichment: Any = None,
 ) -> Any:
     """Run Spine work through Tickerd with the configured worker bindings."""
 
@@ -170,6 +171,7 @@ def run_spine_worker(
         openclaw_channel=openclaw_channel,
         openclaw_sender_mode=openclaw_sender_mode,
         openclaw_fake_result=openclaw_fake_result,
+        enrichment=enrichment,
     )
     adapter = SpineTickerdWorkAdapter(
         connection,
@@ -291,10 +293,11 @@ def _worker_processor(
     openclaw_channel: str,
     openclaw_sender_mode: str,
     openclaw_fake_result: str,
+    enrichment: Any = None,
 ) -> Any:
     if tuple(bindings) == ("openclaw",):
         sender = _openclaw_sender(paths=paths, sender_mode=openclaw_sender_mode, fake_result=openclaw_fake_result)
-        return OpenClawNotificationProcessor(sender=sender, channel_hint=openclaw_channel)
+        return OpenClawNotificationProcessor(sender=sender, channel_hint=openclaw_channel, enrichment=enrichment)
     raise ValueError(f"unsupported worker bindings: {','.join(bindings)}")
 
 

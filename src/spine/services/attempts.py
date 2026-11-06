@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import sqlite3
+from collections.abc import Callable
 from dataclasses import dataclass
 
 from spine.core.errors import SpineValidationError
@@ -38,6 +39,7 @@ def prepare_work_attempt(
     attempted_at_utc: str,
     attempt_id: str | None = None,
     notification_rendering: NotificationRendering | None = None,
+    pre_write_check: Callable[[sqlite3.Connection], None] | None = None,
 ) -> AttemptGate:
     """Persist a started attempt for processable work before any external write."""
 
@@ -60,6 +62,8 @@ def prepare_work_attempt(
             f"{exc.message}; occurrence provenance recovery report: {report_id}",
         ) from exc
     if notification_rendering is None:
+        if pre_write_check is not None:
+            raise SpineValidationError("notification_rendering_persistence_conflict", "custom check requires rendered attempt")
         attempt = create_started_attempt(
             connection,
             attempt_id=attempt_id,
@@ -144,6 +148,8 @@ def prepare_work_attempt(
                 raise SpineValidationError(
                     "notification_rendering_persistence_conflict", "delivery route changed before attempt persistence"
                 )
+        if pre_write_check is not None:
+            pre_write_check(connection)
         attempt = create_started_attempt(
             connection,
             attempt_id=attempt_id,

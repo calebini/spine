@@ -1,0 +1,10 @@
+{
+  "contract": "spine.notification-enrichment.v1",
+  "schema_sha256": "cbff4a2b08947a59bd75a58a834ea1ad1ad4166d5acc06de970aeb1e17385fb3",
+  "owner_schema_sha256": "bf3d132392c41ab21e9f7bf44f765aa79799a8dd41f8666d1d39ad646c442c4b",
+  "files": {
+    "enrichment-v1.schema.json": "cbff4a2b08947a59bd75a58a834ea1ad1ad4166d5acc06de970aeb1e17385fb3",
+    "enrichment-choice.json": "28443ea92b71aac7dd2cf40ff31c4ee8b308ca96eeeb471d0a55918560a1a55a",
+    "enrichment-outbound.json": "f11ce4e571ced836ae921f2b78ad447594a205427f77f929fb70914868e7a23d"
+  }
+}

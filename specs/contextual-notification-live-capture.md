@@ -10,6 +10,12 @@ reminders remain separately qualified and authorized work. SPINE-067's
 retains its original meaning. See [operations](../docs/CONTEXTUAL_NOTIFICATION_LIVE_CAPTURE.md)
 and [decision 0007](decisions/0007-offline-live-capture-profile.md).
 
+The historical [real-reminder pilot proposal](contextual-notification-real-capture-pilot.md)
+is superseded for the selected slice by [opt-in enriched delivery](notification-enrichment-delivery.md),
+which uses a separately marked fresh store and explicit approved-source adapter.
+Neither proposal nor implementation relaxes this profile's synthetic-only
+precondition or permits adopting its existing synthetic stores.
+
 ## 1. Selected boundary
 
 The live-profile consumer exports one opted-in synthetic event from a fresh

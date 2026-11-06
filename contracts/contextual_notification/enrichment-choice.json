@@ -1,0 +1,11 @@
+{
+  "contract": "spine.notification-enrichment-choice.v1",
+  "work_instance_id": "work:fictional",
+  "opportunity_id": "opportunity:fictional",
+  "kind": "enriched",
+  "reason": "ready",
+  "request_sha256": "1111111111111111111111111111111111111111111111111111111111111111",
+  "source_fingerprint": "2222222222222222222222222222222222222222222222222222222222222222",
+  "capture_sha256": "3333333333333333333333333333333333333333333333333333333333333333",
+  "addendum": "Enjoy your practice."
+}

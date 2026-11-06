@@ -72,6 +72,8 @@ def configuration_binding(text):
 class LiveExperiment(Experiment):
     """Separate format-2 profile; inherits only source freshness/fingerprint helpers."""
 
+    capture_contract = CONTRACT
+
     def __init__(self, source, store, launcher, config, *, clock=None):
         require(isinstance(store, LiveCaptureStore), "live_store_required")
         require(store.namespace == source.namespace, "capture_namespace")
@@ -88,9 +90,15 @@ class LiveExperiment(Experiment):
         # Completion and cutoff comparisons must retain the clock's fractions.
         return self.clock().astimezone(UTC).isoformat().replace("+00:00", "Z")
 
-    @staticmethod
-    def validate_binding(binding):
+    def _configuration_binding(self, text):
+        binding = configuration_binding(text)
+        binding["capture_contract"] = self.capture_contract
+        return binding
+
+    @classmethod
+    def validate_binding(cls, binding):
         expected = configuration_binding(binding["configuration_encoding"])
+        expected["capture_contract"] = cls.capture_contract
         for name in ("source_config_sha256", "disclosure_sha256"):
             require(re.fullmatch(r"[0-9a-f]{64}", binding[name]), "stored_fingerprint")
             expected[name] = binding[name]
@@ -103,7 +111,7 @@ class LiveExperiment(Experiment):
             self.validate_binding(existing[1]["binding"])
             return existing
         require("provider_configuration_json" in self.config, "export_configuration_required")
-        binding = configuration_binding(self.config["provider_configuration_json"])
+        binding = self._configuration_binding(self.config["provider_configuration_json"])
         snapshot = self.source.snapshot(work_instance_id, self.config)
         binding["source_config_sha256"] = snapshot["config_hash"]
         binding["disclosure_sha256"] = digest({name: self.config[name] for name in (
@@ -222,7 +230,7 @@ class LiveExperiment(Experiment):
         except (ValueError, TypeError, OverflowError):
             response_digest = None
         record = dict(
-            contract=CONTRACT, **identity, opportunity_id=opportunity, observed_at_utc=now_utc,
+            contract=self.capture_contract, **identity, opportunity_id=opportunity, observed_at_utc=now_utc,
             ordinary_text=request["context"]["notification"]["ordinary_text"], ordinary_text_kind="nominal_preview",
             execution=execution, reason=reason, source=fresh, result_completed_by_cutoff=bool(timely),
             usable_for_hypothetical_selection=usable, selected=False, sent=False, exchange=channel, disposition=disposition,
@@ -232,9 +240,9 @@ class LiveExperiment(Experiment):
         self.store.capture(opportunity, record)
         return record
 
-    @staticmethod
-    def validate_execution(execution, request, binding):
-        config = LiveExperiment.validate_binding(binding)
+    @classmethod
+    def validate_execution(cls, execution, request, binding):
+        config = cls.validate_binding(binding)
         require(execution["configuration_revision"] == binding["configuration_revision"] and
                 execution["provider_configuration"] == config and execution["prompt_revision"] == PROMPT, "execution_pins")
         require(execution["interface_version"] == VERSION and

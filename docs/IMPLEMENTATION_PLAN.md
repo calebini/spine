@@ -9,9 +9,38 @@ see [validation](TZDB_COMPATIBILITY_VALIDATION.md) and [operations](TZDB_COMPATI
 
 
 Role: Roadmap rationale and delivery history; current task status lives in [BACKLOG.md](BACKLOG.md)
-Last updated: 2026-11-05 (SPINE-072 live capture observation precision)
+Last updated: 2026-11-06 (SPINE-074 opt-in enriched delivery)
 
 This is a non-normative delivery plan. The specifications and machine-readable contracts remain authoritative.
+
+**Selected enriched delivery (2026-11-06):** The operator selected the smallest
+end-to-end feature, treating useful enrichment as the product direction rather
+than requiring another usefulness pilot. The [contract](../specs/notification-enrichment-delivery.md)
+and [operations](NOTIFICATION_ENRICHMENT_DELIVERY.md) use exact local disclosure
+approval, a read-only source, the existing counting/capture machinery, small private
+immutable content choices and the canonical send-attempt gate. Research happens
+before delivery; unavailable or stale content falls back to ordinary delivery,
+with no late upgrade or second logical message. A distinct outbound v3 binds the
+actual composed body while preserving honest ordinary rendering records. This
+supersedes the standalone registry, format-3 and seven-day purge proposed in
+SPINE-073. Implementation and qualification use fake data/providers/senders only;
+no actual enrollment, paid execution or activation is selected. SPINE-074 in the
+backlog records final validation and known limitations.
+
+**Historical real-reminder pilot design (2026-11-05):** Following checkpoint
+`726b14a`, the operator selected design of one explicitly opted-in existing-ledger
+reminder capture. The [draft](../specs/contextual-notification-real-capture-pilot.md)
+proposes exact local disclosure consent, a read-only source adapter, stable
+opportunity identity and a persistent enrollment marker separate from private
+format-3 content. Ordinary delivery remains independent and generated output
+remains non-sending. The [operator/implementation plan](CONTEXTUAL_NOTIFICATION_REAL_CAPTURE_PILOT.md)
+records offline oracles and the bounded Impetus scope/retention handoff. Ordinary
+prose can contain location/facet details, so the first case explicitly excludes
+those rendering paths; structured-field omission alone is insufficient. A proposed
+seven-day content limit requires owner-agreed closeout and retained conservative
+accounting before real enrollment. No runtime or real-data access is selected by
+this design; no handoff is sent and no Impetus change is made. SPINE-073 in the
+backlog owns task status and design evidence.
 
 **Selected precision correction (2026-11-05):** The operator selected the concrete
 SPINE-071 observation issue for an offline fix. SPINE-072 preserves full datetime

@@ -1,6 +1,6 @@
 # Spine Backlog
 
-Last updated: 2026-11-05
+Last updated: 2026-11-06
 
 This is the single work queue for Spine development. The
 [implementation plan](IMPLEMENTATION_PLAN.md) explains roadmap direction and delivery
@@ -3160,6 +3160,200 @@ never authorizes deletion of canonical evidence.
 **Source:** [Storage lifecycle horizon](IMPLEMENTATION_PLAN.md#future-horizon-bounded-ledger-storage-lifecycle).
 
 ## Completed
+
+### SPINE-074 — Implement opt-in enriched reminder delivery offline
+
+**Status:** Done locally — implemented and qualified offline, selected for the
+operator-authorized local checkpoint (2026-11-06, Codex); not activated.
+Operator-selected end-to-end implementation, treating useful
+enrichment as the chosen capability. The [contract](../specs/notification-enrichment-delivery.md)
+and [operations](NOTIFICATION_ENRICHMENT_DELIVERY.md) supersede SPINE-073's larger
+capture-pilot architecture for this slice. Its standalone registry, format-3 and
+seven-day purge are not prerequisites. Preserve that proposal as historical design.
+**Implemented:** Exact owned timed/non-recurring event/work enrollment, whole-context
+approval digest (including prose and derived reminder offset), read-only existing
+source, explicitly initialized profile-marked format-2 capture store and existing
+mandatory-count independent Impetus execution. Persist one immutable content choice
+and private composed envelope, recheck consent/source/evidence at the canonical
+attempt gate, and send at most one logical reminder with a validated suffix.
+No-addition, unavailable/failed/uncertain/stale/late research, overlong composition,
+revoked consent or unavailable private evidence use ordinary delivery. No late
+upgrade or repeat research. Normal delivery retries keep the gateway key; actual
+provider duplicate suppression remains gateway-owned.
+**Evidence model:** New closed config/choice/outbound/evidence shapes and byte pins
+match source/package resources. Additive `spine.openclaw.outbound.v3` separates the
+ordinary rendering hash from composed-body hash. Ordinary canonical rendering rows
+remain honest; private `delivery_evidence` recomputes the canonical attempt hash and
+reports its actual status/provider reference. Unused prepared evidence after ordinary
+fallback is not an attempted enriched message. Captures retain selected=false/sent=false.
+No canonical migration, new registered CLI/HTTP capability, release or Tickerd pin;
+optional library/worker injection is disabled by default.
+**Unchanged owner boundary:** Verified independent Impetus HEAD
+`5ff3c0c4530fe07e81cc9067eddadd967a90acc4`, complete corrected schema SHA-256
+`bf3d132392c41ab21e9f7bf44f765aa79799a8dd41f8666d1d39ad646c442c4b`, interface
+`contextual-notification-experiment` / `impetus.openai.v1`. Mandatory count ordinal
+1, generation ordinal 2, zero tools; original insertion-order configuration encoding,
+20-second and 512-byte bounds and all existing execution/usage/reference checks remain.
+**Offline verification:** Python 3.14.6; disposable ledgers/stores, fake clocks,
+independent mocked Impetus subprocess and fake notification senders only. Source
+export/research leave canonical source unchanged and create zero send attempts;
+fake delivery asserts the ordinary rendering and canonical started attempt exist
+before its sender runs. Eighteen new tests cover addendum/no-addition/count failure,
+late/first-late observation, ordinary choice blocking research, consent/source drift,
+transaction-gate races, private-store/receipt loss, credential/config-free restart
+readback, no late second message, stable retry keys, exact disclosure, oversized
+composition, read-only/profile boundaries, immutable evidence and contract parity.
+Final focused capture/delivery/reminder/worker regressions: **140 passed, 59 subtests
+(27.41 seconds; 27.623 seconds wall)**. Full documented unittest: **1,257 tests,
+no skips (292.102 seconds; 292.714 wall)**.
+Full pytest: **1,296 passed, 1,933 subtests, no skips, one known warning
+(293.85 seconds; 294.355 wall)**. Final exact-context preview refinement
+and stronger config-free readback fixture were followed by the focused rerun above,
+**18 targeted tests (5.63 seconds; 5.963 wall)** and installed checks below.
+**Installed qualification:** Succeeded offline with existing sibling Threshold
+setuptools, without downloading/installing dependencies. Built own wheel from an
+isolated source copy, installed only that wheel into a fresh noneditable runtime,
+exposed existing validation dependencies without their editable path hooks, and
+ran from external copied tests under `python -I`. Asserted Spine module/resource
+origins inside the installed prefix, all installed source/resource bytes matching
+the reviewed copy, and checkout source absent from import paths. **56 tests,
+no skips (17.681 seconds; build/install/test 20.319 wall)**, followed by **18 final
+installed tests (5.268 seconds; 5.519 wall)** with the strengthened readback fixture.
+Wheel SHA-256: `1734a3a6211accbc21a971512d5970cc0f51194886a0314582f0acda5148faf5`.
+Artifacts/logs are disposable local scratch, not a published release or real-trial record.
+**Repository checks:** Repository-wide Ruff, compilation of src/tests/examples/scripts,
+all five contract sync checks plus two documentation build tests (0.597 seconds
+combined), 360 local documentation link targets and tracked/untracked diff hygiene
+pass. Final compilation took 0.203 seconds; repository-wide Ruff took 0.072 seconds
+and passed again after final edits. Strict configured core/ledger
+mypy remains **36 pre-existing errors in 10 files (52 checked; 1.100 seconds)**;
+all ten files are byte-identical to HEAD. The known synthetic serialization-deadline
+`capacity_exceeded` ignored trace also recurred in full unittest; it is not a new
+failed assertion or part of this change. No typing/timeout repair is included.
+The build harness and connected tests were enabled with existing tooling and the
+independent sibling, so these checks have no missing-setuptools or missing-owner skip.
+**Development corrections, separate from repository issues:** Initial new-test
+fixtures used a float where delivery requires a datetime; corrected before passing
+runs. An unclosed scratch-store initializer was fixed; warning-free targeted reruns
+pass. The initial focused command named a nonexistent test file and ran no tests;
+the corrected/final 140-test commands above pass. A scratch preservation script
+initially assumed every source fixture was packaged; corrected to compare the
+actual packaged closure. No test weakening or pre-existing issue repair is included.
+**Commands** (from repository root; `$RUN` is disposable validation scratch):
+
+```sh
+PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:tests \
+  IMPETUS_SRC="$PWD/../impetus/src" \
+  SPINE_WHEEL_BUILD_PYTHON="$PWD/../threshold/.venv/bin/python" \
+  .venv/bin/python -m unittest discover -s tests
+# Same environment for pytest; existing provider credential variables removed.
+.venv/bin/python -m pytest -o addopts='' -p no:cacheprovider -q tests
+.venv/bin/python -m pytest -o addopts='' -p no:cacheprovider -q \
+  tests/test_enrichment_delivery.py tests/test_contextual_live.py \
+  tests/test_contextual_live_contract.py tests/test_contextual_experiment.py \
+  tests/test_contextual_experiment_contract.py tests/test_rendering_delivery.py \
+  tests/test_openclaw_adapter.py tests/test_openclaw_gateway_sender.py \
+  tests/test_side_effects_adapter.py tests/test_worker.py
+.venv/bin/ruff check . --no-cache
+.venv/bin/mypy --cache-dir "$RUN/mypy-cache"
+PYTHONPYCACHEPREFIX="$RUN/pycache" .venv/bin/python -m compileall -q src tests examples scripts
+# Each script run with --check: sync_web_contracts.py, sync_facet_web_contracts.py,
+# sync_rendering_contracts.py, sync_revision_readback_contracts.py, sync_people_contracts.py.
+node --test docs/site/build-pages.test.mjs
+# Isolated source copy at $RUN/wheel-final/wheel-source; no checkout editable install:
+../threshold/.venv/bin/python -m pip --isolated wheel --no-index --no-deps \
+  --no-build-isolation --no-cache-dir --disable-pip-version-check \
+  --wheel-dir "$RUN/wheel-final/wheels" "$RUN/wheel-final/wheel-source"
+# Fresh venv --without-pip, own wheel only: existing pip --python <runtime/python>
+# install --no-index --no-deps; runtime python -I runs 56 copied contextual/enrichment
+# tests, then the 18 final enrichment tests; all independent worker providers mocked.
+git diff --check
+```
+
+**Preservation/remaining boundary:** The initial AGENTS.md guidance edit is unchanged;
+SPINE-073 design/tracking is retained with explicit supersession labels. Existing
+Impetus tracked/untracked files are byte-identical; no Impetus edit. At completion
+of validation, HEAD/index were unchanged, with no staging/commit/push/cleanup.
+The operator subsequently authorized this bounded local checkpoint, including the
+supporting superseded SPINE-073 design/history and excluding AGENTS.md guidance.
+Source/package bytes still match the qualified wheel; reuse the completed checks
+and verify the staged diff/hygiene without repeating unchanged runtime tests.
+No real ledger, credential, provider,
+network, actual notification, feature activation or deployment was accessed.
+Next: agree the actual reminder/owner,
+exact disclosure, continuous private state/retention, provider account/configuration
+and one-message authorization before a real invocation/send. No additional usefulness
+pilot or broad deferred resilience campaign is required by this slice.
+
+### SPINE-073 — Design one real-reminder capture pilot
+
+**Subsequent selection:** SPINE-074 supersedes this architecture for the implemented
+enriched-delivery slice. The draft and evidence below remain historical; registry,
+format-3 and seven-day purge proposals are not selected implementation requirements.
+
+**Status:** Done — draft design delivered (2026-11-06, Codex), selected on
+2026-11-05 after checkpoint `726b14a`; not ratified, implemented or activated.
+Define one explicitly opted-in non-sensitive event/reminder
+on an existing ledger, minimized reviewed disclosure, opportunity/store continuity,
+retention and credential-free capture/readback. Ordinary delivery stays independent;
+generated output remains selected=false/sent=false.
+**Scope:** Draft specification and review/implementation plan only. Inspect source,
+contracts and owner documentation, not real ledger contents. Preserve AGENTS.md
+and Impetus edits. No runtime/schema implementation, actual pilot enrollment,
+credential access, provider call, notification, deployment, dependency installation,
+external handoff/review, commit or push is authorized.
+**Acceptance:** Explicit first-pilot eligibility, consent/egress and ordinary-prose
+rules, stable identity and launch-once state transitions, source/freshness and
+normal-delivery independence, retention/access assumptions, existing-wire assessment,
+offline acceptance oracles and prerequisites for a separately authorized real trial.
+**Delivery and decisions:** [Draft specification](../specs/contextual-notification-real-capture-pilot.md)
+and [operator/implementation plan with prepared owner handoff](CONTEXTUAL_NOTIFICATION_REAL_CAPTURE_PILOT.md).
+One owned non-sensitive non-recurring timed event, one exact materialized
+opportunity and local exact-byte consent. Default empty facets; optional at most
+four approved primitive fields from one revision, including model-visible facet
+revision IDs. Refuse primary-location/detail-bearing ordinary prose rather than
+leaking excluded fields through rendering. Use a separate read-only source adapter,
+persistent enrollment registry/authoritative one-way launch marker and proposed
+format-3 private content; preserve synthetic formats 1/2 and work-ID derivation.
+Separate content freshness, ordinary eligibility and retained execution: normal
+delivery may proceed/write its own attempts without pilot writes or generated text.
+Readback is credential-free and payload display requires retained-review consent.
+Propose seven days for source-bearing content copies, then owner-agreed retirement
+with longer-lived continuity/accounting metadata and no released unknown liability.
+These are proposed choices for review; actual source/actor/provider/payload approval
+and the future closed machine contracts are not supplied by this design.
+**Owner boundary:** The complete existing wire appears reusable. Real-data scope,
+retention/closeout and surviving owner accounting need explicit Impetus confirmation
+even if its schema/version do not change. The plan contains the exact bounded owner
+questions; nothing has been sent and no owner agreement is claimed. This corrects
+the earlier suggestion that a handoff would only be needed for a wire change.
+No general deferred resilience/storage campaign is selected.
+**Design verification:** Complete corrected owner schema, Spine source copy and
+package resource match SHA-256
+`bf3d132392c41ab21e9f7bf44f765aa79799a8dd41f8666d1d39ad646c442c4b`, owner HEAD
+`5ff3c0c4530fe07e81cc9067eddadd967a90acc4`. A wholly fictional existing-wire request
+with a non-synthetic-prefixed namespace and primitive facet context passes the
+complete Draft 2020-12 request schema plus independent owner semantic validation
+(0.076s); this establishes shape compatibility only, not authority or real-data
+qualification. Prepared 16 explicitly unexecuted implementation oracles covering
+consent, prose/fields, identity, continuity, concurrency/crash prefixes, count/late
+facts, microsecond timing, source/revocation drift, credential-free readback,
+ordinary delivery, retention and format compatibility. Reviewed state transitions
+have no path from closed/unresolved work back to provider entry.
+Documentation packaging passes both existing tests (114.284ms runner, 0.270s wall),
+local file links and diff whitespace pass. Runtime/full regression/installed-wheel
+checks were not rerun for this design-only change; no executable or machine
+contract bytes changed. Exact fictional assessment and preservation evidence are
+retained in external scratch storage, not runtime/source-data artifacts in Git.
+**Preservation and next action:** Seven Markdown files are new/updated, with
+README/spec index and the existing synthetic contract pointing at the separate
+draft. AGENTS.md, source/tests/contracts/resources, HEAD/index and the entire
+Impetus checkout including its pre-existing edits are unchanged. No real ledger,
+credential, provider, notification, dependency acquisition, staging, commit, push,
+deployment or external review/handoff was accessed/performed. Next review the
+Spine choices and take the prepared scope/retention questions to Impetus, then
+separately select machine-contract/vector codification and offline implementation.
+Real enrollment/preview/disclosure and any invocation remain separately authorized.
 
 ### SPINE-072 — Preserve live capture observation precision
 

@@ -7,6 +7,7 @@ import json
 import os
 import sqlite3
 import subprocess
+from contextlib import nullcontext
 from pathlib import Path
 
 from spine.core import facets as facet_codec
@@ -38,11 +39,16 @@ class Source:
         self.namespace = read_ledger_instance_id(ledger)
 
     def snapshot(self, work_id, config):
+        require(config["synthetic_only"] is True, "experiment_not_opted_in")
+        return self._snapshot(work_id, config)
+
+    def _snapshot(self, work_id, config, *, transactional=True, allow_in_progress=False):
         db = self.ledger
-        with db.atomic_command(write=False):
+        with db.atomic_command(write=False) if transactional else nullcontext():
             work = dict(get_work_instance(db, work_id))
-            require(work["item_id"] in config["opted_in_item_ids"] and config["synthetic_only"] is True, "experiment_not_opted_in")
-            require(work["work_kind"] == "notification_reminder" and work["status"] == "eligible", "work_not_eligible")
+            require(work["item_id"] in config["opted_in_item_ids"], "experiment_not_opted_in")
+            statuses = ("eligible", "in_progress") if allow_in_progress else ("eligible",)
+            require(work["work_kind"] == "notification_reminder" and work["status"] in statuses, "work_not_eligible")
             assert_work_instance_not_stale(db, work_id)
             item = get_current_item(db, work["item_id"])
             require(item["item_type"] == "event" and item["status"] == "active", "unsupported_item")
