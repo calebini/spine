@@ -96,6 +96,14 @@ Version 1 does not support:
 
 Calendar-relative arithmetic is a plausible later extension, but it requires an explicit timezone basis, invalid-local-time behavior, and timezone-database pinning contract. Version 1 uses elapsed seconds so a source UTC instant plus offset has exactly one result.
 
+The separate [recurring-related-task draft](recurring-related-tasks.md) specifies
+series-level generation of one ordinary task per source occurrence. It composes
+individual selected-occurrence bindings with a durable generation-assignment
+record; it does not broaden this Version 1 command's one-task boundary or change
+existing source-unresolved behavior. Its proposed automatic exclusion/cancellation
+handling applies only to assignments governed by that future family. No series
+generation capability is implemented or advertised by this delegation.
+
 ## 5. Relative Temporal Binding Model
 
 ### 5.1 Meaning

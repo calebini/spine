@@ -416,6 +416,9 @@ frontend reviews SPINE-001–003 were withdrawn.
 
 Still deliberately separate or in design:
 
+- [recurring-source related tasks](specs/recurring-related-tasks.md): draft rules
+  generating one ordinary task per event occurrence, with explicit temporal
+  following, cancellation reconciliation and per-task reminders; not implemented;
 - governed contextual LLM advisories and agent-generated enrichment;
 - opt-in [facet-aware notification rendering definitions](specs/notification-rendering-definitions.md)
   supplied as configuration by operators or packs; ratified design and initial machine

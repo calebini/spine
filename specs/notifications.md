@@ -28,6 +28,15 @@ This contract supports one-time notifications, explicit sets of target-relative 
 
 `specs/schedule-create.md` owns only the composite transaction and high-level request/receipt mapping for initial item-plus-policy authoring. It does not define alternate notification schedules, opportunities, work identities, reconciliation, or delivery semantics.
 
+The [recurring-related-task draft](recurring-related-tasks.md) proposes generation
+of ordinary non-recurring tasks with per-task reminder policies targeting their own
+concrete due anchors. It does not create a cross-item notification target or another
+opportunity/work identity model. Confirmed source exclusion/cancellation cancels a
+governed still-open task and its eligible unattempted work, while completed-task
+and attempted/delivered evidence is preserved. Its proposed assignment-freshness
+checks apply only when the future family is implemented and advertised; current
+notification behavior is not extended by this draft reference.
+
 `specs/notification-rendering.md` owns the implemented downstream conversion of accepted ordinary reminder work into deterministic natural-language body text and immutable per-attempt rendering evidence. Rendering is not a notification-policy fact, does not enter schedule, opportunity, or work identity, and cannot authorize delivery.
 
 `specs/operational-resilience.md` owns cross-policy and cross-runtime resource bounds,

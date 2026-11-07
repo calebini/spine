@@ -17,6 +17,14 @@ Local agents and dashboards consume Spine truth or propose candidate actions; th
 
 ## 2. Boundary Summary
 
+The [recurring-related-task draft](recurring-related-tasks.md) keeps recurrence
+authority on the source event while a Spine-owned series rule generates ordinary,
+independently completable tasks through existing relation, binding and notification
+machinery. Durable occurrence assignments prevent duplicate generation; bounded
+planning/reconciliation belongs to Spine, not a second recurrence engine or daemon.
+This is a draft extension, not an implemented capability or a change to current
+command or transport exposure.
+
 The ratified logical [people and responsibility leaf](people-and-responsibility.md) builds on
 subject identities, explicit memberships and item-versioned subject roles. Participation,
 task assignment, resource ownership/access and notification routing remain distinct

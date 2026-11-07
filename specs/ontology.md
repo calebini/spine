@@ -13,6 +13,18 @@ The goal is to make ownership, entity boundaries, and near-term interoperability
 
 ## 2. Design Principles
 
+The [recurring-related-task draft](recurring-related-tasks.md) proposes series-rule,
+immutable rule-revision and durable occurrence-assignment facts. Generated outputs
+remain ordinary task items, versions, due anchors, `part_of` relations and explicit
+selected-occurrence follow bindings; no new coordination-item type or independent
+target recurrence is implied. Assignment history prevents regeneration after a
+task is completed, manually cancelled or detached. These proposed facts and their
+linked task-generation history permit automatic restoration only after proved
+source-only cancellation, without reopening the historical cancelled task. Their
+source-exclusion/cancellation/restoration semantics require a separately advertised
+family and matching persistence before runtime use; no current table or lifecycle
+is changed.
+
 Schema 14 adds a single immutable `ledger_instance_metadata` row independent of
 subjects, items and web access namespaces. Its authoritative shape, generation,
 backfill and restore semantics are defined in

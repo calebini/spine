@@ -1,6 +1,6 @@
 # Spine Backlog
 
-Last updated: 2026-11-06
+Last updated: 2026-11-07
 
 This is the single work queue for Spine development. The
 [implementation plan](IMPLEMENTATION_PLAN.md) explains roadmap direction and delivery
@@ -32,6 +32,75 @@ outcomes; leave later horizons coarse. Before promoting a horizon, define its sc
 dependencies, acceptance criteria, and required decisions. When finishing a task,
 record evidence and move it to Completed. Update affected orientation and contract
 status labels in the same change. Routine task updates do not change spec authority.
+
+## Selected feature design
+
+### SPINE-075 — Specify recurring-source per-occurrence related tasks
+
+**Status:** Done — first design draft written (2026-11-07); not ratified,
+machine-codified or implemented. D-01–05 are now approved; technical contract
+closure and review remain pending.
+**Request:** A recurring class should generate one independently completable
+pickup task per occurrence, due 90 elapsed minutes after the expressed class
+start, following moves, with one reminder ten minutes before its own due time.
+The operator approved automatic cancellation of still-open governed tasks on
+confirmed source exclusion/cancellation. Preserve completed tasks, manual
+cancellation/detach and attempted/delivered evidence.
+**Approved reinstatement (2026-11-07):** D-01 selects automatic restoration without
+confirmation when the same occurrence is proved restored and the latest pickup
+was cancelled solely because of its source. Create one linked successor task
+generation under the same assignment, preserving the cancelled task and all prior
+work/attempt history. Active-rule, identity, manual-suppression, configuration and
+generation/catch-up checks still apply; repeated scans cannot create another
+successor. This is a specification amendment only.
+**Approved generation policy (2026-11-07):** D-02 selects upcoming occurrences
+from enrollment by default, an optional explicit starting occurrence, and a
+configurable eight-week rolling horizon. Persist the chosen start/horizon; do
+not reset enrollment on each scan or drop existing tasks outside the window.
+Already-started-class and downtime catch-up are governed by D-03 below. This
+changes no runtime.
+**Approved catch-up (2026-11-07):** D-03 permits bounded missing-task creation
+while the derived due is strictly future, including after the class starts.
+Past reminders obey their existing late policy; no forced late send or new
+overdue-task backfill. Existing overdue tasks remain unchanged. The same cutoff
+applies to restoration successors, with current-time revalidation before commit.
+**Approved configuration edits (2026-11-07):** D-04 requires an explicit scope:
+normally upcoming open governed tasks plus future generation, with a newly-
+generated-only alternative. Bounded adoption preserves individual exceptions,
+terminal/overdue/detached tasks and attempted history; requested/applied revisions
+and conflicts remain visible. Reusable-profile edits do not implicitly adopt a
+new revision. This adds a draft update surface, not a registered runtime command.
+**Approved retirement (2026-11-07):** D-05 requires explicit keep-following,
+detach or cancel-outstanding-open disposition. All stop new assignments and
+restoration successors. Keep-following preserves existing bindings/reminders;
+detach keeps concrete due values independently; cancellation includes overdue
+governed open tasks. Cleanup is bounded and preserves terminal/manual exceptions
+and attempted history. No source event is changed.
+**Design:** [Recurring related tasks](../specs/recurring-related-tasks.md) owns
+series-rule enrollment, durable per-occurrence assignments/selector reservations,
+explicit lineage continuity, bounded generation and lifecycle reconciliation.
+It reuses ordinary nonrecurring tasks, `part_of`, selected-occurrence bindings,
+notification policies/work and the existing scheduler. Minimal draft delegations
+in the existing command, architecture, ontology, binding and notification owners
+do not change implemented command lists, selectors, routes or v1 behavior.
+**Open product decisions:** None among the selected D-01–05. Exact storage,
+lineage, command, limit/clock and fixture contracts still need closure/review.
+The draft does not assign a runtime family or schema number.
+**Verification:** Local consistency review tightened assignment-aware direct/sweep
+reconciliation, positive novelty proof after source edits, and the per-rule scope
+of duplicate prevention. The existing documentation, scaffold and implemented-
+contract declaration suite passes **12 tests (0.352 seconds, final checkpoint check)**. All **378 local
+Markdown link targets in ten changed documents** resolve; `git diff --check`
+passes. The pre-existing `AGENTS.md` change is byte-for-byte preserved. No runtime,
+machine-schema/fixture, migration or ledger changes; no external audit, commit or
+push is part of this specification step.
+**Checkpoint authorization (2026-11-07):** The operator requested a local
+checkpoint of the draft with D-01–05 and its supporting specification/index/
+tracking amendments. Exclude the pre-existing `AGENTS.md` edit. This does not
+authorize a push, external review, ratification or implementation.
+**Next:** Review the completed product-design draft, then close/codify machine and
+storage contracts and write the implementation plan before runtime work. This is
+selected feature design, not a restart of deferred resilience initiatives.
 
 ## Post-release corrective work
 

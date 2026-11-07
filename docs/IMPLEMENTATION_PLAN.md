@@ -9,9 +9,33 @@ see [validation](TZDB_COMPATIBILITY_VALIDATION.md) and [operations](TZDB_COMPATI
 
 
 Role: Roadmap rationale and delivery history; current task status lives in [BACKLOG.md](BACKLOG.md)
-Last updated: 2026-11-06 (SPINE-074 opt-in enriched delivery)
+Last updated: 2026-11-07 (SPINE-075 recurring-source related-task draft)
 
 This is a non-normative delivery plan. The specifications and machine-readable contracts remain authoritative.
+
+**Selected design (2026-11-07):** The operator requested a native rule creating one
+ordinary task per recurring event occurrence, with an elapsed due offset,
+follow-source behavior and per-task reminders. The
+[first draft](../specs/recurring-related-tasks.md) preserves source recurrence as
+the only recurrence authority and adds durable assignment/lineage and bounded
+generation rather than a second recurring task stream. Confirmed source exclusion
+or cancellation cancels still-open governed tasks while retaining terminal and
+attempted history. D-01 now selects automatic restoration through a linked
+successor task generation under the same assignment when cancellation was solely
+source-caused; operator decisions and terminal history are not undone. No approval
+conversation is needed for the eligible path. D-02 selects upcoming-from-enrollment
+generation with an optional explicit starting occurrence and configurable eight-
+week rolling horizon; existing tasks remain governed outside it. D-03 permits
+bounded catch-up while a missing task's due is still future, even after its class
+starts, without overriding reminder late handling or changing existing overdue
+tasks. D-04 selects explicit configuration-edit scopes, normally upcoming open
+governed tasks plus future generation; bounded adoption preserves individual
+exceptions, terminal/overdue tasks and attempted history. D-05 requires explicit
+retirement disposition: keep following, detach or cancel outstanding open governed
+tasks; all stop new generation/restoration and preserve history. D-01–05 are
+approved; technical contract closure and review remain pending.
+SPINE-075 in the backlog owns design status; machine contracts and a subsequent implementation plan
+are not delivered or authorized by this draft.
 
 **Selected enriched delivery (2026-11-06):** The operator selected the smallest
 end-to-end feature, treating useful enrichment as the product direction rather
