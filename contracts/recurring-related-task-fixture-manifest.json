@@ -85,6 +85,12 @@
       "valid": true
     },
     {
+      "fixture_id": "invalid_create_bare_occurrence_key",
+      "fixture": "tests/fixtures/recurring_related_tasks/contracts/invalid_create_bare_occurrence_key.json",
+      "schema": "contracts/schemas/recurring-related-tasks/create-request.schema.json",
+      "valid": false
+    },
+    {
       "fixture_id": "invalid_create_embedded_roles",
       "fixture": "tests/fixtures/recurring_related_tasks/contracts/invalid_create_embedded_roles.json",
       "schema": "contracts/schemas/recurring-related-tasks/create-request.schema.json",
@@ -153,6 +159,12 @@
     {
       "fixture_id": "request_create_archetype_default",
       "fixture": "tests/fixtures/recurring_related_tasks/contracts/request_create_archetype_default.json",
+      "schema": "contracts/schemas/recurring-related-tasks/create-request.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "request_create_duplicate_assignees",
+      "fixture": "tests/fixtures/recurring_related_tasks/contracts/request_create_duplicate_assignees.json",
       "schema": "contracts/schemas/recurring-related-tasks/create-request.schema.json",
       "valid": true
     },
@@ -431,6 +443,15 @@
   "cursors": "tests/fixtures/recurring_related_tasks/cursors.json",
   "evidence": "tests/fixtures/recurring_related_tasks/evidence.json",
   "decisions": "tests/fixtures/recurring_related_tasks/decisions.json",
+  "source_proofs": "tests/fixtures/recurring_related_tasks/source-proofs.json",
+  "composed_policies": "tests/fixtures/recurring_related_tasks/composed-policies.json",
+  "source_snapshot_schema": "contracts/schemas/recurrence-set.schema.json",
+  "builder_helpers": [
+    "scripts/recurring_related_task_fixture_sources.py"
+  ],
+  "test_oracle_helpers": [
+    "tests/recurring_related_task_oracles.py"
+  ],
   "runtime_obligations": [
     "RRT-01",
     "RRT-02",

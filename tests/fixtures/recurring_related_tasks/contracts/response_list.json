@@ -15,7 +15,7 @@
         },
         "rule_key": "science_pickup",
         "source_item_id": "item_fixture_science_class",
-        "recurrence_set_id": "recurrence_set_fixture_class",
+        "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
         "status": "active",
         "rule_revision_id": "related_task_rule_revision_dd920c726715ba6c9a6723417aa7ef73feb11f22d34cad749546bd065eab3067",
         "change_version": "1",

@@ -11,8 +11,8 @@
   "source": {
     "item_id": "item_fixture_science_class",
     "item_version": "1",
-    "recurrence_set_id": "recurrence_set_fixture_class",
-    "recurrence_revision_id": "recurrence_revision_fixture_1"
+    "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
+    "recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a"
   },
   "enrollment": {
     "kind": "upcoming"

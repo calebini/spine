@@ -8,19 +8,19 @@
   "result": {
     "rows": [
       {
-        "assignment_revision_id": "related_task_assignment_revision_dbc0c6d5221d12327b3c8ced52a20d3098fd6342f8779c55c8d85179a442cb40",
-        "assignment_id": "related_task_assignment_2f5bfca79187b3e7ebb8f1fca3d958b4dfc0cf9a742cdb9f9654350952811f02",
+        "assignment_revision_id": "related_task_assignment_revision_8b6530c829ce0966b90fae9baf970c1d7dc846527c789f8b2ecf49f4fbe57c4e",
+        "assignment_id": "related_task_assignment_8bce9e2b6ce0104c12a34688820805435b38cf2ad92a56e814645d9d17f196b6",
         "change_version": "1",
         "prior_assignment_revision_id": null,
         "state_json": {
-          "generation_id": "related_task_generation_7c941b7ede44128583e902f7d42cc03b2917c657a13abf22236af85660d143aa",
+          "generation_id": "related_task_generation_6043a6b329505d5efbe73660db0118565b39572fd216fae140d82206097edb8d",
           "selector": {
-            "derivation_version": "spine.recurrence-target-occurrence-selector.v1",
             "contract_version": "spine.recurrence.contract.v1",
             "normalization_version": "spine.recurrence.normalization.v1",
             "canonical_json_version": "spine.canonical-json.v1",
-            "recurrence_set_id": "recurrence_set_fixture_class",
-            "segment_ref": "1",
+            "derivation_version": "spine.recurrence-target-occurrence-selector.v1",
+            "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
+            "segment_ref": "0",
             "scheduled_fact": "2026-11-14T11:30:00",
             "origin_kind": "rule",
             "source_rule_selectors": [
@@ -32,22 +32,22 @@
                 "end_condition": {
                   "kind": "unbounded"
                 },
-                "status": "active",
                 "by_weekday": [
                   "SA"
                 ],
-                "week_start": "MO"
+                "week_start": "MO",
+                "status": "active"
               }
             ],
             "source_rdate_selectors": []
           },
-          "occurrence_key": "37220c4acbb53b8dc6009df50a4dd22a4c0de7f12d62cde1ea9716e43cd66f5b",
+          "occurrence_key": "eyJjYW5vbmljYWxfanNvbl92ZXJzaW9uIjoic3BpbmUuY2Fub25pY2FsLWpzb24udjEiLCJjb250cmFjdF92ZXJzaW9uIjoic3BpbmUucmVjdXJyZW5jZS5jb250cmFjdC52MSIsImRlcml2YXRpb25fdmVyc2lvbiI6InNwaW5lLnJlY3VycmVuY2Utb2NjdXJyZW5jZS1rZXkudjIiLCJub3JtYWxpemF0aW9uX3ZlcnNpb24iOiJzcGluZS5yZWN1cnJlbmNlLm5vcm1hbGl6YXRpb24udjEiLCJ0YXJnZXRfb2NjdXJyZW5jZV9zZWxlY3RvciI6eyJjYW5vbmljYWxfanNvbl92ZXJzaW9uIjoic3BpbmUuY2Fub25pY2FsLWpzb24udjEiLCJjb250cmFjdF92ZXJzaW9uIjoic3BpbmUucmVjdXJyZW5jZS5jb250cmFjdC52MSIsImRlcml2YXRpb25fdmVyc2lvbiI6InNwaW5lLnJlY3VycmVuY2UtdGFyZ2V0LW9jY3VycmVuY2Utc2VsZWN0b3IudjEiLCJub3JtYWxpemF0aW9uX3ZlcnNpb24iOiJzcGluZS5yZWN1cnJlbmNlLm5vcm1hbGl6YXRpb24udjEiLCJvcmlnaW5fa2luZCI6InJ1bGUiLCJyZWN1cnJlbmNlX3NldF9pZCI6InJlY3VycmVuY2Vfc2V0Xzg5YTVlZjdlYzhiOTA4ZGRmYmJiYmMxYTBkYzk5MmJhYTUxZDg1Yjg4NGE3NWZiYzhmYWJiY2QyZWJhMWFkMDciLCJzY2hlZHVsZWRfZmFjdCI6IjIwMjYtMTEtMTRUMTE6MzA6MDAiLCJzZWdtZW50X3JlZiI6IjAiLCJzb3VyY2VfcmRhdGVfc2VsZWN0b3JzIjpbXSwic291cmNlX3J1bGVfc2VsZWN0b3JzIjpbeyJieV93ZWVrZGF5IjpbIlNBIl0sImVuZF9jb25kaXRpb24iOnsia2luZCI6InVuYm91bmRlZCJ9LCJmcmVxdWVuY3kiOiJXRUVLTFkiLCJpbnRlcnZhbCI6IjEiLCJzZWVkIjoiMjAyNi0xMS0xNFQxMTozMDowMCIsInN0YXJ0X2JvdW5kIjoiMjAyNi0xMS0xNFQxMTozMDowMCIsInN0YXR1cyI6ImFjdGl2ZSIsIndlZWtfc3RhcnQiOiJNTyJ9XX19.cdb5d6f7fb37da99ae2b5e272eea9e9536328b5d228b9ff0a71f620ed222d664",
           "source_item_version": "1",
-          "recurrence_revision_id": "recurrence_revision_fixture_1",
-          "proof_id": "related_task_proof_88976c22205045697fa0b5c158c3be4c1d80a1ba299dadf55da8d9043f39079e",
-          "task_item_id": "item_218fffa030c67ccab3c8331b1f60a61a80e6a598f00ec52ebc20e7eacc1aef7c",
+          "recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
+          "proof_id": "related_task_proof_5a6d066e554197208858f8c7f5bb31287cbb6ed9f00ddedc9ef7e796163afbbb",
+          "task_item_id": "item_a7b7735a558aa63d5eca349747cea26e0146bb8e2693ab73b793a908e1206b46",
           "task_item_version": "1",
-          "temporal_binding_revision_id": "temporal_binding_revision_7960c5e0c21c1443d5413c828f9fd5e6be7a7e1c8708024e7dcece511a76712a",
+          "temporal_binding_revision_id": "temporal_binding_revision_ef98b84ce20e90ffb0c554bbd7f53d67be6aa2b99886be17c48c1176b96278ef",
           "adopted_rule_revision_id": "related_task_rule_revision_dd920c726715ba6c9a6723417aa7ef73feb11f22d34cad749546bd065eab3067",
           "managed_baseline": {
             "task_template": {
@@ -157,16 +157,16 @@
           "restoration_veto": false,
           "reason": "new_source_slot"
         },
-        "state_hash": "63f3eacb028e577d36ed97d61b152a9d9f826e27ae899d9833075721df50eb59",
+        "state_hash": "b753b7185e1bea2a90c804d950a6ec5261ed4ac6c477131a5ff73bcd065591b7",
         "source_item_version": "1",
-        "recurrence_revision_id": "recurrence_revision_fixture_1",
-        "task_item_id": "item_218fffa030c67ccab3c8331b1f60a61a80e6a598f00ec52ebc20e7eacc1aef7c",
+        "recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
+        "task_item_id": "item_a7b7735a558aa63d5eca349747cea26e0146bb8e2693ab73b793a908e1206b46",
         "task_item_version": "1",
         "adopted_rule_revision_id": "related_task_rule_revision_dd920c726715ba6c9a6723417aa7ef73feb11f22d34cad749546bd065eab3067",
-        "generation_id": "related_task_generation_7c941b7ede44128583e902f7d42cc03b2917c657a13abf22236af85660d143aa",
-        "temporal_binding_revision_id": "temporal_binding_revision_7960c5e0c21c1443d5413c828f9fd5e6be7a7e1c8708024e7dcece511a76712a",
-        "proof_id": "related_task_proof_88976c22205045697fa0b5c158c3be4c1d80a1ba299dadf55da8d9043f39079e",
-        "selector_ref": "recurrence_target_selector_515eeb841a2cdae00625c5b1000645f9b361177bd7722dd464d4dc72ef8c4e5a",
+        "generation_id": "related_task_generation_6043a6b329505d5efbe73660db0118565b39572fd216fae140d82206097edb8d",
+        "temporal_binding_revision_id": "temporal_binding_revision_ef98b84ce20e90ffb0c554bbd7f53d67be6aa2b99886be17c48c1176b96278ef",
+        "proof_id": "related_task_proof_5a6d066e554197208858f8c7f5bb31287cbb6ed9f00ddedc9ef7e796163afbbb",
+        "selector_ref": "recurrence_target_selector_6649a6be323ff33d4cf2c196ac67c8f9dbcf18fbc3184c2bd0800f8a6494ef90",
         "command_id": "fixture_reconcile_page_1",
         "created_at_utc": "2026-11-08T10:00:00Z"
       }
@@ -176,10 +176,10 @@
       "ledger_instance_id": "ledger_instance_disposable_fixture_only",
       "related_task_rule_id": "related_task_rule_a24002492d1555b29fa3ad5630e88f877633cba9703aafb63ee5ded452c938d4",
       "view": "states",
-      "assignment_id": "related_task_assignment_2f5bfca79187b3e7ebb8f1fca3d958b4dfc0cf9a742cdb9f9654350952811f02",
+      "assignment_id": "related_task_assignment_8bce9e2b6ce0104c12a34688820805435b38cf2ad92a56e814645d9d17f196b6",
       "limit": "50"
     },
-    "catalog_generation": "1",
+    "catalog_generation": "2",
     "has_more": false,
     "next_cursor": null,
     "read_at_utc": "2026-11-08T10:00:00Z",

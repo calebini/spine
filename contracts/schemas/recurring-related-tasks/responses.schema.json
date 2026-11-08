@@ -385,7 +385,7 @@
           "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/sourceSelector"
         },
         "occurrence_key": {
-          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/id"
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/occurrenceKey"
         },
         "generation_id": {
           "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/generationId"
@@ -627,7 +627,7 @@
         "conflicting_occurrence_keys": {
           "type": "array",
           "items": {
-            "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/id"
+            "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/occurrenceKey"
           },
           "minItems": 1,
           "maxItems": 2048,
@@ -653,7 +653,7 @@
           "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/sourceSelector"
         },
         "occurrence_key": {
-          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/id"
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/occurrenceKey"
         },
         "assignment_id": {
           "anyOf": [

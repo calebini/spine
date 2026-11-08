@@ -5,7 +5,7 @@
   "changed": false,
   "error": {
     "code": "stale_cursor",
-    "field": "request",
-    "message": "Synthetic offline stale_cursor"
+    "field": "cursor",
+    "message": "Synthetic branch-specific offline stale_cursor"
   }
 }

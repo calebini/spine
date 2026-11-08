@@ -28,6 +28,11 @@
       "sha256": "48507bcf78b6df80a6c9ca8ebf7b0a5fa7e26b8b691befdc1e7353ae63b7b2c1"
     },
     {
+      "uri": "https://cortext.local/spine/contracts/schemas/recurrence-set.schema.json",
+      "path": "contracts/schemas/recurrence-set.schema.json",
+      "sha256": "e2b34874dcd4e1e9d227e240c512f35e9b7aad884b0ec60875b82cfb6149601f"
+    },
+    {
       "uri": "https://cortext.local/spine/contracts/schemas/recurrence-types.schema.json",
       "path": "contracts/schemas/recurrence-types.schema.json",
       "sha256": "a52316c562ca1cda2144db79676cc5799fcd631f8116d70b0c76a2dd6fd9cf86"
@@ -35,7 +40,7 @@
     {
       "uri": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/computed.schema.json",
       "path": "contracts/schemas/recurring-related-tasks/computed.schema.json",
-      "sha256": "f65b537ebc5c030126a92fc7871f0b9ed99afbcd1c2fd2d782d9f04805529fc2"
+      "sha256": "9df8f8caede785490c6af661dc83fbd3b43208c6edf52f0342abaa1651fb953a"
     },
     {
       "uri": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/create-request.schema.json",
@@ -55,7 +60,7 @@
     {
       "uri": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/evidence.schema.json",
       "path": "contracts/schemas/recurring-related-tasks/evidence.schema.json",
-      "sha256": "1996e12265c12716bc433662613acb5d019bbca560fefedf7da7a117760e6adc"
+      "sha256": "c15d660484b38336a7a29d7d12c9461688dd34b9d628721999dd54618df2822f"
     },
     {
       "uri": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/failure.schema.json",
@@ -90,7 +95,7 @@
     {
       "uri": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/responses.schema.json",
       "path": "contracts/schemas/recurring-related-tasks/responses.schema.json",
-      "sha256": "f9f2f14de6e5af615cfa37331bd914aa72a16c4d3553b53cfd009d48d184e56d"
+      "sha256": "66c4244373030e7377612ea057a61393879a6573f8738873c6b10c8598a6c2a3"
     },
     {
       "uri": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/retire-request.schema.json",
@@ -125,7 +130,7 @@
     {
       "uri": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json",
       "path": "contracts/schemas/recurring-related-tasks/types.schema.json",
-      "sha256": "685368cf6379fa94a492607747dea10fdf8c22471170f29e0a6340ad61331be0"
+      "sha256": "d1a35d1a1f09d16fc637e5508175dcc685ca8f4f9e47c3c1fd9ed84ea042661d"
     },
     {
       "uri": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/update-request.schema.json",

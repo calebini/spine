@@ -5,7 +5,7 @@
   "changed": false,
   "error": {
     "code": "stale_evaluation",
-    "field": "request",
-    "message": "Synthetic offline stale_evaluation"
+    "field": "evaluated_at_utc",
+    "message": "Synthetic branch-specific offline stale_evaluation"
   }
 }

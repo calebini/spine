@@ -346,7 +346,7 @@
               "const": "selected_occurrence"
             },
             "occurrence_key": {
-              "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/id"
+              "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/occurrenceKey"
             }
           },
           "required": [
@@ -378,7 +378,7 @@
               "const": "selected_occurrence"
             },
             "occurrence_key": {
-              "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/id"
+              "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/occurrenceKey"
             },
             "selector": {
               "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/sourceSelector"
@@ -446,8 +446,7 @@
           "items": {
             "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/id"
           },
-          "maxItems": 100,
-          "uniqueItems": true
+          "maxItems": 100
         }
       },
       "required": [
@@ -575,7 +574,7 @@
           "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/normalizedTaskItem"
         },
         "people": {
-          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/people"
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/normalizedPeople"
         }
       },
       "required": [
@@ -1485,6 +1484,27 @@
         "capacity_exceeded",
         "stale_evaluation"
       ]
+    },
+    "normalizedPeople": {
+      "type": "object",
+      "properties": {
+        "assignees": {
+          "type": "array",
+          "items": {
+            "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/id"
+          },
+          "maxItems": 100,
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "assignees"
+      ],
+      "additionalProperties": false
+    },
+    "occurrenceKey": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_-]+\\.[0-9a-f]{64}(?![\\s\\S])"
     }
   }
 }

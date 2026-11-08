@@ -445,7 +445,7 @@
                 "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/sha256"
               },
               "value": {
-                "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/id"
+                "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/occurrenceKey"
               }
             },
             "required": [

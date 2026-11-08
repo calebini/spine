@@ -8,11 +8,11 @@
     "rule_change_version": "1",
     "rule_revision_id": "related_task_rule_revision_dd920c726715ba6c9a6723417aa7ef73feb11f22d34cad749546bd065eab3067",
     "source_item_version": "1",
-    "recurrence_revision_id": "recurrence_revision_fixture_1",
+    "recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
     "catalog_generation": "1",
     "assignment_change_version": "2"
   },
-  "assignment_id": "related_task_assignment_2f5bfca79187b3e7ebb8f1fca3d958b4dfc0cf9a742cdb9f9654350952811f02",
-  "target_generation_id": "related_task_generation_7c941b7ede44128583e902f7d42cc03b2917c657a13abf22236af85660d143aa",
-  "target_task_item_id": "item_218fffa030c67ccab3c8331b1f60a61a80e6a598f00ec52ebc20e7eacc1aef7c"
+  "assignment_id": "related_task_assignment_8bce9e2b6ce0104c12a34688820805435b38cf2ad92a56e814645d9d17f196b6",
+  "target_generation_id": "related_task_generation_6043a6b329505d5efbe73660db0118565b39572fd216fae140d82206097edb8d",
+  "target_task_item_id": "item_a7b7735a558aa63d5eca349747cea26e0146bb8e2693ab73b793a908e1206b46"
 }

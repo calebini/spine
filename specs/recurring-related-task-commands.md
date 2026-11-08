@@ -1,6 +1,6 @@
 # Recurring Related Tasks: Detailed Command Contract
 
-Status: Draft v0.1.0-draft.3 — source-only wire contract and machine companion; not registered or implemented
+Status: Draft v0.1.0-draft.4 — source-only wire contract and machine companion; not registered or implemented
 
 Date: 2026-11-08
 
@@ -147,7 +147,10 @@ the existing scheduling-v4 `item` schema: `item_type=task`, required `title` and
 Forbid `event_detail`, `task_detail.subject_roles`, due/start/end anchors, recurrence,
 caller IDs/versions and status. `task_detail` may contain `priority` only under its
 existing schema. `people` is exactly `{assignees:[subject IDs]}`, including empty
-to mean no assignees. It is a complete set, sorted/deduplicated by exact ID; resolve
+to mean no assignees. The bounded raw authoring array may repeat exact IDs;
+normalization sorts and deduplicates it into the stored complete set. The raw
+array still has the declared 100-entry cap; normalization does not allow an
+unbounded duplicate stream. Normalized stored arrays require unique IDs. Resolve
 the existing people continuity/visibility requirements, not family membership
 inference. No facet-value or generalized workflow authoring is added in v1.
 
@@ -553,8 +556,10 @@ Query/target/limit changes, tag or shape errors fail `invalid_request`,
 `field=cursor`; expiration or changed bound generations/source/rule fail
 `stale_cursor`. After a successful committing page, next cursor binds the **resulting**
 catalog/rule freshness, not pre-commit counters; concurrent other changes still
-invalidate it. Prior page successes remain committed. A blocked/failed page cannot
-advance keys or claim coverage. No cursor itself authorizes any mutation.
+invalidate it. Prior page successes remain committed. A successful page may
+advance its selection key past a blocked unit reported under that snapshot,
+without claiming that unit is resolved. A whole-page failure commits no key or
+coverage advancement. No cursor itself authorizes any mutation.
 
 Write comparison uses the existing command receipt model with this exact normalized
 request and command identifier, including actor, requested time, expected facts,

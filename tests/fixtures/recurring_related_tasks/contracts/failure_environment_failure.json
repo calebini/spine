@@ -5,7 +5,7 @@
   "changed": false,
   "error": {
     "code": "environment_failure",
-    "field": "request",
-    "message": "Synthetic offline environment_failure"
+    "field": "schema_version",
+    "message": "Synthetic branch-specific offline environment_failure"
   }
 }

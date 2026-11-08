@@ -7,25 +7,25 @@
   "evaluated_at_utc": "2026-11-08T10:00:00Z",
   "result": {
     "proof": {
-      "proof_id": "related_task_proof_88976c22205045697fa0b5c158c3be4c1d80a1ba299dadf55da8d9043f39079e",
+      "proof_id": "related_task_proof_5a6d066e554197208858f8c7f5bb31287cbb6ed9f00ddedc9ef7e796163afbbb",
       "related_task_rule_id": "related_task_rule_a24002492d1555b29fa3ad5630e88f877633cba9703aafb63ee5ded452c938d4",
       "proof_kind": "enrollment",
       "source_item_version": "1",
-      "recurrence_revision_id": "recurrence_revision_fixture_1",
+      "recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
       "prior_recurrence_revision_id": null,
       "proof_json": {
         "source_item_id": "item_fixture_science_class",
         "source_item_version": "1",
-        "recurrence_set_id": "recurrence_set_fixture_class",
-        "recurrence_revision_id": "recurrence_revision_fixture_1",
-        "normalized_recurrence_set_hash": "a81ad5df22e71bb6557781ff40ffe67836bbe5335759837475d3bcdb9bc96b8c",
+        "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
+        "recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
+        "normalized_recurrence_set_hash": "07a3cf5ae207cefd1dce5b77833773ff1d990d63e20b7588c0d9a3a44ad50d40",
         "selector": {
-          "derivation_version": "spine.recurrence-target-occurrence-selector.v1",
           "contract_version": "spine.recurrence.contract.v1",
           "normalization_version": "spine.recurrence.normalization.v1",
           "canonical_json_version": "spine.canonical-json.v1",
-          "recurrence_set_id": "recurrence_set_fixture_class",
-          "segment_ref": "1",
+          "derivation_version": "spine.recurrence-target-occurrence-selector.v1",
+          "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
+          "segment_ref": "0",
           "scheduled_fact": "2026-11-14T11:30:00",
           "origin_kind": "rule",
           "source_rule_selectors": [
@@ -37,20 +37,20 @@
               "end_condition": {
                 "kind": "unbounded"
               },
-              "status": "active",
               "by_weekday": [
                 "SA"
               ],
-              "week_start": "MO"
+              "week_start": "MO",
+              "status": "active"
             }
           ],
           "source_rdate_selectors": []
         },
-        "occurrence_key": "37220c4acbb53b8dc6009df50a4dd22a4c0de7f12d62cde1ea9716e43cd66f5b",
+        "occurrence_key": "eyJjYW5vbmljYWxfanNvbl92ZXJzaW9uIjoic3BpbmUuY2Fub25pY2FsLWpzb24udjEiLCJjb250cmFjdF92ZXJzaW9uIjoic3BpbmUucmVjdXJyZW5jZS5jb250cmFjdC52MSIsImRlcml2YXRpb25fdmVyc2lvbiI6InNwaW5lLnJlY3VycmVuY2Utb2NjdXJyZW5jZS1rZXkudjIiLCJub3JtYWxpemF0aW9uX3ZlcnNpb24iOiJzcGluZS5yZWN1cnJlbmNlLm5vcm1hbGl6YXRpb24udjEiLCJ0YXJnZXRfb2NjdXJyZW5jZV9zZWxlY3RvciI6eyJjYW5vbmljYWxfanNvbl92ZXJzaW9uIjoic3BpbmUuY2Fub25pY2FsLWpzb24udjEiLCJjb250cmFjdF92ZXJzaW9uIjoic3BpbmUucmVjdXJyZW5jZS5jb250cmFjdC52MSIsImRlcml2YXRpb25fdmVyc2lvbiI6InNwaW5lLnJlY3VycmVuY2UtdGFyZ2V0LW9jY3VycmVuY2Utc2VsZWN0b3IudjEiLCJub3JtYWxpemF0aW9uX3ZlcnNpb24iOiJzcGluZS5yZWN1cnJlbmNlLm5vcm1hbGl6YXRpb24udjEiLCJvcmlnaW5fa2luZCI6InJ1bGUiLCJyZWN1cnJlbmNlX3NldF9pZCI6InJlY3VycmVuY2Vfc2V0Xzg5YTVlZjdlYzhiOTA4ZGRmYmJiYmMxYTBkYzk5MmJhYTUxZDg1Yjg4NGE3NWZiYzhmYWJiY2QyZWJhMWFkMDciLCJzY2hlZHVsZWRfZmFjdCI6IjIwMjYtMTEtMTRUMTE6MzA6MDAiLCJzZWdtZW50X3JlZiI6IjAiLCJzb3VyY2VfcmRhdGVfc2VsZWN0b3JzIjpbXSwic291cmNlX3J1bGVfc2VsZWN0b3JzIjpbeyJieV93ZWVrZGF5IjpbIlNBIl0sImVuZF9jb25kaXRpb24iOnsia2luZCI6InVuYm91bmRlZCJ9LCJmcmVxdWVuY3kiOiJXRUVLTFkiLCJpbnRlcnZhbCI6IjEiLCJzZWVkIjoiMjAyNi0xMS0xNFQxMTozMDowMCIsInN0YXJ0X2JvdW5kIjoiMjAyNi0xMS0xNFQxMTozMDowMCIsInN0YXR1cyI6ImFjdGl2ZSIsIndlZWtfc3RhcnQiOiJNTyJ9XX19.cdb5d6f7fb37da99ae2b5e272eea9e9536328b5d228b9ff0a71f620ed222d664",
         "lineage_ids": [],
-        "enrolled_recurrence_revision_id": "recurrence_revision_fixture_1"
+        "enrolled_recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a"
       },
-      "proof_hash": "88976c22205045697fa0b5c158c3be4c1d80a1ba299dadf55da8d9043f39079e",
+      "proof_hash": "5a6d066e554197208858f8c7f5bb31287cbb6ed9f00ddedc9ef7e796163afbbb",
       "created_by_command_id": "fixture_reconcile_page_1",
       "created_at_utc": "2026-11-08T10:00:00Z"
     },

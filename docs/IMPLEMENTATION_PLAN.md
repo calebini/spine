@@ -9,7 +9,7 @@ see [validation](TZDB_COMPATIBILITY_VALIDATION.md) and [operations](TZDB_COMPATI
 
 
 Role: Roadmap rationale and delivery history; current task status lives in [BACKLOG.md](BACKLOG.md)
-Last updated: 2026-11-08 (SPINE-083 source-only recurring-task machine corpus)
+Last updated: 2026-11-08 (SPINE-085 local machine-corpus corrections verified; recheck pending)
 
 This is a non-normative delivery plan. The specifications and machine-readable contracts remain authoritative.
 
@@ -50,9 +50,33 @@ prerequisites, an offline schema closure and reproducible fixtures. These do not
 register a command, package a web surface, allocate a schema version or prove
 transactions/worker behavior. The pending runtime obligations are explicit in the
 [manifest](../contracts/recurring-related-tasks.v1.json). Machine-contract review
-is next, followed by ratification and a selected implementation delivery plan.
-SPINE-075/079/080/081/082/083 in the backlog own design/review/patch/codification
-status; no runtime implementation or migration is part of this step.
+was attempted under SPINE-084 against checkpoint `9e8260d`, using the explicitly
+approved 121-input package, reviewer-only `audit-change` and built-in consistency.
+Codex rejected the 1,402,443-character prompt before review against its
+1,048,576-character cap; no semantic verdict exists. Three
+[overlapping packages](../whetstone_runs/recurring-related-task-machine-split-review-001/README.md)
+are now staged: A storage/identity (27 inputs), B authoring/lifecycle (96), and
+C reads/integration (64). Their union covers all 121 original inputs. Complete
+rendered prompts are respectively 908,478 / 856,114 / 916,046 characters, verified
+below an enforced 950,000-character preparation ceiling. The operator explicitly
+approved all three exact packages. All completed needs-revision with boundary
+false: A 2 majors / 1 minor, B 1 major / 3 minors, C 1 major / 2 minors; no blockers.
+The [reconciled outcome](../whetstone_runs/recurring-related-task-machine-split-review-001/review-summary.md)
+records ten distinct corrections, including frozen occurrence-key encoding,
+actual offline source-proof inputs, D=B adoption preservation and negative cursor
+oracles. No source was patched between assessments; all approved bytes and the
+failed oversized attempt are preserved. The operator-authorized SPINE-085 manual
+patch now addresses all ten findings locally: encoded occurrence keys, real
+normalized source/lineage witnesses, composed policy identity, D=B preservation,
+blocked-page semantics, raw/normalized assignee sets, error fields, watermarks,
+policy mappings and negative cursor outcomes. The bounded independent oracles
+remain tests, not runtime implementations. All 79 selected tests pass and the
+stdout-only builder reproduces 80 artifacts; no installed/frozen contract,
+runtime registration, DDL or migration changed. Fresh exact-payload rechecks
+remain the next review gate before ratification or runtime implementation.
+No source/runtime/ledger change is part of review execution.
+SPINE-075/079/080/081/082/083/084/085 in the backlog own design/review/patch/
+codification status; no runtime implementation or migration is part of this step.
 
 **Selected enriched delivery (2026-11-06):** The operator selected the smallest
 end-to-end feature, treating useful enrichment as the product direction rather

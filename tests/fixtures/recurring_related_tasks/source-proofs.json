@@ -1,0 +1,3792 @@
+{
+  "contract_version": "spine.recurring-related-task-source-witnesses.v1",
+  "status": "offline_model_only",
+  "runtime_verified": false,
+  "scope": "finite_WEEKLY_fixture_proofs_not_runtime_resolver",
+  "snapshots": [
+    {
+      "case_id": "main",
+      "value": {
+        "contract_version": "spine.recurrence.contract.v1",
+        "normalization_version": "spine.recurrence.normalization.v1",
+        "canonical_json_version": "spine.canonical-json.v1",
+        "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
+        "recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
+        "revision_number": "1",
+        "source_item_id": "item_fixture_science_class",
+        "created_item_version": "1",
+        "source_item_version": "1",
+        "seed_anchor_id": "anchor_fixture_main",
+        "time_basis": "local_instant",
+        "normalized_recurrence_set_hash": "07a3cf5ae207cefd1dce5b77833773ff1d990d63e20b7588c0d9a3a44ad50d40",
+        "segments": [
+          {
+            "segment_id": "recurrence_segment_745701e8f6dc647a155e52115aa6a848b46fe63a386c50f39b623aedfc998c27",
+            "segment_index": "0",
+            "active_start": "2026-11-14T11:30:00",
+            "source_revision_id": "initial",
+            "status": "active"
+          }
+        ],
+        "rules": [
+          {
+            "rule_id": "recurrence_rule_25beffd480d6cb16b9f8d202a6e2cd6d6d4e06c52c792eea558cb04758741a82",
+            "segment_id": "recurrence_segment_745701e8f6dc647a155e52115aa6a848b46fe63a386c50f39b623aedfc998c27",
+            "frequency": "WEEKLY",
+            "interval": "1",
+            "seed": "2026-11-14T11:30:00",
+            "start_bound": "2026-11-14T11:30:00",
+            "end_condition": {
+              "kind": "unbounded"
+            },
+            "by_weekday": [
+              "SA"
+            ],
+            "week_start": "MO",
+            "status": "active"
+          }
+        ],
+        "rdates": [],
+        "exdates": [],
+        "overrides": [],
+        "timezone": "Etc/UTC",
+        "timezone_database_version": "2026c"
+      },
+      "recurrence_set_id_preimage": {
+        "derivation_version": "spine.recurrence-set-id.v1",
+        "contract_version": "spine.recurrence.contract.v1",
+        "normalization_version": "spine.recurrence.normalization.v1",
+        "canonical_json_version": "spine.canonical-json.v1",
+        "source_item_id": "item_fixture_science_class",
+        "seed_anchor_id": "anchor_fixture_main",
+        "created_item_version": "1",
+        "time_basis": "local_instant",
+        "timezone": "Etc/UTC",
+        "timezone_database_version": "2026c"
+      },
+      "normalized_hash_preimage": {
+        "derivation_version": "normalized_recurrence_set_hash.v1",
+        "contract_version": "spine.recurrence.contract.v1",
+        "normalization_version": "spine.recurrence.normalization.v1",
+        "canonical_json_version": "spine.canonical-json.v1",
+        "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
+        "revision_number": "1",
+        "source_item_id": "item_fixture_science_class",
+        "created_item_version": "1",
+        "source_item_version": "1",
+        "seed_anchor_id": "anchor_fixture_main",
+        "time_basis": "local_instant",
+        "segments": [
+          {
+            "segment_index": "0",
+            "active_start": "2026-11-14T11:30:00",
+            "source_revision_id": "initial",
+            "status": "active"
+          }
+        ],
+        "rules": [
+          {
+            "segment_ref": "0",
+            "frequency": "WEEKLY",
+            "interval": "1",
+            "seed": "2026-11-14T11:30:00",
+            "start_bound": "2026-11-14T11:30:00",
+            "end_condition": {
+              "kind": "unbounded"
+            },
+            "by_weekday": [
+              "SA"
+            ],
+            "week_start": "MO",
+            "status": "active"
+          }
+        ],
+        "rdates": [],
+        "exdates": [],
+        "overrides": [],
+        "timezone": "Etc/UTC",
+        "timezone_database_version": "2026c"
+      },
+      "recurrence_revision_id_preimage": {
+        "derivation_version": "spine.recurrence-revision-id.v1",
+        "contract_version": "spine.recurrence.contract.v1",
+        "normalization_version": "spine.recurrence.normalization.v1",
+        "canonical_json_version": "spine.canonical-json.v1",
+        "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
+        "revision_number": "1",
+        "normalized_recurrence_set_hash": "07a3cf5ae207cefd1dce5b77833773ff1d990d63e20b7588c0d9a3a44ad50d40",
+        "command_id": "fixture_source_main"
+      },
+      "segment_id_preimages": [
+        {
+          "derivation_version": "spine.recurrence-segment-id.v1",
+          "contract_version": "spine.recurrence.contract.v1",
+          "normalization_version": "spine.recurrence.normalization.v1",
+          "canonical_json_version": "spine.canonical-json.v1",
+          "recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
+          "segment_index": "0",
+          "active_start": "2026-11-14T11:30:00",
+          "source_revision_id": "initial",
+          "status": "active"
+        }
+      ],
+      "rule_id_preimages": [
+        {
+          "derivation_version": "spine.recurrence-rule-id.v1",
+          "contract_version": "spine.recurrence.contract.v1",
+          "normalization_version": "spine.recurrence.normalization.v1",
+          "canonical_json_version": "spine.canonical-json.v1",
+          "recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
+          "segment_ref": "0",
+          "frequency": "WEEKLY",
+          "interval": "1",
+          "seed": "2026-11-14T11:30:00",
+          "start_bound": "2026-11-14T11:30:00",
+          "end_condition": {
+            "kind": "unbounded"
+          },
+          "by_weekday": [
+            "SA"
+          ],
+          "week_start": "MO",
+          "status": "active"
+        }
+      ],
+      "rdate_id_preimages": []
+    },
+    {
+      "case_id": "copied",
+      "value": {
+        "contract_version": "spine.recurrence.contract.v1",
+        "normalization_version": "spine.recurrence.normalization.v1",
+        "canonical_json_version": "spine.canonical-json.v1",
+        "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
+        "recurrence_revision_id": "recurrence_revision_fcf036592d711ec57b3767b4a94a742f47e2e73cf96ea23e9171d8ff5b4a33f6",
+        "prior_recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
+        "revision_number": "2",
+        "source_item_id": "item_fixture_science_class",
+        "created_item_version": "1",
+        "source_item_version": "2",
+        "seed_anchor_id": "anchor_fixture_main",
+        "time_basis": "local_instant",
+        "normalized_recurrence_set_hash": "44ef252d1e0d025005480aac0d3e2bc58bcdcddd65999918903f67b436874a66",
+        "segments": [
+          {
+            "segment_id": "recurrence_segment_55211a190a601df17a7812c4378b071b6d5456514139084bf6ee3d892d869076",
+            "segment_index": "0",
+            "active_start": "2026-11-14T11:30:00",
+            "source_revision_id": "initial",
+            "status": "active",
+            "created_by_command_id": "fixture_source_copied",
+            "lineage_parent_segment_id": "recurrence_segment_745701e8f6dc647a155e52115aa6a848b46fe63a386c50f39b623aedfc998c27"
+          }
+        ],
+        "rules": [
+          {
+            "rule_id": "recurrence_rule_9d433d333f91e5b1c6bfc59324d4dfeb21e19d1034ba0582796cbcdc2c9bdf63",
+            "segment_id": "recurrence_segment_55211a190a601df17a7812c4378b071b6d5456514139084bf6ee3d892d869076",
+            "frequency": "WEEKLY",
+            "interval": "1",
+            "seed": "2026-11-14T11:30:00",
+            "start_bound": "2026-11-14T11:30:00",
+            "end_condition": {
+              "kind": "unbounded"
+            },
+            "by_weekday": [
+              "SA"
+            ],
+            "week_start": "MO",
+            "status": "active"
+          }
+        ],
+        "rdates": [],
+        "exdates": [],
+        "overrides": [],
+        "timezone": "Etc/UTC",
+        "timezone_database_version": "2026c"
+      },
+      "recurrence_set_id_preimage": {
+        "derivation_version": "spine.recurrence-set-id.v1",
+        "contract_version": "spine.recurrence.contract.v1",
+        "normalization_version": "spine.recurrence.normalization.v1",
+        "canonical_json_version": "spine.canonical-json.v1",
+        "source_item_id": "item_fixture_science_class",
+        "seed_anchor_id": "anchor_fixture_main",
+        "created_item_version": "1",
+        "time_basis": "local_instant",
+        "timezone": "Etc/UTC",
+        "timezone_database_version": "2026c"
+      },
+      "normalized_hash_preimage": {
+        "derivation_version": "normalized_recurrence_set_hash.v1",
+        "contract_version": "spine.recurrence.contract.v1",
+        "normalization_version": "spine.recurrence.normalization.v1",
+        "canonical_json_version": "spine.canonical-json.v1",
+        "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
+        "revision_number": "2",
+        "source_item_id": "item_fixture_science_class",
+        "created_item_version": "1",
+        "source_item_version": "2",
+        "seed_anchor_id": "anchor_fixture_main",
+        "time_basis": "local_instant",
+        "segments": [
+          {
+            "segment_index": "0",
+            "active_start": "2026-11-14T11:30:00",
+            "source_revision_id": "initial",
+            "status": "active",
+            "created_by_command_id": "fixture_source_copied",
+            "lineage_parent_segment_id": "recurrence_segment_745701e8f6dc647a155e52115aa6a848b46fe63a386c50f39b623aedfc998c27"
+          }
+        ],
+        "rules": [
+          {
+            "segment_ref": "0",
+            "frequency": "WEEKLY",
+            "interval": "1",
+            "seed": "2026-11-14T11:30:00",
+            "start_bound": "2026-11-14T11:30:00",
+            "end_condition": {
+              "kind": "unbounded"
+            },
+            "by_weekday": [
+              "SA"
+            ],
+            "week_start": "MO",
+            "status": "active"
+          }
+        ],
+        "rdates": [],
+        "exdates": [],
+        "overrides": [],
+        "timezone": "Etc/UTC",
+        "timezone_database_version": "2026c"
+      },
+      "recurrence_revision_id_preimage": {
+        "derivation_version": "spine.recurrence-revision-id.v1",
+        "contract_version": "spine.recurrence.contract.v1",
+        "normalization_version": "spine.recurrence.normalization.v1",
+        "canonical_json_version": "spine.canonical-json.v1",
+        "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
+        "revision_number": "2",
+        "normalized_recurrence_set_hash": "44ef252d1e0d025005480aac0d3e2bc58bcdcddd65999918903f67b436874a66",
+        "prior_recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
+        "command_id": "fixture_source_copied"
+      },
+      "segment_id_preimages": [
+        {
+          "derivation_version": "spine.recurrence-segment-id.v1",
+          "contract_version": "spine.recurrence.contract.v1",
+          "normalization_version": "spine.recurrence.normalization.v1",
+          "canonical_json_version": "spine.canonical-json.v1",
+          "recurrence_revision_id": "recurrence_revision_fcf036592d711ec57b3767b4a94a742f47e2e73cf96ea23e9171d8ff5b4a33f6",
+          "segment_index": "0",
+          "active_start": "2026-11-14T11:30:00",
+          "source_revision_id": "initial",
+          "status": "active",
+          "created_by_command_id": "fixture_source_copied",
+          "lineage_parent_segment_id": "recurrence_segment_745701e8f6dc647a155e52115aa6a848b46fe63a386c50f39b623aedfc998c27"
+        }
+      ],
+      "rule_id_preimages": [
+        {
+          "derivation_version": "spine.recurrence-rule-id.v1",
+          "contract_version": "spine.recurrence.contract.v1",
+          "normalization_version": "spine.recurrence.normalization.v1",
+          "canonical_json_version": "spine.canonical-json.v1",
+          "recurrence_revision_id": "recurrence_revision_fcf036592d711ec57b3767b4a94a742f47e2e73cf96ea23e9171d8ff5b4a33f6",
+          "segment_ref": "0",
+          "frequency": "WEEKLY",
+          "interval": "1",
+          "seed": "2026-11-14T11:30:00",
+          "start_bound": "2026-11-14T11:30:00",
+          "end_condition": {
+            "kind": "unbounded"
+          },
+          "by_weekday": [
+            "SA"
+          ],
+          "week_start": "MO",
+          "status": "active"
+        }
+      ],
+      "rdate_id_preimages": []
+    },
+    {
+      "case_id": "added",
+      "value": {
+        "contract_version": "spine.recurrence.contract.v1",
+        "normalization_version": "spine.recurrence.normalization.v1",
+        "canonical_json_version": "spine.canonical-json.v1",
+        "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
+        "recurrence_revision_id": "recurrence_revision_6663d82b183c5c9b2d657e87bb4a51ad7dcb1a1dc54cce3e2f0720a80d376184",
+        "prior_recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
+        "revision_number": "2",
+        "source_item_id": "item_fixture_science_class",
+        "created_item_version": "1",
+        "source_item_version": "2",
+        "seed_anchor_id": "anchor_fixture_main",
+        "time_basis": "local_instant",
+        "normalized_recurrence_set_hash": "ea51cd54b90fc91694a7edf34fe7627da16091929d6babe47c59291a1d31bbe0",
+        "segments": [
+          {
+            "segment_id": "recurrence_segment_c8dec7b3586f1b1a61eee42985de8a1a016b8bd0e047b911911d39b0783c6aae",
+            "segment_index": "0",
+            "active_start": "2026-11-14T11:30:00",
+            "source_revision_id": "initial",
+            "status": "active",
+            "created_by_command_id": "fixture_source_added",
+            "lineage_parent_segment_id": "recurrence_segment_745701e8f6dc647a155e52115aa6a848b46fe63a386c50f39b623aedfc998c27"
+          }
+        ],
+        "rules": [
+          {
+            "rule_id": "recurrence_rule_20c749701d95c772a830de1733298b33f0aa86d0dfda0af7528c498011e6365a",
+            "segment_id": "recurrence_segment_c8dec7b3586f1b1a61eee42985de8a1a016b8bd0e047b911911d39b0783c6aae",
+            "frequency": "WEEKLY",
+            "interval": "1",
+            "seed": "2026-11-14T11:30:00",
+            "start_bound": "2026-11-14T11:30:00",
+            "end_condition": {
+              "kind": "unbounded"
+            },
+            "by_weekday": [
+              "SA"
+            ],
+            "week_start": "MO",
+            "status": "active"
+          }
+        ],
+        "rdates": [
+          {
+            "rdate_id": "recurrence_rdate_3e0131819c9f895fd0bb991f926e63ac224221af3aecf132a35f0b310ac5f9aa",
+            "segment_id": "recurrence_segment_c8dec7b3586f1b1a61eee42985de8a1a016b8bd0e047b911911d39b0783c6aae",
+            "scheduled_fact": "2026-11-15T11:30:00",
+            "status": "active"
+          }
+        ],
+        "exdates": [],
+        "overrides": [],
+        "timezone": "Etc/UTC",
+        "timezone_database_version": "2026c"
+      },
+      "recurrence_set_id_preimage": {
+        "derivation_version": "spine.recurrence-set-id.v1",
+        "contract_version": "spine.recurrence.contract.v1",
+        "normalization_version": "spine.recurrence.normalization.v1",
+        "canonical_json_version": "spine.canonical-json.v1",
+        "source_item_id": "item_fixture_science_class",
+        "seed_anchor_id": "anchor_fixture_main",
+        "created_item_version": "1",
+        "time_basis": "local_instant",
+        "timezone": "Etc/UTC",
+        "timezone_database_version": "2026c"
+      },
+      "normalized_hash_preimage": {
+        "derivation_version": "normalized_recurrence_set_hash.v1",
+        "contract_version": "spine.recurrence.contract.v1",
+        "normalization_version": "spine.recurrence.normalization.v1",
+        "canonical_json_version": "spine.canonical-json.v1",
+        "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
+        "revision_number": "2",
+        "source_item_id": "item_fixture_science_class",
+        "created_item_version": "1",
+        "source_item_version": "2",
+        "seed_anchor_id": "anchor_fixture_main",
+        "time_basis": "local_instant",
+        "segments": [
+          {
+            "segment_index": "0",
+            "active_start": "2026-11-14T11:30:00",
+            "source_revision_id": "initial",
+            "status": "active",
+            "created_by_command_id": "fixture_source_added",
+            "lineage_parent_segment_id": "recurrence_segment_745701e8f6dc647a155e52115aa6a848b46fe63a386c50f39b623aedfc998c27"
+          }
+        ],
+        "rules": [
+          {
+            "segment_ref": "0",
+            "frequency": "WEEKLY",
+            "interval": "1",
+            "seed": "2026-11-14T11:30:00",
+            "start_bound": "2026-11-14T11:30:00",
+            "end_condition": {
+              "kind": "unbounded"
+            },
+            "by_weekday": [
+              "SA"
+            ],
+            "week_start": "MO",
+            "status": "active"
+          }
+        ],
+        "rdates": [
+          {
+            "segment_ref": "0",
+            "scheduled_fact": "2026-11-15T11:30:00",
+            "status": "active"
+          }
+        ],
+        "exdates": [],
+        "overrides": [],
+        "timezone": "Etc/UTC",
+        "timezone_database_version": "2026c"
+      },
+      "recurrence_revision_id_preimage": {
+        "derivation_version": "spine.recurrence-revision-id.v1",
+        "contract_version": "spine.recurrence.contract.v1",
+        "normalization_version": "spine.recurrence.normalization.v1",
+        "canonical_json_version": "spine.canonical-json.v1",
+        "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
+        "revision_number": "2",
+        "normalized_recurrence_set_hash": "ea51cd54b90fc91694a7edf34fe7627da16091929d6babe47c59291a1d31bbe0",
+        "prior_recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
+        "command_id": "fixture_source_added"
+      },
+      "segment_id_preimages": [
+        {
+          "derivation_version": "spine.recurrence-segment-id.v1",
+          "contract_version": "spine.recurrence.contract.v1",
+          "normalization_version": "spine.recurrence.normalization.v1",
+          "canonical_json_version": "spine.canonical-json.v1",
+          "recurrence_revision_id": "recurrence_revision_6663d82b183c5c9b2d657e87bb4a51ad7dcb1a1dc54cce3e2f0720a80d376184",
+          "segment_index": "0",
+          "active_start": "2026-11-14T11:30:00",
+          "source_revision_id": "initial",
+          "status": "active",
+          "created_by_command_id": "fixture_source_added",
+          "lineage_parent_segment_id": "recurrence_segment_745701e8f6dc647a155e52115aa6a848b46fe63a386c50f39b623aedfc998c27"
+        }
+      ],
+      "rule_id_preimages": [
+        {
+          "derivation_version": "spine.recurrence-rule-id.v1",
+          "contract_version": "spine.recurrence.contract.v1",
+          "normalization_version": "spine.recurrence.normalization.v1",
+          "canonical_json_version": "spine.canonical-json.v1",
+          "recurrence_revision_id": "recurrence_revision_6663d82b183c5c9b2d657e87bb4a51ad7dcb1a1dc54cce3e2f0720a80d376184",
+          "segment_ref": "0",
+          "frequency": "WEEKLY",
+          "interval": "1",
+          "seed": "2026-11-14T11:30:00",
+          "start_bound": "2026-11-14T11:30:00",
+          "end_condition": {
+            "kind": "unbounded"
+          },
+          "by_weekday": [
+            "SA"
+          ],
+          "week_start": "MO",
+          "status": "active"
+        }
+      ],
+      "rdate_id_preimages": [
+        {
+          "derivation_version": "spine.recurrence-rdate-id.v1",
+          "contract_version": "spine.recurrence.contract.v1",
+          "normalization_version": "spine.recurrence.normalization.v1",
+          "canonical_json_version": "spine.canonical-json.v1",
+          "recurrence_revision_id": "recurrence_revision_6663d82b183c5c9b2d657e87bb4a51ad7dcb1a1dc54cce3e2f0720a80d376184",
+          "segment_ref": "0",
+          "scheduled_fact": "2026-11-15T11:30:00",
+          "status": "active"
+        }
+      ]
+    },
+    {
+      "case_id": "excluded",
+      "value": {
+        "contract_version": "spine.recurrence.contract.v1",
+        "normalization_version": "spine.recurrence.normalization.v1",
+        "canonical_json_version": "spine.canonical-json.v1",
+        "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
+        "recurrence_revision_id": "recurrence_revision_99c33f0aecf53ab6af45ed0e72f17b59cfefe418b3f3790a72fc7944fc493ac8",
+        "prior_recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
+        "revision_number": "2",
+        "source_item_id": "item_fixture_science_class",
+        "created_item_version": "1",
+        "source_item_version": "2",
+        "seed_anchor_id": "anchor_fixture_main",
+        "time_basis": "local_instant",
+        "normalized_recurrence_set_hash": "9190c2cdbc76bdf23205f4b56a4f6a9e5ac9237dfa72229eecf3fd6aeec52d6f",
+        "segments": [
+          {
+            "segment_id": "recurrence_segment_b248993e31f41b3f7f33e8be5d551feccd1393995af70072a7df78922fd5f326",
+            "segment_index": "0",
+            "active_start": "2026-11-14T11:30:00",
+            "source_revision_id": "initial",
+            "status": "active",
+            "created_by_command_id": "fixture_source_excluded",
+            "lineage_parent_segment_id": "recurrence_segment_745701e8f6dc647a155e52115aa6a848b46fe63a386c50f39b623aedfc998c27"
+          }
+        ],
+        "rules": [
+          {
+            "rule_id": "recurrence_rule_de22821ea070560fd985bc88285e8ec689ff85b5cb2a595b1af95ea41ad46603",
+            "segment_id": "recurrence_segment_b248993e31f41b3f7f33e8be5d551feccd1393995af70072a7df78922fd5f326",
+            "frequency": "WEEKLY",
+            "interval": "1",
+            "seed": "2026-11-14T11:30:00",
+            "start_bound": "2026-11-14T11:30:00",
+            "end_condition": {
+              "kind": "unbounded"
+            },
+            "by_weekday": [
+              "SA"
+            ],
+            "week_start": "MO",
+            "status": "active"
+          }
+        ],
+        "rdates": [],
+        "exdates": [
+          {
+            "exdate_id": "recurrence_exdate_4c8054449c2a9c05869e0904c356ab2c97b19376f58e1a49a7b0dfeff4d70e11",
+            "segment_id": "recurrence_segment_b248993e31f41b3f7f33e8be5d551feccd1393995af70072a7df78922fd5f326",
+            "target_occurrence_selector": {
+              "contract_version": "spine.recurrence.contract.v1",
+              "normalization_version": "spine.recurrence.normalization.v1",
+              "canonical_json_version": "spine.canonical-json.v1",
+              "derivation_version": "spine.recurrence-target-occurrence-selector.v1",
+              "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
+              "segment_ref": "0",
+              "scheduled_fact": "2026-11-14T11:30:00",
+              "origin_kind": "rule",
+              "source_rule_selectors": [
+                {
+                  "frequency": "WEEKLY",
+                  "interval": "1",
+                  "seed": "2026-11-14T11:30:00",
+                  "start_bound": "2026-11-14T11:30:00",
+                  "end_condition": {
+                    "kind": "unbounded"
+                  },
+                  "by_weekday": [
+                    "SA"
+                  ],
+                  "week_start": "MO",
+                  "status": "active"
+                }
+              ],
+              "source_rdate_selectors": []
+            },
+            "scheduled_fact": "2026-11-14T11:30:00",
+            "reason_code": "class_cancelled",
+            "status": "active",
+            "target_occurrence_key": "eyJjYW5vbmljYWxfanNvbl92ZXJzaW9uIjoic3BpbmUuY2Fub25pY2FsLWpzb24udjEiLCJjb250cmFjdF92ZXJzaW9uIjoic3BpbmUucmVjdXJyZW5jZS5jb250cmFjdC52MSIsImRlcml2YXRpb25fdmVyc2lvbiI6InNwaW5lLnJlY3VycmVuY2Utb2NjdXJyZW5jZS1rZXkudjIiLCJub3JtYWxpemF0aW9uX3ZlcnNpb24iOiJzcGluZS5yZWN1cnJlbmNlLm5vcm1hbGl6YXRpb24udjEiLCJ0YXJnZXRfb2NjdXJyZW5jZV9zZWxlY3RvciI6eyJjYW5vbmljYWxfanNvbl92ZXJzaW9uIjoic3BpbmUuY2Fub25pY2FsLWpzb24udjEiLCJjb250cmFjdF92ZXJzaW9uIjoic3BpbmUucmVjdXJyZW5jZS5jb250cmFjdC52MSIsImRlcml2YXRpb25fdmVyc2lvbiI6InNwaW5lLnJlY3VycmVuY2UtdGFyZ2V0LW9jY3VycmVuY2Utc2VsZWN0b3IudjEiLCJub3JtYWxpemF0aW9uX3ZlcnNpb24iOiJzcGluZS5yZWN1cnJlbmNlLm5vcm1hbGl6YXRpb24udjEiLCJvcmlnaW5fa2luZCI6InJ1bGUiLCJyZWN1cnJlbmNlX3NldF9pZCI6InJlY3VycmVuY2Vfc2V0Xzg5YTVlZjdlYzhiOTA4ZGRmYmJiYmMxYTBkYzk5MmJhYTUxZDg1Yjg4NGE3NWZiYzhmYWJiY2QyZWJhMWFkMDciLCJzY2hlZHVsZWRfZmFjdCI6IjIwMjYtMTEtMTRUMTE6MzA6MDAiLCJzZWdtZW50X3JlZiI6IjAiLCJzb3VyY2VfcmRhdGVfc2VsZWN0b3JzIjpbXSwic291cmNlX3J1bGVfc2VsZWN0b3JzIjpbeyJieV93ZWVrZGF5IjpbIlNBIl0sImVuZF9jb25kaXRpb24iOnsia2luZCI6InVuYm91bmRlZCJ9LCJmcmVxdWVuY3kiOiJXRUVLTFkiLCJpbnRlcnZhbCI6IjEiLCJzZWVkIjoiMjAyNi0xMS0xNFQxMTozMDowMCIsInN0YXJ0X2JvdW5kIjoiMjAyNi0xMS0xNFQxMTozMDowMCIsInN0YXR1cyI6ImFjdGl2ZSIsIndlZWtfc3RhcnQiOiJNTyJ9XX19.cdb5d6f7fb37da99ae2b5e272eea9e9536328b5d228b9ff0a71f620ed222d664"
+          }
+        ],
+        "overrides": [],
+        "timezone": "Etc/UTC",
+        "timezone_database_version": "2026c"
+      },
+      "recurrence_set_id_preimage": {
+        "derivation_version": "spine.recurrence-set-id.v1",
+        "contract_version": "spine.recurrence.contract.v1",
+        "normalization_version": "spine.recurrence.normalization.v1",
+        "canonical_json_version": "spine.canonical-json.v1",
+        "source_item_id": "item_fixture_science_class",
+        "seed_anchor_id": "anchor_fixture_main",
+        "created_item_version": "1",
+        "time_basis": "local_instant",
+        "timezone": "Etc/UTC",
+        "timezone_database_version": "2026c"
+      },
+      "normalized_hash_preimage": {
+        "derivation_version": "normalized_recurrence_set_hash.v1",
+        "contract_version": "spine.recurrence.contract.v1",
+        "normalization_version": "spine.recurrence.normalization.v1",
+        "canonical_json_version": "spine.canonical-json.v1",
+        "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
+        "revision_number": "2",
+        "source_item_id": "item_fixture_science_class",
+        "created_item_version": "1",
+        "source_item_version": "2",
+        "seed_anchor_id": "anchor_fixture_main",
+        "time_basis": "local_instant",
+        "segments": [
+          {
+            "segment_index": "0",
+            "active_start": "2026-11-14T11:30:00",
+            "source_revision_id": "initial",
+            "status": "active",
+            "created_by_command_id": "fixture_source_excluded",
+            "lineage_parent_segment_id": "recurrence_segment_745701e8f6dc647a155e52115aa6a848b46fe63a386c50f39b623aedfc998c27"
+          }
+        ],
+        "rules": [
+          {
+            "segment_ref": "0",
+            "frequency": "WEEKLY",
+            "interval": "1",
+            "seed": "2026-11-14T11:30:00",
+            "start_bound": "2026-11-14T11:30:00",
+            "end_condition": {
+              "kind": "unbounded"
+            },
+            "by_weekday": [
+              "SA"
+            ],
+            "week_start": "MO",
+            "status": "active"
+          }
+        ],
+        "rdates": [],
+        "exdates": [
+          {
+            "segment_ref": "0",
+            "target_occurrence_selector": {
+              "contract_version": "spine.recurrence.contract.v1",
+              "normalization_version": "spine.recurrence.normalization.v1",
+              "canonical_json_version": "spine.canonical-json.v1",
+              "derivation_version": "spine.recurrence-target-occurrence-selector.v1",
+              "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
+              "segment_ref": "0",
+              "scheduled_fact": "2026-11-14T11:30:00",
+              "origin_kind": "rule",
+              "source_rule_selectors": [
+                {
+                  "frequency": "WEEKLY",
+                  "interval": "1",
+                  "seed": "2026-11-14T11:30:00",
+                  "start_bound": "2026-11-14T11:30:00",
+                  "end_condition": {
+                    "kind": "unbounded"
+                  },
+                  "by_weekday": [
+                    "SA"
+                  ],
+                  "week_start": "MO",
+                  "status": "active"
+                }
+              ],
+              "source_rdate_selectors": []
+            },
+            "scheduled_fact": "2026-11-14T11:30:00",
+            "reason_code": "class_cancelled",
+            "status": "active"
+          }
+        ],
+        "overrides": [],
+        "timezone": "Etc/UTC",
+        "timezone_database_version": "2026c"
+      },
+      "recurrence_revision_id_preimage": {
+        "derivation_version": "spine.recurrence-revision-id.v1",
+        "contract_version": "spine.recurrence.contract.v1",
+        "normalization_version": "spine.recurrence.normalization.v1",
+        "canonical_json_version": "spine.canonical-json.v1",
+        "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
+        "revision_number": "2",
+        "normalized_recurrence_set_hash": "9190c2cdbc76bdf23205f4b56a4f6a9e5ac9237dfa72229eecf3fd6aeec52d6f",
+        "prior_recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
+        "command_id": "fixture_source_excluded"
+      },
+      "segment_id_preimages": [
+        {
+          "derivation_version": "spine.recurrence-segment-id.v1",
+          "contract_version": "spine.recurrence.contract.v1",
+          "normalization_version": "spine.recurrence.normalization.v1",
+          "canonical_json_version": "spine.canonical-json.v1",
+          "recurrence_revision_id": "recurrence_revision_99c33f0aecf53ab6af45ed0e72f17b59cfefe418b3f3790a72fc7944fc493ac8",
+          "segment_index": "0",
+          "active_start": "2026-11-14T11:30:00",
+          "source_revision_id": "initial",
+          "status": "active",
+          "created_by_command_id": "fixture_source_excluded",
+          "lineage_parent_segment_id": "recurrence_segment_745701e8f6dc647a155e52115aa6a848b46fe63a386c50f39b623aedfc998c27"
+        }
+      ],
+      "rule_id_preimages": [
+        {
+          "derivation_version": "spine.recurrence-rule-id.v1",
+          "contract_version": "spine.recurrence.contract.v1",
+          "normalization_version": "spine.recurrence.normalization.v1",
+          "canonical_json_version": "spine.canonical-json.v1",
+          "recurrence_revision_id": "recurrence_revision_99c33f0aecf53ab6af45ed0e72f17b59cfefe418b3f3790a72fc7944fc493ac8",
+          "segment_ref": "0",
+          "frequency": "WEEKLY",
+          "interval": "1",
+          "seed": "2026-11-14T11:30:00",
+          "start_bound": "2026-11-14T11:30:00",
+          "end_condition": {
+            "kind": "unbounded"
+          },
+          "by_weekday": [
+            "SA"
+          ],
+          "week_start": "MO",
+          "status": "active"
+        }
+      ],
+      "rdate_id_preimages": []
+    },
+    {
+      "case_id": "occurrence_cancelled",
+      "value": {
+        "contract_version": "spine.recurrence.contract.v1",
+        "normalization_version": "spine.recurrence.normalization.v1",
+        "canonical_json_version": "spine.canonical-json.v1",
+        "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
+        "recurrence_revision_id": "recurrence_revision_a038787544b273d1d1c0b0e5ee63b360ba19ab99103e27c41c84e463e77d01e2",
+        "prior_recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
+        "revision_number": "2",
+        "source_item_id": "item_fixture_science_class",
+        "created_item_version": "1",
+        "source_item_version": "2",
+        "seed_anchor_id": "anchor_fixture_main",
+        "time_basis": "local_instant",
+        "normalized_recurrence_set_hash": "07502810d1fd81c58d76622d5882867a6cd07316770c5bd23f1cf267adc0e4b6",
+        "segments": [
+          {
+            "segment_id": "recurrence_segment_097d3baa50d2f3f56e5a7d64034e03b8293fe30d77ade7bafd7e618d5c99b10f",
+            "segment_index": "0",
+            "active_start": "2026-11-14T11:30:00",
+            "source_revision_id": "initial",
+            "status": "active",
+            "created_by_command_id": "fixture_source_occurrence_cancelled",
+            "lineage_parent_segment_id": "recurrence_segment_745701e8f6dc647a155e52115aa6a848b46fe63a386c50f39b623aedfc998c27"
+          }
+        ],
+        "rules": [
+          {
+            "rule_id": "recurrence_rule_599939a1e9cc01cd5b22cea89bff888db61f08ff02b88fdffa6d19198d5cb813",
+            "segment_id": "recurrence_segment_097d3baa50d2f3f56e5a7d64034e03b8293fe30d77ade7bafd7e618d5c99b10f",
+            "frequency": "WEEKLY",
+            "interval": "1",
+            "seed": "2026-11-14T11:30:00",
+            "start_bound": "2026-11-14T11:30:00",
+            "end_condition": {
+              "kind": "unbounded"
+            },
+            "by_weekday": [
+              "SA"
+            ],
+            "week_start": "MO",
+            "status": "active"
+          }
+        ],
+        "rdates": [],
+        "exdates": [],
+        "overrides": [
+          {
+            "override_id": "recurrence_override_b323e122e44a0633c26255919f19f2b38db170813f813782916e16d6bb9fbafb",
+            "segment_id": "recurrence_segment_097d3baa50d2f3f56e5a7d64034e03b8293fe30d77ade7bafd7e618d5c99b10f",
+            "target_occurrence_key": "eyJjYW5vbmljYWxfanNvbl92ZXJzaW9uIjoic3BpbmUuY2Fub25pY2FsLWpzb24udjEiLCJjb250cmFjdF92ZXJzaW9uIjoic3BpbmUucmVjdXJyZW5jZS5jb250cmFjdC52MSIsImRlcml2YXRpb25fdmVyc2lvbiI6InNwaW5lLnJlY3VycmVuY2Utb2NjdXJyZW5jZS1rZXkudjIiLCJub3JtYWxpemF0aW9uX3ZlcnNpb24iOiJzcGluZS5yZWN1cnJlbmNlLm5vcm1hbGl6YXRpb24udjEiLCJ0YXJnZXRfb2NjdXJyZW5jZV9zZWxlY3RvciI6eyJjYW5vbmljYWxfanNvbl92ZXJzaW9uIjoic3BpbmUuY2Fub25pY2FsLWpzb24udjEiLCJjb250cmFjdF92ZXJzaW9uIjoic3BpbmUucmVjdXJyZW5jZS5jb250cmFjdC52MSIsImRlcml2YXRpb25fdmVyc2lvbiI6InNwaW5lLnJlY3VycmVuY2UtdGFyZ2V0LW9jY3VycmVuY2Utc2VsZWN0b3IudjEiLCJub3JtYWxpemF0aW9uX3ZlcnNpb24iOiJzcGluZS5yZWN1cnJlbmNlLm5vcm1hbGl6YXRpb24udjEiLCJvcmlnaW5fa2luZCI6InJ1bGUiLCJyZWN1cnJlbmNlX3NldF9pZCI6InJlY3VycmVuY2Vfc2V0Xzg5YTVlZjdlYzhiOTA4ZGRmYmJiYmMxYTBkYzk5MmJhYTUxZDg1Yjg4NGE3NWZiYzhmYWJiY2QyZWJhMWFkMDciLCJzY2hlZHVsZWRfZmFjdCI6IjIwMjYtMTEtMTRUMTE6MzA6MDAiLCJzZWdtZW50X3JlZiI6IjAiLCJzb3VyY2VfcmRhdGVfc2VsZWN0b3JzIjpbXSwic291cmNlX3J1bGVfc2VsZWN0b3JzIjpbeyJieV93ZWVrZGF5IjpbIlNBIl0sImVuZF9jb25kaXRpb24iOnsia2luZCI6InVuYm91bmRlZCJ9LCJmcmVxdWVuY3kiOiJXRUVLTFkiLCJpbnRlcnZhbCI6IjEiLCJzZWVkIjoiMjAyNi0xMS0xNFQxMTozMDowMCIsInN0YXJ0X2JvdW5kIjoiMjAyNi0xMS0xNFQxMTozMDowMCIsInN0YXR1cyI6ImFjdGl2ZSIsIndlZWtfc3RhcnQiOiJNTyJ9XX19.cdb5d6f7fb37da99ae2b5e272eea9e9536328b5d228b9ff0a71f620ed222d664",
+            "target_occurrence_selector": {
+              "contract_version": "spine.recurrence.contract.v1",
+              "normalization_version": "spine.recurrence.normalization.v1",
+              "canonical_json_version": "spine.canonical-json.v1",
+              "derivation_version": "spine.recurrence-target-occurrence-selector.v1",
+              "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
+              "segment_ref": "0",
+              "scheduled_fact": "2026-11-14T11:30:00",
+              "origin_kind": "rule",
+              "source_rule_selectors": [
+                {
+                  "frequency": "WEEKLY",
+                  "interval": "1",
+                  "seed": "2026-11-14T11:30:00",
+                  "start_bound": "2026-11-14T11:30:00",
+                  "end_condition": {
+                    "kind": "unbounded"
+                  },
+                  "by_weekday": [
+                    "SA"
+                  ],
+                  "week_start": "MO",
+                  "status": "active"
+                }
+              ],
+              "source_rdate_selectors": []
+            },
+            "override_kind": "lifecycle",
+            "revision_key": "revkey_e1cbc56e8ea5430acadde016f47a80c7f6bf918b17b43496cccc431b71d646be",
+            "lifecycle": "cancelled",
+            "status": "active"
+          }
+        ],
+        "timezone": "Etc/UTC",
+        "timezone_database_version": "2026c"
+      },
+      "recurrence_set_id_preimage": {
+        "derivation_version": "spine.recurrence-set-id.v1",
+        "contract_version": "spine.recurrence.contract.v1",
+        "normalization_version": "spine.recurrence.normalization.v1",
+        "canonical_json_version": "spine.canonical-json.v1",
+        "source_item_id": "item_fixture_science_class",
+        "seed_anchor_id": "anchor_fixture_main",
+        "created_item_version": "1",
+        "time_basis": "local_instant",
+        "timezone": "Etc/UTC",
+        "timezone_database_version": "2026c"
+      },
+      "normalized_hash_preimage": {
+        "derivation_version": "normalized_recurrence_set_hash.v1",
+        "contract_version": "spine.recurrence.contract.v1",
+        "normalization_version": "spine.recurrence.normalization.v1",
+        "canonical_json_version": "spine.canonical-json.v1",
+        "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
+        "revision_number": "2",
+        "source_item_id": "item_fixture_science_class",
+        "created_item_version": "1",
+        "source_item_version": "2",
+        "seed_anchor_id": "anchor_fixture_main",
+        "time_basis": "local_instant",
+        "segments": [
+          {
+            "segment_index": "0",
+            "active_start": "2026-11-14T11:30:00",
+            "source_revision_id": "initial",
+            "status": "active",
+            "created_by_command_id": "fixture_source_occurrence_cancelled",
+            "lineage_parent_segment_id": "recurrence_segment_745701e8f6dc647a155e52115aa6a848b46fe63a386c50f39b623aedfc998c27"
+          }
+        ],
+        "rules": [
+          {
+            "segment_ref": "0",
+            "frequency": "WEEKLY",
+            "interval": "1",
+            "seed": "2026-11-14T11:30:00",
+            "start_bound": "2026-11-14T11:30:00",
+            "end_condition": {
+              "kind": "unbounded"
+            },
+            "by_weekday": [
+              "SA"
+            ],
+            "week_start": "MO",
+            "status": "active"
+          }
+        ],
+        "rdates": [],
+        "exdates": [],
+        "overrides": [
+          {
+            "target_occurrence_selector": {
+              "contract_version": "spine.recurrence.contract.v1",
+              "normalization_version": "spine.recurrence.normalization.v1",
+              "canonical_json_version": "spine.canonical-json.v1",
+              "derivation_version": "spine.recurrence-target-occurrence-selector.v1",
+              "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
+              "segment_ref": "0",
+              "scheduled_fact": "2026-11-14T11:30:00",
+              "origin_kind": "rule",
+              "source_rule_selectors": [
+                {
+                  "frequency": "WEEKLY",
+                  "interval": "1",
+                  "seed": "2026-11-14T11:30:00",
+                  "start_bound": "2026-11-14T11:30:00",
+                  "end_condition": {
+                    "kind": "unbounded"
+                  },
+                  "by_weekday": [
+                    "SA"
+                  ],
+                  "week_start": "MO",
+                  "status": "active"
+                }
+              ],
+              "source_rdate_selectors": []
+            },
+            "override_kind": "lifecycle",
+            "revision_key": "revkey_e1cbc56e8ea5430acadde016f47a80c7f6bf918b17b43496cccc431b71d646be",
+            "lifecycle": "cancelled",
+            "segment_ref": "0",
+            "status": "active"
+          }
+        ],
+        "timezone": "Etc/UTC",
+        "timezone_database_version": "2026c"
+      },
+      "recurrence_revision_id_preimage": {
+        "derivation_version": "spine.recurrence-revision-id.v1",
+        "contract_version": "spine.recurrence.contract.v1",
+        "normalization_version": "spine.recurrence.normalization.v1",
+        "canonical_json_version": "spine.canonical-json.v1",
+        "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
+        "revision_number": "2",
+        "normalized_recurrence_set_hash": "07502810d1fd81c58d76622d5882867a6cd07316770c5bd23f1cf267adc0e4b6",
+        "prior_recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
+        "command_id": "fixture_source_occurrence_cancelled"
+      },
+      "segment_id_preimages": [
+        {
+          "derivation_version": "spine.recurrence-segment-id.v1",
+          "contract_version": "spine.recurrence.contract.v1",
+          "normalization_version": "spine.recurrence.normalization.v1",
+          "canonical_json_version": "spine.canonical-json.v1",
+          "recurrence_revision_id": "recurrence_revision_a038787544b273d1d1c0b0e5ee63b360ba19ab99103e27c41c84e463e77d01e2",
+          "segment_index": "0",
+          "active_start": "2026-11-14T11:30:00",
+          "source_revision_id": "initial",
+          "status": "active",
+          "created_by_command_id": "fixture_source_occurrence_cancelled",
+          "lineage_parent_segment_id": "recurrence_segment_745701e8f6dc647a155e52115aa6a848b46fe63a386c50f39b623aedfc998c27"
+        }
+      ],
+      "rule_id_preimages": [
+        {
+          "derivation_version": "spine.recurrence-rule-id.v1",
+          "contract_version": "spine.recurrence.contract.v1",
+          "normalization_version": "spine.recurrence.normalization.v1",
+          "canonical_json_version": "spine.canonical-json.v1",
+          "recurrence_revision_id": "recurrence_revision_a038787544b273d1d1c0b0e5ee63b360ba19ab99103e27c41c84e463e77d01e2",
+          "segment_ref": "0",
+          "frequency": "WEEKLY",
+          "interval": "1",
+          "seed": "2026-11-14T11:30:00",
+          "start_bound": "2026-11-14T11:30:00",
+          "end_condition": {
+            "kind": "unbounded"
+          },
+          "by_weekday": [
+            "SA"
+          ],
+          "week_start": "MO",
+          "status": "active"
+        }
+      ],
+      "rdate_id_preimages": []
+    },
+    {
+      "case_id": "source_cancelled",
+      "value": {
+        "contract_version": "spine.recurrence.contract.v1",
+        "normalization_version": "spine.recurrence.normalization.v1",
+        "canonical_json_version": "spine.canonical-json.v1",
+        "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
+        "recurrence_revision_id": "recurrence_revision_789cb1d3003adff667a537b85f57481005112ebe1fb848caca47c9128f4fad58",
+        "prior_recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
+        "revision_number": "2",
+        "source_item_id": "item_fixture_science_class",
+        "created_item_version": "1",
+        "source_item_version": "2",
+        "seed_anchor_id": "anchor_fixture_main",
+        "time_basis": "local_instant",
+        "normalized_recurrence_set_hash": "0203dbe4d4c45e0fc1d808328b4dc259d25d4204ac193218ef80c3bd7ef17e5b",
+        "segments": [
+          {
+            "segment_id": "recurrence_segment_c50f7916b3b0db469a3c53796fcc94569ee65db13fd8c3ea7cbafa07f7fd5e66",
+            "segment_index": "0",
+            "active_start": "2026-11-14T11:30:00",
+            "source_revision_id": "initial",
+            "status": "active",
+            "created_by_command_id": "fixture_source_source_cancelled",
+            "lineage_parent_segment_id": "recurrence_segment_745701e8f6dc647a155e52115aa6a848b46fe63a386c50f39b623aedfc998c27"
+          }
+        ],
+        "rules": [
+          {
+            "rule_id": "recurrence_rule_2a02d042cf3310ebd6fb90f794159a07a6cb4b971b79ccb3c53553363c8d1331",
+            "segment_id": "recurrence_segment_c50f7916b3b0db469a3c53796fcc94569ee65db13fd8c3ea7cbafa07f7fd5e66",
+            "frequency": "WEEKLY",
+            "interval": "1",
+            "seed": "2026-11-14T11:30:00",
+            "start_bound": "2026-11-14T11:30:00",
+            "end_condition": {
+              "kind": "unbounded"
+            },
+            "by_weekday": [
+              "SA"
+            ],
+            "week_start": "MO",
+            "status": "active"
+          }
+        ],
+        "rdates": [],
+        "exdates": [],
+        "overrides": [],
+        "timezone": "Etc/UTC",
+        "timezone_database_version": "2026c"
+      },
+      "recurrence_set_id_preimage": {
+        "derivation_version": "spine.recurrence-set-id.v1",
+        "contract_version": "spine.recurrence.contract.v1",
+        "normalization_version": "spine.recurrence.normalization.v1",
+        "canonical_json_version": "spine.canonical-json.v1",
+        "source_item_id": "item_fixture_science_class",
+        "seed_anchor_id": "anchor_fixture_main",
+        "created_item_version": "1",
+        "time_basis": "local_instant",
+        "timezone": "Etc/UTC",
+        "timezone_database_version": "2026c"
+      },
+      "normalized_hash_preimage": {
+        "derivation_version": "normalized_recurrence_set_hash.v1",
+        "contract_version": "spine.recurrence.contract.v1",
+        "normalization_version": "spine.recurrence.normalization.v1",
+        "canonical_json_version": "spine.canonical-json.v1",
+        "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
+        "revision_number": "2",
+        "source_item_id": "item_fixture_science_class",
+        "created_item_version": "1",
+        "source_item_version": "2",
+        "seed_anchor_id": "anchor_fixture_main",
+        "time_basis": "local_instant",
+        "segments": [
+          {
+            "segment_index": "0",
+            "active_start": "2026-11-14T11:30:00",
+            "source_revision_id": "initial",
+            "status": "active",
+            "created_by_command_id": "fixture_source_source_cancelled",
+            "lineage_parent_segment_id": "recurrence_segment_745701e8f6dc647a155e52115aa6a848b46fe63a386c50f39b623aedfc998c27"
+          }
+        ],
+        "rules": [
+          {
+            "segment_ref": "0",
+            "frequency": "WEEKLY",
+            "interval": "1",
+            "seed": "2026-11-14T11:30:00",
+            "start_bound": "2026-11-14T11:30:00",
+            "end_condition": {
+              "kind": "unbounded"
+            },
+            "by_weekday": [
+              "SA"
+            ],
+            "week_start": "MO",
+            "status": "active"
+          }
+        ],
+        "rdates": [],
+        "exdates": [],
+        "overrides": [],
+        "timezone": "Etc/UTC",
+        "timezone_database_version": "2026c"
+      },
+      "recurrence_revision_id_preimage": {
+        "derivation_version": "spine.recurrence-revision-id.v1",
+        "contract_version": "spine.recurrence.contract.v1",
+        "normalization_version": "spine.recurrence.normalization.v1",
+        "canonical_json_version": "spine.canonical-json.v1",
+        "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
+        "revision_number": "2",
+        "normalized_recurrence_set_hash": "0203dbe4d4c45e0fc1d808328b4dc259d25d4204ac193218ef80c3bd7ef17e5b",
+        "prior_recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
+        "command_id": "fixture_source_source_cancelled"
+      },
+      "segment_id_preimages": [
+        {
+          "derivation_version": "spine.recurrence-segment-id.v1",
+          "contract_version": "spine.recurrence.contract.v1",
+          "normalization_version": "spine.recurrence.normalization.v1",
+          "canonical_json_version": "spine.canonical-json.v1",
+          "recurrence_revision_id": "recurrence_revision_789cb1d3003adff667a537b85f57481005112ebe1fb848caca47c9128f4fad58",
+          "segment_index": "0",
+          "active_start": "2026-11-14T11:30:00",
+          "source_revision_id": "initial",
+          "status": "active",
+          "created_by_command_id": "fixture_source_source_cancelled",
+          "lineage_parent_segment_id": "recurrence_segment_745701e8f6dc647a155e52115aa6a848b46fe63a386c50f39b623aedfc998c27"
+        }
+      ],
+      "rule_id_preimages": [
+        {
+          "derivation_version": "spine.recurrence-rule-id.v1",
+          "contract_version": "spine.recurrence.contract.v1",
+          "normalization_version": "spine.recurrence.normalization.v1",
+          "canonical_json_version": "spine.canonical-json.v1",
+          "recurrence_revision_id": "recurrence_revision_789cb1d3003adff667a537b85f57481005112ebe1fb848caca47c9128f4fad58",
+          "segment_ref": "0",
+          "frequency": "WEEKLY",
+          "interval": "1",
+          "seed": "2026-11-14T11:30:00",
+          "start_bound": "2026-11-14T11:30:00",
+          "end_condition": {
+            "kind": "unbounded"
+          },
+          "by_weekday": [
+            "SA"
+          ],
+          "week_start": "MO",
+          "status": "active"
+        }
+      ],
+      "rdate_id_preimages": []
+    },
+    {
+      "case_id": "counted",
+      "value": {
+        "contract_version": "spine.recurrence.contract.v1",
+        "normalization_version": "spine.recurrence.normalization.v1",
+        "canonical_json_version": "spine.canonical-json.v1",
+        "recurrence_set_id": "recurrence_set_5e835398815f2115e526ea560bfcac9312a66e19788f0757768660dc3fe98bbc",
+        "recurrence_revision_id": "recurrence_revision_688a3fd25eed2627950e8e88cdc120204d03e36a27726814107fca92c80617e1",
+        "revision_number": "1",
+        "source_item_id": "item_fixture_counted",
+        "created_item_version": "1",
+        "source_item_version": "1",
+        "seed_anchor_id": "anchor_fixture_counted",
+        "time_basis": "local_instant",
+        "normalized_recurrence_set_hash": "c7fa342f6887c6cbc5289df7593a887be46bb926aae8736fcbf4958089902684",
+        "segments": [
+          {
+            "segment_id": "recurrence_segment_0be723b96e92076d37cdbdf395c3cea15bea2e64232d3f84d77bae923f027c6a",
+            "segment_index": "0",
+            "active_start": "2026-11-14T11:30:00",
+            "source_revision_id": "initial",
+            "status": "active"
+          }
+        ],
+        "rules": [
+          {
+            "rule_id": "recurrence_rule_c98cc2c257b55ecd4cc92b9c7824326393a7437447e13aa4c7e2e4ea1aa037a5",
+            "segment_id": "recurrence_segment_0be723b96e92076d37cdbdf395c3cea15bea2e64232d3f84d77bae923f027c6a",
+            "frequency": "WEEKLY",
+            "interval": "1",
+            "seed": "2026-11-14T11:30:00",
+            "start_bound": "2026-11-14T11:30:00",
+            "end_condition": {
+              "kind": "count",
+              "count": "6"
+            },
+            "by_weekday": [
+              "SA"
+            ],
+            "week_start": "MO",
+            "status": "active"
+          }
+        ],
+        "rdates": [],
+        "exdates": [],
+        "overrides": [],
+        "timezone": "Etc/UTC",
+        "timezone_database_version": "2026c"
+      },
+      "recurrence_set_id_preimage": {
+        "derivation_version": "spine.recurrence-set-id.v1",
+        "contract_version": "spine.recurrence.contract.v1",
+        "normalization_version": "spine.recurrence.normalization.v1",
+        "canonical_json_version": "spine.canonical-json.v1",
+        "source_item_id": "item_fixture_counted",
+        "seed_anchor_id": "anchor_fixture_counted",
+        "created_item_version": "1",
+        "time_basis": "local_instant",
+        "timezone": "Etc/UTC",
+        "timezone_database_version": "2026c"
+      },
+      "normalized_hash_preimage": {
+        "derivation_version": "normalized_recurrence_set_hash.v1",
+        "contract_version": "spine.recurrence.contract.v1",
+        "normalization_version": "spine.recurrence.normalization.v1",
+        "canonical_json_version": "spine.canonical-json.v1",
+        "recurrence_set_id": "recurrence_set_5e835398815f2115e526ea560bfcac9312a66e19788f0757768660dc3fe98bbc",
+        "revision_number": "1",
+        "source_item_id": "item_fixture_counted",
+        "created_item_version": "1",
+        "source_item_version": "1",
+        "seed_anchor_id": "anchor_fixture_counted",
+        "time_basis": "local_instant",
+        "segments": [
+          {
+            "segment_index": "0",
+            "active_start": "2026-11-14T11:30:00",
+            "source_revision_id": "initial",
+            "status": "active"
+          }
+        ],
+        "rules": [
+          {
+            "segment_ref": "0",
+            "frequency": "WEEKLY",
+            "interval": "1",
+            "seed": "2026-11-14T11:30:00",
+            "start_bound": "2026-11-14T11:30:00",
+            "end_condition": {
+              "kind": "count",
+              "count": "6"
+            },
+            "by_weekday": [
+              "SA"
+            ],
+            "week_start": "MO",
+            "status": "active"
+          }
+        ],
+        "rdates": [],
+        "exdates": [],
+        "overrides": [],
+        "timezone": "Etc/UTC",
+        "timezone_database_version": "2026c"
+      },
+      "recurrence_revision_id_preimage": {
+        "derivation_version": "spine.recurrence-revision-id.v1",
+        "contract_version": "spine.recurrence.contract.v1",
+        "normalization_version": "spine.recurrence.normalization.v1",
+        "canonical_json_version": "spine.canonical-json.v1",
+        "recurrence_set_id": "recurrence_set_5e835398815f2115e526ea560bfcac9312a66e19788f0757768660dc3fe98bbc",
+        "revision_number": "1",
+        "normalized_recurrence_set_hash": "c7fa342f6887c6cbc5289df7593a887be46bb926aae8736fcbf4958089902684",
+        "command_id": "fixture_source_counted"
+      },
+      "segment_id_preimages": [
+        {
+          "derivation_version": "spine.recurrence-segment-id.v1",
+          "contract_version": "spine.recurrence.contract.v1",
+          "normalization_version": "spine.recurrence.normalization.v1",
+          "canonical_json_version": "spine.canonical-json.v1",
+          "recurrence_revision_id": "recurrence_revision_688a3fd25eed2627950e8e88cdc120204d03e36a27726814107fca92c80617e1",
+          "segment_index": "0",
+          "active_start": "2026-11-14T11:30:00",
+          "source_revision_id": "initial",
+          "status": "active"
+        }
+      ],
+      "rule_id_preimages": [
+        {
+          "derivation_version": "spine.recurrence-rule-id.v1",
+          "contract_version": "spine.recurrence.contract.v1",
+          "normalization_version": "spine.recurrence.normalization.v1",
+          "canonical_json_version": "spine.canonical-json.v1",
+          "recurrence_revision_id": "recurrence_revision_688a3fd25eed2627950e8e88cdc120204d03e36a27726814107fca92c80617e1",
+          "segment_ref": "0",
+          "frequency": "WEEKLY",
+          "interval": "1",
+          "seed": "2026-11-14T11:30:00",
+          "start_bound": "2026-11-14T11:30:00",
+          "end_condition": {
+            "kind": "count",
+            "count": "6"
+          },
+          "by_weekday": [
+            "SA"
+          ],
+          "week_start": "MO",
+          "status": "active"
+        }
+      ],
+      "rdate_id_preimages": []
+    },
+    {
+      "case_id": "split",
+      "value": {
+        "contract_version": "spine.recurrence.contract.v1",
+        "normalization_version": "spine.recurrence.normalization.v1",
+        "canonical_json_version": "spine.canonical-json.v1",
+        "recurrence_set_id": "recurrence_set_5e835398815f2115e526ea560bfcac9312a66e19788f0757768660dc3fe98bbc",
+        "recurrence_revision_id": "recurrence_revision_769068271a5b772f50d77beb41827d5f2952e6f71dab033666b647eedd16039c",
+        "prior_recurrence_revision_id": "recurrence_revision_688a3fd25eed2627950e8e88cdc120204d03e36a27726814107fca92c80617e1",
+        "revision_number": "2",
+        "source_item_id": "item_fixture_counted",
+        "created_item_version": "1",
+        "source_item_version": "2",
+        "seed_anchor_id": "anchor_fixture_counted",
+        "time_basis": "local_instant",
+        "normalized_recurrence_set_hash": "8fda02319ddf1872c618605ec1fc23c6e4734b55c1e545929376cb17fffdde18",
+        "segments": [
+          {
+            "segment_id": "recurrence_segment_3723f7c29c27435befbcedf24536a472688b686e48848de8062269d72df6add3",
+            "segment_index": "0",
+            "active_start": "2026-11-14T11:30:00",
+            "source_revision_id": "recurrence_revision_688a3fd25eed2627950e8e88cdc120204d03e36a27726814107fca92c80617e1",
+            "status": "active",
+            "created_by_command_id": "fixture_source_split",
+            "active_end": "2026-11-28T11:30:00",
+            "lineage_parent_segment_id": "recurrence_segment_0be723b96e92076d37cdbdf395c3cea15bea2e64232d3f84d77bae923f027c6a",
+            "reason_code": "this_and_following_prefix"
+          },
+          {
+            "segment_id": "recurrence_segment_12007c7c2faf4dfa81998bbf11d34d92c1d47ecc735b0370e3e45f8bf334e6e9",
+            "segment_index": "1",
+            "active_start": "2026-11-14T11:30:00",
+            "source_revision_id": "recurrence_revision_688a3fd25eed2627950e8e88cdc120204d03e36a27726814107fca92c80617e1",
+            "status": "retired",
+            "created_by_command_id": "fixture_source_split",
+            "lineage_parent_segment_id": "recurrence_segment_0be723b96e92076d37cdbdf395c3cea15bea2e64232d3f84d77bae923f027c6a",
+            "reason_code": "this_and_following_historical"
+          },
+          {
+            "segment_id": "recurrence_segment_78cb1d24d7a40b34c7321800d0ab92a7193c3fee055ea9396aa73e06d943d0ee",
+            "segment_index": "2",
+            "active_start": "2026-11-28T11:30:00",
+            "source_revision_id": "recurrence_revision_688a3fd25eed2627950e8e88cdc120204d03e36a27726814107fca92c80617e1",
+            "status": "active",
+            "created_by_command_id": "fixture_source_split",
+            "lineage_parent_segment_id": "recurrence_segment_0be723b96e92076d37cdbdf395c3cea15bea2e64232d3f84d77bae923f027c6a",
+            "reason_code": "this_and_following_following"
+          }
+        ],
+        "rules": [
+          {
+            "rule_id": "recurrence_rule_780780a664358e3156f49253a2cb5b410322ace606de669b9a5d55f766840c3e",
+            "segment_id": "recurrence_segment_3723f7c29c27435befbcedf24536a472688b686e48848de8062269d72df6add3",
+            "frequency": "WEEKLY",
+            "interval": "1",
+            "seed": "2026-11-14T11:30:00",
+            "start_bound": "2026-11-14T11:30:00",
+            "end_condition": {
+              "kind": "count",
+              "count": "6"
+            },
+            "by_weekday": [
+              "SA"
+            ],
+            "week_start": "MO",
+            "status": "active"
+          },
+          {
+            "rule_id": "recurrence_rule_af7728fa4e41435b51e27d658d596fa7a96cced508f80e78ae03ac9028f524ad",
+            "segment_id": "recurrence_segment_78cb1d24d7a40b34c7321800d0ab92a7193c3fee055ea9396aa73e06d943d0ee",
+            "frequency": "WEEKLY",
+            "interval": "1",
+            "seed": "2026-11-14T11:30:00",
+            "start_bound": "2026-11-28T11:30:00",
+            "end_condition": {
+              "kind": "count",
+              "count": "4"
+            },
+            "by_weekday": [
+              "SA"
+            ],
+            "week_start": "MO",
+            "status": "active"
+          }
+        ],
+        "rdates": [],
+        "exdates": [],
+        "overrides": [],
+        "timezone": "Etc/UTC",
+        "timezone_database_version": "2026c"
+      },
+      "recurrence_set_id_preimage": {
+        "derivation_version": "spine.recurrence-set-id.v1",
+        "contract_version": "spine.recurrence.contract.v1",
+        "normalization_version": "spine.recurrence.normalization.v1",
+        "canonical_json_version": "spine.canonical-json.v1",
+        "source_item_id": "item_fixture_counted",
+        "seed_anchor_id": "anchor_fixture_counted",
+        "created_item_version": "1",
+        "time_basis": "local_instant",
+        "timezone": "Etc/UTC",
+        "timezone_database_version": "2026c"
+      },
+      "normalized_hash_preimage": {
+        "derivation_version": "normalized_recurrence_set_hash.v1",
+        "contract_version": "spine.recurrence.contract.v1",
+        "normalization_version": "spine.recurrence.normalization.v1",
+        "canonical_json_version": "spine.canonical-json.v1",
+        "recurrence_set_id": "recurrence_set_5e835398815f2115e526ea560bfcac9312a66e19788f0757768660dc3fe98bbc",
+        "revision_number": "2",
+        "source_item_id": "item_fixture_counted",
+        "created_item_version": "1",
+        "source_item_version": "2",
+        "seed_anchor_id": "anchor_fixture_counted",
+        "time_basis": "local_instant",
+        "segments": [
+          {
+            "segment_index": "0",
+            "active_start": "2026-11-14T11:30:00",
+            "source_revision_id": "recurrence_revision_688a3fd25eed2627950e8e88cdc120204d03e36a27726814107fca92c80617e1",
+            "status": "active",
+            "created_by_command_id": "fixture_source_split",
+            "active_end": "2026-11-28T11:30:00",
+            "lineage_parent_segment_id": "recurrence_segment_0be723b96e92076d37cdbdf395c3cea15bea2e64232d3f84d77bae923f027c6a",
+            "reason_code": "this_and_following_prefix"
+          },
+          {
+            "segment_index": "1",
+            "active_start": "2026-11-14T11:30:00",
+            "source_revision_id": "recurrence_revision_688a3fd25eed2627950e8e88cdc120204d03e36a27726814107fca92c80617e1",
+            "status": "retired",
+            "created_by_command_id": "fixture_source_split",
+            "lineage_parent_segment_id": "recurrence_segment_0be723b96e92076d37cdbdf395c3cea15bea2e64232d3f84d77bae923f027c6a",
+            "reason_code": "this_and_following_historical"
+          },
+          {
+            "segment_index": "2",
+            "active_start": "2026-11-28T11:30:00",
+            "source_revision_id": "recurrence_revision_688a3fd25eed2627950e8e88cdc120204d03e36a27726814107fca92c80617e1",
+            "status": "active",
+            "created_by_command_id": "fixture_source_split",
+            "lineage_parent_segment_id": "recurrence_segment_0be723b96e92076d37cdbdf395c3cea15bea2e64232d3f84d77bae923f027c6a",
+            "reason_code": "this_and_following_following"
+          }
+        ],
+        "rules": [
+          {
+            "segment_ref": "0",
+            "frequency": "WEEKLY",
+            "interval": "1",
+            "seed": "2026-11-14T11:30:00",
+            "start_bound": "2026-11-14T11:30:00",
+            "end_condition": {
+              "kind": "count",
+              "count": "6"
+            },
+            "by_weekday": [
+              "SA"
+            ],
+            "week_start": "MO",
+            "status": "active"
+          },
+          {
+            "segment_ref": "2",
+            "frequency": "WEEKLY",
+            "interval": "1",
+            "seed": "2026-11-14T11:30:00",
+            "start_bound": "2026-11-28T11:30:00",
+            "end_condition": {
+              "kind": "count",
+              "count": "4"
+            },
+            "by_weekday": [
+              "SA"
+            ],
+            "week_start": "MO",
+            "status": "active"
+          }
+        ],
+        "rdates": [],
+        "exdates": [],
+        "overrides": [],
+        "timezone": "Etc/UTC",
+        "timezone_database_version": "2026c"
+      },
+      "recurrence_revision_id_preimage": {
+        "derivation_version": "spine.recurrence-revision-id.v1",
+        "contract_version": "spine.recurrence.contract.v1",
+        "normalization_version": "spine.recurrence.normalization.v1",
+        "canonical_json_version": "spine.canonical-json.v1",
+        "recurrence_set_id": "recurrence_set_5e835398815f2115e526ea560bfcac9312a66e19788f0757768660dc3fe98bbc",
+        "revision_number": "2",
+        "normalized_recurrence_set_hash": "8fda02319ddf1872c618605ec1fc23c6e4734b55c1e545929376cb17fffdde18",
+        "prior_recurrence_revision_id": "recurrence_revision_688a3fd25eed2627950e8e88cdc120204d03e36a27726814107fca92c80617e1",
+        "command_id": "fixture_source_split"
+      },
+      "segment_id_preimages": [
+        {
+          "derivation_version": "spine.recurrence-segment-id.v1",
+          "contract_version": "spine.recurrence.contract.v1",
+          "normalization_version": "spine.recurrence.normalization.v1",
+          "canonical_json_version": "spine.canonical-json.v1",
+          "recurrence_revision_id": "recurrence_revision_769068271a5b772f50d77beb41827d5f2952e6f71dab033666b647eedd16039c",
+          "segment_index": "0",
+          "active_start": "2026-11-14T11:30:00",
+          "source_revision_id": "recurrence_revision_688a3fd25eed2627950e8e88cdc120204d03e36a27726814107fca92c80617e1",
+          "status": "active",
+          "created_by_command_id": "fixture_source_split",
+          "active_end": "2026-11-28T11:30:00",
+          "lineage_parent_segment_id": "recurrence_segment_0be723b96e92076d37cdbdf395c3cea15bea2e64232d3f84d77bae923f027c6a",
+          "reason_code": "this_and_following_prefix"
+        },
+        {
+          "derivation_version": "spine.recurrence-segment-id.v1",
+          "contract_version": "spine.recurrence.contract.v1",
+          "normalization_version": "spine.recurrence.normalization.v1",
+          "canonical_json_version": "spine.canonical-json.v1",
+          "recurrence_revision_id": "recurrence_revision_769068271a5b772f50d77beb41827d5f2952e6f71dab033666b647eedd16039c",
+          "segment_index": "1",
+          "active_start": "2026-11-14T11:30:00",
+          "source_revision_id": "recurrence_revision_688a3fd25eed2627950e8e88cdc120204d03e36a27726814107fca92c80617e1",
+          "status": "retired",
+          "created_by_command_id": "fixture_source_split",
+          "lineage_parent_segment_id": "recurrence_segment_0be723b96e92076d37cdbdf395c3cea15bea2e64232d3f84d77bae923f027c6a",
+          "reason_code": "this_and_following_historical"
+        },
+        {
+          "derivation_version": "spine.recurrence-segment-id.v1",
+          "contract_version": "spine.recurrence.contract.v1",
+          "normalization_version": "spine.recurrence.normalization.v1",
+          "canonical_json_version": "spine.canonical-json.v1",
+          "recurrence_revision_id": "recurrence_revision_769068271a5b772f50d77beb41827d5f2952e6f71dab033666b647eedd16039c",
+          "segment_index": "2",
+          "active_start": "2026-11-28T11:30:00",
+          "source_revision_id": "recurrence_revision_688a3fd25eed2627950e8e88cdc120204d03e36a27726814107fca92c80617e1",
+          "status": "active",
+          "created_by_command_id": "fixture_source_split",
+          "lineage_parent_segment_id": "recurrence_segment_0be723b96e92076d37cdbdf395c3cea15bea2e64232d3f84d77bae923f027c6a",
+          "reason_code": "this_and_following_following"
+        }
+      ],
+      "rule_id_preimages": [
+        {
+          "derivation_version": "spine.recurrence-rule-id.v1",
+          "contract_version": "spine.recurrence.contract.v1",
+          "normalization_version": "spine.recurrence.normalization.v1",
+          "canonical_json_version": "spine.canonical-json.v1",
+          "recurrence_revision_id": "recurrence_revision_769068271a5b772f50d77beb41827d5f2952e6f71dab033666b647eedd16039c",
+          "segment_ref": "0",
+          "frequency": "WEEKLY",
+          "interval": "1",
+          "seed": "2026-11-14T11:30:00",
+          "start_bound": "2026-11-14T11:30:00",
+          "end_condition": {
+            "kind": "count",
+            "count": "6"
+          },
+          "by_weekday": [
+            "SA"
+          ],
+          "week_start": "MO",
+          "status": "active"
+        },
+        {
+          "derivation_version": "spine.recurrence-rule-id.v1",
+          "contract_version": "spine.recurrence.contract.v1",
+          "normalization_version": "spine.recurrence.normalization.v1",
+          "canonical_json_version": "spine.canonical-json.v1",
+          "recurrence_revision_id": "recurrence_revision_769068271a5b772f50d77beb41827d5f2952e6f71dab033666b647eedd16039c",
+          "segment_ref": "2",
+          "frequency": "WEEKLY",
+          "interval": "1",
+          "seed": "2026-11-14T11:30:00",
+          "start_bound": "2026-11-28T11:30:00",
+          "end_condition": {
+            "kind": "count",
+            "count": "4"
+          },
+          "by_weekday": [
+            "SA"
+          ],
+          "week_start": "MO",
+          "status": "active"
+        }
+      ],
+      "rdate_id_preimages": []
+    },
+    {
+      "case_id": "union",
+      "value": {
+        "contract_version": "spine.recurrence.contract.v1",
+        "normalization_version": "spine.recurrence.normalization.v1",
+        "canonical_json_version": "spine.canonical-json.v1",
+        "recurrence_set_id": "recurrence_set_d05361a806c7f52c98f2028de6391c21475ff29e38a4bc3feff7a4c47bddf3c8",
+        "recurrence_revision_id": "recurrence_revision_cf2deeb46b908180131e0e0c62ed84463c83249fa88e79660a8bf16a36cd145a",
+        "revision_number": "1",
+        "source_item_id": "item_fixture_union",
+        "created_item_version": "1",
+        "source_item_version": "1",
+        "seed_anchor_id": "anchor_fixture_union",
+        "time_basis": "local_instant",
+        "normalized_recurrence_set_hash": "bef0b0a773e9a979b8e548b8929faea9a860760b2f1226b88369177ef4bb9e8e",
+        "segments": [
+          {
+            "segment_id": "recurrence_segment_b6ca7589863881ffb5d7e9127b741da592a50531c44e2abc9e9439e6a4620522",
+            "segment_index": "0",
+            "active_start": "2026-11-14T11:30:00",
+            "source_revision_id": "initial",
+            "status": "active"
+          }
+        ],
+        "rules": [
+          {
+            "rule_id": "recurrence_rule_5042bfd1a41caeb24edaec905cc0e1644b34d0fd4b024d934cb20b6ab113bcce",
+            "segment_id": "recurrence_segment_b6ca7589863881ffb5d7e9127b741da592a50531c44e2abc9e9439e6a4620522",
+            "frequency": "WEEKLY",
+            "interval": "1",
+            "seed": "2026-11-14T11:30:00",
+            "start_bound": "2026-11-14T11:30:00",
+            "end_condition": {
+              "kind": "count",
+              "count": "6"
+            },
+            "by_weekday": [
+              "SA"
+            ],
+            "week_start": "MO",
+            "status": "active"
+          },
+          {
+            "rule_id": "recurrence_rule_77eb388aa714508bd6caeefda40afa88ac314bd9cd83732bbb307787a7556acc",
+            "segment_id": "recurrence_segment_b6ca7589863881ffb5d7e9127b741da592a50531c44e2abc9e9439e6a4620522",
+            "frequency": "WEEKLY",
+            "interval": "2",
+            "seed": "2026-11-14T11:30:00",
+            "start_bound": "2026-11-14T11:30:00",
+            "end_condition": {
+              "kind": "count",
+              "count": "6"
+            },
+            "by_weekday": [
+              "SA"
+            ],
+            "week_start": "MO",
+            "status": "active"
+          }
+        ],
+        "rdates": [],
+        "exdates": [],
+        "overrides": [],
+        "timezone": "Etc/UTC",
+        "timezone_database_version": "2026c"
+      },
+      "recurrence_set_id_preimage": {
+        "derivation_version": "spine.recurrence-set-id.v1",
+        "contract_version": "spine.recurrence.contract.v1",
+        "normalization_version": "spine.recurrence.normalization.v1",
+        "canonical_json_version": "spine.canonical-json.v1",
+        "source_item_id": "item_fixture_union",
+        "seed_anchor_id": "anchor_fixture_union",
+        "created_item_version": "1",
+        "time_basis": "local_instant",
+        "timezone": "Etc/UTC",
+        "timezone_database_version": "2026c"
+      },
+      "normalized_hash_preimage": {
+        "derivation_version": "normalized_recurrence_set_hash.v1",
+        "contract_version": "spine.recurrence.contract.v1",
+        "normalization_version": "spine.recurrence.normalization.v1",
+        "canonical_json_version": "spine.canonical-json.v1",
+        "recurrence_set_id": "recurrence_set_d05361a806c7f52c98f2028de6391c21475ff29e38a4bc3feff7a4c47bddf3c8",
+        "revision_number": "1",
+        "source_item_id": "item_fixture_union",
+        "created_item_version": "1",
+        "source_item_version": "1",
+        "seed_anchor_id": "anchor_fixture_union",
+        "time_basis": "local_instant",
+        "segments": [
+          {
+            "segment_index": "0",
+            "active_start": "2026-11-14T11:30:00",
+            "source_revision_id": "initial",
+            "status": "active"
+          }
+        ],
+        "rules": [
+          {
+            "segment_ref": "0",
+            "frequency": "WEEKLY",
+            "interval": "1",
+            "seed": "2026-11-14T11:30:00",
+            "start_bound": "2026-11-14T11:30:00",
+            "end_condition": {
+              "kind": "count",
+              "count": "6"
+            },
+            "by_weekday": [
+              "SA"
+            ],
+            "week_start": "MO",
+            "status": "active"
+          },
+          {
+            "segment_ref": "0",
+            "frequency": "WEEKLY",
+            "interval": "2",
+            "seed": "2026-11-14T11:30:00",
+            "start_bound": "2026-11-14T11:30:00",
+            "end_condition": {
+              "kind": "count",
+              "count": "6"
+            },
+            "by_weekday": [
+              "SA"
+            ],
+            "week_start": "MO",
+            "status": "active"
+          }
+        ],
+        "rdates": [],
+        "exdates": [],
+        "overrides": [],
+        "timezone": "Etc/UTC",
+        "timezone_database_version": "2026c"
+      },
+      "recurrence_revision_id_preimage": {
+        "derivation_version": "spine.recurrence-revision-id.v1",
+        "contract_version": "spine.recurrence.contract.v1",
+        "normalization_version": "spine.recurrence.normalization.v1",
+        "canonical_json_version": "spine.canonical-json.v1",
+        "recurrence_set_id": "recurrence_set_d05361a806c7f52c98f2028de6391c21475ff29e38a4bc3feff7a4c47bddf3c8",
+        "revision_number": "1",
+        "normalized_recurrence_set_hash": "bef0b0a773e9a979b8e548b8929faea9a860760b2f1226b88369177ef4bb9e8e",
+        "command_id": "fixture_source_union"
+      },
+      "segment_id_preimages": [
+        {
+          "derivation_version": "spine.recurrence-segment-id.v1",
+          "contract_version": "spine.recurrence.contract.v1",
+          "normalization_version": "spine.recurrence.normalization.v1",
+          "canonical_json_version": "spine.canonical-json.v1",
+          "recurrence_revision_id": "recurrence_revision_cf2deeb46b908180131e0e0c62ed84463c83249fa88e79660a8bf16a36cd145a",
+          "segment_index": "0",
+          "active_start": "2026-11-14T11:30:00",
+          "source_revision_id": "initial",
+          "status": "active"
+        }
+      ],
+      "rule_id_preimages": [
+        {
+          "derivation_version": "spine.recurrence-rule-id.v1",
+          "contract_version": "spine.recurrence.contract.v1",
+          "normalization_version": "spine.recurrence.normalization.v1",
+          "canonical_json_version": "spine.canonical-json.v1",
+          "recurrence_revision_id": "recurrence_revision_cf2deeb46b908180131e0e0c62ed84463c83249fa88e79660a8bf16a36cd145a",
+          "segment_ref": "0",
+          "frequency": "WEEKLY",
+          "interval": "1",
+          "seed": "2026-11-14T11:30:00",
+          "start_bound": "2026-11-14T11:30:00",
+          "end_condition": {
+            "kind": "count",
+            "count": "6"
+          },
+          "by_weekday": [
+            "SA"
+          ],
+          "week_start": "MO",
+          "status": "active"
+        },
+        {
+          "derivation_version": "spine.recurrence-rule-id.v1",
+          "contract_version": "spine.recurrence.contract.v1",
+          "normalization_version": "spine.recurrence.normalization.v1",
+          "canonical_json_version": "spine.canonical-json.v1",
+          "recurrence_revision_id": "recurrence_revision_cf2deeb46b908180131e0e0c62ed84463c83249fa88e79660a8bf16a36cd145a",
+          "segment_ref": "0",
+          "frequency": "WEEKLY",
+          "interval": "2",
+          "seed": "2026-11-14T11:30:00",
+          "start_bound": "2026-11-14T11:30:00",
+          "end_condition": {
+            "kind": "count",
+            "count": "6"
+          },
+          "by_weekday": [
+            "SA"
+          ],
+          "week_start": "MO",
+          "status": "active"
+        }
+      ],
+      "rdate_id_preimages": []
+    },
+    {
+      "case_id": "union_copied",
+      "value": {
+        "contract_version": "spine.recurrence.contract.v1",
+        "normalization_version": "spine.recurrence.normalization.v1",
+        "canonical_json_version": "spine.canonical-json.v1",
+        "recurrence_set_id": "recurrence_set_d05361a806c7f52c98f2028de6391c21475ff29e38a4bc3feff7a4c47bddf3c8",
+        "recurrence_revision_id": "recurrence_revision_a1498e501614029a05e113132a918cf4299f526166f1706de4e759e0b4eaf5e5",
+        "prior_recurrence_revision_id": "recurrence_revision_cf2deeb46b908180131e0e0c62ed84463c83249fa88e79660a8bf16a36cd145a",
+        "revision_number": "2",
+        "source_item_id": "item_fixture_union",
+        "created_item_version": "1",
+        "source_item_version": "2",
+        "seed_anchor_id": "anchor_fixture_union",
+        "time_basis": "local_instant",
+        "normalized_recurrence_set_hash": "593f292011436dcc6249fb9fa7a4b5947e5e7f322a3986854d2bf8aac6036b44",
+        "segments": [
+          {
+            "segment_id": "recurrence_segment_2a33ca78c516ff81aac76f1f6ff4122776210ae4697e2a72cfd49918a56bee7f",
+            "segment_index": "0",
+            "active_start": "2026-11-14T11:30:00",
+            "source_revision_id": "initial",
+            "status": "active",
+            "created_by_command_id": "fixture_source_union_copied",
+            "lineage_parent_segment_id": "recurrence_segment_b6ca7589863881ffb5d7e9127b741da592a50531c44e2abc9e9439e6a4620522"
+          }
+        ],
+        "rules": [
+          {
+            "rule_id": "recurrence_rule_02a18f776a2e77b214be8f565e9f5d8165f731e2f6d9cfb72bbbb949fd0a2cb5",
+            "segment_id": "recurrence_segment_2a33ca78c516ff81aac76f1f6ff4122776210ae4697e2a72cfd49918a56bee7f",
+            "frequency": "WEEKLY",
+            "interval": "1",
+            "seed": "2026-11-14T11:30:00",
+            "start_bound": "2026-11-14T11:30:00",
+            "end_condition": {
+              "kind": "count",
+              "count": "6"
+            },
+            "by_weekday": [
+              "SA"
+            ],
+            "week_start": "MO",
+            "status": "active"
+          },
+          {
+            "rule_id": "recurrence_rule_cae183de568cc757bdd9a9e11e72b4163ea35a5a2207fc0b922a96df9a5efd75",
+            "segment_id": "recurrence_segment_2a33ca78c516ff81aac76f1f6ff4122776210ae4697e2a72cfd49918a56bee7f",
+            "frequency": "WEEKLY",
+            "interval": "2",
+            "seed": "2026-11-14T11:30:00",
+            "start_bound": "2026-11-14T11:30:00",
+            "end_condition": {
+              "kind": "count",
+              "count": "6"
+            },
+            "by_weekday": [
+              "SA"
+            ],
+            "week_start": "MO",
+            "status": "active"
+          }
+        ],
+        "rdates": [],
+        "exdates": [],
+        "overrides": [],
+        "timezone": "Etc/UTC",
+        "timezone_database_version": "2026c"
+      },
+      "recurrence_set_id_preimage": {
+        "derivation_version": "spine.recurrence-set-id.v1",
+        "contract_version": "spine.recurrence.contract.v1",
+        "normalization_version": "spine.recurrence.normalization.v1",
+        "canonical_json_version": "spine.canonical-json.v1",
+        "source_item_id": "item_fixture_union",
+        "seed_anchor_id": "anchor_fixture_union",
+        "created_item_version": "1",
+        "time_basis": "local_instant",
+        "timezone": "Etc/UTC",
+        "timezone_database_version": "2026c"
+      },
+      "normalized_hash_preimage": {
+        "derivation_version": "normalized_recurrence_set_hash.v1",
+        "contract_version": "spine.recurrence.contract.v1",
+        "normalization_version": "spine.recurrence.normalization.v1",
+        "canonical_json_version": "spine.canonical-json.v1",
+        "recurrence_set_id": "recurrence_set_d05361a806c7f52c98f2028de6391c21475ff29e38a4bc3feff7a4c47bddf3c8",
+        "revision_number": "2",
+        "source_item_id": "item_fixture_union",
+        "created_item_version": "1",
+        "source_item_version": "2",
+        "seed_anchor_id": "anchor_fixture_union",
+        "time_basis": "local_instant",
+        "segments": [
+          {
+            "segment_index": "0",
+            "active_start": "2026-11-14T11:30:00",
+            "source_revision_id": "initial",
+            "status": "active",
+            "created_by_command_id": "fixture_source_union_copied",
+            "lineage_parent_segment_id": "recurrence_segment_b6ca7589863881ffb5d7e9127b741da592a50531c44e2abc9e9439e6a4620522"
+          }
+        ],
+        "rules": [
+          {
+            "segment_ref": "0",
+            "frequency": "WEEKLY",
+            "interval": "1",
+            "seed": "2026-11-14T11:30:00",
+            "start_bound": "2026-11-14T11:30:00",
+            "end_condition": {
+              "kind": "count",
+              "count": "6"
+            },
+            "by_weekday": [
+              "SA"
+            ],
+            "week_start": "MO",
+            "status": "active"
+          },
+          {
+            "segment_ref": "0",
+            "frequency": "WEEKLY",
+            "interval": "2",
+            "seed": "2026-11-14T11:30:00",
+            "start_bound": "2026-11-14T11:30:00",
+            "end_condition": {
+              "kind": "count",
+              "count": "6"
+            },
+            "by_weekday": [
+              "SA"
+            ],
+            "week_start": "MO",
+            "status": "active"
+          }
+        ],
+        "rdates": [],
+        "exdates": [],
+        "overrides": [],
+        "timezone": "Etc/UTC",
+        "timezone_database_version": "2026c"
+      },
+      "recurrence_revision_id_preimage": {
+        "derivation_version": "spine.recurrence-revision-id.v1",
+        "contract_version": "spine.recurrence.contract.v1",
+        "normalization_version": "spine.recurrence.normalization.v1",
+        "canonical_json_version": "spine.canonical-json.v1",
+        "recurrence_set_id": "recurrence_set_d05361a806c7f52c98f2028de6391c21475ff29e38a4bc3feff7a4c47bddf3c8",
+        "revision_number": "2",
+        "normalized_recurrence_set_hash": "593f292011436dcc6249fb9fa7a4b5947e5e7f322a3986854d2bf8aac6036b44",
+        "prior_recurrence_revision_id": "recurrence_revision_cf2deeb46b908180131e0e0c62ed84463c83249fa88e79660a8bf16a36cd145a",
+        "command_id": "fixture_source_union_copied"
+      },
+      "segment_id_preimages": [
+        {
+          "derivation_version": "spine.recurrence-segment-id.v1",
+          "contract_version": "spine.recurrence.contract.v1",
+          "normalization_version": "spine.recurrence.normalization.v1",
+          "canonical_json_version": "spine.canonical-json.v1",
+          "recurrence_revision_id": "recurrence_revision_a1498e501614029a05e113132a918cf4299f526166f1706de4e759e0b4eaf5e5",
+          "segment_index": "0",
+          "active_start": "2026-11-14T11:30:00",
+          "source_revision_id": "initial",
+          "status": "active",
+          "created_by_command_id": "fixture_source_union_copied",
+          "lineage_parent_segment_id": "recurrence_segment_b6ca7589863881ffb5d7e9127b741da592a50531c44e2abc9e9439e6a4620522"
+        }
+      ],
+      "rule_id_preimages": [
+        {
+          "derivation_version": "spine.recurrence-rule-id.v1",
+          "contract_version": "spine.recurrence.contract.v1",
+          "normalization_version": "spine.recurrence.normalization.v1",
+          "canonical_json_version": "spine.canonical-json.v1",
+          "recurrence_revision_id": "recurrence_revision_a1498e501614029a05e113132a918cf4299f526166f1706de4e759e0b4eaf5e5",
+          "segment_ref": "0",
+          "frequency": "WEEKLY",
+          "interval": "1",
+          "seed": "2026-11-14T11:30:00",
+          "start_bound": "2026-11-14T11:30:00",
+          "end_condition": {
+            "kind": "count",
+            "count": "6"
+          },
+          "by_weekday": [
+            "SA"
+          ],
+          "week_start": "MO",
+          "status": "active"
+        },
+        {
+          "derivation_version": "spine.recurrence-rule-id.v1",
+          "contract_version": "spine.recurrence.contract.v1",
+          "normalization_version": "spine.recurrence.normalization.v1",
+          "canonical_json_version": "spine.canonical-json.v1",
+          "recurrence_revision_id": "recurrence_revision_a1498e501614029a05e113132a918cf4299f526166f1706de4e759e0b4eaf5e5",
+          "segment_ref": "0",
+          "frequency": "WEEKLY",
+          "interval": "2",
+          "seed": "2026-11-14T11:30:00",
+          "start_bound": "2026-11-14T11:30:00",
+          "end_condition": {
+            "kind": "count",
+            "count": "6"
+          },
+          "by_weekday": [
+            "SA"
+          ],
+          "week_start": "MO",
+          "status": "active"
+        }
+      ],
+      "rdate_id_preimages": []
+    },
+    {
+      "case_id": "changed_with_added",
+      "value": {
+        "contract_version": "spine.recurrence.contract.v1",
+        "normalization_version": "spine.recurrence.normalization.v1",
+        "canonical_json_version": "spine.canonical-json.v1",
+        "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
+        "recurrence_revision_id": "recurrence_revision_7ee1b96312717b7f8220a3431b4c66ae8d1c8deefe2b3ce620f0a46333bac9e2",
+        "prior_recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
+        "revision_number": "2",
+        "source_item_id": "item_fixture_science_class",
+        "created_item_version": "1",
+        "source_item_version": "2",
+        "seed_anchor_id": "anchor_fixture_main",
+        "time_basis": "local_instant",
+        "normalized_recurrence_set_hash": "6d5f27389bbfa147d9df70f0833348d3727af6daf9d7c27edb99c220e43059f7",
+        "segments": [
+          {
+            "segment_id": "recurrence_segment_6b0a5023a2135719f87e66c55b97797a8c8f779691f43ff7c703281d5225c7da",
+            "segment_index": "0",
+            "active_start": "2026-11-14T11:30:00",
+            "source_revision_id": "initial",
+            "status": "active",
+            "created_by_command_id": "fixture_source_changed_with_added",
+            "lineage_parent_segment_id": "recurrence_segment_745701e8f6dc647a155e52115aa6a848b46fe63a386c50f39b623aedfc998c27"
+          }
+        ],
+        "rules": [
+          {
+            "rule_id": "recurrence_rule_3e7664d6aefa3b0513214b0563cca63a6cf97c96db9ab0c0530ba899a3eb2b47",
+            "segment_id": "recurrence_segment_6b0a5023a2135719f87e66c55b97797a8c8f779691f43ff7c703281d5225c7da",
+            "frequency": "WEEKLY",
+            "interval": "1",
+            "seed": "2026-11-07T11:30:00",
+            "start_bound": "2026-11-14T11:30:00",
+            "end_condition": {
+              "kind": "unbounded"
+            },
+            "by_weekday": [
+              "SA"
+            ],
+            "week_start": "MO",
+            "status": "active"
+          }
+        ],
+        "rdates": [
+          {
+            "rdate_id": "recurrence_rdate_c7282fde9e97b01836345643e1675491a7fd4f4c29d5169632b0597d7f86bd63",
+            "segment_id": "recurrence_segment_6b0a5023a2135719f87e66c55b97797a8c8f779691f43ff7c703281d5225c7da",
+            "scheduled_fact": "2026-11-15T11:30:00",
+            "status": "active"
+          }
+        ],
+        "exdates": [],
+        "overrides": [],
+        "timezone": "Etc/UTC",
+        "timezone_database_version": "2026c"
+      },
+      "recurrence_set_id_preimage": {
+        "derivation_version": "spine.recurrence-set-id.v1",
+        "contract_version": "spine.recurrence.contract.v1",
+        "normalization_version": "spine.recurrence.normalization.v1",
+        "canonical_json_version": "spine.canonical-json.v1",
+        "source_item_id": "item_fixture_science_class",
+        "seed_anchor_id": "anchor_fixture_main",
+        "created_item_version": "1",
+        "time_basis": "local_instant",
+        "timezone": "Etc/UTC",
+        "timezone_database_version": "2026c"
+      },
+      "normalized_hash_preimage": {
+        "derivation_version": "normalized_recurrence_set_hash.v1",
+        "contract_version": "spine.recurrence.contract.v1",
+        "normalization_version": "spine.recurrence.normalization.v1",
+        "canonical_json_version": "spine.canonical-json.v1",
+        "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
+        "revision_number": "2",
+        "source_item_id": "item_fixture_science_class",
+        "created_item_version": "1",
+        "source_item_version": "2",
+        "seed_anchor_id": "anchor_fixture_main",
+        "time_basis": "local_instant",
+        "segments": [
+          {
+            "segment_index": "0",
+            "active_start": "2026-11-14T11:30:00",
+            "source_revision_id": "initial",
+            "status": "active",
+            "created_by_command_id": "fixture_source_changed_with_added",
+            "lineage_parent_segment_id": "recurrence_segment_745701e8f6dc647a155e52115aa6a848b46fe63a386c50f39b623aedfc998c27"
+          }
+        ],
+        "rules": [
+          {
+            "segment_ref": "0",
+            "frequency": "WEEKLY",
+            "interval": "1",
+            "seed": "2026-11-07T11:30:00",
+            "start_bound": "2026-11-14T11:30:00",
+            "end_condition": {
+              "kind": "unbounded"
+            },
+            "by_weekday": [
+              "SA"
+            ],
+            "week_start": "MO",
+            "status": "active"
+          }
+        ],
+        "rdates": [
+          {
+            "segment_ref": "0",
+            "scheduled_fact": "2026-11-15T11:30:00",
+            "status": "active"
+          }
+        ],
+        "exdates": [],
+        "overrides": [],
+        "timezone": "Etc/UTC",
+        "timezone_database_version": "2026c"
+      },
+      "recurrence_revision_id_preimage": {
+        "derivation_version": "spine.recurrence-revision-id.v1",
+        "contract_version": "spine.recurrence.contract.v1",
+        "normalization_version": "spine.recurrence.normalization.v1",
+        "canonical_json_version": "spine.canonical-json.v1",
+        "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
+        "revision_number": "2",
+        "normalized_recurrence_set_hash": "6d5f27389bbfa147d9df70f0833348d3727af6daf9d7c27edb99c220e43059f7",
+        "prior_recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
+        "command_id": "fixture_source_changed_with_added"
+      },
+      "segment_id_preimages": [
+        {
+          "derivation_version": "spine.recurrence-segment-id.v1",
+          "contract_version": "spine.recurrence.contract.v1",
+          "normalization_version": "spine.recurrence.normalization.v1",
+          "canonical_json_version": "spine.canonical-json.v1",
+          "recurrence_revision_id": "recurrence_revision_7ee1b96312717b7f8220a3431b4c66ae8d1c8deefe2b3ce620f0a46333bac9e2",
+          "segment_index": "0",
+          "active_start": "2026-11-14T11:30:00",
+          "source_revision_id": "initial",
+          "status": "active",
+          "created_by_command_id": "fixture_source_changed_with_added",
+          "lineage_parent_segment_id": "recurrence_segment_745701e8f6dc647a155e52115aa6a848b46fe63a386c50f39b623aedfc998c27"
+        }
+      ],
+      "rule_id_preimages": [
+        {
+          "derivation_version": "spine.recurrence-rule-id.v1",
+          "contract_version": "spine.recurrence.contract.v1",
+          "normalization_version": "spine.recurrence.normalization.v1",
+          "canonical_json_version": "spine.canonical-json.v1",
+          "recurrence_revision_id": "recurrence_revision_7ee1b96312717b7f8220a3431b4c66ae8d1c8deefe2b3ce620f0a46333bac9e2",
+          "segment_ref": "0",
+          "frequency": "WEEKLY",
+          "interval": "1",
+          "seed": "2026-11-07T11:30:00",
+          "start_bound": "2026-11-14T11:30:00",
+          "end_condition": {
+            "kind": "unbounded"
+          },
+          "by_weekday": [
+            "SA"
+          ],
+          "week_start": "MO",
+          "status": "active"
+        }
+      ],
+      "rdate_id_preimages": [
+        {
+          "derivation_version": "spine.recurrence-rdate-id.v1",
+          "contract_version": "spine.recurrence.contract.v1",
+          "normalization_version": "spine.recurrence.normalization.v1",
+          "canonical_json_version": "spine.canonical-json.v1",
+          "recurrence_revision_id": "recurrence_revision_7ee1b96312717b7f8220a3431b4c66ae8d1c8deefe2b3ce620f0a46333bac9e2",
+          "segment_ref": "0",
+          "scheduled_fact": "2026-11-15T11:30:00",
+          "status": "active"
+        }
+      ]
+    },
+    {
+      "case_id": "union_changed",
+      "value": {
+        "contract_version": "spine.recurrence.contract.v1",
+        "normalization_version": "spine.recurrence.normalization.v1",
+        "canonical_json_version": "spine.canonical-json.v1",
+        "recurrence_set_id": "recurrence_set_d05361a806c7f52c98f2028de6391c21475ff29e38a4bc3feff7a4c47bddf3c8",
+        "recurrence_revision_id": "recurrence_revision_5130b894c073ccbeeb4a863ab6d43c196843b3f483e89e098f9793ca83ae9be6",
+        "prior_recurrence_revision_id": "recurrence_revision_cf2deeb46b908180131e0e0c62ed84463c83249fa88e79660a8bf16a36cd145a",
+        "revision_number": "2",
+        "source_item_id": "item_fixture_union",
+        "created_item_version": "1",
+        "source_item_version": "2",
+        "seed_anchor_id": "anchor_fixture_union",
+        "time_basis": "local_instant",
+        "normalized_recurrence_set_hash": "2eda55fde6ef76746b01b981c4726d3812158d0a8e2737f1c379c9050cec7263",
+        "segments": [
+          {
+            "segment_id": "recurrence_segment_4e7faab87b3f3d0072cb6392ff88d84db77b66e5b0a7300bd6b3292725967dda",
+            "segment_index": "0",
+            "active_start": "2026-11-14T11:30:00",
+            "source_revision_id": "initial",
+            "status": "active",
+            "created_by_command_id": "fixture_source_union_changed",
+            "lineage_parent_segment_id": "recurrence_segment_b6ca7589863881ffb5d7e9127b741da592a50531c44e2abc9e9439e6a4620522"
+          }
+        ],
+        "rules": [
+          {
+            "rule_id": "recurrence_rule_46a4d8041d08c2af037a91139b6e30449da9fa4d3c0307ad4c1f137e0d03f9b5",
+            "segment_id": "recurrence_segment_4e7faab87b3f3d0072cb6392ff88d84db77b66e5b0a7300bd6b3292725967dda",
+            "frequency": "WEEKLY",
+            "interval": "1",
+            "seed": "2026-11-14T11:30:00",
+            "start_bound": "2026-11-14T11:30:00",
+            "end_condition": {
+              "kind": "count",
+              "count": "6"
+            },
+            "by_weekday": [
+              "SA"
+            ],
+            "week_start": "MO",
+            "status": "active"
+          },
+          {
+            "rule_id": "recurrence_rule_1531ce27a18da4db9c27a4f20f8f35352145b3a0c96caab7934be34bea313ccc",
+            "segment_id": "recurrence_segment_4e7faab87b3f3d0072cb6392ff88d84db77b66e5b0a7300bd6b3292725967dda",
+            "frequency": "WEEKLY",
+            "interval": "3",
+            "seed": "2026-11-14T11:30:00",
+            "start_bound": "2026-11-14T11:30:00",
+            "end_condition": {
+              "kind": "count",
+              "count": "6"
+            },
+            "by_weekday": [
+              "SA"
+            ],
+            "week_start": "MO",
+            "status": "active"
+          }
+        ],
+        "rdates": [],
+        "exdates": [],
+        "overrides": [],
+        "timezone": "Etc/UTC",
+        "timezone_database_version": "2026c"
+      },
+      "recurrence_set_id_preimage": {
+        "derivation_version": "spine.recurrence-set-id.v1",
+        "contract_version": "spine.recurrence.contract.v1",
+        "normalization_version": "spine.recurrence.normalization.v1",
+        "canonical_json_version": "spine.canonical-json.v1",
+        "source_item_id": "item_fixture_union",
+        "seed_anchor_id": "anchor_fixture_union",
+        "created_item_version": "1",
+        "time_basis": "local_instant",
+        "timezone": "Etc/UTC",
+        "timezone_database_version": "2026c"
+      },
+      "normalized_hash_preimage": {
+        "derivation_version": "normalized_recurrence_set_hash.v1",
+        "contract_version": "spine.recurrence.contract.v1",
+        "normalization_version": "spine.recurrence.normalization.v1",
+        "canonical_json_version": "spine.canonical-json.v1",
+        "recurrence_set_id": "recurrence_set_d05361a806c7f52c98f2028de6391c21475ff29e38a4bc3feff7a4c47bddf3c8",
+        "revision_number": "2",
+        "source_item_id": "item_fixture_union",
+        "created_item_version": "1",
+        "source_item_version": "2",
+        "seed_anchor_id": "anchor_fixture_union",
+        "time_basis": "local_instant",
+        "segments": [
+          {
+            "segment_index": "0",
+            "active_start": "2026-11-14T11:30:00",
+            "source_revision_id": "initial",
+            "status": "active",
+            "created_by_command_id": "fixture_source_union_changed",
+            "lineage_parent_segment_id": "recurrence_segment_b6ca7589863881ffb5d7e9127b741da592a50531c44e2abc9e9439e6a4620522"
+          }
+        ],
+        "rules": [
+          {
+            "segment_ref": "0",
+            "frequency": "WEEKLY",
+            "interval": "1",
+            "seed": "2026-11-14T11:30:00",
+            "start_bound": "2026-11-14T11:30:00",
+            "end_condition": {
+              "kind": "count",
+              "count": "6"
+            },
+            "by_weekday": [
+              "SA"
+            ],
+            "week_start": "MO",
+            "status": "active"
+          },
+          {
+            "segment_ref": "0",
+            "frequency": "WEEKLY",
+            "interval": "3",
+            "seed": "2026-11-14T11:30:00",
+            "start_bound": "2026-11-14T11:30:00",
+            "end_condition": {
+              "kind": "count",
+              "count": "6"
+            },
+            "by_weekday": [
+              "SA"
+            ],
+            "week_start": "MO",
+            "status": "active"
+          }
+        ],
+        "rdates": [],
+        "exdates": [],
+        "overrides": [],
+        "timezone": "Etc/UTC",
+        "timezone_database_version": "2026c"
+      },
+      "recurrence_revision_id_preimage": {
+        "derivation_version": "spine.recurrence-revision-id.v1",
+        "contract_version": "spine.recurrence.contract.v1",
+        "normalization_version": "spine.recurrence.normalization.v1",
+        "canonical_json_version": "spine.canonical-json.v1",
+        "recurrence_set_id": "recurrence_set_d05361a806c7f52c98f2028de6391c21475ff29e38a4bc3feff7a4c47bddf3c8",
+        "revision_number": "2",
+        "normalized_recurrence_set_hash": "2eda55fde6ef76746b01b981c4726d3812158d0a8e2737f1c379c9050cec7263",
+        "prior_recurrence_revision_id": "recurrence_revision_cf2deeb46b908180131e0e0c62ed84463c83249fa88e79660a8bf16a36cd145a",
+        "command_id": "fixture_source_union_changed"
+      },
+      "segment_id_preimages": [
+        {
+          "derivation_version": "spine.recurrence-segment-id.v1",
+          "contract_version": "spine.recurrence.contract.v1",
+          "normalization_version": "spine.recurrence.normalization.v1",
+          "canonical_json_version": "spine.canonical-json.v1",
+          "recurrence_revision_id": "recurrence_revision_5130b894c073ccbeeb4a863ab6d43c196843b3f483e89e098f9793ca83ae9be6",
+          "segment_index": "0",
+          "active_start": "2026-11-14T11:30:00",
+          "source_revision_id": "initial",
+          "status": "active",
+          "created_by_command_id": "fixture_source_union_changed",
+          "lineage_parent_segment_id": "recurrence_segment_b6ca7589863881ffb5d7e9127b741da592a50531c44e2abc9e9439e6a4620522"
+        }
+      ],
+      "rule_id_preimages": [
+        {
+          "derivation_version": "spine.recurrence-rule-id.v1",
+          "contract_version": "spine.recurrence.contract.v1",
+          "normalization_version": "spine.recurrence.normalization.v1",
+          "canonical_json_version": "spine.canonical-json.v1",
+          "recurrence_revision_id": "recurrence_revision_5130b894c073ccbeeb4a863ab6d43c196843b3f483e89e098f9793ca83ae9be6",
+          "segment_ref": "0",
+          "frequency": "WEEKLY",
+          "interval": "1",
+          "seed": "2026-11-14T11:30:00",
+          "start_bound": "2026-11-14T11:30:00",
+          "end_condition": {
+            "kind": "count",
+            "count": "6"
+          },
+          "by_weekday": [
+            "SA"
+          ],
+          "week_start": "MO",
+          "status": "active"
+        },
+        {
+          "derivation_version": "spine.recurrence-rule-id.v1",
+          "contract_version": "spine.recurrence.contract.v1",
+          "normalization_version": "spine.recurrence.normalization.v1",
+          "canonical_json_version": "spine.canonical-json.v1",
+          "recurrence_revision_id": "recurrence_revision_5130b894c073ccbeeb4a863ab6d43c196843b3f483e89e098f9793ca83ae9be6",
+          "segment_ref": "0",
+          "frequency": "WEEKLY",
+          "interval": "3",
+          "seed": "2026-11-14T11:30:00",
+          "start_bound": "2026-11-14T11:30:00",
+          "end_condition": {
+            "kind": "count",
+            "count": "6"
+          },
+          "by_weekday": [
+            "SA"
+          ],
+          "week_start": "MO",
+          "status": "active"
+        }
+      ],
+      "rdate_id_preimages": []
+    }
+  ],
+  "pairs": [
+    {
+      "case_id": "copied",
+      "prior_snapshot": "main",
+      "snapshot": "copied",
+      "lineage": [
+        {
+          "row": {
+            "command_id": "fixture_source_copied",
+            "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
+            "prior_recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
+            "new_recurrence_revision_id": "recurrence_revision_fcf036592d711ec57b3767b4a94a742f47e2e73cf96ea23e9171d8ff5b4a33f6",
+            "lineage_role": "segment_revision",
+            "prior_segment_id": "recurrence_segment_745701e8f6dc647a155e52115aa6a848b46fe63a386c50f39b623aedfc998c27",
+            "new_segment_id": "recurrence_segment_55211a190a601df17a7812c4378b071b6d5456514139084bf6ee3d892d869076",
+            "effect": "active",
+            "lineage_index": "0",
+            "lineage_id": "recurrence_lineage_7c9ca130fdadc1894d588db13afbd41c932a85941b8faa2b713ddd3fde04d65e",
+            "payload_hash": "cb12ba2041b3563ef8dcaa32c18ad9135b2f2d5f0adfb46949d5cfddbabebc3b"
+          },
+          "identity_preimage": {
+            "derivation_version": "spine.recurrence-lineage-id.v1",
+            "contract_version": "spine.recurrence.contract.v1",
+            "normalization_version": "spine.recurrence.normalization.v1",
+            "canonical_json_version": "spine.canonical-json.v1",
+            "command_id": "fixture_source_copied",
+            "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
+            "prior_recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
+            "new_recurrence_revision_id": "recurrence_revision_fcf036592d711ec57b3767b4a94a742f47e2e73cf96ea23e9171d8ff5b4a33f6",
+            "lineage_role": "segment_revision",
+            "prior_segment_id": "recurrence_segment_745701e8f6dc647a155e52115aa6a848b46fe63a386c50f39b623aedfc998c27",
+            "new_segment_id": "recurrence_segment_55211a190a601df17a7812c4378b071b6d5456514139084bf6ee3d892d869076",
+            "effect": "active",
+            "lineage_index": "0"
+          },
+          "payload": {
+            "command_id": "fixture_source_copied",
+            "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
+            "prior_recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
+            "new_recurrence_revision_id": "recurrence_revision_fcf036592d711ec57b3767b4a94a742f47e2e73cf96ea23e9171d8ff5b4a33f6",
+            "lineage_role": "segment_revision",
+            "prior_segment_id": "recurrence_segment_745701e8f6dc647a155e52115aa6a848b46fe63a386c50f39b623aedfc998c27",
+            "new_segment_id": "recurrence_segment_55211a190a601df17a7812c4378b071b6d5456514139084bf6ee3d892d869076",
+            "effect": "active",
+            "lineage_index": "0",
+            "command_effect": "series_edit_whole_applied"
+          }
+        },
+        {
+          "row": {
+            "command_id": "fixture_source_copied",
+            "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
+            "prior_recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
+            "new_recurrence_revision_id": "recurrence_revision_fcf036592d711ec57b3767b4a94a742f47e2e73cf96ea23e9171d8ff5b4a33f6",
+            "lineage_role": "rule_revision",
+            "prior_child_id": "recurrence_rule_25beffd480d6cb16b9f8d202a6e2cd6d6d4e06c52c792eea558cb04758741a82",
+            "new_child_id": "recurrence_rule_9d433d333f91e5b1c6bfc59324d4dfeb21e19d1034ba0582796cbcdc2c9bdf63",
+            "effect": "copied",
+            "lineage_index": "1",
+            "lineage_id": "recurrence_lineage_7fc49e8735ce69e291d881fe917cbf4ff2518d99c1ee3f2899c85dffa9571576",
+            "payload_hash": "e86ef7ce117b719252837808965f932ce6c13b6423a5b7d0beae9b1e2ecfcebe"
+          },
+          "identity_preimage": {
+            "derivation_version": "spine.recurrence-lineage-id.v1",
+            "contract_version": "spine.recurrence.contract.v1",
+            "normalization_version": "spine.recurrence.normalization.v1",
+            "canonical_json_version": "spine.canonical-json.v1",
+            "command_id": "fixture_source_copied",
+            "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
+            "prior_recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
+            "new_recurrence_revision_id": "recurrence_revision_fcf036592d711ec57b3767b4a94a742f47e2e73cf96ea23e9171d8ff5b4a33f6",
+            "lineage_role": "rule_revision",
+            "prior_child_id": "recurrence_rule_25beffd480d6cb16b9f8d202a6e2cd6d6d4e06c52c792eea558cb04758741a82",
+            "new_child_id": "recurrence_rule_9d433d333f91e5b1c6bfc59324d4dfeb21e19d1034ba0582796cbcdc2c9bdf63",
+            "effect": "copied",
+            "lineage_index": "1"
+          },
+          "payload": {
+            "command_id": "fixture_source_copied",
+            "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
+            "prior_recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
+            "new_recurrence_revision_id": "recurrence_revision_fcf036592d711ec57b3767b4a94a742f47e2e73cf96ea23e9171d8ff5b4a33f6",
+            "lineage_role": "rule_revision",
+            "prior_child_id": "recurrence_rule_25beffd480d6cb16b9f8d202a6e2cd6d6d4e06c52c792eea558cb04758741a82",
+            "new_child_id": "recurrence_rule_9d433d333f91e5b1c6bfc59324d4dfeb21e19d1034ba0582796cbcdc2c9bdf63",
+            "effect": "copied",
+            "lineage_index": "1",
+            "command_effect": "series_edit_whole_applied"
+          }
+        }
+      ],
+      "copy_facts": [
+        {
+          "prior_child_id": "recurrence_rule_25beffd480d6cb16b9f8d202a6e2cd6d6d4e06c52c792eea558cb04758741a82",
+          "new_child_id": "recurrence_rule_9d433d333f91e5b1c6bfc59324d4dfeb21e19d1034ba0582796cbcdc2c9bdf63",
+          "lineage_id": "recurrence_lineage_7fc49e8735ce69e291d881fe917cbf4ff2518d99c1ee3f2899c85dffa9571576"
+        }
+      ],
+      "retarget_facts": []
+    },
+    {
+      "case_id": "added",
+      "prior_snapshot": "main",
+      "snapshot": "added",
+      "lineage": [
+        {
+          "row": {
+            "command_id": "fixture_source_added",
+            "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
+            "prior_recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
+            "new_recurrence_revision_id": "recurrence_revision_6663d82b183c5c9b2d657e87bb4a51ad7dcb1a1dc54cce3e2f0720a80d376184",
+            "lineage_role": "segment_revision",
+            "prior_segment_id": "recurrence_segment_745701e8f6dc647a155e52115aa6a848b46fe63a386c50f39b623aedfc998c27",
+            "new_segment_id": "recurrence_segment_c8dec7b3586f1b1a61eee42985de8a1a016b8bd0e047b911911d39b0783c6aae",
+            "effect": "active",
+            "lineage_index": "0",
+            "lineage_id": "recurrence_lineage_30b0fde2015f3015140c933712c9d1cb5fba37a625d1d4a503115847c457cfb5",
+            "payload_hash": "1a28855cdd749e58c06caafc5ecf3c4cd70361d147e4e0b30d09c80a83a3889f"
+          },
+          "identity_preimage": {
+            "derivation_version": "spine.recurrence-lineage-id.v1",
+            "contract_version": "spine.recurrence.contract.v1",
+            "normalization_version": "spine.recurrence.normalization.v1",
+            "canonical_json_version": "spine.canonical-json.v1",
+            "command_id": "fixture_source_added",
+            "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
+            "prior_recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
+            "new_recurrence_revision_id": "recurrence_revision_6663d82b183c5c9b2d657e87bb4a51ad7dcb1a1dc54cce3e2f0720a80d376184",
+            "lineage_role": "segment_revision",
+            "prior_segment_id": "recurrence_segment_745701e8f6dc647a155e52115aa6a848b46fe63a386c50f39b623aedfc998c27",
+            "new_segment_id": "recurrence_segment_c8dec7b3586f1b1a61eee42985de8a1a016b8bd0e047b911911d39b0783c6aae",
+            "effect": "active",
+            "lineage_index": "0"
+          },
+          "payload": {
+            "command_id": "fixture_source_added",
+            "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
+            "prior_recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
+            "new_recurrence_revision_id": "recurrence_revision_6663d82b183c5c9b2d657e87bb4a51ad7dcb1a1dc54cce3e2f0720a80d376184",
+            "lineage_role": "segment_revision",
+            "prior_segment_id": "recurrence_segment_745701e8f6dc647a155e52115aa6a848b46fe63a386c50f39b623aedfc998c27",
+            "new_segment_id": "recurrence_segment_c8dec7b3586f1b1a61eee42985de8a1a016b8bd0e047b911911d39b0783c6aae",
+            "effect": "active",
+            "lineage_index": "0",
+            "command_effect": "instance_add_rdate_created"
+          }
+        },
+        {
+          "row": {
+            "command_id": "fixture_source_added",
+            "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
+            "prior_recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
+            "new_recurrence_revision_id": "recurrence_revision_6663d82b183c5c9b2d657e87bb4a51ad7dcb1a1dc54cce3e2f0720a80d376184",
+            "lineage_role": "rule_revision",
+            "prior_child_id": "recurrence_rule_25beffd480d6cb16b9f8d202a6e2cd6d6d4e06c52c792eea558cb04758741a82",
+            "new_child_id": "recurrence_rule_20c749701d95c772a830de1733298b33f0aa86d0dfda0af7528c498011e6365a",
+            "effect": "copied",
+            "lineage_index": "1",
+            "lineage_id": "recurrence_lineage_4b448c03fa11d7b6a7c80e58e808dabfc1d4278d860616f0ac96c9e6227978c4",
+            "payload_hash": "7c63216cdfa5ba12c0b81b9420586ddcb4295f2f6f1f2bac6e18d41e6adb57bf"
+          },
+          "identity_preimage": {
+            "derivation_version": "spine.recurrence-lineage-id.v1",
+            "contract_version": "spine.recurrence.contract.v1",
+            "normalization_version": "spine.recurrence.normalization.v1",
+            "canonical_json_version": "spine.canonical-json.v1",
+            "command_id": "fixture_source_added",
+            "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
+            "prior_recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
+            "new_recurrence_revision_id": "recurrence_revision_6663d82b183c5c9b2d657e87bb4a51ad7dcb1a1dc54cce3e2f0720a80d376184",
+            "lineage_role": "rule_revision",
+            "prior_child_id": "recurrence_rule_25beffd480d6cb16b9f8d202a6e2cd6d6d4e06c52c792eea558cb04758741a82",
+            "new_child_id": "recurrence_rule_20c749701d95c772a830de1733298b33f0aa86d0dfda0af7528c498011e6365a",
+            "effect": "copied",
+            "lineage_index": "1"
+          },
+          "payload": {
+            "command_id": "fixture_source_added",
+            "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
+            "prior_recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
+            "new_recurrence_revision_id": "recurrence_revision_6663d82b183c5c9b2d657e87bb4a51ad7dcb1a1dc54cce3e2f0720a80d376184",
+            "lineage_role": "rule_revision",
+            "prior_child_id": "recurrence_rule_25beffd480d6cb16b9f8d202a6e2cd6d6d4e06c52c792eea558cb04758741a82",
+            "new_child_id": "recurrence_rule_20c749701d95c772a830de1733298b33f0aa86d0dfda0af7528c498011e6365a",
+            "effect": "copied",
+            "lineage_index": "1",
+            "command_effect": "instance_add_rdate_created"
+          }
+        },
+        {
+          "row": {
+            "command_id": "fixture_source_added",
+            "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
+            "prior_recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
+            "new_recurrence_revision_id": "recurrence_revision_6663d82b183c5c9b2d657e87bb4a51ad7dcb1a1dc54cce3e2f0720a80d376184",
+            "lineage_role": "rdate_revision",
+            "new_child_id": "recurrence_rdate_3e0131819c9f895fd0bb991f926e63ac224221af3aecf132a35f0b310ac5f9aa",
+            "effect": "created",
+            "lineage_index": "2",
+            "lineage_id": "recurrence_lineage_183c643f3adb1ec5276f96a52bb53d21c736725cb7c79d33869c1cba24cfe65f",
+            "payload_hash": "b9714cf8f4cd7c310cbb9e3e755f34d6eac99328dc298c1f4d0741bcf1b3b13f"
+          },
+          "identity_preimage": {
+            "derivation_version": "spine.recurrence-lineage-id.v1",
+            "contract_version": "spine.recurrence.contract.v1",
+            "normalization_version": "spine.recurrence.normalization.v1",
+            "canonical_json_version": "spine.canonical-json.v1",
+            "command_id": "fixture_source_added",
+            "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
+            "prior_recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
+            "new_recurrence_revision_id": "recurrence_revision_6663d82b183c5c9b2d657e87bb4a51ad7dcb1a1dc54cce3e2f0720a80d376184",
+            "lineage_role": "rdate_revision",
+            "new_child_id": "recurrence_rdate_3e0131819c9f895fd0bb991f926e63ac224221af3aecf132a35f0b310ac5f9aa",
+            "effect": "created",
+            "lineage_index": "2"
+          },
+          "payload": {
+            "command_id": "fixture_source_added",
+            "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
+            "prior_recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
+            "new_recurrence_revision_id": "recurrence_revision_6663d82b183c5c9b2d657e87bb4a51ad7dcb1a1dc54cce3e2f0720a80d376184",
+            "lineage_role": "rdate_revision",
+            "new_child_id": "recurrence_rdate_3e0131819c9f895fd0bb991f926e63ac224221af3aecf132a35f0b310ac5f9aa",
+            "effect": "created",
+            "lineage_index": "2",
+            "command_effect": "instance_add_rdate_created"
+          }
+        }
+      ],
+      "copy_facts": [
+        {
+          "prior_child_id": "recurrence_rule_25beffd480d6cb16b9f8d202a6e2cd6d6d4e06c52c792eea558cb04758741a82",
+          "new_child_id": "recurrence_rule_20c749701d95c772a830de1733298b33f0aa86d0dfda0af7528c498011e6365a",
+          "lineage_id": "recurrence_lineage_4b448c03fa11d7b6a7c80e58e808dabfc1d4278d860616f0ac96c9e6227978c4"
+        }
+      ],
+      "retarget_facts": []
+    },
+    {
+      "case_id": "excluded",
+      "prior_snapshot": "main",
+      "snapshot": "excluded",
+      "lineage": [
+        {
+          "row": {
+            "command_id": "fixture_source_excluded",
+            "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
+            "prior_recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
+            "new_recurrence_revision_id": "recurrence_revision_99c33f0aecf53ab6af45ed0e72f17b59cfefe418b3f3790a72fc7944fc493ac8",
+            "lineage_role": "segment_revision",
+            "prior_segment_id": "recurrence_segment_745701e8f6dc647a155e52115aa6a848b46fe63a386c50f39b623aedfc998c27",
+            "new_segment_id": "recurrence_segment_b248993e31f41b3f7f33e8be5d551feccd1393995af70072a7df78922fd5f326",
+            "effect": "active",
+            "lineage_index": "0",
+            "lineage_id": "recurrence_lineage_02f2b2166f3d7a03776c9250a0caf8f5824944a0348bb1f82e59f170ee2ef5ef",
+            "payload_hash": "f356bc43299e5b65f3576fab48629d5fabb7a4006c3f0e1f9efb36ed6ebdf3b1"
+          },
+          "identity_preimage": {
+            "derivation_version": "spine.recurrence-lineage-id.v1",
+            "contract_version": "spine.recurrence.contract.v1",
+            "normalization_version": "spine.recurrence.normalization.v1",
+            "canonical_json_version": "spine.canonical-json.v1",
+            "command_id": "fixture_source_excluded",
+            "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
+            "prior_recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
+            "new_recurrence_revision_id": "recurrence_revision_99c33f0aecf53ab6af45ed0e72f17b59cfefe418b3f3790a72fc7944fc493ac8",
+            "lineage_role": "segment_revision",
+            "prior_segment_id": "recurrence_segment_745701e8f6dc647a155e52115aa6a848b46fe63a386c50f39b623aedfc998c27",
+            "new_segment_id": "recurrence_segment_b248993e31f41b3f7f33e8be5d551feccd1393995af70072a7df78922fd5f326",
+            "effect": "active",
+            "lineage_index": "0"
+          },
+          "payload": {
+            "command_id": "fixture_source_excluded",
+            "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
+            "prior_recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
+            "new_recurrence_revision_id": "recurrence_revision_99c33f0aecf53ab6af45ed0e72f17b59cfefe418b3f3790a72fc7944fc493ac8",
+            "lineage_role": "segment_revision",
+            "prior_segment_id": "recurrence_segment_745701e8f6dc647a155e52115aa6a848b46fe63a386c50f39b623aedfc998c27",
+            "new_segment_id": "recurrence_segment_b248993e31f41b3f7f33e8be5d551feccd1393995af70072a7df78922fd5f326",
+            "effect": "active",
+            "lineage_index": "0",
+            "command_effect": "instance_remove_exdate_created"
+          }
+        },
+        {
+          "row": {
+            "command_id": "fixture_source_excluded",
+            "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
+            "prior_recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
+            "new_recurrence_revision_id": "recurrence_revision_99c33f0aecf53ab6af45ed0e72f17b59cfefe418b3f3790a72fc7944fc493ac8",
+            "lineage_role": "rule_revision",
+            "prior_child_id": "recurrence_rule_25beffd480d6cb16b9f8d202a6e2cd6d6d4e06c52c792eea558cb04758741a82",
+            "new_child_id": "recurrence_rule_de22821ea070560fd985bc88285e8ec689ff85b5cb2a595b1af95ea41ad46603",
+            "effect": "copied",
+            "lineage_index": "1",
+            "lineage_id": "recurrence_lineage_cdc18c4e75f895a686d9ee7908af03f868f4bb98806c28c847ab2f42c223a44b",
+            "payload_hash": "3d24fe53d7ac56fdf41e414d2b70fde568060e8c7f22e9bfdf8c3ada0d524c05"
+          },
+          "identity_preimage": {
+            "derivation_version": "spine.recurrence-lineage-id.v1",
+            "contract_version": "spine.recurrence.contract.v1",
+            "normalization_version": "spine.recurrence.normalization.v1",
+            "canonical_json_version": "spine.canonical-json.v1",
+            "command_id": "fixture_source_excluded",
+            "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
+            "prior_recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
+            "new_recurrence_revision_id": "recurrence_revision_99c33f0aecf53ab6af45ed0e72f17b59cfefe418b3f3790a72fc7944fc493ac8",
+            "lineage_role": "rule_revision",
+            "prior_child_id": "recurrence_rule_25beffd480d6cb16b9f8d202a6e2cd6d6d4e06c52c792eea558cb04758741a82",
+            "new_child_id": "recurrence_rule_de22821ea070560fd985bc88285e8ec689ff85b5cb2a595b1af95ea41ad46603",
+            "effect": "copied",
+            "lineage_index": "1"
+          },
+          "payload": {
+            "command_id": "fixture_source_excluded",
+            "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
+            "prior_recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
+            "new_recurrence_revision_id": "recurrence_revision_99c33f0aecf53ab6af45ed0e72f17b59cfefe418b3f3790a72fc7944fc493ac8",
+            "lineage_role": "rule_revision",
+            "prior_child_id": "recurrence_rule_25beffd480d6cb16b9f8d202a6e2cd6d6d4e06c52c792eea558cb04758741a82",
+            "new_child_id": "recurrence_rule_de22821ea070560fd985bc88285e8ec689ff85b5cb2a595b1af95ea41ad46603",
+            "effect": "copied",
+            "lineage_index": "1",
+            "command_effect": "instance_remove_exdate_created"
+          }
+        },
+        {
+          "row": {
+            "command_id": "fixture_source_excluded",
+            "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
+            "prior_recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
+            "new_recurrence_revision_id": "recurrence_revision_99c33f0aecf53ab6af45ed0e72f17b59cfefe418b3f3790a72fc7944fc493ac8",
+            "lineage_role": "exdate_revision",
+            "new_child_id": "recurrence_exdate_4c8054449c2a9c05869e0904c356ab2c97b19376f58e1a49a7b0dfeff4d70e11",
+            "effect": "created",
+            "lineage_index": "2",
+            "lineage_id": "recurrence_lineage_46fe0f68c0cb9d292d7b6f39cdd59b82dd08f0e493c9e0507c3f4820a501adb3",
+            "payload_hash": "6972f60128a29a0cd4f18740189a2d54e227798c06f4f38df2f88b5a391a9ce0"
+          },
+          "identity_preimage": {
+            "derivation_version": "spine.recurrence-lineage-id.v1",
+            "contract_version": "spine.recurrence.contract.v1",
+            "normalization_version": "spine.recurrence.normalization.v1",
+            "canonical_json_version": "spine.canonical-json.v1",
+            "command_id": "fixture_source_excluded",
+            "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
+            "prior_recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
+            "new_recurrence_revision_id": "recurrence_revision_99c33f0aecf53ab6af45ed0e72f17b59cfefe418b3f3790a72fc7944fc493ac8",
+            "lineage_role": "exdate_revision",
+            "new_child_id": "recurrence_exdate_4c8054449c2a9c05869e0904c356ab2c97b19376f58e1a49a7b0dfeff4d70e11",
+            "effect": "created",
+            "lineage_index": "2"
+          },
+          "payload": {
+            "command_id": "fixture_source_excluded",
+            "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
+            "prior_recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
+            "new_recurrence_revision_id": "recurrence_revision_99c33f0aecf53ab6af45ed0e72f17b59cfefe418b3f3790a72fc7944fc493ac8",
+            "lineage_role": "exdate_revision",
+            "new_child_id": "recurrence_exdate_4c8054449c2a9c05869e0904c356ab2c97b19376f58e1a49a7b0dfeff4d70e11",
+            "effect": "created",
+            "lineage_index": "2",
+            "command_effect": "instance_remove_exdate_created"
+          }
+        }
+      ],
+      "copy_facts": [
+        {
+          "prior_child_id": "recurrence_rule_25beffd480d6cb16b9f8d202a6e2cd6d6d4e06c52c792eea558cb04758741a82",
+          "new_child_id": "recurrence_rule_de22821ea070560fd985bc88285e8ec689ff85b5cb2a595b1af95ea41ad46603",
+          "lineage_id": "recurrence_lineage_cdc18c4e75f895a686d9ee7908af03f868f4bb98806c28c847ab2f42c223a44b"
+        }
+      ],
+      "retarget_facts": []
+    },
+    {
+      "case_id": "occurrence_cancelled",
+      "prior_snapshot": "main",
+      "snapshot": "occurrence_cancelled",
+      "lineage": [
+        {
+          "row": {
+            "command_id": "fixture_source_occurrence_cancelled",
+            "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
+            "prior_recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
+            "new_recurrence_revision_id": "recurrence_revision_a038787544b273d1d1c0b0e5ee63b360ba19ab99103e27c41c84e463e77d01e2",
+            "lineage_role": "segment_revision",
+            "prior_segment_id": "recurrence_segment_745701e8f6dc647a155e52115aa6a848b46fe63a386c50f39b623aedfc998c27",
+            "new_segment_id": "recurrence_segment_097d3baa50d2f3f56e5a7d64034e03b8293fe30d77ade7bafd7e618d5c99b10f",
+            "effect": "active",
+            "lineage_index": "0",
+            "lineage_id": "recurrence_lineage_927ddb6bb13758cc874284ae883fedb74bc5fa672a2fb3d0c69ee4e7fb2f65bf",
+            "payload_hash": "974480f20f3e4b3a9e43783a1fa9bcbeb14bed297dad7432e6c4fbf1f46abce3"
+          },
+          "identity_preimage": {
+            "derivation_version": "spine.recurrence-lineage-id.v1",
+            "contract_version": "spine.recurrence.contract.v1",
+            "normalization_version": "spine.recurrence.normalization.v1",
+            "canonical_json_version": "spine.canonical-json.v1",
+            "command_id": "fixture_source_occurrence_cancelled",
+            "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
+            "prior_recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
+            "new_recurrence_revision_id": "recurrence_revision_a038787544b273d1d1c0b0e5ee63b360ba19ab99103e27c41c84e463e77d01e2",
+            "lineage_role": "segment_revision",
+            "prior_segment_id": "recurrence_segment_745701e8f6dc647a155e52115aa6a848b46fe63a386c50f39b623aedfc998c27",
+            "new_segment_id": "recurrence_segment_097d3baa50d2f3f56e5a7d64034e03b8293fe30d77ade7bafd7e618d5c99b10f",
+            "effect": "active",
+            "lineage_index": "0"
+          },
+          "payload": {
+            "command_id": "fixture_source_occurrence_cancelled",
+            "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
+            "prior_recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
+            "new_recurrence_revision_id": "recurrence_revision_a038787544b273d1d1c0b0e5ee63b360ba19ab99103e27c41c84e463e77d01e2",
+            "lineage_role": "segment_revision",
+            "prior_segment_id": "recurrence_segment_745701e8f6dc647a155e52115aa6a848b46fe63a386c50f39b623aedfc998c27",
+            "new_segment_id": "recurrence_segment_097d3baa50d2f3f56e5a7d64034e03b8293fe30d77ade7bafd7e618d5c99b10f",
+            "effect": "active",
+            "lineage_index": "0",
+            "command_effect": "instance_override_created"
+          }
+        },
+        {
+          "row": {
+            "command_id": "fixture_source_occurrence_cancelled",
+            "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
+            "prior_recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
+            "new_recurrence_revision_id": "recurrence_revision_a038787544b273d1d1c0b0e5ee63b360ba19ab99103e27c41c84e463e77d01e2",
+            "lineage_role": "rule_revision",
+            "prior_child_id": "recurrence_rule_25beffd480d6cb16b9f8d202a6e2cd6d6d4e06c52c792eea558cb04758741a82",
+            "new_child_id": "recurrence_rule_599939a1e9cc01cd5b22cea89bff888db61f08ff02b88fdffa6d19198d5cb813",
+            "effect": "copied",
+            "lineage_index": "1",
+            "lineage_id": "recurrence_lineage_12d650a67a812059ccfc5099d44a9b812df4e059ca15eb983b30c3bb7aa39846",
+            "payload_hash": "031d0cd2328db6dc570bacc359323c61e911e14d35eee46dbd24907123d3d914"
+          },
+          "identity_preimage": {
+            "derivation_version": "spine.recurrence-lineage-id.v1",
+            "contract_version": "spine.recurrence.contract.v1",
+            "normalization_version": "spine.recurrence.normalization.v1",
+            "canonical_json_version": "spine.canonical-json.v1",
+            "command_id": "fixture_source_occurrence_cancelled",
+            "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
+            "prior_recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
+            "new_recurrence_revision_id": "recurrence_revision_a038787544b273d1d1c0b0e5ee63b360ba19ab99103e27c41c84e463e77d01e2",
+            "lineage_role": "rule_revision",
+            "prior_child_id": "recurrence_rule_25beffd480d6cb16b9f8d202a6e2cd6d6d4e06c52c792eea558cb04758741a82",
+            "new_child_id": "recurrence_rule_599939a1e9cc01cd5b22cea89bff888db61f08ff02b88fdffa6d19198d5cb813",
+            "effect": "copied",
+            "lineage_index": "1"
+          },
+          "payload": {
+            "command_id": "fixture_source_occurrence_cancelled",
+            "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
+            "prior_recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
+            "new_recurrence_revision_id": "recurrence_revision_a038787544b273d1d1c0b0e5ee63b360ba19ab99103e27c41c84e463e77d01e2",
+            "lineage_role": "rule_revision",
+            "prior_child_id": "recurrence_rule_25beffd480d6cb16b9f8d202a6e2cd6d6d4e06c52c792eea558cb04758741a82",
+            "new_child_id": "recurrence_rule_599939a1e9cc01cd5b22cea89bff888db61f08ff02b88fdffa6d19198d5cb813",
+            "effect": "copied",
+            "lineage_index": "1",
+            "command_effect": "instance_override_created"
+          }
+        },
+        {
+          "row": {
+            "command_id": "fixture_source_occurrence_cancelled",
+            "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
+            "prior_recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
+            "new_recurrence_revision_id": "recurrence_revision_a038787544b273d1d1c0b0e5ee63b360ba19ab99103e27c41c84e463e77d01e2",
+            "lineage_role": "override_revision",
+            "new_child_id": "recurrence_override_b323e122e44a0633c26255919f19f2b38db170813f813782916e16d6bb9fbafb",
+            "effect": "created",
+            "lineage_index": "2",
+            "lineage_id": "recurrence_lineage_8593844cbd5816a9205f2d662ff8bfd05683d326dd870cb3033d0185f83ab2dc",
+            "payload_hash": "9508e8b2cb142553d93ab0390359c6b489e8c607656af9c545120894d92368af"
+          },
+          "identity_preimage": {
+            "derivation_version": "spine.recurrence-lineage-id.v1",
+            "contract_version": "spine.recurrence.contract.v1",
+            "normalization_version": "spine.recurrence.normalization.v1",
+            "canonical_json_version": "spine.canonical-json.v1",
+            "command_id": "fixture_source_occurrence_cancelled",
+            "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
+            "prior_recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
+            "new_recurrence_revision_id": "recurrence_revision_a038787544b273d1d1c0b0e5ee63b360ba19ab99103e27c41c84e463e77d01e2",
+            "lineage_role": "override_revision",
+            "new_child_id": "recurrence_override_b323e122e44a0633c26255919f19f2b38db170813f813782916e16d6bb9fbafb",
+            "effect": "created",
+            "lineage_index": "2"
+          },
+          "payload": {
+            "command_id": "fixture_source_occurrence_cancelled",
+            "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
+            "prior_recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
+            "new_recurrence_revision_id": "recurrence_revision_a038787544b273d1d1c0b0e5ee63b360ba19ab99103e27c41c84e463e77d01e2",
+            "lineage_role": "override_revision",
+            "new_child_id": "recurrence_override_b323e122e44a0633c26255919f19f2b38db170813f813782916e16d6bb9fbafb",
+            "effect": "created",
+            "lineage_index": "2",
+            "command_effect": "instance_override_created"
+          }
+        }
+      ],
+      "copy_facts": [
+        {
+          "prior_child_id": "recurrence_rule_25beffd480d6cb16b9f8d202a6e2cd6d6d4e06c52c792eea558cb04758741a82",
+          "new_child_id": "recurrence_rule_599939a1e9cc01cd5b22cea89bff888db61f08ff02b88fdffa6d19198d5cb813",
+          "lineage_id": "recurrence_lineage_12d650a67a812059ccfc5099d44a9b812df4e059ca15eb983b30c3bb7aa39846"
+        }
+      ],
+      "retarget_facts": []
+    },
+    {
+      "case_id": "source_cancelled",
+      "prior_snapshot": "main",
+      "snapshot": "source_cancelled",
+      "lineage": [
+        {
+          "row": {
+            "command_id": "fixture_source_source_cancelled",
+            "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
+            "prior_recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
+            "new_recurrence_revision_id": "recurrence_revision_789cb1d3003adff667a537b85f57481005112ebe1fb848caca47c9128f4fad58",
+            "lineage_role": "segment_revision",
+            "prior_segment_id": "recurrence_segment_745701e8f6dc647a155e52115aa6a848b46fe63a386c50f39b623aedfc998c27",
+            "new_segment_id": "recurrence_segment_c50f7916b3b0db469a3c53796fcc94569ee65db13fd8c3ea7cbafa07f7fd5e66",
+            "effect": "active",
+            "lineage_index": "0",
+            "lineage_id": "recurrence_lineage_a45a39d7ecebf07e203ca213296edb87235b2a9c66eb066c72e7acdf2a06ef64",
+            "payload_hash": "dd6ce841fb64fdd65e5a40ce54b028e77742950356463d929274f4806ead2224"
+          },
+          "identity_preimage": {
+            "derivation_version": "spine.recurrence-lineage-id.v1",
+            "contract_version": "spine.recurrence.contract.v1",
+            "normalization_version": "spine.recurrence.normalization.v1",
+            "canonical_json_version": "spine.canonical-json.v1",
+            "command_id": "fixture_source_source_cancelled",
+            "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
+            "prior_recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
+            "new_recurrence_revision_id": "recurrence_revision_789cb1d3003adff667a537b85f57481005112ebe1fb848caca47c9128f4fad58",
+            "lineage_role": "segment_revision",
+            "prior_segment_id": "recurrence_segment_745701e8f6dc647a155e52115aa6a848b46fe63a386c50f39b623aedfc998c27",
+            "new_segment_id": "recurrence_segment_c50f7916b3b0db469a3c53796fcc94569ee65db13fd8c3ea7cbafa07f7fd5e66",
+            "effect": "active",
+            "lineage_index": "0"
+          },
+          "payload": {
+            "command_id": "fixture_source_source_cancelled",
+            "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
+            "prior_recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
+            "new_recurrence_revision_id": "recurrence_revision_789cb1d3003adff667a537b85f57481005112ebe1fb848caca47c9128f4fad58",
+            "lineage_role": "segment_revision",
+            "prior_segment_id": "recurrence_segment_745701e8f6dc647a155e52115aa6a848b46fe63a386c50f39b623aedfc998c27",
+            "new_segment_id": "recurrence_segment_c50f7916b3b0db469a3c53796fcc94569ee65db13fd8c3ea7cbafa07f7fd5e66",
+            "effect": "active",
+            "lineage_index": "0",
+            "command_effect": "series_edit_whole_applied"
+          }
+        },
+        {
+          "row": {
+            "command_id": "fixture_source_source_cancelled",
+            "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
+            "prior_recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
+            "new_recurrence_revision_id": "recurrence_revision_789cb1d3003adff667a537b85f57481005112ebe1fb848caca47c9128f4fad58",
+            "lineage_role": "rule_revision",
+            "prior_child_id": "recurrence_rule_25beffd480d6cb16b9f8d202a6e2cd6d6d4e06c52c792eea558cb04758741a82",
+            "new_child_id": "recurrence_rule_2a02d042cf3310ebd6fb90f794159a07a6cb4b971b79ccb3c53553363c8d1331",
+            "effect": "copied",
+            "lineage_index": "1",
+            "lineage_id": "recurrence_lineage_7d7634de3e8d552d8283395df8693c73cca8ad24a38ba315a0da6a925ee0e559",
+            "payload_hash": "ed0a67e3b14d6c043822392c6dae3af553d2ffe08e3d4b623c7c4e826f753148"
+          },
+          "identity_preimage": {
+            "derivation_version": "spine.recurrence-lineage-id.v1",
+            "contract_version": "spine.recurrence.contract.v1",
+            "normalization_version": "spine.recurrence.normalization.v1",
+            "canonical_json_version": "spine.canonical-json.v1",
+            "command_id": "fixture_source_source_cancelled",
+            "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
+            "prior_recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
+            "new_recurrence_revision_id": "recurrence_revision_789cb1d3003adff667a537b85f57481005112ebe1fb848caca47c9128f4fad58",
+            "lineage_role": "rule_revision",
+            "prior_child_id": "recurrence_rule_25beffd480d6cb16b9f8d202a6e2cd6d6d4e06c52c792eea558cb04758741a82",
+            "new_child_id": "recurrence_rule_2a02d042cf3310ebd6fb90f794159a07a6cb4b971b79ccb3c53553363c8d1331",
+            "effect": "copied",
+            "lineage_index": "1"
+          },
+          "payload": {
+            "command_id": "fixture_source_source_cancelled",
+            "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
+            "prior_recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
+            "new_recurrence_revision_id": "recurrence_revision_789cb1d3003adff667a537b85f57481005112ebe1fb848caca47c9128f4fad58",
+            "lineage_role": "rule_revision",
+            "prior_child_id": "recurrence_rule_25beffd480d6cb16b9f8d202a6e2cd6d6d4e06c52c792eea558cb04758741a82",
+            "new_child_id": "recurrence_rule_2a02d042cf3310ebd6fb90f794159a07a6cb4b971b79ccb3c53553363c8d1331",
+            "effect": "copied",
+            "lineage_index": "1",
+            "command_effect": "series_edit_whole_applied"
+          }
+        }
+      ],
+      "copy_facts": [
+        {
+          "prior_child_id": "recurrence_rule_25beffd480d6cb16b9f8d202a6e2cd6d6d4e06c52c792eea558cb04758741a82",
+          "new_child_id": "recurrence_rule_2a02d042cf3310ebd6fb90f794159a07a6cb4b971b79ccb3c53553363c8d1331",
+          "lineage_id": "recurrence_lineage_7d7634de3e8d552d8283395df8693c73cca8ad24a38ba315a0da6a925ee0e559"
+        }
+      ],
+      "retarget_facts": []
+    },
+    {
+      "case_id": "split",
+      "prior_snapshot": "counted",
+      "snapshot": "split",
+      "lineage": [
+        {
+          "row": {
+            "command_id": "fixture_source_split",
+            "recurrence_set_id": "recurrence_set_5e835398815f2115e526ea560bfcac9312a66e19788f0757768660dc3fe98bbc",
+            "prior_recurrence_revision_id": "recurrence_revision_688a3fd25eed2627950e8e88cdc120204d03e36a27726814107fca92c80617e1",
+            "new_recurrence_revision_id": "recurrence_revision_769068271a5b772f50d77beb41827d5f2952e6f71dab033666b647eedd16039c",
+            "lineage_role": "segment_revision",
+            "prior_segment_id": "recurrence_segment_0be723b96e92076d37cdbdf395c3cea15bea2e64232d3f84d77bae923f027c6a",
+            "new_segment_id": "recurrence_segment_3723f7c29c27435befbcedf24536a472688b686e48848de8062269d72df6add3",
+            "effect": "active",
+            "lineage_index": "0",
+            "lineage_id": "recurrence_lineage_7079542919b6f0a57a06cd39c4b2187a049ef0b3361fac0d7c28d353e0d3c466",
+            "payload_hash": "ced4b34ea31555f24d98db1a62df3feb3e33d09eeedfcebfeef2cca225d978f4"
+          },
+          "identity_preimage": {
+            "derivation_version": "spine.recurrence-lineage-id.v1",
+            "contract_version": "spine.recurrence.contract.v1",
+            "normalization_version": "spine.recurrence.normalization.v1",
+            "canonical_json_version": "spine.canonical-json.v1",
+            "command_id": "fixture_source_split",
+            "recurrence_set_id": "recurrence_set_5e835398815f2115e526ea560bfcac9312a66e19788f0757768660dc3fe98bbc",
+            "prior_recurrence_revision_id": "recurrence_revision_688a3fd25eed2627950e8e88cdc120204d03e36a27726814107fca92c80617e1",
+            "new_recurrence_revision_id": "recurrence_revision_769068271a5b772f50d77beb41827d5f2952e6f71dab033666b647eedd16039c",
+            "lineage_role": "segment_revision",
+            "prior_segment_id": "recurrence_segment_0be723b96e92076d37cdbdf395c3cea15bea2e64232d3f84d77bae923f027c6a",
+            "new_segment_id": "recurrence_segment_3723f7c29c27435befbcedf24536a472688b686e48848de8062269d72df6add3",
+            "effect": "active",
+            "lineage_index": "0"
+          },
+          "payload": {
+            "command_id": "fixture_source_split",
+            "recurrence_set_id": "recurrence_set_5e835398815f2115e526ea560bfcac9312a66e19788f0757768660dc3fe98bbc",
+            "prior_recurrence_revision_id": "recurrence_revision_688a3fd25eed2627950e8e88cdc120204d03e36a27726814107fca92c80617e1",
+            "new_recurrence_revision_id": "recurrence_revision_769068271a5b772f50d77beb41827d5f2952e6f71dab033666b647eedd16039c",
+            "lineage_role": "segment_revision",
+            "prior_segment_id": "recurrence_segment_0be723b96e92076d37cdbdf395c3cea15bea2e64232d3f84d77bae923f027c6a",
+            "new_segment_id": "recurrence_segment_3723f7c29c27435befbcedf24536a472688b686e48848de8062269d72df6add3",
+            "effect": "active",
+            "lineage_index": "0",
+            "command_effect": "series_edit_following_applied"
+          }
+        },
+        {
+          "row": {
+            "command_id": "fixture_source_split",
+            "recurrence_set_id": "recurrence_set_5e835398815f2115e526ea560bfcac9312a66e19788f0757768660dc3fe98bbc",
+            "prior_recurrence_revision_id": "recurrence_revision_688a3fd25eed2627950e8e88cdc120204d03e36a27726814107fca92c80617e1",
+            "new_recurrence_revision_id": "recurrence_revision_769068271a5b772f50d77beb41827d5f2952e6f71dab033666b647eedd16039c",
+            "lineage_role": "segment_revision",
+            "prior_segment_id": "recurrence_segment_0be723b96e92076d37cdbdf395c3cea15bea2e64232d3f84d77bae923f027c6a",
+            "new_segment_id": "recurrence_segment_12007c7c2faf4dfa81998bbf11d34d92c1d47ecc735b0370e3e45f8bf334e6e9",
+            "effect": "retired",
+            "lineage_index": "1",
+            "lineage_id": "recurrence_lineage_743579cdc4074761e1b4b750e73645fb55784989e5c3ada0f77aa522c7f7a7e4",
+            "payload_hash": "cce194440686dbbbaa5e8075d508ddde0db8220f7e5d98ebd4b0cbf0575f0078"
+          },
+          "identity_preimage": {
+            "derivation_version": "spine.recurrence-lineage-id.v1",
+            "contract_version": "spine.recurrence.contract.v1",
+            "normalization_version": "spine.recurrence.normalization.v1",
+            "canonical_json_version": "spine.canonical-json.v1",
+            "command_id": "fixture_source_split",
+            "recurrence_set_id": "recurrence_set_5e835398815f2115e526ea560bfcac9312a66e19788f0757768660dc3fe98bbc",
+            "prior_recurrence_revision_id": "recurrence_revision_688a3fd25eed2627950e8e88cdc120204d03e36a27726814107fca92c80617e1",
+            "new_recurrence_revision_id": "recurrence_revision_769068271a5b772f50d77beb41827d5f2952e6f71dab033666b647eedd16039c",
+            "lineage_role": "segment_revision",
+            "prior_segment_id": "recurrence_segment_0be723b96e92076d37cdbdf395c3cea15bea2e64232d3f84d77bae923f027c6a",
+            "new_segment_id": "recurrence_segment_12007c7c2faf4dfa81998bbf11d34d92c1d47ecc735b0370e3e45f8bf334e6e9",
+            "effect": "retired",
+            "lineage_index": "1"
+          },
+          "payload": {
+            "command_id": "fixture_source_split",
+            "recurrence_set_id": "recurrence_set_5e835398815f2115e526ea560bfcac9312a66e19788f0757768660dc3fe98bbc",
+            "prior_recurrence_revision_id": "recurrence_revision_688a3fd25eed2627950e8e88cdc120204d03e36a27726814107fca92c80617e1",
+            "new_recurrence_revision_id": "recurrence_revision_769068271a5b772f50d77beb41827d5f2952e6f71dab033666b647eedd16039c",
+            "lineage_role": "segment_revision",
+            "prior_segment_id": "recurrence_segment_0be723b96e92076d37cdbdf395c3cea15bea2e64232d3f84d77bae923f027c6a",
+            "new_segment_id": "recurrence_segment_12007c7c2faf4dfa81998bbf11d34d92c1d47ecc735b0370e3e45f8bf334e6e9",
+            "effect": "retired",
+            "lineage_index": "1",
+            "command_effect": "series_edit_following_applied"
+          }
+        },
+        {
+          "row": {
+            "command_id": "fixture_source_split",
+            "recurrence_set_id": "recurrence_set_5e835398815f2115e526ea560bfcac9312a66e19788f0757768660dc3fe98bbc",
+            "prior_recurrence_revision_id": "recurrence_revision_688a3fd25eed2627950e8e88cdc120204d03e36a27726814107fca92c80617e1",
+            "new_recurrence_revision_id": "recurrence_revision_769068271a5b772f50d77beb41827d5f2952e6f71dab033666b647eedd16039c",
+            "lineage_role": "segment_revision",
+            "prior_segment_id": "recurrence_segment_0be723b96e92076d37cdbdf395c3cea15bea2e64232d3f84d77bae923f027c6a",
+            "new_segment_id": "recurrence_segment_78cb1d24d7a40b34c7321800d0ab92a7193c3fee055ea9396aa73e06d943d0ee",
+            "effect": "active",
+            "lineage_index": "2",
+            "lineage_id": "recurrence_lineage_3cc57122f89ba6097dc4ddbad78234ac2eb231e043a24622f2bb7abe4cd01ff4",
+            "payload_hash": "422b0616865e50a0afcd3553da006c33b7960c0afcfc619c7e76920c9a3e3493"
+          },
+          "identity_preimage": {
+            "derivation_version": "spine.recurrence-lineage-id.v1",
+            "contract_version": "spine.recurrence.contract.v1",
+            "normalization_version": "spine.recurrence.normalization.v1",
+            "canonical_json_version": "spine.canonical-json.v1",
+            "command_id": "fixture_source_split",
+            "recurrence_set_id": "recurrence_set_5e835398815f2115e526ea560bfcac9312a66e19788f0757768660dc3fe98bbc",
+            "prior_recurrence_revision_id": "recurrence_revision_688a3fd25eed2627950e8e88cdc120204d03e36a27726814107fca92c80617e1",
+            "new_recurrence_revision_id": "recurrence_revision_769068271a5b772f50d77beb41827d5f2952e6f71dab033666b647eedd16039c",
+            "lineage_role": "segment_revision",
+            "prior_segment_id": "recurrence_segment_0be723b96e92076d37cdbdf395c3cea15bea2e64232d3f84d77bae923f027c6a",
+            "new_segment_id": "recurrence_segment_78cb1d24d7a40b34c7321800d0ab92a7193c3fee055ea9396aa73e06d943d0ee",
+            "effect": "active",
+            "lineage_index": "2"
+          },
+          "payload": {
+            "command_id": "fixture_source_split",
+            "recurrence_set_id": "recurrence_set_5e835398815f2115e526ea560bfcac9312a66e19788f0757768660dc3fe98bbc",
+            "prior_recurrence_revision_id": "recurrence_revision_688a3fd25eed2627950e8e88cdc120204d03e36a27726814107fca92c80617e1",
+            "new_recurrence_revision_id": "recurrence_revision_769068271a5b772f50d77beb41827d5f2952e6f71dab033666b647eedd16039c",
+            "lineage_role": "segment_revision",
+            "prior_segment_id": "recurrence_segment_0be723b96e92076d37cdbdf395c3cea15bea2e64232d3f84d77bae923f027c6a",
+            "new_segment_id": "recurrence_segment_78cb1d24d7a40b34c7321800d0ab92a7193c3fee055ea9396aa73e06d943d0ee",
+            "effect": "active",
+            "lineage_index": "2",
+            "command_effect": "series_edit_following_applied"
+          }
+        },
+        {
+          "row": {
+            "command_id": "fixture_source_split",
+            "recurrence_set_id": "recurrence_set_5e835398815f2115e526ea560bfcac9312a66e19788f0757768660dc3fe98bbc",
+            "prior_recurrence_revision_id": "recurrence_revision_688a3fd25eed2627950e8e88cdc120204d03e36a27726814107fca92c80617e1",
+            "new_recurrence_revision_id": "recurrence_revision_769068271a5b772f50d77beb41827d5f2952e6f71dab033666b647eedd16039c",
+            "lineage_role": "rule_revision",
+            "prior_child_id": "recurrence_rule_c98cc2c257b55ecd4cc92b9c7824326393a7437447e13aa4c7e2e4ea1aa037a5",
+            "new_child_id": "recurrence_rule_780780a664358e3156f49253a2cb5b410322ace606de669b9a5d55f766840c3e",
+            "effect": "copied",
+            "lineage_index": "3",
+            "lineage_id": "recurrence_lineage_45523e2b88b6e5f1c39b6af903a481ae22bcb5c234ca4280cfc5ad7ab8d54d25",
+            "payload_hash": "c213d7bfd16778c65b6eb631723422ef059a34a344cbf9dd114f026eeadb18c2"
+          },
+          "identity_preimage": {
+            "derivation_version": "spine.recurrence-lineage-id.v1",
+            "contract_version": "spine.recurrence.contract.v1",
+            "normalization_version": "spine.recurrence.normalization.v1",
+            "canonical_json_version": "spine.canonical-json.v1",
+            "command_id": "fixture_source_split",
+            "recurrence_set_id": "recurrence_set_5e835398815f2115e526ea560bfcac9312a66e19788f0757768660dc3fe98bbc",
+            "prior_recurrence_revision_id": "recurrence_revision_688a3fd25eed2627950e8e88cdc120204d03e36a27726814107fca92c80617e1",
+            "new_recurrence_revision_id": "recurrence_revision_769068271a5b772f50d77beb41827d5f2952e6f71dab033666b647eedd16039c",
+            "lineage_role": "rule_revision",
+            "prior_child_id": "recurrence_rule_c98cc2c257b55ecd4cc92b9c7824326393a7437447e13aa4c7e2e4ea1aa037a5",
+            "new_child_id": "recurrence_rule_780780a664358e3156f49253a2cb5b410322ace606de669b9a5d55f766840c3e",
+            "effect": "copied",
+            "lineage_index": "3"
+          },
+          "payload": {
+            "command_id": "fixture_source_split",
+            "recurrence_set_id": "recurrence_set_5e835398815f2115e526ea560bfcac9312a66e19788f0757768660dc3fe98bbc",
+            "prior_recurrence_revision_id": "recurrence_revision_688a3fd25eed2627950e8e88cdc120204d03e36a27726814107fca92c80617e1",
+            "new_recurrence_revision_id": "recurrence_revision_769068271a5b772f50d77beb41827d5f2952e6f71dab033666b647eedd16039c",
+            "lineage_role": "rule_revision",
+            "prior_child_id": "recurrence_rule_c98cc2c257b55ecd4cc92b9c7824326393a7437447e13aa4c7e2e4ea1aa037a5",
+            "new_child_id": "recurrence_rule_780780a664358e3156f49253a2cb5b410322ace606de669b9a5d55f766840c3e",
+            "effect": "copied",
+            "lineage_index": "3",
+            "command_effect": "series_edit_following_applied"
+          }
+        },
+        {
+          "row": {
+            "command_id": "fixture_source_split",
+            "recurrence_set_id": "recurrence_set_5e835398815f2115e526ea560bfcac9312a66e19788f0757768660dc3fe98bbc",
+            "prior_recurrence_revision_id": "recurrence_revision_688a3fd25eed2627950e8e88cdc120204d03e36a27726814107fca92c80617e1",
+            "new_recurrence_revision_id": "recurrence_revision_769068271a5b772f50d77beb41827d5f2952e6f71dab033666b647eedd16039c",
+            "lineage_role": "rule_revision",
+            "new_child_id": "recurrence_rule_af7728fa4e41435b51e27d658d596fa7a96cced508f80e78ae03ac9028f524ad",
+            "effect": "copied",
+            "lineage_index": "4",
+            "prior_child_id": "recurrence_rule_c98cc2c257b55ecd4cc92b9c7824326393a7437447e13aa4c7e2e4ea1aa037a5",
+            "lineage_id": "recurrence_lineage_e8a00e9069011f538497daf27583ca659fba7845588a2d99f2c29f808bcd7f52",
+            "payload_hash": "a92fe94a009e1c4f914ea7bf7e67deb4da5cd412de73ba836e023f5f0c1f2307"
+          },
+          "identity_preimage": {
+            "derivation_version": "spine.recurrence-lineage-id.v1",
+            "contract_version": "spine.recurrence.contract.v1",
+            "normalization_version": "spine.recurrence.normalization.v1",
+            "canonical_json_version": "spine.canonical-json.v1",
+            "command_id": "fixture_source_split",
+            "recurrence_set_id": "recurrence_set_5e835398815f2115e526ea560bfcac9312a66e19788f0757768660dc3fe98bbc",
+            "prior_recurrence_revision_id": "recurrence_revision_688a3fd25eed2627950e8e88cdc120204d03e36a27726814107fca92c80617e1",
+            "new_recurrence_revision_id": "recurrence_revision_769068271a5b772f50d77beb41827d5f2952e6f71dab033666b647eedd16039c",
+            "lineage_role": "rule_revision",
+            "new_child_id": "recurrence_rule_af7728fa4e41435b51e27d658d596fa7a96cced508f80e78ae03ac9028f524ad",
+            "effect": "copied",
+            "lineage_index": "4",
+            "prior_child_id": "recurrence_rule_c98cc2c257b55ecd4cc92b9c7824326393a7437447e13aa4c7e2e4ea1aa037a5"
+          },
+          "payload": {
+            "command_id": "fixture_source_split",
+            "recurrence_set_id": "recurrence_set_5e835398815f2115e526ea560bfcac9312a66e19788f0757768660dc3fe98bbc",
+            "prior_recurrence_revision_id": "recurrence_revision_688a3fd25eed2627950e8e88cdc120204d03e36a27726814107fca92c80617e1",
+            "new_recurrence_revision_id": "recurrence_revision_769068271a5b772f50d77beb41827d5f2952e6f71dab033666b647eedd16039c",
+            "lineage_role": "rule_revision",
+            "new_child_id": "recurrence_rule_af7728fa4e41435b51e27d658d596fa7a96cced508f80e78ae03ac9028f524ad",
+            "effect": "copied",
+            "lineage_index": "4",
+            "prior_child_id": "recurrence_rule_c98cc2c257b55ecd4cc92b9c7824326393a7437447e13aa4c7e2e4ea1aa037a5",
+            "command_effect": "series_edit_following_applied"
+          }
+        }
+      ],
+      "copy_facts": [
+        {
+          "prior_child_id": "recurrence_rule_c98cc2c257b55ecd4cc92b9c7824326393a7437447e13aa4c7e2e4ea1aa037a5",
+          "new_child_id": "recurrence_rule_780780a664358e3156f49253a2cb5b410322ace606de669b9a5d55f766840c3e",
+          "lineage_id": "recurrence_lineage_45523e2b88b6e5f1c39b6af903a481ae22bcb5c234ca4280cfc5ad7ab8d54d25"
+        },
+        {
+          "prior_child_id": "recurrence_rule_c98cc2c257b55ecd4cc92b9c7824326393a7437447e13aa4c7e2e4ea1aa037a5",
+          "new_child_id": "recurrence_rule_af7728fa4e41435b51e27d658d596fa7a96cced508f80e78ae03ac9028f524ad",
+          "lineage_id": "recurrence_lineage_e8a00e9069011f538497daf27583ca659fba7845588a2d99f2c29f808bcd7f52",
+          "count_subtraction": {
+            "split_scheduled_fact": "2026-11-28T11:30:00",
+            "original_count": "6",
+            "produced_before_split": "2",
+            "remaining_count": "4"
+          }
+        }
+      ],
+      "retarget_facts": [
+        {
+          "prior_selector": {
+            "contract_version": "spine.recurrence.contract.v1",
+            "normalization_version": "spine.recurrence.normalization.v1",
+            "canonical_json_version": "spine.canonical-json.v1",
+            "derivation_version": "spine.recurrence-target-occurrence-selector.v1",
+            "recurrence_set_id": "recurrence_set_5e835398815f2115e526ea560bfcac9312a66e19788f0757768660dc3fe98bbc",
+            "segment_ref": "0",
+            "scheduled_fact": "2026-11-28T11:30:00",
+            "origin_kind": "rule",
+            "source_rule_selectors": [
+              {
+                "frequency": "WEEKLY",
+                "interval": "1",
+                "seed": "2026-11-14T11:30:00",
+                "start_bound": "2026-11-14T11:30:00",
+                "end_condition": {
+                  "kind": "count",
+                  "count": "6"
+                },
+                "by_weekday": [
+                  "SA"
+                ],
+                "week_start": "MO",
+                "status": "active"
+              }
+            ],
+            "source_rdate_selectors": []
+          },
+          "selector": {
+            "contract_version": "spine.recurrence.contract.v1",
+            "normalization_version": "spine.recurrence.normalization.v1",
+            "canonical_json_version": "spine.canonical-json.v1",
+            "derivation_version": "spine.recurrence-target-occurrence-selector.v1",
+            "recurrence_set_id": "recurrence_set_5e835398815f2115e526ea560bfcac9312a66e19788f0757768660dc3fe98bbc",
+            "segment_ref": "2",
+            "scheduled_fact": "2026-11-28T11:30:00",
+            "origin_kind": "rule",
+            "source_rule_selectors": [
+              {
+                "frequency": "WEEKLY",
+                "interval": "1",
+                "seed": "2026-11-14T11:30:00",
+                "start_bound": "2026-11-28T11:30:00",
+                "end_condition": {
+                  "kind": "count",
+                  "count": "4"
+                },
+                "by_weekday": [
+                  "SA"
+                ],
+                "week_start": "MO",
+                "status": "active"
+              }
+            ],
+            "source_rdate_selectors": []
+          },
+          "lineage_ids": [
+            "recurrence_lineage_3cc57122f89ba6097dc4ddbad78234ac2eb231e043a24622f2bb7abe4cd01ff4",
+            "recurrence_lineage_45523e2b88b6e5f1c39b6af903a481ae22bcb5c234ca4280cfc5ad7ab8d54d25",
+            "recurrence_lineage_7079542919b6f0a57a06cd39c4b2187a049ef0b3361fac0d7c28d353e0d3c466",
+            "recurrence_lineage_743579cdc4074761e1b4b750e73645fb55784989e5c3ada0f77aa522c7f7a7e4",
+            "recurrence_lineage_e8a00e9069011f538497daf27583ca659fba7845588a2d99f2c29f808bcd7f52"
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "union_copied",
+      "prior_snapshot": "union",
+      "snapshot": "union_copied",
+      "lineage": [
+        {
+          "row": {
+            "command_id": "fixture_source_union_copied",
+            "recurrence_set_id": "recurrence_set_d05361a806c7f52c98f2028de6391c21475ff29e38a4bc3feff7a4c47bddf3c8",
+            "prior_recurrence_revision_id": "recurrence_revision_cf2deeb46b908180131e0e0c62ed84463c83249fa88e79660a8bf16a36cd145a",
+            "new_recurrence_revision_id": "recurrence_revision_a1498e501614029a05e113132a918cf4299f526166f1706de4e759e0b4eaf5e5",
+            "lineage_role": "segment_revision",
+            "prior_segment_id": "recurrence_segment_b6ca7589863881ffb5d7e9127b741da592a50531c44e2abc9e9439e6a4620522",
+            "new_segment_id": "recurrence_segment_2a33ca78c516ff81aac76f1f6ff4122776210ae4697e2a72cfd49918a56bee7f",
+            "effect": "active",
+            "lineage_index": "0",
+            "lineage_id": "recurrence_lineage_5b88f00644398c29a5ac6160083dde745772c3ad1b006dc05f34ac3c0038881e",
+            "payload_hash": "e9024560dee739ccc5cabaa1f19d384af9362576f46c413e9fedfb5f8eb12346"
+          },
+          "identity_preimage": {
+            "derivation_version": "spine.recurrence-lineage-id.v1",
+            "contract_version": "spine.recurrence.contract.v1",
+            "normalization_version": "spine.recurrence.normalization.v1",
+            "canonical_json_version": "spine.canonical-json.v1",
+            "command_id": "fixture_source_union_copied",
+            "recurrence_set_id": "recurrence_set_d05361a806c7f52c98f2028de6391c21475ff29e38a4bc3feff7a4c47bddf3c8",
+            "prior_recurrence_revision_id": "recurrence_revision_cf2deeb46b908180131e0e0c62ed84463c83249fa88e79660a8bf16a36cd145a",
+            "new_recurrence_revision_id": "recurrence_revision_a1498e501614029a05e113132a918cf4299f526166f1706de4e759e0b4eaf5e5",
+            "lineage_role": "segment_revision",
+            "prior_segment_id": "recurrence_segment_b6ca7589863881ffb5d7e9127b741da592a50531c44e2abc9e9439e6a4620522",
+            "new_segment_id": "recurrence_segment_2a33ca78c516ff81aac76f1f6ff4122776210ae4697e2a72cfd49918a56bee7f",
+            "effect": "active",
+            "lineage_index": "0"
+          },
+          "payload": {
+            "command_id": "fixture_source_union_copied",
+            "recurrence_set_id": "recurrence_set_d05361a806c7f52c98f2028de6391c21475ff29e38a4bc3feff7a4c47bddf3c8",
+            "prior_recurrence_revision_id": "recurrence_revision_cf2deeb46b908180131e0e0c62ed84463c83249fa88e79660a8bf16a36cd145a",
+            "new_recurrence_revision_id": "recurrence_revision_a1498e501614029a05e113132a918cf4299f526166f1706de4e759e0b4eaf5e5",
+            "lineage_role": "segment_revision",
+            "prior_segment_id": "recurrence_segment_b6ca7589863881ffb5d7e9127b741da592a50531c44e2abc9e9439e6a4620522",
+            "new_segment_id": "recurrence_segment_2a33ca78c516ff81aac76f1f6ff4122776210ae4697e2a72cfd49918a56bee7f",
+            "effect": "active",
+            "lineage_index": "0",
+            "command_effect": "series_edit_whole_applied"
+          }
+        },
+        {
+          "row": {
+            "command_id": "fixture_source_union_copied",
+            "recurrence_set_id": "recurrence_set_d05361a806c7f52c98f2028de6391c21475ff29e38a4bc3feff7a4c47bddf3c8",
+            "prior_recurrence_revision_id": "recurrence_revision_cf2deeb46b908180131e0e0c62ed84463c83249fa88e79660a8bf16a36cd145a",
+            "new_recurrence_revision_id": "recurrence_revision_a1498e501614029a05e113132a918cf4299f526166f1706de4e759e0b4eaf5e5",
+            "lineage_role": "rule_revision",
+            "prior_child_id": "recurrence_rule_5042bfd1a41caeb24edaec905cc0e1644b34d0fd4b024d934cb20b6ab113bcce",
+            "new_child_id": "recurrence_rule_02a18f776a2e77b214be8f565e9f5d8165f731e2f6d9cfb72bbbb949fd0a2cb5",
+            "effect": "copied",
+            "lineage_index": "1",
+            "lineage_id": "recurrence_lineage_c204aba59b8fcba8c4144b50d3c1bcb0235d8256ad542dff1b809dd03fb93d09",
+            "payload_hash": "841161c275df6a1a219b0a828df5b564b78a6b3c5e3bcc39ac4af7e54cb8ddf2"
+          },
+          "identity_preimage": {
+            "derivation_version": "spine.recurrence-lineage-id.v1",
+            "contract_version": "spine.recurrence.contract.v1",
+            "normalization_version": "spine.recurrence.normalization.v1",
+            "canonical_json_version": "spine.canonical-json.v1",
+            "command_id": "fixture_source_union_copied",
+            "recurrence_set_id": "recurrence_set_d05361a806c7f52c98f2028de6391c21475ff29e38a4bc3feff7a4c47bddf3c8",
+            "prior_recurrence_revision_id": "recurrence_revision_cf2deeb46b908180131e0e0c62ed84463c83249fa88e79660a8bf16a36cd145a",
+            "new_recurrence_revision_id": "recurrence_revision_a1498e501614029a05e113132a918cf4299f526166f1706de4e759e0b4eaf5e5",
+            "lineage_role": "rule_revision",
+            "prior_child_id": "recurrence_rule_5042bfd1a41caeb24edaec905cc0e1644b34d0fd4b024d934cb20b6ab113bcce",
+            "new_child_id": "recurrence_rule_02a18f776a2e77b214be8f565e9f5d8165f731e2f6d9cfb72bbbb949fd0a2cb5",
+            "effect": "copied",
+            "lineage_index": "1"
+          },
+          "payload": {
+            "command_id": "fixture_source_union_copied",
+            "recurrence_set_id": "recurrence_set_d05361a806c7f52c98f2028de6391c21475ff29e38a4bc3feff7a4c47bddf3c8",
+            "prior_recurrence_revision_id": "recurrence_revision_cf2deeb46b908180131e0e0c62ed84463c83249fa88e79660a8bf16a36cd145a",
+            "new_recurrence_revision_id": "recurrence_revision_a1498e501614029a05e113132a918cf4299f526166f1706de4e759e0b4eaf5e5",
+            "lineage_role": "rule_revision",
+            "prior_child_id": "recurrence_rule_5042bfd1a41caeb24edaec905cc0e1644b34d0fd4b024d934cb20b6ab113bcce",
+            "new_child_id": "recurrence_rule_02a18f776a2e77b214be8f565e9f5d8165f731e2f6d9cfb72bbbb949fd0a2cb5",
+            "effect": "copied",
+            "lineage_index": "1",
+            "command_effect": "series_edit_whole_applied"
+          }
+        },
+        {
+          "row": {
+            "command_id": "fixture_source_union_copied",
+            "recurrence_set_id": "recurrence_set_d05361a806c7f52c98f2028de6391c21475ff29e38a4bc3feff7a4c47bddf3c8",
+            "prior_recurrence_revision_id": "recurrence_revision_cf2deeb46b908180131e0e0c62ed84463c83249fa88e79660a8bf16a36cd145a",
+            "new_recurrence_revision_id": "recurrence_revision_a1498e501614029a05e113132a918cf4299f526166f1706de4e759e0b4eaf5e5",
+            "lineage_role": "rule_revision",
+            "prior_child_id": "recurrence_rule_77eb388aa714508bd6caeefda40afa88ac314bd9cd83732bbb307787a7556acc",
+            "new_child_id": "recurrence_rule_cae183de568cc757bdd9a9e11e72b4163ea35a5a2207fc0b922a96df9a5efd75",
+            "effect": "copied",
+            "lineage_index": "2",
+            "lineage_id": "recurrence_lineage_46a50de401b365f3b280b43c28f2fac8032dcfa5f33845f677ba52dbb3d0107f",
+            "payload_hash": "d0104ffd647b9425f14334fe55c48889e3b3fd1eda57e94c3cde5645d61dff78"
+          },
+          "identity_preimage": {
+            "derivation_version": "spine.recurrence-lineage-id.v1",
+            "contract_version": "spine.recurrence.contract.v1",
+            "normalization_version": "spine.recurrence.normalization.v1",
+            "canonical_json_version": "spine.canonical-json.v1",
+            "command_id": "fixture_source_union_copied",
+            "recurrence_set_id": "recurrence_set_d05361a806c7f52c98f2028de6391c21475ff29e38a4bc3feff7a4c47bddf3c8",
+            "prior_recurrence_revision_id": "recurrence_revision_cf2deeb46b908180131e0e0c62ed84463c83249fa88e79660a8bf16a36cd145a",
+            "new_recurrence_revision_id": "recurrence_revision_a1498e501614029a05e113132a918cf4299f526166f1706de4e759e0b4eaf5e5",
+            "lineage_role": "rule_revision",
+            "prior_child_id": "recurrence_rule_77eb388aa714508bd6caeefda40afa88ac314bd9cd83732bbb307787a7556acc",
+            "new_child_id": "recurrence_rule_cae183de568cc757bdd9a9e11e72b4163ea35a5a2207fc0b922a96df9a5efd75",
+            "effect": "copied",
+            "lineage_index": "2"
+          },
+          "payload": {
+            "command_id": "fixture_source_union_copied",
+            "recurrence_set_id": "recurrence_set_d05361a806c7f52c98f2028de6391c21475ff29e38a4bc3feff7a4c47bddf3c8",
+            "prior_recurrence_revision_id": "recurrence_revision_cf2deeb46b908180131e0e0c62ed84463c83249fa88e79660a8bf16a36cd145a",
+            "new_recurrence_revision_id": "recurrence_revision_a1498e501614029a05e113132a918cf4299f526166f1706de4e759e0b4eaf5e5",
+            "lineage_role": "rule_revision",
+            "prior_child_id": "recurrence_rule_77eb388aa714508bd6caeefda40afa88ac314bd9cd83732bbb307787a7556acc",
+            "new_child_id": "recurrence_rule_cae183de568cc757bdd9a9e11e72b4163ea35a5a2207fc0b922a96df9a5efd75",
+            "effect": "copied",
+            "lineage_index": "2",
+            "command_effect": "series_edit_whole_applied"
+          }
+        }
+      ],
+      "copy_facts": [
+        {
+          "prior_child_id": "recurrence_rule_5042bfd1a41caeb24edaec905cc0e1644b34d0fd4b024d934cb20b6ab113bcce",
+          "new_child_id": "recurrence_rule_02a18f776a2e77b214be8f565e9f5d8165f731e2f6d9cfb72bbbb949fd0a2cb5",
+          "lineage_id": "recurrence_lineage_c204aba59b8fcba8c4144b50d3c1bcb0235d8256ad542dff1b809dd03fb93d09"
+        },
+        {
+          "prior_child_id": "recurrence_rule_77eb388aa714508bd6caeefda40afa88ac314bd9cd83732bbb307787a7556acc",
+          "new_child_id": "recurrence_rule_cae183de568cc757bdd9a9e11e72b4163ea35a5a2207fc0b922a96df9a5efd75",
+          "lineage_id": "recurrence_lineage_46a50de401b365f3b280b43c28f2fac8032dcfa5f33845f677ba52dbb3d0107f"
+        }
+      ],
+      "retarget_facts": []
+    },
+    {
+      "case_id": "changed_with_added",
+      "prior_snapshot": "main",
+      "snapshot": "changed_with_added",
+      "lineage": [
+        {
+          "row": {
+            "command_id": "fixture_source_changed_with_added",
+            "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
+            "prior_recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
+            "new_recurrence_revision_id": "recurrence_revision_7ee1b96312717b7f8220a3431b4c66ae8d1c8deefe2b3ce620f0a46333bac9e2",
+            "lineage_role": "segment_revision",
+            "prior_segment_id": "recurrence_segment_745701e8f6dc647a155e52115aa6a848b46fe63a386c50f39b623aedfc998c27",
+            "new_segment_id": "recurrence_segment_6b0a5023a2135719f87e66c55b97797a8c8f779691f43ff7c703281d5225c7da",
+            "effect": "active",
+            "lineage_index": "0",
+            "lineage_id": "recurrence_lineage_ab95610a591cffa466731349df80d49fdc91155efeecdc08d59ee772bc9e5029",
+            "payload_hash": "6df80c253fa22de47411f3a37e317cce2f323623267bb71a589a482879d10179"
+          },
+          "identity_preimage": {
+            "derivation_version": "spine.recurrence-lineage-id.v1",
+            "contract_version": "spine.recurrence.contract.v1",
+            "normalization_version": "spine.recurrence.normalization.v1",
+            "canonical_json_version": "spine.canonical-json.v1",
+            "command_id": "fixture_source_changed_with_added",
+            "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
+            "prior_recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
+            "new_recurrence_revision_id": "recurrence_revision_7ee1b96312717b7f8220a3431b4c66ae8d1c8deefe2b3ce620f0a46333bac9e2",
+            "lineage_role": "segment_revision",
+            "prior_segment_id": "recurrence_segment_745701e8f6dc647a155e52115aa6a848b46fe63a386c50f39b623aedfc998c27",
+            "new_segment_id": "recurrence_segment_6b0a5023a2135719f87e66c55b97797a8c8f779691f43ff7c703281d5225c7da",
+            "effect": "active",
+            "lineage_index": "0"
+          },
+          "payload": {
+            "command_id": "fixture_source_changed_with_added",
+            "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
+            "prior_recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
+            "new_recurrence_revision_id": "recurrence_revision_7ee1b96312717b7f8220a3431b4c66ae8d1c8deefe2b3ce620f0a46333bac9e2",
+            "lineage_role": "segment_revision",
+            "prior_segment_id": "recurrence_segment_745701e8f6dc647a155e52115aa6a848b46fe63a386c50f39b623aedfc998c27",
+            "new_segment_id": "recurrence_segment_6b0a5023a2135719f87e66c55b97797a8c8f779691f43ff7c703281d5225c7da",
+            "effect": "active",
+            "lineage_index": "0",
+            "command_effect": "series_edit_whole_applied"
+          }
+        },
+        {
+          "row": {
+            "command_id": "fixture_source_changed_with_added",
+            "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
+            "prior_recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
+            "new_recurrence_revision_id": "recurrence_revision_7ee1b96312717b7f8220a3431b4c66ae8d1c8deefe2b3ce620f0a46333bac9e2",
+            "lineage_role": "rule_revision",
+            "new_child_id": "recurrence_rule_3e7664d6aefa3b0513214b0563cca63a6cf97c96db9ab0c0530ba899a3eb2b47",
+            "effect": "copied",
+            "lineage_index": "1",
+            "prior_child_id": "recurrence_rule_25beffd480d6cb16b9f8d202a6e2cd6d6d4e06c52c792eea558cb04758741a82",
+            "lineage_id": "recurrence_lineage_e55237427c6389a560dd238d08b431a211946cdc28514fa05b24e3372bf05e25",
+            "payload_hash": "a1426385f9df335a2c4c62e44c76b62dbbe4fd74b0554e69d0a0a56711a4b297"
+          },
+          "identity_preimage": {
+            "derivation_version": "spine.recurrence-lineage-id.v1",
+            "contract_version": "spine.recurrence.contract.v1",
+            "normalization_version": "spine.recurrence.normalization.v1",
+            "canonical_json_version": "spine.canonical-json.v1",
+            "command_id": "fixture_source_changed_with_added",
+            "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
+            "prior_recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
+            "new_recurrence_revision_id": "recurrence_revision_7ee1b96312717b7f8220a3431b4c66ae8d1c8deefe2b3ce620f0a46333bac9e2",
+            "lineage_role": "rule_revision",
+            "new_child_id": "recurrence_rule_3e7664d6aefa3b0513214b0563cca63a6cf97c96db9ab0c0530ba899a3eb2b47",
+            "effect": "copied",
+            "lineage_index": "1",
+            "prior_child_id": "recurrence_rule_25beffd480d6cb16b9f8d202a6e2cd6d6d4e06c52c792eea558cb04758741a82"
+          },
+          "payload": {
+            "command_id": "fixture_source_changed_with_added",
+            "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
+            "prior_recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
+            "new_recurrence_revision_id": "recurrence_revision_7ee1b96312717b7f8220a3431b4c66ae8d1c8deefe2b3ce620f0a46333bac9e2",
+            "lineage_role": "rule_revision",
+            "new_child_id": "recurrence_rule_3e7664d6aefa3b0513214b0563cca63a6cf97c96db9ab0c0530ba899a3eb2b47",
+            "effect": "copied",
+            "lineage_index": "1",
+            "prior_child_id": "recurrence_rule_25beffd480d6cb16b9f8d202a6e2cd6d6d4e06c52c792eea558cb04758741a82",
+            "command_effect": "series_edit_whole_applied"
+          }
+        },
+        {
+          "row": {
+            "command_id": "fixture_source_changed_with_added",
+            "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
+            "prior_recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
+            "new_recurrence_revision_id": "recurrence_revision_7ee1b96312717b7f8220a3431b4c66ae8d1c8deefe2b3ce620f0a46333bac9e2",
+            "lineage_role": "rdate_revision",
+            "new_child_id": "recurrence_rdate_c7282fde9e97b01836345643e1675491a7fd4f4c29d5169632b0597d7f86bd63",
+            "effect": "created",
+            "lineage_index": "2",
+            "lineage_id": "recurrence_lineage_1419baf73b4fff71f5d53ae8ee459a435fa501e01030f2afa5bfa0c490689789",
+            "payload_hash": "edb5f99fda2e52adf99b63cb8e906a77969a647d93bad004c5d3642752196b1b"
+          },
+          "identity_preimage": {
+            "derivation_version": "spine.recurrence-lineage-id.v1",
+            "contract_version": "spine.recurrence.contract.v1",
+            "normalization_version": "spine.recurrence.normalization.v1",
+            "canonical_json_version": "spine.canonical-json.v1",
+            "command_id": "fixture_source_changed_with_added",
+            "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
+            "prior_recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
+            "new_recurrence_revision_id": "recurrence_revision_7ee1b96312717b7f8220a3431b4c66ae8d1c8deefe2b3ce620f0a46333bac9e2",
+            "lineage_role": "rdate_revision",
+            "new_child_id": "recurrence_rdate_c7282fde9e97b01836345643e1675491a7fd4f4c29d5169632b0597d7f86bd63",
+            "effect": "created",
+            "lineage_index": "2"
+          },
+          "payload": {
+            "command_id": "fixture_source_changed_with_added",
+            "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
+            "prior_recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
+            "new_recurrence_revision_id": "recurrence_revision_7ee1b96312717b7f8220a3431b4c66ae8d1c8deefe2b3ce620f0a46333bac9e2",
+            "lineage_role": "rdate_revision",
+            "new_child_id": "recurrence_rdate_c7282fde9e97b01836345643e1675491a7fd4f4c29d5169632b0597d7f86bd63",
+            "effect": "created",
+            "lineage_index": "2",
+            "command_effect": "series_edit_whole_applied"
+          }
+        }
+      ],
+      "copy_facts": [
+        {
+          "prior_child_id": "recurrence_rule_25beffd480d6cb16b9f8d202a6e2cd6d6d4e06c52c792eea558cb04758741a82",
+          "new_child_id": "recurrence_rule_3e7664d6aefa3b0513214b0563cca63a6cf97c96db9ab0c0530ba899a3eb2b47",
+          "lineage_id": "recurrence_lineage_e55237427c6389a560dd238d08b431a211946cdc28514fa05b24e3372bf05e25"
+        }
+      ],
+      "retarget_facts": []
+    },
+    {
+      "case_id": "union_changed",
+      "prior_snapshot": "union",
+      "snapshot": "union_changed",
+      "lineage": [
+        {
+          "row": {
+            "command_id": "fixture_source_union_changed",
+            "recurrence_set_id": "recurrence_set_d05361a806c7f52c98f2028de6391c21475ff29e38a4bc3feff7a4c47bddf3c8",
+            "prior_recurrence_revision_id": "recurrence_revision_cf2deeb46b908180131e0e0c62ed84463c83249fa88e79660a8bf16a36cd145a",
+            "new_recurrence_revision_id": "recurrence_revision_5130b894c073ccbeeb4a863ab6d43c196843b3f483e89e098f9793ca83ae9be6",
+            "lineage_role": "segment_revision",
+            "prior_segment_id": "recurrence_segment_b6ca7589863881ffb5d7e9127b741da592a50531c44e2abc9e9439e6a4620522",
+            "new_segment_id": "recurrence_segment_4e7faab87b3f3d0072cb6392ff88d84db77b66e5b0a7300bd6b3292725967dda",
+            "effect": "active",
+            "lineage_index": "0",
+            "lineage_id": "recurrence_lineage_4355fa2151da63a8fd4bdd4253c8f2bf93ce4f459bcc423abd649a6a23c1d18a",
+            "payload_hash": "58f7b8c594f32af1bb96c015ed34de977fdb63dc1acdd4512ae46e44bd5abe6f"
+          },
+          "identity_preimage": {
+            "derivation_version": "spine.recurrence-lineage-id.v1",
+            "contract_version": "spine.recurrence.contract.v1",
+            "normalization_version": "spine.recurrence.normalization.v1",
+            "canonical_json_version": "spine.canonical-json.v1",
+            "command_id": "fixture_source_union_changed",
+            "recurrence_set_id": "recurrence_set_d05361a806c7f52c98f2028de6391c21475ff29e38a4bc3feff7a4c47bddf3c8",
+            "prior_recurrence_revision_id": "recurrence_revision_cf2deeb46b908180131e0e0c62ed84463c83249fa88e79660a8bf16a36cd145a",
+            "new_recurrence_revision_id": "recurrence_revision_5130b894c073ccbeeb4a863ab6d43c196843b3f483e89e098f9793ca83ae9be6",
+            "lineage_role": "segment_revision",
+            "prior_segment_id": "recurrence_segment_b6ca7589863881ffb5d7e9127b741da592a50531c44e2abc9e9439e6a4620522",
+            "new_segment_id": "recurrence_segment_4e7faab87b3f3d0072cb6392ff88d84db77b66e5b0a7300bd6b3292725967dda",
+            "effect": "active",
+            "lineage_index": "0"
+          },
+          "payload": {
+            "command_id": "fixture_source_union_changed",
+            "recurrence_set_id": "recurrence_set_d05361a806c7f52c98f2028de6391c21475ff29e38a4bc3feff7a4c47bddf3c8",
+            "prior_recurrence_revision_id": "recurrence_revision_cf2deeb46b908180131e0e0c62ed84463c83249fa88e79660a8bf16a36cd145a",
+            "new_recurrence_revision_id": "recurrence_revision_5130b894c073ccbeeb4a863ab6d43c196843b3f483e89e098f9793ca83ae9be6",
+            "lineage_role": "segment_revision",
+            "prior_segment_id": "recurrence_segment_b6ca7589863881ffb5d7e9127b741da592a50531c44e2abc9e9439e6a4620522",
+            "new_segment_id": "recurrence_segment_4e7faab87b3f3d0072cb6392ff88d84db77b66e5b0a7300bd6b3292725967dda",
+            "effect": "active",
+            "lineage_index": "0",
+            "command_effect": "series_edit_whole_applied"
+          }
+        },
+        {
+          "row": {
+            "command_id": "fixture_source_union_changed",
+            "recurrence_set_id": "recurrence_set_d05361a806c7f52c98f2028de6391c21475ff29e38a4bc3feff7a4c47bddf3c8",
+            "prior_recurrence_revision_id": "recurrence_revision_cf2deeb46b908180131e0e0c62ed84463c83249fa88e79660a8bf16a36cd145a",
+            "new_recurrence_revision_id": "recurrence_revision_5130b894c073ccbeeb4a863ab6d43c196843b3f483e89e098f9793ca83ae9be6",
+            "lineage_role": "rule_revision",
+            "prior_child_id": "recurrence_rule_5042bfd1a41caeb24edaec905cc0e1644b34d0fd4b024d934cb20b6ab113bcce",
+            "new_child_id": "recurrence_rule_46a4d8041d08c2af037a91139b6e30449da9fa4d3c0307ad4c1f137e0d03f9b5",
+            "effect": "copied",
+            "lineage_index": "1",
+            "lineage_id": "recurrence_lineage_538db7097232afb6cd985ac928b1ebb3a501d700abe6b8c4ed5e66bb360c1831",
+            "payload_hash": "91692dd467a2089f19c102977023a1526b9e86e2c0cd33d89071aac124db01da"
+          },
+          "identity_preimage": {
+            "derivation_version": "spine.recurrence-lineage-id.v1",
+            "contract_version": "spine.recurrence.contract.v1",
+            "normalization_version": "spine.recurrence.normalization.v1",
+            "canonical_json_version": "spine.canonical-json.v1",
+            "command_id": "fixture_source_union_changed",
+            "recurrence_set_id": "recurrence_set_d05361a806c7f52c98f2028de6391c21475ff29e38a4bc3feff7a4c47bddf3c8",
+            "prior_recurrence_revision_id": "recurrence_revision_cf2deeb46b908180131e0e0c62ed84463c83249fa88e79660a8bf16a36cd145a",
+            "new_recurrence_revision_id": "recurrence_revision_5130b894c073ccbeeb4a863ab6d43c196843b3f483e89e098f9793ca83ae9be6",
+            "lineage_role": "rule_revision",
+            "prior_child_id": "recurrence_rule_5042bfd1a41caeb24edaec905cc0e1644b34d0fd4b024d934cb20b6ab113bcce",
+            "new_child_id": "recurrence_rule_46a4d8041d08c2af037a91139b6e30449da9fa4d3c0307ad4c1f137e0d03f9b5",
+            "effect": "copied",
+            "lineage_index": "1"
+          },
+          "payload": {
+            "command_id": "fixture_source_union_changed",
+            "recurrence_set_id": "recurrence_set_d05361a806c7f52c98f2028de6391c21475ff29e38a4bc3feff7a4c47bddf3c8",
+            "prior_recurrence_revision_id": "recurrence_revision_cf2deeb46b908180131e0e0c62ed84463c83249fa88e79660a8bf16a36cd145a",
+            "new_recurrence_revision_id": "recurrence_revision_5130b894c073ccbeeb4a863ab6d43c196843b3f483e89e098f9793ca83ae9be6",
+            "lineage_role": "rule_revision",
+            "prior_child_id": "recurrence_rule_5042bfd1a41caeb24edaec905cc0e1644b34d0fd4b024d934cb20b6ab113bcce",
+            "new_child_id": "recurrence_rule_46a4d8041d08c2af037a91139b6e30449da9fa4d3c0307ad4c1f137e0d03f9b5",
+            "effect": "copied",
+            "lineage_index": "1",
+            "command_effect": "series_edit_whole_applied"
+          }
+        },
+        {
+          "row": {
+            "command_id": "fixture_source_union_changed",
+            "recurrence_set_id": "recurrence_set_d05361a806c7f52c98f2028de6391c21475ff29e38a4bc3feff7a4c47bddf3c8",
+            "prior_recurrence_revision_id": "recurrence_revision_cf2deeb46b908180131e0e0c62ed84463c83249fa88e79660a8bf16a36cd145a",
+            "new_recurrence_revision_id": "recurrence_revision_5130b894c073ccbeeb4a863ab6d43c196843b3f483e89e098f9793ca83ae9be6",
+            "lineage_role": "rule_revision",
+            "new_child_id": "recurrence_rule_1531ce27a18da4db9c27a4f20f8f35352145b3a0c96caab7934be34bea313ccc",
+            "effect": "copied",
+            "lineage_index": "2",
+            "prior_child_id": "recurrence_rule_77eb388aa714508bd6caeefda40afa88ac314bd9cd83732bbb307787a7556acc",
+            "lineage_id": "recurrence_lineage_1ea231d5e10b44200b65d13994a5148a508cb821ea0f343f3bc821b84843d297",
+            "payload_hash": "94ec86ce2c7ca2a4fb0129228cee060a995b5939a0d62190afc780182d0db212"
+          },
+          "identity_preimage": {
+            "derivation_version": "spine.recurrence-lineage-id.v1",
+            "contract_version": "spine.recurrence.contract.v1",
+            "normalization_version": "spine.recurrence.normalization.v1",
+            "canonical_json_version": "spine.canonical-json.v1",
+            "command_id": "fixture_source_union_changed",
+            "recurrence_set_id": "recurrence_set_d05361a806c7f52c98f2028de6391c21475ff29e38a4bc3feff7a4c47bddf3c8",
+            "prior_recurrence_revision_id": "recurrence_revision_cf2deeb46b908180131e0e0c62ed84463c83249fa88e79660a8bf16a36cd145a",
+            "new_recurrence_revision_id": "recurrence_revision_5130b894c073ccbeeb4a863ab6d43c196843b3f483e89e098f9793ca83ae9be6",
+            "lineage_role": "rule_revision",
+            "new_child_id": "recurrence_rule_1531ce27a18da4db9c27a4f20f8f35352145b3a0c96caab7934be34bea313ccc",
+            "effect": "copied",
+            "lineage_index": "2",
+            "prior_child_id": "recurrence_rule_77eb388aa714508bd6caeefda40afa88ac314bd9cd83732bbb307787a7556acc"
+          },
+          "payload": {
+            "command_id": "fixture_source_union_changed",
+            "recurrence_set_id": "recurrence_set_d05361a806c7f52c98f2028de6391c21475ff29e38a4bc3feff7a4c47bddf3c8",
+            "prior_recurrence_revision_id": "recurrence_revision_cf2deeb46b908180131e0e0c62ed84463c83249fa88e79660a8bf16a36cd145a",
+            "new_recurrence_revision_id": "recurrence_revision_5130b894c073ccbeeb4a863ab6d43c196843b3f483e89e098f9793ca83ae9be6",
+            "lineage_role": "rule_revision",
+            "new_child_id": "recurrence_rule_1531ce27a18da4db9c27a4f20f8f35352145b3a0c96caab7934be34bea313ccc",
+            "effect": "copied",
+            "lineage_index": "2",
+            "prior_child_id": "recurrence_rule_77eb388aa714508bd6caeefda40afa88ac314bd9cd83732bbb307787a7556acc",
+            "command_effect": "series_edit_whole_applied"
+          }
+        }
+      ],
+      "copy_facts": [
+        {
+          "prior_child_id": "recurrence_rule_5042bfd1a41caeb24edaec905cc0e1644b34d0fd4b024d934cb20b6ab113bcce",
+          "new_child_id": "recurrence_rule_46a4d8041d08c2af037a91139b6e30449da9fa4d3c0307ad4c1f137e0d03f9b5",
+          "lineage_id": "recurrence_lineage_538db7097232afb6cd985ac928b1ebb3a501d700abe6b8c4ed5e66bb360c1831"
+        },
+        {
+          "prior_child_id": "recurrence_rule_77eb388aa714508bd6caeefda40afa88ac314bd9cd83732bbb307787a7556acc",
+          "new_child_id": "recurrence_rule_1531ce27a18da4db9c27a4f20f8f35352145b3a0c96caab7934be34bea313ccc",
+          "lineage_id": "recurrence_lineage_1ea231d5e10b44200b65d13994a5148a508cb821ea0f343f3bc821b84843d297"
+        }
+      ],
+      "retarget_facts": []
+    }
+  ],
+  "cases": [
+    {
+      "case_id": "unchanged_copy",
+      "pair": "copied",
+      "fact": "2026-11-14T11:30:00",
+      "mode": "copy",
+      "expected": "same_assignment"
+    },
+    {
+      "case_id": "count_split",
+      "pair": "split",
+      "fact": "2026-11-28T11:30:00",
+      "mode": "copy",
+      "expected": "same_assignment"
+    },
+    {
+      "case_id": "exact_retarget",
+      "pair": "split",
+      "fact": "2026-11-28T11:30:00",
+      "mode": "retarget",
+      "expected": "same_assignment"
+    },
+    {
+      "case_id": "all_union_contributors",
+      "pair": "union_copied",
+      "fact": "2026-11-14T11:30:00",
+      "mode": "copy",
+      "expected": "same_assignment"
+    },
+    {
+      "case_id": "genuinely_added_rdate",
+      "pair": "added",
+      "fact": "2026-11-15T11:30:00",
+      "mode": "novel",
+      "expected": "new_slot"
+    },
+    {
+      "case_id": "rule_slot_not_novel",
+      "pair": "added",
+      "fact": "2026-11-14T11:30:00",
+      "mode": "novel",
+      "expected": "not_novel"
+    },
+    {
+      "case_id": "changed_seed_not_continuity",
+      "pair": "changed_with_added",
+      "fact": "2026-11-14T11:30:00",
+      "mode": "copy",
+      "expected": "decision_required"
+    },
+    {
+      "case_id": "addition_does_not_bless_changed_component",
+      "pair": "changed_with_added",
+      "fact": "2026-11-15T11:30:00",
+      "mode": "novel",
+      "expected": "decision_required"
+    },
+    {
+      "case_id": "one_changed_union_contributor",
+      "pair": "union_changed",
+      "fact": "2026-11-14T11:30:00",
+      "mode": "copy",
+      "expected": "decision_required"
+    }
+  ],
+  "event_details": [
+    {
+      "snapshot": "source_cancelled",
+      "item_id": "item_fixture_science_class",
+      "item_version": "2",
+      "status": "cancelled"
+    }
+  ]
+}

@@ -6,6 +6,6 @@
   "error": {
     "code": "semantic_conflict",
     "field": "configuration",
-    "message": "Synthetic offline semantic_conflict"
+    "message": "Synthetic branch-specific offline semantic_conflict"
   }
 }

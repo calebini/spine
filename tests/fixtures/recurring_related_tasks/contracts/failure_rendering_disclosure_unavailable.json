@@ -5,7 +5,7 @@
   "changed": false,
   "error": {
     "code": "rendering_disclosure_unavailable",
-    "field": "request",
-    "message": "Synthetic offline rendering_disclosure_unavailable"
+    "field": "configuration.notification_plan",
+    "message": "Synthetic branch-specific offline rendering_disclosure_unavailable"
   }
 }

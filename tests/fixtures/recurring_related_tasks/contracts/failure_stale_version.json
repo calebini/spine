@@ -5,7 +5,7 @@
   "changed": false,
   "error": {
     "code": "stale_version",
-    "field": "expected",
-    "message": "Synthetic offline stale_version"
+    "field": "expected.rule_change_version",
+    "message": "Synthetic branch-specific offline stale_version"
   }
 }

@@ -5,7 +5,7 @@
   "changed": false,
   "error": {
     "code": "referenced_row_not_found",
-    "field": "request",
-    "message": "Synthetic offline referenced_row_not_found"
+    "field": "related_task_rule_id",
+    "message": "Synthetic branch-specific offline referenced_row_not_found"
   }
 }

@@ -14,13 +14,13 @@
       },
       "rule_key": "science_pickup",
       "source_item_id": "item_fixture_science_class",
-      "recurrence_set_id": "recurrence_set_fixture_class",
+      "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
       "source_snapshot": {
         "source_item_id": "item_fixture_science_class",
         "source_item_version": "1",
-        "recurrence_set_id": "recurrence_set_fixture_class",
-        "recurrence_revision_id": "recurrence_revision_fixture_1",
-        "normalized_recurrence_set_hash": "a81ad5df22e71bb6557781ff40ffe67836bbe5335759837475d3bcdb9bc96b8c"
+        "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
+        "recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
+        "normalized_recurrence_set_hash": "07a3cf5ae207cefd1dce5b77833773ff1d990d63e20b7588c0d9a3a44ad50d40"
       },
       "status": "retired",
       "rule_revision_id": "related_task_rule_revision_75d0571ff60a7e0aa7096020fe99dc777b606bdefe1b342ad370994a5260cb1e",

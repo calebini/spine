@@ -285,6 +285,28 @@
       "expected": "conflict"
     },
     {
+      "case_id": "unchanged_desired_preserves_exception",
+      "family": "adoption",
+      "facts": {
+        "baseline": "B",
+        "current": "C",
+        "desired": "B",
+        "eligible": true
+      },
+      "expected": "preserve_current"
+    },
+    {
+      "case_id": "all_equal_preserved",
+      "family": "adoption",
+      "facts": {
+        "baseline": "B",
+        "current": "B",
+        "desired": "B",
+        "eligible": true
+      },
+      "expected": "preserve_current"
+    },
+    {
       "case_id": "terminal_or_overdue_adoption",
       "family": "adoption",
       "facts": {

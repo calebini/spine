@@ -5,7 +5,7 @@
   "changed": false,
   "error": {
     "code": "unsupported_field",
-    "field": "request",
-    "message": "Synthetic offline unsupported_field"
+    "field": "force",
+    "message": "Synthetic branch-specific offline unsupported_field"
   }
 }

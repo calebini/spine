@@ -398,8 +398,8 @@ ledger/migration, send, deployment, commit or push occurred during review.
 ### SPINE-083 — Codify recurring-task machine contracts and computed fixtures
 
 **Status:** Done locally (2026-11-08) — source-only machine codification after the
-clean scoped SPINE-082 recheck; machine-contract review and ratification remain
-pending. Source-only schemas, capability/dependency manifest, computed
+clean scoped SPINE-082 recheck. SPINE-084's machine review reports needs-revision;
+corrections and ratification remain pending. Source-only schemas, capability/dependency manifest, computed
 wire/identity/cursor/model fixtures and offline contract tests are present.
 No runtime registration, handler/worker behavior, DDL/migration, ratification,
 external audit, commit, push or deployment.
@@ -433,6 +433,138 @@ commit of the cohesive machine corpus and supporting review/codification trackin
 then preparation of a reviewer-only bounded machine-contract review. Exclude the
 unrelated `AGENTS.md` edit. External transmission requires separate exact-payload
 approval; no push, runtime implementation or migration is authorized.
+**Checkpoint:** `9e8260d59b5a4b4949c48d9425979c9492889c12` —
+`Define recurring-task machine contracts and computed fixtures`. The final selected
+suite passed 53 tests before commit. No push; AGENTS.md was excluded.
+
+### SPINE-084 — Bounded consistency review of recurring-task machine corpus
+
+**Status:** Done — all three approved reviewer-only assessments completed
+(2026-11-08), each `needs_revision` and `boundary_preserved=false`. Combined:
+**0 blockers / 4 majors / 6 minors / 0 nits**, ten distinct in-scope findings.
+Assessment completion does not close the findings, ratify the corpus or authorize implementation.
+The original approved attempt remains `audit_failed` at client
+`turn/start`: **1,402,443 characters** exceeded the **1,048,576-character** cap.
+No semantic verdict exists for the oversized attempt; the valid replacement
+assessments are recorded below. Its failure was setup recovery, not source feedback.
+**Scope:** One reviewer-only `audit-change` of SPINE-083's source-only machine
+codification: schema/spec/delegated-resource consistency, closed wire projections,
+canonical preimages/digests, policy tokens/ownership, evidence equality, effects/
+errors/replay/previews, bounded cursors and honest offline/runtime proof boundaries.
+Preserve D-01–05 and BF-001–003 closure. No redesign, Editor, convergence, source
+mutation, implementation, migration, ledger access, send or deployment.
+**Checkpoint:** `9e8260d59b5a4b4949c48d9425979c9492889c12`.
+**Original failed package:** [Audit notes](../whetstone_runs/recurring-related-task-machine-contract-audit-001/audit-notes.md)
+enumerate **121 inputs**: four complete feature leaves, three machine manifests,
+29 complete schema resources, 70 wire fixtures, four computed/evidence/model
+corpora, the builder and offline tests, complete storage-atomicity context and
+eight exact named-section authority extracts. The
+[prepared manifest](../whetstone_runs/recurring-related-task-machine-contract-audit-001/prepared-inputs.json)
+binds ordered input bytes/hashes, original context-source hashes/ranges, notes,
+launcher, adapter and full built-in prompt. Omitted authority sections are outside
+this audit; excerpts are exact text, not summaries. Inputs **1,357,788 bytes**;
+prompt **1,402,443 characters / 1,402,845 UTF-8 bytes**. No AGENTS.md, ledger,
+environment configuration or live credentials are included.
+**Execution pins:** Stable Whetstone `0.1.0`, checkpoint
+`6e19fe3e72dedda50a372781a43c08e5d7e7480a`; Codex Reviewer `gpt-6.1-sol`, explicit
+medium reasoning, installed CLI `0.167.0-alpha.3.2`, built-in `consistency`,
+1200-second timeout. CLI version differs from prior audit-002 and is recorded
+explicitly; no model/runtime fallback.
+**Guard:** [Launcher](../whetstone_runs/recurring-related-task-machine-contract-audit-001/run-review.py)
+defaults to local verification; checks checkpoint, source/copy/section/prompt/
+runtime/CLI/adapter/launcher hashes; refuses absent exact approval or an existing
+attempt. [Authorization](../whetstone_runs/recurring-related-task-machine-contract-audit-001/authorization.md)
+and [execution status](../whetstone_runs/recurring-related-task-machine-contract-audit-001/execution-status.json)
+record the operator's explicit 121-input/notes/context/copies approval and exact
+manifest/notes hashes. Run artifacts remain local under the existing ignore rule.
+**Local verification:** `--verify-only` returns `verified_not_sent` for all 121
+inputs and the exact rendered prompt. This is payload verification, not a model
+review or readiness verdict. The original review roots remain unchanged.
+**Attempt evidence:** The original
+[report](../whetstone_runs/recurring-related-task-machine-contract-audit-001/change_audit/change_audit_report.json)
+and [concise execution summary](../whetstone_runs/recurring-related-task-machine-contract-audit-001/execution-summary.md)
+record `input_too_large`. Nested CLI exited 1; Whetstone/guard exited 0 while
+persisting the failure. No feedback file exists. Zero report counts do not mean
+a clean audit. Post-attempt hashes/runtime/CLI checks pass; all 121 inputs,
+source specs/contracts and AGENTS bytes are unchanged. No automatic retry occurred.
+**Replacement preparation:** The operator requested staging smaller overlapping
+packages, not sending them. The [approval packet](../whetstone_runs/recurring-related-task-machine-split-review-001/README.md)
+and [coverage map](../whetstone_runs/recurring-related-task-machine-split-review-001/review-map.json)
+account for all 121 original exact inputs with no hidden additions or omissions:
+
+- [A: storage/identity](../whetstone_runs/recurring-related-task-machine-audit-002-storage-identity/audit-notes.md)
+  — 27 inputs, full prompt **908,478 characters / 908,675 UTF-8 bytes**, headroom 140,098 characters.
+- [B: authoring/lifecycle](../whetstone_runs/recurring-related-task-machine-audit-003-authoring-lifecycle/audit-notes.md)
+  — 96 inputs, full prompt **856,114 characters / 856,376 UTF-8 bytes**, headroom 192,462 characters.
+- [C: reads/integration](../whetstone_runs/recurring-related-task-machine-audit-004-reads-integration/audit-notes.md)
+  — 64 inputs, full prompt **916,046 characters / 916,306 UTF-8 bytes**, headroom 132,530 characters.
+
+Every guarded launcher passes local `--verify-only`, enforcing complete source/
+context/schema/prompt/runtime hashes and a **950,000-character** staging ceiling.
+The 18 original failed-run files and all machine/source/AGENTS bytes remain unchanged.
+Each replacement now has independent authorization/status recording the operator's
+fresh approval of all three exact inventories, respective notes, built-in reviewer/
+consistency-profile context and generated copies. Old approval was not inherited.
+Source-only runtime/ledger boundaries and execution pins remain unchanged; all
+pre-send guards pass. No review was launched during the earlier preparation.
+**Results:** [A report](../whetstone_runs/recurring-related-task-machine-audit-002-storage-identity/change_audit/change_audit_report.md)
+records 2 majors / 1 minor; [B report](../whetstone_runs/recurring-related-task-machine-audit-003-authoring-lifecycle/change_audit/change_audit_report.md)
+1 major / 3 minors; [C report](../whetstone_runs/recurring-related-task-machine-audit-004-reads-integration/change_audit/change_audit_report.md)
+1 major / 2 minors. The [reconciled summary](../whetstone_runs/recurring-related-task-machine-split-review-001/review-summary.md)
+retains all ten findings and the manual next-step recommendation. Majors concern
+recurrence-key encoding, independently verifiable source/lineage proof inputs,
+the missing D=B adoption branch, and cursor rejection/error-ordering oracles.
+Minors concern composed reminder witnesses, blocked-unit/page wording, assignee
+deduplication, failure fields, read watermarks and blocked-child policy mappings.
+**Integrity:** All three guarded processes exited 0 with valid feedback/reports;
+actual manifests match approved ordered paths/hashes and client identity. The
+entire 121-input union, frozen coverage map, 18 oversized-attempt files and AGENTS
+bytes remain unchanged. No specification/contract/fixture/test/runtime patch,
+Editor, automatic retry, ledger access, migration, send, deployment, commit or push.
+**Follow-up:** The operator authorized bounded manual corrections under SPINE-085;
+its local verification does not revise these original external verdicts.
+**Next:** Stage fresh exact-hash rechecks of the corrected corpus when selected.
+Preserve D-01–05 and all
+existing ownership/identity/notification boundaries. No clean corpus-closure,
+ratification, convergence or runtime-implementation claim is made.
+
+### SPINE-085 — Correct recurring-task machine-review findings
+
+**Status:** Done locally (2026-11-08) — all ten agreed A/B/C findings patched with
+focused offline regression evidence. Not externally rechecked or ratified.
+**Scope:** Source-only specs/schemas, deterministic computed fixtures and offline
+oracles for occurrence-key bytes, positive source/lineage evidence, composed
+multi-policy identities, three-way adoption, blocked-unit/page wording, raw versus
+normalized assignee sets, exact failure fields, cursor rejection/precedence and
+cross-surface catalog/policy mappings. Preserve D-01–05 and existing frozen owners.
+**Boundary:** No runtime handler/worker/DDL/migration or registration changes,
+live ledger, sends, new external audit, ratification, commit, push or deployment.
+Keep all original review reports/manifests and pre-existing AGENTS/tracking edits.
+Changed source will intentionally stale the old exact-payload guards; do not
+rewrite their inventory or claim an external recheck.
+**Changes:** Preserve recurrence's encoded occurrence key rather than substituting
+a digest; regenerate dependent identities. Retain twelve normalized source
+snapshots and nine bounded source-proof cases with independently checked hashes,
+copy/COUNT/union/retarget/novelty evidence. Retain profile-plus-custom composition,
+distinct intent tokens and replacement/copy-forward preimages. Correct D=B
+adoption preservation, successful blocked selection versus failed-page wording,
+raw duplicate-assignee normalization, exact failure fields, read watermarks and
+blocked-task policy mappings. Add 29 cursor outcome cases, including invalid and
+stale contexts and precedence over later expected-fact errors. The independent
+source checker is explicitly limited to the finite WEEKLY fixture shapes and
+64 candidate steps, not a runtime resolver. The standalone stdout-only builder
+also has a direct-entrypoint regression.
+**Verification:** **79 tests passed**: 62 selected machine/scaffold/documentation/
+declaration/scheduling/profile/binding regressions and 17 existing recurrence/
+occurrence/frozen-contract tests. All **80 generated artifacts** reproduce exactly
+(72 wire fixtures, six computed/evidence/model corpora and two manifests); the
+offline schema closure contains 30 resources. Focused Ruff, formatting and
+`git diff --check` pass. Pre-existing AGENTS.md bytes and all 18 inventoried
+oversized-attempt artifacts remain unchanged; original A/B/C reports are retained.
+No runtime `src/`, installed/frozen schema, migration or registration changed.
+**Next:** A focused fresh-payload external recheck is the next review gate when
+authorized. Old payload approvals and their source hashes are not reused. This
+local correction is not whole-corpus closure or implementation authorization.
 
 ## Post-release corrective work
 

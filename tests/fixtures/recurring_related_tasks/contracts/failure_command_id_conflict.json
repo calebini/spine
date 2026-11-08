@@ -5,7 +5,7 @@
   "changed": false,
   "error": {
     "code": "command_id_conflict",
-    "field": "request",
-    "message": "Synthetic offline command_id_conflict"
+    "field": "command_id",
+    "message": "Synthetic branch-specific offline command_id_conflict"
   }
 }

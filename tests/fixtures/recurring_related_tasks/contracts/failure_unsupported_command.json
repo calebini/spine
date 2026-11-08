@@ -5,7 +5,7 @@
   "changed": false,
   "error": {
     "code": "unsupported_command",
-    "field": "request",
-    "message": "Synthetic offline unsupported_command"
+    "field": "command",
+    "message": "Synthetic branch-specific offline unsupported_command"
   }
 }

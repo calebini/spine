@@ -1,6 +1,6 @@
 # Recurring Related Tasks: Machine Companion
 
-Status: Draft v0.1.0-draft.1 — source-only codification; not ratified or implemented
+Status: Draft v0.1.0-draft.2 — source-only codification; not ratified or implemented
 
 Date: 2026-11-08
 
@@ -47,6 +47,10 @@ duplicate object keys and invalid surrogates; allowed strings are not normalized
 JSON booleans remain booleans. Object field order is immaterial to canonical
 hashes; meaningful array order is retained. Schema default annotations do not
 perform normalization: the normalizer must explicitly materialize those values.
+The delegated `occurrence_key` is not a bare digest: retain its exact
+recurrence-owned unpadded base64url canonical-preimage payload, dot and lowercase
+hex digest. The digest remains a separate computed-vector field. Decoding and
+independent canonical-byte/digest comparison are required offline checks.
 
 The following names close descriptive facts already required by the prose:
 
@@ -85,6 +89,9 @@ Initial input may omit `generation_horizon_seconds`; normalization stores
 `4838400`. Complete update configuration requires the concrete value. Limits
 default individually and normalize to the complete seven-field limits object.
 Read page limit defaults to `50`, status to `active`, show view to `rule`.
+Raw assignee inputs may repeat IDs within the 100-entry input cap; stored
+configuration uses the sorted unique set. The distinct raw and normalized schemas
+must not reject an input whose duplication the contract promises to normalize.
 Absent list owner/source filters normalize to explicit null **in query facts**,
 not to inferred group/sender ownership. Null remains invalid where authoring
 requires an object or a missing optional. Exactly one owner FK matches its kind.
@@ -164,3 +171,38 @@ Review this machine corpus before ratification/implementation planning. Runtime
 advertisement requires the pending obligations to be implemented and verified
 against actual constraints, transactions, concurrent writes, migration and
 attempt-start admission. No source-only schema or passing witness waives that gate.
+
+## 6. Bounded independent witness scope
+
+The fixture manifest additionally names complete offline `source-proofs.json`
+and `composed-policies.json` corpora. Source snapshots retain the existing
+normalizers' full values and exact set/revision/hash/child preimages. Successor
+ancestry is checked independently alongside the delegated value-schema
+projection, without changing that existing schema. Lineage retains exact identity
+preimages/payloads, explicit component-copy maps, COUNT subtraction and one-to-one
+retarget facts; positive rdate novelty must exclude prior included/reserved or
+unresolved slots. The finite WEEKLY witness checker rejects unsupported fixture
+shapes and caps candidate generation at 64 steps; it is not an arbitrary-recurrence
+resolver or a substitute for actual provenance/transaction admission.
+
+The source corpus includes valid normalized successors with deliberately
+insufficient copy claims. Tests must reject changed seed/phase or unproved union
+contributors even when a lineage row's own hash is correct. Missing lineage,
+wrong COUNT subtraction, duplicate retargets and alias-blocked novelty have
+independent negative checks. Timezone facts are explicit synthetic inputs; these
+original-schedule membership witnesses do not qualify a timezone provider.
+
+The composition corpus retains a profile plus custom reminder, reordered inputs,
+replacement/copy-forward, complete mappings and every delegated identity
+preimage. Existing intent-creation preimages remain unchanged on copy rather than
+inventing an empty preimage. The three-way adoption oracle checks D=B first,
+preserving C even when it is an individual exception.
+
+Cursor cases retain exact wire bytes, public test keys, expected request/freshness
+context and expected `invalid_request`/`stale_cursor`/`stale_version` precedence.
+They include noncanonical/duplicate JSON, bad tags, unknown keys, cross-purpose/
+ledger/query/limit mismatches, overflow, invalid Unicode, expiry equality and
+combined cursor/expected-fact failures. No cursor test creates a service endpoint
+or authorizes a write. Read watermarks and blocked-child policy mappings are
+checked against concrete creation evidence; selected-but-unresolved units may
+advance selection without falsely certifying resolution or durable no-op change.

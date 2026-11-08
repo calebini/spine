@@ -18,7 +18,13 @@ from pathlib import Path
 from urllib.parse import urldefrag, urljoin
 
 from spine.core.canonical_json import canonical_json_bytes
-from spine.core.notifications import expand_notification_policy, normalize_notification_policy
+from spine.core.notification_profiles import compose_notification_plan
+from spine.core.notifications import expand_notification_policy, normalize_notification_policy, revise_notification_policy
+
+if __package__ in (None, ""):
+    from recurring_related_task_fixture_sources import selector_for, source_witnesses
+else:
+    from scripts.recurring_related_task_fixture_sources import selector_for, source_witnesses
 
 ROOT = Path(__file__).resolve().parents[1]
 SCHEMAS = "contracts/schemas/recurring-related-tasks/"
@@ -55,6 +61,9 @@ def schema_closure():
         if "$id" in value:
             resources[value["$id"]] = (path, value)
     queue = [read(str(p.relative_to(ROOT)))["$id"] for p in (ROOT / SCHEMAS).glob("*.json")]
+    # Complete normalized values in the offline source corpus use this existing
+    # schema owner; no installed runtime closure is changed.
+    queue.append(read("contracts/schemas/recurrence-set.schema.json")["$id"])
     seen = set()
     while queue:
         uri = queue.pop()
@@ -146,6 +155,8 @@ def decision_witnesses():
         ("untouched_adopt", {"baseline": "B", "current": "B", "desired": "D", "eligible": True}, "adopt"),
         ("already_desired", {"baseline": "B", "current": "D", "desired": "D", "eligible": True}, "adopt_witness"),
         ("individual_exception", {"baseline": "B", "current": "C", "desired": "D", "eligible": True}, "conflict"),
+        ("unchanged_desired_preserves_exception", {"baseline": "B", "current": "C", "desired": "B", "eligible": True}, "preserve_current"),
+        ("all_equal_preserved", {"baseline": "B", "current": "B", "desired": "B", "eligible": True}, "preserve_current"),
         ("terminal_or_overdue_adoption", {"baseline": "B", "current": "B", "desired": "D", "eligible": False}, "skip"),
     ]:
         add(name, "adoption", facts, expected)
@@ -190,18 +201,107 @@ def decision_witnesses():
     }
 
 
+def cursor_witnesses(vectors):
+    """Retain exact synthetic invalid/stale/precedence cases, not a validator."""
+    baseline = next(v for v in vectors if v["purpose"] == "reconcile")
+    payload = baseline["payload"]
+    freshness = {
+        k: payload[k]
+        for k in [
+            "catalog_generation",
+            "rule_change_version",
+            "rule_revision_id",
+            "source_item_id",
+            "source_item_version",
+            "recurrence_set_id",
+            "recurrence_revision_id",
+            "normalized_recurrence_set_hash",
+        ]
+    }
+    context = {
+        "keys": {payload["key_id"]: TEST_KEY},
+        "purpose": "reconcile",
+        "query": payload["query"],
+        "now": "2026-11-08T10:00:10Z",
+        "freshness": freshness,
+        "expected_mismatch": False,
+    }
+    cases = []
+
+    def signed(value=None, raw=None, domain=CURSOR):
+        raw = raw if raw is not None else canonical_json_bytes(value if value is not None else payload)
+        tag = hmac.new(bytes.fromhex(TEST_KEY), domain.encode() + b"\0" + raw, hashlib.sha256).digest()
+        return b64(raw) + "." + b64(tag)
+
+    def add(name, expected, *, wire=None, change_context=None, value=None, raw=None, domain=CURSOR):
+        current = copy.deepcopy(context)
+        if change_context:
+            change_context(current)
+        cases.append(
+            {"case_id": name, "wire": wire or signed(value=value, raw=raw, domain=domain), "context": current, "expected": expected}
+        )
+
+    add("accepted", "accepted")
+    add("one_second_before_expiry", "accepted", change_context=lambda c: c.update(now="2026-11-08T10:59:59Z"))
+    add("expiry_equality", "stale_cursor", change_context=lambda c: c.update(now="2026-11-08T11:00:00Z"))
+    add("expired", "stale_cursor", change_context=lambda c: c.update(now="2026-11-08T11:00:01Z"))
+    add("different_query_limit", "invalid_request", change_context=lambda c: c["query"]["limits"].update(assignments="2"))
+    add("wrong_ledger", "invalid_request", change_context=lambda c: c["query"].update(ledger_instance_id="ledger_instance_other_fixture"))
+    add("wrong_purpose", "invalid_request", change_context=lambda c: c.update(purpose="list"))
+    bad_tag = baseline["wire"].split(".")[0] + "." + b64(bytes(32))
+    add("bad_tag", "invalid_request", wire=bad_tag)
+    add("wrong_hmac_domain", "invalid_request", domain="spine.other.cursor.v1")
+    add("padded_encoding", "invalid_request", wire=baseline["wire"].replace(".", "=."))
+    add("noncanonical_json_whitespace", "invalid_request", raw=json.dumps(payload, indent=2).encode())
+    duplicate = '{"catalog_generation":"2",' + canonical_json_bytes(payload).decode()[1:]
+    add("duplicate_json_key", "invalid_request", raw=duplicate.encode())
+    add("malformed_json", "invalid_request", raw=b"{")
+    add("unknown_verification_key", "invalid_request", value={**payload, "key_id": "retired_fixture_key"})
+    add("unknown_payload_field", "invalid_request", value={**payload, "force": True})
+    add("overflow_counter", "invalid_request", value={**payload, "catalog_generation": "9223372036854775808"})
+    add("json_number_counter", "invalid_request", raw=json.dumps({**payload, "catalog_generation": 2}).encode())
+    add("invalid_unicode", "invalid_request", raw=json.dumps({**payload, "key_id": "\ud800"}).encode())
+    add("wrong_lifetime", "invalid_request", value={**payload, "expires_at_utc": "2026-11-08T11:00:01Z"})
+    for key, value in [
+        ("catalog_generation", "3"),
+        ("rule_change_version", "3"),
+        ("rule_revision_id", "related_task_rule_revision_" + "a" * 64),
+        ("source_item_version", "2"),
+        ("recurrence_revision_id", "recurrence_revision_other"),
+        ("normalized_recurrence_set_hash", "a" * 64),
+    ]:
+        add("stale_" + key, "stale_cursor", change_context=lambda c, k=key, v=value: c["freshness"].update({k: v}))
+    add("expected_mismatch_only", "stale_version", change_context=lambda c: c.update(expected_mismatch=True))
+    add("bad_tag_before_expected", "invalid_request", wire=bad_tag, change_context=lambda c: c.update(expected_mismatch=True))
+    add("expiry_before_expected", "stale_cursor", change_context=lambda c: c.update(now="2026-11-08T11:00:00Z", expected_mismatch=True))
+    add(
+        "query_before_stale_and_expected",
+        "invalid_request",
+        change_context=lambda c: (
+            c["query"]["limits"].update(assignments="2"),
+            c["freshness"].update(catalog_generation="3"),
+            c.update(expected_mismatch=True),
+        ),
+    )
+    return cases
+
+
 def build():
     bundle, fixtures, vectors = {}, [], []
     descriptor = read("contracts/recurring-related-tasks.v1.json")
     types = read(SCHEMAS + "types.schema.json")["$defs"]
     limits = {key: str(value[0]) for key, value in descriptor["limits"]["page"].items()}
     owner = {"owner_kind": "subject_group", "owner_group_id": "fixture_kinflow"}
+    sources = source_witnesses()
+    source_values = {s["case_id"]: s["value"] for s in sources["snapshots"]}
+    source_pairs = {p["case_id"]: p for p in sources["pairs"]}
+    initial_source = source_values["main"]
     source = {
-        "source_item_id": "item_fixture_science_class",
+        "source_item_id": initial_source["source_item_id"],
         "source_item_version": "1",
-        "recurrence_set_id": "recurrence_set_fixture_class",
-        "recurrence_revision_id": "recurrence_revision_fixture_1",
-        "normalized_recurrence_set_hash": digest({"fixture_source": "weekly_class_v1"}),
+        "recurrence_set_id": initial_source["recurrence_set_id"],
+        "recurrence_revision_id": initial_source["recurrence_revision_id"],
+        "normalized_recurrence_set_hash": initial_source["normalized_recurrence_set_hash"],
     }
     write = {
         "contract_version": FAMILY,
@@ -209,30 +309,10 @@ def build():
         "actor_subject_id": "fixture_operator",
         "requested_at_utc": NOW,
     }
-    source_rule = {
-        "frequency": "WEEKLY",
-        "interval": "1",
-        "seed": "2026-11-14T11:30:00",
-        "start_bound": "2026-11-14T11:30:00",
-        "end_condition": {"kind": "unbounded"},
-        "status": "active",
-        "by_weekday": ["SA"],
-        "week_start": "MO",
-    }
+    source_rule = {k: v for k, v in initial_source["rules"][0].items() if k not in {"rule_id", "segment_id"}}
 
     def selector(fact):
-        return {
-            "derivation_version": "spine.recurrence-target-occurrence-selector.v1",
-            "contract_version": "spine.recurrence.contract.v1",
-            "normalization_version": "spine.recurrence.normalization.v1",
-            "canonical_json_version": CANONICAL,
-            "recurrence_set_id": source["recurrence_set_id"],
-            "segment_ref": "1",
-            "scheduled_fact": fact,
-            "origin_kind": "rule",
-            "source_rule_selectors": [copy.deepcopy(source_rule)],
-            "source_rdate_selectors": [],
-        }
+        return selector_for(initial_source, fact)
 
     selected = selector("2026-11-14T11:30:00")
 
@@ -240,6 +320,8 @@ def build():
         encoded = canonical_json_bytes(preimage)
         sha = hashlib.sha256(encoded).hexdigest()
         value = prefix + "_" + sha if prefix else sha
+        if artifact == "occurrence_key":
+            value = b64(encoded) + "." + sha
         row = {
             "case_id": case_id,
             "artifact": artifact,
@@ -563,9 +645,15 @@ def build():
         "configuration": configuration,
     }
     fixture("request_create_pickup", create, "create-request")
+    duplicate_people = copy.deepcopy(create)
+    duplicate_people["configuration"]["task_template"]["people"]["assignees"] = ["fixture_parent", "fixture_parent"]
+    fixture("request_create_duplicate_assignees", duplicate_people, "create-request")
     explicit = copy.deepcopy(create)
     explicit["enrollment"] = {"kind": "selected_occurrence", "occurrence_key": occurrence_key}
     fixture("request_create_selected", explicit, "create-request")
+    bare_key = copy.deepcopy(explicit)
+    bare_key["enrollment"]["occurrence_key"] = occurrence_key.split(".")[-1]
+    fixture("invalid_create_bare_occurrence_key", bare_key, "create-request", False)
     no_reminders = copy.deepcopy(create)
     no_reminders["configuration"].update(notification_plan=None, delivery=None, materialization={"mode": "none"})
     fixture("request_create_without_reminders", no_reminders, "create-request")
@@ -718,6 +806,105 @@ def build():
                 "notification_policy_id": policy.value["notification_policy_id"],
             }
         )
+
+    # Retain the composition boundary itself, not only isolated distinct tokens.
+    templates = [
+        {
+            "template_key": key,
+            "schedule": {"kind": "once", "at": {"kind": "target_offset", "offset_basis": "elapsed", "offset_seconds": offset}},
+            "late_handling": {"kind": "skip"},
+        }
+        for key, offset in [("one_hour", "-3600"), ("ten_minutes", "-600")]
+    ]
+    replacements = [
+        {
+            "template_key": "ten_minutes",
+            "schedule": {"kind": "once", "at": {"kind": "target_offset", "offset_basis": "elapsed", "offset_seconds": "-1200"}},
+            "late_handling": {"kind": "skip"},
+        }
+    ]
+    composed_initial = compose_notification_plan(templates, suppress_template_keys=["one_hour"], replacements=[], custom_additions=[custom])
+    composed_reordered = compose_notification_plan(
+        list(reversed(templates)), suppress_template_keys=["one_hour"], replacements=[], custom_additions=[custom]
+    )
+    composed_replaced = compose_notification_plan(
+        templates, suppress_template_keys=["one_hour"], replacements=replacements, custom_additions=[custom]
+    )
+    multi_initial, multi_revised, multi_maps_initial, multi_maps_revised = [], [], [], []
+    for reminder in composed_initial.reminders:
+        key = reminder["policy_key"]
+        token = generation + ":" + key
+        initial = normalize_notification_policy(
+            {
+                "authoring_contract": "spine.notification-schedule-authoring.v1",
+                "target": {"anchor_role": "task_due", "application_scope": "item"},
+                "schedule": reminder["schedule"],
+                "late_handling": reminder["late_handling"],
+            },
+            item_id=children["task_item_id"],
+            item_version="1",
+            command_id=token,
+            created_at_utc=NOW,
+            recipient_kind="subject_group",
+            recipient_id="fixture_kinflow",
+            channel="fixture_channel",
+            delivery_target_id="delivery_target_fixture",
+        )
+        changed = next(r for r in composed_replaced.reminders if r["policy_key"] == key)
+        revised = revise_notification_policy(
+            initial.value,
+            item_version="2",
+            command_id="fixture_multi_adoption",
+            changed_at_utc="2026-11-08T10:01:00Z",
+            recipient_kind="subject_group",
+            recipient_id="fixture_kinflow",
+            channel="fixture_channel",
+            delivery_target_id="delivery_target_fixture",
+            target=initial.value["target"],
+            schedule=changed["schedule"],
+            late_handling=changed["late_handling"],
+        )
+        for phase, normalized_policy in [("initial", initial), ("revised", revised)]:
+            for artifact, prefix, preimage in [
+                ("notification_intent", "notification_intent", normalized_policy.intent_id_preimage or initial.intent_id_preimage),
+                ("normalized_notification_schedule_hash", None, normalized_policy.schedule_hash_preimage),
+                ("notification_schedule", "notification_schedule", normalized_policy.schedule_id_preimage),
+                ("notification_policy", "notification_policy", normalized_policy.policy_id_preimage),
+            ]:
+                vector("composed_" + phase + "_" + key + "_" + artifact, artifact, prefix, preimage)
+        multi_initial.append(initial.value)
+        multi_revised.append(revised.value)
+        for policy, target in [(initial.value, multi_maps_initial), (revised.value, multi_maps_revised)]:
+            target.append(
+                {
+                    "assignment_id": assignment_id,
+                    "generation_id": generation,
+                    "task_item_id": children["task_item_id"],
+                    "policy_key": key,
+                    "creation_token": token,
+                    "notification_intent_id": policy["notification_intent_id"],
+                    "notification_policy_id": policy["notification_policy_id"],
+                }
+            )
+    bundle[FIXTURES + "composed-policies.json"] = {
+        "status": "offline_model_only",
+        "runtime_verified": False,
+        "scenario_semantics": "alternative_configuration_not_extra_main_policies",
+        "templates": templates,
+        "suppress_template_keys": ["one_hour"],
+        "custom_additions": [custom],
+        "replacements": replacements,
+        "initial_reminders": list(composed_initial.reminders),
+        "reordered_reminders": list(composed_reordered.reminders),
+        "replacement_reminders": list(composed_replaced.reminders),
+        "initial_origins": list(composed_initial.origins),
+        "replacement_origins": list(composed_replaced.origins),
+        "initial_policies": multi_initial,
+        "revised_policies": multi_revised,
+        "initial_mappings": multi_maps_initial,
+        "revised_mappings": multi_maps_revised,
+        "real_outer_command_id": "fixture_multi_adoption",
+    }
 
     # Success bodies and cursor vectors bind concrete IDs, not fabricated hash literals.
     def success(name, result, effect, changed=True, command_id=None):
@@ -909,7 +1096,7 @@ def build():
                 {
                     "rows": rows,
                     "query": queries[view],
-                    "catalog_generation": "1",
+                    "catalog_generation": "2",
                     "has_more": False,
                     "next_cursor": None,
                     "read_at_utc": NOW,
@@ -1004,82 +1191,116 @@ def build():
     ]
     blocked["coverage"]["assignments"].update(status="decision_required", processed_count="1", remaining_known_count="1")
     blocked["future_generation"] = "blocked"
+    blocked["policy_mappings"] = [mappings[0]]
+    blocked["selection"].update(lane_start=lane_start, lane_end={"assignment_after_seq": "1", "source_after": None})
     fixture(
         "response_reconcile_decision_required", success("reconcile", blocked, "rule_page_decision_required", False), "reconcile-response"
     )
-    # Independent immutable evidence examples for all proof kinds.
+    # Source evidence now refers to retained normalized snapshots and actual
+    # registered lineage facts, not fixture-label hashes or dangling IDs.
     proofs = [proof]
-    common = {k: v for k, v in proof_payload.items() if k != "enrolled_recurrence_revision_id"}
     prior = {"prior_proof_id": proof_id, "prior_selector": selected}
+
+    def add_proof(kind, snapshot_name, extras, case, *, fact=None, use_rdate=False):
+        current = source_values[snapshot_name]
+        payload = {k: current[k] for k in source}
+        payload["lineage_ids"] = sorted(f["row"]["lineage_id"] for f in source_pairs.get(snapshot_name, {}).get("lineage", []))
+        if kind != "source_cancelled":
+            sel = selector_for(current, fact or selected["scheduled_fact"], rules=not use_rdate, rdates=use_rdate)
+            payload.update(selector=sel, occurrence_key=occurrence(sel, case + "_key"))
+        payload.update(extras)
+        pid = identity("related_task_proof", {"related_task_rule_id": root_id, "proof_kind": kind, "proof_payload": payload}, case)
+        record = {
+            **proof,
+            "proof_id": pid,
+            "proof_kind": kind,
+            "proof_json": payload,
+            "proof_hash": pid.rsplit("_", 1)[1],
+            "source_item_version": payload["source_item_version"],
+            "recurrence_revision_id": payload["recurrence_revision_id"],
+            "prior_recurrence_revision_id": source["recurrence_revision_id"] if snapshot_name != "main" else None,
+        }
+        proofs.append(record)
+        return record
+
+    add_proof("identity", "main", {}, "proof_identity")
+    copied = source_values["copied"]
+    copied_selector = selector_for(copied, selected["scheduled_fact"])
+    copy_ids = sorted(f["row"]["lineage_id"] for f in source_pairs["copied"]["lineage"])
     hop = {
         "prior_revision_id": source["recurrence_revision_id"],
-        "new_revision_id": "recurrence_revision_fixture_2",
+        "new_revision_id": copied["recurrence_revision_id"],
         "prior_selector": selected,
-        "selector": selected,
-        "lineage_ids": ["lineage_fixture_1"],
+        "selector": copied_selector,
+        "lineage_ids": copy_ids,
     }
-    cases = [
-        ("identity", {}),
-        ("carry_forward", {**prior, "hops": [hop]}),
+    add_proof("carry_forward", "copied", {**prior, "hops": [hop]}, "proof_carry_forward")
+    add_proof(
+        "component_candidate",
+        "main",
+        {
+            "basis_revision_id": source["recurrence_revision_id"],
+            "component_selector": {"source_kind": "rule", "selector": source_rule},
+            "hops": [],
+        },
+        "proof_component_candidate",
+    )
+    added = source_values["added"]
+    add_proof(
+        "new_rdate",
+        "added",
+        {
+            "rdate_id": added["rdates"][0]["rdate_id"],
+            "prior_recurrence_revision_id": source["recurrence_revision_id"],
+        },
+        "proof_new_rdate",
+        fact="2026-11-15T11:30:00",
+        use_rdate=True,
+    )
+    for kind, snapshot_name, extras in [
         (
-            "component_candidate",
+            "excluded",
+            "excluded",
+            {"exdate_id": source_values["excluded"]["exdates"][0]["exdate_id"], "exclusion_active": True, "actionable": False},
+        ),
+        (
+            "occurrence_cancelled",
+            "occurrence_cancelled",
             {
-                "basis_revision_id": source["recurrence_revision_id"],
-                "component_selector": {"source_kind": "rule", "selector": source_rule},
-                "hops": [],
+                "override_id": source_values["occurrence_cancelled"]["overrides"][0]["override_id"],
+                "lifecycle": "cancelled",
+                "actionable": False,
             },
         ),
-        ("new_rdate", {"rdate_id": "rdate_fixture_new", "prior_recurrence_revision_id": source["recurrence_revision_id"]}),
-        ("excluded", {**prior, "exdate_id": "exdate_fixture_1", "exclusion_active": True, "actionable": False}),
-        ("occurrence_cancelled", {**prior, "override_id": "override_fixture_cancel", "lifecycle": "cancelled", "actionable": False}),
-        ("source_cancelled", {"cancelled_event_version": "2", "event_status": "cancelled"}),
-    ]
-    for kind, extras in cases:
-        payload = {**copy.deepcopy(common), **extras}
-        if kind != "identity":
-            payload.update(
-                source_item_version="2",
-                recurrence_revision_id="recurrence_revision_fixture_2",
-                normalized_recurrence_set_hash=digest({"fixture_source": "weekly_class_v2"}),
-            )
-        if kind == "carry_forward":
-            payload.update(
-                source_item_version="2", recurrence_revision_id="recurrence_revision_fixture_2", lineage_ids=["lineage_fixture_1"]
-            )
-        if kind == "new_rdate":
-            payload["selector"] = {
-                **selected,
-                "scheduled_fact": "2026-11-15T11:30:00",
-                "origin_kind": "rdate",
-                "source_rule_selectors": [],
-                "source_rdate_selectors": [{"scheduled_fact": "2026-11-15T11:30:00", "status": "active"}],
-            }
-            payload["occurrence_key"] = occurrence(payload["selector"], "added_rdate_key")
-        if kind == "source_cancelled":
-            payload.pop("selector")
-            payload.pop("occurrence_key")
-            payload["source_item_version"] = "2"
-        pid = identity(
-            "related_task_proof", {"related_task_rule_id": root_id, "proof_kind": kind, "proof_payload": payload}, "proof_" + kind
-        )
-        proofs.append(
+    ]:
+        current_identity = add_proof("identity", snapshot_name, prior, "proof_identity_before_" + kind)
+        add_proof(
+            kind,
+            snapshot_name,
             {
-                **proof,
-                "proof_id": pid,
-                "proof_kind": kind,
-                "proof_json": payload,
-                "proof_hash": pid.rsplit("_", 1)[1],
-                "source_item_version": payload["source_item_version"],
-                "recurrence_revision_id": payload["recurrence_revision_id"],
-                "prior_recurrence_revision_id": source["recurrence_revision_id"] if kind != "identity" else None,
-            }
+                **extras,
+                "prior_proof_id": current_identity["proof_id"],
+                "prior_selector": current_identity["proof_json"]["selector"],
+            },
+            "proof_" + kind,
         )
+    add_proof(
+        "source_cancelled",
+        "source_cancelled",
+        {
+            "lineage_ids": [],
+            "cancelled_event_version": "2",
+            "event_status": "cancelled",
+        },
+        "proof_source_cancelled",
+    )
+    excluded_proof = next(p for p in proofs if p["proof_kind"] == "excluded")
     cancelled_state = {
         **state,
         "task_item_version": "2",
-        "proof_id": proofs[-3]["proof_id"],
+        "proof_id": excluded_proof["proof_id"],
         "source_item_version": "2",
-        "recurrence_revision_id": "recurrence_revision_fixture_2",
+        "recurrence_revision_id": excluded_proof["recurrence_revision_id"],
         "disposition": "source_cancelled",
         "reason": "source_excluded",
     }
@@ -1098,7 +1319,7 @@ def build():
         "state_hash": cancelled_hash,
         "task_item_version": "2",
         "source_item_version": "2",
-        "recurrence_revision_id": "recurrence_revision_fixture_2",
+        "recurrence_revision_id": excluded_proof["recurrence_revision_id"],
         "proof_id": cancelled_state["proof_id"],
     }
     cancellation = {
@@ -1162,11 +1383,11 @@ def build():
         source_cancellation=cancellation,
         observed_task_item_version="2",
     )
-    suppressed["source_snapshot"] = {k: proofs[-3]["proof_json"][k] for k in source}
+    suppressed["source_snapshot"] = {k: excluded_proof["proof_json"][k] for k in source}
     suppressed.update(
-        source_proof_id=proofs[-3]["proof_id"],
+        source_proof_id=excluded_proof["proof_id"],
         observed_source_item_version="2",
-        observed_recurrence_revision_id="recurrence_revision_fixture_2",
+        observed_recurrence_revision_id=excluded_proof["recurrence_revision_id"],
     )
     fixture(
         "response_suppress",
@@ -1316,6 +1537,21 @@ def build():
     # Every closed error code has a representative public failure; precedence
     # itself also has explicit offline model witnesses below.
     for code in types["errorCode"]["enum"]:
+        failure_field = {
+            "environment_failure": "schema_version",
+            "unsupported_command": "command",
+            "unsupported_contract_version": "contract_version",
+            "invalid_request": "limits.assignments",
+            "unsupported_field": "force",
+            "command_id_conflict": "command_id",
+            "referenced_row_not_found": "related_task_rule_id",
+            "stale_cursor": "cursor",
+            "stale_version": "expected.rule_change_version",
+            "semantic_conflict": "configuration",
+            "rendering_disclosure_unavailable": "configuration.notification_plan",
+            "capacity_exceeded": "limits.work_rows",
+            "stale_evaluation": "evaluated_at_utc",
+        }[code]
         fixture(
             "failure_" + code,
             {
@@ -1325,8 +1561,8 @@ def build():
                 "changed": False,
                 "error": {
                     "code": code,
-                    "field": "configuration" if code == "semantic_conflict" else "expected" if code == "stale_version" else "request",
-                    "message": "Synthetic offline " + code,
+                    "field": failure_field,
+                    "message": "Synthetic branch-specific offline " + code,
                 },
             },
             "failure",
@@ -1360,8 +1596,10 @@ def build():
         "status": "offline_model_only",
         "runtime_verified": False,
         "vectors": cursor_vectors,
+        "cases": cursor_witnesses(cursor_vectors),
     }
     bundle[FIXTURES + "decisions.json"] = decision_witnesses()
+    bundle[FIXTURES + "source-proofs.json"] = sources
     bundle[FIXTURES + "evidence.json"] = {
         "status": "offline_model_only",
         "runtime_verified": False,
@@ -1399,6 +1637,11 @@ def build():
         "cursors": FIXTURES + "cursors.json",
         "evidence": FIXTURES + "evidence.json",
         "decisions": FIXTURES + "decisions.json",
+        "source_proofs": FIXTURES + "source-proofs.json",
+        "composed_policies": FIXTURES + "composed-policies.json",
+        "source_snapshot_schema": "contracts/schemas/recurrence-set.schema.json",
+        "builder_helpers": ["scripts/recurring_related_task_fixture_sources.py"],
+        "test_oracle_helpers": ["tests/recurring_related_task_oracles.py"],
         "runtime_obligations": [row["id"] for row in descriptor["runtime_obligations"]],
     }
     return bundle

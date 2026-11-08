@@ -5,7 +5,7 @@
   "changed": false,
   "error": {
     "code": "unsupported_contract_version",
-    "field": "request",
-    "message": "Synthetic offline unsupported_contract_version"
+    "field": "contract_version",
+    "message": "Synthetic branch-specific offline unsupported_contract_version"
   }
 }

@@ -5,7 +5,7 @@
   "changed": false,
   "error": {
     "code": "capacity_exceeded",
-    "field": "request",
-    "message": "Synthetic offline capacity_exceeded"
+    "field": "limits.work_rows",
+    "message": "Synthetic branch-specific offline capacity_exceeded"
   }
 }

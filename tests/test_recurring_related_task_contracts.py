@@ -10,6 +10,9 @@ import copy
 import hashlib
 import hmac
 import json
+import os
+import subprocess
+import sys
 import unittest
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -23,7 +26,9 @@ from spine import IMPLEMENTED_CONTRACT_VERSIONS
 from spine.commands.registry import COMMAND_RUNTIME_CONTRACT_REGISTRY
 from spine.core.canonical_json import canonical_json_bytes
 from spine.core.errors import SpineValidationError
+from spine.core.notification_profiles import compose_notification_plan
 from spine.core.notifications import normalize_notification_policy, revise_notification_policy
+from tests.recurring_related_task_oracles import candidate, check_snapshot, cursor_case, source_case
 
 ROOT = Path(__file__).resolve().parents[1]
 SCHEMAS = "contracts/schemas/recurring-related-tasks/"
@@ -91,6 +96,8 @@ def decision_model(family, f):
     if family == "adoption":
         if not f["eligible"]:
             return "skip"
+        if f["desired"] == f["baseline"]:
+            return "preserve_current"
         if f["current"] == f["desired"]:
             return "adopt_witness"
         return "adopt" if f["current"] == f["baseline"] else "conflict"
@@ -120,6 +127,7 @@ class RecurringRelatedTaskContractTests(unittest.TestCase):
         cls.computed = read(cls.manifest["computed"])
         cls.by_case = {v["case_id"]: v for v in cls.computed["vectors"]}
         cls.evidence = read(cls.manifest["evidence"])
+        cls.sources = read(cls.manifest["source_proofs"])
         cls.fixtures = {r["fixture_id"]: read(r["fixture"]) for r in cls.manifest["fixtures"]}
 
     def validator(self, path, fragment=None):
@@ -161,6 +169,9 @@ class RecurringRelatedTaskContractTests(unittest.TestCase):
             if row["path"].startswith(SCHEMAS):
                 visited.add(row["uri"])
                 walk(self.schemas[row["path"]], row["uri"])
+        source_uri = self.schemas[self.manifest["source_snapshot_schema"]]["$id"]
+        visited.add(source_uri)
+        walk(by_uri[source_uri], source_uri)
         self.assertEqual(visited, set(by_uri))
         self.assertEqual(
             {str(p.relative_to(ROOT)) for p in (ROOT / SCHEMAS).glob("*.json")}, {p for p in self.schemas if p.startswith(SCHEMAS)}
@@ -205,6 +216,21 @@ class RecurringRelatedTaskContractTests(unittest.TestCase):
         self.assertFalse((ROOT / "src/spine/contracts/web/schemas/recurring-related-tasks").exists())
         self.assertEqual(set(self.manifest["runtime_obligations"]), {r["id"] for r in self.descriptor["runtime_obligations"]})
         self.assertTrue(all(r["status"] == "pending_runtime_verification" for r in self.descriptor["runtime_obligations"]))
+        self.assertEqual(self.manifest["builder_helpers"], ["scripts/recurring_related_task_fixture_sources.py"])
+        self.assertEqual(self.manifest["test_oracle_helpers"], ["tests/recurring_related_task_oracles.py"])
+
+    def test_builder_standalone_check_entrypoint(self):
+        result = subprocess.run(
+            [sys.executable, "scripts/build_recurring_related_task_contract_fixtures.py", "--check"],
+            cwd=ROOT,
+            env={**os.environ, "PYTHONPATH": str(ROOT / "src"), "PYTHONDONTWRITEBYTECODE": "1"},
+            capture_output=True,
+            text=True,
+            timeout=30,
+            check=False,
+        )
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn("deterministic source-only artifacts; runtime pending", result.stdout)
 
     def test_deterministic_builder_matches_retained_artifacts(self):
         for path, expected in build().items():
@@ -238,15 +264,22 @@ class RecurringRelatedTaskContractTests(unittest.TestCase):
         self.assertEqual(len(reasons), len(set(reasons)))
         code_fixtures = {v["error"]["code"] for name, v in self.fixtures.items() if name.startswith("failure_")}
         self.assertEqual(code_fixtures, set(self.descriptor["error_codes"]))
+        # Independent branch-specific expectations: not copied from the builder.
+        for code, field in {
+            "stale_cursor": "cursor",
+            "stale_evaluation": "evaluated_at_utc",
+            "capacity_exceeded": "limits.work_rows",
+            "stale_version": "expected.rule_change_version",
+            "rendering_disclosure_unavailable": "configuration.notification_plan",
+        }.items():
+            self.assertEqual(self.fixtures["failure_" + code]["error"]["field"], field)
         for name in ("create", "update", "retire", "suppress", "reconcile", "show", "list"):
             envelope = self.schemas[SCHEMAS + "responses.schema.json"]["$defs"][name]
             effects = self.descriptor["effects"][name]
             self.assertEqual(set(envelope["properties"]["effect"]["enum"]), set(effects[0] + effects[1]))
             command = "schedule.related_task_rule." + ("assignment.suppress" if name == "suppress" else name)
             observed = {
-                value["effect"]
-                for key, value in self.fixtures.items()
-                if key.startswith("response_") and value["command"] == command
+                value["effect"] for key, value in self.fixtures.items() if key.startswith("response_") and value["command"] == command
             }
             self.assertEqual(observed, set(effects[0] + effects[1]))
         original = self.fixtures["response_create"]
@@ -277,7 +310,14 @@ class RecurringRelatedTaskContractTests(unittest.TestCase):
                 self.assertEqual(row["canonical_json"].encode(), expected_bytes)
                 self.assertEqual(canonical_json_bytes(row["preimage"]), expected_bytes)
                 self.assertEqual(row["sha256"], hashlib.sha256(expected_bytes).hexdigest())
-                self.assertEqual(row["value"], (row["prefix"] + "_" if row["prefix"] else "") + row["sha256"])
+                if row["artifact"] == "occurrence_key":
+                    payload, digest = row["value"].split(".")
+                    self.assertEqual(base64.urlsafe_b64decode(payload + "=" * (-len(payload) % 4)), expected_bytes)
+                    self.assertEqual(digest, hashlib.sha256(expected_bytes).hexdigest())
+                    self.assertEqual(payload, base64.urlsafe_b64encode(expected_bytes).rstrip(b"=").decode())
+                    self.assertNotEqual(row["value"], row["sha256"])
+                else:
+                    self.assertEqual(row["value"], (row["prefix"] + "_" if row["prefix"] else "") + row["sha256"])
         self.assertEqual(artifact_names, set(self.schemas[SCHEMAS + "preimages.schema.json"]["$defs"]))
         unicode_row = self.by_case["unicode_control_configuration"]
         self.assertIn('Zoë — 科学 🧪\\u000a\\"entrance\\"\\u0009', unicode_row["canonical_json"])
@@ -516,6 +556,191 @@ class RecurringRelatedTaskContractTests(unittest.TestCase):
             {r["family"] for r in corpus["cases"]}, {"cutoff", "restore", "adoption", "retirement", "continuity", "budget", "scheduler"}
         )
         self.assertGreaterEqual(len(seen), 35)
+
+    def test_adoption_preserves_individual_value_when_rule_field_unchanged(self):
+        for baseline, current in [("B", "C"), (None, "C"), (["one"], ["two"]), ({"reminders": ["a"]}, {"reminders": ["b"]})]:
+            self.assertEqual(
+                decision_model(
+                    "adoption", {"baseline": baseline, "current": current, "desired": copy.deepcopy(baseline), "eligible": True}
+                ),
+                "preserve_current",
+            )
+        row = next(c for c in read(self.manifest["decisions"])["cases"] if c["case_id"] == "unchanged_desired_preserves_exception")
+        self.assertEqual(row["expected"], "preserve_current")
+
+    def test_raw_duplicate_assignees_normalize_to_unique_bounded_stored_set(self):
+        request = self.fixtures["request_create_duplicate_assignees"]
+        self.validator(SCHEMAS + "create-request.schema.json").validate(request)
+        raw = request["configuration"]["task_template"]["people"]["assignees"]
+        self.assertEqual(
+            sorted(set(raw)), self.fixtures["response_create"]["result"]["rule"]["configuration"]["task_template"]["people"]["assignees"]
+        )
+        self.assertFalse(self.validator(SCHEMAS + "types.schema.json", "normalizedPeople").is_valid({"assignees": raw}))
+        self.assertFalse(self.validator(SCHEMAS + "types.schema.json", "people").is_valid({"assignees": ["same"] * 101}))
+
+    def test_complete_normalized_source_snapshots_and_hash_preimages(self):
+        self.assertFalse(self.sources["runtime_verified"])
+        for record in self.sources["snapshots"]:
+            with self.subTest(snapshot=record["case_id"]):
+                value = check_snapshot(record, oracle_canonical)
+                # The existing value schema owns domain rows; successor ancestry
+                # is separately checked against the exact revision preimage.
+                projection = {k: v for k, v in value.items() if k != "prior_recurrence_revision_id"}
+                self.validator(self.manifest["source_snapshot_schema"]).validate(projection)
+        bad = copy.deepcopy(self.sources["snapshots"][0])
+        bad["value"]["normalized_recurrence_set_hash"] = "a" * 64
+        with self.assertRaises(ValueError):
+            check_snapshot(bad, oracle_canonical)
+        bad = copy.deepcopy(self.sources["snapshots"][0])
+        bad["value"]["rules"][0]["interval"] = "2"
+        with self.assertRaises(ValueError):
+            check_snapshot(bad, oracle_canonical)
+
+    def test_positive_copy_count_union_retarget_and_novelty_oracles(self):
+        for case in self.sources["cases"]:
+            with self.subTest(case=case["case_id"]):
+                self.assertEqual(source_case(self.sources, case, oracle_canonical), case["expected"])
+        by_revision = {s["value"]["recurrence_revision_id"]: s["value"] for s in self.sources["snapshots"]}
+        for proof in self.evidence["proofs"]:
+            value = by_revision[proof["recurrence_revision_id"]]
+            payload = proof["proof_json"]
+            self.assertEqual(payload["normalized_recurrence_set_hash"], value["normalized_recurrence_set_hash"])
+            if proof["proof_kind"] == "source_cancelled":
+                detail = next(e for e in self.sources["event_details"] if e["snapshot"] == "source_cancelled")
+                self.assertEqual(detail["item_version"], payload["cancelled_event_version"])
+                self.assertEqual(detail["status"], "cancelled")
+                continue
+            found = candidate(value, payload["selector"]["scheduled_fact"], oracle_canonical)
+            self.assertIsNotNone(found)
+            self.assertEqual(found[0], payload["selector"])
+            if proof["proof_kind"] == "new_rdate":
+                self.assertTrue(payload["lineage_ids"])
+                self.assertIn(payload["rdate_id"], {r["rdate_id"] for r in value["rdates"]})
+            if proof["proof_kind"] == "excluded":
+                self.assertIn(payload["exdate_id"], {r["exdate_id"] for r in value["exdates"]})
+            if proof["proof_kind"] == "occurrence_cancelled":
+                self.assertIn(payload["override_id"], {r["override_id"] for r in value["overrides"]})
+        published_lineage = {f["row"]["lineage_id"] for pair in self.sources["pairs"] for f in pair["lineage"]}
+        for proof in self.evidence["proofs"]:
+            self.assertLessEqual(set(proof["proof_json"]["lineage_ids"]), published_lineage)
+
+    def test_source_proofs_reject_missing_lineage_wrong_count_union_and_retarget(self):
+        def evaluate(case_id, mutate):
+            corpus = copy.deepcopy(self.sources)
+            case = next(c for c in corpus["cases"] if c["case_id"] == case_id)
+            pair = next(p for p in corpus["pairs"] if p["case_id"] == case["pair"])
+            mutate(corpus, pair, case)
+            return source_case(corpus, case, oracle_canonical)
+
+        self.assertEqual(evaluate("unchanged_copy", lambda c, p, t: p.update(lineage=[])), "decision_required")
+        self.assertEqual(
+            evaluate(
+                "count_split",
+                lambda c, p, t: next(x for x in p["copy_facts"] if "count_subtraction" in x)["count_subtraction"].update(
+                    produced_before_split="1"
+                ),
+            ),
+            "decision_required",
+        )
+        self.assertEqual(evaluate("all_union_contributors", lambda c, p, t: p["copy_facts"].pop()), "decision_required")
+        self.assertEqual(
+            evaluate("exact_retarget", lambda c, p, t: p["retarget_facts"].append(copy.deepcopy(p["retarget_facts"][0]))),
+            "decision_required",
+        )
+        self.assertEqual(evaluate("genuinely_added_rdate", lambda c, p, t: p.update(lineage=[])), "decision_required")
+
+        def reserve(corpus, pair, case):
+            value = next(s["value"] for s in corpus["snapshots"] if s["case_id"] == pair["snapshot"])
+            case["reserved_selectors"] = [candidate(value, case["fact"], oracle_canonical)[0]]
+
+        self.assertEqual(evaluate("genuinely_added_rdate", reserve), "not_novel")
+
+    def test_retained_profile_composition_reordering_and_replacement_intents(self):
+        corpus = read(self.manifest["composed_policies"])
+        self.assertFalse(corpus["runtime_verified"])
+        self.assertEqual(corpus["initial_reminders"], corpus["reordered_reminders"])
+        self.assertEqual([r["policy_key"] for r in corpus["initial_reminders"]], ["pickup_ten_minutes", "profile_ten_minutes"])
+        reordered = compose_notification_plan(
+            list(reversed(corpus["templates"])),
+            suppress_template_keys=corpus["suppress_template_keys"],
+            replacements=[],
+            custom_additions=list(reversed(corpus["custom_additions"])),
+        )
+        self.assertEqual(list(reordered.reminders), corpus["initial_reminders"])
+        self.assertEqual({r["policy_origin"] for r in corpus["replacement_origins"]}, {"profile_replacement", "custom_addition"})
+        self.assertEqual(len({p["notification_intent_id"] for p in corpus["initial_policies"]}), 2)
+        for initial, revised, mapping in zip(
+            corpus["initial_policies"], corpus["revised_policies"], corpus["initial_mappings"], strict=True
+        ):
+            self.assertEqual(mapping["creation_token"], mapping["generation_id"] + ":" + mapping["policy_key"])
+            self.assertEqual(initial["notification_intent_id"], revised["notification_intent_id"])
+            self.assertEqual(initial["intent_created_by_command_id"], revised["intent_created_by_command_id"])
+            self.assertEqual(initial["intent_created_by_command_id"], mapping["creation_token"])
+            self.assertEqual(revised["created_by_command_id"], corpus["real_outer_command_id"])
+        self.assertEqual(
+            {m["notification_policy_id"] for m in corpus["initial_mappings"]},
+            {p["notification_policy_id"] for p in corpus["initial_policies"]},
+        )
+        self.assertEqual(
+            {m["notification_policy_id"] for m in corpus["revised_mappings"]},
+            {p["notification_policy_id"] for p in corpus["revised_policies"]},
+        )
+
+    def test_cursor_rejection_expiry_and_validation_precedence_oracles(self):
+        corpus = read(self.manifest["cursors"])
+        validator = self.validator(SCHEMAS + "cursor.schema.json", "reconcilePayload")
+        seen = {}
+        for case in corpus["cases"]:
+            with self.subTest(case=case["case_id"]):
+                outcome = cursor_case(case["wire"], case["context"], oracle_canonical, validator.is_valid)
+                self.assertEqual(outcome, case["expected"])
+                seen[case["case_id"]] = outcome
+        for key, expected in {
+            "expiry_equality": "stale_cursor",
+            "different_query_limit": "invalid_request",
+            "wrong_ledger": "invalid_request",
+            "wrong_purpose": "invalid_request",
+            "noncanonical_json_whitespace": "invalid_request",
+            "expected_mismatch_only": "stale_version",
+            "bad_tag_before_expected": "invalid_request",
+            "expiry_before_expected": "stale_cursor",
+            "query_before_stale_and_expected": "invalid_request",
+        }.items():
+            self.assertEqual(seen[key], expected)
+        self.assertGreaterEqual(len(seen), 25)
+
+    def test_cross_surface_catalog_watermarks_and_blocked_policy_completeness(self):
+        creation = self.fixtures["response_reconcile_created"]["result"]
+        for view in ["assignments", "generations", "states"]:
+            readback = self.fixtures["response_show_" + view]["result"]
+            self.assertTrue(readback["rows"])
+            self.assertGreaterEqual(int(readback["catalog_generation"]), int(creation["rule"]["catalog_generation"]))
+
+        def check_mapping(page):
+            processed = {(e["after"]["task_item_id"], e["after"]["task_item_version"]) for e in page["results"] if e["after"] is not None}
+            expected = {
+                p["notification_policy_id"]
+                for p in self.evidence["policies"]
+                if (p["item_id"], p["item_version"]) in processed and p["status"] == "active"
+            }
+            if {m["notification_policy_id"] for m in page["policy_mappings"]} != expected:
+                raise ValueError("incomplete current family policy mapping")
+
+        check_mapping(creation)
+        blocked = self.fixtures["response_reconcile_decision_required"]["result"]
+        check_mapping(blocked)
+        bad = copy.deepcopy(blocked)
+        bad["policy_mappings"] = []
+        with self.assertRaises(ValueError):
+            check_mapping(bad)
+        self.assertLess(
+            int(blocked["selection"]["lane_start"]["assignment_after_seq"]), int(blocked["selection"]["lane_end"]["assignment_after_seq"])
+        )
+        self.assertEqual(blocked["coverage"]["assignments"]["status"], "decision_required")
+        self.assertFalse(self.fixtures["response_reconcile_decision_required"]["changed"])
+        for name, value in self.fixtures.items():
+            if name.startswith("failure_"):
+                self.assertNotIn("result", value)  # Failed whole pages cannot return committed lane advancement.
 
 
 if __name__ == "__main__":

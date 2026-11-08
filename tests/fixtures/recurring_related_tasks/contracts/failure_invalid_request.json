@@ -5,7 +5,7 @@
   "changed": false,
   "error": {
     "code": "invalid_request",
-    "field": "request",
-    "message": "Synthetic offline invalid_request"
+    "field": "limits.assignments",
+    "message": "Synthetic branch-specific offline invalid_request"
   }
 }

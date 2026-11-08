@@ -1,0 +1,379 @@
+{
+  "status": "offline_model_only",
+  "runtime_verified": false,
+  "scenario_semantics": "alternative_configuration_not_extra_main_policies",
+  "templates": [
+    {
+      "template_key": "one_hour",
+      "schedule": {
+        "kind": "once",
+        "at": {
+          "kind": "target_offset",
+          "offset_basis": "elapsed",
+          "offset_seconds": "-3600"
+        }
+      },
+      "late_handling": {
+        "kind": "skip"
+      }
+    },
+    {
+      "template_key": "ten_minutes",
+      "schedule": {
+        "kind": "once",
+        "at": {
+          "kind": "target_offset",
+          "offset_basis": "elapsed",
+          "offset_seconds": "-600"
+        }
+      },
+      "late_handling": {
+        "kind": "skip"
+      }
+    }
+  ],
+  "suppress_template_keys": [
+    "one_hour"
+  ],
+  "custom_additions": [
+    {
+      "policy_key": "pickup_ten_minutes",
+      "schedule": {
+        "kind": "once",
+        "at": {
+          "kind": "target_offset",
+          "offset_basis": "elapsed",
+          "offset_seconds": "-600"
+        }
+      },
+      "late_handling": {
+        "kind": "deliver_within",
+        "grace_seconds": "300"
+      }
+    }
+  ],
+  "replacements": [
+    {
+      "template_key": "ten_minutes",
+      "schedule": {
+        "kind": "once",
+        "at": {
+          "kind": "target_offset",
+          "offset_basis": "elapsed",
+          "offset_seconds": "-1200"
+        }
+      },
+      "late_handling": {
+        "kind": "skip"
+      }
+    }
+  ],
+  "initial_reminders": [
+    {
+      "policy_key": "pickup_ten_minutes",
+      "schedule": {
+        "kind": "once",
+        "at": {
+          "kind": "target_offset",
+          "offset_basis": "elapsed",
+          "offset_seconds": "-600"
+        }
+      },
+      "late_handling": {
+        "kind": "deliver_within",
+        "grace_seconds": "300"
+      }
+    },
+    {
+      "policy_key": "profile_ten_minutes",
+      "schedule": {
+        "kind": "once",
+        "at": {
+          "kind": "target_offset",
+          "offset_basis": "elapsed",
+          "offset_seconds": "-600"
+        }
+      },
+      "late_handling": {
+        "kind": "skip"
+      }
+    }
+  ],
+  "reordered_reminders": [
+    {
+      "policy_key": "pickup_ten_minutes",
+      "schedule": {
+        "kind": "once",
+        "at": {
+          "kind": "target_offset",
+          "offset_basis": "elapsed",
+          "offset_seconds": "-600"
+        }
+      },
+      "late_handling": {
+        "kind": "deliver_within",
+        "grace_seconds": "300"
+      }
+    },
+    {
+      "policy_key": "profile_ten_minutes",
+      "schedule": {
+        "kind": "once",
+        "at": {
+          "kind": "target_offset",
+          "offset_basis": "elapsed",
+          "offset_seconds": "-600"
+        }
+      },
+      "late_handling": {
+        "kind": "skip"
+      }
+    }
+  ],
+  "replacement_reminders": [
+    {
+      "policy_key": "pickup_ten_minutes",
+      "schedule": {
+        "kind": "once",
+        "at": {
+          "kind": "target_offset",
+          "offset_basis": "elapsed",
+          "offset_seconds": "-600"
+        }
+      },
+      "late_handling": {
+        "kind": "deliver_within",
+        "grace_seconds": "300"
+      }
+    },
+    {
+      "policy_key": "profile_ten_minutes",
+      "schedule": {
+        "kind": "once",
+        "at": {
+          "kind": "target_offset",
+          "offset_basis": "elapsed",
+          "offset_seconds": "-1200"
+        }
+      },
+      "late_handling": {
+        "kind": "skip"
+      }
+    }
+  ],
+  "initial_origins": [
+    {
+      "policy_key": "pickup_ten_minutes",
+      "policy_origin": "custom_addition",
+      "source_key": "pickup_ten_minutes"
+    },
+    {
+      "policy_key": "profile_ten_minutes",
+      "policy_origin": "profile_template",
+      "source_key": "ten_minutes",
+      "template_key": "ten_minutes"
+    }
+  ],
+  "replacement_origins": [
+    {
+      "policy_key": "pickup_ten_minutes",
+      "policy_origin": "custom_addition",
+      "source_key": "pickup_ten_minutes"
+    },
+    {
+      "policy_key": "profile_ten_minutes",
+      "policy_origin": "profile_replacement",
+      "source_key": "ten_minutes",
+      "template_key": "ten_minutes"
+    }
+  ],
+  "initial_policies": [
+    {
+      "contract_version": "spine.notification-schedule.contract.v1",
+      "normalization_version": "spine.notification-schedule.normalization.v1",
+      "canonical_json_version": "spine.canonical-json.v1",
+      "notification_intent_id": "notification_intent_43e99ab1ca481339d6c00c91ef13ddf825092e9eb1347a870d4504362299741f",
+      "notification_policy_id": "notification_policy_58bd324433df944aa722f5a35f345f6417a00542b202f7c1cc2699ecd885b03f",
+      "notification_schedule_id": "notification_schedule_86f62f6a5df81b12c0403ec6a32fb3ed7c755eaf2f7a3c95c50a3c1cf5e074f1",
+      "item_id": "item_a7b7735a558aa63d5eca349747cea26e0146bb8e2693ab73b793a908e1206b46",
+      "item_version": "1",
+      "intent_created_item_version": "1",
+      "intent_created_by_command_id": "related_task_generation_6043a6b329505d5efbe73660db0118565b39572fd216fae140d82206097edb8d:pickup_ten_minutes",
+      "recipient_kind": "subject_group",
+      "channel": "fixture_channel",
+      "delivery_target_id": "delivery_target_fixture",
+      "target": {
+        "anchor_role": "task_due",
+        "application_scope": "item"
+      },
+      "schedule": {
+        "kind": "once",
+        "at": {
+          "kind": "target_offset",
+          "offset_basis": "elapsed",
+          "offset_seconds": "-600"
+        }
+      },
+      "normalized_notification_schedule_hash": "0641155cb6c25e8c49dd78e3c71b41bbd9e354a75942f5450e1415601d963156",
+      "late_handling": {
+        "kind": "deliver_within",
+        "grace_seconds": "300"
+      },
+      "status": "active",
+      "created_at_utc": "2026-11-08T10:00:00Z",
+      "created_by_command_id": "related_task_generation_6043a6b329505d5efbe73660db0118565b39572fd216fae140d82206097edb8d:pickup_ten_minutes",
+      "recipient_group_id": "fixture_kinflow"
+    },
+    {
+      "contract_version": "spine.notification-schedule.contract.v1",
+      "normalization_version": "spine.notification-schedule.normalization.v1",
+      "canonical_json_version": "spine.canonical-json.v1",
+      "notification_intent_id": "notification_intent_c82e4c26712c76a3315333571590bc8783e998f9d81d1a8a5a62b60b276540db",
+      "notification_policy_id": "notification_policy_a60db7f6581a40f43a62f79f62961b3c5194a7332364aef4ed088ba9569bb9ba",
+      "notification_schedule_id": "notification_schedule_b6ba6583544df7596d0eb7946cfb4c7efc791835978b3bfb81e519aeefe60b07",
+      "item_id": "item_a7b7735a558aa63d5eca349747cea26e0146bb8e2693ab73b793a908e1206b46",
+      "item_version": "1",
+      "intent_created_item_version": "1",
+      "intent_created_by_command_id": "related_task_generation_6043a6b329505d5efbe73660db0118565b39572fd216fae140d82206097edb8d:profile_ten_minutes",
+      "recipient_kind": "subject_group",
+      "channel": "fixture_channel",
+      "delivery_target_id": "delivery_target_fixture",
+      "target": {
+        "anchor_role": "task_due",
+        "application_scope": "item"
+      },
+      "schedule": {
+        "kind": "once",
+        "at": {
+          "kind": "target_offset",
+          "offset_basis": "elapsed",
+          "offset_seconds": "-600"
+        }
+      },
+      "normalized_notification_schedule_hash": "9267a64536de1c9e1f1f6c432e5c553e412f193387b298e91859140ee749fc3f",
+      "late_handling": {
+        "kind": "skip"
+      },
+      "status": "active",
+      "created_at_utc": "2026-11-08T10:00:00Z",
+      "created_by_command_id": "related_task_generation_6043a6b329505d5efbe73660db0118565b39572fd216fae140d82206097edb8d:profile_ten_minutes",
+      "recipient_group_id": "fixture_kinflow"
+    }
+  ],
+  "revised_policies": [
+    {
+      "contract_version": "spine.notification-schedule.contract.v1",
+      "normalization_version": "spine.notification-schedule.normalization.v1",
+      "canonical_json_version": "spine.canonical-json.v1",
+      "notification_intent_id": "notification_intent_43e99ab1ca481339d6c00c91ef13ddf825092e9eb1347a870d4504362299741f",
+      "intent_created_item_version": "1",
+      "intent_created_by_command_id": "related_task_generation_6043a6b329505d5efbe73660db0118565b39572fd216fae140d82206097edb8d:pickup_ten_minutes",
+      "item_id": "item_a7b7735a558aa63d5eca349747cea26e0146bb8e2693ab73b793a908e1206b46",
+      "item_version": "2",
+      "notification_schedule_id": "notification_schedule_f94f87428ee79e92e6ba3a7a71ba36c5f152357f65c174ca344ecf0df44a2a5b",
+      "recipient_kind": "subject_group",
+      "channel": "fixture_channel",
+      "delivery_target_id": "delivery_target_fixture",
+      "target": {
+        "anchor_role": "task_due",
+        "application_scope": "item"
+      },
+      "normalized_notification_schedule_hash": "0641155cb6c25e8c49dd78e3c71b41bbd9e354a75942f5450e1415601d963156",
+      "status": "active",
+      "created_at_utc": "2026-11-08T10:01:00Z",
+      "created_by_command_id": "fixture_multi_adoption",
+      "source_notification_policy_id": "notification_policy_58bd324433df944aa722f5a35f345f6417a00542b202f7c1cc2699ecd885b03f",
+      "recipient_group_id": "fixture_kinflow",
+      "notification_policy_id": "notification_policy_68fd88d25a758166750b14d9602a43d96108d5af55da7e9e5b06431c35026c89",
+      "schedule": {
+        "kind": "once",
+        "at": {
+          "kind": "target_offset",
+          "offset_basis": "elapsed",
+          "offset_seconds": "-600"
+        }
+      },
+      "late_handling": {
+        "kind": "deliver_within",
+        "grace_seconds": "300"
+      }
+    },
+    {
+      "contract_version": "spine.notification-schedule.contract.v1",
+      "normalization_version": "spine.notification-schedule.normalization.v1",
+      "canonical_json_version": "spine.canonical-json.v1",
+      "notification_intent_id": "notification_intent_c82e4c26712c76a3315333571590bc8783e998f9d81d1a8a5a62b60b276540db",
+      "intent_created_item_version": "1",
+      "intent_created_by_command_id": "related_task_generation_6043a6b329505d5efbe73660db0118565b39572fd216fae140d82206097edb8d:profile_ten_minutes",
+      "item_id": "item_a7b7735a558aa63d5eca349747cea26e0146bb8e2693ab73b793a908e1206b46",
+      "item_version": "2",
+      "notification_schedule_id": "notification_schedule_117a9b3f1d6dd379ee5acd27c107787ad0211db26c26055fd3f85fe52515870d",
+      "recipient_kind": "subject_group",
+      "channel": "fixture_channel",
+      "delivery_target_id": "delivery_target_fixture",
+      "target": {
+        "anchor_role": "task_due",
+        "application_scope": "item"
+      },
+      "normalized_notification_schedule_hash": "c2f58826adb46be524b773d40af26a37197c324ee02635ae4cd7eb58d1198b73",
+      "status": "active",
+      "created_at_utc": "2026-11-08T10:01:00Z",
+      "created_by_command_id": "fixture_multi_adoption",
+      "source_notification_policy_id": "notification_policy_a60db7f6581a40f43a62f79f62961b3c5194a7332364aef4ed088ba9569bb9ba",
+      "recipient_group_id": "fixture_kinflow",
+      "notification_policy_id": "notification_policy_beca1f1a83e7f04db5045cf03d6bd52422297c2c430d268ea59bd611c9684ae8",
+      "schedule": {
+        "kind": "once",
+        "at": {
+          "kind": "target_offset",
+          "offset_basis": "elapsed",
+          "offset_seconds": "-1200"
+        }
+      },
+      "late_handling": {
+        "kind": "skip"
+      }
+    }
+  ],
+  "initial_mappings": [
+    {
+      "assignment_id": "related_task_assignment_8bce9e2b6ce0104c12a34688820805435b38cf2ad92a56e814645d9d17f196b6",
+      "generation_id": "related_task_generation_6043a6b329505d5efbe73660db0118565b39572fd216fae140d82206097edb8d",
+      "task_item_id": "item_a7b7735a558aa63d5eca349747cea26e0146bb8e2693ab73b793a908e1206b46",
+      "policy_key": "pickup_ten_minutes",
+      "creation_token": "related_task_generation_6043a6b329505d5efbe73660db0118565b39572fd216fae140d82206097edb8d:pickup_ten_minutes",
+      "notification_intent_id": "notification_intent_43e99ab1ca481339d6c00c91ef13ddf825092e9eb1347a870d4504362299741f",
+      "notification_policy_id": "notification_policy_58bd324433df944aa722f5a35f345f6417a00542b202f7c1cc2699ecd885b03f"
+    },
+    {
+      "assignment_id": "related_task_assignment_8bce9e2b6ce0104c12a34688820805435b38cf2ad92a56e814645d9d17f196b6",
+      "generation_id": "related_task_generation_6043a6b329505d5efbe73660db0118565b39572fd216fae140d82206097edb8d",
+      "task_item_id": "item_a7b7735a558aa63d5eca349747cea26e0146bb8e2693ab73b793a908e1206b46",
+      "policy_key": "profile_ten_minutes",
+      "creation_token": "related_task_generation_6043a6b329505d5efbe73660db0118565b39572fd216fae140d82206097edb8d:profile_ten_minutes",
+      "notification_intent_id": "notification_intent_c82e4c26712c76a3315333571590bc8783e998f9d81d1a8a5a62b60b276540db",
+      "notification_policy_id": "notification_policy_a60db7f6581a40f43a62f79f62961b3c5194a7332364aef4ed088ba9569bb9ba"
+    }
+  ],
+  "revised_mappings": [
+    {
+      "assignment_id": "related_task_assignment_8bce9e2b6ce0104c12a34688820805435b38cf2ad92a56e814645d9d17f196b6",
+      "generation_id": "related_task_generation_6043a6b329505d5efbe73660db0118565b39572fd216fae140d82206097edb8d",
+      "task_item_id": "item_a7b7735a558aa63d5eca349747cea26e0146bb8e2693ab73b793a908e1206b46",
+      "policy_key": "pickup_ten_minutes",
+      "creation_token": "related_task_generation_6043a6b329505d5efbe73660db0118565b39572fd216fae140d82206097edb8d:pickup_ten_minutes",
+      "notification_intent_id": "notification_intent_43e99ab1ca481339d6c00c91ef13ddf825092e9eb1347a870d4504362299741f",
+      "notification_policy_id": "notification_policy_68fd88d25a758166750b14d9602a43d96108d5af55da7e9e5b06431c35026c89"
+    },
+    {
+      "assignment_id": "related_task_assignment_8bce9e2b6ce0104c12a34688820805435b38cf2ad92a56e814645d9d17f196b6",
+      "generation_id": "related_task_generation_6043a6b329505d5efbe73660db0118565b39572fd216fae140d82206097edb8d",
+      "task_item_id": "item_a7b7735a558aa63d5eca349747cea26e0146bb8e2693ab73b793a908e1206b46",
+      "policy_key": "profile_ten_minutes",
+      "creation_token": "related_task_generation_6043a6b329505d5efbe73660db0118565b39572fd216fae140d82206097edb8d:profile_ten_minutes",
+      "notification_intent_id": "notification_intent_c82e4c26712c76a3315333571590bc8783e998f9d81d1a8a5a62b60b276540db",
+      "notification_policy_id": "notification_policy_beca1f1a83e7f04db5045cf03d6bd52422297c2c430d268ea59bd611c9684ae8"
+    }
+  ],
+  "real_outer_command_id": "fixture_multi_adoption"
+}

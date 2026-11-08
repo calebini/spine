@@ -4,25 +4,25 @@
   "scenario_semantics": "alternative_branch_examples_not_one_ledger_snapshot",
   "proofs": [
     {
-      "proof_id": "related_task_proof_88976c22205045697fa0b5c158c3be4c1d80a1ba299dadf55da8d9043f39079e",
+      "proof_id": "related_task_proof_5a6d066e554197208858f8c7f5bb31287cbb6ed9f00ddedc9ef7e796163afbbb",
       "related_task_rule_id": "related_task_rule_a24002492d1555b29fa3ad5630e88f877633cba9703aafb63ee5ded452c938d4",
       "proof_kind": "enrollment",
       "source_item_version": "1",
-      "recurrence_revision_id": "recurrence_revision_fixture_1",
+      "recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
       "prior_recurrence_revision_id": null,
       "proof_json": {
         "source_item_id": "item_fixture_science_class",
         "source_item_version": "1",
-        "recurrence_set_id": "recurrence_set_fixture_class",
-        "recurrence_revision_id": "recurrence_revision_fixture_1",
-        "normalized_recurrence_set_hash": "a81ad5df22e71bb6557781ff40ffe67836bbe5335759837475d3bcdb9bc96b8c",
+        "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
+        "recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
+        "normalized_recurrence_set_hash": "07a3cf5ae207cefd1dce5b77833773ff1d990d63e20b7588c0d9a3a44ad50d40",
         "selector": {
-          "derivation_version": "spine.recurrence-target-occurrence-selector.v1",
           "contract_version": "spine.recurrence.contract.v1",
           "normalization_version": "spine.recurrence.normalization.v1",
           "canonical_json_version": "spine.canonical-json.v1",
-          "recurrence_set_id": "recurrence_set_fixture_class",
-          "segment_ref": "1",
+          "derivation_version": "spine.recurrence-target-occurrence-selector.v1",
+          "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
+          "segment_ref": "0",
           "scheduled_fact": "2026-11-14T11:30:00",
           "origin_kind": "rule",
           "source_rule_selectors": [
@@ -34,43 +34,44 @@
               "end_condition": {
                 "kind": "unbounded"
               },
-              "status": "active",
               "by_weekday": [
                 "SA"
               ],
-              "week_start": "MO"
+              "week_start": "MO",
+              "status": "active"
             }
           ],
           "source_rdate_selectors": []
         },
-        "occurrence_key": "37220c4acbb53b8dc6009df50a4dd22a4c0de7f12d62cde1ea9716e43cd66f5b",
+        "occurrence_key": "eyJjYW5vbmljYWxfanNvbl92ZXJzaW9uIjoic3BpbmUuY2Fub25pY2FsLWpzb24udjEiLCJjb250cmFjdF92ZXJzaW9uIjoic3BpbmUucmVjdXJyZW5jZS5jb250cmFjdC52MSIsImRlcml2YXRpb25fdmVyc2lvbiI6InNwaW5lLnJlY3VycmVuY2Utb2NjdXJyZW5jZS1rZXkudjIiLCJub3JtYWxpemF0aW9uX3ZlcnNpb24iOiJzcGluZS5yZWN1cnJlbmNlLm5vcm1hbGl6YXRpb24udjEiLCJ0YXJnZXRfb2NjdXJyZW5jZV9zZWxlY3RvciI6eyJjYW5vbmljYWxfanNvbl92ZXJzaW9uIjoic3BpbmUuY2Fub25pY2FsLWpzb24udjEiLCJjb250cmFjdF92ZXJzaW9uIjoic3BpbmUucmVjdXJyZW5jZS5jb250cmFjdC52MSIsImRlcml2YXRpb25fdmVyc2lvbiI6InNwaW5lLnJlY3VycmVuY2UtdGFyZ2V0LW9jY3VycmVuY2Utc2VsZWN0b3IudjEiLCJub3JtYWxpemF0aW9uX3ZlcnNpb24iOiJzcGluZS5yZWN1cnJlbmNlLm5vcm1hbGl6YXRpb24udjEiLCJvcmlnaW5fa2luZCI6InJ1bGUiLCJyZWN1cnJlbmNlX3NldF9pZCI6InJlY3VycmVuY2Vfc2V0Xzg5YTVlZjdlYzhiOTA4ZGRmYmJiYmMxYTBkYzk5MmJhYTUxZDg1Yjg4NGE3NWZiYzhmYWJiY2QyZWJhMWFkMDciLCJzY2hlZHVsZWRfZmFjdCI6IjIwMjYtMTEtMTRUMTE6MzA6MDAiLCJzZWdtZW50X3JlZiI6IjAiLCJzb3VyY2VfcmRhdGVfc2VsZWN0b3JzIjpbXSwic291cmNlX3J1bGVfc2VsZWN0b3JzIjpbeyJieV93ZWVrZGF5IjpbIlNBIl0sImVuZF9jb25kaXRpb24iOnsia2luZCI6InVuYm91bmRlZCJ9LCJmcmVxdWVuY3kiOiJXRUVLTFkiLCJpbnRlcnZhbCI6IjEiLCJzZWVkIjoiMjAyNi0xMS0xNFQxMTozMDowMCIsInN0YXJ0X2JvdW5kIjoiMjAyNi0xMS0xNFQxMTozMDowMCIsInN0YXR1cyI6ImFjdGl2ZSIsIndlZWtfc3RhcnQiOiJNTyJ9XX19.cdb5d6f7fb37da99ae2b5e272eea9e9536328b5d228b9ff0a71f620ed222d664",
         "lineage_ids": [],
-        "enrolled_recurrence_revision_id": "recurrence_revision_fixture_1"
+        "enrolled_recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a"
       },
-      "proof_hash": "88976c22205045697fa0b5c158c3be4c1d80a1ba299dadf55da8d9043f39079e",
+      "proof_hash": "5a6d066e554197208858f8c7f5bb31287cbb6ed9f00ddedc9ef7e796163afbbb",
       "created_by_command_id": "fixture_reconcile_page_1",
       "created_at_utc": "2026-11-08T10:00:00Z"
     },
     {
-      "proof_id": "related_task_proof_4f127e61d2d88aab6ece5435990c8c3a1a555d62cd64861e703617a36d7e2ee2",
+      "proof_id": "related_task_proof_d7e15fcb1b7b2a9a99221f1345bf0250b33f999fbc864a4e8bbfa6144fd812e8",
       "related_task_rule_id": "related_task_rule_a24002492d1555b29fa3ad5630e88f877633cba9703aafb63ee5ded452c938d4",
       "proof_kind": "identity",
       "source_item_version": "1",
-      "recurrence_revision_id": "recurrence_revision_fixture_1",
+      "recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
       "prior_recurrence_revision_id": null,
       "proof_json": {
         "source_item_id": "item_fixture_science_class",
         "source_item_version": "1",
-        "recurrence_set_id": "recurrence_set_fixture_class",
-        "recurrence_revision_id": "recurrence_revision_fixture_1",
-        "normalized_recurrence_set_hash": "a81ad5df22e71bb6557781ff40ffe67836bbe5335759837475d3bcdb9bc96b8c",
+        "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
+        "recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
+        "normalized_recurrence_set_hash": "07a3cf5ae207cefd1dce5b77833773ff1d990d63e20b7588c0d9a3a44ad50d40",
+        "lineage_ids": [],
         "selector": {
-          "derivation_version": "spine.recurrence-target-occurrence-selector.v1",
           "contract_version": "spine.recurrence.contract.v1",
           "normalization_version": "spine.recurrence.normalization.v1",
           "canonical_json_version": "spine.canonical-json.v1",
-          "recurrence_set_id": "recurrence_set_fixture_class",
-          "segment_ref": "1",
+          "derivation_version": "spine.recurrence-target-occurrence-selector.v1",
+          "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
+          "segment_ref": "0",
           "scheduled_fact": "2026-11-14T11:30:00",
           "origin_kind": "rule",
           "source_rule_selectors": [
@@ -82,42 +83,45 @@
               "end_condition": {
                 "kind": "unbounded"
               },
-              "status": "active",
               "by_weekday": [
                 "SA"
               ],
-              "week_start": "MO"
+              "week_start": "MO",
+              "status": "active"
             }
           ],
           "source_rdate_selectors": []
         },
-        "occurrence_key": "37220c4acbb53b8dc6009df50a4dd22a4c0de7f12d62cde1ea9716e43cd66f5b",
-        "lineage_ids": []
+        "occurrence_key": "eyJjYW5vbmljYWxfanNvbl92ZXJzaW9uIjoic3BpbmUuY2Fub25pY2FsLWpzb24udjEiLCJjb250cmFjdF92ZXJzaW9uIjoic3BpbmUucmVjdXJyZW5jZS5jb250cmFjdC52MSIsImRlcml2YXRpb25fdmVyc2lvbiI6InNwaW5lLnJlY3VycmVuY2Utb2NjdXJyZW5jZS1rZXkudjIiLCJub3JtYWxpemF0aW9uX3ZlcnNpb24iOiJzcGluZS5yZWN1cnJlbmNlLm5vcm1hbGl6YXRpb24udjEiLCJ0YXJnZXRfb2NjdXJyZW5jZV9zZWxlY3RvciI6eyJjYW5vbmljYWxfanNvbl92ZXJzaW9uIjoic3BpbmUuY2Fub25pY2FsLWpzb24udjEiLCJjb250cmFjdF92ZXJzaW9uIjoic3BpbmUucmVjdXJyZW5jZS5jb250cmFjdC52MSIsImRlcml2YXRpb25fdmVyc2lvbiI6InNwaW5lLnJlY3VycmVuY2UtdGFyZ2V0LW9jY3VycmVuY2Utc2VsZWN0b3IudjEiLCJub3JtYWxpemF0aW9uX3ZlcnNpb24iOiJzcGluZS5yZWN1cnJlbmNlLm5vcm1hbGl6YXRpb24udjEiLCJvcmlnaW5fa2luZCI6InJ1bGUiLCJyZWN1cnJlbmNlX3NldF9pZCI6InJlY3VycmVuY2Vfc2V0Xzg5YTVlZjdlYzhiOTA4ZGRmYmJiYmMxYTBkYzk5MmJhYTUxZDg1Yjg4NGE3NWZiYzhmYWJiY2QyZWJhMWFkMDciLCJzY2hlZHVsZWRfZmFjdCI6IjIwMjYtMTEtMTRUMTE6MzA6MDAiLCJzZWdtZW50X3JlZiI6IjAiLCJzb3VyY2VfcmRhdGVfc2VsZWN0b3JzIjpbXSwic291cmNlX3J1bGVfc2VsZWN0b3JzIjpbeyJieV93ZWVrZGF5IjpbIlNBIl0sImVuZF9jb25kaXRpb24iOnsia2luZCI6InVuYm91bmRlZCJ9LCJmcmVxdWVuY3kiOiJXRUVLTFkiLCJpbnRlcnZhbCI6IjEiLCJzZWVkIjoiMjAyNi0xMS0xNFQxMTozMDowMCIsInN0YXJ0X2JvdW5kIjoiMjAyNi0xMS0xNFQxMTozMDowMCIsInN0YXR1cyI6ImFjdGl2ZSIsIndlZWtfc3RhcnQiOiJNTyJ9XX19.cdb5d6f7fb37da99ae2b5e272eea9e9536328b5d228b9ff0a71f620ed222d664"
       },
-      "proof_hash": "4f127e61d2d88aab6ece5435990c8c3a1a555d62cd64861e703617a36d7e2ee2",
+      "proof_hash": "d7e15fcb1b7b2a9a99221f1345bf0250b33f999fbc864a4e8bbfa6144fd812e8",
       "created_by_command_id": "fixture_reconcile_page_1",
       "created_at_utc": "2026-11-08T10:00:00Z"
     },
     {
-      "proof_id": "related_task_proof_ae744e73f6eb35ada50ccbe8f29c8f085d89ea040b8cbaee84122382cd838416",
+      "proof_id": "related_task_proof_18a11e45061a4228cc2ce2cc602ec6691e3d46676eeba0d49916975b8f338e72",
       "related_task_rule_id": "related_task_rule_a24002492d1555b29fa3ad5630e88f877633cba9703aafb63ee5ded452c938d4",
       "proof_kind": "carry_forward",
       "source_item_version": "2",
-      "recurrence_revision_id": "recurrence_revision_fixture_2",
-      "prior_recurrence_revision_id": "recurrence_revision_fixture_1",
+      "recurrence_revision_id": "recurrence_revision_fcf036592d711ec57b3767b4a94a742f47e2e73cf96ea23e9171d8ff5b4a33f6",
+      "prior_recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
       "proof_json": {
         "source_item_id": "item_fixture_science_class",
         "source_item_version": "2",
-        "recurrence_set_id": "recurrence_set_fixture_class",
-        "recurrence_revision_id": "recurrence_revision_fixture_2",
-        "normalized_recurrence_set_hash": "800dfbb15fbd9003509e3e26d373e9663ed3f3c115eacb87a991995f8b6477e9",
+        "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
+        "recurrence_revision_id": "recurrence_revision_fcf036592d711ec57b3767b4a94a742f47e2e73cf96ea23e9171d8ff5b4a33f6",
+        "normalized_recurrence_set_hash": "44ef252d1e0d025005480aac0d3e2bc58bcdcddd65999918903f67b436874a66",
+        "lineage_ids": [
+          "recurrence_lineage_7c9ca130fdadc1894d588db13afbd41c932a85941b8faa2b713ddd3fde04d65e",
+          "recurrence_lineage_7fc49e8735ce69e291d881fe917cbf4ff2518d99c1ee3f2899c85dffa9571576"
+        ],
         "selector": {
-          "derivation_version": "spine.recurrence-target-occurrence-selector.v1",
           "contract_version": "spine.recurrence.contract.v1",
           "normalization_version": "spine.recurrence.normalization.v1",
           "canonical_json_version": "spine.canonical-json.v1",
-          "recurrence_set_id": "recurrence_set_fixture_class",
-          "segment_ref": "1",
+          "derivation_version": "spine.recurrence-target-occurrence-selector.v1",
+          "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
+          "segment_ref": "0",
           "scheduled_fact": "2026-11-14T11:30:00",
           "origin_kind": "rule",
           "source_rule_selectors": [
@@ -129,27 +133,24 @@
               "end_condition": {
                 "kind": "unbounded"
               },
-              "status": "active",
               "by_weekday": [
                 "SA"
               ],
-              "week_start": "MO"
+              "week_start": "MO",
+              "status": "active"
             }
           ],
           "source_rdate_selectors": []
         },
-        "occurrence_key": "37220c4acbb53b8dc6009df50a4dd22a4c0de7f12d62cde1ea9716e43cd66f5b",
-        "lineage_ids": [
-          "lineage_fixture_1"
-        ],
-        "prior_proof_id": "related_task_proof_88976c22205045697fa0b5c158c3be4c1d80a1ba299dadf55da8d9043f39079e",
+        "occurrence_key": "eyJjYW5vbmljYWxfanNvbl92ZXJzaW9uIjoic3BpbmUuY2Fub25pY2FsLWpzb24udjEiLCJjb250cmFjdF92ZXJzaW9uIjoic3BpbmUucmVjdXJyZW5jZS5jb250cmFjdC52MSIsImRlcml2YXRpb25fdmVyc2lvbiI6InNwaW5lLnJlY3VycmVuY2Utb2NjdXJyZW5jZS1rZXkudjIiLCJub3JtYWxpemF0aW9uX3ZlcnNpb24iOiJzcGluZS5yZWN1cnJlbmNlLm5vcm1hbGl6YXRpb24udjEiLCJ0YXJnZXRfb2NjdXJyZW5jZV9zZWxlY3RvciI6eyJjYW5vbmljYWxfanNvbl92ZXJzaW9uIjoic3BpbmUuY2Fub25pY2FsLWpzb24udjEiLCJjb250cmFjdF92ZXJzaW9uIjoic3BpbmUucmVjdXJyZW5jZS5jb250cmFjdC52MSIsImRlcml2YXRpb25fdmVyc2lvbiI6InNwaW5lLnJlY3VycmVuY2UtdGFyZ2V0LW9jY3VycmVuY2Utc2VsZWN0b3IudjEiLCJub3JtYWxpemF0aW9uX3ZlcnNpb24iOiJzcGluZS5yZWN1cnJlbmNlLm5vcm1hbGl6YXRpb24udjEiLCJvcmlnaW5fa2luZCI6InJ1bGUiLCJyZWN1cnJlbmNlX3NldF9pZCI6InJlY3VycmVuY2Vfc2V0Xzg5YTVlZjdlYzhiOTA4ZGRmYmJiYmMxYTBkYzk5MmJhYTUxZDg1Yjg4NGE3NWZiYzhmYWJiY2QyZWJhMWFkMDciLCJzY2hlZHVsZWRfZmFjdCI6IjIwMjYtMTEtMTRUMTE6MzA6MDAiLCJzZWdtZW50X3JlZiI6IjAiLCJzb3VyY2VfcmRhdGVfc2VsZWN0b3JzIjpbXSwic291cmNlX3J1bGVfc2VsZWN0b3JzIjpbeyJieV93ZWVrZGF5IjpbIlNBIl0sImVuZF9jb25kaXRpb24iOnsia2luZCI6InVuYm91bmRlZCJ9LCJmcmVxdWVuY3kiOiJXRUVLTFkiLCJpbnRlcnZhbCI6IjEiLCJzZWVkIjoiMjAyNi0xMS0xNFQxMTozMDowMCIsInN0YXJ0X2JvdW5kIjoiMjAyNi0xMS0xNFQxMTozMDowMCIsInN0YXR1cyI6ImFjdGl2ZSIsIndlZWtfc3RhcnQiOiJNTyJ9XX19.cdb5d6f7fb37da99ae2b5e272eea9e9536328b5d228b9ff0a71f620ed222d664",
+        "prior_proof_id": "related_task_proof_5a6d066e554197208858f8c7f5bb31287cbb6ed9f00ddedc9ef7e796163afbbb",
         "prior_selector": {
-          "derivation_version": "spine.recurrence-target-occurrence-selector.v1",
           "contract_version": "spine.recurrence.contract.v1",
           "normalization_version": "spine.recurrence.normalization.v1",
           "canonical_json_version": "spine.canonical-json.v1",
-          "recurrence_set_id": "recurrence_set_fixture_class",
-          "segment_ref": "1",
+          "derivation_version": "spine.recurrence-target-occurrence-selector.v1",
+          "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
+          "segment_ref": "0",
           "scheduled_fact": "2026-11-14T11:30:00",
           "origin_kind": "rule",
           "source_rule_selectors": [
@@ -161,26 +162,26 @@
               "end_condition": {
                 "kind": "unbounded"
               },
-              "status": "active",
               "by_weekday": [
                 "SA"
               ],
-              "week_start": "MO"
+              "week_start": "MO",
+              "status": "active"
             }
           ],
           "source_rdate_selectors": []
         },
         "hops": [
           {
-            "prior_revision_id": "recurrence_revision_fixture_1",
-            "new_revision_id": "recurrence_revision_fixture_2",
+            "prior_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
+            "new_revision_id": "recurrence_revision_fcf036592d711ec57b3767b4a94a742f47e2e73cf96ea23e9171d8ff5b4a33f6",
             "prior_selector": {
-              "derivation_version": "spine.recurrence-target-occurrence-selector.v1",
               "contract_version": "spine.recurrence.contract.v1",
               "normalization_version": "spine.recurrence.normalization.v1",
               "canonical_json_version": "spine.canonical-json.v1",
-              "recurrence_set_id": "recurrence_set_fixture_class",
-              "segment_ref": "1",
+              "derivation_version": "spine.recurrence-target-occurrence-selector.v1",
+              "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
+              "segment_ref": "0",
               "scheduled_fact": "2026-11-14T11:30:00",
               "origin_kind": "rule",
               "source_rule_selectors": [
@@ -192,22 +193,22 @@
                   "end_condition": {
                     "kind": "unbounded"
                   },
-                  "status": "active",
                   "by_weekday": [
                     "SA"
                   ],
-                  "week_start": "MO"
+                  "week_start": "MO",
+                  "status": "active"
                 }
               ],
               "source_rdate_selectors": []
             },
             "selector": {
-              "derivation_version": "spine.recurrence-target-occurrence-selector.v1",
               "contract_version": "spine.recurrence.contract.v1",
               "normalization_version": "spine.recurrence.normalization.v1",
               "canonical_json_version": "spine.canonical-json.v1",
-              "recurrence_set_id": "recurrence_set_fixture_class",
-              "segment_ref": "1",
+              "derivation_version": "spine.recurrence-target-occurrence-selector.v1",
+              "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
+              "segment_ref": "0",
               "scheduled_fact": "2026-11-14T11:30:00",
               "origin_kind": "rule",
               "source_rule_selectors": [
@@ -219,45 +220,47 @@
                   "end_condition": {
                     "kind": "unbounded"
                   },
-                  "status": "active",
                   "by_weekday": [
                     "SA"
                   ],
-                  "week_start": "MO"
+                  "week_start": "MO",
+                  "status": "active"
                 }
               ],
               "source_rdate_selectors": []
             },
             "lineage_ids": [
-              "lineage_fixture_1"
+              "recurrence_lineage_7c9ca130fdadc1894d588db13afbd41c932a85941b8faa2b713ddd3fde04d65e",
+              "recurrence_lineage_7fc49e8735ce69e291d881fe917cbf4ff2518d99c1ee3f2899c85dffa9571576"
             ]
           }
         ]
       },
-      "proof_hash": "ae744e73f6eb35ada50ccbe8f29c8f085d89ea040b8cbaee84122382cd838416",
+      "proof_hash": "18a11e45061a4228cc2ce2cc602ec6691e3d46676eeba0d49916975b8f338e72",
       "created_by_command_id": "fixture_reconcile_page_1",
       "created_at_utc": "2026-11-08T10:00:00Z"
     },
     {
-      "proof_id": "related_task_proof_135c284dde362466e3d890cddf1a0191e54b66fa50591a22179ccdb24bc33faf",
+      "proof_id": "related_task_proof_b017e4617c3942469dc742fe77ce9cf6d765a4de54d3e5977a941cfc3499445f",
       "related_task_rule_id": "related_task_rule_a24002492d1555b29fa3ad5630e88f877633cba9703aafb63ee5ded452c938d4",
       "proof_kind": "component_candidate",
-      "source_item_version": "2",
-      "recurrence_revision_id": "recurrence_revision_fixture_2",
-      "prior_recurrence_revision_id": "recurrence_revision_fixture_1",
+      "source_item_version": "1",
+      "recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
+      "prior_recurrence_revision_id": null,
       "proof_json": {
         "source_item_id": "item_fixture_science_class",
-        "source_item_version": "2",
-        "recurrence_set_id": "recurrence_set_fixture_class",
-        "recurrence_revision_id": "recurrence_revision_fixture_2",
-        "normalized_recurrence_set_hash": "800dfbb15fbd9003509e3e26d373e9663ed3f3c115eacb87a991995f8b6477e9",
+        "source_item_version": "1",
+        "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
+        "recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
+        "normalized_recurrence_set_hash": "07a3cf5ae207cefd1dce5b77833773ff1d990d63e20b7588c0d9a3a44ad50d40",
+        "lineage_ids": [],
         "selector": {
-          "derivation_version": "spine.recurrence-target-occurrence-selector.v1",
           "contract_version": "spine.recurrence.contract.v1",
           "normalization_version": "spine.recurrence.normalization.v1",
           "canonical_json_version": "spine.canonical-json.v1",
-          "recurrence_set_id": "recurrence_set_fixture_class",
-          "segment_ref": "1",
+          "derivation_version": "spine.recurrence-target-occurrence-selector.v1",
+          "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
+          "segment_ref": "0",
           "scheduled_fact": "2026-11-14T11:30:00",
           "origin_kind": "rule",
           "source_rule_selectors": [
@@ -269,18 +272,17 @@
               "end_condition": {
                 "kind": "unbounded"
               },
-              "status": "active",
               "by_weekday": [
                 "SA"
               ],
-              "week_start": "MO"
+              "week_start": "MO",
+              "status": "active"
             }
           ],
           "source_rdate_selectors": []
         },
-        "occurrence_key": "37220c4acbb53b8dc6009df50a4dd22a4c0de7f12d62cde1ea9716e43cd66f5b",
-        "lineage_ids": [],
-        "basis_revision_id": "recurrence_revision_fixture_1",
+        "occurrence_key": "eyJjYW5vbmljYWxfanNvbl92ZXJzaW9uIjoic3BpbmUuY2Fub25pY2FsLWpzb24udjEiLCJjb250cmFjdF92ZXJzaW9uIjoic3BpbmUucmVjdXJyZW5jZS5jb250cmFjdC52MSIsImRlcml2YXRpb25fdmVyc2lvbiI6InNwaW5lLnJlY3VycmVuY2Utb2NjdXJyZW5jZS1rZXkudjIiLCJub3JtYWxpemF0aW9uX3ZlcnNpb24iOiJzcGluZS5yZWN1cnJlbmNlLm5vcm1hbGl6YXRpb24udjEiLCJ0YXJnZXRfb2NjdXJyZW5jZV9zZWxlY3RvciI6eyJjYW5vbmljYWxfanNvbl92ZXJzaW9uIjoic3BpbmUuY2Fub25pY2FsLWpzb24udjEiLCJjb250cmFjdF92ZXJzaW9uIjoic3BpbmUucmVjdXJyZW5jZS5jb250cmFjdC52MSIsImRlcml2YXRpb25fdmVyc2lvbiI6InNwaW5lLnJlY3VycmVuY2UtdGFyZ2V0LW9jY3VycmVuY2Utc2VsZWN0b3IudjEiLCJub3JtYWxpemF0aW9uX3ZlcnNpb24iOiJzcGluZS5yZWN1cnJlbmNlLm5vcm1hbGl6YXRpb24udjEiLCJvcmlnaW5fa2luZCI6InJ1bGUiLCJyZWN1cnJlbmNlX3NldF9pZCI6InJlY3VycmVuY2Vfc2V0Xzg5YTVlZjdlYzhiOTA4ZGRmYmJiYmMxYTBkYzk5MmJhYTUxZDg1Yjg4NGE3NWZiYzhmYWJiY2QyZWJhMWFkMDciLCJzY2hlZHVsZWRfZmFjdCI6IjIwMjYtMTEtMTRUMTE6MzA6MDAiLCJzZWdtZW50X3JlZiI6IjAiLCJzb3VyY2VfcmRhdGVfc2VsZWN0b3JzIjpbXSwic291cmNlX3J1bGVfc2VsZWN0b3JzIjpbeyJieV93ZWVrZGF5IjpbIlNBIl0sImVuZF9jb25kaXRpb24iOnsia2luZCI6InVuYm91bmRlZCJ9LCJmcmVxdWVuY3kiOiJXRUVLTFkiLCJpbnRlcnZhbCI6IjEiLCJzZWVkIjoiMjAyNi0xMS0xNFQxMTozMDowMCIsInN0YXJ0X2JvdW5kIjoiMjAyNi0xMS0xNFQxMTozMDowMCIsInN0YXR1cyI6ImFjdGl2ZSIsIndlZWtfc3RhcnQiOiJNTyJ9XX19.cdb5d6f7fb37da99ae2b5e272eea9e9536328b5d228b9ff0a71f620ed222d664",
+        "basis_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
         "component_selector": {
           "source_kind": "rule",
           "selector": {
@@ -291,39 +293,44 @@
             "end_condition": {
               "kind": "unbounded"
             },
-            "status": "active",
             "by_weekday": [
               "SA"
             ],
-            "week_start": "MO"
+            "week_start": "MO",
+            "status": "active"
           }
         },
         "hops": []
       },
-      "proof_hash": "135c284dde362466e3d890cddf1a0191e54b66fa50591a22179ccdb24bc33faf",
+      "proof_hash": "b017e4617c3942469dc742fe77ce9cf6d765a4de54d3e5977a941cfc3499445f",
       "created_by_command_id": "fixture_reconcile_page_1",
       "created_at_utc": "2026-11-08T10:00:00Z"
     },
     {
-      "proof_id": "related_task_proof_25c142e69211fc63820e450dd0eca122ac94cdb013791cb3ecc465e407517b24",
+      "proof_id": "related_task_proof_bbe2617a834f245d2925a30fc408ba93b3e45ce8046d71adab235c39825b9deb",
       "related_task_rule_id": "related_task_rule_a24002492d1555b29fa3ad5630e88f877633cba9703aafb63ee5ded452c938d4",
       "proof_kind": "new_rdate",
       "source_item_version": "2",
-      "recurrence_revision_id": "recurrence_revision_fixture_2",
-      "prior_recurrence_revision_id": "recurrence_revision_fixture_1",
+      "recurrence_revision_id": "recurrence_revision_6663d82b183c5c9b2d657e87bb4a51ad7dcb1a1dc54cce3e2f0720a80d376184",
+      "prior_recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
       "proof_json": {
         "source_item_id": "item_fixture_science_class",
         "source_item_version": "2",
-        "recurrence_set_id": "recurrence_set_fixture_class",
-        "recurrence_revision_id": "recurrence_revision_fixture_2",
-        "normalized_recurrence_set_hash": "800dfbb15fbd9003509e3e26d373e9663ed3f3c115eacb87a991995f8b6477e9",
+        "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
+        "recurrence_revision_id": "recurrence_revision_6663d82b183c5c9b2d657e87bb4a51ad7dcb1a1dc54cce3e2f0720a80d376184",
+        "normalized_recurrence_set_hash": "ea51cd54b90fc91694a7edf34fe7627da16091929d6babe47c59291a1d31bbe0",
+        "lineage_ids": [
+          "recurrence_lineage_183c643f3adb1ec5276f96a52bb53d21c736725cb7c79d33869c1cba24cfe65f",
+          "recurrence_lineage_30b0fde2015f3015140c933712c9d1cb5fba37a625d1d4a503115847c457cfb5",
+          "recurrence_lineage_4b448c03fa11d7b6a7c80e58e808dabfc1d4278d860616f0ac96c9e6227978c4"
+        ],
         "selector": {
-          "derivation_version": "spine.recurrence-target-occurrence-selector.v1",
           "contract_version": "spine.recurrence.contract.v1",
           "normalization_version": "spine.recurrence.normalization.v1",
           "canonical_json_version": "spine.canonical-json.v1",
-          "recurrence_set_id": "recurrence_set_fixture_class",
-          "segment_ref": "1",
+          "derivation_version": "spine.recurrence-target-occurrence-selector.v1",
+          "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
+          "segment_ref": "0",
           "scheduled_fact": "2026-11-15T11:30:00",
           "origin_kind": "rdate",
           "source_rule_selectors": [],
@@ -334,35 +341,118 @@
             }
           ]
         },
-        "occurrence_key": "01391af455f5400b3969cbc7aa28cfae67c39e585a04d8fef36cdec565788927",
-        "lineage_ids": [],
-        "rdate_id": "rdate_fixture_new",
-        "prior_recurrence_revision_id": "recurrence_revision_fixture_1"
+        "occurrence_key": "eyJjYW5vbmljYWxfanNvbl92ZXJzaW9uIjoic3BpbmUuY2Fub25pY2FsLWpzb24udjEiLCJjb250cmFjdF92ZXJzaW9uIjoic3BpbmUucmVjdXJyZW5jZS5jb250cmFjdC52MSIsImRlcml2YXRpb25fdmVyc2lvbiI6InNwaW5lLnJlY3VycmVuY2Utb2NjdXJyZW5jZS1rZXkudjIiLCJub3JtYWxpemF0aW9uX3ZlcnNpb24iOiJzcGluZS5yZWN1cnJlbmNlLm5vcm1hbGl6YXRpb24udjEiLCJ0YXJnZXRfb2NjdXJyZW5jZV9zZWxlY3RvciI6eyJjYW5vbmljYWxfanNvbl92ZXJzaW9uIjoic3BpbmUuY2Fub25pY2FsLWpzb24udjEiLCJjb250cmFjdF92ZXJzaW9uIjoic3BpbmUucmVjdXJyZW5jZS5jb250cmFjdC52MSIsImRlcml2YXRpb25fdmVyc2lvbiI6InNwaW5lLnJlY3VycmVuY2UtdGFyZ2V0LW9jY3VycmVuY2Utc2VsZWN0b3IudjEiLCJub3JtYWxpemF0aW9uX3ZlcnNpb24iOiJzcGluZS5yZWN1cnJlbmNlLm5vcm1hbGl6YXRpb24udjEiLCJvcmlnaW5fa2luZCI6InJkYXRlIiwicmVjdXJyZW5jZV9zZXRfaWQiOiJyZWN1cnJlbmNlX3NldF84OWE1ZWY3ZWM4YjkwOGRkZmJiYmJjMWEwZGM5OTJiYWE1MWQ4NWI4ODRhNzVmYmM4ZmFiYmNkMmViYTFhZDA3Iiwic2NoZWR1bGVkX2ZhY3QiOiIyMDI2LTExLTE1VDExOjMwOjAwIiwic2VnbWVudF9yZWYiOiIwIiwic291cmNlX3JkYXRlX3NlbGVjdG9ycyI6W3sic2NoZWR1bGVkX2ZhY3QiOiIyMDI2LTExLTE1VDExOjMwOjAwIiwic3RhdHVzIjoiYWN0aXZlIn1dLCJzb3VyY2VfcnVsZV9zZWxlY3RvcnMiOltdfX0.ae27277f9dd6d4134dd67f48895a4ba99f1cd8bc5216d6ca259b89a9dbb2f975",
+        "rdate_id": "recurrence_rdate_3e0131819c9f895fd0bb991f926e63ac224221af3aecf132a35f0b310ac5f9aa",
+        "prior_recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a"
       },
-      "proof_hash": "25c142e69211fc63820e450dd0eca122ac94cdb013791cb3ecc465e407517b24",
+      "proof_hash": "bbe2617a834f245d2925a30fc408ba93b3e45ce8046d71adab235c39825b9deb",
       "created_by_command_id": "fixture_reconcile_page_1",
       "created_at_utc": "2026-11-08T10:00:00Z"
     },
     {
-      "proof_id": "related_task_proof_7549c7d72674dde74939a2b815032aca469098d90789aa9117d67b539a368821",
+      "proof_id": "related_task_proof_c2ee84e0d49c9008fa62f727a0b427ea9ee0a92f3d7b2b39856d6e5051cacb03",
+      "related_task_rule_id": "related_task_rule_a24002492d1555b29fa3ad5630e88f877633cba9703aafb63ee5ded452c938d4",
+      "proof_kind": "identity",
+      "source_item_version": "2",
+      "recurrence_revision_id": "recurrence_revision_99c33f0aecf53ab6af45ed0e72f17b59cfefe418b3f3790a72fc7944fc493ac8",
+      "prior_recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
+      "proof_json": {
+        "source_item_id": "item_fixture_science_class",
+        "source_item_version": "2",
+        "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
+        "recurrence_revision_id": "recurrence_revision_99c33f0aecf53ab6af45ed0e72f17b59cfefe418b3f3790a72fc7944fc493ac8",
+        "normalized_recurrence_set_hash": "9190c2cdbc76bdf23205f4b56a4f6a9e5ac9237dfa72229eecf3fd6aeec52d6f",
+        "lineage_ids": [
+          "recurrence_lineage_02f2b2166f3d7a03776c9250a0caf8f5824944a0348bb1f82e59f170ee2ef5ef",
+          "recurrence_lineage_46fe0f68c0cb9d292d7b6f39cdd59b82dd08f0e493c9e0507c3f4820a501adb3",
+          "recurrence_lineage_cdc18c4e75f895a686d9ee7908af03f868f4bb98806c28c847ab2f42c223a44b"
+        ],
+        "selector": {
+          "contract_version": "spine.recurrence.contract.v1",
+          "normalization_version": "spine.recurrence.normalization.v1",
+          "canonical_json_version": "spine.canonical-json.v1",
+          "derivation_version": "spine.recurrence-target-occurrence-selector.v1",
+          "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
+          "segment_ref": "0",
+          "scheduled_fact": "2026-11-14T11:30:00",
+          "origin_kind": "rule",
+          "source_rule_selectors": [
+            {
+              "frequency": "WEEKLY",
+              "interval": "1",
+              "seed": "2026-11-14T11:30:00",
+              "start_bound": "2026-11-14T11:30:00",
+              "end_condition": {
+                "kind": "unbounded"
+              },
+              "by_weekday": [
+                "SA"
+              ],
+              "week_start": "MO",
+              "status": "active"
+            }
+          ],
+          "source_rdate_selectors": []
+        },
+        "occurrence_key": "eyJjYW5vbmljYWxfanNvbl92ZXJzaW9uIjoic3BpbmUuY2Fub25pY2FsLWpzb24udjEiLCJjb250cmFjdF92ZXJzaW9uIjoic3BpbmUucmVjdXJyZW5jZS5jb250cmFjdC52MSIsImRlcml2YXRpb25fdmVyc2lvbiI6InNwaW5lLnJlY3VycmVuY2Utb2NjdXJyZW5jZS1rZXkudjIiLCJub3JtYWxpemF0aW9uX3ZlcnNpb24iOiJzcGluZS5yZWN1cnJlbmNlLm5vcm1hbGl6YXRpb24udjEiLCJ0YXJnZXRfb2NjdXJyZW5jZV9zZWxlY3RvciI6eyJjYW5vbmljYWxfanNvbl92ZXJzaW9uIjoic3BpbmUuY2Fub25pY2FsLWpzb24udjEiLCJjb250cmFjdF92ZXJzaW9uIjoic3BpbmUucmVjdXJyZW5jZS5jb250cmFjdC52MSIsImRlcml2YXRpb25fdmVyc2lvbiI6InNwaW5lLnJlY3VycmVuY2UtdGFyZ2V0LW9jY3VycmVuY2Utc2VsZWN0b3IudjEiLCJub3JtYWxpemF0aW9uX3ZlcnNpb24iOiJzcGluZS5yZWN1cnJlbmNlLm5vcm1hbGl6YXRpb24udjEiLCJvcmlnaW5fa2luZCI6InJ1bGUiLCJyZWN1cnJlbmNlX3NldF9pZCI6InJlY3VycmVuY2Vfc2V0Xzg5YTVlZjdlYzhiOTA4ZGRmYmJiYmMxYTBkYzk5MmJhYTUxZDg1Yjg4NGE3NWZiYzhmYWJiY2QyZWJhMWFkMDciLCJzY2hlZHVsZWRfZmFjdCI6IjIwMjYtMTEtMTRUMTE6MzA6MDAiLCJzZWdtZW50X3JlZiI6IjAiLCJzb3VyY2VfcmRhdGVfc2VsZWN0b3JzIjpbXSwic291cmNlX3J1bGVfc2VsZWN0b3JzIjpbeyJieV93ZWVrZGF5IjpbIlNBIl0sImVuZF9jb25kaXRpb24iOnsia2luZCI6InVuYm91bmRlZCJ9LCJmcmVxdWVuY3kiOiJXRUVLTFkiLCJpbnRlcnZhbCI6IjEiLCJzZWVkIjoiMjAyNi0xMS0xNFQxMTozMDowMCIsInN0YXJ0X2JvdW5kIjoiMjAyNi0xMS0xNFQxMTozMDowMCIsInN0YXR1cyI6ImFjdGl2ZSIsIndlZWtfc3RhcnQiOiJNTyJ9XX19.cdb5d6f7fb37da99ae2b5e272eea9e9536328b5d228b9ff0a71f620ed222d664",
+        "prior_proof_id": "related_task_proof_5a6d066e554197208858f8c7f5bb31287cbb6ed9f00ddedc9ef7e796163afbbb",
+        "prior_selector": {
+          "contract_version": "spine.recurrence.contract.v1",
+          "normalization_version": "spine.recurrence.normalization.v1",
+          "canonical_json_version": "spine.canonical-json.v1",
+          "derivation_version": "spine.recurrence-target-occurrence-selector.v1",
+          "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
+          "segment_ref": "0",
+          "scheduled_fact": "2026-11-14T11:30:00",
+          "origin_kind": "rule",
+          "source_rule_selectors": [
+            {
+              "frequency": "WEEKLY",
+              "interval": "1",
+              "seed": "2026-11-14T11:30:00",
+              "start_bound": "2026-11-14T11:30:00",
+              "end_condition": {
+                "kind": "unbounded"
+              },
+              "by_weekday": [
+                "SA"
+              ],
+              "week_start": "MO",
+              "status": "active"
+            }
+          ],
+          "source_rdate_selectors": []
+        }
+      },
+      "proof_hash": "c2ee84e0d49c9008fa62f727a0b427ea9ee0a92f3d7b2b39856d6e5051cacb03",
+      "created_by_command_id": "fixture_reconcile_page_1",
+      "created_at_utc": "2026-11-08T10:00:00Z"
+    },
+    {
+      "proof_id": "related_task_proof_276fff29b776615306434a999092d8fc52796287596ed7c3e80f83ca7cb6d984",
       "related_task_rule_id": "related_task_rule_a24002492d1555b29fa3ad5630e88f877633cba9703aafb63ee5ded452c938d4",
       "proof_kind": "excluded",
       "source_item_version": "2",
-      "recurrence_revision_id": "recurrence_revision_fixture_2",
-      "prior_recurrence_revision_id": "recurrence_revision_fixture_1",
+      "recurrence_revision_id": "recurrence_revision_99c33f0aecf53ab6af45ed0e72f17b59cfefe418b3f3790a72fc7944fc493ac8",
+      "prior_recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
       "proof_json": {
         "source_item_id": "item_fixture_science_class",
         "source_item_version": "2",
-        "recurrence_set_id": "recurrence_set_fixture_class",
-        "recurrence_revision_id": "recurrence_revision_fixture_2",
-        "normalized_recurrence_set_hash": "800dfbb15fbd9003509e3e26d373e9663ed3f3c115eacb87a991995f8b6477e9",
+        "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
+        "recurrence_revision_id": "recurrence_revision_99c33f0aecf53ab6af45ed0e72f17b59cfefe418b3f3790a72fc7944fc493ac8",
+        "normalized_recurrence_set_hash": "9190c2cdbc76bdf23205f4b56a4f6a9e5ac9237dfa72229eecf3fd6aeec52d6f",
+        "lineage_ids": [
+          "recurrence_lineage_02f2b2166f3d7a03776c9250a0caf8f5824944a0348bb1f82e59f170ee2ef5ef",
+          "recurrence_lineage_46fe0f68c0cb9d292d7b6f39cdd59b82dd08f0e493c9e0507c3f4820a501adb3",
+          "recurrence_lineage_cdc18c4e75f895a686d9ee7908af03f868f4bb98806c28c847ab2f42c223a44b"
+        ],
         "selector": {
-          "derivation_version": "spine.recurrence-target-occurrence-selector.v1",
           "contract_version": "spine.recurrence.contract.v1",
           "normalization_version": "spine.recurrence.normalization.v1",
           "canonical_json_version": "spine.canonical-json.v1",
-          "recurrence_set_id": "recurrence_set_fixture_class",
-          "segment_ref": "1",
+          "derivation_version": "spine.recurrence-target-occurrence-selector.v1",
+          "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
+          "segment_ref": "0",
           "scheduled_fact": "2026-11-14T11:30:00",
           "origin_kind": "rule",
           "source_rule_selectors": [
@@ -374,73 +464,156 @@
               "end_condition": {
                 "kind": "unbounded"
               },
-              "status": "active",
               "by_weekday": [
                 "SA"
               ],
-              "week_start": "MO"
+              "week_start": "MO",
+              "status": "active"
             }
           ],
           "source_rdate_selectors": []
         },
-        "occurrence_key": "37220c4acbb53b8dc6009df50a4dd22a4c0de7f12d62cde1ea9716e43cd66f5b",
-        "lineage_ids": [],
-        "prior_proof_id": "related_task_proof_88976c22205045697fa0b5c158c3be4c1d80a1ba299dadf55da8d9043f39079e",
-        "prior_selector": {
-          "derivation_version": "spine.recurrence-target-occurrence-selector.v1",
-          "contract_version": "spine.recurrence.contract.v1",
-          "normalization_version": "spine.recurrence.normalization.v1",
-          "canonical_json_version": "spine.canonical-json.v1",
-          "recurrence_set_id": "recurrence_set_fixture_class",
-          "segment_ref": "1",
-          "scheduled_fact": "2026-11-14T11:30:00",
-          "origin_kind": "rule",
-          "source_rule_selectors": [
-            {
-              "frequency": "WEEKLY",
-              "interval": "1",
-              "seed": "2026-11-14T11:30:00",
-              "start_bound": "2026-11-14T11:30:00",
-              "end_condition": {
-                "kind": "unbounded"
-              },
-              "status": "active",
-              "by_weekday": [
-                "SA"
-              ],
-              "week_start": "MO"
-            }
-          ],
-          "source_rdate_selectors": []
-        },
-        "exdate_id": "exdate_fixture_1",
+        "occurrence_key": "eyJjYW5vbmljYWxfanNvbl92ZXJzaW9uIjoic3BpbmUuY2Fub25pY2FsLWpzb24udjEiLCJjb250cmFjdF92ZXJzaW9uIjoic3BpbmUucmVjdXJyZW5jZS5jb250cmFjdC52MSIsImRlcml2YXRpb25fdmVyc2lvbiI6InNwaW5lLnJlY3VycmVuY2Utb2NjdXJyZW5jZS1rZXkudjIiLCJub3JtYWxpemF0aW9uX3ZlcnNpb24iOiJzcGluZS5yZWN1cnJlbmNlLm5vcm1hbGl6YXRpb24udjEiLCJ0YXJnZXRfb2NjdXJyZW5jZV9zZWxlY3RvciI6eyJjYW5vbmljYWxfanNvbl92ZXJzaW9uIjoic3BpbmUuY2Fub25pY2FsLWpzb24udjEiLCJjb250cmFjdF92ZXJzaW9uIjoic3BpbmUucmVjdXJyZW5jZS5jb250cmFjdC52MSIsImRlcml2YXRpb25fdmVyc2lvbiI6InNwaW5lLnJlY3VycmVuY2UtdGFyZ2V0LW9jY3VycmVuY2Utc2VsZWN0b3IudjEiLCJub3JtYWxpemF0aW9uX3ZlcnNpb24iOiJzcGluZS5yZWN1cnJlbmNlLm5vcm1hbGl6YXRpb24udjEiLCJvcmlnaW5fa2luZCI6InJ1bGUiLCJyZWN1cnJlbmNlX3NldF9pZCI6InJlY3VycmVuY2Vfc2V0Xzg5YTVlZjdlYzhiOTA4ZGRmYmJiYmMxYTBkYzk5MmJhYTUxZDg1Yjg4NGE3NWZiYzhmYWJiY2QyZWJhMWFkMDciLCJzY2hlZHVsZWRfZmFjdCI6IjIwMjYtMTEtMTRUMTE6MzA6MDAiLCJzZWdtZW50X3JlZiI6IjAiLCJzb3VyY2VfcmRhdGVfc2VsZWN0b3JzIjpbXSwic291cmNlX3J1bGVfc2VsZWN0b3JzIjpbeyJieV93ZWVrZGF5IjpbIlNBIl0sImVuZF9jb25kaXRpb24iOnsia2luZCI6InVuYm91bmRlZCJ9LCJmcmVxdWVuY3kiOiJXRUVLTFkiLCJpbnRlcnZhbCI6IjEiLCJzZWVkIjoiMjAyNi0xMS0xNFQxMTozMDowMCIsInN0YXJ0X2JvdW5kIjoiMjAyNi0xMS0xNFQxMTozMDowMCIsInN0YXR1cyI6ImFjdGl2ZSIsIndlZWtfc3RhcnQiOiJNTyJ9XX19.cdb5d6f7fb37da99ae2b5e272eea9e9536328b5d228b9ff0a71f620ed222d664",
+        "exdate_id": "recurrence_exdate_4c8054449c2a9c05869e0904c356ab2c97b19376f58e1a49a7b0dfeff4d70e11",
         "exclusion_active": true,
-        "actionable": false
+        "actionable": false,
+        "prior_proof_id": "related_task_proof_c2ee84e0d49c9008fa62f727a0b427ea9ee0a92f3d7b2b39856d6e5051cacb03",
+        "prior_selector": {
+          "contract_version": "spine.recurrence.contract.v1",
+          "normalization_version": "spine.recurrence.normalization.v1",
+          "canonical_json_version": "spine.canonical-json.v1",
+          "derivation_version": "spine.recurrence-target-occurrence-selector.v1",
+          "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
+          "segment_ref": "0",
+          "scheduled_fact": "2026-11-14T11:30:00",
+          "origin_kind": "rule",
+          "source_rule_selectors": [
+            {
+              "frequency": "WEEKLY",
+              "interval": "1",
+              "seed": "2026-11-14T11:30:00",
+              "start_bound": "2026-11-14T11:30:00",
+              "end_condition": {
+                "kind": "unbounded"
+              },
+              "by_weekday": [
+                "SA"
+              ],
+              "week_start": "MO",
+              "status": "active"
+            }
+          ],
+          "source_rdate_selectors": []
+        }
       },
-      "proof_hash": "7549c7d72674dde74939a2b815032aca469098d90789aa9117d67b539a368821",
+      "proof_hash": "276fff29b776615306434a999092d8fc52796287596ed7c3e80f83ca7cb6d984",
       "created_by_command_id": "fixture_reconcile_page_1",
       "created_at_utc": "2026-11-08T10:00:00Z"
     },
     {
-      "proof_id": "related_task_proof_6b5a2edc64d008ce13dedefde330a5a6cf95e08a403af2f2896a5e77ff7249d8",
+      "proof_id": "related_task_proof_8664105911e69889406836abdbeab02b71714d59ae0eaec3dbcdb82d4e23703b",
+      "related_task_rule_id": "related_task_rule_a24002492d1555b29fa3ad5630e88f877633cba9703aafb63ee5ded452c938d4",
+      "proof_kind": "identity",
+      "source_item_version": "2",
+      "recurrence_revision_id": "recurrence_revision_a038787544b273d1d1c0b0e5ee63b360ba19ab99103e27c41c84e463e77d01e2",
+      "prior_recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
+      "proof_json": {
+        "source_item_id": "item_fixture_science_class",
+        "source_item_version": "2",
+        "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
+        "recurrence_revision_id": "recurrence_revision_a038787544b273d1d1c0b0e5ee63b360ba19ab99103e27c41c84e463e77d01e2",
+        "normalized_recurrence_set_hash": "07502810d1fd81c58d76622d5882867a6cd07316770c5bd23f1cf267adc0e4b6",
+        "lineage_ids": [
+          "recurrence_lineage_12d650a67a812059ccfc5099d44a9b812df4e059ca15eb983b30c3bb7aa39846",
+          "recurrence_lineage_8593844cbd5816a9205f2d662ff8bfd05683d326dd870cb3033d0185f83ab2dc",
+          "recurrence_lineage_927ddb6bb13758cc874284ae883fedb74bc5fa672a2fb3d0c69ee4e7fb2f65bf"
+        ],
+        "selector": {
+          "contract_version": "spine.recurrence.contract.v1",
+          "normalization_version": "spine.recurrence.normalization.v1",
+          "canonical_json_version": "spine.canonical-json.v1",
+          "derivation_version": "spine.recurrence-target-occurrence-selector.v1",
+          "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
+          "segment_ref": "0",
+          "scheduled_fact": "2026-11-14T11:30:00",
+          "origin_kind": "rule",
+          "source_rule_selectors": [
+            {
+              "frequency": "WEEKLY",
+              "interval": "1",
+              "seed": "2026-11-14T11:30:00",
+              "start_bound": "2026-11-14T11:30:00",
+              "end_condition": {
+                "kind": "unbounded"
+              },
+              "by_weekday": [
+                "SA"
+              ],
+              "week_start": "MO",
+              "status": "active"
+            }
+          ],
+          "source_rdate_selectors": []
+        },
+        "occurrence_key": "eyJjYW5vbmljYWxfanNvbl92ZXJzaW9uIjoic3BpbmUuY2Fub25pY2FsLWpzb24udjEiLCJjb250cmFjdF92ZXJzaW9uIjoic3BpbmUucmVjdXJyZW5jZS5jb250cmFjdC52MSIsImRlcml2YXRpb25fdmVyc2lvbiI6InNwaW5lLnJlY3VycmVuY2Utb2NjdXJyZW5jZS1rZXkudjIiLCJub3JtYWxpemF0aW9uX3ZlcnNpb24iOiJzcGluZS5yZWN1cnJlbmNlLm5vcm1hbGl6YXRpb24udjEiLCJ0YXJnZXRfb2NjdXJyZW5jZV9zZWxlY3RvciI6eyJjYW5vbmljYWxfanNvbl92ZXJzaW9uIjoic3BpbmUuY2Fub25pY2FsLWpzb24udjEiLCJjb250cmFjdF92ZXJzaW9uIjoic3BpbmUucmVjdXJyZW5jZS5jb250cmFjdC52MSIsImRlcml2YXRpb25fdmVyc2lvbiI6InNwaW5lLnJlY3VycmVuY2UtdGFyZ2V0LW9jY3VycmVuY2Utc2VsZWN0b3IudjEiLCJub3JtYWxpemF0aW9uX3ZlcnNpb24iOiJzcGluZS5yZWN1cnJlbmNlLm5vcm1hbGl6YXRpb24udjEiLCJvcmlnaW5fa2luZCI6InJ1bGUiLCJyZWN1cnJlbmNlX3NldF9pZCI6InJlY3VycmVuY2Vfc2V0Xzg5YTVlZjdlYzhiOTA4ZGRmYmJiYmMxYTBkYzk5MmJhYTUxZDg1Yjg4NGE3NWZiYzhmYWJiY2QyZWJhMWFkMDciLCJzY2hlZHVsZWRfZmFjdCI6IjIwMjYtMTEtMTRUMTE6MzA6MDAiLCJzZWdtZW50X3JlZiI6IjAiLCJzb3VyY2VfcmRhdGVfc2VsZWN0b3JzIjpbXSwic291cmNlX3J1bGVfc2VsZWN0b3JzIjpbeyJieV93ZWVrZGF5IjpbIlNBIl0sImVuZF9jb25kaXRpb24iOnsia2luZCI6InVuYm91bmRlZCJ9LCJmcmVxdWVuY3kiOiJXRUVLTFkiLCJpbnRlcnZhbCI6IjEiLCJzZWVkIjoiMjAyNi0xMS0xNFQxMTozMDowMCIsInN0YXJ0X2JvdW5kIjoiMjAyNi0xMS0xNFQxMTozMDowMCIsInN0YXR1cyI6ImFjdGl2ZSIsIndlZWtfc3RhcnQiOiJNTyJ9XX19.cdb5d6f7fb37da99ae2b5e272eea9e9536328b5d228b9ff0a71f620ed222d664",
+        "prior_proof_id": "related_task_proof_5a6d066e554197208858f8c7f5bb31287cbb6ed9f00ddedc9ef7e796163afbbb",
+        "prior_selector": {
+          "contract_version": "spine.recurrence.contract.v1",
+          "normalization_version": "spine.recurrence.normalization.v1",
+          "canonical_json_version": "spine.canonical-json.v1",
+          "derivation_version": "spine.recurrence-target-occurrence-selector.v1",
+          "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
+          "segment_ref": "0",
+          "scheduled_fact": "2026-11-14T11:30:00",
+          "origin_kind": "rule",
+          "source_rule_selectors": [
+            {
+              "frequency": "WEEKLY",
+              "interval": "1",
+              "seed": "2026-11-14T11:30:00",
+              "start_bound": "2026-11-14T11:30:00",
+              "end_condition": {
+                "kind": "unbounded"
+              },
+              "by_weekday": [
+                "SA"
+              ],
+              "week_start": "MO",
+              "status": "active"
+            }
+          ],
+          "source_rdate_selectors": []
+        }
+      },
+      "proof_hash": "8664105911e69889406836abdbeab02b71714d59ae0eaec3dbcdb82d4e23703b",
+      "created_by_command_id": "fixture_reconcile_page_1",
+      "created_at_utc": "2026-11-08T10:00:00Z"
+    },
+    {
+      "proof_id": "related_task_proof_2b1f3fa3eeb2688c5dea398b2a746004eace0af891fc49833dff1c2026ed89b7",
       "related_task_rule_id": "related_task_rule_a24002492d1555b29fa3ad5630e88f877633cba9703aafb63ee5ded452c938d4",
       "proof_kind": "occurrence_cancelled",
       "source_item_version": "2",
-      "recurrence_revision_id": "recurrence_revision_fixture_2",
-      "prior_recurrence_revision_id": "recurrence_revision_fixture_1",
+      "recurrence_revision_id": "recurrence_revision_a038787544b273d1d1c0b0e5ee63b360ba19ab99103e27c41c84e463e77d01e2",
+      "prior_recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
       "proof_json": {
         "source_item_id": "item_fixture_science_class",
         "source_item_version": "2",
-        "recurrence_set_id": "recurrence_set_fixture_class",
-        "recurrence_revision_id": "recurrence_revision_fixture_2",
-        "normalized_recurrence_set_hash": "800dfbb15fbd9003509e3e26d373e9663ed3f3c115eacb87a991995f8b6477e9",
+        "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
+        "recurrence_revision_id": "recurrence_revision_a038787544b273d1d1c0b0e5ee63b360ba19ab99103e27c41c84e463e77d01e2",
+        "normalized_recurrence_set_hash": "07502810d1fd81c58d76622d5882867a6cd07316770c5bd23f1cf267adc0e4b6",
+        "lineage_ids": [
+          "recurrence_lineage_12d650a67a812059ccfc5099d44a9b812df4e059ca15eb983b30c3bb7aa39846",
+          "recurrence_lineage_8593844cbd5816a9205f2d662ff8bfd05683d326dd870cb3033d0185f83ab2dc",
+          "recurrence_lineage_927ddb6bb13758cc874284ae883fedb74bc5fa672a2fb3d0c69ee4e7fb2f65bf"
+        ],
         "selector": {
-          "derivation_version": "spine.recurrence-target-occurrence-selector.v1",
           "contract_version": "spine.recurrence.contract.v1",
           "normalization_version": "spine.recurrence.normalization.v1",
           "canonical_json_version": "spine.canonical-json.v1",
-          "recurrence_set_id": "recurrence_set_fixture_class",
-          "segment_ref": "1",
+          "derivation_version": "spine.recurrence-target-occurrence-selector.v1",
+          "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
+          "segment_ref": "0",
           "scheduled_fact": "2026-11-14T11:30:00",
           "origin_kind": "rule",
           "source_rule_selectors": [
@@ -452,90 +625,89 @@
               "end_condition": {
                 "kind": "unbounded"
               },
-              "status": "active",
               "by_weekday": [
                 "SA"
               ],
-              "week_start": "MO"
+              "week_start": "MO",
+              "status": "active"
             }
           ],
           "source_rdate_selectors": []
         },
-        "occurrence_key": "37220c4acbb53b8dc6009df50a4dd22a4c0de7f12d62cde1ea9716e43cd66f5b",
-        "lineage_ids": [],
-        "prior_proof_id": "related_task_proof_88976c22205045697fa0b5c158c3be4c1d80a1ba299dadf55da8d9043f39079e",
-        "prior_selector": {
-          "derivation_version": "spine.recurrence-target-occurrence-selector.v1",
-          "contract_version": "spine.recurrence.contract.v1",
-          "normalization_version": "spine.recurrence.normalization.v1",
-          "canonical_json_version": "spine.canonical-json.v1",
-          "recurrence_set_id": "recurrence_set_fixture_class",
-          "segment_ref": "1",
-          "scheduled_fact": "2026-11-14T11:30:00",
-          "origin_kind": "rule",
-          "source_rule_selectors": [
-            {
-              "frequency": "WEEKLY",
-              "interval": "1",
-              "seed": "2026-11-14T11:30:00",
-              "start_bound": "2026-11-14T11:30:00",
-              "end_condition": {
-                "kind": "unbounded"
-              },
-              "status": "active",
-              "by_weekday": [
-                "SA"
-              ],
-              "week_start": "MO"
-            }
-          ],
-          "source_rdate_selectors": []
-        },
-        "override_id": "override_fixture_cancel",
+        "occurrence_key": "eyJjYW5vbmljYWxfanNvbl92ZXJzaW9uIjoic3BpbmUuY2Fub25pY2FsLWpzb24udjEiLCJjb250cmFjdF92ZXJzaW9uIjoic3BpbmUucmVjdXJyZW5jZS5jb250cmFjdC52MSIsImRlcml2YXRpb25fdmVyc2lvbiI6InNwaW5lLnJlY3VycmVuY2Utb2NjdXJyZW5jZS1rZXkudjIiLCJub3JtYWxpemF0aW9uX3ZlcnNpb24iOiJzcGluZS5yZWN1cnJlbmNlLm5vcm1hbGl6YXRpb24udjEiLCJ0YXJnZXRfb2NjdXJyZW5jZV9zZWxlY3RvciI6eyJjYW5vbmljYWxfanNvbl92ZXJzaW9uIjoic3BpbmUuY2Fub25pY2FsLWpzb24udjEiLCJjb250cmFjdF92ZXJzaW9uIjoic3BpbmUucmVjdXJyZW5jZS5jb250cmFjdC52MSIsImRlcml2YXRpb25fdmVyc2lvbiI6InNwaW5lLnJlY3VycmVuY2UtdGFyZ2V0LW9jY3VycmVuY2Utc2VsZWN0b3IudjEiLCJub3JtYWxpemF0aW9uX3ZlcnNpb24iOiJzcGluZS5yZWN1cnJlbmNlLm5vcm1hbGl6YXRpb24udjEiLCJvcmlnaW5fa2luZCI6InJ1bGUiLCJyZWN1cnJlbmNlX3NldF9pZCI6InJlY3VycmVuY2Vfc2V0Xzg5YTVlZjdlYzhiOTA4ZGRmYmJiYmMxYTBkYzk5MmJhYTUxZDg1Yjg4NGE3NWZiYzhmYWJiY2QyZWJhMWFkMDciLCJzY2hlZHVsZWRfZmFjdCI6IjIwMjYtMTEtMTRUMTE6MzA6MDAiLCJzZWdtZW50X3JlZiI6IjAiLCJzb3VyY2VfcmRhdGVfc2VsZWN0b3JzIjpbXSwic291cmNlX3J1bGVfc2VsZWN0b3JzIjpbeyJieV93ZWVrZGF5IjpbIlNBIl0sImVuZF9jb25kaXRpb24iOnsia2luZCI6InVuYm91bmRlZCJ9LCJmcmVxdWVuY3kiOiJXRUVLTFkiLCJpbnRlcnZhbCI6IjEiLCJzZWVkIjoiMjAyNi0xMS0xNFQxMTozMDowMCIsInN0YXJ0X2JvdW5kIjoiMjAyNi0xMS0xNFQxMTozMDowMCIsInN0YXR1cyI6ImFjdGl2ZSIsIndlZWtfc3RhcnQiOiJNTyJ9XX19.cdb5d6f7fb37da99ae2b5e272eea9e9536328b5d228b9ff0a71f620ed222d664",
+        "override_id": "recurrence_override_b323e122e44a0633c26255919f19f2b38db170813f813782916e16d6bb9fbafb",
         "lifecycle": "cancelled",
-        "actionable": false
+        "actionable": false,
+        "prior_proof_id": "related_task_proof_8664105911e69889406836abdbeab02b71714d59ae0eaec3dbcdb82d4e23703b",
+        "prior_selector": {
+          "contract_version": "spine.recurrence.contract.v1",
+          "normalization_version": "spine.recurrence.normalization.v1",
+          "canonical_json_version": "spine.canonical-json.v1",
+          "derivation_version": "spine.recurrence-target-occurrence-selector.v1",
+          "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
+          "segment_ref": "0",
+          "scheduled_fact": "2026-11-14T11:30:00",
+          "origin_kind": "rule",
+          "source_rule_selectors": [
+            {
+              "frequency": "WEEKLY",
+              "interval": "1",
+              "seed": "2026-11-14T11:30:00",
+              "start_bound": "2026-11-14T11:30:00",
+              "end_condition": {
+                "kind": "unbounded"
+              },
+              "by_weekday": [
+                "SA"
+              ],
+              "week_start": "MO",
+              "status": "active"
+            }
+          ],
+          "source_rdate_selectors": []
+        }
       },
-      "proof_hash": "6b5a2edc64d008ce13dedefde330a5a6cf95e08a403af2f2896a5e77ff7249d8",
+      "proof_hash": "2b1f3fa3eeb2688c5dea398b2a746004eace0af891fc49833dff1c2026ed89b7",
       "created_by_command_id": "fixture_reconcile_page_1",
       "created_at_utc": "2026-11-08T10:00:00Z"
     },
     {
-      "proof_id": "related_task_proof_5e7a2503f5cdc32b47f5580ba2b59ce5bfd633ce5a6a1e69fe92b4b6ef581cbf",
+      "proof_id": "related_task_proof_3de2b5d9d795229c3d939da04da660da40f82604baf318c6c42a46360abb88b0",
       "related_task_rule_id": "related_task_rule_a24002492d1555b29fa3ad5630e88f877633cba9703aafb63ee5ded452c938d4",
       "proof_kind": "source_cancelled",
       "source_item_version": "2",
-      "recurrence_revision_id": "recurrence_revision_fixture_2",
-      "prior_recurrence_revision_id": "recurrence_revision_fixture_1",
+      "recurrence_revision_id": "recurrence_revision_789cb1d3003adff667a537b85f57481005112ebe1fb848caca47c9128f4fad58",
+      "prior_recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
       "proof_json": {
         "source_item_id": "item_fixture_science_class",
         "source_item_version": "2",
-        "recurrence_set_id": "recurrence_set_fixture_class",
-        "recurrence_revision_id": "recurrence_revision_fixture_2",
-        "normalized_recurrence_set_hash": "800dfbb15fbd9003509e3e26d373e9663ed3f3c115eacb87a991995f8b6477e9",
+        "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
+        "recurrence_revision_id": "recurrence_revision_789cb1d3003adff667a537b85f57481005112ebe1fb848caca47c9128f4fad58",
+        "normalized_recurrence_set_hash": "0203dbe4d4c45e0fc1d808328b4dc259d25d4204ac193218ef80c3bd7ef17e5b",
         "lineage_ids": [],
         "cancelled_event_version": "2",
         "event_status": "cancelled"
       },
-      "proof_hash": "5e7a2503f5cdc32b47f5580ba2b59ce5bfd633ce5a6a1e69fe92b4b6ef581cbf",
+      "proof_hash": "3de2b5d9d795229c3d939da04da660da40f82604baf318c6c42a46360abb88b0",
       "created_by_command_id": "fixture_reconcile_page_1",
       "created_at_utc": "2026-11-08T10:00:00Z"
     }
   ],
   "states": [
     {
-      "assignment_revision_id": "related_task_assignment_revision_dbc0c6d5221d12327b3c8ced52a20d3098fd6342f8779c55c8d85179a442cb40",
-      "assignment_id": "related_task_assignment_2f5bfca79187b3e7ebb8f1fca3d958b4dfc0cf9a742cdb9f9654350952811f02",
+      "assignment_revision_id": "related_task_assignment_revision_8b6530c829ce0966b90fae9baf970c1d7dc846527c789f8b2ecf49f4fbe57c4e",
+      "assignment_id": "related_task_assignment_8bce9e2b6ce0104c12a34688820805435b38cf2ad92a56e814645d9d17f196b6",
       "change_version": "1",
       "prior_assignment_revision_id": null,
       "state_json": {
-        "generation_id": "related_task_generation_7c941b7ede44128583e902f7d42cc03b2917c657a13abf22236af85660d143aa",
+        "generation_id": "related_task_generation_6043a6b329505d5efbe73660db0118565b39572fd216fae140d82206097edb8d",
         "selector": {
-          "derivation_version": "spine.recurrence-target-occurrence-selector.v1",
           "contract_version": "spine.recurrence.contract.v1",
           "normalization_version": "spine.recurrence.normalization.v1",
           "canonical_json_version": "spine.canonical-json.v1",
-          "recurrence_set_id": "recurrence_set_fixture_class",
-          "segment_ref": "1",
+          "derivation_version": "spine.recurrence-target-occurrence-selector.v1",
+          "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
+          "segment_ref": "0",
           "scheduled_fact": "2026-11-14T11:30:00",
           "origin_kind": "rule",
           "source_rule_selectors": [
@@ -547,22 +719,22 @@
               "end_condition": {
                 "kind": "unbounded"
               },
-              "status": "active",
               "by_weekday": [
                 "SA"
               ],
-              "week_start": "MO"
+              "week_start": "MO",
+              "status": "active"
             }
           ],
           "source_rdate_selectors": []
         },
-        "occurrence_key": "37220c4acbb53b8dc6009df50a4dd22a4c0de7f12d62cde1ea9716e43cd66f5b",
+        "occurrence_key": "eyJjYW5vbmljYWxfanNvbl92ZXJzaW9uIjoic3BpbmUuY2Fub25pY2FsLWpzb24udjEiLCJjb250cmFjdF92ZXJzaW9uIjoic3BpbmUucmVjdXJyZW5jZS5jb250cmFjdC52MSIsImRlcml2YXRpb25fdmVyc2lvbiI6InNwaW5lLnJlY3VycmVuY2Utb2NjdXJyZW5jZS1rZXkudjIiLCJub3JtYWxpemF0aW9uX3ZlcnNpb24iOiJzcGluZS5yZWN1cnJlbmNlLm5vcm1hbGl6YXRpb24udjEiLCJ0YXJnZXRfb2NjdXJyZW5jZV9zZWxlY3RvciI6eyJjYW5vbmljYWxfanNvbl92ZXJzaW9uIjoic3BpbmUuY2Fub25pY2FsLWpzb24udjEiLCJjb250cmFjdF92ZXJzaW9uIjoic3BpbmUucmVjdXJyZW5jZS5jb250cmFjdC52MSIsImRlcml2YXRpb25fdmVyc2lvbiI6InNwaW5lLnJlY3VycmVuY2UtdGFyZ2V0LW9jY3VycmVuY2Utc2VsZWN0b3IudjEiLCJub3JtYWxpemF0aW9uX3ZlcnNpb24iOiJzcGluZS5yZWN1cnJlbmNlLm5vcm1hbGl6YXRpb24udjEiLCJvcmlnaW5fa2luZCI6InJ1bGUiLCJyZWN1cnJlbmNlX3NldF9pZCI6InJlY3VycmVuY2Vfc2V0Xzg5YTVlZjdlYzhiOTA4ZGRmYmJiYmMxYTBkYzk5MmJhYTUxZDg1Yjg4NGE3NWZiYzhmYWJiY2QyZWJhMWFkMDciLCJzY2hlZHVsZWRfZmFjdCI6IjIwMjYtMTEtMTRUMTE6MzA6MDAiLCJzZWdtZW50X3JlZiI6IjAiLCJzb3VyY2VfcmRhdGVfc2VsZWN0b3JzIjpbXSwic291cmNlX3J1bGVfc2VsZWN0b3JzIjpbeyJieV93ZWVrZGF5IjpbIlNBIl0sImVuZF9jb25kaXRpb24iOnsia2luZCI6InVuYm91bmRlZCJ9LCJmcmVxdWVuY3kiOiJXRUVLTFkiLCJpbnRlcnZhbCI6IjEiLCJzZWVkIjoiMjAyNi0xMS0xNFQxMTozMDowMCIsInN0YXJ0X2JvdW5kIjoiMjAyNi0xMS0xNFQxMTozMDowMCIsInN0YXR1cyI6ImFjdGl2ZSIsIndlZWtfc3RhcnQiOiJNTyJ9XX19.cdb5d6f7fb37da99ae2b5e272eea9e9536328b5d228b9ff0a71f620ed222d664",
         "source_item_version": "1",
-        "recurrence_revision_id": "recurrence_revision_fixture_1",
-        "proof_id": "related_task_proof_88976c22205045697fa0b5c158c3be4c1d80a1ba299dadf55da8d9043f39079e",
-        "task_item_id": "item_218fffa030c67ccab3c8331b1f60a61a80e6a598f00ec52ebc20e7eacc1aef7c",
+        "recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
+        "proof_id": "related_task_proof_5a6d066e554197208858f8c7f5bb31287cbb6ed9f00ddedc9ef7e796163afbbb",
+        "task_item_id": "item_a7b7735a558aa63d5eca349747cea26e0146bb8e2693ab73b793a908e1206b46",
         "task_item_version": "1",
-        "temporal_binding_revision_id": "temporal_binding_revision_7960c5e0c21c1443d5413c828f9fd5e6be7a7e1c8708024e7dcece511a76712a",
+        "temporal_binding_revision_id": "temporal_binding_revision_ef98b84ce20e90ffb0c554bbd7f53d67be6aa2b99886be17c48c1176b96278ef",
         "adopted_rule_revision_id": "related_task_rule_revision_dd920c726715ba6c9a6723417aa7ef73feb11f22d34cad749546bd065eab3067",
         "managed_baseline": {
           "task_template": {
@@ -672,33 +844,33 @@
         "restoration_veto": false,
         "reason": "new_source_slot"
       },
-      "state_hash": "63f3eacb028e577d36ed97d61b152a9d9f826e27ae899d9833075721df50eb59",
+      "state_hash": "b753b7185e1bea2a90c804d950a6ec5261ed4ac6c477131a5ff73bcd065591b7",
       "source_item_version": "1",
-      "recurrence_revision_id": "recurrence_revision_fixture_1",
-      "task_item_id": "item_218fffa030c67ccab3c8331b1f60a61a80e6a598f00ec52ebc20e7eacc1aef7c",
+      "recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
+      "task_item_id": "item_a7b7735a558aa63d5eca349747cea26e0146bb8e2693ab73b793a908e1206b46",
       "task_item_version": "1",
       "adopted_rule_revision_id": "related_task_rule_revision_dd920c726715ba6c9a6723417aa7ef73feb11f22d34cad749546bd065eab3067",
-      "generation_id": "related_task_generation_7c941b7ede44128583e902f7d42cc03b2917c657a13abf22236af85660d143aa",
-      "temporal_binding_revision_id": "temporal_binding_revision_7960c5e0c21c1443d5413c828f9fd5e6be7a7e1c8708024e7dcece511a76712a",
-      "proof_id": "related_task_proof_88976c22205045697fa0b5c158c3be4c1d80a1ba299dadf55da8d9043f39079e",
-      "selector_ref": "recurrence_target_selector_515eeb841a2cdae00625c5b1000645f9b361177bd7722dd464d4dc72ef8c4e5a",
+      "generation_id": "related_task_generation_6043a6b329505d5efbe73660db0118565b39572fd216fae140d82206097edb8d",
+      "temporal_binding_revision_id": "temporal_binding_revision_ef98b84ce20e90ffb0c554bbd7f53d67be6aa2b99886be17c48c1176b96278ef",
+      "proof_id": "related_task_proof_5a6d066e554197208858f8c7f5bb31287cbb6ed9f00ddedc9ef7e796163afbbb",
+      "selector_ref": "recurrence_target_selector_6649a6be323ff33d4cf2c196ac67c8f9dbcf18fbc3184c2bd0800f8a6494ef90",
       "command_id": "fixture_reconcile_page_1",
       "created_at_utc": "2026-11-08T10:00:00Z"
     },
     {
-      "assignment_revision_id": "related_task_assignment_revision_c60d9efd089445ac352564f8d004165b0c82e41f9579e2a3598ac1013db79cfc",
-      "assignment_id": "related_task_assignment_2f5bfca79187b3e7ebb8f1fca3d958b4dfc0cf9a742cdb9f9654350952811f02",
+      "assignment_revision_id": "related_task_assignment_revision_e17cab08a5624eeb36f8bb8e0ade7e8bbc88136269c407760f4a7bcaae04cf66",
+      "assignment_id": "related_task_assignment_8bce9e2b6ce0104c12a34688820805435b38cf2ad92a56e814645d9d17f196b6",
       "change_version": "2",
-      "prior_assignment_revision_id": "related_task_assignment_revision_dbc0c6d5221d12327b3c8ced52a20d3098fd6342f8779c55c8d85179a442cb40",
+      "prior_assignment_revision_id": "related_task_assignment_revision_8b6530c829ce0966b90fae9baf970c1d7dc846527c789f8b2ecf49f4fbe57c4e",
       "state_json": {
-        "generation_id": "related_task_generation_7c941b7ede44128583e902f7d42cc03b2917c657a13abf22236af85660d143aa",
+        "generation_id": "related_task_generation_6043a6b329505d5efbe73660db0118565b39572fd216fae140d82206097edb8d",
         "selector": {
-          "derivation_version": "spine.recurrence-target-occurrence-selector.v1",
           "contract_version": "spine.recurrence.contract.v1",
           "normalization_version": "spine.recurrence.normalization.v1",
           "canonical_json_version": "spine.canonical-json.v1",
-          "recurrence_set_id": "recurrence_set_fixture_class",
-          "segment_ref": "1",
+          "derivation_version": "spine.recurrence-target-occurrence-selector.v1",
+          "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
+          "segment_ref": "0",
           "scheduled_fact": "2026-11-14T11:30:00",
           "origin_kind": "rule",
           "source_rule_selectors": [
@@ -710,22 +882,22 @@
               "end_condition": {
                 "kind": "unbounded"
               },
-              "status": "active",
               "by_weekday": [
                 "SA"
               ],
-              "week_start": "MO"
+              "week_start": "MO",
+              "status": "active"
             }
           ],
           "source_rdate_selectors": []
         },
-        "occurrence_key": "37220c4acbb53b8dc6009df50a4dd22a4c0de7f12d62cde1ea9716e43cd66f5b",
+        "occurrence_key": "eyJjYW5vbmljYWxfanNvbl92ZXJzaW9uIjoic3BpbmUuY2Fub25pY2FsLWpzb24udjEiLCJjb250cmFjdF92ZXJzaW9uIjoic3BpbmUucmVjdXJyZW5jZS5jb250cmFjdC52MSIsImRlcml2YXRpb25fdmVyc2lvbiI6InNwaW5lLnJlY3VycmVuY2Utb2NjdXJyZW5jZS1rZXkudjIiLCJub3JtYWxpemF0aW9uX3ZlcnNpb24iOiJzcGluZS5yZWN1cnJlbmNlLm5vcm1hbGl6YXRpb24udjEiLCJ0YXJnZXRfb2NjdXJyZW5jZV9zZWxlY3RvciI6eyJjYW5vbmljYWxfanNvbl92ZXJzaW9uIjoic3BpbmUuY2Fub25pY2FsLWpzb24udjEiLCJjb250cmFjdF92ZXJzaW9uIjoic3BpbmUucmVjdXJyZW5jZS5jb250cmFjdC52MSIsImRlcml2YXRpb25fdmVyc2lvbiI6InNwaW5lLnJlY3VycmVuY2UtdGFyZ2V0LW9jY3VycmVuY2Utc2VsZWN0b3IudjEiLCJub3JtYWxpemF0aW9uX3ZlcnNpb24iOiJzcGluZS5yZWN1cnJlbmNlLm5vcm1hbGl6YXRpb24udjEiLCJvcmlnaW5fa2luZCI6InJ1bGUiLCJyZWN1cnJlbmNlX3NldF9pZCI6InJlY3VycmVuY2Vfc2V0Xzg5YTVlZjdlYzhiOTA4ZGRmYmJiYmMxYTBkYzk5MmJhYTUxZDg1Yjg4NGE3NWZiYzhmYWJiY2QyZWJhMWFkMDciLCJzY2hlZHVsZWRfZmFjdCI6IjIwMjYtMTEtMTRUMTE6MzA6MDAiLCJzZWdtZW50X3JlZiI6IjAiLCJzb3VyY2VfcmRhdGVfc2VsZWN0b3JzIjpbXSwic291cmNlX3J1bGVfc2VsZWN0b3JzIjpbeyJieV93ZWVrZGF5IjpbIlNBIl0sImVuZF9jb25kaXRpb24iOnsia2luZCI6InVuYm91bmRlZCJ9LCJmcmVxdWVuY3kiOiJXRUVLTFkiLCJpbnRlcnZhbCI6IjEiLCJzZWVkIjoiMjAyNi0xMS0xNFQxMTozMDowMCIsInN0YXJ0X2JvdW5kIjoiMjAyNi0xMS0xNFQxMTozMDowMCIsInN0YXR1cyI6ImFjdGl2ZSIsIndlZWtfc3RhcnQiOiJNTyJ9XX19.cdb5d6f7fb37da99ae2b5e272eea9e9536328b5d228b9ff0a71f620ed222d664",
         "source_item_version": "2",
-        "recurrence_revision_id": "recurrence_revision_fixture_2",
-        "proof_id": "related_task_proof_7549c7d72674dde74939a2b815032aca469098d90789aa9117d67b539a368821",
-        "task_item_id": "item_218fffa030c67ccab3c8331b1f60a61a80e6a598f00ec52ebc20e7eacc1aef7c",
+        "recurrence_revision_id": "recurrence_revision_99c33f0aecf53ab6af45ed0e72f17b59cfefe418b3f3790a72fc7944fc493ac8",
+        "proof_id": "related_task_proof_276fff29b776615306434a999092d8fc52796287596ed7c3e80f83ca7cb6d984",
+        "task_item_id": "item_a7b7735a558aa63d5eca349747cea26e0146bb8e2693ab73b793a908e1206b46",
         "task_item_version": "2",
-        "temporal_binding_revision_id": "temporal_binding_revision_7960c5e0c21c1443d5413c828f9fd5e6be7a7e1c8708024e7dcece511a76712a",
+        "temporal_binding_revision_id": "temporal_binding_revision_ef98b84ce20e90ffb0c554bbd7f53d67be6aa2b99886be17c48c1176b96278ef",
         "adopted_rule_revision_id": "related_task_rule_revision_dd920c726715ba6c9a6723417aa7ef73feb11f22d34cad749546bd065eab3067",
         "managed_baseline": {
           "task_template": {
@@ -835,33 +1007,33 @@
         "restoration_veto": false,
         "reason": "source_excluded"
       },
-      "state_hash": "b13a1afed0f6618cb61c693fbf5db0cab13202d97062527d3420e3503a56d437",
+      "state_hash": "9ac6c1565b64ede218b70f6d72640e9813243b75aae66c1c3d70c153fb98d868",
       "source_item_version": "2",
-      "recurrence_revision_id": "recurrence_revision_fixture_2",
-      "task_item_id": "item_218fffa030c67ccab3c8331b1f60a61a80e6a598f00ec52ebc20e7eacc1aef7c",
+      "recurrence_revision_id": "recurrence_revision_99c33f0aecf53ab6af45ed0e72f17b59cfefe418b3f3790a72fc7944fc493ac8",
+      "task_item_id": "item_a7b7735a558aa63d5eca349747cea26e0146bb8e2693ab73b793a908e1206b46",
       "task_item_version": "2",
       "adopted_rule_revision_id": "related_task_rule_revision_dd920c726715ba6c9a6723417aa7ef73feb11f22d34cad749546bd065eab3067",
-      "generation_id": "related_task_generation_7c941b7ede44128583e902f7d42cc03b2917c657a13abf22236af85660d143aa",
-      "temporal_binding_revision_id": "temporal_binding_revision_7960c5e0c21c1443d5413c828f9fd5e6be7a7e1c8708024e7dcece511a76712a",
-      "proof_id": "related_task_proof_7549c7d72674dde74939a2b815032aca469098d90789aa9117d67b539a368821",
-      "selector_ref": "recurrence_target_selector_515eeb841a2cdae00625c5b1000645f9b361177bd7722dd464d4dc72ef8c4e5a",
+      "generation_id": "related_task_generation_6043a6b329505d5efbe73660db0118565b39572fd216fae140d82206097edb8d",
+      "temporal_binding_revision_id": "temporal_binding_revision_ef98b84ce20e90ffb0c554bbd7f53d67be6aa2b99886be17c48c1176b96278ef",
+      "proof_id": "related_task_proof_276fff29b776615306434a999092d8fc52796287596ed7c3e80f83ca7cb6d984",
+      "selector_ref": "recurrence_target_selector_6649a6be323ff33d4cf2c196ac67c8f9dbcf18fbc3184c2bd0800f8a6494ef90",
       "command_id": "fixture_reconcile_page_1",
       "created_at_utc": "2026-11-08T10:00:00Z"
     },
     {
-      "assignment_revision_id": "related_task_assignment_revision_315bfa6a30fcdeafdb9c6b30e5d086247c7b15c18502e44bd467e3f78576e5b0",
-      "assignment_id": "related_task_assignment_2f5bfca79187b3e7ebb8f1fca3d958b4dfc0cf9a742cdb9f9654350952811f02",
+      "assignment_revision_id": "related_task_assignment_revision_0edb90e9686a6cc5f61fed2a3e2724e3163e57d34146f9ee3412db46aab9bbb4",
+      "assignment_id": "related_task_assignment_8bce9e2b6ce0104c12a34688820805435b38cf2ad92a56e814645d9d17f196b6",
       "change_version": "3",
-      "prior_assignment_revision_id": "related_task_assignment_revision_c60d9efd089445ac352564f8d004165b0c82e41f9579e2a3598ac1013db79cfc",
+      "prior_assignment_revision_id": "related_task_assignment_revision_e17cab08a5624eeb36f8bb8e0ade7e8bbc88136269c407760f4a7bcaae04cf66",
       "state_json": {
-        "generation_id": "related_task_generation_7c941b7ede44128583e902f7d42cc03b2917c657a13abf22236af85660d143aa",
+        "generation_id": "related_task_generation_6043a6b329505d5efbe73660db0118565b39572fd216fae140d82206097edb8d",
         "selector": {
-          "derivation_version": "spine.recurrence-target-occurrence-selector.v1",
           "contract_version": "spine.recurrence.contract.v1",
           "normalization_version": "spine.recurrence.normalization.v1",
           "canonical_json_version": "spine.canonical-json.v1",
-          "recurrence_set_id": "recurrence_set_fixture_class",
-          "segment_ref": "1",
+          "derivation_version": "spine.recurrence-target-occurrence-selector.v1",
+          "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
+          "segment_ref": "0",
           "scheduled_fact": "2026-11-14T11:30:00",
           "origin_kind": "rule",
           "source_rule_selectors": [
@@ -873,22 +1045,22 @@
               "end_condition": {
                 "kind": "unbounded"
               },
-              "status": "active",
               "by_weekday": [
                 "SA"
               ],
-              "week_start": "MO"
+              "week_start": "MO",
+              "status": "active"
             }
           ],
           "source_rdate_selectors": []
         },
-        "occurrence_key": "37220c4acbb53b8dc6009df50a4dd22a4c0de7f12d62cde1ea9716e43cd66f5b",
+        "occurrence_key": "eyJjYW5vbmljYWxfanNvbl92ZXJzaW9uIjoic3BpbmUuY2Fub25pY2FsLWpzb24udjEiLCJjb250cmFjdF92ZXJzaW9uIjoic3BpbmUucmVjdXJyZW5jZS5jb250cmFjdC52MSIsImRlcml2YXRpb25fdmVyc2lvbiI6InNwaW5lLnJlY3VycmVuY2Utb2NjdXJyZW5jZS1rZXkudjIiLCJub3JtYWxpemF0aW9uX3ZlcnNpb24iOiJzcGluZS5yZWN1cnJlbmNlLm5vcm1hbGl6YXRpb24udjEiLCJ0YXJnZXRfb2NjdXJyZW5jZV9zZWxlY3RvciI6eyJjYW5vbmljYWxfanNvbl92ZXJzaW9uIjoic3BpbmUuY2Fub25pY2FsLWpzb24udjEiLCJjb250cmFjdF92ZXJzaW9uIjoic3BpbmUucmVjdXJyZW5jZS5jb250cmFjdC52MSIsImRlcml2YXRpb25fdmVyc2lvbiI6InNwaW5lLnJlY3VycmVuY2UtdGFyZ2V0LW9jY3VycmVuY2Utc2VsZWN0b3IudjEiLCJub3JtYWxpemF0aW9uX3ZlcnNpb24iOiJzcGluZS5yZWN1cnJlbmNlLm5vcm1hbGl6YXRpb24udjEiLCJvcmlnaW5fa2luZCI6InJ1bGUiLCJyZWN1cnJlbmNlX3NldF9pZCI6InJlY3VycmVuY2Vfc2V0Xzg5YTVlZjdlYzhiOTA4ZGRmYmJiYmMxYTBkYzk5MmJhYTUxZDg1Yjg4NGE3NWZiYzhmYWJiY2QyZWJhMWFkMDciLCJzY2hlZHVsZWRfZmFjdCI6IjIwMjYtMTEtMTRUMTE6MzA6MDAiLCJzZWdtZW50X3JlZiI6IjAiLCJzb3VyY2VfcmRhdGVfc2VsZWN0b3JzIjpbXSwic291cmNlX3J1bGVfc2VsZWN0b3JzIjpbeyJieV93ZWVrZGF5IjpbIlNBIl0sImVuZF9jb25kaXRpb24iOnsia2luZCI6InVuYm91bmRlZCJ9LCJmcmVxdWVuY3kiOiJXRUVLTFkiLCJpbnRlcnZhbCI6IjEiLCJzZWVkIjoiMjAyNi0xMS0xNFQxMTozMDowMCIsInN0YXJ0X2JvdW5kIjoiMjAyNi0xMS0xNFQxMTozMDowMCIsInN0YXR1cyI6ImFjdGl2ZSIsIndlZWtfc3RhcnQiOiJNTyJ9XX19.cdb5d6f7fb37da99ae2b5e272eea9e9536328b5d228b9ff0a71f620ed222d664",
         "source_item_version": "2",
-        "recurrence_revision_id": "recurrence_revision_fixture_2",
-        "proof_id": "related_task_proof_7549c7d72674dde74939a2b815032aca469098d90789aa9117d67b539a368821",
-        "task_item_id": "item_218fffa030c67ccab3c8331b1f60a61a80e6a598f00ec52ebc20e7eacc1aef7c",
+        "recurrence_revision_id": "recurrence_revision_99c33f0aecf53ab6af45ed0e72f17b59cfefe418b3f3790a72fc7944fc493ac8",
+        "proof_id": "related_task_proof_276fff29b776615306434a999092d8fc52796287596ed7c3e80f83ca7cb6d984",
+        "task_item_id": "item_a7b7735a558aa63d5eca349747cea26e0146bb8e2693ab73b793a908e1206b46",
         "task_item_version": "2",
-        "temporal_binding_revision_id": "temporal_binding_revision_7960c5e0c21c1443d5413c828f9fd5e6be7a7e1c8708024e7dcece511a76712a",
+        "temporal_binding_revision_id": "temporal_binding_revision_ef98b84ce20e90ffb0c554bbd7f53d67be6aa2b99886be17c48c1176b96278ef",
         "adopted_rule_revision_id": "related_task_rule_revision_dd920c726715ba6c9a6723417aa7ef73feb11f22d34cad749546bd065eab3067",
         "managed_baseline": {
           "task_template": {
@@ -998,33 +1170,33 @@
         "restoration_veto": true,
         "reason": "restoration_suppressed"
       },
-      "state_hash": "f5752801826ec92b6f56f6986b181d418123672f2e5570b3e1a2f8680b048bf4",
+      "state_hash": "b7b781c7b35778913f528bb4fe728058be8045ca99d36a10125ec84aa93034ff",
       "source_item_version": "2",
-      "recurrence_revision_id": "recurrence_revision_fixture_2",
-      "task_item_id": "item_218fffa030c67ccab3c8331b1f60a61a80e6a598f00ec52ebc20e7eacc1aef7c",
+      "recurrence_revision_id": "recurrence_revision_99c33f0aecf53ab6af45ed0e72f17b59cfefe418b3f3790a72fc7944fc493ac8",
+      "task_item_id": "item_a7b7735a558aa63d5eca349747cea26e0146bb8e2693ab73b793a908e1206b46",
       "task_item_version": "2",
       "adopted_rule_revision_id": "related_task_rule_revision_dd920c726715ba6c9a6723417aa7ef73feb11f22d34cad749546bd065eab3067",
-      "generation_id": "related_task_generation_7c941b7ede44128583e902f7d42cc03b2917c657a13abf22236af85660d143aa",
-      "temporal_binding_revision_id": "temporal_binding_revision_7960c5e0c21c1443d5413c828f9fd5e6be7a7e1c8708024e7dcece511a76712a",
-      "proof_id": "related_task_proof_7549c7d72674dde74939a2b815032aca469098d90789aa9117d67b539a368821",
-      "selector_ref": "recurrence_target_selector_515eeb841a2cdae00625c5b1000645f9b361177bd7722dd464d4dc72ef8c4e5a",
+      "generation_id": "related_task_generation_6043a6b329505d5efbe73660db0118565b39572fd216fae140d82206097edb8d",
+      "temporal_binding_revision_id": "temporal_binding_revision_ef98b84ce20e90ffb0c554bbd7f53d67be6aa2b99886be17c48c1176b96278ef",
+      "proof_id": "related_task_proof_276fff29b776615306434a999092d8fc52796287596ed7c3e80f83ca7cb6d984",
+      "selector_ref": "recurrence_target_selector_6649a6be323ff33d4cf2c196ac67c8f9dbcf18fbc3184c2bd0800f8a6494ef90",
       "command_id": "fixture_suppress",
       "created_at_utc": "2026-11-08T10:00:00Z"
     }
   ],
   "generations": [
     {
-      "generation_id": "related_task_generation_7c941b7ede44128583e902f7d42cc03b2917c657a13abf22236af85660d143aa",
-      "assignment_id": "related_task_assignment_2f5bfca79187b3e7ebb8f1fca3d958b4dfc0cf9a742cdb9f9654350952811f02",
+      "generation_id": "related_task_generation_6043a6b329505d5efbe73660db0118565b39572fd216fae140d82206097edb8d",
+      "assignment_id": "related_task_assignment_8bce9e2b6ce0104c12a34688820805435b38cf2ad92a56e814645d9d17f196b6",
       "generation_index": "1",
       "predecessor_generation_id": null,
-      "task_item_id": "item_218fffa030c67ccab3c8331b1f60a61a80e6a598f00ec52ebc20e7eacc1aef7c",
+      "task_item_id": "item_a7b7735a558aa63d5eca349747cea26e0146bb8e2693ab73b793a908e1206b46",
       "created_task_version": "1",
-      "relationship_id": "relation_866c18f568986cefc263d3da4a29e53c30cae0dbfb2a64b951323f57d2589e61",
-      "temporal_binding_id": "temporal_binding_347e6c823f2321dbbc1ee946e131487a4b5ccc93e9acbba0ea198c0a59519fc7",
-      "item_access_owner_id": "item_access_owner_996cc22ff0c1425d4ec1331fd584255b251475842b596215df7cd5d74113c8bb",
+      "relationship_id": "relation_e6be299c8b9aa1d9dc0536b4275206a22b70aeae00c1bea23a420238825ea553",
+      "temporal_binding_id": "temporal_binding_c81bd0bdafa65a1ae5d96a0923b61ba403d91a54ed01b987ab7ee06ed4d31e7b",
+      "item_access_owner_id": "item_access_owner_5afd6d6c9d4916f7c858893dac33706892717efe03fdc8b037d804e4674d3182",
       "created_rule_revision_id": "related_task_rule_revision_dd920c726715ba6c9a6723417aa7ef73feb11f22d34cad749546bd065eab3067",
-      "creation_proof_id": "related_task_proof_88976c22205045697fa0b5c158c3be4c1d80a1ba299dadf55da8d9043f39079e",
+      "creation_proof_id": "related_task_proof_5a6d066e554197208858f8c7f5bb31287cbb6ed9f00ddedc9ef7e796163afbbb",
       "created_by_command_id": "fixture_reconcile_page_1",
       "created_at_utc": "2026-11-08T10:00:00Z"
     }
@@ -1088,10 +1260,10 @@
   ],
   "source_cancellations": [
     {
-      "generation_id": "related_task_generation_7c941b7ede44128583e902f7d42cc03b2917c657a13abf22236af85660d143aa",
+      "generation_id": "related_task_generation_6043a6b329505d5efbe73660db0118565b39572fd216fae140d82206097edb8d",
       "cancelled_task_version": "2",
-      "proof_id": "related_task_proof_7549c7d72674dde74939a2b815032aca469098d90789aa9117d67b539a368821",
-      "assignment_revision_id": "related_task_assignment_revision_c60d9efd089445ac352564f8d004165b0c82e41f9579e2a3598ac1013db79cfc",
+      "proof_id": "related_task_proof_276fff29b776615306434a999092d8fc52796287596ed7c3e80f83ca7cb6d984",
+      "assignment_revision_id": "related_task_assignment_revision_e17cab08a5624eeb36f8bb8e0ade7e8bbc88136269c407760f4a7bcaae04cf66",
       "command_id": "fixture_reconcile_page_1",
       "cancelled_at_utc": "2026-11-08T10:00:00Z"
     }
@@ -1099,8 +1271,8 @@
   "owners": [
     {
       "header": {
-        "item_id": "item_218fffa030c67ccab3c8331b1f60a61a80e6a598f00ec52ebc20e7eacc1aef7c",
-        "item_access_owner_id": "item_access_owner_996cc22ff0c1425d4ec1331fd584255b251475842b596215df7cd5d74113c8bb",
+        "item_id": "item_a7b7735a558aa63d5eca349747cea26e0146bb8e2693ab73b793a908e1206b46",
+        "item_access_owner_id": "item_access_owner_5afd6d6c9d4916f7c858893dac33706892717efe03fdc8b037d804e4674d3182",
         "current_revision": "1",
         "owner_kind": "subject_group",
         "owner_subject_id": null,
@@ -1109,8 +1281,8 @@
         "created_by_command_id": "fixture_reconcile_page_1"
       },
       "revision": {
-        "item_id": "item_218fffa030c67ccab3c8331b1f60a61a80e6a598f00ec52ebc20e7eacc1aef7c",
-        "item_access_owner_id": "item_access_owner_996cc22ff0c1425d4ec1331fd584255b251475842b596215df7cd5d74113c8bb",
+        "item_id": "item_a7b7735a558aa63d5eca349747cea26e0146bb8e2693ab73b793a908e1206b46",
+        "item_access_owner_id": "item_access_owner_5afd6d6c9d4916f7c858893dac33706892717efe03fdc8b037d804e4674d3182",
         "owner_kind": "subject_group",
         "owner_subject_id": null,
         "owner_group_id": "fixture_kinflow",
@@ -1125,9 +1297,9 @@
   ],
   "suppressions": [
     {
-      "suppression_id": "related_task_suppression_e3d29d2b312f4d69290d35270ac9c71240f5779720b9eaf3b10ffe5401f9818b",
-      "assignment_id": "related_task_assignment_2f5bfca79187b3e7ebb8f1fca3d958b4dfc0cf9a742cdb9f9654350952811f02",
-      "target_generation_id": "related_task_generation_7c941b7ede44128583e902f7d42cc03b2917c657a13abf22236af85660d143aa",
+      "suppression_id": "related_task_suppression_ef8e02161e5e9da61c11d73586ec301cc2bc19d6be657263c50632bec9621e2a",
+      "assignment_id": "related_task_assignment_8bce9e2b6ce0104c12a34688820805435b38cf2ad92a56e814645d9d17f196b6",
+      "target_generation_id": "related_task_generation_6043a6b329505d5efbe73660db0118565b39572fd216fae140d82206097edb8d",
       "actor_subject_id": "fixture_operator",
       "command_id": "fixture_suppress",
       "command_receipt_id": "command_receipt_126f9711f15d9a82eb427aa5c3b347681d289399295166f6d1f2c51118deb208",
@@ -1139,13 +1311,13 @@
       "contract_version": "spine.notification-schedule.contract.v1",
       "normalization_version": "spine.notification-schedule.normalization.v1",
       "canonical_json_version": "spine.canonical-json.v1",
-      "notification_intent_id": "notification_intent_16015ebf134416d4be25549c833f5029dfd4949b5881f072996edd2ee739cf28",
-      "notification_policy_id": "notification_policy_887c370f1392822a61e2b07dc645e3dec7cb7847f4a76b785407d2d2b515871d",
-      "notification_schedule_id": "notification_schedule_4d0eea47fc5e4538a19edd05d86a7c7933f9c8b70ef89ff82265939f5f577fbd",
-      "item_id": "item_218fffa030c67ccab3c8331b1f60a61a80e6a598f00ec52ebc20e7eacc1aef7c",
+      "notification_intent_id": "notification_intent_43e99ab1ca481339d6c00c91ef13ddf825092e9eb1347a870d4504362299741f",
+      "notification_policy_id": "notification_policy_58bd324433df944aa722f5a35f345f6417a00542b202f7c1cc2699ecd885b03f",
+      "notification_schedule_id": "notification_schedule_86f62f6a5df81b12c0403ec6a32fb3ed7c755eaf2f7a3c95c50a3c1cf5e074f1",
+      "item_id": "item_a7b7735a558aa63d5eca349747cea26e0146bb8e2693ab73b793a908e1206b46",
       "item_version": "1",
       "intent_created_item_version": "1",
-      "intent_created_by_command_id": "related_task_generation_7c941b7ede44128583e902f7d42cc03b2917c657a13abf22236af85660d143aa:pickup_ten_minutes",
+      "intent_created_by_command_id": "related_task_generation_6043a6b329505d5efbe73660db0118565b39572fd216fae140d82206097edb8d:pickup_ten_minutes",
       "recipient_kind": "subject_group",
       "channel": "fixture_channel",
       "delivery_target_id": "delivery_target_fixture",
@@ -1168,20 +1340,20 @@
       },
       "status": "active",
       "created_at_utc": "2026-11-08T10:00:00Z",
-      "created_by_command_id": "related_task_generation_7c941b7ede44128583e902f7d42cc03b2917c657a13abf22236af85660d143aa:pickup_ten_minutes",
+      "created_by_command_id": "related_task_generation_6043a6b329505d5efbe73660db0118565b39572fd216fae140d82206097edb8d:pickup_ten_minutes",
       "recipient_group_id": "fixture_kinflow"
     },
     {
       "contract_version": "spine.notification-schedule.contract.v1",
       "normalization_version": "spine.notification-schedule.normalization.v1",
       "canonical_json_version": "spine.canonical-json.v1",
-      "notification_intent_id": "notification_intent_854c98a4930f03cb30c20749f5a9d10c0d099936a25fe49c406d88a87cc87cfa",
-      "notification_policy_id": "notification_policy_e2ec3715b9521bf3ebb43a992be87fb33ef58c312afd5b1f45029ee86a4dd40f",
-      "notification_schedule_id": "notification_schedule_2e47a72775187c8f36c46e645fb1f39c1ee99b916d49c57fed3de05814bae7a6",
-      "item_id": "item_845058f5e1a8b29a02208ea78430ecb27628e7273161971b6ad4bcde52cdbdcc",
+      "notification_intent_id": "notification_intent_c4de81bd13c34fcd2dc25b8a9d916c201a6f338ec87c8f68ec64eadd96551bcd",
+      "notification_policy_id": "notification_policy_84bfe7883ff1e98a0af54fd35dedaa9d19df6de32c38a1022d517b94006cde29",
+      "notification_schedule_id": "notification_schedule_05f8b6b043276f0c75d10913388f85c254e4875268d7f12bca1cff1195322c6f",
+      "item_id": "item_a7be594924da1e6961b5de27a7a6ebbd9fafe86ec16245bebeac73b2515eae91",
       "item_version": "1",
       "intent_created_item_version": "1",
-      "intent_created_by_command_id": "related_task_generation_65fd0a0d5e4813656e767cffbbdc8c4bf69975da82a132a8c72aacf62738c1cb:pickup_ten_minutes",
+      "intent_created_by_command_id": "related_task_generation_0147adcc477035bf7c0ad48d7753b82a9247881c40e3ea64eba5b32b0d3ec663:pickup_ten_minutes",
       "recipient_kind": "subject_group",
       "channel": "fixture_channel",
       "delivery_target_id": "delivery_target_fixture",
@@ -1204,17 +1376,17 @@
       },
       "status": "active",
       "created_at_utc": "2026-11-08T10:00:00Z",
-      "created_by_command_id": "related_task_generation_65fd0a0d5e4813656e767cffbbdc8c4bf69975da82a132a8c72aacf62738c1cb:pickup_ten_minutes",
+      "created_by_command_id": "related_task_generation_0147adcc477035bf7c0ad48d7753b82a9247881c40e3ea64eba5b32b0d3ec663:pickup_ten_minutes",
       "recipient_group_id": "fixture_kinflow"
     }
   ],
   "opportunities": [
     {
-      "notification_opportunity_id": "notification_opportunity_991362d236ea6a0bd7ac02d63cd1a4f15e85c1917490b1296ad69f75792d5d86",
+      "notification_opportunity_id": "notification_opportunity_dc1d3de9742f432e5e816b53c932e1314e18d5d9148ce65ddc1bf2b27ac45f42",
       "notification_schedule_slot_key": "notification_schedule_slot_f6e046753b1914206f8cb801cccf10244ea1f6439de531b30c64c791d04084e1",
-      "notification_intent_id": "notification_intent_16015ebf134416d4be25549c833f5029dfd4949b5881f072996edd2ee739cf28",
-      "notification_policy_id": "notification_policy_887c370f1392822a61e2b07dc645e3dec7cb7847f4a76b785407d2d2b515871d",
-      "item_id": "item_218fffa030c67ccab3c8331b1f60a61a80e6a598f00ec52ebc20e7eacc1aef7c",
+      "notification_intent_id": "notification_intent_43e99ab1ca481339d6c00c91ef13ddf825092e9eb1347a870d4504362299741f",
+      "notification_policy_id": "notification_policy_58bd324433df944aa722f5a35f345f6417a00542b202f7c1cc2699ecd885b03f",
+      "item_id": "item_a7b7735a558aa63d5eca349747cea26e0146bb8e2693ab73b793a908e1206b46",
       "source_item_version": "1",
       "normalized_notification_schedule_hash": "0641155cb6c25e8c49dd78e3c71b41bbd9e354a75942f5450e1415601d963156",
       "anchor_role": "task_due",
@@ -1230,11 +1402,11 @@
       "target_at_utc": "2026-11-14T13:00:00Z"
     },
     {
-      "notification_opportunity_id": "notification_opportunity_19ba21abe0d7444bbd4abece6f71c38e288283cbaaab96e394bccebed42ab907",
+      "notification_opportunity_id": "notification_opportunity_60825d3b8fc8e98cea7934c643ffa4a91a22651d294ebe05be66c50d79b46148",
       "notification_schedule_slot_key": "notification_schedule_slot_f6e046753b1914206f8cb801cccf10244ea1f6439de531b30c64c791d04084e1",
-      "notification_intent_id": "notification_intent_854c98a4930f03cb30c20749f5a9d10c0d099936a25fe49c406d88a87cc87cfa",
-      "notification_policy_id": "notification_policy_e2ec3715b9521bf3ebb43a992be87fb33ef58c312afd5b1f45029ee86a4dd40f",
-      "item_id": "item_845058f5e1a8b29a02208ea78430ecb27628e7273161971b6ad4bcde52cdbdcc",
+      "notification_intent_id": "notification_intent_c4de81bd13c34fcd2dc25b8a9d916c201a6f338ec87c8f68ec64eadd96551bcd",
+      "notification_policy_id": "notification_policy_84bfe7883ff1e98a0af54fd35dedaa9d19df6de32c38a1022d517b94006cde29",
+      "item_id": "item_a7be594924da1e6961b5de27a7a6ebbd9fafe86ec16245bebeac73b2515eae91",
       "source_item_version": "1",
       "normalized_notification_schedule_hash": "0641155cb6c25e8c49dd78e3c71b41bbd9e354a75942f5450e1415601d963156",
       "anchor_role": "task_due",
