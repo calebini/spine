@@ -1,0 +1,184 @@
+{
+  "vector_version": "spine.recurring-related-task-cursors.v1",
+  "status": "offline_model_only",
+  "runtime_verified": false,
+  "vectors": [
+    {
+      "purpose": "list",
+      "key_hex": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+      "payload": {
+        "cursor_version": "spine.recurring-related-tasks.cursor.v1",
+        "canonical_json_version": "spine.canonical-json.v1",
+        "key_id": "public_fixture_key",
+        "catalog_generation": "2",
+        "issued_at_utc": "2026-11-08T10:00:00Z",
+        "expires_at_utc": "2026-11-08T11:00:00Z",
+        "purpose": "list",
+        "query": {
+          "contract_version": "spine.recurring-related-tasks.v1",
+          "ledger_instance_id": "ledger_instance_disposable_fixture_only",
+          "owner": null,
+          "source_item_id": null,
+          "status": "active",
+          "limit": "50"
+        },
+        "after": "related_task_rule_a24002492d1555b29fa3ad5630e88f877633cba9703aafb63ee5ded452c938d4"
+      },
+      "canonical_json": "{\"after\":\"related_task_rule_a24002492d1555b29fa3ad5630e88f877633cba9703aafb63ee5ded452c938d4\",\"canonical_json_version\":\"spine.canonical-json.v1\",\"catalog_generation\":\"2\",\"cursor_version\":\"spine.recurring-related-tasks.cursor.v1\",\"expires_at_utc\":\"2026-11-08T11:00:00Z\",\"issued_at_utc\":\"2026-11-08T10:00:00Z\",\"key_id\":\"public_fixture_key\",\"purpose\":\"list\",\"query\":{\"contract_version\":\"spine.recurring-related-tasks.v1\",\"ledger_instance_id\":\"ledger_instance_disposable_fixture_only\",\"limit\":\"50\",\"owner\":null,\"source_item_id\":null,\"status\":\"active\"}}",
+      "hmac_input_hex": "7370696e652e726563757272696e672d72656c617465642d7461736b732e637572736f722e7631007b226166746572223a2272656c617465645f7461736b5f72756c655f61323430303234393264313535356232396661336164353633306538386638373736333363626139373033616166623633656535646564343532633933386434222c2263616e6f6e6963616c5f6a736f6e5f76657273696f6e223a227370696e652e63616e6f6e6963616c2d6a736f6e2e7631222c22636174616c6f675f67656e65726174696f6e223a2232222c22637572736f725f76657273696f6e223a227370696e652e726563757272696e672d72656c617465642d7461736b732e637572736f722e7631222c22657870697265735f61745f757463223a22323032362d31312d30385431313a30303a30305a222c226973737565645f61745f757463223a22323032362d31312d30385431303a30303a30305a222c226b65795f6964223a227075626c69635f666978747572655f6b6579222c22707572706f7365223a226c697374222c227175657279223a7b22636f6e74726163745f76657273696f6e223a227370696e652e726563757272696e672d72656c617465642d7461736b732e7631222c226c65646765725f696e7374616e63655f6964223a226c65646765725f696e7374616e63655f646973706f7361626c655f666978747572655f6f6e6c79222c226c696d6974223a223530222c226f776e6572223a6e756c6c2c22736f757263655f6974656d5f6964223a6e756c6c2c22737461747573223a22616374697665227d7d",
+      "hmac_sha256": "f1c62b9f294266d3e495e8e195477195bc1010e4f75564cfb6cfd8b73a847c03",
+      "wire": "eyJhZnRlciI6InJlbGF0ZWRfdGFza19ydWxlX2EyNDAwMjQ5MmQxNTU1YjI5ZmEzYWQ1NjMwZTg4Zjg3NzYzM2NiYTk3MDNhYWZiNjNlZTVkZWQ0NTJjOTM4ZDQiLCJjYW5vbmljYWxfanNvbl92ZXJzaW9uIjoic3BpbmUuY2Fub25pY2FsLWpzb24udjEiLCJjYXRhbG9nX2dlbmVyYXRpb24iOiIyIiwiY3Vyc29yX3ZlcnNpb24iOiJzcGluZS5yZWN1cnJpbmctcmVsYXRlZC10YXNrcy5jdXJzb3IudjEiLCJleHBpcmVzX2F0X3V0YyI6IjIwMjYtMTEtMDhUMTE6MDA6MDBaIiwiaXNzdWVkX2F0X3V0YyI6IjIwMjYtMTEtMDhUMTA6MDA6MDBaIiwia2V5X2lkIjoicHVibGljX2ZpeHR1cmVfa2V5IiwicHVycG9zZSI6Imxpc3QiLCJxdWVyeSI6eyJjb250cmFjdF92ZXJzaW9uIjoic3BpbmUucmVjdXJyaW5nLXJlbGF0ZWQtdGFza3MudjEiLCJsZWRnZXJfaW5zdGFuY2VfaWQiOiJsZWRnZXJfaW5zdGFuY2VfZGlzcG9zYWJsZV9maXh0dXJlX29ubHkiLCJsaW1pdCI6IjUwIiwib3duZXIiOm51bGwsInNvdXJjZV9pdGVtX2lkIjpudWxsLCJzdGF0dXMiOiJhY3RpdmUifX0.8cYrnylCZtPklejhlUdxlbwQEOT3VWTPts_YtzqEfAM"
+    },
+    {
+      "purpose": "assignments",
+      "key_hex": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+      "payload": {
+        "cursor_version": "spine.recurring-related-tasks.cursor.v1",
+        "canonical_json_version": "spine.canonical-json.v1",
+        "key_id": "public_fixture_key",
+        "catalog_generation": "2",
+        "issued_at_utc": "2026-11-08T10:00:00Z",
+        "expires_at_utc": "2026-11-08T11:00:00Z",
+        "purpose": "assignments",
+        "query": {
+          "contract_version": "spine.recurring-related-tasks.v1",
+          "ledger_instance_id": "ledger_instance_disposable_fixture_only",
+          "related_task_rule_id": "related_task_rule_a24002492d1555b29fa3ad5630e88f877633cba9703aafb63ee5ded452c938d4",
+          "view": "assignments",
+          "limit": "50"
+        },
+        "after": "1"
+      },
+      "canonical_json": "{\"after\":\"1\",\"canonical_json_version\":\"spine.canonical-json.v1\",\"catalog_generation\":\"2\",\"cursor_version\":\"spine.recurring-related-tasks.cursor.v1\",\"expires_at_utc\":\"2026-11-08T11:00:00Z\",\"issued_at_utc\":\"2026-11-08T10:00:00Z\",\"key_id\":\"public_fixture_key\",\"purpose\":\"assignments\",\"query\":{\"contract_version\":\"spine.recurring-related-tasks.v1\",\"ledger_instance_id\":\"ledger_instance_disposable_fixture_only\",\"limit\":\"50\",\"related_task_rule_id\":\"related_task_rule_a24002492d1555b29fa3ad5630e88f877633cba9703aafb63ee5ded452c938d4\",\"view\":\"assignments\"}}",
+      "hmac_input_hex": "7370696e652e726563757272696e672d72656c617465642d7461736b732e637572736f722e7631007b226166746572223a2231222c2263616e6f6e6963616c5f6a736f6e5f76657273696f6e223a227370696e652e63616e6f6e6963616c2d6a736f6e2e7631222c22636174616c6f675f67656e65726174696f6e223a2232222c22637572736f725f76657273696f6e223a227370696e652e726563757272696e672d72656c617465642d7461736b732e637572736f722e7631222c22657870697265735f61745f757463223a22323032362d31312d30385431313a30303a30305a222c226973737565645f61745f757463223a22323032362d31312d30385431303a30303a30305a222c226b65795f6964223a227075626c69635f666978747572655f6b6579222c22707572706f7365223a2261737369676e6d656e7473222c227175657279223a7b22636f6e74726163745f76657273696f6e223a227370696e652e726563757272696e672d72656c617465642d7461736b732e7631222c226c65646765725f696e7374616e63655f6964223a226c65646765725f696e7374616e63655f646973706f7361626c655f666978747572655f6f6e6c79222c226c696d6974223a223530222c2272656c617465645f7461736b5f72756c655f6964223a2272656c617465645f7461736b5f72756c655f61323430303234393264313535356232396661336164353633306538386638373736333363626139373033616166623633656535646564343532633933386434222c2276696577223a2261737369676e6d656e7473227d7d",
+      "hmac_sha256": "7f247230bf0f0760789fdc9c4bd9d721878bc614a4e1441ebcd8cb223dee5bc3",
+      "wire": "eyJhZnRlciI6IjEiLCJjYW5vbmljYWxfanNvbl92ZXJzaW9uIjoic3BpbmUuY2Fub25pY2FsLWpzb24udjEiLCJjYXRhbG9nX2dlbmVyYXRpb24iOiIyIiwiY3Vyc29yX3ZlcnNpb24iOiJzcGluZS5yZWN1cnJpbmctcmVsYXRlZC10YXNrcy5jdXJzb3IudjEiLCJleHBpcmVzX2F0X3V0YyI6IjIwMjYtMTEtMDhUMTE6MDA6MDBaIiwiaXNzdWVkX2F0X3V0YyI6IjIwMjYtMTEtMDhUMTA6MDA6MDBaIiwia2V5X2lkIjoicHVibGljX2ZpeHR1cmVfa2V5IiwicHVycG9zZSI6ImFzc2lnbm1lbnRzIiwicXVlcnkiOnsiY29udHJhY3RfdmVyc2lvbiI6InNwaW5lLnJlY3VycmluZy1yZWxhdGVkLXRhc2tzLnYxIiwibGVkZ2VyX2luc3RhbmNlX2lkIjoibGVkZ2VyX2luc3RhbmNlX2Rpc3Bvc2FibGVfZml4dHVyZV9vbmx5IiwibGltaXQiOiI1MCIsInJlbGF0ZWRfdGFza19ydWxlX2lkIjoicmVsYXRlZF90YXNrX3J1bGVfYTI0MDAyNDkyZDE1NTViMjlmYTNhZDU2MzBlODhmODc3NjMzY2JhOTcwM2FhZmI2M2VlNWRlZDQ1MmM5MzhkNCIsInZpZXciOiJhc3NpZ25tZW50cyJ9fQ.fyRyML8PB2B4n9ycS9nXIYeLxhSk4UQevNjLIj3uW8M"
+    },
+    {
+      "purpose": "generations",
+      "key_hex": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+      "payload": {
+        "cursor_version": "spine.recurring-related-tasks.cursor.v1",
+        "canonical_json_version": "spine.canonical-json.v1",
+        "key_id": "public_fixture_key",
+        "catalog_generation": "2",
+        "issued_at_utc": "2026-11-08T10:00:00Z",
+        "expires_at_utc": "2026-11-08T11:00:00Z",
+        "purpose": "generations",
+        "query": {
+          "contract_version": "spine.recurring-related-tasks.v1",
+          "ledger_instance_id": "ledger_instance_disposable_fixture_only",
+          "related_task_rule_id": "related_task_rule_a24002492d1555b29fa3ad5630e88f877633cba9703aafb63ee5ded452c938d4",
+          "view": "generations",
+          "assignment_id": "related_task_assignment_2f5bfca79187b3e7ebb8f1fca3d958b4dfc0cf9a742cdb9f9654350952811f02",
+          "limit": "50"
+        },
+        "after": "1"
+      },
+      "canonical_json": "{\"after\":\"1\",\"canonical_json_version\":\"spine.canonical-json.v1\",\"catalog_generation\":\"2\",\"cursor_version\":\"spine.recurring-related-tasks.cursor.v1\",\"expires_at_utc\":\"2026-11-08T11:00:00Z\",\"issued_at_utc\":\"2026-11-08T10:00:00Z\",\"key_id\":\"public_fixture_key\",\"purpose\":\"generations\",\"query\":{\"assignment_id\":\"related_task_assignment_2f5bfca79187b3e7ebb8f1fca3d958b4dfc0cf9a742cdb9f9654350952811f02\",\"contract_version\":\"spine.recurring-related-tasks.v1\",\"ledger_instance_id\":\"ledger_instance_disposable_fixture_only\",\"limit\":\"50\",\"related_task_rule_id\":\"related_task_rule_a24002492d1555b29fa3ad5630e88f877633cba9703aafb63ee5ded452c938d4\",\"view\":\"generations\"}}",
+      "hmac_input_hex": "7370696e652e726563757272696e672d72656c617465642d7461736b732e637572736f722e7631007b226166746572223a2231222c2263616e6f6e6963616c5f6a736f6e5f76657273696f6e223a227370696e652e63616e6f6e6963616c2d6a736f6e2e7631222c22636174616c6f675f67656e65726174696f6e223a2232222c22637572736f725f76657273696f6e223a227370696e652e726563757272696e672d72656c617465642d7461736b732e637572736f722e7631222c22657870697265735f61745f757463223a22323032362d31312d30385431313a30303a30305a222c226973737565645f61745f757463223a22323032362d31312d30385431303a30303a30305a222c226b65795f6964223a227075626c69635f666978747572655f6b6579222c22707572706f7365223a2267656e65726174696f6e73222c227175657279223a7b2261737369676e6d656e745f6964223a2272656c617465645f7461736b5f61737369676e6d656e745f32663562666361373931383762336537656262386631666361336439353862346466633063663961373432636462396639363534333530393532383131663032222c22636f6e74726163745f76657273696f6e223a227370696e652e726563757272696e672d72656c617465642d7461736b732e7631222c226c65646765725f696e7374616e63655f6964223a226c65646765725f696e7374616e63655f646973706f7361626c655f666978747572655f6f6e6c79222c226c696d6974223a223530222c2272656c617465645f7461736b5f72756c655f6964223a2272656c617465645f7461736b5f72756c655f61323430303234393264313535356232396661336164353633306538386638373736333363626139373033616166623633656535646564343532633933386434222c2276696577223a2267656e65726174696f6e73227d7d",
+      "hmac_sha256": "f0cbc042124ce321a6424c04fe6e7b8404629df58938c573addb2c0b38bb61a2",
+      "wire": "eyJhZnRlciI6IjEiLCJjYW5vbmljYWxfanNvbl92ZXJzaW9uIjoic3BpbmUuY2Fub25pY2FsLWpzb24udjEiLCJjYXRhbG9nX2dlbmVyYXRpb24iOiIyIiwiY3Vyc29yX3ZlcnNpb24iOiJzcGluZS5yZWN1cnJpbmctcmVsYXRlZC10YXNrcy5jdXJzb3IudjEiLCJleHBpcmVzX2F0X3V0YyI6IjIwMjYtMTEtMDhUMTE6MDA6MDBaIiwiaXNzdWVkX2F0X3V0YyI6IjIwMjYtMTEtMDhUMTA6MDA6MDBaIiwia2V5X2lkIjoicHVibGljX2ZpeHR1cmVfa2V5IiwicHVycG9zZSI6ImdlbmVyYXRpb25zIiwicXVlcnkiOnsiYXNzaWdubWVudF9pZCI6InJlbGF0ZWRfdGFza19hc3NpZ25tZW50XzJmNWJmY2E3OTE4N2IzZTdlYmI4ZjFmY2EzZDk1OGI0ZGZjMGNmOWE3NDJjZGI5Zjk2NTQzNTA5NTI4MTFmMDIiLCJjb250cmFjdF92ZXJzaW9uIjoic3BpbmUucmVjdXJyaW5nLXJlbGF0ZWQtdGFza3MudjEiLCJsZWRnZXJfaW5zdGFuY2VfaWQiOiJsZWRnZXJfaW5zdGFuY2VfZGlzcG9zYWJsZV9maXh0dXJlX29ubHkiLCJsaW1pdCI6IjUwIiwicmVsYXRlZF90YXNrX3J1bGVfaWQiOiJyZWxhdGVkX3Rhc2tfcnVsZV9hMjQwMDI0OTJkMTU1NWIyOWZhM2FkNTYzMGU4OGY4Nzc2MzNjYmE5NzAzYWFmYjYzZWU1ZGVkNDUyYzkzOGQ0IiwidmlldyI6ImdlbmVyYXRpb25zIn19.8MvAQhJM4yGmQkwE_m57hARinfWJOMVzrdssCzi7YaI"
+    },
+    {
+      "purpose": "states",
+      "key_hex": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+      "payload": {
+        "cursor_version": "spine.recurring-related-tasks.cursor.v1",
+        "canonical_json_version": "spine.canonical-json.v1",
+        "key_id": "public_fixture_key",
+        "catalog_generation": "2",
+        "issued_at_utc": "2026-11-08T10:00:00Z",
+        "expires_at_utc": "2026-11-08T11:00:00Z",
+        "purpose": "states",
+        "query": {
+          "contract_version": "spine.recurring-related-tasks.v1",
+          "ledger_instance_id": "ledger_instance_disposable_fixture_only",
+          "related_task_rule_id": "related_task_rule_a24002492d1555b29fa3ad5630e88f877633cba9703aafb63ee5ded452c938d4",
+          "view": "states",
+          "assignment_id": "related_task_assignment_2f5bfca79187b3e7ebb8f1fca3d958b4dfc0cf9a742cdb9f9654350952811f02",
+          "limit": "50"
+        },
+        "after": "1"
+      },
+      "canonical_json": "{\"after\":\"1\",\"canonical_json_version\":\"spine.canonical-json.v1\",\"catalog_generation\":\"2\",\"cursor_version\":\"spine.recurring-related-tasks.cursor.v1\",\"expires_at_utc\":\"2026-11-08T11:00:00Z\",\"issued_at_utc\":\"2026-11-08T10:00:00Z\",\"key_id\":\"public_fixture_key\",\"purpose\":\"states\",\"query\":{\"assignment_id\":\"related_task_assignment_2f5bfca79187b3e7ebb8f1fca3d958b4dfc0cf9a742cdb9f9654350952811f02\",\"contract_version\":\"spine.recurring-related-tasks.v1\",\"ledger_instance_id\":\"ledger_instance_disposable_fixture_only\",\"limit\":\"50\",\"related_task_rule_id\":\"related_task_rule_a24002492d1555b29fa3ad5630e88f877633cba9703aafb63ee5ded452c938d4\",\"view\":\"states\"}}",
+      "hmac_input_hex": "7370696e652e726563757272696e672d72656c617465642d7461736b732e637572736f722e7631007b226166746572223a2231222c2263616e6f6e6963616c5f6a736f6e5f76657273696f6e223a227370696e652e63616e6f6e6963616c2d6a736f6e2e7631222c22636174616c6f675f67656e65726174696f6e223a2232222c22637572736f725f76657273696f6e223a227370696e652e726563757272696e672d72656c617465642d7461736b732e637572736f722e7631222c22657870697265735f61745f757463223a22323032362d31312d30385431313a30303a30305a222c226973737565645f61745f757463223a22323032362d31312d30385431303a30303a30305a222c226b65795f6964223a227075626c69635f666978747572655f6b6579222c22707572706f7365223a22737461746573222c227175657279223a7b2261737369676e6d656e745f6964223a2272656c617465645f7461736b5f61737369676e6d656e745f32663562666361373931383762336537656262386631666361336439353862346466633063663961373432636462396639363534333530393532383131663032222c22636f6e74726163745f76657273696f6e223a227370696e652e726563757272696e672d72656c617465642d7461736b732e7631222c226c65646765725f696e7374616e63655f6964223a226c65646765725f696e7374616e63655f646973706f7361626c655f666978747572655f6f6e6c79222c226c696d6974223a223530222c2272656c617465645f7461736b5f72756c655f6964223a2272656c617465645f7461736b5f72756c655f61323430303234393264313535356232396661336164353633306538386638373736333363626139373033616166623633656535646564343532633933386434222c2276696577223a22737461746573227d7d",
+      "hmac_sha256": "4425abc5ff1a7b022e077b88518b04e87fe73d32f503b95f1331af801262e614",
+      "wire": "eyJhZnRlciI6IjEiLCJjYW5vbmljYWxfanNvbl92ZXJzaW9uIjoic3BpbmUuY2Fub25pY2FsLWpzb24udjEiLCJjYXRhbG9nX2dlbmVyYXRpb24iOiIyIiwiY3Vyc29yX3ZlcnNpb24iOiJzcGluZS5yZWN1cnJpbmctcmVsYXRlZC10YXNrcy5jdXJzb3IudjEiLCJleHBpcmVzX2F0X3V0YyI6IjIwMjYtMTEtMDhUMTE6MDA6MDBaIiwiaXNzdWVkX2F0X3V0YyI6IjIwMjYtMTEtMDhUMTA6MDA6MDBaIiwia2V5X2lkIjoicHVibGljX2ZpeHR1cmVfa2V5IiwicHVycG9zZSI6InN0YXRlcyIsInF1ZXJ5Ijp7ImFzc2lnbm1lbnRfaWQiOiJyZWxhdGVkX3Rhc2tfYXNzaWdubWVudF8yZjViZmNhNzkxODdiM2U3ZWJiOGYxZmNhM2Q5NThiNGRmYzBjZjlhNzQyY2RiOWY5NjU0MzUwOTUyODExZjAyIiwiY29udHJhY3RfdmVyc2lvbiI6InNwaW5lLnJlY3VycmluZy1yZWxhdGVkLXRhc2tzLnYxIiwibGVkZ2VyX2luc3RhbmNlX2lkIjoibGVkZ2VyX2luc3RhbmNlX2Rpc3Bvc2FibGVfZml4dHVyZV9vbmx5IiwibGltaXQiOiI1MCIsInJlbGF0ZWRfdGFza19ydWxlX2lkIjoicmVsYXRlZF90YXNrX3J1bGVfYTI0MDAyNDkyZDE1NTViMjlmYTNhZDU2MzBlODhmODc3NjMzY2JhOTcwM2FhZmI2M2VlNWRlZDQ1MmM5MzhkNCIsInZpZXciOiJzdGF0ZXMifX0.RCWrxf8aewIuB3uIUYsE6H_nPTL1A7lfEzGvgBJi5hQ"
+    },
+    {
+      "purpose": "reconcile",
+      "key_hex": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+      "payload": {
+        "cursor_version": "spine.recurring-related-tasks.cursor.v1",
+        "canonical_json_version": "spine.canonical-json.v1",
+        "key_id": "public_fixture_key",
+        "catalog_generation": "2",
+        "issued_at_utc": "2026-11-08T10:00:00Z",
+        "expires_at_utc": "2026-11-08T11:00:00Z",
+        "purpose": "reconcile",
+        "query": {
+          "contract_version": "spine.recurring-related-tasks.v1",
+          "ledger_instance_id": "ledger_instance_disposable_fixture_only",
+          "related_task_rule_id": "related_task_rule_a24002492d1555b29fa3ad5630e88f877633cba9703aafb63ee5ded452c938d4",
+          "limits": {
+            "source_candidates": "256",
+            "assignments": "32",
+            "mutations": "32",
+            "proof_steps": "10000",
+            "lineage_hops": "64",
+            "work_rows": "128",
+            "response_bytes": "262144"
+          }
+        },
+        "after": {
+          "assignment_after_seq": "1",
+          "source_after": {
+            "scheduled_fact": "2026-11-14T11:30:00",
+            "selector": {
+              "derivation_version": "spine.recurrence-target-occurrence-selector.v1",
+              "contract_version": "spine.recurrence.contract.v1",
+              "normalization_version": "spine.recurrence.normalization.v1",
+              "canonical_json_version": "spine.canonical-json.v1",
+              "recurrence_set_id": "recurrence_set_fixture_class",
+              "segment_ref": "1",
+              "scheduled_fact": "2026-11-14T11:30:00",
+              "origin_kind": "rule",
+              "source_rule_selectors": [
+                {
+                  "frequency": "WEEKLY",
+                  "interval": "1",
+                  "seed": "2026-11-14T11:30:00",
+                  "start_bound": "2026-11-14T11:30:00",
+                  "end_condition": {
+                    "kind": "unbounded"
+                  },
+                  "status": "active",
+                  "by_weekday": [
+                    "SA"
+                  ],
+                  "week_start": "MO"
+                }
+              ],
+              "source_rdate_selectors": []
+            }
+          }
+        },
+        "rule_change_version": "2",
+        "rule_revision_id": "related_task_rule_revision_dd920c726715ba6c9a6723417aa7ef73feb11f22d34cad749546bd065eab3067",
+        "source_item_id": "item_fixture_science_class",
+        "source_item_version": "1",
+        "recurrence_set_id": "recurrence_set_fixture_class",
+        "recurrence_revision_id": "recurrence_revision_fixture_1",
+        "normalized_recurrence_set_hash": "a81ad5df22e71bb6557781ff40ffe67836bbe5335759837475d3bcdb9bc96b8c",
+        "evaluation_at_utc": "2026-11-08T10:00:00Z",
+        "range_start_utc": "2026-11-08T10:00:00Z",
+        "range_end_utc": "2027-01-03T10:00:00Z"
+      },
+      "canonical_json": "{\"after\":{\"assignment_after_seq\":\"1\",\"source_after\":{\"scheduled_fact\":\"2026-11-14T11:30:00\",\"selector\":{\"canonical_json_version\":\"spine.canonical-json.v1\",\"contract_version\":\"spine.recurrence.contract.v1\",\"derivation_version\":\"spine.recurrence-target-occurrence-selector.v1\",\"normalization_version\":\"spine.recurrence.normalization.v1\",\"origin_kind\":\"rule\",\"recurrence_set_id\":\"recurrence_set_fixture_class\",\"scheduled_fact\":\"2026-11-14T11:30:00\",\"segment_ref\":\"1\",\"source_rdate_selectors\":[],\"source_rule_selectors\":[{\"by_weekday\":[\"SA\"],\"end_condition\":{\"kind\":\"unbounded\"},\"frequency\":\"WEEKLY\",\"interval\":\"1\",\"seed\":\"2026-11-14T11:30:00\",\"start_bound\":\"2026-11-14T11:30:00\",\"status\":\"active\",\"week_start\":\"MO\"}]}}},\"canonical_json_version\":\"spine.canonical-json.v1\",\"catalog_generation\":\"2\",\"cursor_version\":\"spine.recurring-related-tasks.cursor.v1\",\"evaluation_at_utc\":\"2026-11-08T10:00:00Z\",\"expires_at_utc\":\"2026-11-08T11:00:00Z\",\"issued_at_utc\":\"2026-11-08T10:00:00Z\",\"key_id\":\"public_fixture_key\",\"normalized_recurrence_set_hash\":\"a81ad5df22e71bb6557781ff40ffe67836bbe5335759837475d3bcdb9bc96b8c\",\"purpose\":\"reconcile\",\"query\":{\"contract_version\":\"spine.recurring-related-tasks.v1\",\"ledger_instance_id\":\"ledger_instance_disposable_fixture_only\",\"limits\":{\"assignments\":\"32\",\"lineage_hops\":\"64\",\"mutations\":\"32\",\"proof_steps\":\"10000\",\"response_bytes\":\"262144\",\"source_candidates\":\"256\",\"work_rows\":\"128\"},\"related_task_rule_id\":\"related_task_rule_a24002492d1555b29fa3ad5630e88f877633cba9703aafb63ee5ded452c938d4\"},\"range_end_utc\":\"2027-01-03T10:00:00Z\",\"range_start_utc\":\"2026-11-08T10:00:00Z\",\"recurrence_revision_id\":\"recurrence_revision_fixture_1\",\"recurrence_set_id\":\"recurrence_set_fixture_class\",\"rule_change_version\":\"2\",\"rule_revision_id\":\"related_task_rule_revision_dd920c726715ba6c9a6723417aa7ef73feb11f22d34cad749546bd065eab3067\",\"source_item_id\":\"item_fixture_science_class\",\"source_item_version\":\"1\"}",
+      "hmac_input_hex": "7370696e652e726563757272696e672d72656c617465642d7461736b732e637572736f722e7631007b226166746572223a7b2261737369676e6d656e745f61667465725f736571223a2231222c22736f757263655f6166746572223a7b227363686564756c65645f66616374223a22323032362d31312d31345431313a33303a3030222c2273656c6563746f72223a7b2263616e6f6e6963616c5f6a736f6e5f76657273696f6e223a227370696e652e63616e6f6e6963616c2d6a736f6e2e7631222c22636f6e74726163745f76657273696f6e223a227370696e652e726563757272656e63652e636f6e74726163742e7631222c2264657269766174696f6e5f76657273696f6e223a227370696e652e726563757272656e63652d7461726765742d6f6363757272656e63652d73656c6563746f722e7631222c226e6f726d616c697a6174696f6e5f76657273696f6e223a227370696e652e726563757272656e63652e6e6f726d616c697a6174696f6e2e7631222c226f726967696e5f6b696e64223a2272756c65222c22726563757272656e63655f7365745f6964223a22726563757272656e63655f7365745f666978747572655f636c617373222c227363686564756c65645f66616374223a22323032362d31312d31345431313a33303a3030222c227365676d656e745f726566223a2231222c22736f757263655f72646174655f73656c6563746f7273223a5b5d2c22736f757263655f72756c655f73656c6563746f7273223a5b7b2262795f7765656b646179223a5b225341225d2c22656e645f636f6e646974696f6e223a7b226b696e64223a22756e626f756e646564227d2c226672657175656e6379223a225745454b4c59222c22696e74657276616c223a2231222c2273656564223a22323032362d31312d31345431313a33303a3030222c2273746172745f626f756e64223a22323032362d31312d31345431313a33303a3030222c22737461747573223a22616374697665222c227765656b5f7374617274223a224d4f227d5d7d7d7d2c2263616e6f6e6963616c5f6a736f6e5f76657273696f6e223a227370696e652e63616e6f6e6963616c2d6a736f6e2e7631222c22636174616c6f675f67656e65726174696f6e223a2232222c22637572736f725f76657273696f6e223a227370696e652e726563757272696e672d72656c617465642d7461736b732e637572736f722e7631222c226576616c756174696f6e5f61745f757463223a22323032362d31312d30385431303a30303a30305a222c22657870697265735f61745f757463223a22323032362d31312d30385431313a30303a30305a222c226973737565645f61745f757463223a22323032362d31312d30385431303a30303a30305a222c226b65795f6964223a227075626c69635f666978747572655f6b6579222c226e6f726d616c697a65645f726563757272656e63655f7365745f68617368223a2261383161643564663232653731626236353537373831666634306666653637383336626265353333353735393833373437356433626364623962633936623863222c22707572706f7365223a227265636f6e63696c65222c227175657279223a7b22636f6e74726163745f76657273696f6e223a227370696e652e726563757272696e672d72656c617465642d7461736b732e7631222c226c65646765725f696e7374616e63655f6964223a226c65646765725f696e7374616e63655f646973706f7361626c655f666978747572655f6f6e6c79222c226c696d697473223a7b2261737369676e6d656e7473223a223332222c226c696e656167655f686f7073223a223634222c226d75746174696f6e73223a223332222c2270726f6f665f7374657073223a223130303030222c22726573706f6e73655f6279746573223a22323632313434222c22736f757263655f63616e64696461746573223a22323536222c22776f726b5f726f7773223a22313238227d2c2272656c617465645f7461736b5f72756c655f6964223a2272656c617465645f7461736b5f72756c655f61323430303234393264313535356232396661336164353633306538386638373736333363626139373033616166623633656535646564343532633933386434227d2c2272616e67655f656e645f757463223a22323032372d30312d30335431303a30303a30305a222c2272616e67655f73746172745f757463223a22323032362d31312d30385431303a30303a30305a222c22726563757272656e63655f7265766973696f6e5f6964223a22726563757272656e63655f7265766973696f6e5f666978747572655f31222c22726563757272656e63655f7365745f6964223a22726563757272656e63655f7365745f666978747572655f636c617373222c2272756c655f6368616e67655f76657273696f6e223a2232222c2272756c655f7265766973696f6e5f6964223a2272656c617465645f7461736b5f72756c655f7265766973696f6e5f64643932306337323637313562613663396136373233343137616137656637336665623131663232643334636164373439353436626430363565616233303637222c22736f757263655f6974656d5f6964223a226974656d5f666978747572655f736369656e63655f636c617373222c22736f757263655f6974656d5f76657273696f6e223a2231227d",
+      "hmac_sha256": "8b3c3ec41fc24b0f154699741e491ad4b8bfb9c2d27ff38f27f5ce3b05b78b1c",
+      "wire": "eyJhZnRlciI6eyJhc3NpZ25tZW50X2FmdGVyX3NlcSI6IjEiLCJzb3VyY2VfYWZ0ZXIiOnsic2NoZWR1bGVkX2ZhY3QiOiIyMDI2LTExLTE0VDExOjMwOjAwIiwic2VsZWN0b3IiOnsiY2Fub25pY2FsX2pzb25fdmVyc2lvbiI6InNwaW5lLmNhbm9uaWNhbC1qc29uLnYxIiwiY29udHJhY3RfdmVyc2lvbiI6InNwaW5lLnJlY3VycmVuY2UuY29udHJhY3QudjEiLCJkZXJpdmF0aW9uX3ZlcnNpb24iOiJzcGluZS5yZWN1cnJlbmNlLXRhcmdldC1vY2N1cnJlbmNlLXNlbGVjdG9yLnYxIiwibm9ybWFsaXphdGlvbl92ZXJzaW9uIjoic3BpbmUucmVjdXJyZW5jZS5ub3JtYWxpemF0aW9uLnYxIiwib3JpZ2luX2tpbmQiOiJydWxlIiwicmVjdXJyZW5jZV9zZXRfaWQiOiJyZWN1cnJlbmNlX3NldF9maXh0dXJlX2NsYXNzIiwic2NoZWR1bGVkX2ZhY3QiOiIyMDI2LTExLTE0VDExOjMwOjAwIiwic2VnbWVudF9yZWYiOiIxIiwic291cmNlX3JkYXRlX3NlbGVjdG9ycyI6W10sInNvdXJjZV9ydWxlX3NlbGVjdG9ycyI6W3siYnlfd2Vla2RheSI6WyJTQSJdLCJlbmRfY29uZGl0aW9uIjp7ImtpbmQiOiJ1bmJvdW5kZWQifSwiZnJlcXVlbmN5IjoiV0VFS0xZIiwiaW50ZXJ2YWwiOiIxIiwic2VlZCI6IjIwMjYtMTEtMTRUMTE6MzA6MDAiLCJzdGFydF9ib3VuZCI6IjIwMjYtMTEtMTRUMTE6MzA6MDAiLCJzdGF0dXMiOiJhY3RpdmUiLCJ3ZWVrX3N0YXJ0IjoiTU8ifV19fX0sImNhbm9uaWNhbF9qc29uX3ZlcnNpb24iOiJzcGluZS5jYW5vbmljYWwtanNvbi52MSIsImNhdGFsb2dfZ2VuZXJhdGlvbiI6IjIiLCJjdXJzb3JfdmVyc2lvbiI6InNwaW5lLnJlY3VycmluZy1yZWxhdGVkLXRhc2tzLmN1cnNvci52MSIsImV2YWx1YXRpb25fYXRfdXRjIjoiMjAyNi0xMS0wOFQxMDowMDowMFoiLCJleHBpcmVzX2F0X3V0YyI6IjIwMjYtMTEtMDhUMTE6MDA6MDBaIiwiaXNzdWVkX2F0X3V0YyI6IjIwMjYtMTEtMDhUMTA6MDA6MDBaIiwia2V5X2lkIjoicHVibGljX2ZpeHR1cmVfa2V5Iiwibm9ybWFsaXplZF9yZWN1cnJlbmNlX3NldF9oYXNoIjoiYTgxYWQ1ZGYyMmU3MWJiNjU1Nzc4MWZmNDBmZmU2NzgzNmJiZTUzMzU3NTk4Mzc0NzVkM2JjZGI5YmM5NmI4YyIsInB1cnBvc2UiOiJyZWNvbmNpbGUiLCJxdWVyeSI6eyJjb250cmFjdF92ZXJzaW9uIjoic3BpbmUucmVjdXJyaW5nLXJlbGF0ZWQtdGFza3MudjEiLCJsZWRnZXJfaW5zdGFuY2VfaWQiOiJsZWRnZXJfaW5zdGFuY2VfZGlzcG9zYWJsZV9maXh0dXJlX29ubHkiLCJsaW1pdHMiOnsiYXNzaWdubWVudHMiOiIzMiIsImxpbmVhZ2VfaG9wcyI6IjY0IiwibXV0YXRpb25zIjoiMzIiLCJwcm9vZl9zdGVwcyI6IjEwMDAwIiwicmVzcG9uc2VfYnl0ZXMiOiIyNjIxNDQiLCJzb3VyY2VfY2FuZGlkYXRlcyI6IjI1NiIsIndvcmtfcm93cyI6IjEyOCJ9LCJyZWxhdGVkX3Rhc2tfcnVsZV9pZCI6InJlbGF0ZWRfdGFza19ydWxlX2EyNDAwMjQ5MmQxNTU1YjI5ZmEzYWQ1NjMwZTg4Zjg3NzYzM2NiYTk3MDNhYWZiNjNlZTVkZWQ0NTJjOTM4ZDQifSwicmFuZ2VfZW5kX3V0YyI6IjIwMjctMDEtMDNUMTA6MDA6MDBaIiwicmFuZ2Vfc3RhcnRfdXRjIjoiMjAyNi0xMS0wOFQxMDowMDowMFoiLCJyZWN1cnJlbmNlX3JldmlzaW9uX2lkIjoicmVjdXJyZW5jZV9yZXZpc2lvbl9maXh0dXJlXzEiLCJyZWN1cnJlbmNlX3NldF9pZCI6InJlY3VycmVuY2Vfc2V0X2ZpeHR1cmVfY2xhc3MiLCJydWxlX2NoYW5nZV92ZXJzaW9uIjoiMiIsInJ1bGVfcmV2aXNpb25faWQiOiJyZWxhdGVkX3Rhc2tfcnVsZV9yZXZpc2lvbl9kZDkyMGM3MjY3MTViYTZjOWE2NzIzNDE3YWE3ZWY3M2ZlYjExZjIyZDM0Y2FkNzQ5NTQ2YmQwNjVlYWIzMDY3Iiwic291cmNlX2l0ZW1faWQiOiJpdGVtX2ZpeHR1cmVfc2NpZW5jZV9jbGFzcyIsInNvdXJjZV9pdGVtX3ZlcnNpb24iOiIxIn0.izw-xB_CSw8VRpl0Hkka1Li_ucLSf_OPJ_XOOwW3ixw"
+    }
+  ]
+}

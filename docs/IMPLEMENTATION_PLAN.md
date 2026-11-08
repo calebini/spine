@@ -9,7 +9,7 @@ see [validation](TZDB_COMPATIBILITY_VALIDATION.md) and [operations](TZDB_COMPATI
 
 
 Role: Roadmap rationale and delivery history; current task status lives in [BACKLOG.md](BACKLOG.md)
-Last updated: 2026-11-08 (SPINE-081 recurring-task bounded contract amendment)
+Last updated: 2026-11-08 (SPINE-083 source-only recurring-task machine corpus)
 
 This is a non-normative delivery plan. The specifications and machine-readable contracts remain authoritative.
 
@@ -42,10 +42,17 @@ majors: selector storage authority, distinct reminder intent derivation and atom
 child ownership/rendering admission. SPINE-081 amends these locally: reuse existing
 selector storage and per-policy token conventions; explicitly establish subject/
 group child ownership/history before presentation/work, without grants or implicit
-transfer. Focused external recheck remains next before machine schemas/computed
-fixtures; no runtime implementation or schema migration is included.
-SPINE-075/079/080/081 in the backlog own design/review/patch status; a subsequent
-implementation delivery plan follows those contracts.
+transfer. SPINE-082's focused external buildability recheck passed with zero
+findings and boundary preserved. SPINE-083 codifies the source-only
+[machine companion](../specs/recurring-related-task-machine-contract.md), seven
+command schema pairs, typed storage/identity/cursor evidence, exact existing
+prerequisites, an offline schema closure and reproducible fixtures. These do not
+register a command, package a web surface, allocate a schema version or prove
+transactions/worker behavior. The pending runtime obligations are explicit in the
+[manifest](../contracts/recurring-related-tasks.v1.json). Machine-contract review
+is next, followed by ratification and a selected implementation delivery plan.
+SPINE-075/079/080/081/082/083 in the backlog own design/review/patch/codification
+status; no runtime implementation or migration is part of this step.
 
 **Selected enriched delivery (2026-11-06):** The operator selected the smallest
 end-to-end feature, treating useful enrichment as the product direction rather

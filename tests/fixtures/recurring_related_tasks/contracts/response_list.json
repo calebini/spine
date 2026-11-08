@@ -1,0 +1,42 @@
+{
+  "ok": true,
+  "response_contract": "spine.recurring-related-tasks-response.v1",
+  "command": "schedule.related_task_rule.list",
+  "changed": false,
+  "effect": "rules_listed",
+  "evaluated_at_utc": "2026-11-08T10:00:00Z",
+  "result": {
+    "rows": [
+      {
+        "related_task_rule_id": "related_task_rule_a24002492d1555b29fa3ad5630e88f877633cba9703aafb63ee5ded452c938d4",
+        "owner": {
+          "owner_kind": "subject_group",
+          "owner_group_id": "fixture_kinflow"
+        },
+        "rule_key": "science_pickup",
+        "source_item_id": "item_fixture_science_class",
+        "recurrence_set_id": "recurrence_set_fixture_class",
+        "status": "active",
+        "rule_revision_id": "related_task_rule_revision_dd920c726715ba6c9a6723417aa7ef73feb11f22d34cad749546bd065eab3067",
+        "change_version": "1",
+        "adoption_intent": null,
+        "retirement_intent": null,
+        "progress": null
+      }
+    ],
+    "query": {
+      "contract_version": "spine.recurring-related-tasks.v1",
+      "ledger_instance_id": "ledger_instance_disposable_fixture_only",
+      "owner": null,
+      "source_item_id": null,
+      "status": "active",
+      "limit": "50"
+    },
+    "catalog_generation": "1",
+    "has_more": false,
+    "next_cursor": null,
+    "read_at_utc": "2026-11-08T10:00:00Z",
+    "delivery": "not_attempted_by_command"
+  },
+  "commit_cutoff_recheck_required": true
+}

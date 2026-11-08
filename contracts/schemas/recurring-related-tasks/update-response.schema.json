@@ -1,0 +1,6 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/update-response.schema.json",
+  "title": "Draft recurring-task update response",
+  "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/responses.schema.json#/$defs/update"
+}

@@ -1,0 +1,178 @@
+{
+  "ok": true,
+  "response_contract": "spine.recurring-related-tasks-response.v1",
+  "command": "schedule.related_task_rule.retire",
+  "changed": true,
+  "effect": "rule_retired",
+  "evaluated_at_utc": "2026-11-08T10:00:00Z",
+  "result": {
+    "rule": {
+      "related_task_rule_id": "related_task_rule_a24002492d1555b29fa3ad5630e88f877633cba9703aafb63ee5ded452c938d4",
+      "owner": {
+        "owner_kind": "subject_group",
+        "owner_group_id": "fixture_kinflow"
+      },
+      "rule_key": "science_pickup",
+      "source_item_id": "item_fixture_science_class",
+      "recurrence_set_id": "recurrence_set_fixture_class",
+      "source_snapshot": {
+        "source_item_id": "item_fixture_science_class",
+        "source_item_version": "1",
+        "recurrence_set_id": "recurrence_set_fixture_class",
+        "recurrence_revision_id": "recurrence_revision_fixture_1",
+        "normalized_recurrence_set_hash": "a81ad5df22e71bb6557781ff40ffe67836bbe5335759837475d3bcdb9bc96b8c"
+      },
+      "status": "retired",
+      "rule_revision_id": "related_task_rule_revision_75d0571ff60a7e0aa7096020fe99dc777b606bdefe1b342ad370994a5260cb1e",
+      "revision_index": "2",
+      "configuration": {
+        "task_owner": {
+          "owner_kind": "subject_group",
+          "owner_group_id": "fixture_kinflow"
+        },
+        "task_template": {
+          "item": {
+            "item_type": "task",
+            "title": "Pick up Joe",
+            "task_detail": {
+              "priority": null
+            },
+            "summary": null,
+            "source_ref": null,
+            "primary_location": null,
+            "archetype": null
+          },
+          "people": {
+            "assignees": [
+              "fixture_parent"
+            ]
+          }
+        },
+        "offset_basis": "elapsed",
+        "offset_seconds": "6000",
+        "notification_plan": {
+          "requested": {
+            "mode": "none",
+            "custom_additions": [
+              {
+                "policy_key": "pickup_ten_minutes",
+                "schedule": {
+                  "kind": "once",
+                  "at": {
+                    "kind": "target_offset",
+                    "offset_basis": "elapsed",
+                    "offset_seconds": "-600"
+                  }
+                },
+                "late_handling": {
+                  "kind": "deliver_within",
+                  "grace_seconds": "300"
+                }
+              }
+            ]
+          },
+          "resolved": {
+            "selection_mode": "none",
+            "profile": null,
+            "notification_profile_binding_id": null,
+            "scope_chain": [],
+            "effective_templates": [
+              {
+                "policy_origin": "custom_addition",
+                "source_key": "pickup_ten_minutes",
+                "policy_key": "pickup_ten_minutes",
+                "template": {
+                  "template_key": "pickup_ten_minutes",
+                  "schedule": {
+                    "kind": "once",
+                    "at": {
+                      "kind": "target_offset",
+                      "offset_basis": "elapsed",
+                      "offset_seconds": "-600"
+                    }
+                  },
+                  "late_handling": {
+                    "kind": "deliver_within",
+                    "grace_seconds": "300"
+                  },
+                  "rendering": {
+                    "kind": "ordinary"
+                  }
+                },
+                "presentation": {
+                  "kind": "ordinary"
+                }
+              }
+            ]
+          }
+        },
+        "delivery": {
+          "requested": {
+            "recipient_kind": "subject_group",
+            "recipient_group_id": "fixture_kinflow",
+            "channel": "fixture_channel",
+            "target": {
+              "resolution": "explicit",
+              "delivery_target_id": "delivery_target_fixture"
+            }
+          },
+          "resolved": {
+            "delivery_target_id": "delivery_target_fixture",
+            "resolution_source": "explicit",
+            "recipient_kind": "subject_group",
+            "recipient_group_id": "fixture_kinflow",
+            "channel": "fixture_channel",
+            "adapter_name": "test_capture",
+            "target_ref": "fixture://no-send/pickup"
+          }
+        },
+        "materialization": {
+          "mode": "bounded",
+          "lookback_seconds": "0",
+          "horizon_seconds": "4838400",
+          "opportunity_limit": "100"
+        },
+        "generation_horizon_seconds": "4838400"
+      },
+      "configuration_hash": "4b26a38c59113bc245794544103b75300130b3c26096073f94db15b6380c450b",
+      "change_version": "4",
+      "catalog_generation": "4",
+      "enrollment": {
+        "kind": "upcoming"
+      },
+      "enrolled_at_utc": "2026-11-08T10:00:00Z",
+      "retirement_disposition": "keep_following",
+      "retirement_intent": {
+        "intent_id": "related_task_intent_02fc0e0315ba30c119e9d840bf91b621ec177fd0c5e187f7f17a2c12ef6df85d",
+        "status": "pending",
+        "kind": "retire",
+        "assignment_high_water": "1",
+        "scope": null,
+        "disposition": "keep_following",
+        "configuration_revision_id": null
+      },
+      "adoption_intent": {
+        "intent_id": "related_task_intent_392697daddfbe834632eca1aa988230a97815663f7801ce59f5d14e890fbd327",
+        "status": "pending",
+        "kind": "adopt",
+        "assignment_high_water": "1",
+        "scope": "upcoming_open",
+        "disposition": null,
+        "configuration_revision_id": "related_task_rule_revision_75d0571ff60a7e0aa7096020fe99dc777b606bdefe1b342ad370994a5260cb1e"
+      },
+      "progress": null
+    },
+    "generation_stopped": true,
+    "cleanup_status": "pending",
+    "retirement_intent_id": "related_task_intent_02fc0e0315ba30c119e9d840bf91b621ec177fd0c5e187f7f17a2c12ef6df85d",
+    "assignment_high_water": "1",
+    "disposition": "keep_following",
+    "delivery": "not_attempted_by_command"
+  },
+  "command_id": "fixture_retire_keep_following",
+  "command_receipt_id": "command_receipt_451a9073ebd501c4a90f8327b54e10822c840c5dd5e1474757765ebd4a755b66",
+  "audit_ids": [
+    "audit_7ee9821f964bbe04898419f3769840ab5b4e451d493cc2a1f2cd2e7406db8d35"
+  ],
+  "replayed": false
+}

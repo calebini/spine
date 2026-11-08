@@ -1,0 +1,482 @@
+{
+  "contract_version": "spine.recurring-related-task-decision-witnesses.v1",
+  "status": "offline_model_only",
+  "runtime_verified": false,
+  "cases": [
+    {
+      "case_id": "class_started_due_future",
+      "family": "cutoff",
+      "facts": {
+        "exists": false,
+        "source_actionable": true,
+        "enrolled": true,
+        "evaluation": "2026-11-14T12:00:00Z",
+        "commit": "2026-11-14T12:00:01Z",
+        "due": "2026-11-14T13:00:00Z"
+      },
+      "expected": "create"
+    },
+    {
+      "case_id": "due_equal_evaluation",
+      "family": "cutoff",
+      "facts": {
+        "exists": false,
+        "source_actionable": true,
+        "enrolled": true,
+        "evaluation": "2026-11-14T12:00:00Z",
+        "commit": "2026-11-14T12:00:01Z",
+        "due": "2026-11-14T12:00:00Z"
+      },
+      "expected": "skip"
+    },
+    {
+      "case_id": "due_equal_commit",
+      "family": "cutoff",
+      "facts": {
+        "exists": false,
+        "source_actionable": true,
+        "enrolled": true,
+        "evaluation": "2026-11-14T12:00:00Z",
+        "commit": "2026-11-14T12:00:01Z",
+        "due": "2026-11-14T12:00:01Z"
+      },
+      "expected": "stale_evaluation"
+    },
+    {
+      "case_id": "commit_crossed_due",
+      "family": "cutoff",
+      "facts": {
+        "exists": false,
+        "source_actionable": true,
+        "enrolled": true,
+        "evaluation": "2026-11-14T12:00:00Z",
+        "commit": "2026-11-14T13:00:01Z",
+        "due": "2026-11-14T13:00:00Z"
+      },
+      "expected": "stale_evaluation"
+    },
+    {
+      "case_id": "clock_backwards",
+      "family": "cutoff",
+      "facts": {
+        "exists": false,
+        "source_actionable": true,
+        "enrolled": true,
+        "evaluation": "2026-11-14T12:00:00Z",
+        "commit": "2026-11-14T11:59:59Z",
+        "due": "2026-11-14T13:00:00Z"
+      },
+      "expected": "environment_failure"
+    },
+    {
+      "case_id": "existing_overdue_kept",
+      "family": "cutoff",
+      "facts": {
+        "exists": true,
+        "source_actionable": true,
+        "enrolled": true,
+        "evaluation": "2026-11-14T12:00:00Z",
+        "commit": "2026-11-14T12:00:01Z",
+        "due": "2026-11-14T11:00:00Z"
+      },
+      "expected": "retain"
+    },
+    {
+      "case_id": "not_enrolled",
+      "family": "cutoff",
+      "facts": {
+        "exists": false,
+        "source_actionable": true,
+        "enrolled": false,
+        "evaluation": "2026-11-14T12:00:00Z",
+        "commit": "2026-11-14T12:00:01Z",
+        "due": "2026-11-14T13:00:00Z"
+      },
+      "expected": "skip"
+    },
+    {
+      "case_id": "source_not_actionable",
+      "family": "cutoff",
+      "facts": {
+        "exists": false,
+        "source_actionable": false,
+        "enrolled": true,
+        "evaluation": "2026-11-14T12:00:00Z",
+        "commit": "2026-11-14T12:00:01Z",
+        "due": "2026-11-14T13:00:00Z"
+      },
+      "expected": "skip"
+    },
+    {
+      "case_id": "source_only_restoration",
+      "family": "restore",
+      "facts": {
+        "active_rule": true,
+        "one_to_one_proof": true,
+        "source_restored": true,
+        "latest_source_cancelled": true,
+        "successor_exists": false,
+        "veto": false,
+        "future_due": true,
+        "task_done": false,
+        "manual_exception": false
+      },
+      "expected": "new_successor"
+    },
+    {
+      "case_id": "repeat_restoration",
+      "family": "restore",
+      "facts": {
+        "active_rule": true,
+        "one_to_one_proof": true,
+        "source_restored": true,
+        "latest_source_cancelled": true,
+        "successor_exists": true,
+        "veto": false,
+        "future_due": true,
+        "task_done": false,
+        "manual_exception": false
+      },
+      "expected": "retain"
+    },
+    {
+      "case_id": "suppression_wins",
+      "family": "restore",
+      "facts": {
+        "active_rule": true,
+        "one_to_one_proof": true,
+        "source_restored": true,
+        "latest_source_cancelled": true,
+        "successor_exists": false,
+        "veto": true,
+        "future_due": true,
+        "task_done": false,
+        "manual_exception": false
+      },
+      "expected": "retain"
+    },
+    {
+      "case_id": "completed_consumes_slot",
+      "family": "restore",
+      "facts": {
+        "active_rule": true,
+        "one_to_one_proof": true,
+        "source_restored": true,
+        "latest_source_cancelled": true,
+        "successor_exists": false,
+        "veto": false,
+        "future_due": true,
+        "task_done": true,
+        "manual_exception": false
+      },
+      "expected": "retain"
+    },
+    {
+      "case_id": "manual_cancel_never_restored",
+      "family": "restore",
+      "facts": {
+        "active_rule": true,
+        "one_to_one_proof": true,
+        "source_restored": true,
+        "latest_source_cancelled": true,
+        "successor_exists": false,
+        "veto": false,
+        "future_due": true,
+        "task_done": false,
+        "manual_exception": true
+      },
+      "expected": "retain"
+    },
+    {
+      "case_id": "retirement_stops_restoration",
+      "family": "restore",
+      "facts": {
+        "active_rule": false,
+        "one_to_one_proof": true,
+        "source_restored": true,
+        "latest_source_cancelled": true,
+        "successor_exists": false,
+        "veto": false,
+        "future_due": true,
+        "task_done": false,
+        "manual_exception": false
+      },
+      "expected": "retain"
+    },
+    {
+      "case_id": "overdue_restore_skipped",
+      "family": "restore",
+      "facts": {
+        "active_rule": true,
+        "one_to_one_proof": true,
+        "source_restored": true,
+        "latest_source_cancelled": true,
+        "successor_exists": false,
+        "veto": false,
+        "future_due": false,
+        "task_done": false,
+        "manual_exception": false
+      },
+      "expected": "retain"
+    },
+    {
+      "case_id": "unresolved_not_cancellation",
+      "family": "restore",
+      "facts": {
+        "active_rule": true,
+        "one_to_one_proof": false,
+        "source_restored": true,
+        "latest_source_cancelled": true,
+        "successor_exists": false,
+        "veto": false,
+        "future_due": true,
+        "task_done": false,
+        "manual_exception": false
+      },
+      "expected": "decision_required"
+    },
+    {
+      "case_id": "source_still_excluded",
+      "family": "restore",
+      "facts": {
+        "active_rule": true,
+        "one_to_one_proof": true,
+        "source_restored": false,
+        "latest_source_cancelled": true,
+        "successor_exists": false,
+        "veto": false,
+        "future_due": true,
+        "task_done": false,
+        "manual_exception": false
+      },
+      "expected": "retain"
+    },
+    {
+      "case_id": "untouched_adopt",
+      "family": "adoption",
+      "facts": {
+        "baseline": "B",
+        "current": "B",
+        "desired": "D",
+        "eligible": true
+      },
+      "expected": "adopt"
+    },
+    {
+      "case_id": "already_desired",
+      "family": "adoption",
+      "facts": {
+        "baseline": "B",
+        "current": "D",
+        "desired": "D",
+        "eligible": true
+      },
+      "expected": "adopt_witness"
+    },
+    {
+      "case_id": "individual_exception",
+      "family": "adoption",
+      "facts": {
+        "baseline": "B",
+        "current": "C",
+        "desired": "D",
+        "eligible": true
+      },
+      "expected": "conflict"
+    },
+    {
+      "case_id": "terminal_or_overdue_adoption",
+      "family": "adoption",
+      "facts": {
+        "baseline": "B",
+        "current": "B",
+        "desired": "D",
+        "eligible": false
+      },
+      "expected": "skip"
+    },
+    {
+      "case_id": "retire_keep_following",
+      "family": "retirement",
+      "facts": {
+        "disposition": "keep_following",
+        "open_governed": true
+      },
+      "expected": "follow"
+    },
+    {
+      "case_id": "retire_terminal_keep_following",
+      "family": "retirement",
+      "facts": {
+        "disposition": "keep_following",
+        "open_governed": false
+      },
+      "expected": "preserve"
+    },
+    {
+      "case_id": "retire_detach_open",
+      "family": "retirement",
+      "facts": {
+        "disposition": "detach_open",
+        "open_governed": true
+      },
+      "expected": "detach"
+    },
+    {
+      "case_id": "retire_terminal_detach_open",
+      "family": "retirement",
+      "facts": {
+        "disposition": "detach_open",
+        "open_governed": false
+      },
+      "expected": "preserve"
+    },
+    {
+      "case_id": "retire_cancel_open",
+      "family": "retirement",
+      "facts": {
+        "disposition": "cancel_open",
+        "open_governed": true
+      },
+      "expected": "cancel"
+    },
+    {
+      "case_id": "retire_terminal_cancel_open",
+      "family": "retirement",
+      "facts": {
+        "disposition": "cancel_open",
+        "open_governed": false
+      },
+      "expected": "preserve"
+    },
+    {
+      "case_id": "exact_selector",
+      "family": "continuity",
+      "facts": {
+        "exact": true,
+        "positive_lineage": false,
+        "matches": "1",
+        "range_absent": false
+      },
+      "expected": "same_assignment"
+    },
+    {
+      "case_id": "proved_move",
+      "family": "continuity",
+      "facts": {
+        "exact": false,
+        "positive_lineage": true,
+        "matches": "1",
+        "range_absent": false
+      },
+      "expected": "same_assignment"
+    },
+    {
+      "case_id": "union_many_to_one",
+      "family": "continuity",
+      "facts": {
+        "exact": false,
+        "positive_lineage": true,
+        "matches": "2",
+        "range_absent": false
+      },
+      "expected": "decision_required"
+    },
+    {
+      "case_id": "no_nearest_time_pairing",
+      "family": "continuity",
+      "facts": {
+        "exact": false,
+        "positive_lineage": false,
+        "matches": "1",
+        "range_absent": false
+      },
+      "expected": "decision_required"
+    },
+    {
+      "case_id": "absence_not_exclusion",
+      "family": "continuity",
+      "facts": {
+        "exact": false,
+        "positive_lineage": false,
+        "matches": "0",
+        "range_absent": true
+      },
+      "expected": "decision_required"
+    },
+    {
+      "case_id": "whole_unit_fits",
+      "family": "budget",
+      "facts": {
+        "used": "1",
+        "unit": "2",
+        "limit": "3",
+        "hard": "4"
+      },
+      "expected": "process"
+    },
+    {
+      "case_id": "stop_between_units",
+      "family": "budget",
+      "facts": {
+        "used": "2",
+        "unit": "2",
+        "limit": "3",
+        "hard": "4"
+      },
+      "expected": "continue"
+    },
+    {
+      "case_id": "unit_exceeds_request",
+      "family": "budget",
+      "facts": {
+        "used": "0",
+        "unit": "4",
+        "limit": "3",
+        "hard": "4"
+      },
+      "expected": "capacity_exceeded"
+    },
+    {
+      "case_id": "unit_exceeds_hard_cap",
+      "family": "budget",
+      "facts": {
+        "used": "0",
+        "unit": "5",
+        "limit": "4",
+        "hard": "4"
+      },
+      "expected": "capacity_exceeded"
+    },
+    {
+      "case_id": "idle_clock_only",
+      "family": "scheduler",
+      "facts": {
+        "domain_change": false,
+        "semantic_progress": false,
+        "clock_only": true
+      },
+      "expected": "no_dispatch"
+    },
+    {
+      "case_id": "new_candidate",
+      "family": "scheduler",
+      "facts": {
+        "domain_change": true,
+        "semantic_progress": false,
+        "clock_only": false
+      },
+      "expected": "dispatch"
+    },
+    {
+      "case_id": "real_cleanup_progress",
+      "family": "scheduler",
+      "facts": {
+        "domain_change": false,
+        "semantic_progress": true,
+        "clock_only": false
+      },
+      "expected": "dispatch"
+    }
+  ]
+}

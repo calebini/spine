@@ -1,0 +1,249 @@
+{
+  "ok": true,
+  "response_contract": "spine.recurring-related-tasks-response.v1",
+  "command": "schedule.related_task_rule.reconcile",
+  "changed": true,
+  "effect": "rule_progress_advanced",
+  "evaluated_at_utc": "2026-11-08T10:00:00Z",
+  "result": {
+    "rule": {
+      "related_task_rule_id": "related_task_rule_a24002492d1555b29fa3ad5630e88f877633cba9703aafb63ee5ded452c938d4",
+      "owner": {
+        "owner_kind": "subject_group",
+        "owner_group_id": "fixture_kinflow"
+      },
+      "rule_key": "science_pickup",
+      "source_item_id": "item_fixture_science_class",
+      "recurrence_set_id": "recurrence_set_fixture_class",
+      "source_snapshot": {
+        "source_item_id": "item_fixture_science_class",
+        "source_item_version": "1",
+        "recurrence_set_id": "recurrence_set_fixture_class",
+        "recurrence_revision_id": "recurrence_revision_fixture_1",
+        "normalized_recurrence_set_hash": "a81ad5df22e71bb6557781ff40ffe67836bbe5335759837475d3bcdb9bc96b8c"
+      },
+      "status": "active",
+      "rule_revision_id": "related_task_rule_revision_dd920c726715ba6c9a6723417aa7ef73feb11f22d34cad749546bd065eab3067",
+      "revision_index": "1",
+      "configuration": {
+        "task_owner": {
+          "owner_kind": "subject_group",
+          "owner_group_id": "fixture_kinflow"
+        },
+        "task_template": {
+          "item": {
+            "item_type": "task",
+            "title": "Pick up Joe",
+            "task_detail": {
+              "priority": null
+            },
+            "summary": null,
+            "source_ref": null,
+            "primary_location": null,
+            "archetype": null
+          },
+          "people": {
+            "assignees": [
+              "fixture_parent"
+            ]
+          }
+        },
+        "offset_basis": "elapsed",
+        "offset_seconds": "5400",
+        "notification_plan": {
+          "requested": {
+            "mode": "none",
+            "custom_additions": [
+              {
+                "policy_key": "pickup_ten_minutes",
+                "schedule": {
+                  "kind": "once",
+                  "at": {
+                    "kind": "target_offset",
+                    "offset_basis": "elapsed",
+                    "offset_seconds": "-600"
+                  }
+                },
+                "late_handling": {
+                  "kind": "deliver_within",
+                  "grace_seconds": "300"
+                }
+              }
+            ]
+          },
+          "resolved": {
+            "selection_mode": "none",
+            "profile": null,
+            "notification_profile_binding_id": null,
+            "scope_chain": [],
+            "effective_templates": [
+              {
+                "policy_origin": "custom_addition",
+                "source_key": "pickup_ten_minutes",
+                "policy_key": "pickup_ten_minutes",
+                "template": {
+                  "template_key": "pickup_ten_minutes",
+                  "schedule": {
+                    "kind": "once",
+                    "at": {
+                      "kind": "target_offset",
+                      "offset_basis": "elapsed",
+                      "offset_seconds": "-600"
+                    }
+                  },
+                  "late_handling": {
+                    "kind": "deliver_within",
+                    "grace_seconds": "300"
+                  },
+                  "rendering": {
+                    "kind": "ordinary"
+                  }
+                },
+                "presentation": {
+                  "kind": "ordinary"
+                }
+              }
+            ]
+          }
+        },
+        "delivery": {
+          "requested": {
+            "recipient_kind": "subject_group",
+            "recipient_group_id": "fixture_kinflow",
+            "channel": "fixture_channel",
+            "target": {
+              "resolution": "explicit",
+              "delivery_target_id": "delivery_target_fixture"
+            }
+          },
+          "resolved": {
+            "delivery_target_id": "delivery_target_fixture",
+            "resolution_source": "explicit",
+            "recipient_kind": "subject_group",
+            "recipient_group_id": "fixture_kinflow",
+            "channel": "fixture_channel",
+            "adapter_name": "test_capture",
+            "target_ref": "fixture://no-send/pickup"
+          }
+        },
+        "materialization": {
+          "mode": "bounded",
+          "lookback_seconds": "0",
+          "horizon_seconds": "4838400",
+          "opportunity_limit": "100"
+        },
+        "generation_horizon_seconds": "4838400"
+      },
+      "configuration_hash": "c2a930a96b9d9ac3b0999befaff93bd1d9f4d8d87a514a704a98606b5cc58946",
+      "change_version": "2",
+      "catalog_generation": "2",
+      "enrollment": {
+        "kind": "upcoming"
+      },
+      "enrolled_at_utc": "2026-11-08T10:00:00Z",
+      "retirement_disposition": null,
+      "retirement_intent": null,
+      "adoption_intent": null,
+      "progress": null
+    },
+    "source_snapshot": {
+      "source_item_id": "item_fixture_science_class",
+      "source_item_version": "1",
+      "recurrence_set_id": "recurrence_set_fixture_class",
+      "recurrence_revision_id": "recurrence_revision_fixture_1",
+      "normalized_recurrence_set_hash": "a81ad5df22e71bb6557781ff40ffe67836bbe5335759837475d3bcdb9bc96b8c"
+    },
+    "selection": {
+      "evaluation_at_utc": "2026-11-08T10:00:00Z",
+      "execution_at_utc": "2026-11-08T10:00:00Z",
+      "limits": {
+        "source_candidates": "256",
+        "assignments": "32",
+        "mutations": "32",
+        "proof_steps": "10000",
+        "lineage_hops": "64",
+        "work_rows": "128",
+        "response_bytes": "262144"
+      },
+      "lane_start": {
+        "assignment_after_seq": "0",
+        "source_after": null
+      },
+      "lane_end": {
+        "assignment_after_seq": "1",
+        "source_after": {
+          "scheduled_fact": "2026-11-14T11:30:00",
+          "selector": {
+            "derivation_version": "spine.recurrence-target-occurrence-selector.v1",
+            "contract_version": "spine.recurrence.contract.v1",
+            "normalization_version": "spine.recurrence.normalization.v1",
+            "canonical_json_version": "spine.canonical-json.v1",
+            "recurrence_set_id": "recurrence_set_fixture_class",
+            "segment_ref": "1",
+            "scheduled_fact": "2026-11-14T11:30:00",
+            "origin_kind": "rule",
+            "source_rule_selectors": [
+              {
+                "frequency": "WEEKLY",
+                "interval": "1",
+                "seed": "2026-11-14T11:30:00",
+                "start_bound": "2026-11-14T11:30:00",
+                "end_condition": {
+                  "kind": "unbounded"
+                },
+                "status": "active",
+                "by_weekday": [
+                  "SA"
+                ],
+                "week_start": "MO"
+              }
+            ],
+            "source_rdate_selectors": []
+          }
+        }
+      },
+      "intent_id": null,
+      "assignment_high_water": null
+    },
+    "results": [],
+    "policy_mappings": [],
+    "work": {
+      "created": [],
+      "retained": [],
+      "cancelled": [],
+      "protected_stale": []
+    },
+    "coverage": {
+      "generation": {
+        "status": "complete",
+        "processed_count": "0",
+        "remaining_known_count": "0"
+      },
+      "assignments": {
+        "status": "complete",
+        "processed_count": "0",
+        "remaining_known_count": "0"
+      },
+      "adoption": {
+        "status": "not_applicable",
+        "processed_count": "0",
+        "remaining_known_count": "0"
+      },
+      "retirement": {
+        "status": "not_applicable",
+        "processed_count": "0",
+        "remaining_known_count": "0"
+      }
+    },
+    "future_generation": "waiting",
+    "has_more": false,
+    "next_cursor": null,
+    "delivery": "not_attempted_by_command"
+  },
+  "command_id": "fixture_reconcile_page_1",
+  "command_receipt_id": "command_receipt_6064d1390b3857207f1c52c45a330a8fb9e1da16db1ff29fffa54d61f5395330",
+  "audit_ids": [
+    "audit_8be8efa127c3b52596782b3aca5686ac908f9409184eead60ca6bae66236f63a"
+  ],
+  "replayed": false
+}

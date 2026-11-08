@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/create-request.schema.json",
+  "title": "Draft recurring-task create request",
+  "$comment": "Source only. Command identifier is external dispatch, not a request field. Dry run is an execution option. Exact semantic validation/precedence and byte caps remain required.",
+  "type": "object",
+  "properties": {
+    "contract_version": {
+      "const": "spine.recurring-related-tasks.v1"
+    },
+    "command_id": {
+      "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/id"
+    },
+    "actor_subject_id": {
+      "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/id"
+    },
+    "requested_at_utc": {
+      "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/utc"
+    },
+    "owner": {
+      "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/owner"
+    },
+    "rule_key": {
+      "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/key"
+    },
+    "source": {
+      "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/source"
+    },
+    "enrollment": {
+      "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/enrollment"
+    },
+    "configuration": {
+      "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/configuration"
+    }
+  },
+  "required": [
+    "contract_version",
+    "command_id",
+    "actor_subject_id",
+    "requested_at_utc",
+    "owner",
+    "rule_key",
+    "source",
+    "enrollment",
+    "configuration"
+  ],
+  "additionalProperties": false
+}

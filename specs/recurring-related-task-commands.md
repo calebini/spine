@@ -1,6 +1,6 @@
 # Recurring Related Tasks: Detailed Command Contract
 
-Status: Draft v0.1.0-draft.2 — human-readable wire contract; not registered or implemented
+Status: Draft v0.1.0-draft.3 — source-only wire contract and machine companion; not registered or implemented
 
 Date: 2026-11-08
 
@@ -81,6 +81,12 @@ Compatible stored receipt replay takes precedence even if `--dry-run` was suppli
 return the original committed result with `replayed=true`, not a fabricated
 null-receipt preview. Reads always have `changed=false` and no command receipt/audit/replay fields.
 All results carry `delivery=not_attempted_by_command`.
+
+The source-only [machine companion](recurring-related-task-machine-contract.md)
+closes the descriptive projection/tuple names used below. In particular, reads
+and fresh previews require `commit_cutoff_recheck_required=true`, rule readback
+includes `source_snapshot`, and reconcile requires `future_generation` in its
+result. These mechanical draft representations do not activate the command family.
 
 Receipt identity uses the existing `spine.command-id.v1` derivation with the real
 command/command ID, role `command_receipt`, path `/command_receipt`; root audit
@@ -638,9 +644,13 @@ field, exact current-version evidence and no-write outcome are fixture oracles.
 No-op writes do not bypass validation/expected facts merely because their desired
 configuration or veto already exists.
 
-## 9. Required machine corpus and next gate
+## 9. Machine corpus and next gate
 
-The next machine-contract step must produce closed request/response/shared types,
+The source-only [machine companion](recurring-related-task-machine-contract.md),
+[capability manifest](../contracts/recurring-related-tasks.v1.json) and
+[fixture manifest](../contracts/recurring-related-task-fixture-manifest.json) now
+codify the proposed shapes and offline examples. Review them before ratification
+and implementation planning. The corpus must retain closed request/response/shared types,
 exact prerequisite manifest, canonical configuration/proof/state/ID and cursor
 schemas, command capability declarations kept source-only until activation, and
 computed fixtures. Do not advertise placeholders as implemented or publish broad
@@ -670,7 +680,9 @@ Minimum computed oracles pair this file's wire receipts with storage Section 8:
    updates, owner-creation/presentation/work-stage rollback with unchanged old
    owner-less schedule-create behavior.
 
-This draft closes proposed human-readable contracts. It is not ratification,
-an external review, delivered fixtures, a runtime test result, an implementation
-plan or permission to build/deploy. Review the technical closure, then codify the
-machine corpus and its implementation plan as separately selected work.
+This draft and its source-only corpus close proposed representations, not runtime
+behavior. Offline examples do not satisfy the actual transaction/concurrency/
+migration/attempt-start proof families above. They are not ratification, an
+external machine-contract review, a runtime test result, an implementation plan
+or permission to build/deploy. Review the corpus, then ratify and select its
+implementation plan separately.

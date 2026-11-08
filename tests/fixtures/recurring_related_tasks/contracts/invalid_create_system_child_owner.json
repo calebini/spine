@@ -1,0 +1,74 @@
+{
+  "contract_version": "spine.recurring-related-tasks.v1",
+  "command_id": "fixture_author_rule",
+  "actor_subject_id": "fixture_operator",
+  "requested_at_utc": "2026-11-08T10:00:00Z",
+  "owner": {
+    "owner_kind": "subject_group",
+    "owner_group_id": "fixture_kinflow"
+  },
+  "rule_key": "science_pickup",
+  "source": {
+    "item_id": "item_fixture_science_class",
+    "item_version": "1",
+    "recurrence_set_id": "recurrence_set_fixture_class",
+    "recurrence_revision_id": "recurrence_revision_fixture_1"
+  },
+  "enrollment": {
+    "kind": "upcoming"
+  },
+  "configuration": {
+    "task_owner": {
+      "owner_kind": "system"
+    },
+    "task_template": {
+      "item": {
+        "item_type": "task",
+        "title": "Pick up Joe",
+        "task_detail": {}
+      },
+      "people": {
+        "assignees": [
+          "fixture_parent"
+        ]
+      }
+    },
+    "offset_basis": "elapsed",
+    "offset_seconds": "5400",
+    "notification_plan": {
+      "mode": "none",
+      "custom_additions": [
+        {
+          "policy_key": "pickup_ten_minutes",
+          "schedule": {
+            "kind": "once",
+            "at": {
+              "kind": "target_offset",
+              "offset_basis": "elapsed",
+              "offset_seconds": "-600"
+            }
+          },
+          "late_handling": {
+            "kind": "deliver_within",
+            "grace_seconds": "300"
+          }
+        }
+      ]
+    },
+    "delivery": {
+      "recipient_kind": "subject_group",
+      "recipient_group_id": "fixture_kinflow",
+      "channel": "fixture_channel",
+      "target": {
+        "resolution": "explicit",
+        "delivery_target_id": "delivery_target_fixture"
+      }
+    },
+    "materialization": {
+      "mode": "bounded",
+      "lookback_seconds": "0",
+      "horizon_seconds": "4838400",
+      "opportunity_limit": "100"
+    }
+  }
+}

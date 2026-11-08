@@ -1,0 +1,11 @@
+{
+  "ok": false,
+  "response_contract": "spine.recurring-related-tasks-response.v1",
+  "command": "schedule.related_task_rule.reconcile",
+  "changed": false,
+  "error": {
+    "code": "capacity_exceeded",
+    "field": "request",
+    "message": "Synthetic offline capacity_exceeded"
+  }
+}

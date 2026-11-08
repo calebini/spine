@@ -50,7 +50,9 @@ The selected product decisions in Section 14 are approved, but the full draft
 still requires contract closure and review. MUST and MUST NOT below express
 proposed contract requirements, not an implemented runtime
 claim. This draft does not reserve a ledger schema number, register a runtime
-family, add machine schemas or expose a command or HTTP route.
+family or expose a command or HTTP route. The separate source-only
+[machine companion](recurring-related-task-machine-contract.md) now defines draft
+schemas/computed fixtures without activating any of those runtime surfaces.
 
 The proposed detailed [storage, identity and lineage](recurring-related-task-storage.md)
 and [command contract](recurring-related-task-commands.md) companions now close

@@ -1,0 +1,109 @@
+{
+  "ok": true,
+  "response_contract": "spine.recurring-related-tasks-response.v1",
+  "command": "schedule.related_task_rule.show",
+  "changed": false,
+  "effect": "rule_shown",
+  "evaluated_at_utc": "2026-11-08T10:00:00Z",
+  "result": {
+    "assignment": {
+      "assignment_id": "related_task_assignment_2f5bfca79187b3e7ebb8f1fca3d958b4dfc0cf9a742cdb9f9654350952811f02",
+      "assignment_seq": "1",
+      "change_version": "1",
+      "assignment_revision_id": "related_task_assignment_revision_dbc0c6d5221d12327b3c8ced52a20d3098fd6342f8779c55c8d85179a442cb40",
+      "initial_selector": {
+        "derivation_version": "spine.recurrence-target-occurrence-selector.v1",
+        "contract_version": "spine.recurrence.contract.v1",
+        "normalization_version": "spine.recurrence.normalization.v1",
+        "canonical_json_version": "spine.canonical-json.v1",
+        "recurrence_set_id": "recurrence_set_fixture_class",
+        "segment_ref": "1",
+        "scheduled_fact": "2026-11-14T11:30:00",
+        "origin_kind": "rule",
+        "source_rule_selectors": [
+          {
+            "frequency": "WEEKLY",
+            "interval": "1",
+            "seed": "2026-11-14T11:30:00",
+            "start_bound": "2026-11-14T11:30:00",
+            "end_condition": {
+              "kind": "unbounded"
+            },
+            "status": "active",
+            "by_weekday": [
+              "SA"
+            ],
+            "week_start": "MO"
+          }
+        ],
+        "source_rdate_selectors": []
+      },
+      "current_selector": {
+        "derivation_version": "spine.recurrence-target-occurrence-selector.v1",
+        "contract_version": "spine.recurrence.contract.v1",
+        "normalization_version": "spine.recurrence.normalization.v1",
+        "canonical_json_version": "spine.canonical-json.v1",
+        "recurrence_set_id": "recurrence_set_fixture_class",
+        "segment_ref": "1",
+        "scheduled_fact": "2026-11-14T11:30:00",
+        "origin_kind": "rule",
+        "source_rule_selectors": [
+          {
+            "frequency": "WEEKLY",
+            "interval": "1",
+            "seed": "2026-11-14T11:30:00",
+            "start_bound": "2026-11-14T11:30:00",
+            "end_condition": {
+              "kind": "unbounded"
+            },
+            "status": "active",
+            "by_weekday": [
+              "SA"
+            ],
+            "week_start": "MO"
+          }
+        ],
+        "source_rdate_selectors": []
+      },
+      "occurrence_key": "37220c4acbb53b8dc6009df50a4dd22a4c0de7f12d62cde1ea9716e43cd66f5b",
+      "generation_id": "related_task_generation_7c941b7ede44128583e902f7d42cc03b2917c657a13abf22236af85660d143aa",
+      "generation_index": "1",
+      "task_item_id": "item_218fffa030c67ccab3c8331b1f60a61a80e6a598f00ec52ebc20e7eacc1aef7c",
+      "task_item_version": "1",
+      "task_status": "open",
+      "temporal_binding_id": "temporal_binding_347e6c823f2321dbbc1ee946e131487a4b5ccc93e9acbba0ea198c0a59519fc7",
+      "temporal_binding_revision_id": "temporal_binding_revision_7960c5e0c21c1443d5413c828f9fd5e6be7a7e1c8708024e7dcece511a76712a",
+      "relationship_id": "relation_866c18f568986cefc263d3da4a29e53c30cae0dbfb2a64b951323f57d2589e61",
+      "item_access_owner_id": "item_access_owner_996cc22ff0c1425d4ec1331fd584255b251475842b596215df7cd5d74113c8bb",
+      "task_owner": {
+        "owner_kind": "subject_group",
+        "owner_group_id": "fixture_kinflow"
+      },
+      "item_access_owner_revision": "1",
+      "adopted_rule_revision_id": "related_task_rule_revision_dd920c726715ba6c9a6723417aa7ef73feb11f22d34cad749546bd065eab3067",
+      "desired_rule_revision_id": null,
+      "disposition": "governed",
+      "reason": "new_source_slot",
+      "restoration_veto": false,
+      "suppression": null,
+      "source_proof_id": "related_task_proof_88976c22205045697fa0b5c158c3be4c1d80a1ba299dadf55da8d9043f39079e",
+      "source_snapshot": {
+        "source_item_id": "item_fixture_science_class",
+        "source_item_version": "1",
+        "recurrence_set_id": "recurrence_set_fixture_class",
+        "recurrence_revision_id": "recurrence_revision_fixture_1",
+        "normalized_recurrence_set_hash": "a81ad5df22e71bb6557781ff40ffe67836bbe5335759837475d3bcdb9bc96b8c"
+      },
+      "predecessor_generation_id": null,
+      "successor_generation_id": null,
+      "source_cancellation": null,
+      "freshness": "current",
+      "observed_source_item_version": "1",
+      "observed_recurrence_revision_id": "recurrence_revision_fixture_1",
+      "observed_task_item_version": "1"
+    },
+    "read_at_utc": "2026-11-08T10:00:00Z",
+    "delivery": "not_attempted_by_command"
+  },
+  "commit_cutoff_recheck_required": true
+}

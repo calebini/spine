@@ -1,0 +1,151 @@
+{
+  "contract_version": "spine.recurring-related-task-schema-closure.v1",
+  "status": "draft_source_only",
+  "resources": [
+    {
+      "uri": "https://cortext.local/spine/contracts/schemas/notification-profile-types-v2.schema.json",
+      "path": "contracts/schemas/notification-profile-types-v2.schema.json",
+      "sha256": "e1587494d473198b49f16be89e27de12e32df512821d5670f9c8bf48f654f875"
+    },
+    {
+      "uri": "https://cortext.local/spine/contracts/schemas/notification-profile-types.schema.json",
+      "path": "contracts/schemas/notification-profile-types.schema.json",
+      "sha256": "182353b53719d924cb062d898d7e3cae1f0de9e124bb2b793c26fa6a59ab6b8c"
+    },
+    {
+      "uri": "https://cortext.local/spine/contracts/schemas/notification-rendering-definition-types.schema.json",
+      "path": "contracts/schemas/notification-rendering-definition-types.schema.json",
+      "sha256": "3b6ea94ce86bbb06f45c63516700235edba43cd0800ed4be05261fc774848344"
+    },
+    {
+      "uri": "https://cortext.local/spine/contracts/schemas/notification-rendering-integration-types.schema.json",
+      "path": "contracts/schemas/notification-rendering-integration-types.schema.json",
+      "sha256": "5740b6f3e92cdac2f48daf4f85ea79b37803345dfb54a705f5fd8c37ff320aa6"
+    },
+    {
+      "uri": "https://cortext.local/spine/contracts/schemas/notification-types.schema.json",
+      "path": "contracts/schemas/notification-types.schema.json",
+      "sha256": "48507bcf78b6df80a6c9ca8ebf7b0a5fa7e26b8b691befdc1e7353ae63b7b2c1"
+    },
+    {
+      "uri": "https://cortext.local/spine/contracts/schemas/recurrence-types.schema.json",
+      "path": "contracts/schemas/recurrence-types.schema.json",
+      "sha256": "a52316c562ca1cda2144db79676cc5799fcd631f8116d70b0c76a2dd6fd9cf86"
+    },
+    {
+      "uri": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/computed.schema.json",
+      "path": "contracts/schemas/recurring-related-tasks/computed.schema.json",
+      "sha256": "f65b537ebc5c030126a92fc7871f0b9ed99afbcd1c2fd2d782d9f04805529fc2"
+    },
+    {
+      "uri": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/create-request.schema.json",
+      "path": "contracts/schemas/recurring-related-tasks/create-request.schema.json",
+      "sha256": "07bbbb92817acaa150a1c0789145a27291c5aff2349f6e00a8312530ab4bb48b"
+    },
+    {
+      "uri": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/create-response.schema.json",
+      "path": "contracts/schemas/recurring-related-tasks/create-response.schema.json",
+      "sha256": "08d22c39da841a1b5007235a7f0c252ce6ad077eaf2118b967693a9ac9a540ec"
+    },
+    {
+      "uri": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/cursor.schema.json",
+      "path": "contracts/schemas/recurring-related-tasks/cursor.schema.json",
+      "sha256": "e591aafd8fe9eb02a6f9b8760d8a1f2bbeb44dc3924fb2f474e89ce8692382ea"
+    },
+    {
+      "uri": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/evidence.schema.json",
+      "path": "contracts/schemas/recurring-related-tasks/evidence.schema.json",
+      "sha256": "1996e12265c12716bc433662613acb5d019bbca560fefedf7da7a117760e6adc"
+    },
+    {
+      "uri": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/failure.schema.json",
+      "path": "contracts/schemas/recurring-related-tasks/failure.schema.json",
+      "sha256": "09f0a035321bc47b8e02b65e434e8a965c23a796b242fbdec3907c90bf757d1f"
+    },
+    {
+      "uri": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/list-request.schema.json",
+      "path": "contracts/schemas/recurring-related-tasks/list-request.schema.json",
+      "sha256": "9b4b98391fe12b08c2deab8821a62bc7191b55878ba59f2a18ad18cba1590fe5"
+    },
+    {
+      "uri": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/list-response.schema.json",
+      "path": "contracts/schemas/recurring-related-tasks/list-response.schema.json",
+      "sha256": "9c831173e7abc6a0ecc300ca3d46d9fa9929513a79a4994dcf88c253dab9a5e3"
+    },
+    {
+      "uri": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/preimages.schema.json",
+      "path": "contracts/schemas/recurring-related-tasks/preimages.schema.json",
+      "sha256": "41fd36113ac98896eb982e0ce17481410395690e5604136c508bdeb5a61514c2"
+    },
+    {
+      "uri": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/reconcile-request.schema.json",
+      "path": "contracts/schemas/recurring-related-tasks/reconcile-request.schema.json",
+      "sha256": "5d9059fd08a939d5befae9deafbc0b3ef9fcd68b9cef260a16c54e934bb22bff"
+    },
+    {
+      "uri": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/reconcile-response.schema.json",
+      "path": "contracts/schemas/recurring-related-tasks/reconcile-response.schema.json",
+      "sha256": "91fca0dcbcdfa9cf8398c361686ad3ae86615e5854b40da7d298c6c5c0bdb13a"
+    },
+    {
+      "uri": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/responses.schema.json",
+      "path": "contracts/schemas/recurring-related-tasks/responses.schema.json",
+      "sha256": "f9f2f14de6e5af615cfa37331bd914aa72a16c4d3553b53cfd009d48d184e56d"
+    },
+    {
+      "uri": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/retire-request.schema.json",
+      "path": "contracts/schemas/recurring-related-tasks/retire-request.schema.json",
+      "sha256": "f095706016917b40f039e3fd02a0671448113b124e1bfaf3dac1f9fdd6a16863"
+    },
+    {
+      "uri": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/retire-response.schema.json",
+      "path": "contracts/schemas/recurring-related-tasks/retire-response.schema.json",
+      "sha256": "2324775658e6c2d4d25535daf7522cecf6f2c16875427e7a53f2c54c313bdb91"
+    },
+    {
+      "uri": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/show-request.schema.json",
+      "path": "contracts/schemas/recurring-related-tasks/show-request.schema.json",
+      "sha256": "4b93baf15ecf7ab39fee793bddbabf744f05536f190e974c9918589e996ce660"
+    },
+    {
+      "uri": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/show-response.schema.json",
+      "path": "contracts/schemas/recurring-related-tasks/show-response.schema.json",
+      "sha256": "6280031e4f989b4a9a0eb6094108bb75fc0116f0f64b2bab406acedbfcdf8dd4"
+    },
+    {
+      "uri": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/suppress-request.schema.json",
+      "path": "contracts/schemas/recurring-related-tasks/suppress-request.schema.json",
+      "sha256": "9ee52341f6c68ad23576465921ff3db90aa74ec799ad52e865ec2d94dfb37f23"
+    },
+    {
+      "uri": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/suppress-response.schema.json",
+      "path": "contracts/schemas/recurring-related-tasks/suppress-response.schema.json",
+      "sha256": "364cd02cd41efe68dc88d2abd4577c53aec1839a1c5799e066a36baf60724e6f"
+    },
+    {
+      "uri": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json",
+      "path": "contracts/schemas/recurring-related-tasks/types.schema.json",
+      "sha256": "685368cf6379fa94a492607747dea10fdf8c22471170f29e0a6340ad61331be0"
+    },
+    {
+      "uri": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/update-request.schema.json",
+      "path": "contracts/schemas/recurring-related-tasks/update-request.schema.json",
+      "sha256": "4ba0d9b5cbff3922c2fe4d9ae87a1f9b5b699e98c1fbd9e60c6de95830b5c864"
+    },
+    {
+      "uri": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/update-response.schema.json",
+      "path": "contracts/schemas/recurring-related-tasks/update-response.schema.json",
+      "sha256": "cb5d067adb37626032ea8e71aa8035c7bcee6488e5ffa315e25941e8e49a5a40"
+    },
+    {
+      "uri": "https://cortext.local/spine/contracts/schemas/schedule-create-request.schema.json",
+      "path": "contracts/schemas/schedule-create-request.schema.json",
+      "sha256": "36def6761f9d2d7359a72896244ffd38437190cf1f594641b02de1ddc059109b"
+    },
+    {
+      "uri": "https://cortext.local/spine/contracts/schemas/schedule-primary-location-types.schema.json",
+      "path": "contracts/schemas/schedule-primary-location-types.schema.json",
+      "sha256": "661d062c440cb2b299132fe6d67390f1888c9639ca17945523744241a31217e3"
+    }
+  ]
+}

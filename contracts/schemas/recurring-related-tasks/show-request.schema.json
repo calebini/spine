@@ -1,0 +1,168 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/show-request.schema.json",
+  "title": "Draft recurring-task show request",
+  "$comment": "Source only. Command identifier is external dispatch, not a request field. Dry run is an execution option. Exact semantic validation/precedence and byte caps remain required.",
+  "oneOf": [
+    {
+      "type": "object",
+      "properties": {
+        "contract_version": {
+          "const": "spine.recurring-related-tasks.v1"
+        },
+        "related_task_rule_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/ruleId"
+        },
+        "view": {
+          "const": "rule",
+          "default": "rule"
+        }
+      },
+      "required": [
+        "contract_version",
+        "related_task_rule_id"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "contract_version": {
+          "const": "spine.recurring-related-tasks.v1"
+        },
+        "related_task_rule_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/ruleId"
+        },
+        "view": {
+          "const": "assignments"
+        },
+        "limit": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/positive",
+          "pattern": "^(?:[1-9]|[1-9][0-9]|1[0-9]{2}|200)(?![\\s\\S])",
+          "default": "50"
+        },
+        "cursor": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/cursor"
+        }
+      },
+      "required": [
+        "contract_version",
+        "related_task_rule_id",
+        "view"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "contract_version": {
+          "const": "spine.recurring-related-tasks.v1"
+        },
+        "related_task_rule_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/ruleId"
+        },
+        "view": {
+          "const": "assignment"
+        },
+        "assignment_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/assignmentId"
+        }
+      },
+      "required": [
+        "contract_version",
+        "related_task_rule_id",
+        "view",
+        "assignment_id"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "contract_version": {
+          "const": "spine.recurring-related-tasks.v1"
+        },
+        "related_task_rule_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/ruleId"
+        },
+        "view": {
+          "const": "generations"
+        },
+        "assignment_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/assignmentId"
+        },
+        "limit": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/positive",
+          "pattern": "^(?:[1-9]|[1-9][0-9]|1[0-9]{2}|200)(?![\\s\\S])",
+          "default": "50"
+        },
+        "cursor": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/cursor"
+        }
+      },
+      "required": [
+        "contract_version",
+        "related_task_rule_id",
+        "view",
+        "assignment_id"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "contract_version": {
+          "const": "spine.recurring-related-tasks.v1"
+        },
+        "related_task_rule_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/ruleId"
+        },
+        "view": {
+          "const": "proof"
+        },
+        "proof_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/proofId"
+        }
+      },
+      "required": [
+        "contract_version",
+        "related_task_rule_id",
+        "view",
+        "proof_id"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "contract_version": {
+          "const": "spine.recurring-related-tasks.v1"
+        },
+        "related_task_rule_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/ruleId"
+        },
+        "view": {
+          "const": "states"
+        },
+        "assignment_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/assignmentId"
+        },
+        "limit": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/positive",
+          "pattern": "^(?:[1-9]|[1-9][0-9]|1[0-9]{2}|200)(?![\\s\\S])",
+          "default": "50"
+        },
+        "cursor": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/cursor"
+        }
+      },
+      "required": [
+        "contract_version",
+        "related_task_rule_id",
+        "view",
+        "assignment_id"
+      ],
+      "additionalProperties": false
+    }
+  ]
+}

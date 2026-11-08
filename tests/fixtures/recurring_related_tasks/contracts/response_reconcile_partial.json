@@ -1,0 +1,318 @@
+{
+  "ok": true,
+  "response_contract": "spine.recurring-related-tasks-response.v1",
+  "command": "schedule.related_task_rule.reconcile",
+  "changed": true,
+  "effect": "rule_page_applied",
+  "evaluated_at_utc": "2026-11-08T10:00:00Z",
+  "result": {
+    "rule": {
+      "related_task_rule_id": "related_task_rule_a24002492d1555b29fa3ad5630e88f877633cba9703aafb63ee5ded452c938d4",
+      "owner": {
+        "owner_kind": "subject_group",
+        "owner_group_id": "fixture_kinflow"
+      },
+      "rule_key": "science_pickup",
+      "source_item_id": "item_fixture_science_class",
+      "recurrence_set_id": "recurrence_set_fixture_class",
+      "source_snapshot": {
+        "source_item_id": "item_fixture_science_class",
+        "source_item_version": "1",
+        "recurrence_set_id": "recurrence_set_fixture_class",
+        "recurrence_revision_id": "recurrence_revision_fixture_1",
+        "normalized_recurrence_set_hash": "a81ad5df22e71bb6557781ff40ffe67836bbe5335759837475d3bcdb9bc96b8c"
+      },
+      "status": "active",
+      "rule_revision_id": "related_task_rule_revision_dd920c726715ba6c9a6723417aa7ef73feb11f22d34cad749546bd065eab3067",
+      "revision_index": "1",
+      "configuration": {
+        "task_owner": {
+          "owner_kind": "subject_group",
+          "owner_group_id": "fixture_kinflow"
+        },
+        "task_template": {
+          "item": {
+            "item_type": "task",
+            "title": "Pick up Joe",
+            "task_detail": {
+              "priority": null
+            },
+            "summary": null,
+            "source_ref": null,
+            "primary_location": null,
+            "archetype": null
+          },
+          "people": {
+            "assignees": [
+              "fixture_parent"
+            ]
+          }
+        },
+        "offset_basis": "elapsed",
+        "offset_seconds": "5400",
+        "notification_plan": {
+          "requested": {
+            "mode": "none",
+            "custom_additions": [
+              {
+                "policy_key": "pickup_ten_minutes",
+                "schedule": {
+                  "kind": "once",
+                  "at": {
+                    "kind": "target_offset",
+                    "offset_basis": "elapsed",
+                    "offset_seconds": "-600"
+                  }
+                },
+                "late_handling": {
+                  "kind": "deliver_within",
+                  "grace_seconds": "300"
+                }
+              }
+            ]
+          },
+          "resolved": {
+            "selection_mode": "none",
+            "profile": null,
+            "notification_profile_binding_id": null,
+            "scope_chain": [],
+            "effective_templates": [
+              {
+                "policy_origin": "custom_addition",
+                "source_key": "pickup_ten_minutes",
+                "policy_key": "pickup_ten_minutes",
+                "template": {
+                  "template_key": "pickup_ten_minutes",
+                  "schedule": {
+                    "kind": "once",
+                    "at": {
+                      "kind": "target_offset",
+                      "offset_basis": "elapsed",
+                      "offset_seconds": "-600"
+                    }
+                  },
+                  "late_handling": {
+                    "kind": "deliver_within",
+                    "grace_seconds": "300"
+                  },
+                  "rendering": {
+                    "kind": "ordinary"
+                  }
+                },
+                "presentation": {
+                  "kind": "ordinary"
+                }
+              }
+            ]
+          }
+        },
+        "delivery": {
+          "requested": {
+            "recipient_kind": "subject_group",
+            "recipient_group_id": "fixture_kinflow",
+            "channel": "fixture_channel",
+            "target": {
+              "resolution": "explicit",
+              "delivery_target_id": "delivery_target_fixture"
+            }
+          },
+          "resolved": {
+            "delivery_target_id": "delivery_target_fixture",
+            "resolution_source": "explicit",
+            "recipient_kind": "subject_group",
+            "recipient_group_id": "fixture_kinflow",
+            "channel": "fixture_channel",
+            "adapter_name": "test_capture",
+            "target_ref": "fixture://no-send/pickup"
+          }
+        },
+        "materialization": {
+          "mode": "bounded",
+          "lookback_seconds": "0",
+          "horizon_seconds": "4838400",
+          "opportunity_limit": "100"
+        },
+        "generation_horizon_seconds": "4838400"
+      },
+      "configuration_hash": "c2a930a96b9d9ac3b0999befaff93bd1d9f4d8d87a514a704a98606b5cc58946",
+      "change_version": "2",
+      "catalog_generation": "2",
+      "enrollment": {
+        "kind": "upcoming"
+      },
+      "enrolled_at_utc": "2026-11-08T10:00:00Z",
+      "retirement_disposition": null,
+      "retirement_intent": null,
+      "adoption_intent": null,
+      "progress": null
+    },
+    "source_snapshot": {
+      "source_item_id": "item_fixture_science_class",
+      "source_item_version": "1",
+      "recurrence_set_id": "recurrence_set_fixture_class",
+      "recurrence_revision_id": "recurrence_revision_fixture_1",
+      "normalized_recurrence_set_hash": "a81ad5df22e71bb6557781ff40ffe67836bbe5335759837475d3bcdb9bc96b8c"
+    },
+    "selection": {
+      "evaluation_at_utc": "2026-11-08T10:00:00Z",
+      "execution_at_utc": "2026-11-08T10:00:00Z",
+      "limits": {
+        "source_candidates": "256",
+        "assignments": "32",
+        "mutations": "32",
+        "proof_steps": "10000",
+        "lineage_hops": "64",
+        "work_rows": "128",
+        "response_bytes": "262144"
+      },
+      "lane_start": {
+        "assignment_after_seq": "0",
+        "source_after": null
+      },
+      "lane_end": {
+        "assignment_after_seq": "1",
+        "source_after": {
+          "scheduled_fact": "2026-11-14T11:30:00",
+          "selector": {
+            "derivation_version": "spine.recurrence-target-occurrence-selector.v1",
+            "contract_version": "spine.recurrence.contract.v1",
+            "normalization_version": "spine.recurrence.normalization.v1",
+            "canonical_json_version": "spine.canonical-json.v1",
+            "recurrence_set_id": "recurrence_set_fixture_class",
+            "segment_ref": "1",
+            "scheduled_fact": "2026-11-14T11:30:00",
+            "origin_kind": "rule",
+            "source_rule_selectors": [
+              {
+                "frequency": "WEEKLY",
+                "interval": "1",
+                "seed": "2026-11-14T11:30:00",
+                "start_bound": "2026-11-14T11:30:00",
+                "end_condition": {
+                  "kind": "unbounded"
+                },
+                "status": "active",
+                "by_weekday": [
+                  "SA"
+                ],
+                "week_start": "MO"
+              }
+            ],
+            "source_rdate_selectors": []
+          }
+        }
+      },
+      "intent_id": null,
+      "assignment_high_water": null
+    },
+    "results": [
+      {
+        "outcome": "created",
+        "reason": "new_source_slot",
+        "selector": {
+          "derivation_version": "spine.recurrence-target-occurrence-selector.v1",
+          "contract_version": "spine.recurrence.contract.v1",
+          "normalization_version": "spine.recurrence.normalization.v1",
+          "canonical_json_version": "spine.canonical-json.v1",
+          "recurrence_set_id": "recurrence_set_fixture_class",
+          "segment_ref": "1",
+          "scheduled_fact": "2026-11-14T11:30:00",
+          "origin_kind": "rule",
+          "source_rule_selectors": [
+            {
+              "frequency": "WEEKLY",
+              "interval": "1",
+              "seed": "2026-11-14T11:30:00",
+              "start_bound": "2026-11-14T11:30:00",
+              "end_condition": {
+                "kind": "unbounded"
+              },
+              "status": "active",
+              "by_weekday": [
+                "SA"
+              ],
+              "week_start": "MO"
+            }
+          ],
+          "source_rdate_selectors": []
+        },
+        "occurrence_key": "37220c4acbb53b8dc6009df50a4dd22a4c0de7f12d62cde1ea9716e43cd66f5b",
+        "assignment_id": "related_task_assignment_2f5bfca79187b3e7ebb8f1fca3d958b4dfc0cf9a742cdb9f9654350952811f02",
+        "generation_id": "related_task_generation_7c941b7ede44128583e902f7d42cc03b2917c657a13abf22236af85660d143aa",
+        "actions": [
+          "alias_reserved",
+          "assignment_created",
+          "task_created"
+        ],
+        "before": null,
+        "after": {
+          "assignment_id": "related_task_assignment_2f5bfca79187b3e7ebb8f1fca3d958b4dfc0cf9a742cdb9f9654350952811f02",
+          "generation_id": "related_task_generation_7c941b7ede44128583e902f7d42cc03b2917c657a13abf22236af85660d143aa",
+          "task_item_id": "item_218fffa030c67ccab3c8331b1f60a61a80e6a598f00ec52ebc20e7eacc1aef7c",
+          "task_item_version": "1",
+          "temporal_binding_id": "temporal_binding_347e6c823f2321dbbc1ee946e131487a4b5ccc93e9acbba0ea198c0a59519fc7",
+          "temporal_binding_revision_id": "temporal_binding_revision_7960c5e0c21c1443d5413c828f9fd5e6be7a7e1c8708024e7dcece511a76712a",
+          "adopted_rule_revision_id": "related_task_rule_revision_dd920c726715ba6c9a6723417aa7ef73feb11f22d34cad749546bd065eab3067",
+          "desired_rule_revision_id": null,
+          "predecessor_generation_id": null,
+          "item_access_owner_id": "item_access_owner_996cc22ff0c1425d4ec1331fd584255b251475842b596215df7cd5d74113c8bb",
+          "item_access_owner_revision": "1"
+        },
+        "proof_ids": [
+          "related_task_proof_88976c22205045697fa0b5c158c3be4c1d80a1ba299dadf55da8d9043f39079e"
+        ]
+      }
+    ],
+    "policy_mappings": [
+      {
+        "assignment_id": "related_task_assignment_2f5bfca79187b3e7ebb8f1fca3d958b4dfc0cf9a742cdb9f9654350952811f02",
+        "generation_id": "related_task_generation_7c941b7ede44128583e902f7d42cc03b2917c657a13abf22236af85660d143aa",
+        "task_item_id": "item_218fffa030c67ccab3c8331b1f60a61a80e6a598f00ec52ebc20e7eacc1aef7c",
+        "policy_key": "pickup_ten_minutes",
+        "creation_token": "related_task_generation_7c941b7ede44128583e902f7d42cc03b2917c657a13abf22236af85660d143aa:pickup_ten_minutes",
+        "notification_intent_id": "notification_intent_16015ebf134416d4be25549c833f5029dfd4949b5881f072996edd2ee739cf28",
+        "notification_policy_id": "notification_policy_887c370f1392822a61e2b07dc645e3dec7cb7847f4a76b785407d2d2b515871d"
+      }
+    ],
+    "work": {
+      "created": [
+        "work_instance_c5b55a8b8148364badabc6e57b203b37c712a038e56c338a47c2c78caa447bc3"
+      ],
+      "retained": [],
+      "cancelled": [],
+      "protected_stale": []
+    },
+    "coverage": {
+      "generation": {
+        "status": "partial",
+        "processed_count": "1",
+        "remaining_known_count": null
+      },
+      "assignments": {
+        "status": "complete",
+        "processed_count": "0",
+        "remaining_known_count": "0"
+      },
+      "adoption": {
+        "status": "not_applicable",
+        "processed_count": "0",
+        "remaining_known_count": "0"
+      },
+      "retirement": {
+        "status": "not_applicable",
+        "processed_count": "0",
+        "remaining_known_count": "0"
+      }
+    },
+    "future_generation": "waiting",
+    "has_more": true,
+    "next_cursor": "eyJhZnRlciI6eyJhc3NpZ25tZW50X2FmdGVyX3NlcSI6IjEiLCJzb3VyY2VfYWZ0ZXIiOnsic2NoZWR1bGVkX2ZhY3QiOiIyMDI2LTExLTE0VDExOjMwOjAwIiwic2VsZWN0b3IiOnsiY2Fub25pY2FsX2pzb25fdmVyc2lvbiI6InNwaW5lLmNhbm9uaWNhbC1qc29uLnYxIiwiY29udHJhY3RfdmVyc2lvbiI6InNwaW5lLnJlY3VycmVuY2UuY29udHJhY3QudjEiLCJkZXJpdmF0aW9uX3ZlcnNpb24iOiJzcGluZS5yZWN1cnJlbmNlLXRhcmdldC1vY2N1cnJlbmNlLXNlbGVjdG9yLnYxIiwibm9ybWFsaXphdGlvbl92ZXJzaW9uIjoic3BpbmUucmVjdXJyZW5jZS5ub3JtYWxpemF0aW9uLnYxIiwib3JpZ2luX2tpbmQiOiJydWxlIiwicmVjdXJyZW5jZV9zZXRfaWQiOiJyZWN1cnJlbmNlX3NldF9maXh0dXJlX2NsYXNzIiwic2NoZWR1bGVkX2ZhY3QiOiIyMDI2LTExLTE0VDExOjMwOjAwIiwic2VnbWVudF9yZWYiOiIxIiwic291cmNlX3JkYXRlX3NlbGVjdG9ycyI6W10sInNvdXJjZV9ydWxlX3NlbGVjdG9ycyI6W3siYnlfd2Vla2RheSI6WyJTQSJdLCJlbmRfY29uZGl0aW9uIjp7ImtpbmQiOiJ1bmJvdW5kZWQifSwiZnJlcXVlbmN5IjoiV0VFS0xZIiwiaW50ZXJ2YWwiOiIxIiwic2VlZCI6IjIwMjYtMTEtMTRUMTE6MzA6MDAiLCJzdGFydF9ib3VuZCI6IjIwMjYtMTEtMTRUMTE6MzA6MDAiLCJzdGF0dXMiOiJhY3RpdmUiLCJ3ZWVrX3N0YXJ0IjoiTU8ifV19fX0sImNhbm9uaWNhbF9qc29uX3ZlcnNpb24iOiJzcGluZS5jYW5vbmljYWwtanNvbi52MSIsImNhdGFsb2dfZ2VuZXJhdGlvbiI6IjIiLCJjdXJzb3JfdmVyc2lvbiI6InNwaW5lLnJlY3VycmluZy1yZWxhdGVkLXRhc2tzLmN1cnNvci52MSIsImV2YWx1YXRpb25fYXRfdXRjIjoiMjAyNi0xMS0wOFQxMDowMDowMFoiLCJleHBpcmVzX2F0X3V0YyI6IjIwMjYtMTEtMDhUMTE6MDA6MDBaIiwiaXNzdWVkX2F0X3V0YyI6IjIwMjYtMTEtMDhUMTA6MDA6MDBaIiwia2V5X2lkIjoicHVibGljX2ZpeHR1cmVfa2V5Iiwibm9ybWFsaXplZF9yZWN1cnJlbmNlX3NldF9oYXNoIjoiYTgxYWQ1ZGYyMmU3MWJiNjU1Nzc4MWZmNDBmZmU2NzgzNmJiZTUzMzU3NTk4Mzc0NzVkM2JjZGI5YmM5NmI4YyIsInB1cnBvc2UiOiJyZWNvbmNpbGUiLCJxdWVyeSI6eyJjb250cmFjdF92ZXJzaW9uIjoic3BpbmUucmVjdXJyaW5nLXJlbGF0ZWQtdGFza3MudjEiLCJsZWRnZXJfaW5zdGFuY2VfaWQiOiJsZWRnZXJfaW5zdGFuY2VfZGlzcG9zYWJsZV9maXh0dXJlX29ubHkiLCJsaW1pdHMiOnsiYXNzaWdubWVudHMiOiIzMiIsImxpbmVhZ2VfaG9wcyI6IjY0IiwibXV0YXRpb25zIjoiMzIiLCJwcm9vZl9zdGVwcyI6IjEwMDAwIiwicmVzcG9uc2VfYnl0ZXMiOiIyNjIxNDQiLCJzb3VyY2VfY2FuZGlkYXRlcyI6IjI1NiIsIndvcmtfcm93cyI6IjEyOCJ9LCJyZWxhdGVkX3Rhc2tfcnVsZV9pZCI6InJlbGF0ZWRfdGFza19ydWxlX2EyNDAwMjQ5MmQxNTU1YjI5ZmEzYWQ1NjMwZTg4Zjg3NzYzM2NiYTk3MDNhYWZiNjNlZTVkZWQ0NTJjOTM4ZDQifSwicmFuZ2VfZW5kX3V0YyI6IjIwMjctMDEtMDNUMTA6MDA6MDBaIiwicmFuZ2Vfc3RhcnRfdXRjIjoiMjAyNi0xMS0wOFQxMDowMDowMFoiLCJyZWN1cnJlbmNlX3JldmlzaW9uX2lkIjoicmVjdXJyZW5jZV9yZXZpc2lvbl9maXh0dXJlXzEiLCJyZWN1cnJlbmNlX3NldF9pZCI6InJlY3VycmVuY2Vfc2V0X2ZpeHR1cmVfY2xhc3MiLCJydWxlX2NoYW5nZV92ZXJzaW9uIjoiMiIsInJ1bGVfcmV2aXNpb25faWQiOiJyZWxhdGVkX3Rhc2tfcnVsZV9yZXZpc2lvbl9kZDkyMGM3MjY3MTViYTZjOWE2NzIzNDE3YWE3ZWY3M2ZlYjExZjIyZDM0Y2FkNzQ5NTQ2YmQwNjVlYWIzMDY3Iiwic291cmNlX2l0ZW1faWQiOiJpdGVtX2ZpeHR1cmVfc2NpZW5jZV9jbGFzcyIsInNvdXJjZV9pdGVtX3ZlcnNpb24iOiIxIn0.izw-xB_CSw8VRpl0Hkka1Li_ucLSf_OPJ_XOOwW3ixw",
+    "delivery": "not_attempted_by_command"
+  },
+  "command_id": "fixture_reconcile_page_1",
+  "command_receipt_id": "command_receipt_6064d1390b3857207f1c52c45a330a8fb9e1da16db1ff29fffa54d61f5395330",
+  "audit_ids": [
+    "audit_8be8efa127c3b52596782b3aca5686ac908f9409184eead60ca6bae66236f63a"
+  ],
+  "replayed": false
+}

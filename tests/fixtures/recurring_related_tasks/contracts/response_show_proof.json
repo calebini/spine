@@ -1,0 +1,61 @@
+{
+  "ok": true,
+  "response_contract": "spine.recurring-related-tasks-response.v1",
+  "command": "schedule.related_task_rule.show",
+  "changed": false,
+  "effect": "rule_shown",
+  "evaluated_at_utc": "2026-11-08T10:00:00Z",
+  "result": {
+    "proof": {
+      "proof_id": "related_task_proof_88976c22205045697fa0b5c158c3be4c1d80a1ba299dadf55da8d9043f39079e",
+      "related_task_rule_id": "related_task_rule_a24002492d1555b29fa3ad5630e88f877633cba9703aafb63ee5ded452c938d4",
+      "proof_kind": "enrollment",
+      "source_item_version": "1",
+      "recurrence_revision_id": "recurrence_revision_fixture_1",
+      "prior_recurrence_revision_id": null,
+      "proof_json": {
+        "source_item_id": "item_fixture_science_class",
+        "source_item_version": "1",
+        "recurrence_set_id": "recurrence_set_fixture_class",
+        "recurrence_revision_id": "recurrence_revision_fixture_1",
+        "normalized_recurrence_set_hash": "a81ad5df22e71bb6557781ff40ffe67836bbe5335759837475d3bcdb9bc96b8c",
+        "selector": {
+          "derivation_version": "spine.recurrence-target-occurrence-selector.v1",
+          "contract_version": "spine.recurrence.contract.v1",
+          "normalization_version": "spine.recurrence.normalization.v1",
+          "canonical_json_version": "spine.canonical-json.v1",
+          "recurrence_set_id": "recurrence_set_fixture_class",
+          "segment_ref": "1",
+          "scheduled_fact": "2026-11-14T11:30:00",
+          "origin_kind": "rule",
+          "source_rule_selectors": [
+            {
+              "frequency": "WEEKLY",
+              "interval": "1",
+              "seed": "2026-11-14T11:30:00",
+              "start_bound": "2026-11-14T11:30:00",
+              "end_condition": {
+                "kind": "unbounded"
+              },
+              "status": "active",
+              "by_weekday": [
+                "SA"
+              ],
+              "week_start": "MO"
+            }
+          ],
+          "source_rdate_selectors": []
+        },
+        "occurrence_key": "37220c4acbb53b8dc6009df50a4dd22a4c0de7f12d62cde1ea9716e43cd66f5b",
+        "lineage_ids": [],
+        "enrolled_recurrence_revision_id": "recurrence_revision_fixture_1"
+      },
+      "proof_hash": "88976c22205045697fa0b5c158c3be4c1d80a1ba299dadf55da8d9043f39079e",
+      "created_by_command_id": "fixture_reconcile_page_1",
+      "created_at_utc": "2026-11-08T10:00:00Z"
+    },
+    "read_at_utc": "2026-11-08T10:00:00Z",
+    "delivery": "not_attempted_by_command"
+  },
+  "commit_cutoff_recheck_required": true
+}

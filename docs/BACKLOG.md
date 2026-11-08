@@ -43,7 +43,7 @@ review is complete under SPINE-076; SPINE-077's three additional lenses reported
 one operability minor, now amended locally under SPINE-078 without an external
 recheck. Detailed technical companions are now drafted under SPINE-079; their
 SPINE-080 buildability review reported three majors, now amended locally under
-SPINE-081 pending external recheck before machine codification. No product
+SPINE-081 and passed the scoped SPINE-082 recheck before machine codification. No product
 decision is reopened by recording or correcting those contract seams.
 **Request:** A recurring class should generate one independently completable
 pickup task per occurrence, due 90 elapsed minutes after the expressed class
@@ -323,7 +323,8 @@ Original finding counts/verdict are unchanged. No automatic patch/review loop.
 ### SPINE-081 — Bounded amendment for recurring-task buildability findings
 
 **Status:** Done — operator-authorized manual specification patch applied and
-locally verified (2026-11-08) for SPINE-080 BF-001–003; not externally rechecked.
+locally verified (2026-11-08) for SPINE-080 BF-001–003; the subsequent focused
+SPINE-082 recheck passed with zero findings and boundary preserved.
 No runtime, schema/DDL, machine-fixture generation, new audit, commit, push or deployment.
 **Assessment:** Agree with all three as normative gaps, not confirmed runtime
 defects. Existing recurrence selector storage and per-policy authoring-token
@@ -347,14 +348,91 @@ Existing doc/declaration, create/profile and selected-binding checks pass
 **39 tests**; pure no-ledger identity checks and static DDL dependency checks pass.
 Local links/new anchors, diff hygiene and unchanged AGENTS bytes are verified.
 This is not new-family runtime or migration test evidence.
-**Next:** Report the local patch, then separately stage/authorize a focused
-buildability recheck before machine schemas/computed fixtures. No ratification
-or change to the original audit's three-major/false-boundary outcome is claimed.
+**Next:** SPINE-082 records the separate clean focused recheck; machine schemas/
+computed fixtures are the next separately selected step. No ratification or
+change to the original audit's three-major/false-boundary report is claimed.
 **Checkpoint/recheck request (2026-11-08):** The operator requested a local commit
 of the bounded patch and related audit tracking, then a focused buildability
 recheck. Exclude the unrelated `AGENTS.md` amendment. Prepare a new exact payload
 and approval record; the earlier 18-file approval does not approve changed source
 bytes or an additional reviewer request. No push is authorized.
+
+### SPINE-082 — Focused buildability recheck of BF-001–003
+
+**Status:** Done — approved focused pass completed (2026-11-08): **pass**,
+**boundary_preserved=true**, **0 blockers / 0 majors / 0 minors / 0 nits**.
+SPINE-081 patch checkpoint:
+`d1631670eff8b718b5a6cff2c839885f884bb2b8`. No push is authorized.
+**Package:** [Audit notes](../whetstone_runs/recurring-related-task-technical-buildability-audit-002/audit-notes.md)
+list **13 inputs: 12 complete specifications plus original BF-001–003 feedback**.
+The [prepared manifest](../whetstone_runs/recurring-related-task-technical-buildability-audit-002/prepared-inputs.json)
+binds their ordered paths, bytes/hashes, notes, adapter and full built-in prompt.
+Inputs: **609,337 bytes**; prompt: **623,658 characters / 624,065 UTF-8 bytes**.
+Prior feedback is historical evidence, not normative authority or a file to rewrite.
+**Focus:** Exact selector authority/producer/reuse; distinct reminder tokens and
+real outer attribution; explicit subject/group child ownership/header/history/
+epoch before disclosure/work. Recheck the three findings and patch-introduced
+regressions only; preserve D-01–05, ordinary create behavior and frozen identities.
+**Execution:** One reviewer-only `audit-change`, built-in `buildability`, stable
+Whetstone `0.1.0` checkpoint `6e19fe3e72dedda50a372781a43c08e5d7e7480a`,
+Codex CLI `0.166.0-alpha.6`, `gpt-6.1-sol`, explicit medium reasoning and
+1200-second timeout. No Editor, convergence, automatic retry or source mutation.
+**Guard:** The [launcher](../whetstone_runs/recurring-related-task-technical-buildability-audit-002/run-review.py)
+defaults to local verification and refuses source/checkpoint/runtime/adapter/CLI/
+prompt drift, missing approval hashes or an existing attempt. The
+[authorization](../whetstone_runs/recurring-related-task-technical-buildability-audit-002/authorization.md)
+and [status](../whetstone_runs/recurring-related-task-technical-buildability-audit-002/execution-status.json)
+record the actual operator approval and manifest/notes hashes. Original run artifacts are unchanged; new artifacts
+remain local under the existing ignore rule. The unrelated AGENTS edit is excluded.
+**Outcome:** The [persisted report](../whetstone_runs/recurring-related-task-technical-buildability-audit-002/change_audit/change_audit_report.md)
+and [execution summary](../whetstone_runs/recurring-related-task-technical-buildability-audit-002/execution-summary.md)
+show empty feedback and no remaining findings within the BF-001–003/patch-regression
+scope. No per-ID reviewer narrative was supplied; do not invent broader endorsement.
+Process exit 0; all approved inputs, notes, prompt, runtime/adapter/CLI and AGENTS
+bytes unchanged. Original audit-001 verdict/counts/reports are preserved.
+**Next:** Separately select machine schemas/computed fixtures, then their review
+and implementation plan. This scoped result is not convergence, ratification,
+whole-feature runtime acceptance or permission to implement/deploy. No runtime,
+ledger/migration, send, deployment, commit or push occurred during review.
+
+### SPINE-083 — Codify recurring-task machine contracts and computed fixtures
+
+**Status:** Done locally (2026-11-08) — source-only machine codification after the
+clean scoped SPINE-082 recheck; machine-contract review and ratification remain
+pending. Source-only schemas, capability/dependency manifest, computed
+wire/identity/cursor/model fixtures and offline contract tests are present.
+No runtime registration, handler/worker behavior, DDL/migration, ratification,
+external audit, commit, push or deployment.
+**Authority:** Preserve the reviewed logical/storage/command leaves and D-01–05.
+Record mechanical wire-name/representation closure explicitly where prose used
+descriptive tuples; do not invent product policy or treat offline model evidence
+as runtime concurrency, transaction, migration or delivery proof.
+**Preservation:** Keep existing AGENTS and review-tracking changes; do not alter
+frozen schemas, installed HTTP registries/pins or packaged runtime declarations.
+**Artifacts:** [Machine companion](../specs/recurring-related-task-machine-contract.md),
+[capability/dependency manifest](../contracts/recurring-related-tasks.v1.json),
+[fixture manifest](../contracts/recurring-related-task-fixture-manifest.json),
+[21 source-only schemas](../contracts/schemas/recurring-related-tasks/), and
+[offline contract tests](../tests/test_recurring_related_task_contracts.py).
+The explicit offline closure binds 29 resources, including eight existing delegated
+schemas. No frozen schema or runtime registry is changed. The corpus contains
+70 wire fixtures (59 valid, 11 intentionally invalid), 85 canonical preimage/hash/ID
+vectors, five purpose-specific cursor/HMAC vectors and 39 finite decision witnesses.
+Mutually exclusive evidence branches are labelled as alternatives, not a single
+ledger snapshot. Eighteen actual runtime proof obligations remain explicitly pending.
+**Verification:** The new 14-test module plus existing documentation, declarations,
+schedule-create, profile-command and relative-binding regressions pass **53 tests**.
+The deterministic stdout-only builder's `--check` verifies all 76 generated
+artifacts; focused Ruff and `git diff --check` pass. Existing AGENTS.md bytes are
+unchanged; all **414 local Markdown targets** in seven affected documents resolve. Offline
+examples do not prove SQL, migration, locking, scheduler or delivery races.
+**Next:** Review this machine corpus before ratification and the selected runtime
+implementation plan. No external review, commit or push was performed in this step.
+**Checkpoint/review preparation (2026-11-08):** The operator requested a local
+commit of the cohesive machine corpus and supporting review/codification tracking,
+then preparation of a reviewer-only bounded machine-contract review. Exclude the
+unrelated `AGENTS.md` edit. External transmission requires separate exact-payload
+approval; no push, runtime implementation or migration is authorized.
 
 ## Post-release corrective work
 

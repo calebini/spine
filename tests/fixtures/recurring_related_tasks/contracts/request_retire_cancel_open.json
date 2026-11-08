@@ -1,0 +1,15 @@
+{
+  "contract_version": "spine.recurring-related-tasks.v1",
+  "command_id": "fixture_author_rule",
+  "actor_subject_id": "fixture_operator",
+  "requested_at_utc": "2026-11-08T10:00:00Z",
+  "related_task_rule_id": "related_task_rule_a24002492d1555b29fa3ad5630e88f877633cba9703aafb63ee5ded452c938d4",
+  "expected": {
+    "rule_change_version": "1",
+    "rule_revision_id": "related_task_rule_revision_dd920c726715ba6c9a6723417aa7ef73feb11f22d34cad749546bd065eab3067",
+    "source_item_version": "1",
+    "recurrence_revision_id": "recurrence_revision_fixture_1",
+    "catalog_generation": "1"
+  },
+  "disposition": "cancel_open"
+}

@@ -1,0 +1,454 @@
+{
+  "contract_version": "spine.recurring-related-task-fixtures.v1",
+  "status": "draft_source_only",
+  "runtime_verified": false,
+  "registry": "contracts/recurring-related-tasks.v1.json",
+  "schema_closure": "contracts/recurring-related-task-schema-closure.v1.json",
+  "builder": "scripts/build_recurring_related_task_contract_fixtures.py",
+  "fixtures": [
+    {
+      "fixture_id": "failure_capacity_exceeded",
+      "fixture": "tests/fixtures/recurring_related_tasks/contracts/failure_capacity_exceeded.json",
+      "schema": "contracts/schemas/recurring-related-tasks/failure.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "failure_command_id_conflict",
+      "fixture": "tests/fixtures/recurring_related_tasks/contracts/failure_command_id_conflict.json",
+      "schema": "contracts/schemas/recurring-related-tasks/failure.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "failure_environment_failure",
+      "fixture": "tests/fixtures/recurring_related_tasks/contracts/failure_environment_failure.json",
+      "schema": "contracts/schemas/recurring-related-tasks/failure.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "failure_invalid_request",
+      "fixture": "tests/fixtures/recurring_related_tasks/contracts/failure_invalid_request.json",
+      "schema": "contracts/schemas/recurring-related-tasks/failure.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "failure_referenced_row_not_found",
+      "fixture": "tests/fixtures/recurring_related_tasks/contracts/failure_referenced_row_not_found.json",
+      "schema": "contracts/schemas/recurring-related-tasks/failure.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "failure_rendering_disclosure_unavailable",
+      "fixture": "tests/fixtures/recurring_related_tasks/contracts/failure_rendering_disclosure_unavailable.json",
+      "schema": "contracts/schemas/recurring-related-tasks/failure.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "failure_semantic_conflict",
+      "fixture": "tests/fixtures/recurring_related_tasks/contracts/failure_semantic_conflict.json",
+      "schema": "contracts/schemas/recurring-related-tasks/failure.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "failure_stale_cursor",
+      "fixture": "tests/fixtures/recurring_related_tasks/contracts/failure_stale_cursor.json",
+      "schema": "contracts/schemas/recurring-related-tasks/failure.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "failure_stale_evaluation",
+      "fixture": "tests/fixtures/recurring_related_tasks/contracts/failure_stale_evaluation.json",
+      "schema": "contracts/schemas/recurring-related-tasks/failure.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "failure_stale_version",
+      "fixture": "tests/fixtures/recurring_related_tasks/contracts/failure_stale_version.json",
+      "schema": "contracts/schemas/recurring-related-tasks/failure.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "failure_unsupported_command",
+      "fixture": "tests/fixtures/recurring_related_tasks/contracts/failure_unsupported_command.json",
+      "schema": "contracts/schemas/recurring-related-tasks/failure.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "failure_unsupported_contract_version",
+      "fixture": "tests/fixtures/recurring_related_tasks/contracts/failure_unsupported_contract_version.json",
+      "schema": "contracts/schemas/recurring-related-tasks/failure.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "failure_unsupported_field",
+      "fixture": "tests/fixtures/recurring_related_tasks/contracts/failure_unsupported_field.json",
+      "schema": "contracts/schemas/recurring-related-tasks/failure.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "invalid_create_embedded_roles",
+      "fixture": "tests/fixtures/recurring_related_tasks/contracts/invalid_create_embedded_roles.json",
+      "schema": "contracts/schemas/recurring-related-tasks/create-request.schema.json",
+      "valid": false
+    },
+    {
+      "fixture_id": "invalid_create_system_child_owner",
+      "fixture": "tests/fixtures/recurring_related_tasks/contracts/invalid_create_system_child_owner.json",
+      "schema": "contracts/schemas/recurring-related-tasks/create-request.schema.json",
+      "valid": false
+    },
+    {
+      "fixture_id": "invalid_create_wrong_group_field",
+      "fixture": "tests/fixtures/recurring_related_tasks/contracts/invalid_create_wrong_group_field.json",
+      "schema": "contracts/schemas/recurring-related-tasks/create-request.schema.json",
+      "valid": false
+    },
+    {
+      "fixture_id": "invalid_false_delivery_claim",
+      "fixture": "tests/fixtures/recurring_related_tasks/contracts/invalid_false_delivery_claim.json",
+      "schema": "contracts/schemas/recurring-related-tasks/create-response.schema.json",
+      "valid": false
+    },
+    {
+      "fixture_id": "invalid_fractional_time",
+      "fixture": "tests/fixtures/recurring_related_tasks/contracts/invalid_fractional_time.json",
+      "schema": "contracts/schemas/recurring-related-tasks/create-request.schema.json",
+      "valid": false
+    },
+    {
+      "fixture_id": "invalid_negative_zero",
+      "fixture": "tests/fixtures/recurring_related_tasks/contracts/invalid_negative_zero.json",
+      "schema": "contracts/schemas/recurring-related-tasks/create-request.schema.json",
+      "valid": false
+    },
+    {
+      "fixture_id": "invalid_numeric_limit",
+      "fixture": "tests/fixtures/recurring_related_tasks/contracts/invalid_numeric_limit.json",
+      "schema": "contracts/schemas/recurring-related-tasks/reconcile-request.schema.json",
+      "valid": false
+    },
+    {
+      "fixture_id": "invalid_over_limit",
+      "fixture": "tests/fixtures/recurring_related_tasks/contracts/invalid_over_limit.json",
+      "schema": "contracts/schemas/recurring-related-tasks/reconcile-request.schema.json",
+      "valid": false
+    },
+    {
+      "fixture_id": "invalid_preview_receipt",
+      "fixture": "tests/fixtures/recurring_related_tasks/contracts/invalid_preview_receipt.json",
+      "schema": "contracts/schemas/recurring-related-tasks/create-response.schema.json",
+      "valid": false
+    },
+    {
+      "fixture_id": "invalid_read_receipt",
+      "fixture": "tests/fixtures/recurring_related_tasks/contracts/invalid_read_receipt.json",
+      "schema": "contracts/schemas/recurring-related-tasks/show-response.schema.json",
+      "valid": false
+    },
+    {
+      "fixture_id": "invalid_unknown_force",
+      "fixture": "tests/fixtures/recurring_related_tasks/contracts/invalid_unknown_force.json",
+      "schema": "contracts/schemas/recurring-related-tasks/reconcile-request.schema.json",
+      "valid": false
+    },
+    {
+      "fixture_id": "request_create_archetype_default",
+      "fixture": "tests/fixtures/recurring_related_tasks/contracts/request_create_archetype_default.json",
+      "schema": "contracts/schemas/recurring-related-tasks/create-request.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "request_create_exact_profile",
+      "fixture": "tests/fixtures/recurring_related_tasks/contracts/request_create_exact_profile.json",
+      "schema": "contracts/schemas/recurring-related-tasks/create-request.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "request_create_pickup",
+      "fixture": "tests/fixtures/recurring_related_tasks/contracts/request_create_pickup.json",
+      "schema": "contracts/schemas/recurring-related-tasks/create-request.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "request_create_selected",
+      "fixture": "tests/fixtures/recurring_related_tasks/contracts/request_create_selected.json",
+      "schema": "contracts/schemas/recurring-related-tasks/create-request.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "request_create_two_reminders",
+      "fixture": "tests/fixtures/recurring_related_tasks/contracts/request_create_two_reminders.json",
+      "schema": "contracts/schemas/recurring-related-tasks/create-request.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "request_create_without_reminders",
+      "fixture": "tests/fixtures/recurring_related_tasks/contracts/request_create_without_reminders.json",
+      "schema": "contracts/schemas/recurring-related-tasks/create-request.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "request_list_cursor",
+      "fixture": "tests/fixtures/recurring_related_tasks/contracts/request_list_cursor.json",
+      "schema": "contracts/schemas/recurring-related-tasks/list-request.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "request_list_defaults",
+      "fixture": "tests/fixtures/recurring_related_tasks/contracts/request_list_defaults.json",
+      "schema": "contracts/schemas/recurring-related-tasks/list-request.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "request_reconcile_cursor",
+      "fixture": "tests/fixtures/recurring_related_tasks/contracts/request_reconcile_cursor.json",
+      "schema": "contracts/schemas/recurring-related-tasks/reconcile-request.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "request_reconcile_defaults",
+      "fixture": "tests/fixtures/recurring_related_tasks/contracts/request_reconcile_defaults.json",
+      "schema": "contracts/schemas/recurring-related-tasks/reconcile-request.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "request_retire_cancel_open",
+      "fixture": "tests/fixtures/recurring_related_tasks/contracts/request_retire_cancel_open.json",
+      "schema": "contracts/schemas/recurring-related-tasks/retire-request.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "request_retire_detach_open",
+      "fixture": "tests/fixtures/recurring_related_tasks/contracts/request_retire_detach_open.json",
+      "schema": "contracts/schemas/recurring-related-tasks/retire-request.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "request_retire_keep_following",
+      "fixture": "tests/fixtures/recurring_related_tasks/contracts/request_retire_keep_following.json",
+      "schema": "contracts/schemas/recurring-related-tasks/retire-request.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "request_show_assignment",
+      "fixture": "tests/fixtures/recurring_related_tasks/contracts/request_show_assignment.json",
+      "schema": "contracts/schemas/recurring-related-tasks/show-request.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "request_show_assignments",
+      "fixture": "tests/fixtures/recurring_related_tasks/contracts/request_show_assignments.json",
+      "schema": "contracts/schemas/recurring-related-tasks/show-request.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "request_show_default",
+      "fixture": "tests/fixtures/recurring_related_tasks/contracts/request_show_default.json",
+      "schema": "contracts/schemas/recurring-related-tasks/show-request.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "request_show_generations",
+      "fixture": "tests/fixtures/recurring_related_tasks/contracts/request_show_generations.json",
+      "schema": "contracts/schemas/recurring-related-tasks/show-request.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "request_show_proof",
+      "fixture": "tests/fixtures/recurring_related_tasks/contracts/request_show_proof.json",
+      "schema": "contracts/schemas/recurring-related-tasks/show-request.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "request_show_states",
+      "fixture": "tests/fixtures/recurring_related_tasks/contracts/request_show_states.json",
+      "schema": "contracts/schemas/recurring-related-tasks/show-request.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "request_suppress",
+      "fixture": "tests/fixtures/recurring_related_tasks/contracts/request_suppress.json",
+      "schema": "contracts/schemas/recurring-related-tasks/suppress-request.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "request_update_new_only",
+      "fixture": "tests/fixtures/recurring_related_tasks/contracts/request_update_new_only.json",
+      "schema": "contracts/schemas/recurring-related-tasks/update-request.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "request_update_upcoming",
+      "fixture": "tests/fixtures/recurring_related_tasks/contracts/request_update_upcoming.json",
+      "schema": "contracts/schemas/recurring-related-tasks/update-request.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "response_create",
+      "fixture": "tests/fixtures/recurring_related_tasks/contracts/response_create.json",
+      "schema": "contracts/schemas/recurring-related-tasks/create-response.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "response_create_preview",
+      "fixture": "tests/fixtures/recurring_related_tasks/contracts/response_create_preview.json",
+      "schema": "contracts/schemas/recurring-related-tasks/create-response.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "response_create_replay",
+      "fixture": "tests/fixtures/recurring_related_tasks/contracts/response_create_replay.json",
+      "schema": "contracts/schemas/recurring-related-tasks/create-response.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "response_list",
+      "fixture": "tests/fixtures/recurring_related_tasks/contracts/response_list.json",
+      "schema": "contracts/schemas/recurring-related-tasks/list-response.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "response_reconcile_created",
+      "fixture": "tests/fixtures/recurring_related_tasks/contracts/response_reconcile_created.json",
+      "schema": "contracts/schemas/recurring-related-tasks/reconcile-response.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "response_reconcile_decision_required",
+      "fixture": "tests/fixtures/recurring_related_tasks/contracts/response_reconcile_decision_required.json",
+      "schema": "contracts/schemas/recurring-related-tasks/reconcile-response.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "response_reconcile_noop",
+      "fixture": "tests/fixtures/recurring_related_tasks/contracts/response_reconcile_noop.json",
+      "schema": "contracts/schemas/recurring-related-tasks/reconcile-response.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "response_reconcile_partial",
+      "fixture": "tests/fixtures/recurring_related_tasks/contracts/response_reconcile_partial.json",
+      "schema": "contracts/schemas/recurring-related-tasks/reconcile-response.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "response_reconcile_progress",
+      "fixture": "tests/fixtures/recurring_related_tasks/contracts/response_reconcile_progress.json",
+      "schema": "contracts/schemas/recurring-related-tasks/reconcile-response.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "response_retire_cancel_open",
+      "fixture": "tests/fixtures/recurring_related_tasks/contracts/response_retire_cancel_open.json",
+      "schema": "contracts/schemas/recurring-related-tasks/retire-response.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "response_retire_detach_open",
+      "fixture": "tests/fixtures/recurring_related_tasks/contracts/response_retire_detach_open.json",
+      "schema": "contracts/schemas/recurring-related-tasks/retire-response.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "response_retire_keep_following",
+      "fixture": "tests/fixtures/recurring_related_tasks/contracts/response_retire_keep_following.json",
+      "schema": "contracts/schemas/recurring-related-tasks/retire-response.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "response_retire_noop",
+      "fixture": "tests/fixtures/recurring_related_tasks/contracts/response_retire_noop.json",
+      "schema": "contracts/schemas/recurring-related-tasks/retire-response.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "response_show_assignment",
+      "fixture": "tests/fixtures/recurring_related_tasks/contracts/response_show_assignment.json",
+      "schema": "contracts/schemas/recurring-related-tasks/show-response.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "response_show_assignments",
+      "fixture": "tests/fixtures/recurring_related_tasks/contracts/response_show_assignments.json",
+      "schema": "contracts/schemas/recurring-related-tasks/show-response.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "response_show_generations",
+      "fixture": "tests/fixtures/recurring_related_tasks/contracts/response_show_generations.json",
+      "schema": "contracts/schemas/recurring-related-tasks/show-response.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "response_show_proof",
+      "fixture": "tests/fixtures/recurring_related_tasks/contracts/response_show_proof.json",
+      "schema": "contracts/schemas/recurring-related-tasks/show-response.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "response_show_rule",
+      "fixture": "tests/fixtures/recurring_related_tasks/contracts/response_show_rule.json",
+      "schema": "contracts/schemas/recurring-related-tasks/show-response.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "response_show_states",
+      "fixture": "tests/fixtures/recurring_related_tasks/contracts/response_show_states.json",
+      "schema": "contracts/schemas/recurring-related-tasks/show-response.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "response_suppress",
+      "fixture": "tests/fixtures/recurring_related_tasks/contracts/response_suppress.json",
+      "schema": "contracts/schemas/recurring-related-tasks/suppress-response.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "response_suppress_noop",
+      "fixture": "tests/fixtures/recurring_related_tasks/contracts/response_suppress_noop.json",
+      "schema": "contracts/schemas/recurring-related-tasks/suppress-response.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "response_update",
+      "fixture": "tests/fixtures/recurring_related_tasks/contracts/response_update.json",
+      "schema": "contracts/schemas/recurring-related-tasks/update-response.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "response_update_adoption_only",
+      "fixture": "tests/fixtures/recurring_related_tasks/contracts/response_update_adoption_only.json",
+      "schema": "contracts/schemas/recurring-related-tasks/update-response.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "response_update_noop",
+      "fixture": "tests/fixtures/recurring_related_tasks/contracts/response_update_noop.json",
+      "schema": "contracts/schemas/recurring-related-tasks/update-response.schema.json",
+      "valid": true
+    }
+  ],
+  "computed": "tests/fixtures/recurring_related_tasks/computed.json",
+  "cursors": "tests/fixtures/recurring_related_tasks/cursors.json",
+  "evidence": "tests/fixtures/recurring_related_tasks/evidence.json",
+  "decisions": "tests/fixtures/recurring_related_tasks/decisions.json",
+  "runtime_obligations": [
+    "RRT-01",
+    "RRT-02",
+    "RRT-03",
+    "RRT-04",
+    "RRT-05",
+    "RRT-06",
+    "RRT-07",
+    "RRT-08",
+    "RRT-09",
+    "RRT-10",
+    "RRT-11",
+    "RRT-12",
+    "RRT-13",
+    "RRT-14",
+    "RRT-15",
+    "RRT-16",
+    "RRT-17",
+    "RRT-18"
+  ]
+}
