@@ -38,8 +38,10 @@ status labels in the same change. Routine task updates do not change spec author
 ### SPINE-075 — Specify recurring-source per-occurrence related tasks
 
 **Status:** Done — first design draft written (2026-11-07); not ratified,
-machine-codified or implemented. D-01–05 are now approved; technical contract
-closure and review remain pending.
+machine-codified or implemented. D-01–05 are now approved. The bounded consistency
+review is complete under SPINE-076; SPINE-077's three additional lenses reported
+one operability minor, now amended locally under SPINE-078 without an external
+recheck. Technical contract closure remains pending; no product decision is reopened.
 **Request:** A recurring class should generate one independently completable
 pickup task per occurrence, due 90 elapsed minutes after the expressed class
 start, following moves, with one reminder ten minutes before its own due time.
@@ -101,6 +103,127 @@ authorize a push, external review, ratification or implementation.
 **Next:** Review the completed product-design draft, then close/codify machine and
 storage contracts and write the implementation plan before runtime work. This is
 selected feature design, not a restart of deferred resilience initiatives.
+
+### SPINE-076 — Bounded review of recurring-related-task design
+
+**Status:** Done — the authorized single reviewer-only pass returned **pass**,
+boundary preserved, with zero blockers, majors, minors or nits. No source edits.
+**Scope:** One reviewer-only consistency audit of SPINE-075 at checkpoint
+`d9a8397fbf0bb82294ca2bdf47c014a72cd0949d`; preserve D-01–05 and existing owner
+boundaries. Check source-slot continuity, cancellation/restoration, enrollment/
+catch-up, scoped edits/retirement, bounded page/replay behavior and reminder safety.
+Do not confuse deferred machine codification with a whole-bundle readiness review.
+**Package:** [Audit notes](../whetstone_runs/recurring-related-tasks-contract-audit-001/audit-notes.md)
+enumerate fourteen complete specification inputs; the
+[prepared manifest](../whetstone_runs/recurring-related-tasks-contract-audit-001/prepared-inputs.json)
+binds their hashes, notes and complete rendered built-in-context prompt. Source
+payload is 694,706 bytes; rendered prompt is 709,654 UTF-8 bytes. No runtime code,
+ledger, credentials or environment configuration is included.
+**Runtime/destination:** Stable Whetstone `0.1.0` checkpoint
+`6e19fe3e72dedda50a372781a43c08e5d7e7480a`; Codex Reviewer `gpt-6.1-sol`, explicit
+medium reasoning, installed CLI `0.166.0-alpha.6`. This records the current CLI,
+not the older version in retained people audits. No development-channel fallback.
+**Guard:** The [launcher](../whetstone_runs/recurring-related-tasks-contract-audit-001/run-review.py)
+verifies checkpoint, source/notes/prompt hashes and runtime/client versions locally.
+Execution refuses until actual exact-payload approval is recorded in
+[execution status](../whetstone_runs/recurring-related-tasks-contract-audit-001/execution-status.json).
+The operator subsequently approved the exact prepared package in this thread;
+the [authorization](../whetstone_runs/recurring-related-tasks-contract-audit-001/authorization.md)
+records the payload/model boundary. No source-spec mutation, Editor, convergence,
+ratification, implementation, commit or push is authorized by this audit.
+**Local verification:** The guarded launcher passes `--verify-only` with fourteen
+sources and the exact complete prompt; it reports `verified_not_sent`. Stable
+selection and installed client version are checked without a reviewer/model call.
+**Outcome:** The persisted
+[report](../whetstone_runs/recurring-related-tasks-contract-audit-001/change_audit/change_audit_report.md)
+contains no findings. The actual manifest/brief match the approved fourteen-source
+package and complete prompt hash, and all source hashes are unchanged. The
+[execution summary](../whetstone_runs/recurring-related-tasks-contract-audit-001/execution-summary.md)
+records the supported runtime/model, checks and limits. No Editor, automatic
+retry/correction loop or convergence claim; no source/runtime/ledger mutations,
+ratification, implementation, commit or push.
+**Next:** Report the bounded consistency pass. Technical storage/lineage/wire
+closure, machine schemas/computed fixtures and ratification remain separate
+operator-directed work before the implementation plan and runtime implementation.
+
+### SPINE-077 — Structural, determinism and operability design evaluations
+
+**Status:** Done — all three approved reviewer-only passes completed on unchanged
+inputs. Structural integrity and determinism pass with zero findings; operability
+passes with one minor clarification. Zero blockers/majors; all boundaries preserved.
+**Scope:** Independent `structural_integrity`, `determinism` and `operability`
+`audit-change` passes against the same fourteen-specification checkpoint
+`d9a8397fbf0bb82294ca2bdf47c014a72cd0949d`. Preserve D-01–05, source recurrence
+authority, ordinary tasks, per-rule assignment/generation identity and existing
+notification/ownership boundaries. No edits or finding feedback between passes.
+**Package:** [Shared audit notes](../whetstone_runs/recurring-related-tasks-design-evaluations-001/audit-notes.md)
+list the exact fourteen full specifications and lens-specific questions. The
+[prepared manifest](../whetstone_runs/recurring-related-tasks-design-evaluations-001/prepared-inputs.json)
+binds unchanged source/notes bytes and all three complete prompts. Each pass
+contains 694,706 source bytes; complete prompts total 2,131,221 UTF-8 bytes across
+three separate calls. No prior feedback/report, runtime code, ledger or private
+configuration is added to the transmitted package.
+**Execution:** Stable Whetstone `0.1.0` checkpoint
+`6e19fe3e72dedda50a372781a43c08e5d7e7480a`, external Codex `gpt-6.1-sol`, medium
+reasoning, CLI `0.166.0-alpha.6`. One pass per profile, isolated output directories,
+1200-second subprocess timeout each; no Editor, Phase 1/convergence, automatic
+correction/new review loop, source mutation, ratification, runtime implementation,
+commit or push. Detailed mechanical contracts remain deferred; real semantic
+gaps are in scope under each selected lens.
+**Guard:** The [launcher](../whetstone_runs/recurring-related-tasks-design-evaluations-001/run-review.py)
+verifies the checkpoint, all sources/notes, each complete prompt, runtime and client
+versions without sending. Execution requires actual approval recorded in
+[execution status](../whetstone_runs/recurring-related-tasks-design-evaluations-001/execution-status.json),
+one explicit profile and an unused profile output directory. Source/destination
+drift requires renewed explanation/approval, not fallback.
+**Verification:** The guarded launcher passes local `--verify-only` for all three
+profiles and fourteen unchanged sources, reporting `verified_not_sent`. Diff
+hygiene passes; no source specification or pre-existing guidance edit changed.
+**Authorization:** The operator approved all fourteen specifications, shared notes,
+each built-in reviewer/profile context and generated copies for all three passes;
+the [authorization record](../whetstone_runs/recurring-related-tasks-design-evaluations-001/authorization.md)
+binds the exact scope/model/prompt hashes.
+**Outcome:** The [execution summary](../whetstone_runs/recurring-related-tasks-design-evaluations-001/execution-summary.md)
+links each persisted report/feedback. Actual manifests and complete rendered
+prompts match the approved package; all fourteen source hashes remain unchanged.
+No Editor, source corrections, ratification or convergence claim.
+**Reported minor:** Operability `OP-001` identifies no supported way to record
+an individual restoration veto after source-only task cancellation: the binding
+is retired and the task cannot be freshly cancelled again. The recommended
+technical clarification is a replay-safe assignment-level suppression action,
+explicit concurrent-successor precedence and visible veto readback, preserving
+the terminal predecessor. This exercises an approved safeguard, not new policy.
+**Subsequent action:** The operator authorized the narrow local specification patch
+recorded under SPINE-078. Original reports/feedback and their counts are unchanged;
+the amendment has not received an external recheck.
+
+### SPINE-078 — Specify the individual restoration-suppression action
+
+**Status:** Done — operator-authorized bounded specification amendment for
+SPINE-077 operability `OP-001` applied and locally verified; not externally
+rechecked. No runtime or machine-schema changes.
+**Change:** [Recurring related tasks Section 8.3](../specs/recurring-related-tasks.md#83-individual-restoration-suppression-after-source-cancellation)
+defines a supported assignment-level veto after source-only cancellation, even
+when the task is terminal and the binding retired. Add a provisional command,
+persistent evidence/readback and required fixture cases. Suppression-first blocks
+restoration; restoration-first makes the stale veto fail without implicitly
+cancelling a successor. Preserve D-01–05, other assignments and all terminal/
+attempted history. Exact field/enum/preimage codification remains pending.
+**Verification:** Existing documentation/scaffold/implemented-contract declaration
+checks pass **12 tests (0.359 seconds)**. All **393 local Markdown link targets
+in ten documents**, new-leaf section anchors and diff hygiene pass. The
+[local follow-up](../whetstone_runs/recurring-related-tasks-design-evaluations-001/minor-patch-followup.md)
+records the patch; original audit reports/feedback/counts and reviewed source
+hashes are preserved. This is not runtime suppression/race test evidence.
+**Boundary:** No audit rerun, source report rewrite, ratification, implementation,
+ledger access, migration, delivery, commit or push is authorized by this patch.
+**Checkpoint authorization (2026-11-08):** The operator subsequently requested a
+local commit of the amended leaf and supporting review/patch tracking. Exclude
+the pre-existing `AGENTS.md` edit. Generated Whetstone run artifacts remain local
+under the repository's existing ignore rule; the recorded verdicts and local
+patch status are retained here. No push or additional review is authorized.
+**Next:** Report the applied clarification before separately directed checkpoint,
+technical contract closure or a focused external recheck.
 
 ## Post-release corrective work
 

@@ -1,6 +1,6 @@
 # Spine Recurring-Source Related Tasks
 
-Status: Draft v0.1.0-draft.6 — specification only; not ratified or implemented
+Status: Draft v0.1.0-draft.7 — specification only; not ratified or implemented
 
 Created: 2026-11-07
 
@@ -138,6 +138,8 @@ It owns:
 - ordered task generations, each naming its task ID, `part_of` relation ID and
   logical temporal-binding ID, with at most one current generation;
 - exact source-caused cancellation evidence and any linked restoration successor;
+- explicit assignment-level restoration-suppression evidence, including actor,
+  command, timestamp and the task generation against which it was recorded;
 - the rule revision and source item/recurrence/provenance facts used to create it;
 - later immutable observations and source/target version references; and
 - retained disposition evidence for a completed, cancelled, detached or unresolved
@@ -572,6 +574,8 @@ requires all of these facts to be revalidated in the committing transaction:
    overrides restoration, and no successor already exists for that cancelled
    generation. Historical generations never become new restoration candidates
    after a later generation has consumed or suppressed the assignment.
+   The assignment-level veto in Section 8.3 remains available after the source-
+   cancelled task's binding has retired; it does not require another task cancel.
 4. The effective boundary, generation/catch-up policy and bounded operation permit
    restoration at the current occurrence time, including the strictly future-due
    check in Section 7.5. This does not authorize historical overdue restoration or
@@ -661,6 +665,67 @@ disposition. No reactivation or disposition-switching surface is implied. Any
 later new rule is a separate explicit enrollment; it does not automatically adopt
 old tasks or bypass the per-rule duplicate/adoption boundary in Section 11.
 
+### 8.3 Individual restoration suppression after source cancellation
+
+Provide a supported trusted-local assignment-level suppression action, proposed
+as `schedule.related_task_rule.assignment.suppress`. It records the operator intent
+"do not automatically restore this pickup assignment" without retiring the entire
+rule or mutating a terminal task. This makes the existing Section 8.1 suppression
+safeguard exercisable; it is not a different reinstatement policy.
+
+The action targets an exact rule/assignment and its latest source-cancelled task
+generation, with expected assignment-change version and task-generation identity.
+It remains legal when the task is already `cancelled` solely by the source
+transition and its binding is retired, provided no restoration successor has
+committed. It does not require the source still to be excluded; the current
+generation/successor facts decide the race. Missing or contradictory cancellation
+evidence fails closed. A task title, date or retired binding ID is not a substitute
+for exact assignment targeting. Use the family's existing trusted-local actor and
+write-authority posture; do not add an access or delivery grant.
+
+Suppression has assignment scope: it vetoes automatic successor creation for that
+same source slot through later source revisions, moves and reinstatement cycles.
+It does not delete the reservation or cause the generator to treat the slot as
+new. Other assignments and future unrelated class occurrences are unaffected.
+This action does not create, cancel, reopen, detach or alter a task, policy, work
+row or side-effect attempt. A request addressing an open successor must instead
+use its ordinary explicit task cancellation/detach capabilities when desired.
+No suppression-release or terminal-reopening operation is introduced here.
+
+Recheck expected assignment facts, the latest generation, existing successor and
+veto inside the same outer write transaction as the immutable suppression fact,
+assignment-change invalidation, audit and receipt. Restoration transactions must
+check that veto and the same assignment freshness before creating a successor:
+
+- **Suppression commits first:** the fresh veto prevents successor creation.
+  A restoration mutation prepared before it fails stale without writes; it
+  cannot silently switch the branch under the old expected facts. Fresh read-only
+  planning then reports suppression without dispatching another no-op mutation
+  or creating any task, reminder or work.
+- **Restoration commits first:** the old suppression request fails with a
+  structured stale-version conflict and no mutation. It must not report that
+  restoration was prevented, set a veto against a different generation, or
+  implicitly cancel the existing successor. The operator rereads current state
+  and may explicitly cancel/detach the now-current task through supported surfaces.
+
+Compatible command replay returns the original suppression receipt, before fresh
+stale checks, with no additional assignment/audit facts. A fresh request with
+current matching facts and an already-recorded identical veto is a semantic
+no-op; a new command ID does not excuse stale inputs. Dry run previews the same
+eligible branch without writing. Page/automatic planning remains read-only and
+must not receipt-churn a suppressed assignment.
+
+Rule/assignment readback and the suppression receipt expose at least the stable
+assignment ID, targeted task generation and terminal task ID, veto state,
+suppression actor/time/command/receipt evidence, current change-version facts and
+whether a successor already exists. Generation/reconciliation reports distinguish
+explicit suppression from unresolved source identity, retired rule or missing
+work. Use the new family's versioned surfaces, not extra fields on frozen reads.
+Exact wire fields, error/effect enums and suppression identity preimages remain
+part of machine-contract closure, but the operation and precedence above are
+required. The historical task status, source-cancellation cause and prior receipts
+remain unchanged.
+
 ## 9. Notification safety and granularity
 
 Source mutations may commit before all child tasks have reconciled. Attempt-start
@@ -701,6 +766,7 @@ Provisional trusted-local command names, **not registered commands**:
 | `schedule.related_task_rule.list` | Discover bounded rules and reconcile/decision-required status |
 | `schedule.related_task_rule.reconcile` | Preview or atomically apply one bounded generation/reconciliation page |
 | `schedule.related_task_rule.retire` | Stop generation with the explicitly resolved outstanding-task disposition |
+| `schedule.related_task_rule.assignment.suppress` | Record an individual restoration veto against an exact source-cancelled assignment/generation without changing its terminal task |
 
 Creating a rule is not a claim that children or work have been generated. A caller
 may then reconcile bounded pages or let the configured automatic loop do so.
@@ -738,8 +804,8 @@ facts but cannot assert generation or delivery beyond the actual evidence.
 ## 11. Persistence, concurrency and replay
 
 The logical minimum is durable rule headers, immutable configuration revisions,
-assignments, task-generation/successor records, selector reservations/continuity
-evidence and assignment observations.
+assignments, task-generation/successor records, explicit restoration-suppression
+facts, selector reservations/continuity evidence and assignment observations.
 Exact physical tables and indexes must be specified before implementation under
 the Spine-wide storage owner; do not hide these facts in command JSON receipts or
 an agent's memory. References point to actual canonical source/target items,
@@ -821,6 +887,7 @@ expected receipts/work evidence, not merely final clock times.
 | Series edits/splits | Proven one-to-one continuity retains task IDs; unsupported or conflicting mappings fail closed |
 | Terminal/manual control | Completion, cancellation, detach and inactive relation preserve slot reservation across restarts |
 | Reinstatement | Source-only cancellation restores automatically without confirmation; same assignment/new linked task; no terminal reopening, manual override or duplicate successor; restore-before-cancel and repeated cycles; retired rule, bounds and ambiguous proof controls |
+| Assignment suppression | Source-cancelled task with retired binding; exact assignment/generation targeting; suppression-first versus restoration-first interleavings; visible persistent veto; no changes to task/work/attempt history; other occurrences unaffected; fresh no-op, replay, stale/new command, dry run and transaction rollback; no idle receipt churn |
 | Effective start/horizon | Enrollment instant retained across scans; upcoming same-day occurrence included; explicit inclusive starting occurrence; original-past/expressed-future move; eight-week default and bounded override; rolling replenishment; assigned move outside window; incompatible early reminder surfaced |
 | Catch-up | Late enrollment and downtime; started source/future due; negative offset/past due; exact due equality; pre-cutoff preview/late commit; eligible versus expired reminder grace; explicit-start boundary; offset-bounded lookback; existing overdue task retained; no duplicate/restored overdue task |
 | Time | DST, source timezone/version changes where permitted by owning contracts, signed offsets, precision and multiple reminder horizons |
