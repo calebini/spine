@@ -24,6 +24,12 @@ catalog/disclosure and policy-presentation persistence plus a versioned extensio
 the existing notification-rendering table. The accepted rendering-definition document
 retains logical authority; this delegation does not ratify the leaf or activate DDL.
 
+The draft [recurring-related-task storage leaf](recurring-related-task-storage.md)
+owns that family's proposed tables, constraints, canonical identity/proof records,
+indexes and migration requirements. [Recurring related tasks](recurring-related-tasks.md)
+retains lifecycle/generation authority. This is delegation only: no runtime family,
+schema number or migration is activated by adding the leaf.
+
 ## 2. Shared persistence boundary
 
 - One canonical SQLite ledger owns coordination truth. Derived indexes and external

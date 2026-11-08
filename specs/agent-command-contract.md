@@ -75,10 +75,13 @@ V2 adds `facet_schema` grant targets only, as defined by
 The [recurring-related-task draft](recurring-related-tasks.md) owns the proposed
 series-rule authoring, bounded generation/reconciliation and assignment readback
 surface. It composes ordinary tasks and selected-occurrence bindings without
-reinterpreting `schedule.related_task.create` as a series operation. Command names,
-version selectors, schemas and fixtures remain subject to that draft's contract
-closure; no implemented-command list, compiled requirement, current request shape
-or HTTP allowlist is extended here.
+reinterpreting `schedule.related_task.create` as a series operation. Its draft
+[command companion](recurring-related-task-commands.md) defines the proposed local
+family, exact request/readback branches, replay, errors/effects, clock and cursor
+rules; its [storage companion](recurring-related-task-storage.md) defines identity
+and proof bytes. Machine schemas, computed fixtures and exact installed prerequisite
+manifest remain pending. No implemented-command list, compiled requirement, current
+request shape or HTTP allowlist is extended here.
 
 The ratified logical [people and responsibility leaf](people-and-responsibility.md) defines
 scoped people discovery, item participation/assignment read/update and separately

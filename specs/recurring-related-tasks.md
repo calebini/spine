@@ -1,6 +1,6 @@
 # Spine Recurring-Source Related Tasks
 
-Status: Draft v0.1.0-draft.7 — specification only; not ratified or implemented
+Status: Draft v0.1.0-draft.8 — specification only; not ratified or implemented
 
 Created: 2026-11-07
 
@@ -52,6 +52,11 @@ proposed contract requirements, not an implemented runtime
 claim. This draft does not reserve a ledger schema number, register a runtime
 family, add machine schemas or expose a command or HTTP route.
 
+The proposed detailed [storage, identity and lineage](recurring-related-task-storage.md)
+and [command contract](recurring-related-task-commands.md) companions now close
+the human-readable technical rules. They remain draft: review and machine-readable
+schemas/computed fixtures precede ratification and runtime implementation.
+
 ## 2. Authority and preservation
 
 This leaf owns series-rule enrollment, generated-task assignment, generation
@@ -68,6 +73,8 @@ coverage and series-scoped lifecycle reconciliation. It delegates:
 | [People and responsibility](people-and-responsibility.md) and [permissions](permissions.md) | Ownership, participation, assignment, authority and disclosure |
 | [Command contract](agent-command-contract.md) | Validation, dry run, replay, audit and receipt conventions |
 | [Storage and atomicity](STORAGE_ATOMICITY_SPEC.md) | Ledger transactions, schema admission and migration discipline |
+| [Related-task storage](recurring-related-task-storage.md) | Physical records, source proof, identity bytes, constraints, indexes and migration |
+| [Related-task commands](recurring-related-task-commands.md) | Detailed draft requests/receipts, effects/errors, limits, clocks and continuation |
 
 The new family MUST NOT silently broaden the implemented one-task binding v1
 contract. In particular, ordinary v1 `source_unresolved` remains decision-required;
@@ -343,9 +350,9 @@ the gap; do not interpret the budget failure as source removal.
 ### 7.3 Bounded pages and coverage
 
 Every operation has explicit finite source-range, source-candidate, assignment,
-mutation and expansion-work limits. The accepted hard maxima and deployment-neutral
-default recommendations must be closed in the machine-contract step; a date range
-alone is not a work bound for a dense or old recurrence.
+mutation and expansion-work limits. [Command Section 5](recurring-related-task-commands.md#5-one-page-reconciliation-budgets-and-execution-time)
+defines the proposed defaults/hard maxima and complete-unit failure semantics;
+a date range alone is not a work bound for a dense or old recurrence.
 
 An explicit reconcile command applies **one bounded page for one rule**. The page
 is atomic; the complete series is not. Selection and ordering must be deterministic,
@@ -359,8 +366,9 @@ freshness, original selection/evaluation facts, limits and assignment generation
 A committing page returns a continuation based on its **post-commit** generation,
 so its own writes do not immediately invalidate the next page. Concurrent relevant
 changes invalidate continuation; restart fresh discovery without discarding prior
-assignments. The exact format and expiry are machine-contract requirements, not
-an invitation to use unsigned client-authored proof or offset pagination.
+assignments. [Command Section 7](recurring-related-task-commands.md#7-continuation-replay-and-freshness)
+defines purpose/ledger-bound authenticated cursor bytes and expiry, not unsigned
+client-authored proof or offset pagination.
 
 New-task generation, affected-assignment reconciliation and cancellation progress
 must be separately observable and fairly scheduled. A dense series or repeatedly
@@ -423,8 +431,9 @@ For a class at 11:30, pickup at 13:00 and reminder at 12:50:
 
 The committing transaction must revalidate future-due eligibility against current
 execution time. A stale caller timestamp or a preview taken before the cutoff
-cannot authorize task creation after the due time. Exact clock/freshness validation
-and deterministic preview/cutoff fixtures must be closed in the machine contract.
+cannot authorize task creation after the due time. Command Section 5 defines
+transaction-entry and pre-commit clock validation and cutoff rollback. The computed
+preview/cutoff fixtures still need to be produced in the machine-contract step.
 Compatible replay still returns the original receipt and never re-executes creation.
 
 This policy applies to **missing generations**, not existing overdue tasks. An
@@ -437,8 +446,8 @@ continues to follow the notification owner's late-handling and attempt rules.
 ### 7.6 Explicitly scoped template changes (D-04 approved)
 
 An edit creates a new immutable rule configuration revision. Its request MUST
-state one of two adoption scopes, using final enum names defined by the machine
-contract:
+state one of two adoption scopes, `upcoming_open` or `new_assignments_only`, as
+defined by the command companion:
 
 - **Upcoming open governed tasks and future generation:** New assignments use
   the new revision. Existing current task generations are selected for bounded
@@ -469,9 +478,9 @@ overdue before adoption are preserved and reported as skipped, not overwritten.
 
 Per-assignment desired revisions must be explicit and replay-safe. Later edits
 cannot silently replace an earlier pending adoption or apply a task against the
-wrong expected adopted revision. Exact ordering/conflict and continuation rules
-must be closed in the machine contract; no inference from the root's latest
-pointer is sufficient to authorize a child mutation.
+wrong expected adopted revision. The companions specify one serialized pending
+adoption intent, a finite assignment high water and exact continuation rules;
+no inference from the root's latest pointer is sufficient to authorize a child mutation.
 
 Use the task's last adopted configuration as the comparison baseline for explicit
 individual edits. Compare normalized rule-managed fields against both current
@@ -479,9 +488,10 @@ child truth and the requested change. Preserve non-conflicting customizations;
 if a rule edit overlaps a different individual value, surface a conflict and
 leave that task's content/adopted revision unchanged. Equality with the requested
 new value is not a conflicting override. Do not guess from actor labels or treat
-an ordinary source-follow reschedule as a manual override. The field comparison,
-complete reminder-set semantics and exact override-resolution path must be
-defined before implementation; there is no implicit force-overwrite mode.
+an ordinary source-follow reschedule as a manual override. Storage Section 5
+defines normalized three-way field comparison, atomic complete-reminder-set
+comparison and explicit task-edit/cancel/detach resolution; there is no implicit
+force-overwrite mode.
 
 When a selected pending edit affects due time, reminders or delivery authority,
 attempt-start checks must account for the desired-versus-adopted configuration
@@ -618,8 +628,9 @@ new work must obey ordinary current opportunity identity and late-handling rules
 ### 8.2 Retirement with explicit disposition (D-05 approved)
 
 Retirement stops the rule, not its source event. The write request must explicitly
-select one of the following dispositions; final enum names belong in the machine
-contract. There is no omitted-field default or silent interpretation of "stop."
+select one of the following dispositions, named `keep_following`, `detach_open`
+and `cancel_open` in the command companion. There is no omitted-field default or
+silent interpretation of "stop."
 
 | Disposition | Existing-task behavior |
 | --- | --- |
@@ -656,8 +667,8 @@ for pending cancellation or detachment: it cannot send against obsolete governin
 truth while the bounded cleanup catches up. After detachment commits, reminders
 use the now-independent task's ordinary current truth, not the class's freshness.
 Do not leave a stale desired-configuration gate that can never be resolved after
-the binding is retired. Exact precedence/progress facts must be closed together
-with the machine contracts and all-writer validation.
+the binding is retired. The storage/command companions close intent precedence,
+progress facts and all-writer validation; their machine schemas remain pending.
 
 Compatible retirement replay returns its original disposition and evidence.
 Different command IDs do not restart completed cleanup or change the selected
@@ -721,9 +732,9 @@ suppression actor/time/command/receipt evidence, current change-version facts an
 whether a successor already exists. Generation/reconciliation reports distinguish
 explicit suppression from unresolved source identity, retired rule or missing
 work. Use the new family's versioned surfaces, not extra fields on frozen reads.
-Exact wire fields, error/effect enums and suppression identity preimages remain
-part of machine-contract closure, but the operation and precedence above are
-required. The historical task status, source-cancellation cause and prior receipts
+The companions specify exact targeting fields, error/effect enums and suppression
+identity preimages, ready for machine codification/review. The historical task
+status, source-cancellation cause and prior receipts
 remain unchanged.
 
 ## 9. Notification safety and granularity
@@ -756,9 +767,11 @@ additional fields or includes need an explicit supported successor or new surfac
 
 ## 10. Command and readback design
 
-Provisional trusted-local command names, **not registered commands**:
+Draft trusted-local command names, **not registered commands**. The
+[command companion](recurring-related-task-commands.md) defines their detailed
+requests, projections and validation; this table is the responsibility index:
 
-| Candidate | Responsibility |
+| Command | Responsibility |
 | --- | --- |
 | `schedule.related_task_rule.create` | Author the rule, explicit configuration snapshot and effective generation boundary |
 | `schedule.related_task_rule.update` | Author an immutable configuration revision with explicit existing-task adoption scope |
@@ -777,10 +790,11 @@ and must enumerate actual committed child evidence.
 Writes carry exact contract selectors, `command_id`, actor, command-specific
 timestamp and relevant expected rule/source/recurrence/assignment version facts.
 Supported reads remain non-mutating and may never opportunistically generate tasks.
-Before ratification, machine contracts must close the request/response fields,
-normalization, hash preimages, validation order, closed error/effect sets, limits,
-cursor bytes, and exact runtime-family advertisement. Candidate names here do
-not change the implemented-command list or imply web support.
+The companions close proposed request/response fields, normalization, hash
+preimages, validation order, closed error/effect sets, limits and cursor bytes.
+Before ratification/activation those rules still require reviewed machine schemas,
+computed fixtures and an exact installed runtime-family prerequisite manifest.
+Names here do not change the implemented-command list or imply web support.
 
 A reconcile receipt separates at least:
 
@@ -806,9 +820,9 @@ facts but cannot assert generation or delivery beyond the actual evidence.
 The logical minimum is durable rule headers, immutable configuration revisions,
 assignments, task-generation/successor records, explicit restoration-suppression
 facts, selector reservations/continuity evidence and assignment observations.
-Exact physical tables and indexes must be specified before implementation under
-the Spine-wide storage owner; do not hide these facts in command JSON receipts or
-an agent's memory. References point to actual canonical source/target items,
+The [storage companion](recurring-related-task-storage.md) specifies physical
+tables/indexes under the Spine-wide storage owner; do not hide these facts in
+command JSON receipts or an agent's memory. References point to actual canonical source/target items,
 versions, recurrence facts, bindings, routes and receipts as applicable.
 
 Required constraints include owner-local rule-key uniqueness, unique per-rule
@@ -825,8 +839,8 @@ canonical source slot, not the reconcile command, expressed start, current recur
 revision, task title or page boundary. Accepted continuity adds aliases without
 changing assignment/current-task identity. Only proved reinstatement creates a
 linked successor task generation under Section 8.1; old task identities never
-change. Exact derivation versions and bytes belong in the forthcoming machine
-companion and computed fixture corpus.
+change. Exact new-family derivation versions and delegated ordinary child seed
+bytes are specified in storage Section 2; computed fixtures remain to be produced.
 
 For each selected page, one outer transaction rechecks replay, authority, source
 freshness, reservations and target versions; creates/updates ordinary child truth;
@@ -941,10 +955,13 @@ tasks, including overdue ones. New assignments and reinstatement successors stop
 under every disposition; terminal/manual exceptions and attempted history remain
 preserved. Section 8.2 defines bounded completion and freshness behavior.
 
-No selected product decision D-01–05 remains open. This does not ratify the draft
-or claim implementation readiness: exact storage, lineage proofs, command schemas,
-limits, reason/effect values, concurrency/clock rules and computed fixtures still
-require closure and review before the implementation plan and runtime work.
+No selected product decision D-01–05 remains open. The technical companions close
+proposed storage, supported lineage proofs, command shapes, limits, reason/effect
+values and concurrency/clock rules. This does not ratify the draft or claim
+implementation readiness: bounded technical review, machine schemas and computed
+fixtures still precede the implementation plan and runtime work. Arbitrary changed
+recurrence topology without one-to-one source proof remains explicitly unsupported,
+not a new heuristic identity policy or an unrecorded product decision.
 
 Independent of these choices, manually completed/cancelled/detached assignments
 cannot be silently regenerated. Any restoration or bulk-update extension must

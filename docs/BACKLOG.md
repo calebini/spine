@@ -1,6 +1,6 @@
 # Spine Backlog
 
-Last updated: 2026-11-07
+Last updated: 2026-11-08
 
 This is the single work queue for Spine development. The
 [implementation plan](IMPLEMENTATION_PLAN.md) explains roadmap direction and delivery
@@ -41,7 +41,8 @@ status labels in the same change. Routine task updates do not change spec author
 machine-codified or implemented. D-01–05 are now approved. The bounded consistency
 review is complete under SPINE-076; SPINE-077's three additional lenses reported
 one operability minor, now amended locally under SPINE-078 without an external
-recheck. Technical contract closure remains pending; no product decision is reopened.
+recheck. Detailed technical companions are now drafted under SPINE-079; their
+review and machine codification remain pending. No product decision is reopened.
 **Request:** A recurring class should generate one independently completable
 pickup task per occurrence, due 90 elapsed minutes after the expressed class
 start, following moves, with one reminder ten minutes before its own due time.
@@ -85,9 +86,10 @@ It reuses ordinary nonrecurring tasks, `part_of`, selected-occurrence bindings,
 notification policies/work and the existing scheduler. Minimal draft delegations
 in the existing command, architecture, ontology, binding and notification owners
 do not change implemented command lists, selectors, routes or v1 behavior.
-**Open product decisions:** None among the selected D-01–05. Exact storage,
-lineage, command, limit/clock and fixture contracts still need closure/review.
-The draft does not assign a runtime family or schema number.
+**Open product decisions:** None among the selected D-01–05. SPINE-079 specifies
+proposed storage, lineage, command and limit/clock rules; technical review and
+machine schemas/computed fixtures remain pending. Draft family names are not
+runtime declarations and no schema number is reserved.
 **Verification:** Local consistency review tightened assignment-aware direct/sweep
 reconciliation, positive novelty proof after source edits, and the per-rule scope
 of duplicate prevention. The existing documentation, scaffold and implemented-
@@ -100,8 +102,8 @@ push is part of this specification step.
 checkpoint of the draft with D-01–05 and its supporting specification/index/
 tracking amendments. Exclude the pre-existing `AGENTS.md` edit. This does not
 authorize a push, external review, ratification or implementation.
-**Next:** Review the completed product-design draft, then close/codify machine and
-storage contracts and write the implementation plan before runtime work. This is
+**Next:** Review the detailed technical companions, then codify machine contracts/
+fixtures and write the implementation plan before runtime work. This is
 selected feature design, not a restart of deferred resilience initiatives.
 
 ### SPINE-076 — Bounded review of recurring-related-task design
@@ -224,6 +226,47 @@ under the repository's existing ignore rule; the recorded verdicts and local
 patch status are retained here. No push or additional review is authorized.
 **Next:** Report the applied clarification before separately directed checkpoint,
 technical contract closure or a focused external recheck.
+
+### SPINE-079 — Close recurring-task storage, identity and command contracts
+
+**Status:** Done — detailed human-readable technical drafts written and locally
+verified (2026-11-08), not ratified or externally reviewed. Preserve approved
+D-01–05 and the individual restoration veto. No runtime, machine schemas/fixtures,
+migration, external review, commit, push or deployment is included.
+**Scope:** Focused physical-storage/identity and command companions beneath the
+logical recurring-related-task leaf: canonical configuration and source proofs,
+constraints and indexes, bounded progress, edit/retirement intent, all-writer
+freshness, replay, clock/cursor rules and verification oracles. Existing source
+recurrence and ordinary child identities retain their owning contracts.
+**Artifacts:** [Storage/identity/lineage](../specs/recurring-related-task-storage.md)
+specifies a relational header/history layout with canonical immutable payloads,
+per-rule slot reservations, linked task generations, source-only cancellation and
+suppression evidence, bounded edit/retirement intents, indexed invalidation and
+migration/rollback. [Commands](../specs/recurring-related-task-commands.md) specifies
+the seven proposed local operations, exact configuration/read branches, complete-unit
+budgets, commit-time future-due checks, closed effects/reasons/errors, replay and
+purpose/ledger-bound HMAC continuation. The logical owner delegates minimally;
+the Spine-wide storage owner, command authority and indexes retain their roles.
+**Support boundary:** Exact selectors and validated one-to-one carry-forward proof
+can retain a task. Arbitrary changed recurrence topology without authoritative
+mapping remains decision-required; no ordinal/nearest-time pairing, inferred
+novelty or client-authored mapping is introduced. Pending edits/retirement gate
+obsolete work; no-op clocks/empty rolling horizons do not write progress.
+**Preservation:** The pre-existing `AGENTS.md` amendment is unrelated and remains
+untouched. Environment-specific release/deployment considerations stay outside
+these specifications. Ambiguous source continuity is not inferred from timestamps
+or occurrence ordinals.
+**Verification:** Documentation/scaffold/implemented-contract declaration suite:
+**12 tests pass**. All **413 local Markdown targets in nine changed documents**,
+new-leaf anchors, untracked-leaf whitespace,
+`git diff --check` and the unchanged AGENTS SHA-256 are checked. This is prose
+verification, not runtime/migration/race or machine-fixture evidence.
+**Next:** Separately authorize a bounded buildability review of this technical
+closure, then machine-contract/fixture codification and the implementation plan.
+**Checkpoint authorization (2026-11-08):** The operator requested committing the
+detailed specification closure, excluding the unrelated `AGENTS.md` amendment,
+then staging a reviewer-only bounded buildability package. Staging does not
+authorize transmitting its new payload, launching a reviewer or pushing commits.
 
 ## Post-release corrective work
 

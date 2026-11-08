@@ -9,7 +9,7 @@ see [validation](TZDB_COMPATIBILITY_VALIDATION.md) and [operations](TZDB_COMPATI
 
 
 Role: Roadmap rationale and delivery history; current task status lives in [BACKLOG.md](BACKLOG.md)
-Last updated: 2026-11-07 (SPINE-075 recurring-source related-task draft)
+Last updated: 2026-11-08 (SPINE-079 recurring-task technical contract draft)
 
 This is a non-normative delivery plan. The specifications and machine-readable contracts remain authoritative.
 
@@ -33,9 +33,13 @@ governed tasks plus future generation; bounded adoption preserves individual
 exceptions, terminal/overdue tasks and attempted history. D-05 requires explicit
 retirement disposition: keep following, detach or cancel outstanding open governed
 tasks; all stop new generation/restoration and preserve history. D-01–05 are
-approved; technical contract closure and review remain pending.
-SPINE-075 in the backlog owns design status; machine contracts and a subsequent implementation plan
-are not delivered or authorized by this draft.
+approved. SPINE-079 adds proposed [storage/identity](../specs/recurring-related-task-storage.md)
+and [command](../specs/recurring-related-task-commands.md) companions: explicit
+source proof rather than heuristic remapping, durable slot reservations and linked
+generations, bounded edit/retirement intents and current-attempt freshness.
+Technical review and machine schemas/computed fixtures remain next; no runtime
+implementation or schema migration is included. SPINE-075/079 in the backlog own
+design status; a subsequent implementation delivery plan follows those contracts.
 
 **Selected enriched delivery (2026-11-06):** The operator selected the smallest
 end-to-end feature, treating useful enrichment as the product direction rather
