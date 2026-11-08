@@ -163,6 +163,65 @@ Identity registry:
 - `occurrence_provenance_content_hash`: no prefix; `derivation_version=spine.occurrence-provenance-content-hash.v2`; preimage fields are the full immutable provenance semantic snapshot excluding `occurrence_provenance_id`, management status, and any response-only sequence position.
 - `cursor_digest`: no prefix; `derivation_version=spine.recurrence-cursor-digest.v2`; preimage is exactly the canonical cursor JSON bytes defined in Section 6, including version constants, item freshness facts, recurrence facts, canonical range facts, accepted `limit`, diagnostics flag, and last ordering tuple.
 
+### 5.1 Existing normalized selector persistence
+
+The recurrence-owned physical authority is
+`recurrence_target_occurrence_selectors.target_occurrence_selector_ref`, not a
+notification-policy row. This existing schema-7 representation is shared by
+exdate/override targets, occurrence provenance and selected-occurrence bindings:
+
+- `recurrence_target_occurrence_selectors`: TEXT primary key
+  `target_occurrence_selector_ref`; unique TEXT `occurrence_key`; TEXT
+  `recurrence_set_id` FK to the set; nonnegative INTEGER `segment_ref`; TEXT
+  `scheduled_fact`; TEXT `origin_kind` in `rule|rdate|union`.
+- `recurrence_target_rule_sources`: primary key `(target_occurrence_selector_ref,
+  source_index)`, FK to that selector, and the normalized rule fields `frequency`,
+  INTEGER `interval_value`, `seed`, `start_bound`, `end_kind`, nullable INTEGER
+  `end_count`, nullable `end_until`, nullable `week_start`, `status`, nullable
+  INTEGER `rule_duplicate_index`. End-field presence follows the exact normalized
+  `end_condition`; INTEGER source indexes are zero-based and contiguous.
+- `recurrence_target_rule_source_selectors`: primary key
+  `(target_occurrence_selector_ref,source_index,selector_kind,selector_index)`;
+  composite FK to the rule source; TEXT `selector_value`. Selector kind is one of
+  `by_month|by_month_day|by_weekday|by_set_position`; indexes preserve the normalized
+  zero-based array order, not input order.
+- `recurrence_target_rdate_sources`: primary key
+  `(target_occurrence_selector_ref,source_index)`, FK to the selector, TEXT
+  `scheduled_fact`, TEXT `status`, nullable INTEGER `rdate_duplicate_index`.
+
+Required columns are non-null except the explicitly nullable normalized optional
+fields. All selector/source FKs use the existing deferred transaction discipline.
+The storage reference is exactly `recurrence_target_selector_` plus lowercase
+SHA-256 of the complete canonical selector JSON from Section 5. This is an existing
+storage-only addressing convention, not a new public recurrence identity version.
+Loading reconstructs the complete canonical selector from those relational rows,
+converting numeric values back to canonical decimal strings; version constants
+and omitted/defaulted fields follow Section 5, not a second normalization scheme.
+
+The recurrence persistence service is the producer; callers supply the canonical
+selector/key resolved under the ordinary recurrence domain validation. Inside its
+mutating outer transaction, the proposed recurring-related-task consumer first
+looks up the derived reference/key. If present, reconstruct and compare the complete
+existing selector/key/set **before** invoking any insert helper; do not fill
+missing children on reuse. If absent, insert the complete normalized selector and
+children through the existing persistence service, then reconstruct/compare before
+reserving a slot or referencing it. No helper commits. A collision, incomplete
+child set or contradictory reuse
+fails `semantic_conflict`, `field=selector_ref`, with whole-page rollback; do not
+repair history with an ignored insert/upsert. Reads/plans/dry run reconstruct or
+derive would-be references without persisting anything.
+
+Notification targeting adds its own bridge
+`notification_target_occurrence_selectors.recurrence_target_occurrence_selector_ref`
+to this existing key, as specified by [ontology Section 8.3](ontology.md#83-structured-notification-schedules).
+The notification reference and recurrence reference are distinct storage IDs for
+the same reconstructed selector. A binding/assignment references the recurrence
+key directly; an item-scoped pickup reminder needs no notification occurrence
+bridge at all. Reuse does not author a notification policy or create another
+selector authority. No new selector table, selector backfill, migration or changed
+historical key is implied by this clarification; a runtime missing this dependency
+fails feature admission rather than inventing it.
+
 ## 6. Expansion Semantics
 
 Expansion is explicit, read-only, and bounded. The `item.occurrences` request requires `item_id`, `range_start`, and `range_end`; optional fields are `limit`, `cursor`, `range_basis`, and `include_diagnostics`. Reserved floating-local fields fail as `unsupported_field`. `limit` is a canonical decimal string in `1..1000`; omission derives `"100"`. Ranges are inclusive start and exclusive end.

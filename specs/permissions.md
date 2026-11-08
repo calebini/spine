@@ -69,6 +69,17 @@ Every item exposed through multi-user coordination access has one explicit owner
 a subject or a subject group. Existing `item_subject_roles.owner` is not this record.
 Unresolved legacy item ownership requires adoption; it must not become public by default.
 
+The proposed [recurring-related-task family](recurring-related-tasks.md#12-ownership-roles-routes-and-authority)
+adds an explicit subject/group `task_owner` input for its **newly generated**
+ordinary tasks only. Its draft [storage contract](recurring-related-task-storage.md#331-explicit-generated-item-ownership)
+establishes the existing item-owner header and immutable revision in the same
+task/policy/work transaction, with real local actor/receipt evidence and no
+inferred creator entitlement. It creates no account/membership/access/disclosure
+grant, grants no new chat identity assurance and cannot transfer an existing
+child's owner through a template edit. System catalog ownership is not legal
+item ownership. This proposal does not activate the family, alter existing
+trusted-local authoring commands or adopt legacy/unrelated tasks automatically.
+
 Catalogs, bindings, and delivery targets reuse their existing canonical owner facts;
 do not duplicate those owners in a competing registry. System-owned catalogs require
 an explicit deployment read/use policy; system ownership is not automatic public access.

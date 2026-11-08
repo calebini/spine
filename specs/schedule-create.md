@@ -246,7 +246,19 @@ Ordinary command-derived item, anchor, audit, and receipt IDs use `command=sched
 When the primary-location capability is used, its location and item-location paths are
 the exact paths registered by `specs/schedule-primary-location.md`.
 
-Recurrence, notification, occurrence, provenance, opportunity, and work identities use their owning content-addressed specifications. For initial notification intent derivation, `intent_created_item_version="1"` and `intent_created_by_command_id` is the composite `command_id`. Policy normalization order is canonical `policy_key` order; `policy_key` is included in the composite receipt mapping but is not added to the existing notification-policy identity preimage.
+Recurrence, notification, occurrence, provenance, opportunity, and work identities
+use their owning content-addressed specifications. For each fresh initial policy,
+`intent_created_item_version="1"` and `intent_created_by_command_id` is exactly
+`command_id + ":" + policy_key`, not the same undifferentiated composite ID for
+all policies. The existing normalizer also uses that token as the initial policy's
+`created_by_command_id`. The real outer command remains audit/receipt causation;
+there is no independently executed or receipted per-policy command. Policy
+normalization order is canonical `policy_key` order. The existing key/intent/policy
+mapping and outer command ID determine the token under
+[notifications Section 3.1](notifications.md#31-registered-multi-policy-creation-token-mapping).
+`policy_key` is not added as a new field to the frozen notification identity
+preimages. This aligns the prose with existing composite derivation, without
+changing historical IDs or existing request/response selectors.
 
 On fresh non-dry-run success, exactly one `command_receipts` row is written. Compatible replay and dry run write no receipt row. The persisted receipt has:
 

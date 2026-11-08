@@ -1,6 +1,6 @@
 # Spine Recurring-Source Related Tasks
 
-Status: Draft v0.1.0-draft.8 — specification only; not ratified or implemented
+Status: Draft v0.1.0-draft.9 — specification only; not ratified or implemented
 
 Created: 2026-11-07
 
@@ -876,6 +876,12 @@ Enrollment must name the intended child owner scope and concrete task/reminder
 configuration. Any reuse of source ownership or a default route is a visible,
 recorded authoring choice under the existing contracts, not an ambient read-time
 inheritance. Source/child cross-scope authority must be checked rather than assumed.
+The child owner is explicitly subject/group, not the system catalog owner. Its
+existing item-owner header/history is created atomically with each initial or
+restored child under [storage Section 3.3.1](recurring-related-task-storage.md#331-explicit-generated-item-ownership),
+before disclosure/policy/work validation. No creator entitlement or access grant
+is inferred. Child ownership is fixed at enrollment; configuration adoption is
+not ownership transfer, including under the new-assignments-only scope.
 Changing the source's people or ownership does not silently grant child access,
 change assignees or redirect deliveries.
 
@@ -908,6 +914,7 @@ expected receipts/work evidence, not merely final clock times.
 | Template edits | Both explicit scopes; eight-week pre-generated tasks; pending/applied coverage; concurrent edits; source following under old adopted offset; normalized individual-edit conflict versus equal/non-overlapping changes; completion/overdue race; no profile auto-adoption; no-op and replay |
 | Rule retirement | All three explicit dispositions; source unchanged; generation/retirement race; bounded out-of-horizon cleanup; overdue cancellation; terminal/detached/history preservation; retained follow freshness with retired root; no reinstatement successor; pending-edit precedence; replay and no idle churn |
 | Notification lineage | Successor due and successor policy IDs; pending configuration freshness and conflict gates; work uniqueness across unchanged pages, replacement and retries |
+| Reviewed owner/identity seams | Existing normalized recurrence-selector authority/producer and immutable reuse; distinct per-policy tokens with real outer attribution; explicit subject/group child owner/header/history/access epoch before presentation/work, rejected system owner/transfer and whole-page rollback |
 | Attempt race | Source edit before/after attempt admission, protected retry/in-progress/terminal evidence and no false unsend claim |
 | Transactions | Injected failure after assignment, child, policy, work and receipt stages rolls the entire page back |
 | Concurrent generation | Same slot from different commands/processes/windows creates one task and one logical reminder per opportunity |

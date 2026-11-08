@@ -212,6 +212,26 @@ Protected creation's existing envelope ownership orchestration is not removed, b
 this amendment neither activates rendering there nor extends its registry. An atomic
 trusted-local owner-plus-rendering create would require a separate explicit contract.
 
+#### Proposed recurring-task explicit-owner boundary
+
+The draft [recurring-task command family](recurring-related-task-commands.md#3-configuration-and-enrollment)
+is a separate, explicitly owned generation composite, not the owner-less local
+`schedule.create` above. If/when that family is activated, its explicit subject/
+group `task_owner` creates the actual `item_access_owners` header and immutable
+revision inside the same child transaction, **before** profile/presentation/work
+application, under its [storage contract](recurring-related-task-storage.md#331-explicit-generated-item-ownership).
+Validate the existing exact disclosure against that actual item owner, destination,
+definition/selection and recorded profile/direct origin before commit. A prospective
+rule-owner or profile-owner value alone is never sufficient evidence. Failure rolls
+back child ownership together with task/policy/work/audit/receipt; no staged
+ordinary item is left behind by this new atomic path.
+
+This registers a draft integration boundary, not implemented activation or a new
+approval/grant. Existing owner-less local schedule-create requests remain subject
+to the ordinary-only fresh-create rule and separately receipted adoption sequence
+above. Protected routes/registries, existing disclosure scope matching, revocation,
+attempt-time fallback and historical evidence are unchanged.
+
 ## 4. Identity, copy-forward and work continuity
 
 Presentation is an immutable supporting fact of a versioned policy, not a new policy

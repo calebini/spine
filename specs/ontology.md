@@ -841,7 +841,25 @@ Structured-policy constraints:
 
 `notification_schedule_selectors` owns normalized local-calendar selector values. It stores `schedule_id`, `selector_kind`, canonical `selector_value`, and deterministic `selector_index`. It MUST NOT store a JSON identity blob. Selector legality, ordering, defaulting, and value domains are those imported by `specs/notifications.md` from `specs/recurrence.md`.
 
-`notification_target_occurrence_selectors` stores the revision-independent selected-occurrence target as normalized relational facts and exposes the storage-only `target_occurrence_selector_ref` used by a policy row. It stores the recurrence-set id, normalized segment reference, canonical original scheduled fact, origin kind, and ordered normalized rule/rdate selector children required to reconstruct the exact `target_occurrence_selector` object from `specs/recurrence.md`. It MUST NOT store that selector as an opaque JSON identity blob. Hashing expands the reference back to the normative selector object; the storage reference itself is never substituted into a schedule-hash, slot-key, or opportunity-id preimage.
+`notification_target_occurrence_selectors` exposes the storage-only
+`target_occurrence_selector_ref` used by a selected-occurrence policy. Its exact
+existing columns are that TEXT primary key, unique TEXT
+`recurrence_target_occurrence_selector_ref` FK to
+`recurrence_target_occurrence_selectors.target_occurrence_selector_ref`, and unique
+TEXT `occurrence_key`, all non-null. The recurrence-owned root and normalized
+rule/rdate children are specified by [recurrence Section 5.1](recurrence.md#51-existing-normalized-selector-persistence).
+Notification rule/rdate source bridge rows reference those normalized children;
+notification rule selector rows retain the same ordered scalar values. Together
+they reconstruct the exact canonical selector, not an opaque JSON identity blob.
+The notification storage reference is `notification_target_selector_` plus SHA-256
+of the complete canonical selector JSON. Its transaction-aware producer creates/
+reuses the recurrence selector first, then the bridge/children without an inner
+commit; reuse by the proposed recurring-task family verifies reconstructed bytes
+and never silently repairs contradictory history. Binding and assignment FKs
+use the recurrence reference, not the notification bridge. Hashing always expands
+a reference back to the normative selector object; neither storage reference is
+substituted into a schedule-hash, slot-key or opportunity-id preimage. This
+clarification documents existing storage, without changing public identity bytes.
 
 `notification_opportunity_provenance` MAY be persisted when a consumer needs durable pre-work evidence. Its minimum facts are opportunity id and slot key, notification intent and policy identities, item/source version, target and nominal eligibility facts, normalized schedule hash and version constants, recipient/routing snapshot, lifecycle/actionability, and recurrence occurrence/provenance facts when applicable. A virtual opportunity alone never authorizes adapter delivery.
 

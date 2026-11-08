@@ -1,6 +1,6 @@
 # Recurring Related Tasks: Detailed Command Contract
 
-Status: Draft v0.1.0-draft.1 — human-readable wire contract; not registered or implemented
+Status: Draft v0.1.0-draft.2 — human-readable wire contract; not registered or implemented
 
 Date: 2026-11-08
 
@@ -117,10 +117,23 @@ that boundary through proved lineage, not through expressed-time guesses.
 
 `configuration` requires exactly `task_owner`, `task_template`, `offset_basis`,
 `offset_seconds`, `notification_plan`, `delivery`, `materialization`,
-`generation_horizon_seconds`. Owner uses the existing profile-owner union
-(`owner_kind` with `owner_subject_id` or `owner_group_id` for its corresponding
-kind, neither for system) and must exist/be valid under the
-current trusted-local ownership model. The root owner and child owner are separate.
+`generation_horizon_seconds`. `task_owner` uses the existing **item-owner** union:
+`{owner_kind:"subject",owner_subject_id}` or
+`{owner_kind:"subject_group",owner_group_id}` with exactly the matching ID.
+`owner_kind=system` fails `invalid_request`,
+`field=configuration.task_owner.owner_kind`. The referenced subject/group must
+exist and satisfy current ownership validation. The separate rule `owner` retains
+the catalog-owner union, including system; no rule owner implies a child owner.
+
+This explicit field authorizes creation of the generated item's existing owner
+header/revision in the same bounded transaction as the task, before policy/
+presentation/work creation, as closed by
+[storage Section 3.3.1](recurring-related-task-storage.md#331-explicit-generated-item-ownership).
+It grants no creator entitlement, group membership or disclosure approval. The
+child owner is immutable for this rule: update must carry the same normalized
+`task_owner`; a different value fails `semantic_conflict`,
+`field=configuration.task_owner`, even for `new_assignments_only`. This family
+does not transfer ownership or adopt existing unrelated tasks.
 
 `task_template` contains required `item`, `people`. `item` is the task branch of
 the existing scheduling-v4 `item` schema: `item_type=task`, required `title` and
@@ -143,6 +156,15 @@ selection, overlays and rendering applications **once** during authoring, retain
 the requested input and exact resolved profile/archetype/template/presentation
 facts. Subsequent generation/adoption/restoration uses that immutable snapshot;
 current route/disclosure/eligibility still must validate. Never auto-grant approval.
+Rule authoring checks the explicit prospective child owner and reusable disclosure
+scope; it does not fabricate item ownership or task-specific application evidence.
+Each actual generation first establishes the real child owner and then validates
+the selected presentation against that exact item/owner/destination before commit.
+Missing or mismatching disclosure fails authoring with the existing
+`rendering_disclosure_unavailable` code at `configuration.notification_plan`;
+an existing assignment reports `disclosure_unavailable` without unauthorized work.
+The existing owner-less local `schedule.create` remains ordinary-only on fresh
+creation; this is a separate explicit-owner draft, not an amendment to its request.
 `delivery` is null iff the resolved reminder set is empty; otherwise it is the
 existing scheduling `delivery` shape. Resolve a context default at authoring and
 persist the concrete target/destination snapshot. No route upsert is implicit.
@@ -159,12 +181,17 @@ delegated input. Notification `resolved` has exactly `selection_mode`, `profile`
 - Binding ID is null unless archetype-default resolution used one; scope chain
   is the exact ordered resolved owner chain (empty for explicit/custom-only).
 - Effective templates are a sorted array of exactly
-  `{policy_origin,source_key,template,presentation}`. Origin is
+  `{policy_origin,source_key,policy_key,template,presentation}`. Origin is
   `profile_template|profile_replacement|custom_addition`; `template` is the closed
   normalized profile-v2 template schema, with concrete schedule/late handling and
   exact rendering revision. `presentation` is the existing closed
   `policyPresentation` union, with exact resolved disclosure reference, or ordinary.
   No task-specific policy/intent/application ID is fabricated at rule authoring.
+  Derive `policy_key` by the existing composition rule: `profile_` plus template
+  key for profile templates/replacements, unchanged custom policy key otherwise.
+  Sort by final policy key; reject invalid keys or post-composition collisions.
+  Initial generated/restored task intents use the registered generation-ID/key
+  token from storage Section 2; current policy copies retain their existing intent.
 
 Delivery `resolved` is exactly the existing schedule-create-v3 response
 `$defs/delivery`, excluding only `delivery_state`: concrete delivery target,
@@ -348,7 +375,7 @@ reservations or permission to execute after expiry. No deterministic ID depends
 on the later commit-clock sample. Compatible replay never samples it again.
 
 Reconcile result requires: `rule`, `source_snapshot`, `selection`, `results`,
-`work`, `coverage`, `has_more`, `next_cursor`, `delivery`. Source snapshot contains
+`policy_mappings`, `work`, `coverage`, `has_more`, `next_cursor`, `delivery`. Source snapshot contains
 source item/version, recurrence set/revision/hash. Selection contains original
 evaluation, current execution time, normalized limits, both lane start/end keys
 and any intent high water. Every processed assignment/candidate has exactly one
@@ -373,9 +400,23 @@ Entry shape: required `outcome`, `reason`, complete `selector`, `occurrence_key`
 `adopted` and both applicable actions. `before/after` are null or exact assignment,
 generation, task/version, binding/revision, adopted/desired revision and predecessor
 references. No action claims a mutation merely observed from another command.
+Before/after child references also carry actual `item_access_owner_id` and
+`item_access_owner_revision`, never a catalog owner substituted for item evidence.
 Task IDs and proof arrays must identify actual rows or explicitly marked dry-run
 would-be rows; ambiguous candidates report the conflicting reference IDs in
 `before`, not guessed after facts.
+
+`policy_mappings` is an array of exactly `{assignment_id,generation_id,task_item_id,
+policy_key,creation_token,notification_intent_id,notification_policy_id}` for the
+complete active current **family-composed** policy set on processed existing/new
+child tasks. Preserve independently authored policies under ordinary adoption/
+copy-forward rules; inspect them through existing policy reads rather than invent
+a composed key or creation token for them. Order by task ID then policy key; no
+duplicate task/key pair among active mapped intents. Empty for no such policies. Tokens come
+from actual immutable intent creation facts, not the current outer command unless
+it created that intent. The real invoking command is the envelope `command_id`;
+the mappings do not fabricate subcommand receipts. Count all mapping bytes under
+the page response cap; never silently truncate the reminder set.
 
 `work` has exactly `created`, `retained`, `cancelled`, `protected_stale` arrays of
 existing work IDs, each unique, pairwise disjoint and sorted lexicographically.
@@ -427,6 +468,7 @@ An assignment projection has `assignment_id`, `assignment_seq`, `change_version`
 `assignment_revision_id`, `initial_selector`, `current_selector`, `occurrence_key`,
 `generation_id`, `generation_index`, `task_item_id`, `task_item_version`,
 `temporal_binding_id`, `temporal_binding_revision_id`, `relationship_id`,
+`task_owner`, `item_access_owner_id`, `item_access_owner_revision`,
 `adopted_rule_revision_id`, `desired_rule_revision_id` (null if none),
 `disposition`, `reason`, `restoration_veto`, `suppression` (null or immutable
 ID/actor/time/command evidence), `source_proof_id`, `source_snapshot`,
@@ -579,9 +621,11 @@ First failure wins in this order:
    generation, assignment version, then target generation/task identity.
 8. Semantic validation: `semantic_conflict` for occupied key, retired-root update,
    incompatible pending intent/disposition, wrong target/cancellation cause,
-   unsupported source basis/configuration or conflicting stored preimages;
+   changed child owner, unsupported source basis/configuration or conflicting stored preimages;
    use its exact input field. A valid page's per-assignment proof/conflict outcome
-   is decision-required, not this whole-page failure.
+   is decision-required, not this whole-page failure. Authoring an unavailable/
+   mismatching detail selection uses delegated `rendering_disclosure_unavailable`
+   at `configuration.notification_plan`, without task/owner/policy residue.
 9. Complete-unit budget and source resolution/environment failure:
    `capacity_exceeded` at `limits.<name>`; `environment_failure` at
    `timezone_database_version`, `cursor_configuration`, `clock` or underlying
@@ -620,6 +664,11 @@ Minimum computed oracles pair this file's wire receipts with storage Section 8:
    concurrent invalidation, forged/cross-ledger/wrong-purpose/expired cursors.
 8. Exact read views/history and SQL-free task→binding→policy→work→attempt traversal,
    no read repairs, no idle receipt/progress churn and finite old/dense recurrence work.
+9. Exact recurrence-selector producer/reuse, multi-template/custom policy-key/token
+   mappings, actual owner header/history/epoch before detail application, no
+   creator/grant inference, rejected system child owner and ownership-transfer
+   updates, owner-creation/presentation/work-stage rollback with unchanged old
+   owner-less schedule-create behavior.
 
 This draft closes proposed human-readable contracts. It is not ratification,
 an external review, delivered fixtures, a runtime test result, an implementation

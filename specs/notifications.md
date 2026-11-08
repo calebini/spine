@@ -89,6 +89,43 @@ Initial authoring derives `notification_intent_id` with prefix `notification_int
 
 `notification_policy_id` uses prefix `notification_policy` over Spine canonical JSON containing exactly `derivation_version=spine.notification-policy-id.v1`, the three version constants, `notification_intent_id`, `intent_created_item_version`, `intent_created_by_command_id`, `item_id`, `item_version`, `notification_schedule_id`, recipient facts, `channel`, `delivery_target_id`, normalized target, `normalized_notification_schedule_hash`, `status`, `created_at_utc`, `created_by_command_id`, and optional `source_notification_policy_id` and `disabled_at_utc`. Derivation order is intent id, normalized schedule hash, schedule id, then policy id.
 
+### 3.1 Registered multi-policy creation-token mapping
+
+The existing v1 intent preimage is unchanged. Its historical field
+`intent_created_by_command_id` is the notification normalizer's **creation token**;
+for direct single-policy authoring that is the real command ID. A composite that
+authors multiple fresh policies must supply distinct registered per-policy tokens,
+not repeat one outer command ID for every intent on the same item version.
+
+For existing `schedule.create` and fresh-policy additions in `schedule.update`,
+the token is exactly `outer_command_id + ":" + policy_key`. Keys use the existing
+`[a-z][a-z0-9_-]{0,63}` grammar, have no colon and are unique after composition.
+Both initial `intent_created_by_command_id` and initial policy
+`created_by_command_id` receive that token under the existing normalizer; item
+version is the actual authored version. The enclosing receipt/audit stores the
+real command ID. Its existing ordered key/intent/policy mapping determines the
+token mechanically under this rule; no new `creation_token` field is added to a
+frozen response. A token is not an executed command and has no
+independent command receipt or authorization. No creator identity is inferred from it.
+This documents the existing composite mapping; stored IDs are not rederived.
+
+The proposed [recurring-task storage contract](recurring-related-task-storage.md#2-representation-and-identity-registry)
+registers an additional base token: the stable generation ID for fresh initial/
+restored tasks. Append the same colon and canonical composed policy key. Later
+fresh intents introduced by task/configuration edits use the actual outer edit
+command ID plus key, as ordinary schedule-update authoring does. Existing intents
+are carried/edited by exact intent/policy ancestry with their original creation
+token unchanged; an edit or profile re-resolution is not automatically a new
+intent. Real outer operation/actor/receipt evidence is always retained separately.
+
+The owning composition contract maps profile/template/custom keys before token
+derivation and rejects collisions; array position, due time, schedule text and page
+number are not substitute discriminators. One policy with several offsets still
+has one intent and multiple schedule slots, not one intent per offset. Existing
+duplicate-policy validation remains separate from intent identity. Do not add
+`policy_key` to the frozen intent/policy preimages, bump their derivation versions,
+mint fake subcommands or rewrite historical intents to implement this clarification.
+
 ## 4. Target Binding
 
 `target` contains required `anchor_role` and `application_scope`.

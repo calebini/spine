@@ -410,6 +410,17 @@ Canonical composition order is:
 2. profile replacements by `template_key`; and
 3. custom additions by `policy_key`.
 
+For ordinary policy authoring, profile templates and replacements map to
+`policy_key="profile_" + template_key`; a replacement retains the original key.
+A custom addition retains its explicit `policy_key`. The final keys must be
+unique and valid under ordinary multi-policy authoring, including after the
+prefix is applied; a custom/profile collision or unrepresentable key fails
+`semantic_conflict`/the owning key validation, never silently renames a template.
+Normalize policies in final policy-key order. This registers the existing
+composition mapping and does not change profile revision hash ordering.
+The resulting keys address the distinct per-policy creation tokens in
+[notifications Section 3.1](notifications.md#31-registered-multi-policy-creation-token-mapping).
+
 Origin and key are receipt/provenance facts, not additions to the existing
 notification-policy identity preimage. After ordinary target, recipient, route,
 schedule, and late-handling normalization, duplicate canonical policies fail with the

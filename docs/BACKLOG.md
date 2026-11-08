@@ -42,7 +42,9 @@ machine-codified or implemented. D-01–05 are now approved. The bounded consist
 review is complete under SPINE-076; SPINE-077's three additional lenses reported
 one operability minor, now amended locally under SPINE-078 without an external
 recheck. Detailed technical companions are now drafted under SPINE-079; their
-review and machine codification remain pending. No product decision is reopened.
+SPINE-080 buildability review reported three majors, now amended locally under
+SPINE-081 pending external recheck before machine codification. No product
+decision is reopened by recording or correcting those contract seams.
 **Request:** A recurring class should generate one independently completable
 pickup task per occurrence, due 90 elapsed minutes after the expressed class
 start, following moves, with one reminder ten minutes before its own due time.
@@ -230,7 +232,8 @@ technical contract closure or a focused external recheck.
 ### SPINE-079 — Close recurring-task storage, identity and command contracts
 
 **Status:** Done — detailed human-readable technical drafts written and locally
-verified (2026-11-08), not ratified or externally reviewed. Preserve approved
+verified (2026-11-08), not ratified. Subsequent SPINE-080 review requires three
+major boundary/dependency corrections; this entry is not review acceptance. Preserve approved
 D-01–05 and the individual restoration veto. No runtime, machine schemas/fixtures,
 migration, external review, commit, push or deployment is included.
 **Scope:** Focused physical-storage/identity and command companions beneath the
@@ -267,6 +270,91 @@ closure, then machine-contract/fixture codification and the implementation plan.
 detailed specification closure, excluding the unrelated `AGENTS.md` amendment,
 then staging a reviewer-only bounded buildability package. Staging does not
 authorize transmitting its new payload, launching a reviewer or pushing commits.
+
+### SPINE-080 — Bounded buildability review of recurring-task technical closure
+
+**Status:** Done — approved single reviewer pass completed (2026-11-08):
+**needs_revision**, **boundary_preserved=false**, **0 blockers / 3 majors /
+0 minors / 0 nits**. Review execution is complete; technical acceptance is not.
+The operator requested staging after the SPINE-079 local
+checkpoint `0a33da39d69da874b13b60273a019e09b03e42b0`; no push is authorized.
+**Package:** [Audit notes](../whetstone_runs/recurring-related-task-technical-buildability-audit-001/audit-notes.md)
+enumerate **18 complete specifications**, comprising the logical/storage/command
+drafts and their preserved owners. The
+[prepared manifest](../whetstone_runs/recurring-related-task-technical-buildability-audit-001/prepared-inputs.json)
+binds all source bytes, notes, pinned adapter and complete built-in buildability
+prompt. Source bytes: **878,001**; rendered prompt: **893,073 characters /
+893,501 UTF-8 bytes**. No runtime, machine schemas or old review reports are inputs.
+**Reviewer:** One `audit-change` pass, real built-in `buildability`, stable Whetstone
+`0.1.0` checkpoint `6e19fe3e72dedda50a372781a43c08e5d7e7480a`, Codex CLI
+`0.166.0-alpha.6`, `gpt-6.1-sol`, explicit medium reasoning, 1200-second timeout.
+**Focus:** Physical keys/history, source proof/novelty, stable child generation,
+command/projection closure, adoption/retirement progress, bounded pages/cursors,
+clock/replay/races, all-writer attempt freshness, migration and no idle writes.
+Preserve D-01–05 and the suppression action; no scope expansion or heuristic mapping.
+**Guard:** [Launcher](../whetstone_runs/recurring-related-task-technical-buildability-audit-001/run-review.py)
+defaults to local verification. Execution requires actual approval bound to the
+manifest/notes hashes in the
+[status record](../whetstone_runs/recurring-related-task-technical-buildability-audit-001/execution-status.json),
+then normal tool permission for nested CLI state. It refuses changed source,
+checkpoint/runtime/adapter/prompt/CLI or an existing attempt. The
+[authorization record](../whetstone_runs/recurring-related-task-technical-buildability-audit-001/authorization.md)
+records the actual operator approval and its exact manifest/notes hashes. Audit
+artifacts remain local under the existing ignore rule.
+**Boundary:** Reviewer-only; no source edits, Editor, convergence loop, ratification,
+runtime implementation, ledger access, migration, delivery, deployment or push.
+Subsequent machine schemas/computed fixtures are explicitly not delivered by this
+review. Its result is not whole-feature runtime acceptance or convergence.
+**Outcome:** The [persisted report](../whetstone_runs/recurring-related-task-technical-buildability-audit-001/change_audit/change_audit_report.md)
+and [execution summary](../whetstone_runs/recurring-related-task-technical-buildability-audit-001/execution-summary.md)
+record all three in-scope majors: BF-001 missing normative selector-table/key/
+producer dependency; BF-002 unspecified distinct per-reminder intent creation
+discriminator; BF-003 child owner domain/atomic ownership evidence inconsistent
+with definition-rendering admission. The boundary flag describes the proposed
+ownership contract, not an audit process violation or confirmed runtime defect.
+**Integrity:** Process exit 0; all 18 source hashes, notes, complete prompt and
+runtime/CLI/adapter remain unchanged. No source correction or further audit was
+performed. Original report/feedback bytes are preserved; local run artifacts
+remain ignored. The unrelated `AGENTS.md` amendment is unchanged.
+**Next:** SPINE-081 records the subsequently authorized local manual amendment;
+a focused external recheck still precedes machine schemas/computed fixtures.
+Original finding counts/verdict are unchanged. No automatic patch/review loop.
+
+### SPINE-081 — Bounded amendment for recurring-task buildability findings
+
+**Status:** Done — operator-authorized manual specification patch applied and
+locally verified (2026-11-08) for SPINE-080 BF-001–003; not externally rechecked.
+No runtime, schema/DDL, machine-fixture generation, new audit, commit, push or deployment.
+**Assessment:** Agree with all three as normative gaps, not confirmed runtime
+defects. Existing recurrence selector storage and per-policy authoring-token
+machinery already exist; document/reuse them. Restrict generated item ownership
+to subject/group, explicitly establish existing owner/header history atomically,
+and preserve ordinary local create/rendering behavior outside this new family.
+**Preservation:** Keep D-01–05, immutable identities/history, original audit reports,
+and the pre-existing `AGENTS.md`/audit-tracking changes. No implicit ownership
+transfer, creator entitlement, access grant or disclosure approval.
+**Changes:** Recurrence/ontology/binding owners now identify existing selector
+storage, exact FK and insert-versus-reuse validation. Notification/create/profile
+owners register the already-implemented policy-key creation-token convention;
+the new family closes generation-specific reminder mapping without rewriting
+old IDs. Logical/storage/command drafts restrict child owners to subject/group,
+create the existing owner/header history before presentation/work, record real
+actor/receipt evidence and access-epoch change, and exclude ownership transfer.
+Permissions/rendering owners preserve current ordinary local creation and grants.
+**Evidence:** [Manual follow-up](../whetstone_runs/recurring-related-task-technical-buildability-audit-001/manual-patch-followup.md)
+distinguishes verified gaps from runtime claims and preserves original reports.
+Existing doc/declaration, create/profile and selected-binding checks pass
+**39 tests**; pure no-ledger identity checks and static DDL dependency checks pass.
+Local links/new anchors, diff hygiene and unchanged AGENTS bytes are verified.
+This is not new-family runtime or migration test evidence.
+**Next:** Report the local patch, then separately stage/authorize a focused
+buildability recheck before machine schemas/computed fixtures. No ratification
+or change to the original audit's three-major/false-boundary outcome is claimed.
+**Checkpoint/recheck request (2026-11-08):** The operator requested a local commit
+of the bounded patch and related audit tracking, then a focused buildability
+recheck. Exclude the unrelated `AGENTS.md` amendment. Prepare a new exact payload
+and approval record; the earlier 18-file approval does not approve changed source
+bytes or an additional reviewer request. No push is authorized.
 
 ## Post-release corrective work
 

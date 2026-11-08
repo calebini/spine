@@ -9,7 +9,7 @@ see [validation](TZDB_COMPATIBILITY_VALIDATION.md) and [operations](TZDB_COMPATI
 
 
 Role: Roadmap rationale and delivery history; current task status lives in [BACKLOG.md](BACKLOG.md)
-Last updated: 2026-11-08 (SPINE-079 recurring-task technical contract draft)
+Last updated: 2026-11-08 (SPINE-081 recurring-task bounded contract amendment)
 
 This is a non-normative delivery plan. The specifications and machine-readable contracts remain authoritative.
 
@@ -37,9 +37,15 @@ approved. SPINE-079 adds proposed [storage/identity](../specs/recurring-related-
 and [command](../specs/recurring-related-task-commands.md) companions: explicit
 source proof rather than heuristic remapping, durable slot reservations and linked
 generations, bounded edit/retirement intents and current-attempt freshness.
-Technical review and machine schemas/computed fixtures remain next; no runtime
-implementation or schema migration is included. SPINE-075/079 in the backlog own
-design status; a subsequent implementation delivery plan follows those contracts.
+The SPINE-080 bounded buildability review returned needs-revision with three
+majors: selector storage authority, distinct reminder intent derivation and atomic
+child ownership/rendering admission. SPINE-081 amends these locally: reuse existing
+selector storage and per-policy token conventions; explicitly establish subject/
+group child ownership/history before presentation/work, without grants or implicit
+transfer. Focused external recheck remains next before machine schemas/computed
+fixtures; no runtime implementation or schema migration is included.
+SPINE-075/079/080/081 in the backlog own design/review/patch status; a subsequent
+implementation delivery plan follows those contracts.
 
 **Selected enriched delivery (2026-11-06):** The operator selected the smallest
 end-to-end feature, treating useful enrichment as the product direction rather

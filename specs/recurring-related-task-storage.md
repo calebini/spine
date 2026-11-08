@@ -1,6 +1,6 @@
 # Recurring Related Tasks: Storage, Identity and Lineage
 
-Status: Draft v0.1.0-draft.1 — proposed physical contract; not ratified or implemented
+Status: Draft v0.1.0-draft.2 — proposed physical contract; not ratified or implemented
 
 Date: 2026-11-08
 
@@ -85,7 +85,28 @@ binding `temporal_binding` at `/temporal_binding`; first binding revision
 `item`, `anchor`, `relation`, `temporal_binding`, `temporal_binding_revision`.
 This is an internal seed, never a second actual command/receipt. Existing
 notification intent/policy derivations then consume the resulting task and exact
-policy facts. Later task/binding revisions use their existing update derivations
+policy facts. In particular, each effective reminder uses its canonical composed
+`policy_key`: `profile_` plus template key for a profile template/replacement, or
+the explicit custom policy key, under the notification-profile composition owner.
+Initial/restored task intent creation uses exactly `generation_id + ":" + policy_key`
+as `intent_created_by_command_id` and the initial policy's `created_by_command_id`.
+This is the registered [notifications Section 3.1](notifications.md#31-registered-multi-policy-creation-token-mapping)
+creation-token convention, not another public command or new intent preimage.
+Reject invalid/colliding composed keys before any generation/policy writes.
+
+The family receipt records, in policy-key order, each task/generation, policy key,
+creation token, intent and active current family-composed policy IDs plus the
+**real** outer command ID; independent custom policies are preserved/read through
+their existing owner, not relabelled with an invented family key;
+task-generation/owner/audit/receipt rows use real outer attribution, not the token.
+Copy-forward/revision preserves each existing intent and original creation token.
+New intents introduced during adoption use the real outer reconcile command ID
+plus `":" + policy_key`, under ordinary fresh-policy edit rules; they are not
+created again on an already adopted task or merely because a page is retried.
+Distinct generations have distinct task and intent identities, while one policy
+with several schedule offsets retains one intent and several slots. Equal-token/
+different-preimage conflicts roll back the page, never replace a historical intent.
+Later task/binding revisions use their existing update derivations
 under the real outer operation and retain the created root IDs.
 
 Rule revisions are contiguous positive integers. Rule `change_version` also
@@ -106,6 +127,17 @@ selectors target `recurrence_target_occurrence_selectors`; binding IDs/revisions
 target the existing relative-temporal-binding tables. Every cross-record same-rule,
 same-assignment, same-set and exact item-version relationship is checked before
 commit; FKs alone do not prove those semantic relationships.
+
+The exact selector key, normalized children and producer are the **existing**
+[recurrence Section 5.1](recurrence.md#51-existing-normalized-selector-persistence)
+contract. Use its recurrence persistence service inside this page, before selector
+FK insertion, and reconstruct/compare canonical selector/key/set on reuse. This
+feature's migration verifies that dependency; it does not create a competing
+selector table. The `initial_selector_json`/`selector_json` fields below are
+immutable comparison/evidence snapshots validated against those relational facts,
+not an alternative opaque selector authority. Notification policies use their
+separate bridge only when actually targeting a selected recurrence occurrence;
+generated-task item-scoped reminders do not require it.
 
 ### 3.1 Rule headers and immutable configurations
 
@@ -194,6 +226,7 @@ PRIMARY KEY both. Missing dependencies prevent the page, not a guessed mapping.
 `task_item_id TEXT UNIQUE` FK coordination items, `created_task_version INTEGER`,
 `relationship_id TEXT UNIQUE` FK `coordination_item_relations(relation_id)`,
 `temporal_binding_id TEXT UNIQUE` FK relative bindings,
+`item_access_owner_id TEXT UNIQUE` FK `item_access_owners(item_access_owner_id)`,
 `created_rule_revision_id TEXT` FK configurations, `creation_proof_id TEXT` FK
 proofs, `created_by_command_id TEXT`, `created_at_utc TEXT`.
 UNIQUE `(assignment_id,generation_index)`, UNIQUE non-null
@@ -210,6 +243,52 @@ target role `task_due`, `offset_basis=elapsed`. Store the existing closed bindin
 authorize confirmed source cancellation under this family's stronger proof.
 Neither an old v1 archived-source branch nor root retirement may bypass that
 guard. No new value is inserted into the frozen binding enum.
+
+#### 3.3.1 Explicit generated-item ownership
+
+`configuration.task_owner` is an explicit **item** owner, exactly subject or
+subject_group under [permissions Section 3](permissions.md#3-resource-ownership).
+System is legal for the separate rule/catalog owner, never for this child field.
+The child owner is fixed at enrollment; update cannot transfer it through a task
+template. Each first/restored generation creates its ordinary task **and** its
+existing `item_access_owners` header/current revision 1 atomically. No new owner
+table, membership, access grant, account or ownership model is introduced.
+
+Owner ID uses existing `spine.command-id.v1`: prefix/role `item_access_owner`,
+command `schedule.related_task_rule.reconcile`, identity seed `generation_id`,
+path `/task_owner`. This keeps the header stable across concurrent generation
+attempts. Header fields are exact task `item_id`, that owner ID,
+`current_revision=1`, configured `owner_kind` and its matching subject/group FK
+(other FK null), `creator_entitlement_subject_id=NULL`,
+`created_by_command_id=real outer command_id`. Do not infer a human creator from
+the local agent, rule actor, participants, source owner or recipient.
+
+Insert the complete `item_access_owner_revisions` row in the same transaction:
+the exact header fields except `current_revision` becomes `revision=1`, plus
+`changed_at_utc=page execution time`, `changed_by_subject_id=real local actor`,
+`command_receipt_id=real outer receipt ID`. Its deferred FKs permit the header/
+history/receipt cycle; all must exist before commit. Validate actual owner refs
+and their current eligibility again under the writer lock. Readback exposes this
+owner ID/revision; a preexisting conflicting owner fails closed, never transfers.
+
+When a page creates one or more owner headers, increment
+`ledger_access_state.access_epoch` once in that same transaction and invalidate
+the relevant catalogs. Existing-task following, replay, no-op and dry run create
+no owner history or epoch change solely for observation. Configuration adoption
+and target item-version copy-forward retain the same owner header/revision, not
+another owner row per task version. Owner changes/missing or contradictory
+ownership evidence invalidate assignment freshness and require explicit resolution,
+not automatic restoration of a different owner or grants.
+
+The ordering is task/owner/history, then concrete child profile/presentation
+validation and policy/application rows, then selected work, audit/receipt, one
+commit. An exact pre-authorized reusable disclosure may be applied only after
+checking the actual newly established child owner, item and destination inside
+that transaction. Rule configuration is not itself an item owner or disclosure
+grant. Failure leaves no task, owner, policy, work, audit or receipt residue.
+This proposed explicit-owner family is distinct from the existing owner-less
+trusted-local `schedule.create`; [rendering Section 3.3](notification-rendering-integration.md#33-fresh-trusted-local-creation-and-explicit-adoption)
+keeps that command's ordinary-only fresh-create rule unchanged.
 
 `related_task_source_cancellations`:
 `generation_id TEXT PRIMARY KEY` FK generations,
@@ -417,13 +496,15 @@ For adoption use a three-way comparison per normalized managed field: baseline
 `B`, current child `C`, desired `D`. If `D=B`, preserve `C`; if `C=B` or `C=D`,
 apply `D`; otherwise record conflict and change none of that task's managed
 content, adopted revision or work. Managed fields are task title, summary, source_ref, priority,
-owner, archetype selection, assignee set, primary location, elapsed offset,
+archetype selection, assignee set, primary location, elapsed offset,
 complete reminder/delivery/presentation set and materialization configuration.
 Each people set is sorted unique IDs; absent summary/priority/location is normalized
 to null; each reminder is keyed by immutable template key and order is canonical.
 The reminder/delivery/presentation set is one comparison field: no implicit
 partial policy merge. Due time itself is derived, not compared as a manual field;
 an ordinary source-follow move is not a manual offset override.
+Item ownership is instead an invariant under Section 3.3.1, not a three-way
+template field or an ownership-transfer operation.
 
 To resolve an overlap, explicitly edit the ordinary task to the baseline or desired
 value, or explicitly cancel/detach it, then reconcile against new expected facts.
@@ -444,7 +525,7 @@ routes/disclosure still fail closed; copied evidence is not a new approval.
 
 ## 6. All-writer freshness and notification boundary
 
-All source item/version, recurrence, relation, target task/binding and relevant
+All source item/version, recurrence, relation, target task/binding/ownership and relevant
 policy changes must invalidate affected rules/assignments and catalog generation
 in the same canonical transaction. Use indexed joins from source to roots and
 target to generation; do not scan all tasks/history. Source fan-out queues roots,
@@ -456,7 +537,8 @@ including low-level commands, rather than assuming only these new composites wri
 
 At **each actual attempt start**, inside the existing attempt admission boundary,
 recheck current task, active binding/relation, latest generation, veto, root
-disposition, pending material adoption/cleanup and source proof/actionability.
+disposition, actual item owner/revision, pending material adoption/cleanup and
+source proof/actionability.
 Root retired/keep-following permits maintenance, never new generations. Pending
 cancel/detach prevents obsolete source-governed sends until cleanup commits;
 pending material adoption or unresolved continuity also blocks. Source version
@@ -524,6 +606,13 @@ Before implementation activation, publish computed fixture families for:
 
 - canonical configuration/IDs including Unicode, absent/null, array order,
   signed offsets, owner distinction, all derivation preimages and delegated IDs;
+- existing recurrence-selector dependency/producer/reuse with exact bytes,
+  zero-reminder child without notification bridge, conflicting/missing children;
+- two-reminder profile/custom-key tokens, input reordering, replacement intent
+  carry-forward, distinct restored-generation intents and real outer attribution;
+- explicit subject/group owner header/history/epoch, no creator entitlement,
+  rejected system child owner/transfer, actual owner/disclosure validation and
+  rollback after owner creation but before policy/work/receipt completion;
 - fresh/changed source selectors, copies/COUNT split, union contributor changes,
   exact retarget maps and unsupported topology without heuristic novelty;
 - reservation collisions, generation predecessor uniqueness, suppression races,

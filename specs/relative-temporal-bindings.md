@@ -219,7 +219,17 @@ The implementation introduces three ordinary relational authorities:
 - `relative_temporal_binding_revisions`, immutable revision rows with a unique `(temporal_binding_id, revision_index)` and foreign keys to the exact source/target item versions, target anchor, relationship, recurrence revision, and occurrence provenance when present; and
 - `temporal_binding_catalog_state`, exactly one singleton row containing the nonnegative integer `binding_catalog_generation` used only for cursor invalidation.
 
-Semantic binding and selector facts MUST NOT be stored as opaque JSON identity blobs. Normalized selector children use the same relational representation and reconstruction rules as notification selected-occurrence selectors. The active-binding uniqueness constraint is `(target_item_id, target_anchor_role)` where `binding_status=active`. Revision indexes begin at `1`, are contiguous within one logical binding, and are assigned before the revision identity and hash are persisted.
+Semantic binding and selector facts MUST NOT be stored as opaque JSON identity blobs.
+`source_occurrence_selector_ref` references the existing recurrence authority
+`recurrence_target_occurrence_selectors.target_occurrence_selector_ref` directly,
+under [recurrence Section 5.1](recurrence.md#51-existing-normalized-selector-persistence).
+Notification selected-occurrence policies add a bridge to that same normalized
+authority; bindings do not require the notification bridge. The proposed recurring
+task family uses the same transaction-aware producer/reconstruction checks, not a
+new selector store. The active-binding uniqueness constraint is
+`(target_item_id, target_anchor_role)` where `binding_status=active`. Revision indexes
+begin at `1`, are contiguous within one logical binding, and are assigned before
+the revision identity and hash are persisted.
 
 The catalog generation begins at `0` when the migration creates the singleton. Every successful transaction that changes any fact capable of changing binding membership or Section 7.1 state increments it exactly once in that same transaction. Read-only operations, dry runs, compatible replays, receipt-only no-ops, and work-only reconciliation do not increment it. The generation is an invalidation watermark, not schedule truth, and no state predicate may consult its numeric value.
 
