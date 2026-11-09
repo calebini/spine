@@ -9,14 +9,15 @@ see [validation](TZDB_COMPATIBILITY_VALIDATION.md) and [operations](TZDB_COMPATI
 
 
 Role: Roadmap rationale and delivery history; current task status lives in [BACKLOG.md](BACKLOG.md)
-Last updated: 2026-11-09 (SPINE-091 contract ratification and recurring-task delivery plan; implementation not started)
+Last updated: 2026-11-10 (SPINE-092 internal persistence/source-identity checkpoint)
 
 This is a non-normative delivery plan. The specifications and machine-readable contracts remain authoritative.
 
 ## Planned Delivery: Recurring-Source Related Tasks
 
 The operator ratified the reviewed source contract family on **2026-11-09** and
-selected implementation planning, not runtime implementation. The accepted
+initially selected implementation planning, then authorized R1 after commit
+`5ed85be`. The accepted
 [logical](../specs/recurring-related-tasks.md),
 [storage/identity](../specs/recurring-related-task-storage.md),
 [command](../specs/recurring-related-task-commands.md) and
@@ -55,11 +56,20 @@ needed for any checkpoint. Use disposable ledgers and fake adapters/clocks only.
 3. **R3 / SPINE-094:** all-writer/attempt safety and automatic scheduling.
 4. **R4 / SPINE-095:** public activation, packaged verification and operator handoff.
 
-The first implementation task is R1. Its backlog status is ready for a separate
-operator kickoff; this plan is not that authorization. Later slices depend on the
-earlier checkpoint and must retain its regression evidence.
+R1 is now an implemented internal checkpoint; R2 remains unstarted and requires
+operator kickoff. Later slices depend on the earlier checkpoint and must retain
+its regression evidence. A plan entry alone is not implementation authorization.
 
 ### R1 — Persistence and source-identity foundation (SPINE-092)
+
+**Checkpoint (2026-11-10):** Internal candidate 20 and the storage/source-proof
+helpers are implemented and tested on disposable ledgers. Normal runtime/schema
+declarations remain `0.11.2` / `19`; no public command or automatic generation is
+enabled. See the [R1 evidence and producer seams](design-notes/recurring-related-task-r1-checkpoint.md).
+The actual generic recurrence producer retains initial copied-segment ancestry
+and does not itself establish adjusted-COUNT copy lineage. R1 fails closed rather
+than repairing historical facts. Include a narrow prospective producer follow-up
+in the next selected checkpoint before relying on those copy mappings.
 
 Deliver the storage leaf's exact header/history, assignment/reservation/proof/
 lineage, generation/cancellation/suppression, intent/outcome, progress/catalog and

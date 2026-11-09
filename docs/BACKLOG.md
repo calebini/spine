@@ -1,6 +1,6 @@
 # Spine Backlog
 
-Last updated: 2026-11-09
+Last updated: 2026-11-10
 
 This is the single work queue for Spine development. The
 [implementation plan](IMPLEMENTATION_PLAN.md) explains roadmap direction and delivery
@@ -782,14 +782,15 @@ title metadata; closure resource paths are identical and all hashes current.
 All 18 runtime obligations remain pending. Runtime/package/migration declarations,
 AGENTS bytes, raw reviews and 88 inventoried prior audit artifacts are preserved.
 No runtime work, external audit, commit or push occurred.
-**Next:** Optional checkpoint, then operator kickoff of SPINE-092/R1. No new
-product decision is required; surface any newly discovered normative conflict
-instead of inventing policy during implementation.
+**Checkpoint:** Ratification and plan committed as `5ed85be`; AGENTS.md excluded.
+The operator then authorized SPINE-092/R1. No push was requested.
+**Next:** Follow SPINE-092's implementation evidence; retain the source-only
+activation boundary until R4, rather than treating ratification as runtime support.
 
 ### SPINE-092 — R1: recurring-task persistence and source identity
 
-**Status:** Ready — planned first implementation checkpoint; requires a separate
-operator kickoff. SPINE-091 is complete; implementation not started.
+**Status:** Done, internal checkpoint (2026-11-10) — operator authorized R1 after
+ratification/plan commit `5ed85be`. Implementation remains uncommitted; no push.
 **Scope:** Exact physical records/constraints/indexes and ordered migration,
 canonical decoders/identities, authentic bounded source proof and lineage.
 Existing items/selectors/owners/bindings/notification tables retain authority;
@@ -800,12 +801,26 @@ history rejection, reservation/predecessor races, source identity/COUNT/union/
 retarget/novelty fail-closed cases and indexed access plans. Introduce RRT-01/04/
 05/18 evidence; detailed work and exit gate are in the
 [delivery plan](IMPLEMENTATION_PLAN.md#r1--persistence-and-source-identity-foundation-spine-092).
-**Next:** Await operator authorization, then implement and verify this checkpoint.
-Do not start another feature or any environment-specific deployment work.
+**Evidence:** Candidate migration 20 implements 15 tables, 27 guards and 11 explicit
+indexes without changing normal schema-19 initialization/migration. New canonical
+helpers exercise all 110 published vectors. Actual SQLite graph/rollback/drift,
+reservation/CAS and physical predecessor races, indexed plans and actual source
+membership/COUNT/union/move/exclusion/novelty tests pass. See the
+[R1 checkpoint](design-notes/recurring-related-task-r1-checkpoint.md) for exact
+test ownership, activation limits and the delegated producer seams; no historical
+source facts were repaired. RRT-01/04/05/18 receive foundation evidence only.
+**Verification:** Full regression run **1,305 passed / one skipped**; final selected
+run **105 passed**, including **25 R1 tests**; focused Ruff, strict mypy on the four
+new modules, documentation targets and `git diff --check` pass. See checkpoint
+notes for the final-run sequence and non-fatal diagnostics.
+**Next:** Checkpoint R1 if requested; obtain R2 kickoff including a narrow
+forward-only recurrence ancestry/COUNT-copy producer follow-up. No public command,
+automatic generation, delivery or environment-specific deployment is authorized.
 
 ### SPINE-093 — R2: recurring-task commands and manual reconciliation
 
-**Status:** Blocked by SPINE-092; planned, not started or separately authorized.
+**Status:** Ready for operator selection after SPINE-092; not started or
+separately authorized. Retain the R1 producer-seam follow-up below.
 **Scope:** All seven internal command handlers, configuration/enrollment,
 read/history/cursors, atomic ordinary task/owner/binding/policy/work creation,
 move/cancel/restore/suppress, both adoption scopes and all retirement dispositions.
@@ -815,7 +830,10 @@ strict-future commit and whole-unit budgets; distinct reminder identities and
 immutable ownership without grants; lifecycle/adoption/retirement and cursor
 positive/negative/race tests. Primary RRT-03/06/07/08/09/10/11/12/15/16/17 proof.
 See [R2](IMPLEMENTATION_PLAN.md#r2--command-engine-and-manual-reconciliation-spine-093).
-**Next:** Finish R1 and obtain the selected checkpoint's implementation kickoff.
+**Next:** Obtain R2 kickoff and explicitly include prospective recurrence copy
+ancestry/COUNT-copy evidence fixes identified by the
+[R1 checkpoint](design-notes/recurring-related-task-r1-checkpoint.md). Preserve
+existing immutable history; unsupported correspondence stays unresolved.
 
 ### SPINE-094 — R3: recurring-task all-writer safety and automatic scheduling
 

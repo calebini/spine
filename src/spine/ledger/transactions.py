@@ -18,6 +18,26 @@ class LedgerConnection(sqlite3.Connection):
 
     _command_transaction: bool = False
 
+    def enable_recurring_tasks(self) -> None:
+        """Internal candidate only: validate touched new-family rows at commit."""
+        if getattr(self, "_recurring_tasks_enabled", False):
+            return
+        from spine.ledger.recurring_tasks import TABLE_KEYS
+
+        self._recurring_tasks_enabled = True
+        self._recurring_task_rows: set[tuple[str, str, str | None]] = set()
+        self.create_function("spine_touch_recurring_task", 3, self._touch_recurring_task)
+        for table, keys in TABLE_KEYS.items():
+            for operation in ("INSERT", "UPDATE", "DELETE"):
+                record = "OLD" if operation == "DELETE" else "NEW"
+                second = f"{record}.{keys[1]}" if len(keys) == 2 else "NULL"
+                self.execute(f"""CREATE TEMP TRIGGER spine_rrt_{table}_{operation} AFTER {operation} ON main.{table}
+                    BEGIN SELECT spine_touch_recurring_task('{table}',{record}.{keys[0]},{second}); END""")
+
+    def _touch_recurring_task(self, table: str, first: str, second: str | None) -> int:
+        self._recurring_task_rows.add((table, str(first), None if second is None else str(second)))
+        return 0
+
     def enable_renderings(self) -> None:
         """Candidate storage tracking, armed only when explicitly installed."""
         if getattr(self, "_renderings_enabled", False):
@@ -142,6 +162,8 @@ class LedgerConnection(sqlite3.Connection):
             self._facet_producer = None
 
     def _clear_facets(self) -> None:
+        if getattr(self, "_recurring_tasks_enabled", False):
+            self._recurring_task_rows.clear()
         if getattr(self, "_renderings_enabled", False):
             self._rendering_pending.clear()
             self._rendering_versions.clear()
@@ -158,6 +180,10 @@ class LedgerConnection(sqlite3.Connection):
 
     def _finalize_pending(self) -> None:
         """Validate touched state without granting commit (also used by previews)."""
+        if getattr(self, "_recurring_tasks_enabled", False):
+            from spine.ledger.recurring_tasks import finalize as finalize_recurring_tasks
+
+            finalize_recurring_tasks(self, frozenset(self._recurring_task_rows))
         if getattr(self, "_renderings_enabled", False):
             from spine.ledger.rendering_definitions import finalize as finalize_renderings
 
