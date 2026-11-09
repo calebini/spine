@@ -9,7 +9,7 @@ see [validation](TZDB_COMPATIBILITY_VALIDATION.md) and [operations](TZDB_COMPATI
 
 
 Role: Roadmap rationale and delivery history; current task status lives in [BACKLOG.md](BACKLOG.md)
-Last updated: 2026-11-08 (SPINE-085 local machine-corpus corrections verified; recheck pending)
+Last updated: 2026-11-08 (SPINE-088 two focused residuals patched locally; external recheck pending)
 
 This is a non-normative delivery plan. The specifications and machine-readable contracts remain authoritative.
 
@@ -74,8 +74,26 @@ remain tests, not runtime implementations. All 79 selected tests pass and the
 stdout-only builder reproduces 80 artifacts; no installed/frozen contract,
 runtime registration, DDL or migration changed. Fresh exact-payload rechecks
 remain the next review gate before ratification or runtime implementation.
+The correction is committed as `1837248`; AGENTS.md was excluded and no push
+occurred. SPINE-086 stages four [focused rechecks](../whetstone_runs/recurring-related-task-machine-rechecks-001/README.md):
+A identity/composition (32 inputs), B source proofs (26), C authoring (93), and
+D reads/cursors (68). All ten findings are assigned, and each complete prompt
+verifies under the 950,000-character staging ceiling. Stable Whetstone/reviewer/
+medium-reasoning pins are unchanged. Fresh exact-payload approval was then granted,
+and SPINE-087 completed all four: A and D pass, B needs revision (one major), C
+passes with minor clarification (one minor). The [reconciled outcome](../whetstone_runs/recurring-related-task-machine-rechecks-001/review-summary.md)
+retains successor segment ancestry and authoring failure-command mismatches as
+remaining corrections. Original audit evidence and all source bytes remain
+unchanged; no patch between reviews, ratification or implementation is implied.
+SPINE-088 subsequently corrects both residuals locally: explicit predecessor
+inputs for newly constructed successor fixture segments, independent rejection
+of hash-valid invalid ancestry, and complete command/code/field assertions for
+concrete update failures. Seven artifacts were regenerated; all 80 artifacts
+reproduce and 80 selected tests pass. The machine companion clarifies the offline
+scope in draft.3. Existing recurrence owners, schemas and runtime remain unchanged.
+Fresh focused rechecks are still pending; old approvals/payload hashes are not reused.
 No source/runtime/ledger change is part of review execution.
-SPINE-075/079/080/081/082/083/084/085 in the backlog own design/review/patch/
+SPINE-075/079/080/081/082/083/084/085/086/087/088 in the backlog own design/review/patch/
 codification status; no runtime implementation or migration is part of this step.
 
 **Selected enriched delivery (2026-11-06):** The operator selected the smallest

@@ -161,7 +161,7 @@
         "normalization_version": "spine.recurrence.normalization.v1",
         "canonical_json_version": "spine.canonical-json.v1",
         "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
-        "recurrence_revision_id": "recurrence_revision_fcf036592d711ec57b3767b4a94a742f47e2e73cf96ea23e9171d8ff5b4a33f6",
+        "recurrence_revision_id": "recurrence_revision_917e95d72b2aa66807cc2f50ac979ce38f6a1cd60043e92e2774c3310aa69e65",
         "prior_recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
         "revision_number": "2",
         "source_item_id": "item_fixture_science_class",
@@ -169,13 +169,13 @@
         "source_item_version": "2",
         "seed_anchor_id": "anchor_fixture_main",
         "time_basis": "local_instant",
-        "normalized_recurrence_set_hash": "44ef252d1e0d025005480aac0d3e2bc58bcdcddd65999918903f67b436874a66",
+        "normalized_recurrence_set_hash": "8abd5d89506d79daab3961194acc5deb8498167b87195fa0223ea37544bdaf2d",
         "segments": [
           {
-            "segment_id": "recurrence_segment_55211a190a601df17a7812c4378b071b6d5456514139084bf6ee3d892d869076",
+            "segment_id": "recurrence_segment_9ae264bc806491819266bb76a170c88d008a143f2c577ba64f111a172ba1810a",
             "segment_index": "0",
             "active_start": "2026-11-14T11:30:00",
-            "source_revision_id": "initial",
+            "source_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
             "status": "active",
             "created_by_command_id": "fixture_source_copied",
             "lineage_parent_segment_id": "recurrence_segment_745701e8f6dc647a155e52115aa6a848b46fe63a386c50f39b623aedfc998c27"
@@ -183,8 +183,8 @@
         ],
         "rules": [
           {
-            "rule_id": "recurrence_rule_9d433d333f91e5b1c6bfc59324d4dfeb21e19d1034ba0582796cbcdc2c9bdf63",
-            "segment_id": "recurrence_segment_55211a190a601df17a7812c4378b071b6d5456514139084bf6ee3d892d869076",
+            "rule_id": "recurrence_rule_a6ef5276de8bd1f6369b60b2bf6d9a90299e0fc356bb9776d298c2e8be6cfce7",
+            "segment_id": "recurrence_segment_9ae264bc806491819266bb76a170c88d008a143f2c577ba64f111a172ba1810a",
             "frequency": "WEEKLY",
             "interval": "1",
             "seed": "2026-11-14T11:30:00",
@@ -233,7 +233,7 @@
           {
             "segment_index": "0",
             "active_start": "2026-11-14T11:30:00",
-            "source_revision_id": "initial",
+            "source_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
             "status": "active",
             "created_by_command_id": "fixture_source_copied",
             "lineage_parent_segment_id": "recurrence_segment_745701e8f6dc647a155e52115aa6a848b46fe63a386c50f39b623aedfc998c27"
@@ -269,7 +269,7 @@
         "canonical_json_version": "spine.canonical-json.v1",
         "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
         "revision_number": "2",
-        "normalized_recurrence_set_hash": "44ef252d1e0d025005480aac0d3e2bc58bcdcddd65999918903f67b436874a66",
+        "normalized_recurrence_set_hash": "8abd5d89506d79daab3961194acc5deb8498167b87195fa0223ea37544bdaf2d",
         "prior_recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
         "command_id": "fixture_source_copied"
       },
@@ -279,10 +279,10 @@
           "contract_version": "spine.recurrence.contract.v1",
           "normalization_version": "spine.recurrence.normalization.v1",
           "canonical_json_version": "spine.canonical-json.v1",
-          "recurrence_revision_id": "recurrence_revision_fcf036592d711ec57b3767b4a94a742f47e2e73cf96ea23e9171d8ff5b4a33f6",
+          "recurrence_revision_id": "recurrence_revision_917e95d72b2aa66807cc2f50ac979ce38f6a1cd60043e92e2774c3310aa69e65",
           "segment_index": "0",
           "active_start": "2026-11-14T11:30:00",
-          "source_revision_id": "initial",
+          "source_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
           "status": "active",
           "created_by_command_id": "fixture_source_copied",
           "lineage_parent_segment_id": "recurrence_segment_745701e8f6dc647a155e52115aa6a848b46fe63a386c50f39b623aedfc998c27"
@@ -294,7 +294,7 @@
           "contract_version": "spine.recurrence.contract.v1",
           "normalization_version": "spine.recurrence.normalization.v1",
           "canonical_json_version": "spine.canonical-json.v1",
-          "recurrence_revision_id": "recurrence_revision_fcf036592d711ec57b3767b4a94a742f47e2e73cf96ea23e9171d8ff5b4a33f6",
+          "recurrence_revision_id": "recurrence_revision_917e95d72b2aa66807cc2f50ac979ce38f6a1cd60043e92e2774c3310aa69e65",
           "segment_ref": "0",
           "frequency": "WEEKLY",
           "interval": "1",
@@ -319,7 +319,7 @@
         "normalization_version": "spine.recurrence.normalization.v1",
         "canonical_json_version": "spine.canonical-json.v1",
         "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
-        "recurrence_revision_id": "recurrence_revision_6663d82b183c5c9b2d657e87bb4a51ad7dcb1a1dc54cce3e2f0720a80d376184",
+        "recurrence_revision_id": "recurrence_revision_0b4427461f20050b3149655f58629e128ac8fff40c1f1b67124fc523ac679520",
         "prior_recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
         "revision_number": "2",
         "source_item_id": "item_fixture_science_class",
@@ -327,13 +327,13 @@
         "source_item_version": "2",
         "seed_anchor_id": "anchor_fixture_main",
         "time_basis": "local_instant",
-        "normalized_recurrence_set_hash": "ea51cd54b90fc91694a7edf34fe7627da16091929d6babe47c59291a1d31bbe0",
+        "normalized_recurrence_set_hash": "f1e04fb8f29b9282c67ed415a6e14c34d2d9bf5baef8fe4739799fddb50765c6",
         "segments": [
           {
-            "segment_id": "recurrence_segment_c8dec7b3586f1b1a61eee42985de8a1a016b8bd0e047b911911d39b0783c6aae",
+            "segment_id": "recurrence_segment_1bf901dd2a57e47b898146262e697b2ba5504b718f9548df1fe7738cbbeb0797",
             "segment_index": "0",
             "active_start": "2026-11-14T11:30:00",
-            "source_revision_id": "initial",
+            "source_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
             "status": "active",
             "created_by_command_id": "fixture_source_added",
             "lineage_parent_segment_id": "recurrence_segment_745701e8f6dc647a155e52115aa6a848b46fe63a386c50f39b623aedfc998c27"
@@ -341,8 +341,8 @@
         ],
         "rules": [
           {
-            "rule_id": "recurrence_rule_20c749701d95c772a830de1733298b33f0aa86d0dfda0af7528c498011e6365a",
-            "segment_id": "recurrence_segment_c8dec7b3586f1b1a61eee42985de8a1a016b8bd0e047b911911d39b0783c6aae",
+            "rule_id": "recurrence_rule_af926a87bacbdcf224721eda4db6152d1cacf3ed84faae2e2f888bc5c0e68b40",
+            "segment_id": "recurrence_segment_1bf901dd2a57e47b898146262e697b2ba5504b718f9548df1fe7738cbbeb0797",
             "frequency": "WEEKLY",
             "interval": "1",
             "seed": "2026-11-14T11:30:00",
@@ -359,8 +359,8 @@
         ],
         "rdates": [
           {
-            "rdate_id": "recurrence_rdate_3e0131819c9f895fd0bb991f926e63ac224221af3aecf132a35f0b310ac5f9aa",
-            "segment_id": "recurrence_segment_c8dec7b3586f1b1a61eee42985de8a1a016b8bd0e047b911911d39b0783c6aae",
+            "rdate_id": "recurrence_rdate_c2971612b3b2b94c1247ac80a30f051845fccf4b05ad317f3a4528a7c9156e32",
+            "segment_id": "recurrence_segment_1bf901dd2a57e47b898146262e697b2ba5504b718f9548df1fe7738cbbeb0797",
             "scheduled_fact": "2026-11-15T11:30:00",
             "status": "active"
           }
@@ -398,7 +398,7 @@
           {
             "segment_index": "0",
             "active_start": "2026-11-14T11:30:00",
-            "source_revision_id": "initial",
+            "source_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
             "status": "active",
             "created_by_command_id": "fixture_source_added",
             "lineage_parent_segment_id": "recurrence_segment_745701e8f6dc647a155e52115aa6a848b46fe63a386c50f39b623aedfc998c27"
@@ -440,7 +440,7 @@
         "canonical_json_version": "spine.canonical-json.v1",
         "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
         "revision_number": "2",
-        "normalized_recurrence_set_hash": "ea51cd54b90fc91694a7edf34fe7627da16091929d6babe47c59291a1d31bbe0",
+        "normalized_recurrence_set_hash": "f1e04fb8f29b9282c67ed415a6e14c34d2d9bf5baef8fe4739799fddb50765c6",
         "prior_recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
         "command_id": "fixture_source_added"
       },
@@ -450,10 +450,10 @@
           "contract_version": "spine.recurrence.contract.v1",
           "normalization_version": "spine.recurrence.normalization.v1",
           "canonical_json_version": "spine.canonical-json.v1",
-          "recurrence_revision_id": "recurrence_revision_6663d82b183c5c9b2d657e87bb4a51ad7dcb1a1dc54cce3e2f0720a80d376184",
+          "recurrence_revision_id": "recurrence_revision_0b4427461f20050b3149655f58629e128ac8fff40c1f1b67124fc523ac679520",
           "segment_index": "0",
           "active_start": "2026-11-14T11:30:00",
-          "source_revision_id": "initial",
+          "source_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
           "status": "active",
           "created_by_command_id": "fixture_source_added",
           "lineage_parent_segment_id": "recurrence_segment_745701e8f6dc647a155e52115aa6a848b46fe63a386c50f39b623aedfc998c27"
@@ -465,7 +465,7 @@
           "contract_version": "spine.recurrence.contract.v1",
           "normalization_version": "spine.recurrence.normalization.v1",
           "canonical_json_version": "spine.canonical-json.v1",
-          "recurrence_revision_id": "recurrence_revision_6663d82b183c5c9b2d657e87bb4a51ad7dcb1a1dc54cce3e2f0720a80d376184",
+          "recurrence_revision_id": "recurrence_revision_0b4427461f20050b3149655f58629e128ac8fff40c1f1b67124fc523ac679520",
           "segment_ref": "0",
           "frequency": "WEEKLY",
           "interval": "1",
@@ -487,7 +487,7 @@
           "contract_version": "spine.recurrence.contract.v1",
           "normalization_version": "spine.recurrence.normalization.v1",
           "canonical_json_version": "spine.canonical-json.v1",
-          "recurrence_revision_id": "recurrence_revision_6663d82b183c5c9b2d657e87bb4a51ad7dcb1a1dc54cce3e2f0720a80d376184",
+          "recurrence_revision_id": "recurrence_revision_0b4427461f20050b3149655f58629e128ac8fff40c1f1b67124fc523ac679520",
           "segment_ref": "0",
           "scheduled_fact": "2026-11-15T11:30:00",
           "status": "active"
@@ -501,7 +501,7 @@
         "normalization_version": "spine.recurrence.normalization.v1",
         "canonical_json_version": "spine.canonical-json.v1",
         "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
-        "recurrence_revision_id": "recurrence_revision_99c33f0aecf53ab6af45ed0e72f17b59cfefe418b3f3790a72fc7944fc493ac8",
+        "recurrence_revision_id": "recurrence_revision_3c7396176f77f83f8ccf18adac51e7fb61806b18996371d1f2bb5725a3ac8b58",
         "prior_recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
         "revision_number": "2",
         "source_item_id": "item_fixture_science_class",
@@ -509,13 +509,13 @@
         "source_item_version": "2",
         "seed_anchor_id": "anchor_fixture_main",
         "time_basis": "local_instant",
-        "normalized_recurrence_set_hash": "9190c2cdbc76bdf23205f4b56a4f6a9e5ac9237dfa72229eecf3fd6aeec52d6f",
+        "normalized_recurrence_set_hash": "ea043fe6b11c466a364513c67cac555e2166e2784efdade92e72fc0638bf0b4f",
         "segments": [
           {
-            "segment_id": "recurrence_segment_b248993e31f41b3f7f33e8be5d551feccd1393995af70072a7df78922fd5f326",
+            "segment_id": "recurrence_segment_4afb64416514e1a1efcbb501d7711a1d1c53a1f38cc46025021f963f644123af",
             "segment_index": "0",
             "active_start": "2026-11-14T11:30:00",
-            "source_revision_id": "initial",
+            "source_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
             "status": "active",
             "created_by_command_id": "fixture_source_excluded",
             "lineage_parent_segment_id": "recurrence_segment_745701e8f6dc647a155e52115aa6a848b46fe63a386c50f39b623aedfc998c27"
@@ -523,8 +523,8 @@
         ],
         "rules": [
           {
-            "rule_id": "recurrence_rule_de22821ea070560fd985bc88285e8ec689ff85b5cb2a595b1af95ea41ad46603",
-            "segment_id": "recurrence_segment_b248993e31f41b3f7f33e8be5d551feccd1393995af70072a7df78922fd5f326",
+            "rule_id": "recurrence_rule_eba34cfac7e011b774ec169f40eb9e9f8ee7cd0d6fb112f193541c86ef12665a",
+            "segment_id": "recurrence_segment_4afb64416514e1a1efcbb501d7711a1d1c53a1f38cc46025021f963f644123af",
             "frequency": "WEEKLY",
             "interval": "1",
             "seed": "2026-11-14T11:30:00",
@@ -542,8 +542,8 @@
         "rdates": [],
         "exdates": [
           {
-            "exdate_id": "recurrence_exdate_4c8054449c2a9c05869e0904c356ab2c97b19376f58e1a49a7b0dfeff4d70e11",
-            "segment_id": "recurrence_segment_b248993e31f41b3f7f33e8be5d551feccd1393995af70072a7df78922fd5f326",
+            "exdate_id": "recurrence_exdate_ee51219b66ff06998eb66c6d81581f2e267238eb85cb22b99ae56e266c0e912d",
+            "segment_id": "recurrence_segment_4afb64416514e1a1efcbb501d7711a1d1c53a1f38cc46025021f963f644123af",
             "target_occurrence_selector": {
               "contract_version": "spine.recurrence.contract.v1",
               "normalization_version": "spine.recurrence.normalization.v1",
@@ -609,7 +609,7 @@
           {
             "segment_index": "0",
             "active_start": "2026-11-14T11:30:00",
-            "source_revision_id": "initial",
+            "source_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
             "status": "active",
             "created_by_command_id": "fixture_source_excluded",
             "lineage_parent_segment_id": "recurrence_segment_745701e8f6dc647a155e52115aa6a848b46fe63a386c50f39b623aedfc998c27"
@@ -679,7 +679,7 @@
         "canonical_json_version": "spine.canonical-json.v1",
         "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
         "revision_number": "2",
-        "normalized_recurrence_set_hash": "9190c2cdbc76bdf23205f4b56a4f6a9e5ac9237dfa72229eecf3fd6aeec52d6f",
+        "normalized_recurrence_set_hash": "ea043fe6b11c466a364513c67cac555e2166e2784efdade92e72fc0638bf0b4f",
         "prior_recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
         "command_id": "fixture_source_excluded"
       },
@@ -689,10 +689,10 @@
           "contract_version": "spine.recurrence.contract.v1",
           "normalization_version": "spine.recurrence.normalization.v1",
           "canonical_json_version": "spine.canonical-json.v1",
-          "recurrence_revision_id": "recurrence_revision_99c33f0aecf53ab6af45ed0e72f17b59cfefe418b3f3790a72fc7944fc493ac8",
+          "recurrence_revision_id": "recurrence_revision_3c7396176f77f83f8ccf18adac51e7fb61806b18996371d1f2bb5725a3ac8b58",
           "segment_index": "0",
           "active_start": "2026-11-14T11:30:00",
-          "source_revision_id": "initial",
+          "source_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
           "status": "active",
           "created_by_command_id": "fixture_source_excluded",
           "lineage_parent_segment_id": "recurrence_segment_745701e8f6dc647a155e52115aa6a848b46fe63a386c50f39b623aedfc998c27"
@@ -704,7 +704,7 @@
           "contract_version": "spine.recurrence.contract.v1",
           "normalization_version": "spine.recurrence.normalization.v1",
           "canonical_json_version": "spine.canonical-json.v1",
-          "recurrence_revision_id": "recurrence_revision_99c33f0aecf53ab6af45ed0e72f17b59cfefe418b3f3790a72fc7944fc493ac8",
+          "recurrence_revision_id": "recurrence_revision_3c7396176f77f83f8ccf18adac51e7fb61806b18996371d1f2bb5725a3ac8b58",
           "segment_ref": "0",
           "frequency": "WEEKLY",
           "interval": "1",
@@ -729,7 +729,7 @@
         "normalization_version": "spine.recurrence.normalization.v1",
         "canonical_json_version": "spine.canonical-json.v1",
         "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
-        "recurrence_revision_id": "recurrence_revision_a038787544b273d1d1c0b0e5ee63b360ba19ab99103e27c41c84e463e77d01e2",
+        "recurrence_revision_id": "recurrence_revision_a584df18c1aeeb1bcc8b4cb1d5baa4510a0ba1842d55f0c74406b0db417e5b6b",
         "prior_recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
         "revision_number": "2",
         "source_item_id": "item_fixture_science_class",
@@ -737,13 +737,13 @@
         "source_item_version": "2",
         "seed_anchor_id": "anchor_fixture_main",
         "time_basis": "local_instant",
-        "normalized_recurrence_set_hash": "07502810d1fd81c58d76622d5882867a6cd07316770c5bd23f1cf267adc0e4b6",
+        "normalized_recurrence_set_hash": "79b47f5c79cf4892bc6a19d7f73e7593c30a8739aba0da21d18c348e11fa4544",
         "segments": [
           {
-            "segment_id": "recurrence_segment_097d3baa50d2f3f56e5a7d64034e03b8293fe30d77ade7bafd7e618d5c99b10f",
+            "segment_id": "recurrence_segment_ddcc0d8bdde91a10201caacecf2dec1db23de38107aa02c1a8a5ab2a8d6e1a4e",
             "segment_index": "0",
             "active_start": "2026-11-14T11:30:00",
-            "source_revision_id": "initial",
+            "source_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
             "status": "active",
             "created_by_command_id": "fixture_source_occurrence_cancelled",
             "lineage_parent_segment_id": "recurrence_segment_745701e8f6dc647a155e52115aa6a848b46fe63a386c50f39b623aedfc998c27"
@@ -751,8 +751,8 @@
         ],
         "rules": [
           {
-            "rule_id": "recurrence_rule_599939a1e9cc01cd5b22cea89bff888db61f08ff02b88fdffa6d19198d5cb813",
-            "segment_id": "recurrence_segment_097d3baa50d2f3f56e5a7d64034e03b8293fe30d77ade7bafd7e618d5c99b10f",
+            "rule_id": "recurrence_rule_11997d9f9f47bc65feefee63319e3e1a44aafdadb429ee9399228fe894ac284e",
+            "segment_id": "recurrence_segment_ddcc0d8bdde91a10201caacecf2dec1db23de38107aa02c1a8a5ab2a8d6e1a4e",
             "frequency": "WEEKLY",
             "interval": "1",
             "seed": "2026-11-14T11:30:00",
@@ -771,8 +771,8 @@
         "exdates": [],
         "overrides": [
           {
-            "override_id": "recurrence_override_b323e122e44a0633c26255919f19f2b38db170813f813782916e16d6bb9fbafb",
-            "segment_id": "recurrence_segment_097d3baa50d2f3f56e5a7d64034e03b8293fe30d77ade7bafd7e618d5c99b10f",
+            "override_id": "recurrence_override_29c2155d1b7f2d5ae0c69dc19df20c72456eabced6efcdcb4393a33070552a94",
+            "segment_id": "recurrence_segment_ddcc0d8bdde91a10201caacecf2dec1db23de38107aa02c1a8a5ab2a8d6e1a4e",
             "target_occurrence_key": "eyJjYW5vbmljYWxfanNvbl92ZXJzaW9uIjoic3BpbmUuY2Fub25pY2FsLWpzb24udjEiLCJjb250cmFjdF92ZXJzaW9uIjoic3BpbmUucmVjdXJyZW5jZS5jb250cmFjdC52MSIsImRlcml2YXRpb25fdmVyc2lvbiI6InNwaW5lLnJlY3VycmVuY2Utb2NjdXJyZW5jZS1rZXkudjIiLCJub3JtYWxpemF0aW9uX3ZlcnNpb24iOiJzcGluZS5yZWN1cnJlbmNlLm5vcm1hbGl6YXRpb24udjEiLCJ0YXJnZXRfb2NjdXJyZW5jZV9zZWxlY3RvciI6eyJjYW5vbmljYWxfanNvbl92ZXJzaW9uIjoic3BpbmUuY2Fub25pY2FsLWpzb24udjEiLCJjb250cmFjdF92ZXJzaW9uIjoic3BpbmUucmVjdXJyZW5jZS5jb250cmFjdC52MSIsImRlcml2YXRpb25fdmVyc2lvbiI6InNwaW5lLnJlY3VycmVuY2UtdGFyZ2V0LW9jY3VycmVuY2Utc2VsZWN0b3IudjEiLCJub3JtYWxpemF0aW9uX3ZlcnNpb24iOiJzcGluZS5yZWN1cnJlbmNlLm5vcm1hbGl6YXRpb24udjEiLCJvcmlnaW5fa2luZCI6InJ1bGUiLCJyZWN1cnJlbmNlX3NldF9pZCI6InJlY3VycmVuY2Vfc2V0Xzg5YTVlZjdlYzhiOTA4ZGRmYmJiYmMxYTBkYzk5MmJhYTUxZDg1Yjg4NGE3NWZiYzhmYWJiY2QyZWJhMWFkMDciLCJzY2hlZHVsZWRfZmFjdCI6IjIwMjYtMTEtMTRUMTE6MzA6MDAiLCJzZWdtZW50X3JlZiI6IjAiLCJzb3VyY2VfcmRhdGVfc2VsZWN0b3JzIjpbXSwic291cmNlX3J1bGVfc2VsZWN0b3JzIjpbeyJieV93ZWVrZGF5IjpbIlNBIl0sImVuZF9jb25kaXRpb24iOnsia2luZCI6InVuYm91bmRlZCJ9LCJmcmVxdWVuY3kiOiJXRUVLTFkiLCJpbnRlcnZhbCI6IjEiLCJzZWVkIjoiMjAyNi0xMS0xNFQxMTozMDowMCIsInN0YXJ0X2JvdW5kIjoiMjAyNi0xMS0xNFQxMTozMDowMCIsInN0YXR1cyI6ImFjdGl2ZSIsIndlZWtfc3RhcnQiOiJNTyJ9XX19.cdb5d6f7fb37da99ae2b5e272eea9e9536328b5d228b9ff0a71f620ed222d664",
             "target_occurrence_selector": {
               "contract_version": "spine.recurrence.contract.v1",
@@ -838,7 +838,7 @@
           {
             "segment_index": "0",
             "active_start": "2026-11-14T11:30:00",
-            "source_revision_id": "initial",
+            "source_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
             "status": "active",
             "created_by_command_id": "fixture_source_occurrence_cancelled",
             "lineage_parent_segment_id": "recurrence_segment_745701e8f6dc647a155e52115aa6a848b46fe63a386c50f39b623aedfc998c27"
@@ -909,7 +909,7 @@
         "canonical_json_version": "spine.canonical-json.v1",
         "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
         "revision_number": "2",
-        "normalized_recurrence_set_hash": "07502810d1fd81c58d76622d5882867a6cd07316770c5bd23f1cf267adc0e4b6",
+        "normalized_recurrence_set_hash": "79b47f5c79cf4892bc6a19d7f73e7593c30a8739aba0da21d18c348e11fa4544",
         "prior_recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
         "command_id": "fixture_source_occurrence_cancelled"
       },
@@ -919,10 +919,10 @@
           "contract_version": "spine.recurrence.contract.v1",
           "normalization_version": "spine.recurrence.normalization.v1",
           "canonical_json_version": "spine.canonical-json.v1",
-          "recurrence_revision_id": "recurrence_revision_a038787544b273d1d1c0b0e5ee63b360ba19ab99103e27c41c84e463e77d01e2",
+          "recurrence_revision_id": "recurrence_revision_a584df18c1aeeb1bcc8b4cb1d5baa4510a0ba1842d55f0c74406b0db417e5b6b",
           "segment_index": "0",
           "active_start": "2026-11-14T11:30:00",
-          "source_revision_id": "initial",
+          "source_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
           "status": "active",
           "created_by_command_id": "fixture_source_occurrence_cancelled",
           "lineage_parent_segment_id": "recurrence_segment_745701e8f6dc647a155e52115aa6a848b46fe63a386c50f39b623aedfc998c27"
@@ -934,7 +934,7 @@
           "contract_version": "spine.recurrence.contract.v1",
           "normalization_version": "spine.recurrence.normalization.v1",
           "canonical_json_version": "spine.canonical-json.v1",
-          "recurrence_revision_id": "recurrence_revision_a038787544b273d1d1c0b0e5ee63b360ba19ab99103e27c41c84e463e77d01e2",
+          "recurrence_revision_id": "recurrence_revision_a584df18c1aeeb1bcc8b4cb1d5baa4510a0ba1842d55f0c74406b0db417e5b6b",
           "segment_ref": "0",
           "frequency": "WEEKLY",
           "interval": "1",
@@ -959,7 +959,7 @@
         "normalization_version": "spine.recurrence.normalization.v1",
         "canonical_json_version": "spine.canonical-json.v1",
         "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
-        "recurrence_revision_id": "recurrence_revision_789cb1d3003adff667a537b85f57481005112ebe1fb848caca47c9128f4fad58",
+        "recurrence_revision_id": "recurrence_revision_9dbc92f54b7b35f32527033b6f1706f0a8e0702eae505d99f5876bfe20e62f09",
         "prior_recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
         "revision_number": "2",
         "source_item_id": "item_fixture_science_class",
@@ -967,13 +967,13 @@
         "source_item_version": "2",
         "seed_anchor_id": "anchor_fixture_main",
         "time_basis": "local_instant",
-        "normalized_recurrence_set_hash": "0203dbe4d4c45e0fc1d808328b4dc259d25d4204ac193218ef80c3bd7ef17e5b",
+        "normalized_recurrence_set_hash": "35c61775a0d3dc97b97bde3096186eb7fe431d40e01e290f8df2ef26a7629f5a",
         "segments": [
           {
-            "segment_id": "recurrence_segment_c50f7916b3b0db469a3c53796fcc94569ee65db13fd8c3ea7cbafa07f7fd5e66",
+            "segment_id": "recurrence_segment_8e0b58296a44943aaa3211b97ba71316ba98c0e1e2097131e53c3123ff57ee0e",
             "segment_index": "0",
             "active_start": "2026-11-14T11:30:00",
-            "source_revision_id": "initial",
+            "source_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
             "status": "active",
             "created_by_command_id": "fixture_source_source_cancelled",
             "lineage_parent_segment_id": "recurrence_segment_745701e8f6dc647a155e52115aa6a848b46fe63a386c50f39b623aedfc998c27"
@@ -981,8 +981,8 @@
         ],
         "rules": [
           {
-            "rule_id": "recurrence_rule_2a02d042cf3310ebd6fb90f794159a07a6cb4b971b79ccb3c53553363c8d1331",
-            "segment_id": "recurrence_segment_c50f7916b3b0db469a3c53796fcc94569ee65db13fd8c3ea7cbafa07f7fd5e66",
+            "rule_id": "recurrence_rule_a892bd2b2c1c26597ead5fde357540d6207dd03d81d40ce40ad04e2912b76607",
+            "segment_id": "recurrence_segment_8e0b58296a44943aaa3211b97ba71316ba98c0e1e2097131e53c3123ff57ee0e",
             "frequency": "WEEKLY",
             "interval": "1",
             "seed": "2026-11-14T11:30:00",
@@ -1031,7 +1031,7 @@
           {
             "segment_index": "0",
             "active_start": "2026-11-14T11:30:00",
-            "source_revision_id": "initial",
+            "source_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
             "status": "active",
             "created_by_command_id": "fixture_source_source_cancelled",
             "lineage_parent_segment_id": "recurrence_segment_745701e8f6dc647a155e52115aa6a848b46fe63a386c50f39b623aedfc998c27"
@@ -1067,7 +1067,7 @@
         "canonical_json_version": "spine.canonical-json.v1",
         "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
         "revision_number": "2",
-        "normalized_recurrence_set_hash": "0203dbe4d4c45e0fc1d808328b4dc259d25d4204ac193218ef80c3bd7ef17e5b",
+        "normalized_recurrence_set_hash": "35c61775a0d3dc97b97bde3096186eb7fe431d40e01e290f8df2ef26a7629f5a",
         "prior_recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
         "command_id": "fixture_source_source_cancelled"
       },
@@ -1077,10 +1077,10 @@
           "contract_version": "spine.recurrence.contract.v1",
           "normalization_version": "spine.recurrence.normalization.v1",
           "canonical_json_version": "spine.canonical-json.v1",
-          "recurrence_revision_id": "recurrence_revision_789cb1d3003adff667a537b85f57481005112ebe1fb848caca47c9128f4fad58",
+          "recurrence_revision_id": "recurrence_revision_9dbc92f54b7b35f32527033b6f1706f0a8e0702eae505d99f5876bfe20e62f09",
           "segment_index": "0",
           "active_start": "2026-11-14T11:30:00",
-          "source_revision_id": "initial",
+          "source_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
           "status": "active",
           "created_by_command_id": "fixture_source_source_cancelled",
           "lineage_parent_segment_id": "recurrence_segment_745701e8f6dc647a155e52115aa6a848b46fe63a386c50f39b623aedfc998c27"
@@ -1092,7 +1092,7 @@
           "contract_version": "spine.recurrence.contract.v1",
           "normalization_version": "spine.recurrence.normalization.v1",
           "canonical_json_version": "spine.canonical-json.v1",
-          "recurrence_revision_id": "recurrence_revision_789cb1d3003adff667a537b85f57481005112ebe1fb848caca47c9128f4fad58",
+          "recurrence_revision_id": "recurrence_revision_9dbc92f54b7b35f32527033b6f1706f0a8e0702eae505d99f5876bfe20e62f09",
           "segment_ref": "0",
           "frequency": "WEEKLY",
           "interval": "1",
@@ -1764,7 +1764,7 @@
         "normalization_version": "spine.recurrence.normalization.v1",
         "canonical_json_version": "spine.canonical-json.v1",
         "recurrence_set_id": "recurrence_set_d05361a806c7f52c98f2028de6391c21475ff29e38a4bc3feff7a4c47bddf3c8",
-        "recurrence_revision_id": "recurrence_revision_a1498e501614029a05e113132a918cf4299f526166f1706de4e759e0b4eaf5e5",
+        "recurrence_revision_id": "recurrence_revision_02ff9a66f5bf57bc1712bb50d42f67442e53773efd03597877e16ad33fffe865",
         "prior_recurrence_revision_id": "recurrence_revision_cf2deeb46b908180131e0e0c62ed84463c83249fa88e79660a8bf16a36cd145a",
         "revision_number": "2",
         "source_item_id": "item_fixture_union",
@@ -1772,13 +1772,13 @@
         "source_item_version": "2",
         "seed_anchor_id": "anchor_fixture_union",
         "time_basis": "local_instant",
-        "normalized_recurrence_set_hash": "593f292011436dcc6249fb9fa7a4b5947e5e7f322a3986854d2bf8aac6036b44",
+        "normalized_recurrence_set_hash": "f88e864bf777b33e9493768e01df52a3accf86912bc797a2c341c0a494ca0b94",
         "segments": [
           {
-            "segment_id": "recurrence_segment_2a33ca78c516ff81aac76f1f6ff4122776210ae4697e2a72cfd49918a56bee7f",
+            "segment_id": "recurrence_segment_91c14d84506639524e6ec8a28d83ce1bc05c6d510dd24db168650b6cbe3f1b78",
             "segment_index": "0",
             "active_start": "2026-11-14T11:30:00",
-            "source_revision_id": "initial",
+            "source_revision_id": "recurrence_revision_cf2deeb46b908180131e0e0c62ed84463c83249fa88e79660a8bf16a36cd145a",
             "status": "active",
             "created_by_command_id": "fixture_source_union_copied",
             "lineage_parent_segment_id": "recurrence_segment_b6ca7589863881ffb5d7e9127b741da592a50531c44e2abc9e9439e6a4620522"
@@ -1786,8 +1786,8 @@
         ],
         "rules": [
           {
-            "rule_id": "recurrence_rule_02a18f776a2e77b214be8f565e9f5d8165f731e2f6d9cfb72bbbb949fd0a2cb5",
-            "segment_id": "recurrence_segment_2a33ca78c516ff81aac76f1f6ff4122776210ae4697e2a72cfd49918a56bee7f",
+            "rule_id": "recurrence_rule_3b8a3dcc64f82c6629efa6f9c0d9b46f4bcda299a927984649cdf38eae9d9224",
+            "segment_id": "recurrence_segment_91c14d84506639524e6ec8a28d83ce1bc05c6d510dd24db168650b6cbe3f1b78",
             "frequency": "WEEKLY",
             "interval": "1",
             "seed": "2026-11-14T11:30:00",
@@ -1803,8 +1803,8 @@
             "status": "active"
           },
           {
-            "rule_id": "recurrence_rule_cae183de568cc757bdd9a9e11e72b4163ea35a5a2207fc0b922a96df9a5efd75",
-            "segment_id": "recurrence_segment_2a33ca78c516ff81aac76f1f6ff4122776210ae4697e2a72cfd49918a56bee7f",
+            "rule_id": "recurrence_rule_6b6874864f732b88dcd80a2795decf1d6741b6abceda1f34e65563c3d6e30780",
+            "segment_id": "recurrence_segment_91c14d84506639524e6ec8a28d83ce1bc05c6d510dd24db168650b6cbe3f1b78",
             "frequency": "WEEKLY",
             "interval": "2",
             "seed": "2026-11-14T11:30:00",
@@ -1854,7 +1854,7 @@
           {
             "segment_index": "0",
             "active_start": "2026-11-14T11:30:00",
-            "source_revision_id": "initial",
+            "source_revision_id": "recurrence_revision_cf2deeb46b908180131e0e0c62ed84463c83249fa88e79660a8bf16a36cd145a",
             "status": "active",
             "created_by_command_id": "fixture_source_union_copied",
             "lineage_parent_segment_id": "recurrence_segment_b6ca7589863881ffb5d7e9127b741da592a50531c44e2abc9e9439e6a4620522"
@@ -1907,7 +1907,7 @@
         "canonical_json_version": "spine.canonical-json.v1",
         "recurrence_set_id": "recurrence_set_d05361a806c7f52c98f2028de6391c21475ff29e38a4bc3feff7a4c47bddf3c8",
         "revision_number": "2",
-        "normalized_recurrence_set_hash": "593f292011436dcc6249fb9fa7a4b5947e5e7f322a3986854d2bf8aac6036b44",
+        "normalized_recurrence_set_hash": "f88e864bf777b33e9493768e01df52a3accf86912bc797a2c341c0a494ca0b94",
         "prior_recurrence_revision_id": "recurrence_revision_cf2deeb46b908180131e0e0c62ed84463c83249fa88e79660a8bf16a36cd145a",
         "command_id": "fixture_source_union_copied"
       },
@@ -1917,10 +1917,10 @@
           "contract_version": "spine.recurrence.contract.v1",
           "normalization_version": "spine.recurrence.normalization.v1",
           "canonical_json_version": "spine.canonical-json.v1",
-          "recurrence_revision_id": "recurrence_revision_a1498e501614029a05e113132a918cf4299f526166f1706de4e759e0b4eaf5e5",
+          "recurrence_revision_id": "recurrence_revision_02ff9a66f5bf57bc1712bb50d42f67442e53773efd03597877e16ad33fffe865",
           "segment_index": "0",
           "active_start": "2026-11-14T11:30:00",
-          "source_revision_id": "initial",
+          "source_revision_id": "recurrence_revision_cf2deeb46b908180131e0e0c62ed84463c83249fa88e79660a8bf16a36cd145a",
           "status": "active",
           "created_by_command_id": "fixture_source_union_copied",
           "lineage_parent_segment_id": "recurrence_segment_b6ca7589863881ffb5d7e9127b741da592a50531c44e2abc9e9439e6a4620522"
@@ -1932,7 +1932,7 @@
           "contract_version": "spine.recurrence.contract.v1",
           "normalization_version": "spine.recurrence.normalization.v1",
           "canonical_json_version": "spine.canonical-json.v1",
-          "recurrence_revision_id": "recurrence_revision_a1498e501614029a05e113132a918cf4299f526166f1706de4e759e0b4eaf5e5",
+          "recurrence_revision_id": "recurrence_revision_02ff9a66f5bf57bc1712bb50d42f67442e53773efd03597877e16ad33fffe865",
           "segment_ref": "0",
           "frequency": "WEEKLY",
           "interval": "1",
@@ -1953,7 +1953,7 @@
           "contract_version": "spine.recurrence.contract.v1",
           "normalization_version": "spine.recurrence.normalization.v1",
           "canonical_json_version": "spine.canonical-json.v1",
-          "recurrence_revision_id": "recurrence_revision_a1498e501614029a05e113132a918cf4299f526166f1706de4e759e0b4eaf5e5",
+          "recurrence_revision_id": "recurrence_revision_02ff9a66f5bf57bc1712bb50d42f67442e53773efd03597877e16ad33fffe865",
           "segment_ref": "0",
           "frequency": "WEEKLY",
           "interval": "2",
@@ -1979,7 +1979,7 @@
         "normalization_version": "spine.recurrence.normalization.v1",
         "canonical_json_version": "spine.canonical-json.v1",
         "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
-        "recurrence_revision_id": "recurrence_revision_7ee1b96312717b7f8220a3431b4c66ae8d1c8deefe2b3ce620f0a46333bac9e2",
+        "recurrence_revision_id": "recurrence_revision_bb7ad4048674ee5b6c75b935732846d3d5246166c0c107e6753de4ea48034fb3",
         "prior_recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
         "revision_number": "2",
         "source_item_id": "item_fixture_science_class",
@@ -1987,13 +1987,13 @@
         "source_item_version": "2",
         "seed_anchor_id": "anchor_fixture_main",
         "time_basis": "local_instant",
-        "normalized_recurrence_set_hash": "6d5f27389bbfa147d9df70f0833348d3727af6daf9d7c27edb99c220e43059f7",
+        "normalized_recurrence_set_hash": "9ca8b1bbf7e8369af1d83b30aaf39f800f1f5a00eec792c77966dc56a72d492f",
         "segments": [
           {
-            "segment_id": "recurrence_segment_6b0a5023a2135719f87e66c55b97797a8c8f779691f43ff7c703281d5225c7da",
+            "segment_id": "recurrence_segment_246cc643f72d9023cf23b1d065613461aaf90b0820a063ceec663cf2b58d382b",
             "segment_index": "0",
             "active_start": "2026-11-14T11:30:00",
-            "source_revision_id": "initial",
+            "source_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
             "status": "active",
             "created_by_command_id": "fixture_source_changed_with_added",
             "lineage_parent_segment_id": "recurrence_segment_745701e8f6dc647a155e52115aa6a848b46fe63a386c50f39b623aedfc998c27"
@@ -2001,8 +2001,8 @@
         ],
         "rules": [
           {
-            "rule_id": "recurrence_rule_3e7664d6aefa3b0513214b0563cca63a6cf97c96db9ab0c0530ba899a3eb2b47",
-            "segment_id": "recurrence_segment_6b0a5023a2135719f87e66c55b97797a8c8f779691f43ff7c703281d5225c7da",
+            "rule_id": "recurrence_rule_51e8c6e7afdfd32ea2c2063a95f9b8f7b547b5d5701448fdb8cad429da13dec4",
+            "segment_id": "recurrence_segment_246cc643f72d9023cf23b1d065613461aaf90b0820a063ceec663cf2b58d382b",
             "frequency": "WEEKLY",
             "interval": "1",
             "seed": "2026-11-07T11:30:00",
@@ -2019,8 +2019,8 @@
         ],
         "rdates": [
           {
-            "rdate_id": "recurrence_rdate_c7282fde9e97b01836345643e1675491a7fd4f4c29d5169632b0597d7f86bd63",
-            "segment_id": "recurrence_segment_6b0a5023a2135719f87e66c55b97797a8c8f779691f43ff7c703281d5225c7da",
+            "rdate_id": "recurrence_rdate_30cece1a5f974e5901c0869eaa88143ddbd49d063d16a2b65a369b5d8133e03d",
+            "segment_id": "recurrence_segment_246cc643f72d9023cf23b1d065613461aaf90b0820a063ceec663cf2b58d382b",
             "scheduled_fact": "2026-11-15T11:30:00",
             "status": "active"
           }
@@ -2058,7 +2058,7 @@
           {
             "segment_index": "0",
             "active_start": "2026-11-14T11:30:00",
-            "source_revision_id": "initial",
+            "source_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
             "status": "active",
             "created_by_command_id": "fixture_source_changed_with_added",
             "lineage_parent_segment_id": "recurrence_segment_745701e8f6dc647a155e52115aa6a848b46fe63a386c50f39b623aedfc998c27"
@@ -2100,7 +2100,7 @@
         "canonical_json_version": "spine.canonical-json.v1",
         "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
         "revision_number": "2",
-        "normalized_recurrence_set_hash": "6d5f27389bbfa147d9df70f0833348d3727af6daf9d7c27edb99c220e43059f7",
+        "normalized_recurrence_set_hash": "9ca8b1bbf7e8369af1d83b30aaf39f800f1f5a00eec792c77966dc56a72d492f",
         "prior_recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
         "command_id": "fixture_source_changed_with_added"
       },
@@ -2110,10 +2110,10 @@
           "contract_version": "spine.recurrence.contract.v1",
           "normalization_version": "spine.recurrence.normalization.v1",
           "canonical_json_version": "spine.canonical-json.v1",
-          "recurrence_revision_id": "recurrence_revision_7ee1b96312717b7f8220a3431b4c66ae8d1c8deefe2b3ce620f0a46333bac9e2",
+          "recurrence_revision_id": "recurrence_revision_bb7ad4048674ee5b6c75b935732846d3d5246166c0c107e6753de4ea48034fb3",
           "segment_index": "0",
           "active_start": "2026-11-14T11:30:00",
-          "source_revision_id": "initial",
+          "source_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
           "status": "active",
           "created_by_command_id": "fixture_source_changed_with_added",
           "lineage_parent_segment_id": "recurrence_segment_745701e8f6dc647a155e52115aa6a848b46fe63a386c50f39b623aedfc998c27"
@@ -2125,7 +2125,7 @@
           "contract_version": "spine.recurrence.contract.v1",
           "normalization_version": "spine.recurrence.normalization.v1",
           "canonical_json_version": "spine.canonical-json.v1",
-          "recurrence_revision_id": "recurrence_revision_7ee1b96312717b7f8220a3431b4c66ae8d1c8deefe2b3ce620f0a46333bac9e2",
+          "recurrence_revision_id": "recurrence_revision_bb7ad4048674ee5b6c75b935732846d3d5246166c0c107e6753de4ea48034fb3",
           "segment_ref": "0",
           "frequency": "WEEKLY",
           "interval": "1",
@@ -2147,7 +2147,7 @@
           "contract_version": "spine.recurrence.contract.v1",
           "normalization_version": "spine.recurrence.normalization.v1",
           "canonical_json_version": "spine.canonical-json.v1",
-          "recurrence_revision_id": "recurrence_revision_7ee1b96312717b7f8220a3431b4c66ae8d1c8deefe2b3ce620f0a46333bac9e2",
+          "recurrence_revision_id": "recurrence_revision_bb7ad4048674ee5b6c75b935732846d3d5246166c0c107e6753de4ea48034fb3",
           "segment_ref": "0",
           "scheduled_fact": "2026-11-15T11:30:00",
           "status": "active"
@@ -2161,7 +2161,7 @@
         "normalization_version": "spine.recurrence.normalization.v1",
         "canonical_json_version": "spine.canonical-json.v1",
         "recurrence_set_id": "recurrence_set_d05361a806c7f52c98f2028de6391c21475ff29e38a4bc3feff7a4c47bddf3c8",
-        "recurrence_revision_id": "recurrence_revision_5130b894c073ccbeeb4a863ab6d43c196843b3f483e89e098f9793ca83ae9be6",
+        "recurrence_revision_id": "recurrence_revision_513310a24d637082ea1e2847548cd50474d71a03dd143357b2ab1eca73874def",
         "prior_recurrence_revision_id": "recurrence_revision_cf2deeb46b908180131e0e0c62ed84463c83249fa88e79660a8bf16a36cd145a",
         "revision_number": "2",
         "source_item_id": "item_fixture_union",
@@ -2169,13 +2169,13 @@
         "source_item_version": "2",
         "seed_anchor_id": "anchor_fixture_union",
         "time_basis": "local_instant",
-        "normalized_recurrence_set_hash": "2eda55fde6ef76746b01b981c4726d3812158d0a8e2737f1c379c9050cec7263",
+        "normalized_recurrence_set_hash": "e3d9daf365ee849cf189ff44598381423c586b1d8e466964b9e35aef72eb37a2",
         "segments": [
           {
-            "segment_id": "recurrence_segment_4e7faab87b3f3d0072cb6392ff88d84db77b66e5b0a7300bd6b3292725967dda",
+            "segment_id": "recurrence_segment_08475da9425ea3b3dbc9bc1ee65fd1b7aea9a953111f8743173a70307ac8c485",
             "segment_index": "0",
             "active_start": "2026-11-14T11:30:00",
-            "source_revision_id": "initial",
+            "source_revision_id": "recurrence_revision_cf2deeb46b908180131e0e0c62ed84463c83249fa88e79660a8bf16a36cd145a",
             "status": "active",
             "created_by_command_id": "fixture_source_union_changed",
             "lineage_parent_segment_id": "recurrence_segment_b6ca7589863881ffb5d7e9127b741da592a50531c44e2abc9e9439e6a4620522"
@@ -2183,8 +2183,8 @@
         ],
         "rules": [
           {
-            "rule_id": "recurrence_rule_46a4d8041d08c2af037a91139b6e30449da9fa4d3c0307ad4c1f137e0d03f9b5",
-            "segment_id": "recurrence_segment_4e7faab87b3f3d0072cb6392ff88d84db77b66e5b0a7300bd6b3292725967dda",
+            "rule_id": "recurrence_rule_1308aea5204ea0b22fc56d5a86ffed9ef5b564954dd5c0b7fba646906a4ba936",
+            "segment_id": "recurrence_segment_08475da9425ea3b3dbc9bc1ee65fd1b7aea9a953111f8743173a70307ac8c485",
             "frequency": "WEEKLY",
             "interval": "1",
             "seed": "2026-11-14T11:30:00",
@@ -2200,8 +2200,8 @@
             "status": "active"
           },
           {
-            "rule_id": "recurrence_rule_1531ce27a18da4db9c27a4f20f8f35352145b3a0c96caab7934be34bea313ccc",
-            "segment_id": "recurrence_segment_4e7faab87b3f3d0072cb6392ff88d84db77b66e5b0a7300bd6b3292725967dda",
+            "rule_id": "recurrence_rule_198b5a512400b1be4126d20fbc8327ac3e627fe5e1c4c4a6471e7803ff2d5794",
+            "segment_id": "recurrence_segment_08475da9425ea3b3dbc9bc1ee65fd1b7aea9a953111f8743173a70307ac8c485",
             "frequency": "WEEKLY",
             "interval": "3",
             "seed": "2026-11-14T11:30:00",
@@ -2251,7 +2251,7 @@
           {
             "segment_index": "0",
             "active_start": "2026-11-14T11:30:00",
-            "source_revision_id": "initial",
+            "source_revision_id": "recurrence_revision_cf2deeb46b908180131e0e0c62ed84463c83249fa88e79660a8bf16a36cd145a",
             "status": "active",
             "created_by_command_id": "fixture_source_union_changed",
             "lineage_parent_segment_id": "recurrence_segment_b6ca7589863881ffb5d7e9127b741da592a50531c44e2abc9e9439e6a4620522"
@@ -2304,7 +2304,7 @@
         "canonical_json_version": "spine.canonical-json.v1",
         "recurrence_set_id": "recurrence_set_d05361a806c7f52c98f2028de6391c21475ff29e38a4bc3feff7a4c47bddf3c8",
         "revision_number": "2",
-        "normalized_recurrence_set_hash": "2eda55fde6ef76746b01b981c4726d3812158d0a8e2737f1c379c9050cec7263",
+        "normalized_recurrence_set_hash": "e3d9daf365ee849cf189ff44598381423c586b1d8e466964b9e35aef72eb37a2",
         "prior_recurrence_revision_id": "recurrence_revision_cf2deeb46b908180131e0e0c62ed84463c83249fa88e79660a8bf16a36cd145a",
         "command_id": "fixture_source_union_changed"
       },
@@ -2314,10 +2314,10 @@
           "contract_version": "spine.recurrence.contract.v1",
           "normalization_version": "spine.recurrence.normalization.v1",
           "canonical_json_version": "spine.canonical-json.v1",
-          "recurrence_revision_id": "recurrence_revision_5130b894c073ccbeeb4a863ab6d43c196843b3f483e89e098f9793ca83ae9be6",
+          "recurrence_revision_id": "recurrence_revision_513310a24d637082ea1e2847548cd50474d71a03dd143357b2ab1eca73874def",
           "segment_index": "0",
           "active_start": "2026-11-14T11:30:00",
-          "source_revision_id": "initial",
+          "source_revision_id": "recurrence_revision_cf2deeb46b908180131e0e0c62ed84463c83249fa88e79660a8bf16a36cd145a",
           "status": "active",
           "created_by_command_id": "fixture_source_union_changed",
           "lineage_parent_segment_id": "recurrence_segment_b6ca7589863881ffb5d7e9127b741da592a50531c44e2abc9e9439e6a4620522"
@@ -2329,7 +2329,7 @@
           "contract_version": "spine.recurrence.contract.v1",
           "normalization_version": "spine.recurrence.normalization.v1",
           "canonical_json_version": "spine.canonical-json.v1",
-          "recurrence_revision_id": "recurrence_revision_5130b894c073ccbeeb4a863ab6d43c196843b3f483e89e098f9793ca83ae9be6",
+          "recurrence_revision_id": "recurrence_revision_513310a24d637082ea1e2847548cd50474d71a03dd143357b2ab1eca73874def",
           "segment_ref": "0",
           "frequency": "WEEKLY",
           "interval": "1",
@@ -2350,7 +2350,7 @@
           "contract_version": "spine.recurrence.contract.v1",
           "normalization_version": "spine.recurrence.normalization.v1",
           "canonical_json_version": "spine.canonical-json.v1",
-          "recurrence_revision_id": "recurrence_revision_5130b894c073ccbeeb4a863ab6d43c196843b3f483e89e098f9793ca83ae9be6",
+          "recurrence_revision_id": "recurrence_revision_513310a24d637082ea1e2847548cd50474d71a03dd143357b2ab1eca73874def",
           "segment_ref": "0",
           "frequency": "WEEKLY",
           "interval": "3",
@@ -2381,14 +2381,14 @@
             "command_id": "fixture_source_copied",
             "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
             "prior_recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
-            "new_recurrence_revision_id": "recurrence_revision_fcf036592d711ec57b3767b4a94a742f47e2e73cf96ea23e9171d8ff5b4a33f6",
+            "new_recurrence_revision_id": "recurrence_revision_917e95d72b2aa66807cc2f50ac979ce38f6a1cd60043e92e2774c3310aa69e65",
             "lineage_role": "segment_revision",
             "prior_segment_id": "recurrence_segment_745701e8f6dc647a155e52115aa6a848b46fe63a386c50f39b623aedfc998c27",
-            "new_segment_id": "recurrence_segment_55211a190a601df17a7812c4378b071b6d5456514139084bf6ee3d892d869076",
+            "new_segment_id": "recurrence_segment_9ae264bc806491819266bb76a170c88d008a143f2c577ba64f111a172ba1810a",
             "effect": "active",
             "lineage_index": "0",
-            "lineage_id": "recurrence_lineage_7c9ca130fdadc1894d588db13afbd41c932a85941b8faa2b713ddd3fde04d65e",
-            "payload_hash": "cb12ba2041b3563ef8dcaa32c18ad9135b2f2d5f0adfb46949d5cfddbabebc3b"
+            "lineage_id": "recurrence_lineage_e5065ea64d621ac13f8358ed73eca73ad638c4ea13af95c1f0438744d15619e9",
+            "payload_hash": "499624b5441838193a3a67841548e2da471cf89d6bfcd23c5620f100d8546ece"
           },
           "identity_preimage": {
             "derivation_version": "spine.recurrence-lineage-id.v1",
@@ -2398,10 +2398,10 @@
             "command_id": "fixture_source_copied",
             "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
             "prior_recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
-            "new_recurrence_revision_id": "recurrence_revision_fcf036592d711ec57b3767b4a94a742f47e2e73cf96ea23e9171d8ff5b4a33f6",
+            "new_recurrence_revision_id": "recurrence_revision_917e95d72b2aa66807cc2f50ac979ce38f6a1cd60043e92e2774c3310aa69e65",
             "lineage_role": "segment_revision",
             "prior_segment_id": "recurrence_segment_745701e8f6dc647a155e52115aa6a848b46fe63a386c50f39b623aedfc998c27",
-            "new_segment_id": "recurrence_segment_55211a190a601df17a7812c4378b071b6d5456514139084bf6ee3d892d869076",
+            "new_segment_id": "recurrence_segment_9ae264bc806491819266bb76a170c88d008a143f2c577ba64f111a172ba1810a",
             "effect": "active",
             "lineage_index": "0"
           },
@@ -2409,10 +2409,10 @@
             "command_id": "fixture_source_copied",
             "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
             "prior_recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
-            "new_recurrence_revision_id": "recurrence_revision_fcf036592d711ec57b3767b4a94a742f47e2e73cf96ea23e9171d8ff5b4a33f6",
+            "new_recurrence_revision_id": "recurrence_revision_917e95d72b2aa66807cc2f50ac979ce38f6a1cd60043e92e2774c3310aa69e65",
             "lineage_role": "segment_revision",
             "prior_segment_id": "recurrence_segment_745701e8f6dc647a155e52115aa6a848b46fe63a386c50f39b623aedfc998c27",
-            "new_segment_id": "recurrence_segment_55211a190a601df17a7812c4378b071b6d5456514139084bf6ee3d892d869076",
+            "new_segment_id": "recurrence_segment_9ae264bc806491819266bb76a170c88d008a143f2c577ba64f111a172ba1810a",
             "effect": "active",
             "lineage_index": "0",
             "command_effect": "series_edit_whole_applied"
@@ -2423,14 +2423,14 @@
             "command_id": "fixture_source_copied",
             "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
             "prior_recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
-            "new_recurrence_revision_id": "recurrence_revision_fcf036592d711ec57b3767b4a94a742f47e2e73cf96ea23e9171d8ff5b4a33f6",
+            "new_recurrence_revision_id": "recurrence_revision_917e95d72b2aa66807cc2f50ac979ce38f6a1cd60043e92e2774c3310aa69e65",
             "lineage_role": "rule_revision",
             "prior_child_id": "recurrence_rule_25beffd480d6cb16b9f8d202a6e2cd6d6d4e06c52c792eea558cb04758741a82",
-            "new_child_id": "recurrence_rule_9d433d333f91e5b1c6bfc59324d4dfeb21e19d1034ba0582796cbcdc2c9bdf63",
+            "new_child_id": "recurrence_rule_a6ef5276de8bd1f6369b60b2bf6d9a90299e0fc356bb9776d298c2e8be6cfce7",
             "effect": "copied",
             "lineage_index": "1",
-            "lineage_id": "recurrence_lineage_7fc49e8735ce69e291d881fe917cbf4ff2518d99c1ee3f2899c85dffa9571576",
-            "payload_hash": "e86ef7ce117b719252837808965f932ce6c13b6423a5b7d0beae9b1e2ecfcebe"
+            "lineage_id": "recurrence_lineage_b59bce62642b20de734791f6913c1e7845dfc25a6a02558acd50308d7541cf30",
+            "payload_hash": "717e45d5015053d44ae5ac98f7efd40e3471fbe8370e79862fece06d36eee956"
           },
           "identity_preimage": {
             "derivation_version": "spine.recurrence-lineage-id.v1",
@@ -2440,10 +2440,10 @@
             "command_id": "fixture_source_copied",
             "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
             "prior_recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
-            "new_recurrence_revision_id": "recurrence_revision_fcf036592d711ec57b3767b4a94a742f47e2e73cf96ea23e9171d8ff5b4a33f6",
+            "new_recurrence_revision_id": "recurrence_revision_917e95d72b2aa66807cc2f50ac979ce38f6a1cd60043e92e2774c3310aa69e65",
             "lineage_role": "rule_revision",
             "prior_child_id": "recurrence_rule_25beffd480d6cb16b9f8d202a6e2cd6d6d4e06c52c792eea558cb04758741a82",
-            "new_child_id": "recurrence_rule_9d433d333f91e5b1c6bfc59324d4dfeb21e19d1034ba0582796cbcdc2c9bdf63",
+            "new_child_id": "recurrence_rule_a6ef5276de8bd1f6369b60b2bf6d9a90299e0fc356bb9776d298c2e8be6cfce7",
             "effect": "copied",
             "lineage_index": "1"
           },
@@ -2451,10 +2451,10 @@
             "command_id": "fixture_source_copied",
             "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
             "prior_recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
-            "new_recurrence_revision_id": "recurrence_revision_fcf036592d711ec57b3767b4a94a742f47e2e73cf96ea23e9171d8ff5b4a33f6",
+            "new_recurrence_revision_id": "recurrence_revision_917e95d72b2aa66807cc2f50ac979ce38f6a1cd60043e92e2774c3310aa69e65",
             "lineage_role": "rule_revision",
             "prior_child_id": "recurrence_rule_25beffd480d6cb16b9f8d202a6e2cd6d6d4e06c52c792eea558cb04758741a82",
-            "new_child_id": "recurrence_rule_9d433d333f91e5b1c6bfc59324d4dfeb21e19d1034ba0582796cbcdc2c9bdf63",
+            "new_child_id": "recurrence_rule_a6ef5276de8bd1f6369b60b2bf6d9a90299e0fc356bb9776d298c2e8be6cfce7",
             "effect": "copied",
             "lineage_index": "1",
             "command_effect": "series_edit_whole_applied"
@@ -2464,8 +2464,8 @@
       "copy_facts": [
         {
           "prior_child_id": "recurrence_rule_25beffd480d6cb16b9f8d202a6e2cd6d6d4e06c52c792eea558cb04758741a82",
-          "new_child_id": "recurrence_rule_9d433d333f91e5b1c6bfc59324d4dfeb21e19d1034ba0582796cbcdc2c9bdf63",
-          "lineage_id": "recurrence_lineage_7fc49e8735ce69e291d881fe917cbf4ff2518d99c1ee3f2899c85dffa9571576"
+          "new_child_id": "recurrence_rule_a6ef5276de8bd1f6369b60b2bf6d9a90299e0fc356bb9776d298c2e8be6cfce7",
+          "lineage_id": "recurrence_lineage_b59bce62642b20de734791f6913c1e7845dfc25a6a02558acd50308d7541cf30"
         }
       ],
       "retarget_facts": []
@@ -2480,14 +2480,14 @@
             "command_id": "fixture_source_added",
             "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
             "prior_recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
-            "new_recurrence_revision_id": "recurrence_revision_6663d82b183c5c9b2d657e87bb4a51ad7dcb1a1dc54cce3e2f0720a80d376184",
+            "new_recurrence_revision_id": "recurrence_revision_0b4427461f20050b3149655f58629e128ac8fff40c1f1b67124fc523ac679520",
             "lineage_role": "segment_revision",
             "prior_segment_id": "recurrence_segment_745701e8f6dc647a155e52115aa6a848b46fe63a386c50f39b623aedfc998c27",
-            "new_segment_id": "recurrence_segment_c8dec7b3586f1b1a61eee42985de8a1a016b8bd0e047b911911d39b0783c6aae",
+            "new_segment_id": "recurrence_segment_1bf901dd2a57e47b898146262e697b2ba5504b718f9548df1fe7738cbbeb0797",
             "effect": "active",
             "lineage_index": "0",
-            "lineage_id": "recurrence_lineage_30b0fde2015f3015140c933712c9d1cb5fba37a625d1d4a503115847c457cfb5",
-            "payload_hash": "1a28855cdd749e58c06caafc5ecf3c4cd70361d147e4e0b30d09c80a83a3889f"
+            "lineage_id": "recurrence_lineage_3058c6dfd2327b4870a612992794951a40cc4b515ec1fa266a1a66ecb85d1a05",
+            "payload_hash": "f6f39c317dc0158d4e50c90fcfbcd4aac1a66c8eae988643c97835e3b45c5240"
           },
           "identity_preimage": {
             "derivation_version": "spine.recurrence-lineage-id.v1",
@@ -2497,10 +2497,10 @@
             "command_id": "fixture_source_added",
             "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
             "prior_recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
-            "new_recurrence_revision_id": "recurrence_revision_6663d82b183c5c9b2d657e87bb4a51ad7dcb1a1dc54cce3e2f0720a80d376184",
+            "new_recurrence_revision_id": "recurrence_revision_0b4427461f20050b3149655f58629e128ac8fff40c1f1b67124fc523ac679520",
             "lineage_role": "segment_revision",
             "prior_segment_id": "recurrence_segment_745701e8f6dc647a155e52115aa6a848b46fe63a386c50f39b623aedfc998c27",
-            "new_segment_id": "recurrence_segment_c8dec7b3586f1b1a61eee42985de8a1a016b8bd0e047b911911d39b0783c6aae",
+            "new_segment_id": "recurrence_segment_1bf901dd2a57e47b898146262e697b2ba5504b718f9548df1fe7738cbbeb0797",
             "effect": "active",
             "lineage_index": "0"
           },
@@ -2508,10 +2508,10 @@
             "command_id": "fixture_source_added",
             "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
             "prior_recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
-            "new_recurrence_revision_id": "recurrence_revision_6663d82b183c5c9b2d657e87bb4a51ad7dcb1a1dc54cce3e2f0720a80d376184",
+            "new_recurrence_revision_id": "recurrence_revision_0b4427461f20050b3149655f58629e128ac8fff40c1f1b67124fc523ac679520",
             "lineage_role": "segment_revision",
             "prior_segment_id": "recurrence_segment_745701e8f6dc647a155e52115aa6a848b46fe63a386c50f39b623aedfc998c27",
-            "new_segment_id": "recurrence_segment_c8dec7b3586f1b1a61eee42985de8a1a016b8bd0e047b911911d39b0783c6aae",
+            "new_segment_id": "recurrence_segment_1bf901dd2a57e47b898146262e697b2ba5504b718f9548df1fe7738cbbeb0797",
             "effect": "active",
             "lineage_index": "0",
             "command_effect": "instance_add_rdate_created"
@@ -2522,14 +2522,14 @@
             "command_id": "fixture_source_added",
             "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
             "prior_recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
-            "new_recurrence_revision_id": "recurrence_revision_6663d82b183c5c9b2d657e87bb4a51ad7dcb1a1dc54cce3e2f0720a80d376184",
+            "new_recurrence_revision_id": "recurrence_revision_0b4427461f20050b3149655f58629e128ac8fff40c1f1b67124fc523ac679520",
             "lineage_role": "rule_revision",
             "prior_child_id": "recurrence_rule_25beffd480d6cb16b9f8d202a6e2cd6d6d4e06c52c792eea558cb04758741a82",
-            "new_child_id": "recurrence_rule_20c749701d95c772a830de1733298b33f0aa86d0dfda0af7528c498011e6365a",
+            "new_child_id": "recurrence_rule_af926a87bacbdcf224721eda4db6152d1cacf3ed84faae2e2f888bc5c0e68b40",
             "effect": "copied",
             "lineage_index": "1",
-            "lineage_id": "recurrence_lineage_4b448c03fa11d7b6a7c80e58e808dabfc1d4278d860616f0ac96c9e6227978c4",
-            "payload_hash": "7c63216cdfa5ba12c0b81b9420586ddcb4295f2f6f1f2bac6e18d41e6adb57bf"
+            "lineage_id": "recurrence_lineage_0aa6df1e0dc404f194bad37cd6bdc97606d235da5cf1c9834353a8c929a42d0a",
+            "payload_hash": "a94a595967b5ed058c987ad9a6c1a568261bb24a06c67fab735e05253c2f2a1d"
           },
           "identity_preimage": {
             "derivation_version": "spine.recurrence-lineage-id.v1",
@@ -2539,10 +2539,10 @@
             "command_id": "fixture_source_added",
             "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
             "prior_recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
-            "new_recurrence_revision_id": "recurrence_revision_6663d82b183c5c9b2d657e87bb4a51ad7dcb1a1dc54cce3e2f0720a80d376184",
+            "new_recurrence_revision_id": "recurrence_revision_0b4427461f20050b3149655f58629e128ac8fff40c1f1b67124fc523ac679520",
             "lineage_role": "rule_revision",
             "prior_child_id": "recurrence_rule_25beffd480d6cb16b9f8d202a6e2cd6d6d4e06c52c792eea558cb04758741a82",
-            "new_child_id": "recurrence_rule_20c749701d95c772a830de1733298b33f0aa86d0dfda0af7528c498011e6365a",
+            "new_child_id": "recurrence_rule_af926a87bacbdcf224721eda4db6152d1cacf3ed84faae2e2f888bc5c0e68b40",
             "effect": "copied",
             "lineage_index": "1"
           },
@@ -2550,10 +2550,10 @@
             "command_id": "fixture_source_added",
             "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
             "prior_recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
-            "new_recurrence_revision_id": "recurrence_revision_6663d82b183c5c9b2d657e87bb4a51ad7dcb1a1dc54cce3e2f0720a80d376184",
+            "new_recurrence_revision_id": "recurrence_revision_0b4427461f20050b3149655f58629e128ac8fff40c1f1b67124fc523ac679520",
             "lineage_role": "rule_revision",
             "prior_child_id": "recurrence_rule_25beffd480d6cb16b9f8d202a6e2cd6d6d4e06c52c792eea558cb04758741a82",
-            "new_child_id": "recurrence_rule_20c749701d95c772a830de1733298b33f0aa86d0dfda0af7528c498011e6365a",
+            "new_child_id": "recurrence_rule_af926a87bacbdcf224721eda4db6152d1cacf3ed84faae2e2f888bc5c0e68b40",
             "effect": "copied",
             "lineage_index": "1",
             "command_effect": "instance_add_rdate_created"
@@ -2564,13 +2564,13 @@
             "command_id": "fixture_source_added",
             "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
             "prior_recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
-            "new_recurrence_revision_id": "recurrence_revision_6663d82b183c5c9b2d657e87bb4a51ad7dcb1a1dc54cce3e2f0720a80d376184",
+            "new_recurrence_revision_id": "recurrence_revision_0b4427461f20050b3149655f58629e128ac8fff40c1f1b67124fc523ac679520",
             "lineage_role": "rdate_revision",
-            "new_child_id": "recurrence_rdate_3e0131819c9f895fd0bb991f926e63ac224221af3aecf132a35f0b310ac5f9aa",
+            "new_child_id": "recurrence_rdate_c2971612b3b2b94c1247ac80a30f051845fccf4b05ad317f3a4528a7c9156e32",
             "effect": "created",
             "lineage_index": "2",
-            "lineage_id": "recurrence_lineage_183c643f3adb1ec5276f96a52bb53d21c736725cb7c79d33869c1cba24cfe65f",
-            "payload_hash": "b9714cf8f4cd7c310cbb9e3e755f34d6eac99328dc298c1f4d0741bcf1b3b13f"
+            "lineage_id": "recurrence_lineage_e17e86b5faeb86602de2346027fe7534262aeaa7cdf9641e17dddeb473772d3f",
+            "payload_hash": "f2062f2965c3e84e67eb63c5a3aebb88289b88877fe2ea40b8b08117d6df231c"
           },
           "identity_preimage": {
             "derivation_version": "spine.recurrence-lineage-id.v1",
@@ -2580,9 +2580,9 @@
             "command_id": "fixture_source_added",
             "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
             "prior_recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
-            "new_recurrence_revision_id": "recurrence_revision_6663d82b183c5c9b2d657e87bb4a51ad7dcb1a1dc54cce3e2f0720a80d376184",
+            "new_recurrence_revision_id": "recurrence_revision_0b4427461f20050b3149655f58629e128ac8fff40c1f1b67124fc523ac679520",
             "lineage_role": "rdate_revision",
-            "new_child_id": "recurrence_rdate_3e0131819c9f895fd0bb991f926e63ac224221af3aecf132a35f0b310ac5f9aa",
+            "new_child_id": "recurrence_rdate_c2971612b3b2b94c1247ac80a30f051845fccf4b05ad317f3a4528a7c9156e32",
             "effect": "created",
             "lineage_index": "2"
           },
@@ -2590,9 +2590,9 @@
             "command_id": "fixture_source_added",
             "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
             "prior_recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
-            "new_recurrence_revision_id": "recurrence_revision_6663d82b183c5c9b2d657e87bb4a51ad7dcb1a1dc54cce3e2f0720a80d376184",
+            "new_recurrence_revision_id": "recurrence_revision_0b4427461f20050b3149655f58629e128ac8fff40c1f1b67124fc523ac679520",
             "lineage_role": "rdate_revision",
-            "new_child_id": "recurrence_rdate_3e0131819c9f895fd0bb991f926e63ac224221af3aecf132a35f0b310ac5f9aa",
+            "new_child_id": "recurrence_rdate_c2971612b3b2b94c1247ac80a30f051845fccf4b05ad317f3a4528a7c9156e32",
             "effect": "created",
             "lineage_index": "2",
             "command_effect": "instance_add_rdate_created"
@@ -2602,8 +2602,8 @@
       "copy_facts": [
         {
           "prior_child_id": "recurrence_rule_25beffd480d6cb16b9f8d202a6e2cd6d6d4e06c52c792eea558cb04758741a82",
-          "new_child_id": "recurrence_rule_20c749701d95c772a830de1733298b33f0aa86d0dfda0af7528c498011e6365a",
-          "lineage_id": "recurrence_lineage_4b448c03fa11d7b6a7c80e58e808dabfc1d4278d860616f0ac96c9e6227978c4"
+          "new_child_id": "recurrence_rule_af926a87bacbdcf224721eda4db6152d1cacf3ed84faae2e2f888bc5c0e68b40",
+          "lineage_id": "recurrence_lineage_0aa6df1e0dc404f194bad37cd6bdc97606d235da5cf1c9834353a8c929a42d0a"
         }
       ],
       "retarget_facts": []
@@ -2618,14 +2618,14 @@
             "command_id": "fixture_source_excluded",
             "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
             "prior_recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
-            "new_recurrence_revision_id": "recurrence_revision_99c33f0aecf53ab6af45ed0e72f17b59cfefe418b3f3790a72fc7944fc493ac8",
+            "new_recurrence_revision_id": "recurrence_revision_3c7396176f77f83f8ccf18adac51e7fb61806b18996371d1f2bb5725a3ac8b58",
             "lineage_role": "segment_revision",
             "prior_segment_id": "recurrence_segment_745701e8f6dc647a155e52115aa6a848b46fe63a386c50f39b623aedfc998c27",
-            "new_segment_id": "recurrence_segment_b248993e31f41b3f7f33e8be5d551feccd1393995af70072a7df78922fd5f326",
+            "new_segment_id": "recurrence_segment_4afb64416514e1a1efcbb501d7711a1d1c53a1f38cc46025021f963f644123af",
             "effect": "active",
             "lineage_index": "0",
-            "lineage_id": "recurrence_lineage_02f2b2166f3d7a03776c9250a0caf8f5824944a0348bb1f82e59f170ee2ef5ef",
-            "payload_hash": "f356bc43299e5b65f3576fab48629d5fabb7a4006c3f0e1f9efb36ed6ebdf3b1"
+            "lineage_id": "recurrence_lineage_8a46130a5fea9070ff99fd766ce7c034a2b747d75409d1c947eb2921ca07ed37",
+            "payload_hash": "6283375c0e6b4843a1f078a4f10a89558129e5282cb503fcc0b03c72ae73f75c"
           },
           "identity_preimage": {
             "derivation_version": "spine.recurrence-lineage-id.v1",
@@ -2635,10 +2635,10 @@
             "command_id": "fixture_source_excluded",
             "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
             "prior_recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
-            "new_recurrence_revision_id": "recurrence_revision_99c33f0aecf53ab6af45ed0e72f17b59cfefe418b3f3790a72fc7944fc493ac8",
+            "new_recurrence_revision_id": "recurrence_revision_3c7396176f77f83f8ccf18adac51e7fb61806b18996371d1f2bb5725a3ac8b58",
             "lineage_role": "segment_revision",
             "prior_segment_id": "recurrence_segment_745701e8f6dc647a155e52115aa6a848b46fe63a386c50f39b623aedfc998c27",
-            "new_segment_id": "recurrence_segment_b248993e31f41b3f7f33e8be5d551feccd1393995af70072a7df78922fd5f326",
+            "new_segment_id": "recurrence_segment_4afb64416514e1a1efcbb501d7711a1d1c53a1f38cc46025021f963f644123af",
             "effect": "active",
             "lineage_index": "0"
           },
@@ -2646,10 +2646,10 @@
             "command_id": "fixture_source_excluded",
             "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
             "prior_recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
-            "new_recurrence_revision_id": "recurrence_revision_99c33f0aecf53ab6af45ed0e72f17b59cfefe418b3f3790a72fc7944fc493ac8",
+            "new_recurrence_revision_id": "recurrence_revision_3c7396176f77f83f8ccf18adac51e7fb61806b18996371d1f2bb5725a3ac8b58",
             "lineage_role": "segment_revision",
             "prior_segment_id": "recurrence_segment_745701e8f6dc647a155e52115aa6a848b46fe63a386c50f39b623aedfc998c27",
-            "new_segment_id": "recurrence_segment_b248993e31f41b3f7f33e8be5d551feccd1393995af70072a7df78922fd5f326",
+            "new_segment_id": "recurrence_segment_4afb64416514e1a1efcbb501d7711a1d1c53a1f38cc46025021f963f644123af",
             "effect": "active",
             "lineage_index": "0",
             "command_effect": "instance_remove_exdate_created"
@@ -2660,14 +2660,14 @@
             "command_id": "fixture_source_excluded",
             "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
             "prior_recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
-            "new_recurrence_revision_id": "recurrence_revision_99c33f0aecf53ab6af45ed0e72f17b59cfefe418b3f3790a72fc7944fc493ac8",
+            "new_recurrence_revision_id": "recurrence_revision_3c7396176f77f83f8ccf18adac51e7fb61806b18996371d1f2bb5725a3ac8b58",
             "lineage_role": "rule_revision",
             "prior_child_id": "recurrence_rule_25beffd480d6cb16b9f8d202a6e2cd6d6d4e06c52c792eea558cb04758741a82",
-            "new_child_id": "recurrence_rule_de22821ea070560fd985bc88285e8ec689ff85b5cb2a595b1af95ea41ad46603",
+            "new_child_id": "recurrence_rule_eba34cfac7e011b774ec169f40eb9e9f8ee7cd0d6fb112f193541c86ef12665a",
             "effect": "copied",
             "lineage_index": "1",
-            "lineage_id": "recurrence_lineage_cdc18c4e75f895a686d9ee7908af03f868f4bb98806c28c847ab2f42c223a44b",
-            "payload_hash": "3d24fe53d7ac56fdf41e414d2b70fde568060e8c7f22e9bfdf8c3ada0d524c05"
+            "lineage_id": "recurrence_lineage_7e999bf19884d3d84a99c7ac5edd0c5c0e07c81a98d1e70e33644d47aa9402a8",
+            "payload_hash": "14f68d0bff16d6a7afdd949067157d682b1af14a99737d99d88d2ff9119a2d47"
           },
           "identity_preimage": {
             "derivation_version": "spine.recurrence-lineage-id.v1",
@@ -2677,10 +2677,10 @@
             "command_id": "fixture_source_excluded",
             "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
             "prior_recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
-            "new_recurrence_revision_id": "recurrence_revision_99c33f0aecf53ab6af45ed0e72f17b59cfefe418b3f3790a72fc7944fc493ac8",
+            "new_recurrence_revision_id": "recurrence_revision_3c7396176f77f83f8ccf18adac51e7fb61806b18996371d1f2bb5725a3ac8b58",
             "lineage_role": "rule_revision",
             "prior_child_id": "recurrence_rule_25beffd480d6cb16b9f8d202a6e2cd6d6d4e06c52c792eea558cb04758741a82",
-            "new_child_id": "recurrence_rule_de22821ea070560fd985bc88285e8ec689ff85b5cb2a595b1af95ea41ad46603",
+            "new_child_id": "recurrence_rule_eba34cfac7e011b774ec169f40eb9e9f8ee7cd0d6fb112f193541c86ef12665a",
             "effect": "copied",
             "lineage_index": "1"
           },
@@ -2688,10 +2688,10 @@
             "command_id": "fixture_source_excluded",
             "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
             "prior_recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
-            "new_recurrence_revision_id": "recurrence_revision_99c33f0aecf53ab6af45ed0e72f17b59cfefe418b3f3790a72fc7944fc493ac8",
+            "new_recurrence_revision_id": "recurrence_revision_3c7396176f77f83f8ccf18adac51e7fb61806b18996371d1f2bb5725a3ac8b58",
             "lineage_role": "rule_revision",
             "prior_child_id": "recurrence_rule_25beffd480d6cb16b9f8d202a6e2cd6d6d4e06c52c792eea558cb04758741a82",
-            "new_child_id": "recurrence_rule_de22821ea070560fd985bc88285e8ec689ff85b5cb2a595b1af95ea41ad46603",
+            "new_child_id": "recurrence_rule_eba34cfac7e011b774ec169f40eb9e9f8ee7cd0d6fb112f193541c86ef12665a",
             "effect": "copied",
             "lineage_index": "1",
             "command_effect": "instance_remove_exdate_created"
@@ -2702,13 +2702,13 @@
             "command_id": "fixture_source_excluded",
             "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
             "prior_recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
-            "new_recurrence_revision_id": "recurrence_revision_99c33f0aecf53ab6af45ed0e72f17b59cfefe418b3f3790a72fc7944fc493ac8",
+            "new_recurrence_revision_id": "recurrence_revision_3c7396176f77f83f8ccf18adac51e7fb61806b18996371d1f2bb5725a3ac8b58",
             "lineage_role": "exdate_revision",
-            "new_child_id": "recurrence_exdate_4c8054449c2a9c05869e0904c356ab2c97b19376f58e1a49a7b0dfeff4d70e11",
+            "new_child_id": "recurrence_exdate_ee51219b66ff06998eb66c6d81581f2e267238eb85cb22b99ae56e266c0e912d",
             "effect": "created",
             "lineage_index": "2",
-            "lineage_id": "recurrence_lineage_46fe0f68c0cb9d292d7b6f39cdd59b82dd08f0e493c9e0507c3f4820a501adb3",
-            "payload_hash": "6972f60128a29a0cd4f18740189a2d54e227798c06f4f38df2f88b5a391a9ce0"
+            "lineage_id": "recurrence_lineage_4541181590ac4ad23a8d420520fb3251de6699b8e6c3cfd2d449d6011e2efdc5",
+            "payload_hash": "aa6aa47d943cdc55f0a5ea6f3b509ac93b82d6b4a7a3fe1a5dae0e9869e7cd22"
           },
           "identity_preimage": {
             "derivation_version": "spine.recurrence-lineage-id.v1",
@@ -2718,9 +2718,9 @@
             "command_id": "fixture_source_excluded",
             "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
             "prior_recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
-            "new_recurrence_revision_id": "recurrence_revision_99c33f0aecf53ab6af45ed0e72f17b59cfefe418b3f3790a72fc7944fc493ac8",
+            "new_recurrence_revision_id": "recurrence_revision_3c7396176f77f83f8ccf18adac51e7fb61806b18996371d1f2bb5725a3ac8b58",
             "lineage_role": "exdate_revision",
-            "new_child_id": "recurrence_exdate_4c8054449c2a9c05869e0904c356ab2c97b19376f58e1a49a7b0dfeff4d70e11",
+            "new_child_id": "recurrence_exdate_ee51219b66ff06998eb66c6d81581f2e267238eb85cb22b99ae56e266c0e912d",
             "effect": "created",
             "lineage_index": "2"
           },
@@ -2728,9 +2728,9 @@
             "command_id": "fixture_source_excluded",
             "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
             "prior_recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
-            "new_recurrence_revision_id": "recurrence_revision_99c33f0aecf53ab6af45ed0e72f17b59cfefe418b3f3790a72fc7944fc493ac8",
+            "new_recurrence_revision_id": "recurrence_revision_3c7396176f77f83f8ccf18adac51e7fb61806b18996371d1f2bb5725a3ac8b58",
             "lineage_role": "exdate_revision",
-            "new_child_id": "recurrence_exdate_4c8054449c2a9c05869e0904c356ab2c97b19376f58e1a49a7b0dfeff4d70e11",
+            "new_child_id": "recurrence_exdate_ee51219b66ff06998eb66c6d81581f2e267238eb85cb22b99ae56e266c0e912d",
             "effect": "created",
             "lineage_index": "2",
             "command_effect": "instance_remove_exdate_created"
@@ -2740,8 +2740,8 @@
       "copy_facts": [
         {
           "prior_child_id": "recurrence_rule_25beffd480d6cb16b9f8d202a6e2cd6d6d4e06c52c792eea558cb04758741a82",
-          "new_child_id": "recurrence_rule_de22821ea070560fd985bc88285e8ec689ff85b5cb2a595b1af95ea41ad46603",
-          "lineage_id": "recurrence_lineage_cdc18c4e75f895a686d9ee7908af03f868f4bb98806c28c847ab2f42c223a44b"
+          "new_child_id": "recurrence_rule_eba34cfac7e011b774ec169f40eb9e9f8ee7cd0d6fb112f193541c86ef12665a",
+          "lineage_id": "recurrence_lineage_7e999bf19884d3d84a99c7ac5edd0c5c0e07c81a98d1e70e33644d47aa9402a8"
         }
       ],
       "retarget_facts": []
@@ -2756,14 +2756,14 @@
             "command_id": "fixture_source_occurrence_cancelled",
             "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
             "prior_recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
-            "new_recurrence_revision_id": "recurrence_revision_a038787544b273d1d1c0b0e5ee63b360ba19ab99103e27c41c84e463e77d01e2",
+            "new_recurrence_revision_id": "recurrence_revision_a584df18c1aeeb1bcc8b4cb1d5baa4510a0ba1842d55f0c74406b0db417e5b6b",
             "lineage_role": "segment_revision",
             "prior_segment_id": "recurrence_segment_745701e8f6dc647a155e52115aa6a848b46fe63a386c50f39b623aedfc998c27",
-            "new_segment_id": "recurrence_segment_097d3baa50d2f3f56e5a7d64034e03b8293fe30d77ade7bafd7e618d5c99b10f",
+            "new_segment_id": "recurrence_segment_ddcc0d8bdde91a10201caacecf2dec1db23de38107aa02c1a8a5ab2a8d6e1a4e",
             "effect": "active",
             "lineage_index": "0",
-            "lineage_id": "recurrence_lineage_927ddb6bb13758cc874284ae883fedb74bc5fa672a2fb3d0c69ee4e7fb2f65bf",
-            "payload_hash": "974480f20f3e4b3a9e43783a1fa9bcbeb14bed297dad7432e6c4fbf1f46abce3"
+            "lineage_id": "recurrence_lineage_75e22906132ba31f7dca174af1fd893a852c3b0b652e5ab29ac75244e93f7c97",
+            "payload_hash": "0bbd4214d521ae20f737b271f3479b2d906a6d07f14c9ab03260ff430b4e13bd"
           },
           "identity_preimage": {
             "derivation_version": "spine.recurrence-lineage-id.v1",
@@ -2773,10 +2773,10 @@
             "command_id": "fixture_source_occurrence_cancelled",
             "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
             "prior_recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
-            "new_recurrence_revision_id": "recurrence_revision_a038787544b273d1d1c0b0e5ee63b360ba19ab99103e27c41c84e463e77d01e2",
+            "new_recurrence_revision_id": "recurrence_revision_a584df18c1aeeb1bcc8b4cb1d5baa4510a0ba1842d55f0c74406b0db417e5b6b",
             "lineage_role": "segment_revision",
             "prior_segment_id": "recurrence_segment_745701e8f6dc647a155e52115aa6a848b46fe63a386c50f39b623aedfc998c27",
-            "new_segment_id": "recurrence_segment_097d3baa50d2f3f56e5a7d64034e03b8293fe30d77ade7bafd7e618d5c99b10f",
+            "new_segment_id": "recurrence_segment_ddcc0d8bdde91a10201caacecf2dec1db23de38107aa02c1a8a5ab2a8d6e1a4e",
             "effect": "active",
             "lineage_index": "0"
           },
@@ -2784,10 +2784,10 @@
             "command_id": "fixture_source_occurrence_cancelled",
             "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
             "prior_recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
-            "new_recurrence_revision_id": "recurrence_revision_a038787544b273d1d1c0b0e5ee63b360ba19ab99103e27c41c84e463e77d01e2",
+            "new_recurrence_revision_id": "recurrence_revision_a584df18c1aeeb1bcc8b4cb1d5baa4510a0ba1842d55f0c74406b0db417e5b6b",
             "lineage_role": "segment_revision",
             "prior_segment_id": "recurrence_segment_745701e8f6dc647a155e52115aa6a848b46fe63a386c50f39b623aedfc998c27",
-            "new_segment_id": "recurrence_segment_097d3baa50d2f3f56e5a7d64034e03b8293fe30d77ade7bafd7e618d5c99b10f",
+            "new_segment_id": "recurrence_segment_ddcc0d8bdde91a10201caacecf2dec1db23de38107aa02c1a8a5ab2a8d6e1a4e",
             "effect": "active",
             "lineage_index": "0",
             "command_effect": "instance_override_created"
@@ -2798,14 +2798,14 @@
             "command_id": "fixture_source_occurrence_cancelled",
             "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
             "prior_recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
-            "new_recurrence_revision_id": "recurrence_revision_a038787544b273d1d1c0b0e5ee63b360ba19ab99103e27c41c84e463e77d01e2",
+            "new_recurrence_revision_id": "recurrence_revision_a584df18c1aeeb1bcc8b4cb1d5baa4510a0ba1842d55f0c74406b0db417e5b6b",
             "lineage_role": "rule_revision",
             "prior_child_id": "recurrence_rule_25beffd480d6cb16b9f8d202a6e2cd6d6d4e06c52c792eea558cb04758741a82",
-            "new_child_id": "recurrence_rule_599939a1e9cc01cd5b22cea89bff888db61f08ff02b88fdffa6d19198d5cb813",
+            "new_child_id": "recurrence_rule_11997d9f9f47bc65feefee63319e3e1a44aafdadb429ee9399228fe894ac284e",
             "effect": "copied",
             "lineage_index": "1",
-            "lineage_id": "recurrence_lineage_12d650a67a812059ccfc5099d44a9b812df4e059ca15eb983b30c3bb7aa39846",
-            "payload_hash": "031d0cd2328db6dc570bacc359323c61e911e14d35eee46dbd24907123d3d914"
+            "lineage_id": "recurrence_lineage_213ad53180f042fb1baedb38a7f0615566ff99509ed4badc849847fcc2ee1b93",
+            "payload_hash": "b872bd233508dee5bf452b1565a47e3f7863cbc87af088abf45c3f2bcf8491e8"
           },
           "identity_preimage": {
             "derivation_version": "spine.recurrence-lineage-id.v1",
@@ -2815,10 +2815,10 @@
             "command_id": "fixture_source_occurrence_cancelled",
             "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
             "prior_recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
-            "new_recurrence_revision_id": "recurrence_revision_a038787544b273d1d1c0b0e5ee63b360ba19ab99103e27c41c84e463e77d01e2",
+            "new_recurrence_revision_id": "recurrence_revision_a584df18c1aeeb1bcc8b4cb1d5baa4510a0ba1842d55f0c74406b0db417e5b6b",
             "lineage_role": "rule_revision",
             "prior_child_id": "recurrence_rule_25beffd480d6cb16b9f8d202a6e2cd6d6d4e06c52c792eea558cb04758741a82",
-            "new_child_id": "recurrence_rule_599939a1e9cc01cd5b22cea89bff888db61f08ff02b88fdffa6d19198d5cb813",
+            "new_child_id": "recurrence_rule_11997d9f9f47bc65feefee63319e3e1a44aafdadb429ee9399228fe894ac284e",
             "effect": "copied",
             "lineage_index": "1"
           },
@@ -2826,10 +2826,10 @@
             "command_id": "fixture_source_occurrence_cancelled",
             "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
             "prior_recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
-            "new_recurrence_revision_id": "recurrence_revision_a038787544b273d1d1c0b0e5ee63b360ba19ab99103e27c41c84e463e77d01e2",
+            "new_recurrence_revision_id": "recurrence_revision_a584df18c1aeeb1bcc8b4cb1d5baa4510a0ba1842d55f0c74406b0db417e5b6b",
             "lineage_role": "rule_revision",
             "prior_child_id": "recurrence_rule_25beffd480d6cb16b9f8d202a6e2cd6d6d4e06c52c792eea558cb04758741a82",
-            "new_child_id": "recurrence_rule_599939a1e9cc01cd5b22cea89bff888db61f08ff02b88fdffa6d19198d5cb813",
+            "new_child_id": "recurrence_rule_11997d9f9f47bc65feefee63319e3e1a44aafdadb429ee9399228fe894ac284e",
             "effect": "copied",
             "lineage_index": "1",
             "command_effect": "instance_override_created"
@@ -2840,13 +2840,13 @@
             "command_id": "fixture_source_occurrence_cancelled",
             "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
             "prior_recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
-            "new_recurrence_revision_id": "recurrence_revision_a038787544b273d1d1c0b0e5ee63b360ba19ab99103e27c41c84e463e77d01e2",
+            "new_recurrence_revision_id": "recurrence_revision_a584df18c1aeeb1bcc8b4cb1d5baa4510a0ba1842d55f0c74406b0db417e5b6b",
             "lineage_role": "override_revision",
-            "new_child_id": "recurrence_override_b323e122e44a0633c26255919f19f2b38db170813f813782916e16d6bb9fbafb",
+            "new_child_id": "recurrence_override_29c2155d1b7f2d5ae0c69dc19df20c72456eabced6efcdcb4393a33070552a94",
             "effect": "created",
             "lineage_index": "2",
-            "lineage_id": "recurrence_lineage_8593844cbd5816a9205f2d662ff8bfd05683d326dd870cb3033d0185f83ab2dc",
-            "payload_hash": "9508e8b2cb142553d93ab0390359c6b489e8c607656af9c545120894d92368af"
+            "lineage_id": "recurrence_lineage_c675f6eb2d405b0070f6abcfe70e7c859b175e46cb2c70675a1decdf9e4395d4",
+            "payload_hash": "fed16a3495aff939daf8a2f9b469cdd9449a5775fe19badec24c2a54f9d222a1"
           },
           "identity_preimage": {
             "derivation_version": "spine.recurrence-lineage-id.v1",
@@ -2856,9 +2856,9 @@
             "command_id": "fixture_source_occurrence_cancelled",
             "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
             "prior_recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
-            "new_recurrence_revision_id": "recurrence_revision_a038787544b273d1d1c0b0e5ee63b360ba19ab99103e27c41c84e463e77d01e2",
+            "new_recurrence_revision_id": "recurrence_revision_a584df18c1aeeb1bcc8b4cb1d5baa4510a0ba1842d55f0c74406b0db417e5b6b",
             "lineage_role": "override_revision",
-            "new_child_id": "recurrence_override_b323e122e44a0633c26255919f19f2b38db170813f813782916e16d6bb9fbafb",
+            "new_child_id": "recurrence_override_29c2155d1b7f2d5ae0c69dc19df20c72456eabced6efcdcb4393a33070552a94",
             "effect": "created",
             "lineage_index": "2"
           },
@@ -2866,9 +2866,9 @@
             "command_id": "fixture_source_occurrence_cancelled",
             "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
             "prior_recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
-            "new_recurrence_revision_id": "recurrence_revision_a038787544b273d1d1c0b0e5ee63b360ba19ab99103e27c41c84e463e77d01e2",
+            "new_recurrence_revision_id": "recurrence_revision_a584df18c1aeeb1bcc8b4cb1d5baa4510a0ba1842d55f0c74406b0db417e5b6b",
             "lineage_role": "override_revision",
-            "new_child_id": "recurrence_override_b323e122e44a0633c26255919f19f2b38db170813f813782916e16d6bb9fbafb",
+            "new_child_id": "recurrence_override_29c2155d1b7f2d5ae0c69dc19df20c72456eabced6efcdcb4393a33070552a94",
             "effect": "created",
             "lineage_index": "2",
             "command_effect": "instance_override_created"
@@ -2878,8 +2878,8 @@
       "copy_facts": [
         {
           "prior_child_id": "recurrence_rule_25beffd480d6cb16b9f8d202a6e2cd6d6d4e06c52c792eea558cb04758741a82",
-          "new_child_id": "recurrence_rule_599939a1e9cc01cd5b22cea89bff888db61f08ff02b88fdffa6d19198d5cb813",
-          "lineage_id": "recurrence_lineage_12d650a67a812059ccfc5099d44a9b812df4e059ca15eb983b30c3bb7aa39846"
+          "new_child_id": "recurrence_rule_11997d9f9f47bc65feefee63319e3e1a44aafdadb429ee9399228fe894ac284e",
+          "lineage_id": "recurrence_lineage_213ad53180f042fb1baedb38a7f0615566ff99509ed4badc849847fcc2ee1b93"
         }
       ],
       "retarget_facts": []
@@ -2894,14 +2894,14 @@
             "command_id": "fixture_source_source_cancelled",
             "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
             "prior_recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
-            "new_recurrence_revision_id": "recurrence_revision_789cb1d3003adff667a537b85f57481005112ebe1fb848caca47c9128f4fad58",
+            "new_recurrence_revision_id": "recurrence_revision_9dbc92f54b7b35f32527033b6f1706f0a8e0702eae505d99f5876bfe20e62f09",
             "lineage_role": "segment_revision",
             "prior_segment_id": "recurrence_segment_745701e8f6dc647a155e52115aa6a848b46fe63a386c50f39b623aedfc998c27",
-            "new_segment_id": "recurrence_segment_c50f7916b3b0db469a3c53796fcc94569ee65db13fd8c3ea7cbafa07f7fd5e66",
+            "new_segment_id": "recurrence_segment_8e0b58296a44943aaa3211b97ba71316ba98c0e1e2097131e53c3123ff57ee0e",
             "effect": "active",
             "lineage_index": "0",
-            "lineage_id": "recurrence_lineage_a45a39d7ecebf07e203ca213296edb87235b2a9c66eb066c72e7acdf2a06ef64",
-            "payload_hash": "dd6ce841fb64fdd65e5a40ce54b028e77742950356463d929274f4806ead2224"
+            "lineage_id": "recurrence_lineage_3ade11f02e24b663442811a943dfa5dc96521035ca6e40d508faa8df9759006e",
+            "payload_hash": "a2f41618838ec04e940eb08150e32585cdcfa116dadbccb064bebd5d2a04d418"
           },
           "identity_preimage": {
             "derivation_version": "spine.recurrence-lineage-id.v1",
@@ -2911,10 +2911,10 @@
             "command_id": "fixture_source_source_cancelled",
             "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
             "prior_recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
-            "new_recurrence_revision_id": "recurrence_revision_789cb1d3003adff667a537b85f57481005112ebe1fb848caca47c9128f4fad58",
+            "new_recurrence_revision_id": "recurrence_revision_9dbc92f54b7b35f32527033b6f1706f0a8e0702eae505d99f5876bfe20e62f09",
             "lineage_role": "segment_revision",
             "prior_segment_id": "recurrence_segment_745701e8f6dc647a155e52115aa6a848b46fe63a386c50f39b623aedfc998c27",
-            "new_segment_id": "recurrence_segment_c50f7916b3b0db469a3c53796fcc94569ee65db13fd8c3ea7cbafa07f7fd5e66",
+            "new_segment_id": "recurrence_segment_8e0b58296a44943aaa3211b97ba71316ba98c0e1e2097131e53c3123ff57ee0e",
             "effect": "active",
             "lineage_index": "0"
           },
@@ -2922,10 +2922,10 @@
             "command_id": "fixture_source_source_cancelled",
             "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
             "prior_recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
-            "new_recurrence_revision_id": "recurrence_revision_789cb1d3003adff667a537b85f57481005112ebe1fb848caca47c9128f4fad58",
+            "new_recurrence_revision_id": "recurrence_revision_9dbc92f54b7b35f32527033b6f1706f0a8e0702eae505d99f5876bfe20e62f09",
             "lineage_role": "segment_revision",
             "prior_segment_id": "recurrence_segment_745701e8f6dc647a155e52115aa6a848b46fe63a386c50f39b623aedfc998c27",
-            "new_segment_id": "recurrence_segment_c50f7916b3b0db469a3c53796fcc94569ee65db13fd8c3ea7cbafa07f7fd5e66",
+            "new_segment_id": "recurrence_segment_8e0b58296a44943aaa3211b97ba71316ba98c0e1e2097131e53c3123ff57ee0e",
             "effect": "active",
             "lineage_index": "0",
             "command_effect": "series_edit_whole_applied"
@@ -2936,14 +2936,14 @@
             "command_id": "fixture_source_source_cancelled",
             "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
             "prior_recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
-            "new_recurrence_revision_id": "recurrence_revision_789cb1d3003adff667a537b85f57481005112ebe1fb848caca47c9128f4fad58",
+            "new_recurrence_revision_id": "recurrence_revision_9dbc92f54b7b35f32527033b6f1706f0a8e0702eae505d99f5876bfe20e62f09",
             "lineage_role": "rule_revision",
             "prior_child_id": "recurrence_rule_25beffd480d6cb16b9f8d202a6e2cd6d6d4e06c52c792eea558cb04758741a82",
-            "new_child_id": "recurrence_rule_2a02d042cf3310ebd6fb90f794159a07a6cb4b971b79ccb3c53553363c8d1331",
+            "new_child_id": "recurrence_rule_a892bd2b2c1c26597ead5fde357540d6207dd03d81d40ce40ad04e2912b76607",
             "effect": "copied",
             "lineage_index": "1",
-            "lineage_id": "recurrence_lineage_7d7634de3e8d552d8283395df8693c73cca8ad24a38ba315a0da6a925ee0e559",
-            "payload_hash": "ed0a67e3b14d6c043822392c6dae3af553d2ffe08e3d4b623c7c4e826f753148"
+            "lineage_id": "recurrence_lineage_502970a9cbcfe16f58d8d04c5963539dc720edaf04c103bb1149dbd62ec16743",
+            "payload_hash": "cf5a742ada9cdcb202eefe6b602df74eb397eefaf198f4a64941a7db6e801fc3"
           },
           "identity_preimage": {
             "derivation_version": "spine.recurrence-lineage-id.v1",
@@ -2953,10 +2953,10 @@
             "command_id": "fixture_source_source_cancelled",
             "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
             "prior_recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
-            "new_recurrence_revision_id": "recurrence_revision_789cb1d3003adff667a537b85f57481005112ebe1fb848caca47c9128f4fad58",
+            "new_recurrence_revision_id": "recurrence_revision_9dbc92f54b7b35f32527033b6f1706f0a8e0702eae505d99f5876bfe20e62f09",
             "lineage_role": "rule_revision",
             "prior_child_id": "recurrence_rule_25beffd480d6cb16b9f8d202a6e2cd6d6d4e06c52c792eea558cb04758741a82",
-            "new_child_id": "recurrence_rule_2a02d042cf3310ebd6fb90f794159a07a6cb4b971b79ccb3c53553363c8d1331",
+            "new_child_id": "recurrence_rule_a892bd2b2c1c26597ead5fde357540d6207dd03d81d40ce40ad04e2912b76607",
             "effect": "copied",
             "lineage_index": "1"
           },
@@ -2964,10 +2964,10 @@
             "command_id": "fixture_source_source_cancelled",
             "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
             "prior_recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
-            "new_recurrence_revision_id": "recurrence_revision_789cb1d3003adff667a537b85f57481005112ebe1fb848caca47c9128f4fad58",
+            "new_recurrence_revision_id": "recurrence_revision_9dbc92f54b7b35f32527033b6f1706f0a8e0702eae505d99f5876bfe20e62f09",
             "lineage_role": "rule_revision",
             "prior_child_id": "recurrence_rule_25beffd480d6cb16b9f8d202a6e2cd6d6d4e06c52c792eea558cb04758741a82",
-            "new_child_id": "recurrence_rule_2a02d042cf3310ebd6fb90f794159a07a6cb4b971b79ccb3c53553363c8d1331",
+            "new_child_id": "recurrence_rule_a892bd2b2c1c26597ead5fde357540d6207dd03d81d40ce40ad04e2912b76607",
             "effect": "copied",
             "lineage_index": "1",
             "command_effect": "series_edit_whole_applied"
@@ -2977,8 +2977,8 @@
       "copy_facts": [
         {
           "prior_child_id": "recurrence_rule_25beffd480d6cb16b9f8d202a6e2cd6d6d4e06c52c792eea558cb04758741a82",
-          "new_child_id": "recurrence_rule_2a02d042cf3310ebd6fb90f794159a07a6cb4b971b79ccb3c53553363c8d1331",
-          "lineage_id": "recurrence_lineage_7d7634de3e8d552d8283395df8693c73cca8ad24a38ba315a0da6a925ee0e559"
+          "new_child_id": "recurrence_rule_a892bd2b2c1c26597ead5fde357540d6207dd03d81d40ce40ad04e2912b76607",
+          "lineage_id": "recurrence_lineage_502970a9cbcfe16f58d8d04c5963539dc720edaf04c103bb1149dbd62ec16743"
         }
       ],
       "retarget_facts": []
@@ -3295,14 +3295,14 @@
             "command_id": "fixture_source_union_copied",
             "recurrence_set_id": "recurrence_set_d05361a806c7f52c98f2028de6391c21475ff29e38a4bc3feff7a4c47bddf3c8",
             "prior_recurrence_revision_id": "recurrence_revision_cf2deeb46b908180131e0e0c62ed84463c83249fa88e79660a8bf16a36cd145a",
-            "new_recurrence_revision_id": "recurrence_revision_a1498e501614029a05e113132a918cf4299f526166f1706de4e759e0b4eaf5e5",
+            "new_recurrence_revision_id": "recurrence_revision_02ff9a66f5bf57bc1712bb50d42f67442e53773efd03597877e16ad33fffe865",
             "lineage_role": "segment_revision",
             "prior_segment_id": "recurrence_segment_b6ca7589863881ffb5d7e9127b741da592a50531c44e2abc9e9439e6a4620522",
-            "new_segment_id": "recurrence_segment_2a33ca78c516ff81aac76f1f6ff4122776210ae4697e2a72cfd49918a56bee7f",
+            "new_segment_id": "recurrence_segment_91c14d84506639524e6ec8a28d83ce1bc05c6d510dd24db168650b6cbe3f1b78",
             "effect": "active",
             "lineage_index": "0",
-            "lineage_id": "recurrence_lineage_5b88f00644398c29a5ac6160083dde745772c3ad1b006dc05f34ac3c0038881e",
-            "payload_hash": "e9024560dee739ccc5cabaa1f19d384af9362576f46c413e9fedfb5f8eb12346"
+            "lineage_id": "recurrence_lineage_59dbbe3c907ec58253286eb3227335b072edf62e67d1e33fc16b725e8b118308",
+            "payload_hash": "d43ed93f611b4ef803f49a368ded6bf63d9ffc1f357b59ffbf93c3f3996ae801"
           },
           "identity_preimage": {
             "derivation_version": "spine.recurrence-lineage-id.v1",
@@ -3312,10 +3312,10 @@
             "command_id": "fixture_source_union_copied",
             "recurrence_set_id": "recurrence_set_d05361a806c7f52c98f2028de6391c21475ff29e38a4bc3feff7a4c47bddf3c8",
             "prior_recurrence_revision_id": "recurrence_revision_cf2deeb46b908180131e0e0c62ed84463c83249fa88e79660a8bf16a36cd145a",
-            "new_recurrence_revision_id": "recurrence_revision_a1498e501614029a05e113132a918cf4299f526166f1706de4e759e0b4eaf5e5",
+            "new_recurrence_revision_id": "recurrence_revision_02ff9a66f5bf57bc1712bb50d42f67442e53773efd03597877e16ad33fffe865",
             "lineage_role": "segment_revision",
             "prior_segment_id": "recurrence_segment_b6ca7589863881ffb5d7e9127b741da592a50531c44e2abc9e9439e6a4620522",
-            "new_segment_id": "recurrence_segment_2a33ca78c516ff81aac76f1f6ff4122776210ae4697e2a72cfd49918a56bee7f",
+            "new_segment_id": "recurrence_segment_91c14d84506639524e6ec8a28d83ce1bc05c6d510dd24db168650b6cbe3f1b78",
             "effect": "active",
             "lineage_index": "0"
           },
@@ -3323,10 +3323,10 @@
             "command_id": "fixture_source_union_copied",
             "recurrence_set_id": "recurrence_set_d05361a806c7f52c98f2028de6391c21475ff29e38a4bc3feff7a4c47bddf3c8",
             "prior_recurrence_revision_id": "recurrence_revision_cf2deeb46b908180131e0e0c62ed84463c83249fa88e79660a8bf16a36cd145a",
-            "new_recurrence_revision_id": "recurrence_revision_a1498e501614029a05e113132a918cf4299f526166f1706de4e759e0b4eaf5e5",
+            "new_recurrence_revision_id": "recurrence_revision_02ff9a66f5bf57bc1712bb50d42f67442e53773efd03597877e16ad33fffe865",
             "lineage_role": "segment_revision",
             "prior_segment_id": "recurrence_segment_b6ca7589863881ffb5d7e9127b741da592a50531c44e2abc9e9439e6a4620522",
-            "new_segment_id": "recurrence_segment_2a33ca78c516ff81aac76f1f6ff4122776210ae4697e2a72cfd49918a56bee7f",
+            "new_segment_id": "recurrence_segment_91c14d84506639524e6ec8a28d83ce1bc05c6d510dd24db168650b6cbe3f1b78",
             "effect": "active",
             "lineage_index": "0",
             "command_effect": "series_edit_whole_applied"
@@ -3337,14 +3337,14 @@
             "command_id": "fixture_source_union_copied",
             "recurrence_set_id": "recurrence_set_d05361a806c7f52c98f2028de6391c21475ff29e38a4bc3feff7a4c47bddf3c8",
             "prior_recurrence_revision_id": "recurrence_revision_cf2deeb46b908180131e0e0c62ed84463c83249fa88e79660a8bf16a36cd145a",
-            "new_recurrence_revision_id": "recurrence_revision_a1498e501614029a05e113132a918cf4299f526166f1706de4e759e0b4eaf5e5",
+            "new_recurrence_revision_id": "recurrence_revision_02ff9a66f5bf57bc1712bb50d42f67442e53773efd03597877e16ad33fffe865",
             "lineage_role": "rule_revision",
             "prior_child_id": "recurrence_rule_5042bfd1a41caeb24edaec905cc0e1644b34d0fd4b024d934cb20b6ab113bcce",
-            "new_child_id": "recurrence_rule_02a18f776a2e77b214be8f565e9f5d8165f731e2f6d9cfb72bbbb949fd0a2cb5",
+            "new_child_id": "recurrence_rule_3b8a3dcc64f82c6629efa6f9c0d9b46f4bcda299a927984649cdf38eae9d9224",
             "effect": "copied",
             "lineage_index": "1",
-            "lineage_id": "recurrence_lineage_c204aba59b8fcba8c4144b50d3c1bcb0235d8256ad542dff1b809dd03fb93d09",
-            "payload_hash": "841161c275df6a1a219b0a828df5b564b78a6b3c5e3bcc39ac4af7e54cb8ddf2"
+            "lineage_id": "recurrence_lineage_fc4e814c9052cd191d193648423bc5fb6822b83e0223792434d1a3e591a36371",
+            "payload_hash": "3a9f2f720105fa8b770dc3dc9c4b22986927f8527b32dfe833a2c8702dc95745"
           },
           "identity_preimage": {
             "derivation_version": "spine.recurrence-lineage-id.v1",
@@ -3354,10 +3354,10 @@
             "command_id": "fixture_source_union_copied",
             "recurrence_set_id": "recurrence_set_d05361a806c7f52c98f2028de6391c21475ff29e38a4bc3feff7a4c47bddf3c8",
             "prior_recurrence_revision_id": "recurrence_revision_cf2deeb46b908180131e0e0c62ed84463c83249fa88e79660a8bf16a36cd145a",
-            "new_recurrence_revision_id": "recurrence_revision_a1498e501614029a05e113132a918cf4299f526166f1706de4e759e0b4eaf5e5",
+            "new_recurrence_revision_id": "recurrence_revision_02ff9a66f5bf57bc1712bb50d42f67442e53773efd03597877e16ad33fffe865",
             "lineage_role": "rule_revision",
             "prior_child_id": "recurrence_rule_5042bfd1a41caeb24edaec905cc0e1644b34d0fd4b024d934cb20b6ab113bcce",
-            "new_child_id": "recurrence_rule_02a18f776a2e77b214be8f565e9f5d8165f731e2f6d9cfb72bbbb949fd0a2cb5",
+            "new_child_id": "recurrence_rule_3b8a3dcc64f82c6629efa6f9c0d9b46f4bcda299a927984649cdf38eae9d9224",
             "effect": "copied",
             "lineage_index": "1"
           },
@@ -3365,10 +3365,10 @@
             "command_id": "fixture_source_union_copied",
             "recurrence_set_id": "recurrence_set_d05361a806c7f52c98f2028de6391c21475ff29e38a4bc3feff7a4c47bddf3c8",
             "prior_recurrence_revision_id": "recurrence_revision_cf2deeb46b908180131e0e0c62ed84463c83249fa88e79660a8bf16a36cd145a",
-            "new_recurrence_revision_id": "recurrence_revision_a1498e501614029a05e113132a918cf4299f526166f1706de4e759e0b4eaf5e5",
+            "new_recurrence_revision_id": "recurrence_revision_02ff9a66f5bf57bc1712bb50d42f67442e53773efd03597877e16ad33fffe865",
             "lineage_role": "rule_revision",
             "prior_child_id": "recurrence_rule_5042bfd1a41caeb24edaec905cc0e1644b34d0fd4b024d934cb20b6ab113bcce",
-            "new_child_id": "recurrence_rule_02a18f776a2e77b214be8f565e9f5d8165f731e2f6d9cfb72bbbb949fd0a2cb5",
+            "new_child_id": "recurrence_rule_3b8a3dcc64f82c6629efa6f9c0d9b46f4bcda299a927984649cdf38eae9d9224",
             "effect": "copied",
             "lineage_index": "1",
             "command_effect": "series_edit_whole_applied"
@@ -3379,14 +3379,14 @@
             "command_id": "fixture_source_union_copied",
             "recurrence_set_id": "recurrence_set_d05361a806c7f52c98f2028de6391c21475ff29e38a4bc3feff7a4c47bddf3c8",
             "prior_recurrence_revision_id": "recurrence_revision_cf2deeb46b908180131e0e0c62ed84463c83249fa88e79660a8bf16a36cd145a",
-            "new_recurrence_revision_id": "recurrence_revision_a1498e501614029a05e113132a918cf4299f526166f1706de4e759e0b4eaf5e5",
+            "new_recurrence_revision_id": "recurrence_revision_02ff9a66f5bf57bc1712bb50d42f67442e53773efd03597877e16ad33fffe865",
             "lineage_role": "rule_revision",
             "prior_child_id": "recurrence_rule_77eb388aa714508bd6caeefda40afa88ac314bd9cd83732bbb307787a7556acc",
-            "new_child_id": "recurrence_rule_cae183de568cc757bdd9a9e11e72b4163ea35a5a2207fc0b922a96df9a5efd75",
+            "new_child_id": "recurrence_rule_6b6874864f732b88dcd80a2795decf1d6741b6abceda1f34e65563c3d6e30780",
             "effect": "copied",
             "lineage_index": "2",
-            "lineage_id": "recurrence_lineage_46a50de401b365f3b280b43c28f2fac8032dcfa5f33845f677ba52dbb3d0107f",
-            "payload_hash": "d0104ffd647b9425f14334fe55c48889e3b3fd1eda57e94c3cde5645d61dff78"
+            "lineage_id": "recurrence_lineage_942ad0ae1a573c3e2b6580d8ba10a33f538a127b1fcbebdbbeba4196b98eb160",
+            "payload_hash": "aa43498b47330c10f8b554056b197da28399472e0ddf9caf91272502c5af78ee"
           },
           "identity_preimage": {
             "derivation_version": "spine.recurrence-lineage-id.v1",
@@ -3396,10 +3396,10 @@
             "command_id": "fixture_source_union_copied",
             "recurrence_set_id": "recurrence_set_d05361a806c7f52c98f2028de6391c21475ff29e38a4bc3feff7a4c47bddf3c8",
             "prior_recurrence_revision_id": "recurrence_revision_cf2deeb46b908180131e0e0c62ed84463c83249fa88e79660a8bf16a36cd145a",
-            "new_recurrence_revision_id": "recurrence_revision_a1498e501614029a05e113132a918cf4299f526166f1706de4e759e0b4eaf5e5",
+            "new_recurrence_revision_id": "recurrence_revision_02ff9a66f5bf57bc1712bb50d42f67442e53773efd03597877e16ad33fffe865",
             "lineage_role": "rule_revision",
             "prior_child_id": "recurrence_rule_77eb388aa714508bd6caeefda40afa88ac314bd9cd83732bbb307787a7556acc",
-            "new_child_id": "recurrence_rule_cae183de568cc757bdd9a9e11e72b4163ea35a5a2207fc0b922a96df9a5efd75",
+            "new_child_id": "recurrence_rule_6b6874864f732b88dcd80a2795decf1d6741b6abceda1f34e65563c3d6e30780",
             "effect": "copied",
             "lineage_index": "2"
           },
@@ -3407,10 +3407,10 @@
             "command_id": "fixture_source_union_copied",
             "recurrence_set_id": "recurrence_set_d05361a806c7f52c98f2028de6391c21475ff29e38a4bc3feff7a4c47bddf3c8",
             "prior_recurrence_revision_id": "recurrence_revision_cf2deeb46b908180131e0e0c62ed84463c83249fa88e79660a8bf16a36cd145a",
-            "new_recurrence_revision_id": "recurrence_revision_a1498e501614029a05e113132a918cf4299f526166f1706de4e759e0b4eaf5e5",
+            "new_recurrence_revision_id": "recurrence_revision_02ff9a66f5bf57bc1712bb50d42f67442e53773efd03597877e16ad33fffe865",
             "lineage_role": "rule_revision",
             "prior_child_id": "recurrence_rule_77eb388aa714508bd6caeefda40afa88ac314bd9cd83732bbb307787a7556acc",
-            "new_child_id": "recurrence_rule_cae183de568cc757bdd9a9e11e72b4163ea35a5a2207fc0b922a96df9a5efd75",
+            "new_child_id": "recurrence_rule_6b6874864f732b88dcd80a2795decf1d6741b6abceda1f34e65563c3d6e30780",
             "effect": "copied",
             "lineage_index": "2",
             "command_effect": "series_edit_whole_applied"
@@ -3420,13 +3420,13 @@
       "copy_facts": [
         {
           "prior_child_id": "recurrence_rule_5042bfd1a41caeb24edaec905cc0e1644b34d0fd4b024d934cb20b6ab113bcce",
-          "new_child_id": "recurrence_rule_02a18f776a2e77b214be8f565e9f5d8165f731e2f6d9cfb72bbbb949fd0a2cb5",
-          "lineage_id": "recurrence_lineage_c204aba59b8fcba8c4144b50d3c1bcb0235d8256ad542dff1b809dd03fb93d09"
+          "new_child_id": "recurrence_rule_3b8a3dcc64f82c6629efa6f9c0d9b46f4bcda299a927984649cdf38eae9d9224",
+          "lineage_id": "recurrence_lineage_fc4e814c9052cd191d193648423bc5fb6822b83e0223792434d1a3e591a36371"
         },
         {
           "prior_child_id": "recurrence_rule_77eb388aa714508bd6caeefda40afa88ac314bd9cd83732bbb307787a7556acc",
-          "new_child_id": "recurrence_rule_cae183de568cc757bdd9a9e11e72b4163ea35a5a2207fc0b922a96df9a5efd75",
-          "lineage_id": "recurrence_lineage_46a50de401b365f3b280b43c28f2fac8032dcfa5f33845f677ba52dbb3d0107f"
+          "new_child_id": "recurrence_rule_6b6874864f732b88dcd80a2795decf1d6741b6abceda1f34e65563c3d6e30780",
+          "lineage_id": "recurrence_lineage_942ad0ae1a573c3e2b6580d8ba10a33f538a127b1fcbebdbbeba4196b98eb160"
         }
       ],
       "retarget_facts": []
@@ -3441,14 +3441,14 @@
             "command_id": "fixture_source_changed_with_added",
             "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
             "prior_recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
-            "new_recurrence_revision_id": "recurrence_revision_7ee1b96312717b7f8220a3431b4c66ae8d1c8deefe2b3ce620f0a46333bac9e2",
+            "new_recurrence_revision_id": "recurrence_revision_bb7ad4048674ee5b6c75b935732846d3d5246166c0c107e6753de4ea48034fb3",
             "lineage_role": "segment_revision",
             "prior_segment_id": "recurrence_segment_745701e8f6dc647a155e52115aa6a848b46fe63a386c50f39b623aedfc998c27",
-            "new_segment_id": "recurrence_segment_6b0a5023a2135719f87e66c55b97797a8c8f779691f43ff7c703281d5225c7da",
+            "new_segment_id": "recurrence_segment_246cc643f72d9023cf23b1d065613461aaf90b0820a063ceec663cf2b58d382b",
             "effect": "active",
             "lineage_index": "0",
-            "lineage_id": "recurrence_lineage_ab95610a591cffa466731349df80d49fdc91155efeecdc08d59ee772bc9e5029",
-            "payload_hash": "6df80c253fa22de47411f3a37e317cce2f323623267bb71a589a482879d10179"
+            "lineage_id": "recurrence_lineage_b9969554b7964f5bff658ff09a115ac0a77603d3dac21a256b70e8b5a962b367",
+            "payload_hash": "f1c8d71ea1c7d13a7701f5ad85d243d2d9805d1251faac3e20c8d37b0b6ba27a"
           },
           "identity_preimage": {
             "derivation_version": "spine.recurrence-lineage-id.v1",
@@ -3458,10 +3458,10 @@
             "command_id": "fixture_source_changed_with_added",
             "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
             "prior_recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
-            "new_recurrence_revision_id": "recurrence_revision_7ee1b96312717b7f8220a3431b4c66ae8d1c8deefe2b3ce620f0a46333bac9e2",
+            "new_recurrence_revision_id": "recurrence_revision_bb7ad4048674ee5b6c75b935732846d3d5246166c0c107e6753de4ea48034fb3",
             "lineage_role": "segment_revision",
             "prior_segment_id": "recurrence_segment_745701e8f6dc647a155e52115aa6a848b46fe63a386c50f39b623aedfc998c27",
-            "new_segment_id": "recurrence_segment_6b0a5023a2135719f87e66c55b97797a8c8f779691f43ff7c703281d5225c7da",
+            "new_segment_id": "recurrence_segment_246cc643f72d9023cf23b1d065613461aaf90b0820a063ceec663cf2b58d382b",
             "effect": "active",
             "lineage_index": "0"
           },
@@ -3469,10 +3469,10 @@
             "command_id": "fixture_source_changed_with_added",
             "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
             "prior_recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
-            "new_recurrence_revision_id": "recurrence_revision_7ee1b96312717b7f8220a3431b4c66ae8d1c8deefe2b3ce620f0a46333bac9e2",
+            "new_recurrence_revision_id": "recurrence_revision_bb7ad4048674ee5b6c75b935732846d3d5246166c0c107e6753de4ea48034fb3",
             "lineage_role": "segment_revision",
             "prior_segment_id": "recurrence_segment_745701e8f6dc647a155e52115aa6a848b46fe63a386c50f39b623aedfc998c27",
-            "new_segment_id": "recurrence_segment_6b0a5023a2135719f87e66c55b97797a8c8f779691f43ff7c703281d5225c7da",
+            "new_segment_id": "recurrence_segment_246cc643f72d9023cf23b1d065613461aaf90b0820a063ceec663cf2b58d382b",
             "effect": "active",
             "lineage_index": "0",
             "command_effect": "series_edit_whole_applied"
@@ -3483,14 +3483,14 @@
             "command_id": "fixture_source_changed_with_added",
             "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
             "prior_recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
-            "new_recurrence_revision_id": "recurrence_revision_7ee1b96312717b7f8220a3431b4c66ae8d1c8deefe2b3ce620f0a46333bac9e2",
+            "new_recurrence_revision_id": "recurrence_revision_bb7ad4048674ee5b6c75b935732846d3d5246166c0c107e6753de4ea48034fb3",
             "lineage_role": "rule_revision",
-            "new_child_id": "recurrence_rule_3e7664d6aefa3b0513214b0563cca63a6cf97c96db9ab0c0530ba899a3eb2b47",
+            "new_child_id": "recurrence_rule_51e8c6e7afdfd32ea2c2063a95f9b8f7b547b5d5701448fdb8cad429da13dec4",
             "effect": "copied",
             "lineage_index": "1",
             "prior_child_id": "recurrence_rule_25beffd480d6cb16b9f8d202a6e2cd6d6d4e06c52c792eea558cb04758741a82",
-            "lineage_id": "recurrence_lineage_e55237427c6389a560dd238d08b431a211946cdc28514fa05b24e3372bf05e25",
-            "payload_hash": "a1426385f9df335a2c4c62e44c76b62dbbe4fd74b0554e69d0a0a56711a4b297"
+            "lineage_id": "recurrence_lineage_e0ad6cb56af47b675b087fe6145b0a3c86bbe8d2769c323f413876cd089717b3",
+            "payload_hash": "19fcf0d22b32c89dfdd2ddbb1ce361254ef46e24318fd9f80bc35e84b0ccba5f"
           },
           "identity_preimage": {
             "derivation_version": "spine.recurrence-lineage-id.v1",
@@ -3500,9 +3500,9 @@
             "command_id": "fixture_source_changed_with_added",
             "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
             "prior_recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
-            "new_recurrence_revision_id": "recurrence_revision_7ee1b96312717b7f8220a3431b4c66ae8d1c8deefe2b3ce620f0a46333bac9e2",
+            "new_recurrence_revision_id": "recurrence_revision_bb7ad4048674ee5b6c75b935732846d3d5246166c0c107e6753de4ea48034fb3",
             "lineage_role": "rule_revision",
-            "new_child_id": "recurrence_rule_3e7664d6aefa3b0513214b0563cca63a6cf97c96db9ab0c0530ba899a3eb2b47",
+            "new_child_id": "recurrence_rule_51e8c6e7afdfd32ea2c2063a95f9b8f7b547b5d5701448fdb8cad429da13dec4",
             "effect": "copied",
             "lineage_index": "1",
             "prior_child_id": "recurrence_rule_25beffd480d6cb16b9f8d202a6e2cd6d6d4e06c52c792eea558cb04758741a82"
@@ -3511,9 +3511,9 @@
             "command_id": "fixture_source_changed_with_added",
             "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
             "prior_recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
-            "new_recurrence_revision_id": "recurrence_revision_7ee1b96312717b7f8220a3431b4c66ae8d1c8deefe2b3ce620f0a46333bac9e2",
+            "new_recurrence_revision_id": "recurrence_revision_bb7ad4048674ee5b6c75b935732846d3d5246166c0c107e6753de4ea48034fb3",
             "lineage_role": "rule_revision",
-            "new_child_id": "recurrence_rule_3e7664d6aefa3b0513214b0563cca63a6cf97c96db9ab0c0530ba899a3eb2b47",
+            "new_child_id": "recurrence_rule_51e8c6e7afdfd32ea2c2063a95f9b8f7b547b5d5701448fdb8cad429da13dec4",
             "effect": "copied",
             "lineage_index": "1",
             "prior_child_id": "recurrence_rule_25beffd480d6cb16b9f8d202a6e2cd6d6d4e06c52c792eea558cb04758741a82",
@@ -3525,13 +3525,13 @@
             "command_id": "fixture_source_changed_with_added",
             "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
             "prior_recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
-            "new_recurrence_revision_id": "recurrence_revision_7ee1b96312717b7f8220a3431b4c66ae8d1c8deefe2b3ce620f0a46333bac9e2",
+            "new_recurrence_revision_id": "recurrence_revision_bb7ad4048674ee5b6c75b935732846d3d5246166c0c107e6753de4ea48034fb3",
             "lineage_role": "rdate_revision",
-            "new_child_id": "recurrence_rdate_c7282fde9e97b01836345643e1675491a7fd4f4c29d5169632b0597d7f86bd63",
+            "new_child_id": "recurrence_rdate_30cece1a5f974e5901c0869eaa88143ddbd49d063d16a2b65a369b5d8133e03d",
             "effect": "created",
             "lineage_index": "2",
-            "lineage_id": "recurrence_lineage_1419baf73b4fff71f5d53ae8ee459a435fa501e01030f2afa5bfa0c490689789",
-            "payload_hash": "edb5f99fda2e52adf99b63cb8e906a77969a647d93bad004c5d3642752196b1b"
+            "lineage_id": "recurrence_lineage_a89091e840c0bc422f57d15fa2092e678cf891161d65d8afb369edce6f2bdca0",
+            "payload_hash": "b21077d423e8d2e3177d60665db8e0e8aec7239b6408ea36905c7204bca14acf"
           },
           "identity_preimage": {
             "derivation_version": "spine.recurrence-lineage-id.v1",
@@ -3541,9 +3541,9 @@
             "command_id": "fixture_source_changed_with_added",
             "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
             "prior_recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
-            "new_recurrence_revision_id": "recurrence_revision_7ee1b96312717b7f8220a3431b4c66ae8d1c8deefe2b3ce620f0a46333bac9e2",
+            "new_recurrence_revision_id": "recurrence_revision_bb7ad4048674ee5b6c75b935732846d3d5246166c0c107e6753de4ea48034fb3",
             "lineage_role": "rdate_revision",
-            "new_child_id": "recurrence_rdate_c7282fde9e97b01836345643e1675491a7fd4f4c29d5169632b0597d7f86bd63",
+            "new_child_id": "recurrence_rdate_30cece1a5f974e5901c0869eaa88143ddbd49d063d16a2b65a369b5d8133e03d",
             "effect": "created",
             "lineage_index": "2"
           },
@@ -3551,9 +3551,9 @@
             "command_id": "fixture_source_changed_with_added",
             "recurrence_set_id": "recurrence_set_89a5ef7ec8b908ddfbbbbc1a0dc992baa51d85b884a75fbc8fabbcd2eba1ad07",
             "prior_recurrence_revision_id": "recurrence_revision_531470e8ea3e249a7a4b6bcde2f38a153375fba9a8f875eae0081dbdf1e0572a",
-            "new_recurrence_revision_id": "recurrence_revision_7ee1b96312717b7f8220a3431b4c66ae8d1c8deefe2b3ce620f0a46333bac9e2",
+            "new_recurrence_revision_id": "recurrence_revision_bb7ad4048674ee5b6c75b935732846d3d5246166c0c107e6753de4ea48034fb3",
             "lineage_role": "rdate_revision",
-            "new_child_id": "recurrence_rdate_c7282fde9e97b01836345643e1675491a7fd4f4c29d5169632b0597d7f86bd63",
+            "new_child_id": "recurrence_rdate_30cece1a5f974e5901c0869eaa88143ddbd49d063d16a2b65a369b5d8133e03d",
             "effect": "created",
             "lineage_index": "2",
             "command_effect": "series_edit_whole_applied"
@@ -3563,8 +3563,8 @@
       "copy_facts": [
         {
           "prior_child_id": "recurrence_rule_25beffd480d6cb16b9f8d202a6e2cd6d6d4e06c52c792eea558cb04758741a82",
-          "new_child_id": "recurrence_rule_3e7664d6aefa3b0513214b0563cca63a6cf97c96db9ab0c0530ba899a3eb2b47",
-          "lineage_id": "recurrence_lineage_e55237427c6389a560dd238d08b431a211946cdc28514fa05b24e3372bf05e25"
+          "new_child_id": "recurrence_rule_51e8c6e7afdfd32ea2c2063a95f9b8f7b547b5d5701448fdb8cad429da13dec4",
+          "lineage_id": "recurrence_lineage_e0ad6cb56af47b675b087fe6145b0a3c86bbe8d2769c323f413876cd089717b3"
         }
       ],
       "retarget_facts": []
@@ -3579,14 +3579,14 @@
             "command_id": "fixture_source_union_changed",
             "recurrence_set_id": "recurrence_set_d05361a806c7f52c98f2028de6391c21475ff29e38a4bc3feff7a4c47bddf3c8",
             "prior_recurrence_revision_id": "recurrence_revision_cf2deeb46b908180131e0e0c62ed84463c83249fa88e79660a8bf16a36cd145a",
-            "new_recurrence_revision_id": "recurrence_revision_5130b894c073ccbeeb4a863ab6d43c196843b3f483e89e098f9793ca83ae9be6",
+            "new_recurrence_revision_id": "recurrence_revision_513310a24d637082ea1e2847548cd50474d71a03dd143357b2ab1eca73874def",
             "lineage_role": "segment_revision",
             "prior_segment_id": "recurrence_segment_b6ca7589863881ffb5d7e9127b741da592a50531c44e2abc9e9439e6a4620522",
-            "new_segment_id": "recurrence_segment_4e7faab87b3f3d0072cb6392ff88d84db77b66e5b0a7300bd6b3292725967dda",
+            "new_segment_id": "recurrence_segment_08475da9425ea3b3dbc9bc1ee65fd1b7aea9a953111f8743173a70307ac8c485",
             "effect": "active",
             "lineage_index": "0",
-            "lineage_id": "recurrence_lineage_4355fa2151da63a8fd4bdd4253c8f2bf93ce4f459bcc423abd649a6a23c1d18a",
-            "payload_hash": "58f7b8c594f32af1bb96c015ed34de977fdb63dc1acdd4512ae46e44bd5abe6f"
+            "lineage_id": "recurrence_lineage_f3511a5f8a09cf7834fb3e6927ba6a085b698864c673bb7400783566e24adeb2",
+            "payload_hash": "523b89cd4116e053566fcd507e31c42af9e955def26c8189c4674b10019cf3fc"
           },
           "identity_preimage": {
             "derivation_version": "spine.recurrence-lineage-id.v1",
@@ -3596,10 +3596,10 @@
             "command_id": "fixture_source_union_changed",
             "recurrence_set_id": "recurrence_set_d05361a806c7f52c98f2028de6391c21475ff29e38a4bc3feff7a4c47bddf3c8",
             "prior_recurrence_revision_id": "recurrence_revision_cf2deeb46b908180131e0e0c62ed84463c83249fa88e79660a8bf16a36cd145a",
-            "new_recurrence_revision_id": "recurrence_revision_5130b894c073ccbeeb4a863ab6d43c196843b3f483e89e098f9793ca83ae9be6",
+            "new_recurrence_revision_id": "recurrence_revision_513310a24d637082ea1e2847548cd50474d71a03dd143357b2ab1eca73874def",
             "lineage_role": "segment_revision",
             "prior_segment_id": "recurrence_segment_b6ca7589863881ffb5d7e9127b741da592a50531c44e2abc9e9439e6a4620522",
-            "new_segment_id": "recurrence_segment_4e7faab87b3f3d0072cb6392ff88d84db77b66e5b0a7300bd6b3292725967dda",
+            "new_segment_id": "recurrence_segment_08475da9425ea3b3dbc9bc1ee65fd1b7aea9a953111f8743173a70307ac8c485",
             "effect": "active",
             "lineage_index": "0"
           },
@@ -3607,10 +3607,10 @@
             "command_id": "fixture_source_union_changed",
             "recurrence_set_id": "recurrence_set_d05361a806c7f52c98f2028de6391c21475ff29e38a4bc3feff7a4c47bddf3c8",
             "prior_recurrence_revision_id": "recurrence_revision_cf2deeb46b908180131e0e0c62ed84463c83249fa88e79660a8bf16a36cd145a",
-            "new_recurrence_revision_id": "recurrence_revision_5130b894c073ccbeeb4a863ab6d43c196843b3f483e89e098f9793ca83ae9be6",
+            "new_recurrence_revision_id": "recurrence_revision_513310a24d637082ea1e2847548cd50474d71a03dd143357b2ab1eca73874def",
             "lineage_role": "segment_revision",
             "prior_segment_id": "recurrence_segment_b6ca7589863881ffb5d7e9127b741da592a50531c44e2abc9e9439e6a4620522",
-            "new_segment_id": "recurrence_segment_4e7faab87b3f3d0072cb6392ff88d84db77b66e5b0a7300bd6b3292725967dda",
+            "new_segment_id": "recurrence_segment_08475da9425ea3b3dbc9bc1ee65fd1b7aea9a953111f8743173a70307ac8c485",
             "effect": "active",
             "lineage_index": "0",
             "command_effect": "series_edit_whole_applied"
@@ -3621,14 +3621,14 @@
             "command_id": "fixture_source_union_changed",
             "recurrence_set_id": "recurrence_set_d05361a806c7f52c98f2028de6391c21475ff29e38a4bc3feff7a4c47bddf3c8",
             "prior_recurrence_revision_id": "recurrence_revision_cf2deeb46b908180131e0e0c62ed84463c83249fa88e79660a8bf16a36cd145a",
-            "new_recurrence_revision_id": "recurrence_revision_5130b894c073ccbeeb4a863ab6d43c196843b3f483e89e098f9793ca83ae9be6",
+            "new_recurrence_revision_id": "recurrence_revision_513310a24d637082ea1e2847548cd50474d71a03dd143357b2ab1eca73874def",
             "lineage_role": "rule_revision",
             "prior_child_id": "recurrence_rule_5042bfd1a41caeb24edaec905cc0e1644b34d0fd4b024d934cb20b6ab113bcce",
-            "new_child_id": "recurrence_rule_46a4d8041d08c2af037a91139b6e30449da9fa4d3c0307ad4c1f137e0d03f9b5",
+            "new_child_id": "recurrence_rule_1308aea5204ea0b22fc56d5a86ffed9ef5b564954dd5c0b7fba646906a4ba936",
             "effect": "copied",
             "lineage_index": "1",
-            "lineage_id": "recurrence_lineage_538db7097232afb6cd985ac928b1ebb3a501d700abe6b8c4ed5e66bb360c1831",
-            "payload_hash": "91692dd467a2089f19c102977023a1526b9e86e2c0cd33d89071aac124db01da"
+            "lineage_id": "recurrence_lineage_5e0093fbda5e850fda59d3d53b24256ecede900b325f2e5f497f73593c8f81be",
+            "payload_hash": "83dbce854e292c55f37b3ac80ef5e01540a69f2fd2317b542699eaaf4db080bd"
           },
           "identity_preimage": {
             "derivation_version": "spine.recurrence-lineage-id.v1",
@@ -3638,10 +3638,10 @@
             "command_id": "fixture_source_union_changed",
             "recurrence_set_id": "recurrence_set_d05361a806c7f52c98f2028de6391c21475ff29e38a4bc3feff7a4c47bddf3c8",
             "prior_recurrence_revision_id": "recurrence_revision_cf2deeb46b908180131e0e0c62ed84463c83249fa88e79660a8bf16a36cd145a",
-            "new_recurrence_revision_id": "recurrence_revision_5130b894c073ccbeeb4a863ab6d43c196843b3f483e89e098f9793ca83ae9be6",
+            "new_recurrence_revision_id": "recurrence_revision_513310a24d637082ea1e2847548cd50474d71a03dd143357b2ab1eca73874def",
             "lineage_role": "rule_revision",
             "prior_child_id": "recurrence_rule_5042bfd1a41caeb24edaec905cc0e1644b34d0fd4b024d934cb20b6ab113bcce",
-            "new_child_id": "recurrence_rule_46a4d8041d08c2af037a91139b6e30449da9fa4d3c0307ad4c1f137e0d03f9b5",
+            "new_child_id": "recurrence_rule_1308aea5204ea0b22fc56d5a86ffed9ef5b564954dd5c0b7fba646906a4ba936",
             "effect": "copied",
             "lineage_index": "1"
           },
@@ -3649,10 +3649,10 @@
             "command_id": "fixture_source_union_changed",
             "recurrence_set_id": "recurrence_set_d05361a806c7f52c98f2028de6391c21475ff29e38a4bc3feff7a4c47bddf3c8",
             "prior_recurrence_revision_id": "recurrence_revision_cf2deeb46b908180131e0e0c62ed84463c83249fa88e79660a8bf16a36cd145a",
-            "new_recurrence_revision_id": "recurrence_revision_5130b894c073ccbeeb4a863ab6d43c196843b3f483e89e098f9793ca83ae9be6",
+            "new_recurrence_revision_id": "recurrence_revision_513310a24d637082ea1e2847548cd50474d71a03dd143357b2ab1eca73874def",
             "lineage_role": "rule_revision",
             "prior_child_id": "recurrence_rule_5042bfd1a41caeb24edaec905cc0e1644b34d0fd4b024d934cb20b6ab113bcce",
-            "new_child_id": "recurrence_rule_46a4d8041d08c2af037a91139b6e30449da9fa4d3c0307ad4c1f137e0d03f9b5",
+            "new_child_id": "recurrence_rule_1308aea5204ea0b22fc56d5a86ffed9ef5b564954dd5c0b7fba646906a4ba936",
             "effect": "copied",
             "lineage_index": "1",
             "command_effect": "series_edit_whole_applied"
@@ -3663,14 +3663,14 @@
             "command_id": "fixture_source_union_changed",
             "recurrence_set_id": "recurrence_set_d05361a806c7f52c98f2028de6391c21475ff29e38a4bc3feff7a4c47bddf3c8",
             "prior_recurrence_revision_id": "recurrence_revision_cf2deeb46b908180131e0e0c62ed84463c83249fa88e79660a8bf16a36cd145a",
-            "new_recurrence_revision_id": "recurrence_revision_5130b894c073ccbeeb4a863ab6d43c196843b3f483e89e098f9793ca83ae9be6",
+            "new_recurrence_revision_id": "recurrence_revision_513310a24d637082ea1e2847548cd50474d71a03dd143357b2ab1eca73874def",
             "lineage_role": "rule_revision",
-            "new_child_id": "recurrence_rule_1531ce27a18da4db9c27a4f20f8f35352145b3a0c96caab7934be34bea313ccc",
+            "new_child_id": "recurrence_rule_198b5a512400b1be4126d20fbc8327ac3e627fe5e1c4c4a6471e7803ff2d5794",
             "effect": "copied",
             "lineage_index": "2",
             "prior_child_id": "recurrence_rule_77eb388aa714508bd6caeefda40afa88ac314bd9cd83732bbb307787a7556acc",
-            "lineage_id": "recurrence_lineage_1ea231d5e10b44200b65d13994a5148a508cb821ea0f343f3bc821b84843d297",
-            "payload_hash": "94ec86ce2c7ca2a4fb0129228cee060a995b5939a0d62190afc780182d0db212"
+            "lineage_id": "recurrence_lineage_ac86b8a1598d0aa7bb5028daf8e60298441e34ea61e49d20ad68578b504a70ae",
+            "payload_hash": "06ad76c8970ef68a45254fd0c417e38b61685a1ce04b59027a74ec74a24d0828"
           },
           "identity_preimage": {
             "derivation_version": "spine.recurrence-lineage-id.v1",
@@ -3680,9 +3680,9 @@
             "command_id": "fixture_source_union_changed",
             "recurrence_set_id": "recurrence_set_d05361a806c7f52c98f2028de6391c21475ff29e38a4bc3feff7a4c47bddf3c8",
             "prior_recurrence_revision_id": "recurrence_revision_cf2deeb46b908180131e0e0c62ed84463c83249fa88e79660a8bf16a36cd145a",
-            "new_recurrence_revision_id": "recurrence_revision_5130b894c073ccbeeb4a863ab6d43c196843b3f483e89e098f9793ca83ae9be6",
+            "new_recurrence_revision_id": "recurrence_revision_513310a24d637082ea1e2847548cd50474d71a03dd143357b2ab1eca73874def",
             "lineage_role": "rule_revision",
-            "new_child_id": "recurrence_rule_1531ce27a18da4db9c27a4f20f8f35352145b3a0c96caab7934be34bea313ccc",
+            "new_child_id": "recurrence_rule_198b5a512400b1be4126d20fbc8327ac3e627fe5e1c4c4a6471e7803ff2d5794",
             "effect": "copied",
             "lineage_index": "2",
             "prior_child_id": "recurrence_rule_77eb388aa714508bd6caeefda40afa88ac314bd9cd83732bbb307787a7556acc"
@@ -3691,9 +3691,9 @@
             "command_id": "fixture_source_union_changed",
             "recurrence_set_id": "recurrence_set_d05361a806c7f52c98f2028de6391c21475ff29e38a4bc3feff7a4c47bddf3c8",
             "prior_recurrence_revision_id": "recurrence_revision_cf2deeb46b908180131e0e0c62ed84463c83249fa88e79660a8bf16a36cd145a",
-            "new_recurrence_revision_id": "recurrence_revision_5130b894c073ccbeeb4a863ab6d43c196843b3f483e89e098f9793ca83ae9be6",
+            "new_recurrence_revision_id": "recurrence_revision_513310a24d637082ea1e2847548cd50474d71a03dd143357b2ab1eca73874def",
             "lineage_role": "rule_revision",
-            "new_child_id": "recurrence_rule_1531ce27a18da4db9c27a4f20f8f35352145b3a0c96caab7934be34bea313ccc",
+            "new_child_id": "recurrence_rule_198b5a512400b1be4126d20fbc8327ac3e627fe5e1c4c4a6471e7803ff2d5794",
             "effect": "copied",
             "lineage_index": "2",
             "prior_child_id": "recurrence_rule_77eb388aa714508bd6caeefda40afa88ac314bd9cd83732bbb307787a7556acc",
@@ -3704,13 +3704,13 @@
       "copy_facts": [
         {
           "prior_child_id": "recurrence_rule_5042bfd1a41caeb24edaec905cc0e1644b34d0fd4b024d934cb20b6ab113bcce",
-          "new_child_id": "recurrence_rule_46a4d8041d08c2af037a91139b6e30449da9fa4d3c0307ad4c1f137e0d03f9b5",
-          "lineage_id": "recurrence_lineage_538db7097232afb6cd985ac928b1ebb3a501d700abe6b8c4ed5e66bb360c1831"
+          "new_child_id": "recurrence_rule_1308aea5204ea0b22fc56d5a86ffed9ef5b564954dd5c0b7fba646906a4ba936",
+          "lineage_id": "recurrence_lineage_5e0093fbda5e850fda59d3d53b24256ecede900b325f2e5f497f73593c8f81be"
         },
         {
           "prior_child_id": "recurrence_rule_77eb388aa714508bd6caeefda40afa88ac314bd9cd83732bbb307787a7556acc",
-          "new_child_id": "recurrence_rule_1531ce27a18da4db9c27a4f20f8f35352145b3a0c96caab7934be34bea313ccc",
-          "lineage_id": "recurrence_lineage_1ea231d5e10b44200b65d13994a5148a508cb821ea0f343f3bc821b84843d297"
+          "new_child_id": "recurrence_rule_198b5a512400b1be4126d20fbc8327ac3e627fe5e1c4c4a6471e7803ff2d5794",
+          "lineage_id": "recurrence_lineage_ac86b8a1598d0aa7bb5028daf8e60298441e34ea61e49d20ad68578b504a70ae"
         }
       ],
       "retarget_facts": []

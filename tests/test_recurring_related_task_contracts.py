@@ -28,7 +28,8 @@ from spine.core.canonical_json import canonical_json_bytes
 from spine.core.errors import SpineValidationError
 from spine.core.notification_profiles import compose_notification_plan
 from spine.core.notifications import normalize_notification_policy, revise_notification_policy
-from tests.recurring_related_task_oracles import candidate, check_snapshot, cursor_case, source_case
+from spine.core.recurrence_mutations import build_successor_recurrence_revision
+from tests.recurring_related_task_oracles import candidate, check_snapshot, check_snapshot_hashes, cursor_case, source_case
 
 ROOT = Path(__file__).resolve().parents[1]
 SCHEMAS = "contracts/schemas/recurring-related-tasks/"
@@ -265,14 +266,25 @@ class RecurringRelatedTaskContractTests(unittest.TestCase):
         code_fixtures = {v["error"]["code"] for name, v in self.fixtures.items() if name.startswith("failure_")}
         self.assertEqual(code_fixtures, set(self.descriptor["error_codes"]))
         # Independent branch-specific expectations: not copied from the builder.
-        for code, field in {
-            "stale_cursor": "cursor",
-            "stale_evaluation": "evaluated_at_utc",
-            "capacity_exceeded": "limits.work_rows",
-            "stale_version": "expected.rule_change_version",
-            "rendering_disclosure_unavailable": "configuration.notification_plan",
+        for code, (command, field) in {
+            "environment_failure": ("reconcile", "schema_version"),
+            "unsupported_command": ("reconcile", "command"),
+            "unsupported_contract_version": ("reconcile", "contract_version"),
+            "invalid_request": ("reconcile", "limits.assignments"),
+            "unsupported_field": ("reconcile", "force"),
+            "command_id_conflict": ("reconcile", "command_id"),
+            "referenced_row_not_found": ("reconcile", "related_task_rule_id"),
+            "stale_cursor": ("reconcile", "cursor"),
+            "stale_evaluation": ("reconcile", "evaluated_at_utc"),
+            "capacity_exceeded": ("reconcile", "limits.work_rows"),
+            "stale_version": ("reconcile", "expected.rule_change_version"),
+            "semantic_conflict": ("update", "configuration.task_owner"),
+            "rendering_disclosure_unavailable": ("update", "configuration.notification_plan"),
         }.items():
-            self.assertEqual(self.fixtures["failure_" + code]["error"]["field"], field)
+            row = self.fixtures["failure_" + code]
+            self.assertEqual(
+                (row["command"], row["error"]["code"], row["error"]["field"]), ("schedule.related_task_rule." + command, code, field)
+            )
         for name in ("create", "update", "retire", "suppress", "reconcile", "show", "list"):
             envelope = self.schemas[SCHEMAS + "responses.schema.json"]["$defs"][name]
             effects = self.descriptor["effects"][name]
@@ -595,6 +607,36 @@ class RecurringRelatedTaskContractTests(unittest.TestCase):
         bad["value"]["rules"][0]["interval"] = "2"
         with self.assertRaises(ValueError):
             check_snapshot(bad, oracle_canonical)
+
+    def test_successor_segment_ancestry_rejects_self_consistently_hashed_wrong_sources(self):
+        initial = next(s for s in self.sources["snapshots"] if s["case_id"] == "main")
+        current = next(s for s in self.sources["snapshots"] if s["case_id"] == "copied")
+        unrelated = next(s["value"]["recurrence_revision_id"] for s in self.sources["snapshots"] if s["case_id"] == "union")
+        self.assertEqual(check_snapshot(initial, oracle_canonical), initial["value"])
+        self.assertEqual(check_snapshot(current, oracle_canonical), current["value"])
+        for wrong_source in ["initial", unrelated]:
+            with self.subTest(source_revision_id=wrong_source):
+                # Deliberately construct a mathematically self-consistent invalid
+                # successor. The independent identity-only checker accepts its
+                # hashes; the ancestry check must reject it for the right reason.
+                malformed = build_successor_recurrence_revision(
+                    initial["value"],
+                    source_item_version="2",
+                    command_id="fixture_invalid_ancestry",
+                    segments=[{**s, "source_revision_id": wrong_source} for s in initial["value"]["segments"]],
+                )
+                bad = {
+                    "value": malformed.value,
+                    "recurrence_set_id_preimage": initial["recurrence_set_id_preimage"],
+                    "normalized_hash_preimage": malformed.normalized_hash_preimage,
+                    "recurrence_revision_id_preimage": malformed.recurrence_revision_id_preimage,
+                    "segment_id_preimages": list(malformed.segment_id_preimages),
+                    "rule_id_preimages": list(malformed.rule_id_preimages),
+                    "rdate_id_preimages": list(malformed.rdate_id_preimages),
+                }
+                self.assertEqual(check_snapshot_hashes(bad, oracle_canonical), malformed.value)
+                with self.assertRaisesRegex(ValueError, "segment ancestry mismatch"):
+                    check_snapshot(bad, oracle_canonical)
 
     def test_positive_copy_count_union_retarget_and_novelty_oracles(self):
         for case in self.sources["cases"]:

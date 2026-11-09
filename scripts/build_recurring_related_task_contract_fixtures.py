@@ -1547,22 +1547,29 @@ def build():
             "referenced_row_not_found": "related_task_rule_id",
             "stale_cursor": "cursor",
             "stale_version": "expected.rule_change_version",
-            "semantic_conflict": "configuration",
+            "semantic_conflict": "configuration.task_owner",
             "rendering_disclosure_unavailable": "configuration.notification_plan",
             "capacity_exceeded": "limits.work_rows",
             "stale_evaluation": "evaluated_at_utc",
         }[code]
+        failure_command, failure_message = {
+            "semantic_conflict": ("update", "Synthetic update branch: configuration.task_owner changes the rule's immutable child owner."),
+            "rendering_disclosure_unavailable": (
+                "update",
+                "Synthetic update branch: configuration.notification_plan selects unavailable detail disclosure.",
+            ),
+        }.get(code, ("reconcile", "Synthetic branch-specific offline " + code))
         fixture(
             "failure_" + code,
             {
                 "ok": False,
                 "response_contract": RESPONSE,
-                "command": BASE + "reconcile",
+                "command": BASE + failure_command,
                 "changed": False,
                 "error": {
                     "code": code,
                     "field": failure_field,
-                    "message": "Synthetic branch-specific offline " + code,
+                    "message": failure_message,
                 },
             },
             "failure",

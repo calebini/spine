@@ -565,6 +565,117 @@ No runtime `src/`, installed/frozen schema, migration or registration changed.
 **Next:** A focused fresh-payload external recheck is the next review gate when
 authorized. Old payload approvals and their source hashes are not reused. This
 local correction is not whole-corpus closure or implementation authorization.
+**Checkpoint:** `183724882a6084932cfa2a520f710cbd1466aa5f` —
+`Correct recurring-task machine contracts and regression evidence`. All 79 selected
+tests and exact regeneration passed again before commit. The unrelated AGENTS.md
+change was excluded; no push occurred. Focused recheck preparation is SPINE-086.
+
+### SPINE-086 — Stage focused recurring-task machine-correction rechecks
+
+**Status:** Done — preparation only (2026-11-08); all four packages verify locally
+as `verified_not_sent`. Fresh exact-payload external approval remains pending.
+**Scope:** Reviewer-only `audit-change`, built-in `consistency`, against correction
+checkpoint `1837248`. The [approval packet](../whetstone_runs/recurring-related-task-machine-rechecks-001/README.md)
+and [finding map](../whetstone_runs/recurring-related-task-machine-rechecks-001/review-map.json)
+assign all ten prior findings exactly once, with overlapping complete schema/code/
+authority context. This is focused finding coverage, not a repeat of every original
+121-input review file or a whole-feature convergence run.
+
+- [A: identity/composition](../whetstone_runs/recurring-related-task-machine-audit-005-identity-composition-recheck/audit-notes.md)
+  — **32 inputs**, 943,477 full prompt characters; A/F-001 and A/F-003.
+- [B: source proofs](../whetstone_runs/recurring-related-task-machine-audit-006-source-proof-recheck/audit-notes.md)
+  — **26 inputs**, 850,516 characters; A/F-002.
+- [C: authoring](../whetstone_runs/recurring-related-task-machine-audit-007-authoring-recheck/audit-notes.md)
+  — **93 inputs**, 781,200 characters; B/FB-001–004.
+- [D: reads/cursors](../whetstone_runs/recurring-related-task-machine-audit-008-read-cursor-recheck/audit-notes.md)
+  — **68 inputs**, 908,100 characters; C/fb_001–003.
+
+**Guards:** Each ordered payload, notes, exact source-hashed named-section context,
+schema-reference closure, checkpoint, shared finding map, prior artifact hashes,
+launcher/adapter/runtime/CLI and complete built-in prompt is bound and locally
+verified. Prompt ceiling remains 950,000 characters below the observed 1,048,576
+client cap; no unmeasured trimming or fallback. Explicit staged pins: stable
+Whetstone 0.1.0 / `6e19fe3e72dedda50a372781a43c08e5d7e7480a`, Codex CLI
+0.167.0-alpha.3.2, `gpt-6.1-sol`, medium reasoning, 1200 seconds. Exact inventories
+are in each `prepared-inputs.json`; no AGENTS/environment/ledger/credentials.
+**Authorization:** All four status files explicitly deny external-send approval;
+no reviewer launched and no `change_audit` output exists. Old A/B/C approvals are
+not inherited. Normal execution access is still required after affirmative new
+approval. No Editor, source change, implementation, migration, send or deployment
+is part of preparation. New artifacts remain local under the existing ignore rule;
+these tracking additions follow the selected commit and are not yet committed.
+**Next:** Obtain exact A/B/C/D payload approval, then execute and monitor each
+bounded assessment separately and reconcile all findings/shared seams. No clean
+machine-corpus closure, ratification or runtime implementation is claimed.
+**Approval follow-up:** The operator explicitly approved the four exact packages,
+notes, built-in context and generated copies. Fresh authorization records bind
+each unchanged manifest/notes hash; execution is tracked separately below.
+
+### SPINE-087 — Execute focused recurring-task machine-correction rechecks
+
+**Status:** Done — all four explicitly approved reviewer-only assessments
+completed (2026-11-08). Combined **0 blockers / 1 major / 1 minor / 0 nits**;
+the machine corpus still needs correction and is not ratified.
+**Scope:** Only SPINE-086's exact 32/26/93/68-input packages against `1837248`,
+stable Whetstone, built-in consistency, GPT-6.1 Sol at medium reasoning. Verify
+each payload, runtime, destination and full prompt before launch. Preserve source
+bytes and all old review evidence; record persisted results independently of
+process exit codes. No automatic retry, source patch, Editor, implementation,
+ledger access, migration, send, deployment, commit or push.
+**Results:** [Terminal reconciliation](../whetstone_runs/recurring-related-task-machine-rechecks-001/review-summary.md).
+A passes with no findings; B returns needs-revision, boundary false, one major;
+C passes with minor clarification, boundary true, one minor; D passes with no
+findings. B/F-001 leaves original A/F-002 incomplete: successor fixture segment
+ancestry still says `initial` rather than the producing/copying predecessor,
+and hash checks do not independently reject that relationship. C/FB-001 leaves
+original B/FB-004 incomplete: two authoring configuration failure fixtures still
+name reconcile, and tests omit command from their code/field comparison.
+**Verification:** All four processes exited 0 with valid reports/feedback, not
+merely empty failure counts. Actual submitted manifests exactly match approved
+ordered paths/hashes, notes and reviewer identity. All four post-review guards
+pass; 44 inventoried prior artifacts and AGENTS bytes remain unchanged. There
+were no source patches between reviews. Local authorization/status and tracking
+changes are uncommitted; no push, runtime work or automatic retry occurred.
+**Next:** Seek authorization for the two narrow source-only corrections and
+regression tests, then freshly stage the affected rechecks. Original approval
+does not authorize changed payloads or implementation. No whole-corpus closure
+or convergence claim is made.
+
+### SPINE-088 — Correct the two focused machine-recheck residuals
+
+**Status:** Done locally (2026-11-08) — both SPINE-087 residuals patched with
+independent regressions. Not externally rechecked or ratified.
+**Scope:** Correct successor fixture segment ancestry without changing runtime
+normalizers, regenerate affected identities/evidence, reject self-consistently
+hashed invalid ancestry, and align authoring failure examples with matching
+command/code/field branches. Preserve existing historical ancestry and all
+working-tree changes; old review artifacts and approvals remain immutable.
+**Boundary:** No runtime behavior, migrations, ledger access, new external audit,
+ratification, commit, push or deployment.
+**Changes:** Fixture construction explicitly supplies the producing/copying
+predecessor revision for successor segments, including matching preview inputs
+used for deterministic copy IDs. This is scoped to newly constructed fixture
+facts, not a historical-row rewrite or runtime-normalizer change. Independent
+snapshot checking now separates identity/hash verification from ancestry; the
+new regression constructs successors with valid hashes but `initial` or an
+unrelated stable source revision, proves their mathematical identities valid,
+then rejects their ancestry. Regenerated seven affected artifacts, including
+proof/lineage identities and suppression references. The two authoring failures
+now model update of immutable `configuration.task_owner` and unavailable
+`configuration.notification_plan` disclosure; independent tests assert all 13
+command/code/field triples. Reconcile per-assignment decision-required semantics
+remain unchanged. The machine companion is draft.3 with explicit oracle scope.
+**Verification:** **80 selected tests passed**, including 24 source-only machine
+tests and existing scheduling/profile/binding/recurrence regressions. All **80
+generated artifacts** reproduce exactly; focused Ruff, formatting and
+`git diff --check` pass. Original source owner specifications, public schemas,
+runtime `src/`, old audit inputs/reports, all 44 inventoried prior artifacts and
+AGENTS bytes are unchanged. Pre-existing tracking changes remain intact. No new
+audit, ledger access, runtime work, commit or push occurred.
+**Next:** Checkpoint and freshly stage focused rechecks of the affected proof and
+failure branches when requested. The old source-bound guards are intentionally
+stale after correction; do not refresh their frozen hashes or reuse old approval.
+Local verification does not establish external closure or implementation readiness.
 
 ## Post-release corrective work
 

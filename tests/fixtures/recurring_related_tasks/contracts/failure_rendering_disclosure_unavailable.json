@@ -1,11 +1,11 @@
 {
   "ok": false,
   "response_contract": "spine.recurring-related-tasks-response.v1",
-  "command": "schedule.related_task_rule.reconcile",
+  "command": "schedule.related_task_rule.update",
   "changed": false,
   "error": {
     "code": "rendering_disclosure_unavailable",
     "field": "configuration.notification_plan",
-    "message": "Synthetic branch-specific offline rendering_disclosure_unavailable"
+    "message": "Synthetic update branch: configuration.notification_plan selects unavailable detail disclosure."
   }
 }

@@ -19,6 +19,20 @@ VERSIONS = {
 SEED = "2026-11-14T11:30:00"
 
 
+def successor_segments(before, supplied=None):
+    """Explicit inputs for the fixture's newly copied/produced segment facts.
+
+    All segments constructed here are new facts in this successor, including
+    retired split facts. Do not use this as a general historical-row rewriter.
+    """
+    if supplied is not None:
+        return [{**row, "source_revision_id": before["recurrence_revision_id"]} for row in supplied]
+    return [
+        {**row, "source_revision_id": before["recurrence_revision_id"], "lineage_parent_segment_id": row["segment_id"]}
+        for row in before["segments"]
+    ]
+
+
 def selector_for(value, fact, *, rules=True, rdates=False):
     """Construct the declared candidate selector; independent tests prove it."""
     rule_rows = [r for r in value["rules"] if r["status"] == "active"] if rules else []
@@ -96,6 +110,7 @@ def source_witnesses():
     def successor(name, prior_name="main", *, effect="series_edit_whole_applied", copies=None, **changes):
         before = normalized[prior_name].value
         command = "fixture_source_" + name
+        changes["segments"] = successor_segments(before, changes.get("segments"))
         norm = build_successor_recurrence_revision(before, source_item_version="2", command_id=command, **changes)
         root = next(s["recurrence_set_id_preimage"] for s in snapshots if s["case_id"] == prior_name)
         after = retain(name, norm, root)
@@ -208,7 +223,7 @@ def source_witnesses():
     # Build once to obtain deterministic child IDs, then retain the complete
     # explicit copy relation with its exact COUNT subtraction facts.
     preview = build_successor_recurrence_revision(
-        counted, source_item_version="2", command_id="fixture_source_split", segments=segments, rules=rules
+        counted, source_item_version="2", command_id="fixture_source_split", segments=successor_segments(counted, segments), rules=rules
     )
     copies = {r["rule_id"]: old_rule["rule_id"] for r in preview.value["rules"]}
     following, split_pair = successor(
@@ -240,7 +255,12 @@ def source_witnesses():
     changed.update(segment_ref="0", seed="2026-11-07T11:30:00")
     dates = [{"segment_ref": "0", "scheduled_fact": "2026-11-15T11:30:00", "status": "active"}]
     preview = build_successor_recurrence_revision(
-        main, source_item_version="2", command_id="fixture_source_changed_with_added", rules=[changed], rdates=dates
+        main,
+        source_item_version="2",
+        command_id="fixture_source_changed_with_added",
+        segments=successor_segments(main),
+        rules=[changed],
+        rdates=dates,
     )
     successor(
         "changed_with_added", rules=[changed], rdates=dates, copies={preview.value["rules"][0]["rule_id"]: main["rules"][0]["rule_id"]}
@@ -255,7 +275,7 @@ def source_witnesses():
         for r in union["rules"]
     ]
     preview = build_successor_recurrence_revision(
-        union, source_item_version="2", command_id="fixture_source_union_changed", rules=changed_rules
+        union, source_item_version="2", command_id="fixture_source_union_changed", segments=successor_segments(union), rules=changed_rules
     )
     copy_claims = {
         r["rule_id"]: next(old["rule_id"] for old in union["rules"] if old["interval"] == ("2" if r["interval"] == "3" else "1"))

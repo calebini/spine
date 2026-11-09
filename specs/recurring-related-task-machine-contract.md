@@ -1,6 +1,6 @@
 # Recurring Related Tasks: Machine Companion
 
-Status: Draft v0.1.0-draft.2 — source-only codification; not ratified or implemented
+Status: Draft v0.1.0-draft.3 — source-only codification; not ratified or implemented
 
 Date: 2026-11-08
 
@@ -178,7 +178,13 @@ The fixture manifest additionally names complete offline `source-proofs.json`
 and `composed-policies.json` corpora. Source snapshots retain the existing
 normalizers' full values and exact set/revision/hash/child preimages. Successor
 ancestry is checked independently alongside the delegated value-schema
-projection, without changing that existing schema. Lineage retains exact identity
+projection, without changing that existing schema. Every segment newly produced
+or copied by a retained successor fixture names the actual predecessor revision
+in `source_revision_id`; `initial` applies only to the initial fixture revision.
+The oracle rejects self-consistently hashed invalid successor ancestry, including
+`initial` and an unrelated stable revision. This checks newly constructed fixture
+facts; it does not rewrite previously persisted historical segments.
+Lineage retains exact identity
 preimages/payloads, explicit component-copy maps, COUNT subtraction and one-to-one
 retarget facts; positive rdate novelty must exclude prior included/reserved or
 unresolved slots. The finite WEEKLY witness checker rejects unsupported fixture
@@ -206,3 +212,7 @@ combined cursor/expected-fact failures. No cursor test creates a service endpoin
 or authorizes a write. Read watermarks and blocked-child policy mappings are
 checked against concrete creation evidence; selected-but-unresolved units may
 advance selection without falsely certifying resolution or durable no-op change.
+Failure witnesses independently assert the complete command/code/field tuple.
+Immutable child-owner changes and unavailable authoring disclosure are update
+failures at their exact configuration fields; per-assignment reconcile problems
+remain decision-required outcomes rather than authoring failures.

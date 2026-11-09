@@ -26,6 +26,25 @@ def digest(value, encode):
 
 
 def check_snapshot(record, encode):
+    """Identity correctness does not waive the fixture's copied-segment ancestry."""
+    value = check_snapshot_hashes(record, encode)
+    prior = value.get("prior_recurrence_revision_id")
+    if value["revision_number"] == "1":
+        if prior is not None:
+            raise ValueError("initial snapshot has a predecessor")
+        expected_source = "initial"
+    else:
+        if not isinstance(prior, str) or not prior.startswith("recurrence_revision_"):
+            raise ValueError("successor snapshot lacks a stable predecessor")
+        expected_source = prior
+    # These fixture segments are all newly produced/copied in their revision,
+    # including the split's retired lineage facts. Historical rows are not edited.
+    if any(row["source_revision_id"] != expected_source for row in value["segments"]):
+        raise ValueError("fixture segment ancestry mismatch")
+    return value
+
+
+def check_snapshot_hashes(record, encode):
     """Check public rows against complete independent hash/ID preimages."""
     value, pre = record["value"], record["normalized_hash_preimage"]
     refs = {s["segment_id"]: s["segment_index"] for s in value["segments"]}
