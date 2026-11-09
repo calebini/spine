@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json",
-  "title": "Recurring related tasks v1 shared types (draft, source only)",
+  "title": "Recurring related tasks v1 shared types (ratified, source only)",
   "$comment": "No runtime or HTTP activation. Cross-field ordering, reference equality, byte limits and semantic validation are specified separately; JSON Schema iteration is not command error precedence.",
   "$defs": {
     "id": {

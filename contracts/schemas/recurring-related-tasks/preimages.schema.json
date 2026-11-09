@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/preimages.schema.json",
-  "title": "Closed recurring-task and delegated identity preimages (draft/source only)",
+  "title": "Closed recurring-task and delegated identity preimages (ratified/source only)",
   "$comment": "New-family preimages and delegated old preimages remain distinct. No new fields are added to frozen command/notification/recurrence algorithms.",
   "$defs": {
     "related_task_rule": {

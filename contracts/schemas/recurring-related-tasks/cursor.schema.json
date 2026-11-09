@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/cursor.schema.json",
-  "title": "Purpose-separated recurring-task cursor payloads (draft/source only)",
+  "title": "Purpose-separated recurring-task cursor payloads (ratified/source only)",
   "$comment": "HMAC-SHA256(domain UTF-8 + NUL + exact canonical payload bytes), unpadded base64url payload.tag. Expiry exactly +3600 seconds, query/ledger/purpose/freshness checks are semantic obligations. No keys or authority secrets in payload.",
   "$defs": {
     "listQuery": {

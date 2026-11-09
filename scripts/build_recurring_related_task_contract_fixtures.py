@@ -90,7 +90,7 @@ def schema_closure():
         walk(value)
     return {
         "contract_version": "spine.recurring-related-task-schema-closure.v1",
-        "status": "draft_source_only",
+        "status": "ratified_source_only",
         "resources": [
             {
                 "uri": uri,
@@ -1634,7 +1634,7 @@ def build():
     bundle[closure_path] = schema_closure()
     bundle["contracts/recurring-related-task-fixture-manifest.json"] = {
         "contract_version": "spine.recurring-related-task-fixtures.v1",
-        "status": "draft_source_only",
+        "status": "ratified_source_only",
         "runtime_verified": False,
         "registry": "contracts/recurring-related-tasks.v1.json",
         "schema_closure": closure_path,

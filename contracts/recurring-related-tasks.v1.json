@@ -4,7 +4,7 @@
   "response_contract": "spine.recurring-related-tasks-response.v1",
   "cursor_version": "spine.recurring-related-tasks.cursor.v1",
   "canonical_json_version": "spine.canonical-json.v1",
-  "status": "draft_machine_contract",
+  "status": "ratified_machine_contract",
   "exposure": "trusted_local_only",
   "runtime_implemented": false,
   "ledger_schema_version": null,

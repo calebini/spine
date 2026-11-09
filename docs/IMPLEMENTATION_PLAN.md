@@ -9,9 +9,234 @@ see [validation](TZDB_COMPATIBILITY_VALIDATION.md) and [operations](TZDB_COMPATI
 
 
 Role: Roadmap rationale and delivery history; current task status lives in [BACKLOG.md](BACKLOG.md)
-Last updated: 2026-11-08 (SPINE-088 two focused residuals patched locally; external recheck pending)
+Last updated: 2026-11-09 (SPINE-091 contract ratification and recurring-task delivery plan; implementation not started)
 
 This is a non-normative delivery plan. The specifications and machine-readable contracts remain authoritative.
+
+## Planned Delivery: Recurring-Source Related Tasks
+
+The operator ratified the reviewed source contract family on **2026-11-09** and
+selected implementation planning, not runtime implementation. The accepted
+[logical](../specs/recurring-related-tasks.md),
+[storage/identity](../specs/recurring-related-task-storage.md),
+[command](../specs/recurring-related-task-commands.md) and
+[machine](../specs/recurring-related-task-machine-contract.md) leaves own behavior.
+The [capability manifest](../contracts/recurring-related-tasks.v1.json) owns exact
+versions, dependencies, limits and `RRT-01`–`RRT-18`; the
+[fixture manifest](../contracts/recurring-related-task-fixture-manifest.json) owns
+the retained offline corpus. Ratification changes acceptance/status metadata,
+not reviewed wire shapes, identity preimages, limits or product choices.
+
+The bounded review chain is recorded under SPINE-084–090: no reported in-scope
+findings remain, with the final two rechecks clean at checkpoint `d5744ba` and
+earlier clean identity/read seams retained. The generated reviewer-model metadata
+caveat remains recorded, not rewritten. These are reviewer-only assessments,
+not convergence or runtime proof. This plan introduces **no environment-specific
+deployment procedure, maintenance fork, web expansion or sending authorization**.
+
+### Delivery boundary and sequence
+
+Four substantial internal checkpoints produce **one complete end-to-end feature**.
+They are not separate deployment promises. The existing package/schema remain
+unchanged by this planning step (`0.11.2` / schema `19` at the planning baseline).
+Choose the next free ordered migration during R1 and the release number during
+final integration, not by assuming an unused number now. The source descriptor
+keeps `runtime_implemented=false` and `ledger_schema_version=null` until activation.
+
+Do not advertise a complete contract family or expose a partly implemented
+command through the public registry between checkpoints. R1–R3 may add internal
+implementation and tests when individually authorized; R4 admits all seven CLI
+commands and implemented declarations only after the required proofs pass. No
+production service, live ledger, real recipient, external send or pack install is
+needed for any checkpoint. Use disposable ledgers and fake adapters/clocks only.
+
+1. **R1 / SPINE-092:** physical persistence and authentic source identity.
+2. **R2 / SPINE-093:** complete command engine and manual reconciliation.
+3. **R3 / SPINE-094:** all-writer/attempt safety and automatic scheduling.
+4. **R4 / SPINE-095:** public activation, packaged verification and operator handoff.
+
+The first implementation task is R1. Its backlog status is ready for a separate
+operator kickoff; this plan is not that authorization. Later slices depend on the
+earlier checkpoint and must retain its regression evidence.
+
+### R1 — Persistence and source-identity foundation (SPINE-092)
+
+Deliver the storage leaf's exact header/history, assignment/reservation/proof/
+lineage, generation/cancellation/suppression, intent/outcome, progress/catalog and
+coalescing dirty-queue records. Reuse existing item ownership, recurrence-selector,
+binding, policy/work and attempt tables; do not create a second task store.
+
+Implement canonical configuration/identity helpers and immutable decoders from the
+ratified preimages. Add exact extracted-column/JSON equality, contiguous history,
+same-root/source/set ownership, one-to-one selector reservation and generation
+predecessor constraints. Add the named indexes with exact column order and verify
+the intended root/source/target/history/keyset query plans against actual SQLite.
+
+Build a bounded source-proof layer over actual stored recurrence revisions,
+selectors, children and lineage. Cover copied segments with correct ancestry,
+COUNT splits, complete union contributors, exact retargets, added/rdate novelty,
+original versus expressed time and evidence absence/ambiguity. Unsupported topology
+returns unresolved evidence, never guessed identity or destructive cancellation.
+No expansion from seed just to recognize an old assignment. Exercise real source
+producer/reuse paths; pure normalized fixture hashes alone are not sufficient.
+If those tests expose a delegated producer/contract mismatch, surface the exact
+seam before expanding repair scope; never rewrite existing history to pass a test.
+
+**Required proof:** fresh initialization and populated synthetic migration; empty
+new tables/catalog zero; old bytes/identities unchanged; FK/unique/immutability/
+preimage corruption rejection; interruption/DDL rollback and old-writer schema
+refusal; duplicate reservation and predecessor races using separate connections;
+all published canonical vectors; indexed proof/history lookups; bounded rejection
+of missing/contradictory source evidence. Do not auto-enroll old related tasks.
+Update schema-object fingerprints and migration machinery together when DDL is
+introduced, preserving bounded routine preflight and explicit deep verification.
+
+**Exit:** tested storage and source-proof substrate with no public command
+registration, automatic generation or new delivery eligibility. Initial proof
+ownership: RRT-01/04/05/18; prerequisites for all later transactional tests.
+
+### R2 — Command engine and manual reconciliation (SPINE-093)
+
+Implement all seven command handlers internally using the shared command context
+and one outer transaction, not recursive public-command submissions or child
+commits. Normalize raw/unique assignees, exact owner and profile/presentation
+selection, immutable enrollment and eight-week default horizon under the accepted
+schemas. Implement read-only show/list/history plus purpose-separated authenticated
+keyset cursors, their normalized queries, snapshot facts, expiry and exact errors.
+Reuse configured cursor-key handling where appropriate; never ship fixture keys.
+
+Manual reconcile combines existing assignments (including outside the current
+horizon) with bounded merged source candidates. Create ordinary tasks with the
+explicit owner/header/history before profile/presentation validation and policy/
+work insertion; increment access epoch once per creating transaction. Support
+zero reminders as well as profile/custom multi-policy composition, generation-
+scoped creation tokens, real outer actor attribution and intent-preserving copies.
+
+Complete the lifecycle in this checkpoint: source moves, exclusion/cancellation,
+source-only cancellation records, latest-only linked restoration, permanent
+suppression and terminal/manual/detach vetoes. Implement both edit scopes with
+three-way managed-baseline adoption (including D=B preserves C), serialized
+high-water intents, explicit conflict outcomes and all retirement dispositions.
+Handle repeated pages/replay, empty clears, no-op, dry run, progress-only and
+successful blocked-unit versus failed-page behavior without inventing receipts.
+Re-read the clock and expected facts before commit; equality at due is too late.
+
+**Required proof:** public wire fixture parity through handler tests; exact
+command/code/field precedence; rollback injection after task, owner/history,
+binding, policy, work, audit and receipt stages; compatible replay after state/
+cursor changes and incompatible command reuse; all limits and one-unit overflow;
+strict-future initial/restoration/adoption boundaries; malformed/stale/cross-query/
+ledger cursors; read-only no-write evidence; races between distinct commands
+selecting the same assignment/generation. No schema-only witness counts as these
+actual transaction tests. Generated item ownership, source ownership, assignees
+and notification destinations remain independent.
+
+**Exit:** a fully exercised manual command engine, still not publicly advertised
+or automatically invoked. Primary proof: RRT-03/06/07/08/09/10/11/12/15/16/17,
+building on R1; automatic-writer and attempt gates are not yet claimed complete.
+
+### R3 — All-writer safety and automatic scheduling (SPINE-094)
+
+Inventory and integrate every existing source/item/recurrence, relation, binding,
+target-task/owner and relevant policy writer. Invalidate affected roots/witnesses
+and catalog generations in the same canonical transaction, including old direct
+command surfaces. Source fan-out queues affected roots without eagerly mutating
+every child. Direct binding reconciliation must use the assignment-aware guard;
+unrelated v1 bindings/tasks retain their current behavior.
+
+At each actual send-attempt admission, check current source proof/actionability,
+latest generation, root disposition, relation/binding, owner/revision, target
+version, veto and pending material adoption/cleanup inside the existing attempt
+boundary. Cancel only eligible zero-attempt work; retain leased/in-progress/
+attempted/terminal evidence and refuse an obsolete next attempt. Persist canonical
+`side_effect_attempts` before fake sends. An already admitted send is not undone.
+
+Integrate the read-only scheduler planner, fair root rotation, separate budgets,
+coalesced invalidation and dirty-generation CAS into the existing scheduling/
+Tickerd adapter path. Time alone may make work eligible, so empty current coverage
+cannot permanently exhaust a moving horizon. Idle/retained/blocked observation
+must not emit durable receipts, progress, audits or unchanged continuations.
+
+**Required proof:** source/task/policy/owner/direct-binding writes versus
+reconciliation; exclusion and reinstatement versus suppression; intent versus
+task completion/overdue transition; dirty-queue invalidation versus old-page clear;
+attempt admitted before versus after source changes; protected work-state matrix;
+future horizon rollover and catch-up boundaries; repeated idle cycles with zero
+durable churn; fairness for dense/blocked roots; operational safety-stop behavior
+unchanged. Use explicit interleaving barriers, not timing sleeps or real sends.
+
+**Exit:** complete internal automatic feature with actual freshness/race evidence
+and unchanged ordinary-task behavior. Primary proof: RRT-13/14 and finalization of
+RRT-04/05/07/10/11/12/16/17/18 across all writers and worker entrypoints.
+
+### R4 — Public activation and release verification (SPINE-095)
+
+Package the exact offline source schema closure and register the seven trusted-
+local CLI commands and their exact dependencies only after R1–R3 tests pass.
+Change the source-only tests to implemented-behavior assertions in the same
+activation change; do not merely delete their safety checks. Update implemented
+versions, schema-object manifests, package data, migration schema declaration and
+runtime descriptor coherently. No HTTP/web registry entry or new authorization
+model is implied. Required contract/schema drift must fail closed at bounded
+runtime preflight without a deep ledger scan.
+
+Run one end-to-end synthetic science-class scenario through installed public CLI
+commands: multiple Saturday pickups, +5400 elapsed due, -600 reminder; repeat
+reconcile without duplicates; move one class; exclude/restore with linked task
+history; finish one task; suppress another restoration; apply a scoped rule edit;
+retire through each disposition on isolated cases. Include zero/profile/custom
+reminders, ownership/readback and per-task lifecycle/attempt evidence. Observe
+queued work through fake processing only. Exercise existing unrelated commands,
+read APIs, recurrence/profile/rendering/facet behavior and original binding paths.
+
+Verify a non-editable installed wheel outside the source tree against the exact
+supported dependency pins, fresh and populated synthetic migrations, explicit
+deep verification, normal preflight, worker startup and public CLI discovery.
+Run the documented full test suite, Ruff, applicable strict typing, compilation,
+contract synchronization and regeneration; record exact results and any failure.
+Update generic operator guide/quickstart with the rule-versus-generated-task
+distinction, command examples, expected facts, bounded continuation, unresolved
+decisions, suppression, retirement and authored/materialized/delivered wording.
+Keep service/host/ledger configuration and deployment instructions outside this
+feature's repository plan.
+
+**Exit:** all 18 obligations have named real test evidence and pass together;
+only then advertise the family as implemented. Primary proof: RRT-02 and full
+cross-slice rerun. No live deployment or production qualification is performed by
+this checkpoint; those remain separately requested operator actions.
+
+### Required proof allocation
+
+This matrix allocates work; every row is **pending**, not an executed proof.
+R4 reruns all rows and records test names/results before activation.
+
+| Obligation | Introduce/finalize | Required real evidence |
+| --- | --- | --- |
+| RRT-01 | R1, rerun R4 | Fresh/populated migration, immutable rows/FKs, rollback, old-writer refusal |
+| RRT-02 | R4 | Installed wheel closure, exact registry/dependencies, local-only discovery and drift rejection |
+| RRT-03 | R2 | One outer transaction, injected-stage rollback, real receipts/replay and no child commits |
+| RRT-04 | R1 → R3 | Actual selectors/children/proofs validated before reuse/insert and after all writer changes |
+| RRT-05 | R1 → R3 | Multi-revision lineage, COUNT/union/retarget, unresolved/ambiguous fail-closed cases |
+| RRT-06 | R2 | Enrollment, moved/rdate merging, late/dense source discovery and proof bounds |
+| RRT-07 | R2 → R3 | Commit clock, equality/rollback, initial/restoration/adoption and worker cutoff races |
+| RRT-08 | R2 | Deterministic generations and owner/header/history/epoch before policies/work; no grants |
+| RRT-09 | R2 | Multiple policy keys/tokens, restored generations and intent-preserving copy/adoption |
+| RRT-10 | R2 → R3 | Confirmed cancellation, latest-only successor uniqueness, permanent veto/suppression races |
+| RRT-11 | R2 → R3 | D=B and other adoption branches, bounded high-water outcomes and overdue gate release |
+| RRT-12 | R2 → R3 | All retirement dispositions, overdue/out-of-horizon cleanup and source/attempt races |
+| RRT-13 | R3 | Current attempt admission, protected stale work and admitted-before/after-change matrix |
+| RRT-14 | R3 | Idle zero-write cycles, fairness, clock rollover and no unchanged progress/continuation |
+| RRT-15 | R2 | Authentic snapshots, all cursor rejections/precedence, seek indexes and non-mutating reads |
+| RRT-16 | R2 → R3 | Actual subject/group ownership, people/route/disclosure checks and rollback without entitlement |
+| RRT-17 | R2 → R3 | Exact candidate/proof/hop/assignment/mutation/work/byte bounds and whole-unit/page behavior |
+| RRT-18 | R1/R2 → R3 | Separate-connection CAS/reservations/predecessor uniqueness, writer/worker/replay races |
+
+No new product decision is open. If implementation exposes an authority conflict
+or missing normative case, stop that affected path and request a bounded decision;
+do not invent identity heuristics, ownership grants, disclosure or lifecycle policy.
+Do not restart deferred resilience/retention work, general qualification campaigns,
+facet extensions, contextual advisories, packs, GUI or calendar integration here.
+Task status and checkpoint evidence live in [BACKLOG.md](BACKLOG.md).
 
 **Selected design (2026-11-07):** The operator requested a native rule creating one
 ordinary task per recurring event occurrence, with an elapsed due offset,
@@ -92,8 +317,24 @@ concrete update failures. Seven artifacts were regenerated; all 80 artifacts
 reproduce and 80 selected tests pass. The machine companion clarifies the offline
 scope in draft.3. Existing recurrence owners, schemas and runtime remain unchanged.
 Fresh focused rechecks are still pending; old approvals/payload hashes are not reused.
+The correction is committed as `d5744ba`; all 80 selected tests passed again,
+AGENTS.md was excluded and no push occurred. SPINE-089 prepares two fresh
+[finding-focused rechecks](../whetstone_runs/recurring-related-task-machine-residual-rechecks-001/README.md):
+source ancestry (26 inputs, 854,569 prompt characters) and failure attribution
+(46 inputs, 659,414 characters). Both verify locally under the staging ceiling,
+with source/schema/context/prompt/runtime pins bound and external approval false.
+The earlier clean A/D scopes and all historical audit evidence are retained;
+no external review, ratification or runtime work is started by preparation.
+The operator then approved both exact packages. SPINE-090 completed them with
+`pass`, preserved boundaries and zero findings. The [terminal reconciliation](../whetstone_runs/recurring-related-task-machine-residual-rechecks-001/review-summary.md)
+records bounded closure, retained clean A/D seams and unchanged source bytes.
+Audit-010's generated model self-label differs from the verified requested model;
+the raw output and configuration-versus-attestation caveat are preserved, not
+rewritten. No reported machine-contract findings remain within the reviewed
+chain. Explicit ratification and a bounded implementation plan are next; all
+runtime obligations, real transaction/worker verification and implementation remain pending.
 No source/runtime/ledger change is part of review execution.
-SPINE-075/079/080/081/082/083/084/085/086/087/088 in the backlog own design/review/patch/
+SPINE-075/079/080/081/082/083/084/085/086/087/088/089/090 in the backlog own design/review/patch/
 codification status; no runtime implementation or migration is part of this step.
 
 **Selected enriched delivery (2026-11-06):** The operator selected the smallest

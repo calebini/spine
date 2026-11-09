@@ -1,8 +1,8 @@
 # Recurring Related Tasks: Machine Companion
 
-Status: Draft v0.1.0-draft.3 — source-only codification; not ratified or implemented
+Status: Accepted v1.0.0 — ratified machine contracts; source-only, not implemented
 
-Date: 2026-11-08
+Ratified: 2026-11-09
 
 ## 1. Authority and activation
 
@@ -13,12 +13,14 @@ closure and computed corpus. It does not add another task model or execution
 engine. D-01–05, explicit subject/group child ownership, source proof, no-op
 suppression and existing notification/attempt rules remain unchanged.
 
-The proposed capability manifest is
+The ratified source capability manifest is
 [recurring-related-tasks.v1.json](../contracts/recurring-related-tasks.v1.json).
-It declares exact proposed versions, seven local commands, request/response paths,
+It declares exact versions, seven local commands, request/response paths,
 prerequisites, bounds, identity conventions and pending runtime obligations.
 It is **not** the compiled runtime registry. No handler, HTTP allowlist, installed
 schema closure, package version or ledger schema is activated by this corpus.
+`proposed_contract_versions` lists the source declarations pending runtime
+activation; ratification does not add them to compiled implemented declarations.
 
 The [fixture manifest](../contracts/recurring-related-task-fixture-manifest.json)
 separates valid/invalid wire fixtures, computed hash/cursor vectors and pure
@@ -167,8 +169,17 @@ notification identity functions are delegated, not replaced by a second ledger
 implementation. Published immutable inputs and complete expected output facts
 make the examples reproducible rather than assertions about deployed state.
 
-Review this machine corpus before ratification/implementation planning. Runtime
-advertisement requires the pending obligations to be implemented and verified
+The operator ratified this corpus on 2026-11-09 after the bounded review chain
+against source checkpoints `1837248` and `d5744ba`: identity/composition and
+read/cursor passes, then clean focused successor-ancestry and failure-attribution
+rechecks. No reported in-scope findings remain in that chain. This is acceptance
+of the source contract, not a Phase 1/Phase 2 convergence or runtime result.
+The retained feedback's generated model-label caveat is recorded in the backlog;
+review metadata is not a runtime dependency or a reciprocal hash gate.
+
+The [implementation plan](../docs/IMPLEMENTATION_PLAN.md#planned-delivery-recurring-source-related-tasks)
+allocates every `RRT-01`–`RRT-18` obligation to a delivery slice and real tests.
+Runtime advertisement requires those obligations to be implemented and verified
 against actual constraints, transactions, concurrent writes, migration and
 attempt-start admission. No source-only schema or passing witness waives that gate.
 

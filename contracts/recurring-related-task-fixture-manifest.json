@@ -1,6 +1,6 @@
 {
   "contract_version": "spine.recurring-related-task-fixtures.v1",
-  "status": "draft_source_only",
+  "status": "ratified_source_only",
   "runtime_verified": false,
   "registry": "contracts/recurring-related-tasks.v1.json",
   "schema_closure": "contracts/recurring-related-task-schema-closure.v1.json",

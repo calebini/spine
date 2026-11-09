@@ -1,6 +1,6 @@
 # Spine Backlog
 
-Last updated: 2026-11-08
+Last updated: 2026-11-09
 
 This is the single work queue for Spine development. The
 [implementation plan](IMPLEMENTATION_PLAN.md) explains roadmap direction and delivery
@@ -37,8 +37,9 @@ status labels in the same change. Routine task updates do not change spec author
 
 ### SPINE-075 — Specify recurring-source per-occurrence related tasks
 
-**Status:** Done — first design draft written (2026-11-07); not ratified,
-machine-codified or implemented. D-01–05 are now approved. The bounded consistency
+**Status:** Done — first design draft written (2026-11-07), machine-codified and
+ratified under SPINE-091 (2026-11-09); not implemented. D-01–05 are approved.
+The bounded consistency
 review is complete under SPINE-076; SPINE-077's three additional lenses reported
 one operability minor, now amended locally under SPINE-078 without an external
 recheck. Detailed technical companions are now drafted under SPINE-079; their
@@ -397,12 +398,12 @@ ledger/migration, send, deployment, commit or push occurred during review.
 
 ### SPINE-083 — Codify recurring-task machine contracts and computed fixtures
 
-**Status:** Done locally (2026-11-08) — source-only machine codification after the
-clean scoped SPINE-082 recheck. SPINE-084's machine review reports needs-revision;
-corrections and ratification remain pending. Source-only schemas, capability/dependency manifest, computed
+**Status:** Done — source-only machine codification (2026-11-08) after the clean
+SPINE-082 recheck. SPINE-084–090 records correction/review through clean residual
+rechecks; SPINE-091 ratifies the source family (2026-11-09). Source-only schemas, capability/dependency manifest, computed
 wire/identity/cursor/model fixtures and offline contract tests are present.
-No runtime registration, handler/worker behavior, DDL/migration, ratification,
-external audit, commit, push or deployment.
+No runtime registration, handler/worker behavior or DDL/migration is implemented
+by source codification. Later reviews/checkpoints are recorded in their own entries.
 **Authority:** Preserve the reviewed logical/storage/command leaves and D-01–05.
 Record mechanical wire-name/representation closure explicitly where prose used
 descriptive tuples; do not invent product policy or treat offline model evidence
@@ -643,8 +644,9 @@ or convergence claim is made.
 
 ### SPINE-088 — Correct the two focused machine-recheck residuals
 
-**Status:** Done locally (2026-11-08) — both SPINE-087 residuals patched with
-independent regressions. Not externally rechecked or ratified.
+**Status:** Done — both SPINE-087 residuals patched locally (2026-11-08) with
+independent regressions; the SPINE-090 focused rechecks passed (2026-11-09).
+Not ratified or implemented.
 **Scope:** Correct successor fixture segment ancestry without changing runtime
 normalizers, regenerate affected identities/evidence, reject self-consistently
 hashed invalid ancestry, and align authoring failure examples with matching
@@ -676,6 +678,173 @@ audit, ledger access, runtime work, commit or push occurred.
 failure branches when requested. The old source-bound guards are intentionally
 stale after correction; do not refresh their frozen hashes or reuse old approval.
 Local verification does not establish external closure or implementation readiness.
+**Checkpoint:** `d5744bad53fa820eb9e6c132df427bf601871a78` —
+`Correct recurring-task fixture ancestry and failure attribution` (2026-11-09).
+All 80 selected tests, exact 80-artifact regeneration, focused Ruff and diff
+hygiene passed again before commit. AGENTS.md was excluded; no push occurred.
+Fresh focused recheck preparation follows under SPINE-089.
+
+### SPINE-089 — Stage the two residual machine-contract rechecks
+
+**Status:** Done — preparation only (2026-11-09). Both guarded launchers return
+`verified_not_sent`; fresh exact-payload external approval remains pending.
+**Scope:** Reviewer-only `audit-change`, built-in `consistency`, against corrected
+checkpoint `d5744ba`, preserving the earlier clean A/D reports rather than rerunning
+all four scopes. The [approval packet](../whetstone_runs/recurring-related-task-machine-residual-rechecks-001/README.md)
+and [finding map](../whetstone_runs/recurring-related-task-machine-residual-rechecks-001/review-map.json)
+bind the two residuals and all overlap/context explicitly:
+
+- [B: successor ancestry](../whetstone_runs/recurring-related-task-machine-audit-009-source-ancestry-recheck/audit-notes.md)
+  — **26 inputs**, **854,569** full prompt characters, B/F-001 from audit-006.
+- [C: failure attribution](../whetstone_runs/recurring-related-task-machine-audit-010-failure-attribution-recheck/audit-notes.md)
+  — **46 inputs**, **659,414** characters, C/FB-001 from audit-007.
+
+**Verification:** Ordered input/notes/source-context/schema-reference hashes,
+committed checkpoint, two-finding coverage, prior artifact preservation, launcher,
+adapter/runtime/CLI and complete built-in prompts all verify locally. Complete
+included schemas are transitively closed (11 and 17 documents); authority excerpts
+are exact source-hashed named sections, never summaries. Both prompts are under
+the 950,000-character staging ceiling and observed 1,048,576-character client cap.
+**Pins:** Stable Whetstone 0.1.0 / `6e19fe3e72dedda50a372781a43c08e5d7e7480a`,
+Codex CLI 0.167.0-alpha.3.2, `gpt-6.1-sol`, explicit medium reasoning and 1200 seconds.
+Exact inventories and full prompt hashes are in each `prepared-inputs.json`.
+**Authorization/boundary:** Both status files deny external-send approval; no
+reviewer launched and no `change_audit` output exists. Old approvals and frozen
+review inputs are not rewritten or reused. No Editor, source mutation, runtime
+work, migration, ledger access, notification send, deployment, ratification or
+convergence is part of staging. AGENTS.md remains unchanged and uncommitted;
+only new preparation tracking follows the selected commit. No push occurred.
+**Next:** Obtain approval of both exact payloads, notes, built-in consistency
+context and generated copies, then run and monitor each independently through its
+normal permission mechanism. Reconcile results with retained clean A/D evidence;
+neither local staging nor an individual pass establishes whole-corpus closure.
+**Approval follow-up:** The operator explicitly approved both exact packages,
+notes, built-in review context and generated copies using GPT-6.1 Sol at medium
+reasoning. Fresh package authorization records bind the unchanged manifest and
+notes hashes; execution is recorded separately below.
+
+### SPINE-090 — Execute the two residual machine-contract rechecks
+
+**Status:** Done (2026-11-09) — both approved reviewer-only assessments completed
+with `pass`, preserved boundaries and **0 blockers / 0 majors / 0 minors / 0 nits**.
+**Scope:** SPINE-089's 26-input successor-ancestry and 46-input failure-attribution
+packages at `d5744ba`, stable Whetstone, built-in consistency, GPT-6.1 Sol at medium
+reasoning. Preserve all source bytes, old review evidence and working-tree edits.
+No source patch, Editor, runtime work, migration, ledger access, notification send,
+deployment, commit, push or automatic retry.
+**Results:** [Terminal reconciliation](../whetstone_runs/recurring-related-task-machine-residual-rechecks-001/review-summary.md).
+Audit-009 source ancestry and audit-010 failure attribution have empty structured
+feedback arrays. The two residuals receive no remaining or introduced findings;
+retained clean A/D evidence and unchanged composition/cursor/read fixtures are
+reconciled without claiming a new full-corpus review.
+**Verification:** Both processes exited 0 and produced valid reports; submitted
+ordered paths/hashes, notes and configured reviewer pins match approval. All
+post-review guards pass; 88 prior artifacts and AGENTS bytes remain unchanged.
+**Metadata caveat:** Audit-010's generated reviewer.model says `gpt-6`; its approved
+launcher/actual manifest and inspected pinned adapter request `gpt-6.1-sol` with
+medium reasoning. Raw feedback is preserved. Generated self-description is not
+runtime attestation; ephemeral CLI mode retains no independent session record.
+No fallback is present in the inspected launch path. This caveat is recorded
+separately from semantic findings and is not silently rewritten.
+**Boundary:** No source edit, Editor, runtime work, ledger access, migration,
+notification send, deployment, commit, push or retry occurred. Tracking and local
+execution artifacts remain uncommitted. No convergence or automatic ratification.
+**Next:** Seek explicit ratification, then prepare the implementation plan and its
+pending runtime verification obligations. No reported in-scope machine findings
+remain outstanding in the reviewed chain; passing offline review is not runtime proof.
+
+### SPINE-091 — Ratify recurring-task contracts and prepare delivery plan
+
+**Status:** Done (2026-11-09) — operator-authorized source contract ratification
+and four-slice implementation plan complete; runtime implementation not started.
+**Scope:** Accept the reviewed logical/storage/command/machine family as v1.0.0,
+align source manifest/schema annotation/fixture status labels, preserve all wire
+shapes and identity bytes, and allocate all 18 runtime obligations to substantial
+implementation checkpoints. Preserve existing AGENTS/tracking changes and raw
+audit evidence, including the generated model-label caveat.
+**Boundary:** Runtime declarations, command/web registries, package/schema
+versions and migration files remain unchanged. No ledger access, external review,
+notification send, commit, push or deployment.
+**Changes:** All four feature leaves accepted v1.0.0; descriptor and source-only
+fixture/closure statuses ratified, five schema title annotations aligned and
+closure hashes regenerated. Existing source-only boundary tests now require
+ratified status while retaining unimplemented/undeclared/unregistered guards.
+README/spec index and current backlog status reflect acceptance, not delivery.
+The existing implementation plan now defines four substantial checkpoints for
+one complete feature, R1–R4 below, with every RRT-01–18 obligation mapped once
+to concrete real-test evidence and a final activation gate. Product D-01–05,
+trusted-local exposure and all wire/normalization/identity/limit semantics are unchanged.
+**Verification:** **80 selected tests passed**; all **80 deterministic artifacts**
+reproduce; focused Ruff/formatting, local Markdown targets/added anchors and
+`git diff --check` pass. Mechanical comparison confirms the 20 family schema
+validation semantics and descriptor/fixture content are unchanged except status/
+title metadata; closure resource paths are identical and all hashes current.
+All 18 runtime obligations remain pending. Runtime/package/migration declarations,
+AGENTS bytes, raw reviews and 88 inventoried prior audit artifacts are preserved.
+No runtime work, external audit, commit or push occurred.
+**Next:** Optional checkpoint, then operator kickoff of SPINE-092/R1. No new
+product decision is required; surface any newly discovered normative conflict
+instead of inventing policy during implementation.
+
+### SPINE-092 — R1: recurring-task persistence and source identity
+
+**Status:** Ready — planned first implementation checkpoint; requires a separate
+operator kickoff. SPINE-091 is complete; implementation not started.
+**Scope:** Exact physical records/constraints/indexes and ordered migration,
+canonical decoders/identities, authentic bounded source proof and lineage.
+Existing items/selectors/owners/bindings/notification tables retain authority;
+no automatic enrollment or public command activation. Choose the next free
+migration number during implementation, not in this plan.
+**Acceptance:** Actual fresh/populated synthetic migration, rollback/FK/unique/
+history rejection, reservation/predecessor races, source identity/COUNT/union/
+retarget/novelty fail-closed cases and indexed access plans. Introduce RRT-01/04/
+05/18 evidence; detailed work and exit gate are in the
+[delivery plan](IMPLEMENTATION_PLAN.md#r1--persistence-and-source-identity-foundation-spine-092).
+**Next:** Await operator authorization, then implement and verify this checkpoint.
+Do not start another feature or any environment-specific deployment work.
+
+### SPINE-093 — R2: recurring-task commands and manual reconciliation
+
+**Status:** Blocked by SPINE-092; planned, not started or separately authorized.
+**Scope:** All seven internal command handlers, configuration/enrollment,
+read/history/cursors, atomic ordinary task/owner/binding/policy/work creation,
+move/cancel/restore/suppress, both adoption scopes and all retirement dispositions.
+No partial public family registration or automatic invocation before later gates.
+**Acceptance:** Real outer transactions/replay/rollback and no child commits;
+strict-future commit and whole-unit budgets; distinct reminder identities and
+immutable ownership without grants; lifecycle/adoption/retirement and cursor
+positive/negative/race tests. Primary RRT-03/06/07/08/09/10/11/12/15/16/17 proof.
+See [R2](IMPLEMENTATION_PLAN.md#r2--command-engine-and-manual-reconciliation-spine-093).
+**Next:** Finish R1 and obtain the selected checkpoint's implementation kickoff.
+
+### SPINE-094 — R3: recurring-task all-writer safety and automatic scheduling
+
+**Status:** Blocked by SPINE-093; planned, not started or separately authorized.
+**Scope:** All existing source/target/relation/binding/owner/policy writers,
+atomic invalidation/catalog/dirty-CAS integration, per-attempt current-truth
+admission and fair bounded read-only scheduler planning. Preserve ordinary v1
+bindings/tasks, attempted history and Tickerd ownership/safety boundaries.
+**Acceptance:** RRT-13/14 plus final RRT-04/05/07/10/11/12/16/17/18 evidence:
+explicit writer/reconcile/attempt interleavings, suppression/restoration and
+pending-intent races, protected-work matrix, rollover/catch-up, dense-root fairness
+and repeated idle zero-write cycles. No real sends. See
+[R3](IMPLEMENTATION_PLAN.md#r3--all-writer-safety-and-automatic-scheduling-spine-094).
+**Next:** Finish R2 and obtain the selected checkpoint's implementation kickoff.
+
+### SPINE-095 — R4: recurring-task activation and release verification
+
+**Status:** Blocked by SPINE-094; planned, not started or separately authorized.
+**Scope:** Exact packaged closure, trusted-local public commands and dependencies,
+implemented declarations, coherent migration/package metadata and generic operator
+documentation. No web allowlist, authentication redesign or deployment procedure.
+**Acceptance:** RRT-02 and all 18 obligations rerun with named real test evidence;
+non-editable installed-wheel public CLI science-class scenario, exact pinned
+dependencies, fresh/populated synthetic migrations, fake worker/attempts, full
+documented suite and applicable lint/typing/compilation/sync/regeneration checks.
+Change source-only assertions to implemented-behavior tests, not removed gates.
+See [R4](IMPLEMENTATION_PLAN.md#r4--public-activation-and-release-verification-spine-095).
+**Next:** Finish R3, verify the complete release and only then advertise the family.
+Any live deployment or real-send test requires a separate operator request.
 
 ## Post-release corrective work
 

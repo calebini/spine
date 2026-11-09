@@ -1,23 +1,23 @@
 # Recurring Related Tasks: Detailed Command Contract
 
-Status: Draft v0.1.0-draft.4 — source-only wire contract and machine companion; not registered or implemented
+Status: Accepted v1.0.0 — ratified source-only wire contract; not registered or implemented
 
-Date: 2026-11-08
+Ratified: 2026-11-09
 
 ## 1. Scope, versions and compatibility
 
-This companion closes the proposed trusted-local family under
+This companion defines the ratified trusted-local family under
 [recurring related tasks](recurring-related-tasks.md). Its
 [storage/identity companion](recurring-related-task-storage.md) owns physical
 records, ID bytes and positive source proof. Existing [command conventions](agent-command-contract.md),
 [relative bindings](relative-temporal-bindings.md), [notifications](notifications.md)
 and [schedule operations](schedule-operations.md) retain their authority.
 
-The exact proposed request selector and runtime family are
+The exact request selector and runtime family are
 `spine.recurring-related-tasks.v1`; normalization is
 `spine.recurring-related-tasks.normalization.v1`; canonical JSON is
 `spine.canonical-json.v1`. Response selector is
-`spine.recurring-related-tasks-response.v1`. These are draft constants, not current
+`spine.recurring-related-tasks-response.v1`. These are accepted constants, not current
 compiled declarations. Implementation activation requires schemas, computed
 fixtures, installed closure, schema admission and tests in a later step.
 
@@ -44,7 +44,7 @@ schedule operations/people, recurrence contract/normalization v1, relative bindi
 v1, notification scheduling/work, profiles v2 and rendering integration v1, plus
 canonical JSON. The machine manifest must enumerate the concrete installed
 identifiers from the current registry, not wildcard `latest` or invented aliases.
-This paragraph does not change existing registry rows or mark a draft supported.
+This paragraph does not change existing registry rows or mark this family implemented.
 
 ## 2. Shared scalar and envelope rules
 
@@ -86,7 +86,7 @@ The source-only [machine companion](recurring-related-task-machine-contract.md)
 closes the descriptive projection/tuple names used below. In particular, reads
 and fresh previews require `commit_cutoff_recheck_required=true`, rule readback
 includes `source_snapshot`, and reconcile requires `future_generation` in its
-result. These mechanical draft representations do not activate the command family.
+result. These source-only representations do not activate the command family.
 
 Receipt identity uses the existing `spine.command-id.v1` derivation with the real
 command/command ID, role `command_receipt`, path `/command_receipt`; root audit
@@ -173,7 +173,7 @@ Missing or mismatching disclosure fails authoring with the existing
 `rendering_disclosure_unavailable` code at `configuration.notification_plan`;
 an existing assignment reports `disclosure_unavailable` without unauthorized work.
 The existing owner-less local `schedule.create` remains ordinary-only on fresh
-creation; this is a separate explicit-owner draft, not an amendment to its request.
+creation; this is a separate explicit-owner contract, not an amendment to its request.
 `delivery` is null iff the resolved reminder set is empty; otherwise it is the
 existing scheduling `delivery` shape. Resolve a context default at authoring and
 persist the concrete target/destination snapshot. No route upsert is implicit.
@@ -654,8 +654,8 @@ configuration or veto already exists.
 The source-only [machine companion](recurring-related-task-machine-contract.md),
 [capability manifest](../contracts/recurring-related-tasks.v1.json) and
 [fixture manifest](../contracts/recurring-related-task-fixture-manifest.json) now
-codify the proposed shapes and offline examples. Review them before ratification
-and implementation planning. The corpus must retain closed request/response/shared types,
+codify the accepted shapes and offline examples, ratified on 2026-11-09 after the
+bounded review chain. The corpus must retain closed request/response/shared types,
 exact prerequisite manifest, canonical configuration/proof/state/ID and cursor
 schemas, command capability declarations kept source-only until activation, and
 computed fixtures. Do not advertise placeholders as implemented or publish broad
@@ -685,9 +685,9 @@ Minimum computed oracles pair this file's wire receipts with storage Section 8:
    updates, owner-creation/presentation/work-stage rollback with unchanged old
    owner-less schedule-create behavior.
 
-This draft and its source-only corpus close proposed representations, not runtime
+This accepted contract and its source-only corpus define representations, not runtime
 behavior. Offline examples do not satisfy the actual transaction/concurrency/
-migration/attempt-start proof families above. They are not ratification, an
-external machine-contract review, a runtime test result, an implementation plan
-or permission to build/deploy. Review the corpus, then ratify and select its
-implementation plan separately.
+migration/attempt-start proof families above. Ratification is the operator's
+acceptance of this design; it is not a runtime test result, implemented-version
+declaration or permission to deploy. The separately selected implementation plan
+allocates these obligations; runtime execution still requires its own authorization.

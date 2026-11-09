@@ -198,7 +198,9 @@ class RecurringRelatedTaskContractTests(unittest.TestCase):
     def test_source_only_boundary_and_exact_existing_prerequisites(self):
         self.assertFalse(self.descriptor["runtime_implemented"])
         self.assertFalse(self.manifest["runtime_verified"])
-        self.assertEqual(self.descriptor["status"], "draft_machine_contract")
+        self.assertEqual(self.descriptor["status"], "ratified_machine_contract")
+        self.assertEqual(self.manifest["status"], "ratified_source_only")
+        self.assertEqual(read("contracts/recurring-related-task-schema-closure.v1.json")["status"], "ratified_source_only")
         self.assertEqual(self.descriptor["exposure"], "trusted_local_only")
         self.assertIsNone(self.descriptor["ledger_schema_version"])
         proposed = self.descriptor["proposed_contract_versions"]

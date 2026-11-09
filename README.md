@@ -416,13 +416,15 @@ frontend reviews SPINE-001–003 were withdrawn.
 
 Still deliberately separate or in design:
 
-- [recurring-source related tasks](specs/recurring-related-tasks.md): draft rules
+- [recurring-source related tasks](specs/recurring-related-tasks.md): ratified rules
   generating one ordinary task per event occurrence, with explicit temporal
   following, cancellation reconciliation and per-task reminders; detailed
   [storage/lineage](specs/recurring-related-task-storage.md) and
   [command](specs/recurring-related-task-commands.md) companions passed scoped
   technical review; the [machine companion](specs/recurring-related-task-machine-contract.md)
-  now supplies source-only schemas and computed fixtures awaiting review, not implementation;
+  supplies reviewed, ratified source-only schemas and computed fixtures. The
+  [four-slice implementation plan](docs/IMPLEMENTATION_PLAN.md#planned-delivery-recurring-source-related-tasks)
+  is prepared; runtime behavior is not implemented or advertised;
 - governed contextual LLM advisories and agent-generated enrichment;
 - opt-in [facet-aware notification rendering definitions](specs/notification-rendering-definitions.md)
   supplied as configuration by operators or packs; ratified design and initial machine

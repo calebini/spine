@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/evidence.schema.json",
-  "title": "Recurring task immutable evidence v1 (draft/source only)",
+  "title": "Recurring task immutable evidence v1 (ratified/source only)",
   "$comment": "Hash/equality, relational FKs, contiguous history, monotone veto and transaction proofs require offline semantic oracles and later runtime tests, not schema acceptance alone.",
   "$defs": {
     "lineageHop": {

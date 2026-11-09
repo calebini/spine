@@ -1,8 +1,10 @@
 # Spine Recurring-Source Related Tasks
 
-Status: Draft v0.1.0-draft.9 — specification only; not ratified or implemented
+Status: Accepted v1.0.0 — ratified design and machine-contract family; not implemented
 
 Created: 2026-11-07
+
+Ratified: 2026-11-09
 
 Scope: One ordinary task per selected occurrence of a recurring source event, with explicit temporal following, bounded generation and per-task reminders
 
@@ -46,18 +48,20 @@ D-05 is approved: retirement requires an explicit choice to keep existing tasks
 following, detach them or cancel outstanding open governed tasks. It always stops
 new generation and reinstatement successors. Section 8.2 defines the distinction.
 
-The selected product decisions in Section 14 are approved, but the full draft
-still requires contract closure and review. MUST and MUST NOT below express
-proposed contract requirements, not an implemented runtime
-claim. This draft does not reserve a ledger schema number, register a runtime
+The selected product decisions in Section 14 and the reviewed source contract
+family are ratified. MUST and MUST NOT below express accepted implementation
+requirements, not an implemented runtime claim. Ratification does not reserve a
+ledger schema number, register a runtime
 family or expose a command or HTTP route. The separate source-only
-[machine companion](recurring-related-task-machine-contract.md) now defines draft
+[machine companion](recurring-related-task-machine-contract.md) defines accepted
 schemas/computed fixtures without activating any of those runtime surfaces.
 
-The proposed detailed [storage, identity and lineage](recurring-related-task-storage.md)
+The detailed [storage, identity and lineage](recurring-related-task-storage.md)
 and [command contract](recurring-related-task-commands.md) companions now close
-the human-readable technical rules. They remain draft: review and machine-readable
-schemas/computed fixtures precede ratification and runtime implementation.
+the human-readable technical rules. These companions and the source-only schemas/
+computed corpus were ratified on 2026-11-09 after the bounded review chain. The
+implementation plan and pending runtime obligations govern delivery, not these
+acceptance labels alone.
 
 ## 2. Authority and preservation
 
@@ -76,7 +80,7 @@ coverage and series-scoped lifecycle reconciliation. It delegates:
 | [Command contract](agent-command-contract.md) | Validation, dry run, replay, audit and receipt conventions |
 | [Storage and atomicity](STORAGE_ATOMICITY_SPEC.md) | Ledger transactions, schema admission and migration discipline |
 | [Related-task storage](recurring-related-task-storage.md) | Physical records, source proof, identity bytes, constraints, indexes and migration |
-| [Related-task commands](recurring-related-task-commands.md) | Detailed draft requests/receipts, effects/errors, limits, clocks and continuation |
+| [Related-task commands](recurring-related-task-commands.md) | Detailed requests/receipts, effects/errors, limits, clocks and continuation |
 
 The new family MUST NOT silently broaden the implemented one-task binding v1
 contract. In particular, ordinary v1 `source_unresolved` remains decision-required;
@@ -85,7 +89,7 @@ No external executor, calendar, agent or transport becomes schedule authority.
 
 ## 3. Scope
 
-The proposed first family supports:
+The accepted first family specifies:
 
 - one existing recurring, scheduled event as each rule's source;
 - one named task template per rule, producing at most one current governed task
@@ -105,7 +109,7 @@ or date-only derivation, business/calendar-day offsets, arbitrary nesting of
 generation rules, adopting existing tasks by title, implicit assignment/routing,
 bulk mutation inside a source edit, and any new sending or enrichment mechanism.
 The initial surface is trusted-local. No web-registry expansion, authenticated
-admission design or access-control bypass is introduced by this draft.
+admission design or access-control bypass is introduced by this contract.
 
 ## 4. Model and invariants
 
@@ -353,7 +357,7 @@ the gap; do not interpret the budget failure as source removal.
 
 Every operation has explicit finite source-range, source-candidate, assignment,
 mutation and expansion-work limits. [Command Section 5](recurring-related-task-commands.md#5-one-page-reconciliation-budgets-and-execution-time)
-defines the proposed defaults/hard maxima and complete-unit failure semantics;
+defines the defaults/hard maxima and complete-unit failure semantics;
 a date range alone is not a work bound for a dense or old recurrence.
 
 An explicit reconcile command applies **one bounded page for one rule**. The page
@@ -680,7 +684,7 @@ old tasks or bypass the per-rule duplicate/adoption boundary in Section 11.
 
 ### 8.3 Individual restoration suppression after source cancellation
 
-Provide a supported trusted-local assignment-level suppression action, proposed
+Provide a supported trusted-local assignment-level suppression action, specified
 as `schedule.related_task_rule.assignment.suppress`. It records the operator intent
 "do not automatically restore this pickup assignment" without retiring the entire
 rule or mutating a terminal task. This makes the existing Section 8.1 suppression
@@ -792,10 +796,11 @@ and must enumerate actual committed child evidence.
 Writes carry exact contract selectors, `command_id`, actor, command-specific
 timestamp and relevant expected rule/source/recurrence/assignment version facts.
 Supported reads remain non-mutating and may never opportunistically generate tasks.
-The companions close proposed request/response fields, normalization, hash
+The companions define accepted request/response fields, normalization, hash
 preimages, validation order, closed error/effect sets, limits and cursor bytes.
-Before ratification/activation those rules still require reviewed machine schemas,
-computed fixtures and an exact installed runtime-family prerequisite manifest.
+Reviewed machine schemas and computed fixtures now accompany these rules.
+Activation still requires the exact installed runtime-family prerequisite manifest
+and the runtime verification allocated by the implementation plan.
 Names here do not change the implemented-command list or imply web support.
 
 A reconcile receipt separates at least:
@@ -895,8 +900,9 @@ scheduler execution cannot invent a privilege exemption for such a future surfac
 
 ## 13. Verification and machine-contract readiness
 
-The following are required fixture/test families, not fixtures delivered by this
-draft. They must publish normalized inputs, exact selectors/assignments and
+The following are required fixture/test families. The source-only machine corpus
+supplies offline witnesses, not the pending runtime tests. Tests must publish
+normalized inputs, exact selectors/assignments and
 expected receipts/work evidence, not merely final clock times.
 
 | Family | Required proof |
@@ -938,7 +944,7 @@ D-01 is also approved (2026-11-07): automatic linked-successor restoration after
 source-only cancellation, with the Section 8.1 eligibility checks and no user
 confirmation. Completed, manually cancelled, detached or explicitly suppressed
 assignments are not restored. This resolves the prior explicit-restoration
-recommendation; it does not ratify the complete draft.
+recommendation. The complete source family was subsequently ratified on 2026-11-09.
 
 D-02 is approved (2026-11-07): default to upcoming occurrences from enrollment,
 allow an explicit starting occurrence, and use a configurable eight-week rolling
@@ -965,10 +971,10 @@ under every disposition; terminal/manual exceptions and attempted history remain
 preserved. Section 8.2 defines bounded completion and freshness behavior.
 
 No selected product decision D-01–05 remains open. The technical companions close
-proposed storage, supported lineage proofs, command shapes, limits, reason/effect
-values and concurrency/clock rules. This does not ratify the draft or claim
-implementation readiness: bounded technical review, machine schemas and computed
-fixtures still precede the implementation plan and runtime work. Arbitrary changed
+accepted storage, supported lineage proofs, command shapes, limits, reason/effect
+values and concurrency/clock rules. Ratification accepts this reviewed design and
+its machine corpus; it does not claim implemented behavior. The implementation
+plan allocates the pending runtime proofs before activation. Arbitrary changed
 recurrence topology without one-to-one source proof remains explicitly unsupported,
 not a new heuristic identity policy or an unrecorded product decision.
 

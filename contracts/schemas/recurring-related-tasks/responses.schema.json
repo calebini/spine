@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/responses.schema.json",
-  "title": "Recurring-task responses v1 (draft/source only)",
+  "title": "Recurring-task responses v1 (ratified/source only)",
   "$comment": "Exactly one branch per command. No receipts on reads/failure, no durable evidence for fresh preview, no sent/delivered claim. Cross-object identity/ordering/disjointness requires semantic checks.",
   "$defs": {
     "intent": {

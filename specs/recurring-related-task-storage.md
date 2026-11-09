@@ -1,8 +1,8 @@
 # Recurring Related Tasks: Storage, Identity and Lineage
 
-Status: Draft v0.1.0-draft.2 — proposed physical contract; not ratified or implemented
+Status: Accepted v1.0.0 — ratified physical contract; not implemented
 
-Date: 2026-11-08
+Ratified: 2026-11-09
 
 ## 1. Authority and chosen layout
 
@@ -10,9 +10,9 @@ Date: 2026-11-08
 D-01–05. [Storage and atomicity](STORAGE_ATOMICITY_SPEC.md) owns Spine-wide
 transactions, migration and admission. This leaf owns only this family's physical
 records, identities, source-continuity proofs and access paths. The
-[command companion](recurring-related-task-commands.md) owns proposed wire shapes,
+[command companion](recurring-related-task-commands.md) owns wire shapes,
 limits, effects, clocks and pagination. No schema number or runtime registration
-is allocated by these drafts.
+is allocated by ratification of these source contracts.
 
 Use a **relational header/history layout with canonical JSON payloads**. Relational
 keys enforce reservations, generations, current pointers and source/target joins;
@@ -286,7 +286,7 @@ commit. An exact pre-authorized reusable disclosure may be applied only after
 checking the actual newly established child owner, item and destination inside
 that transaction. Rule configuration is not itself an item owner or disclosure
 grant. Failure leaves no task, owner, policy, work, audit or receipt residue.
-This proposed explicit-owner family is distinct from the existing owner-less
+This explicit-owner family is distinct from the existing owner-less
 trusted-local `schedule.create`; [rendering Section 3.3](notification-rendering-integration.md#33-fresh-trusted-local-creation-and-explicit-adoption)
 keeps that command's ordinary-only fresh-create rule unchanged.
 
@@ -624,6 +624,8 @@ Before implementation activation, publish computed fixture families for:
 - migration fingerprint/constraint failures, immutable historical decoding and
   `EXPLAIN QUERY PLAN` proving indexed root/target/selector/keyset paths.
 
-These are specified oracles, not executed tests or delivered machine fixtures.
-DDL and fixture implementation must mechanically verify this leaf's names,
+The [machine companion](recurring-related-task-machine-contract.md) and retained
+corpus supply the offline representations and finite witnesses. Actual database,
+transaction, concurrency, migration and attempt-start oracles remain unexecuted
+runtime obligations. DDL and runtime tests must mechanically verify this leaf's names,
 constraints and extracted canonical bytes before advertising the family.
