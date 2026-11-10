@@ -882,10 +882,42 @@ plan/apply digests, exact row-ID reuse, offline schema closure and non-activatio
 Focused Ruff, frozen web-copy synchronization, new local links and diff hygiene
 pass. No runtime code or ledger was changed; SQL/race/migration obligations remain
 explicitly pending, not satisfied by those offline tests.
+**Checkpoint/review staging (2026-11-10):** Bootstrap design and candidate machine
+package committed as `46f444c` (52 files; no push). The unrelated `AGENTS.md` edit
+was excluded. The [bounded machine consistency review](../whetstone_runs/local-ownership-bootstrap-machine-audit-001/audit-notes.md)
+completed after exact-payload operator approval on 2026-11-10: 60 exact inputs
+(59 complete source files plus one
+source-hashed named command-contract context), notes and built-in context;
+GPT-6.1 Sol/medium through stable `6e19fe3`. All 15 schema documents in the exact
+closure and all 28 fixture files are included. Prepared hashes and a verify-only
+launcher bind the source checkpoint, excerpts, notes, full prompt, adapter and
+CLI. Pre/postlaunch verification passed; nested CLI process confirmed the requested
+GPT-6.1 Sol/medium and read-only/no-web configuration. The persisted
+[report](../whetstone_runs/local-ownership-bootstrap-machine-audit-001/change_audit/change_audit_report.md)
+is **pass_with_minor_clarification**, boundary preserved, zero blockers/majors,
+two minors. F001 asks to align or explicitly document SQL-versus-projection ID
+validation and add a configured control-character negative witness. F002 corrects
+Section 11's attribution: pending LOB-01–08 live in the descriptor, not the fixture
+manifest. Neither is patched by this assessment. Machine ratification and actual
+runtime proof remain pending; this is not convergence.
+**Authorized minor follow-up (2026-11-10):** F001/F002 are now patched locally,
+not externally re-reviewed. The candidate ID schema adds strict end-of-string
+checking without modifying frozen v1/v2 definitions. Prose and the migration
+blueprint explicitly require full identifier validation before copy, mutation and
+projection; SQL CHECKs are intentionally only the storage/length/posture layer.
+Three negative configured-state fixtures and a regression matrix cover all 33
+control characters at each position in ledger/realm IDs, including final newline.
+Section 11 now links pending LOB-01–08 to the descriptor's `runtime_obligations`,
+with the fixture manifest retained as the offline witness index.
+**Verification:** New regressions failed against the prior candidate, then all
+49 selected contract tests passed with the patch (10 bootstrap tests; 31 fixture
+files). Focused Ruff, frozen web-copy synchronization, local links and diff
+hygiene pass. No runtime, DDL execution, migration, new review, commit or push;
+the existing audit report remains evidence for its original exact payload.
 R2 is **not complete**; selected passing tests do not close an
 entire RRT obligation or authorize R3/R4.
 **Next:** Operator authorized the remaining R2 implementation on 2026-11-10.
-Review the new bootstrap machine/migration package before its implementation,
+Complete the candidate machine-contract acceptance/checkpoint before implementation,
 then continue the manual reconciliation/lifecycle engine against these tested
 foundations. Preserve immutable history and the R4-only public activation boundary.
 

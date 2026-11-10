@@ -3,7 +3,14 @@
   "$id": "https://cortext.local/spine/contracts/schemas/local-ownership-bootstrap/types.schema.json",
   "$defs": {
     "id": {
-      "$ref": "../trusted-web-types.schema.json#/$defs/id"
+      "allOf": [
+        {
+          "$ref": "../trusted-web-types.schema.json#/$defs/id"
+        },
+        {
+          "pattern": "^[^\\u0000-\\u001f\\u007f]+(?![\\s\\S])"
+        }
+      ]
     },
     "positive": {
       "type": "string",

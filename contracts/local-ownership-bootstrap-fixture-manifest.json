@@ -35,6 +35,24 @@
       "valid": false
     },
     {
+      "fixture_id": "invalid_state_configured_ledger_control",
+      "fixture": "tests/fixtures/local_ownership_bootstrap/invalid_state_configured_ledger_control.json",
+      "schema": "contracts/schemas/local-ownership-bootstrap/state.schema.json",
+      "valid": false
+    },
+    {
+      "fixture_id": "invalid_state_configured_realm_control",
+      "fixture": "tests/fixtures/local_ownership_bootstrap/invalid_state_configured_realm_control.json",
+      "schema": "contracts/schemas/local-ownership-bootstrap/state.schema.json",
+      "valid": false
+    },
+    {
+      "fixture_id": "invalid_state_configured_trailing_newline",
+      "fixture": "tests/fixtures/local_ownership_bootstrap/invalid_state_configured_trailing_newline.json",
+      "schema": "contracts/schemas/local-ownership-bootstrap/state.schema.json",
+      "valid": false
+    },
+    {
       "fixture_id": "invalid_state_overflow",
       "fixture": "tests/fixtures/local_ownership_bootstrap/invalid_state_overflow.json",
       "schema": "contracts/schemas/local-ownership-bootstrap/state.schema.json",

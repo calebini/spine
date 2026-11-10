@@ -21,6 +21,24 @@
     "access_epoch",
     "recovery_epoch"
   ],
+  "identifier_validation": {
+    "identifier_schema": "contracts/schemas/local-ownership-bootstrap/types.schema.json#/$defs/id",
+    "configured_identifier_fields": [
+      "ledger_id",
+      "realm_id"
+    ],
+    "forbidden_code_points": [
+      "U+0000..U+001F",
+      "U+007F"
+    ],
+    "sql_constraint_boundary": "The DDL enforces storage class, length and posture, not the complete identifier character domain. Passing SQL CHECKs is not sufficient validation.",
+    "required_at": [
+      "migration_before_copy",
+      "writer_before_mutation",
+      "decoder_before_projection"
+    ],
+    "on_invalid": "Fail closed using the owning boundary's existing failure mapping. Abort migration before copying invalid identifiers; never trim, normalize, repair or project them. Preserve valid configured identifiers byte-for-byte."
+  },
   "preserve_fk_targets": [
     {
       "table": "account_subject_bindings",

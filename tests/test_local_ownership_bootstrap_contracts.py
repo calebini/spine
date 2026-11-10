@@ -172,6 +172,44 @@ class LocalOwnershipBootstrapContractTests(unittest.TestCase):
         altered["normalized_plan"]["realm_id"] = "different-realm"
         self.assertNotEqual(hashlib.sha256(canonical_oracle(altered)).hexdigest(), digest)
 
+    def test_configured_identifiers_reject_controls_at_every_position(self):
+        state_validator = self.validator(SCHEMAS + "state.schema.json")
+        plan_validator = self.validator(SCHEMAS + "provisioning-plan-request.v3.schema.json")
+        state = read(FIXTURES + "state_configured.json")
+        plan = read(FIXTURES + "request_plan_configured.json")
+        for codepoint in (*range(32), 127):
+            control = chr(codepoint)
+            for field in ("ledger_id", "realm_id"):
+                for value in (control + "identifier", "left" + control + "right", "identifier" + control):
+                    with self.subTest(codepoint=codepoint, field=field, value=repr(value)):
+                        candidate = copy.deepcopy(state)
+                        candidate["state"][field] = value
+                        self.assertFalse(state_validator.is_valid(candidate))
+                        candidate = copy.deepcopy(plan)
+                        candidate[field] = value
+                        self.assertFalse(plan_validator.is_valid(candidate))
+        for value in ("configured-ledger", "realm-é", r"literal\n", "x" * 256):
+            candidate = copy.deepcopy(state)
+            candidate["state"]["realm_id"] = value
+            self.assertTrue(state_validator.is_valid(candidate), value)
+
+    def test_identifier_validation_and_runtime_obligation_authorities(self):
+        migration = read(self.descriptor["migration_contract"])
+        validation = migration["identifier_validation"]
+        self.assertEqual(validation["identifier_schema"], SCHEMAS + "types.schema.json#/$defs/id")
+        self.assertEqual(validation["configured_identifier_fields"], ["ledger_id", "realm_id"])
+        self.assertEqual(validation["required_at"],
+                         ["migration_before_copy", "writer_before_mutation", "decoder_before_projection"])
+        self.assertEqual(validation["forbidden_code_points"], ["U+0000..U+001F", "U+007F"])
+        spec = (ROOT / self.descriptor["specification"]).read_text()
+        section = spec.split("## 11. Verification and implementation gates\n", 1)[1]
+        self.assertIn("[capability descriptor](../contracts/local-ownership-bootstrap.v1.json)", section)
+        self.assertIn("`runtime_obligations`", section)
+        self.assertNotIn("fixture manifest enumerates pending", section)
+        self.assertEqual(self.manifest["descriptor"], "contracts/local-ownership-bootstrap.v1.json")
+        self.assertEqual([o["id"] for o in self.descriptor["runtime_obligations"]],
+                         [f"LOB-{n:02}" for n in range(1, 9)])
+
     def test_existing_row_id_derivation_and_replay_projection(self):
         request = read(FIXTURES + "request_apply_local.json")
         response = read(FIXTURES + "response_apply_local.json")

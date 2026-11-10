@@ -215,6 +215,18 @@ Existing configured logical ledger IDs are preserved; only a new local row must
 equal the valid existing physical instance ID. Canonical JSON is
 `spine.canonical-json.v1`, without Unicode normalization or omitted nulls.
 
+Configured `ledger_id` and `realm_id` retain the inherited nonempty, at-most-256
+character ID domain, excluding U+0000–U+001F and U+007F at **every** position,
+including the final character. The new source-only ID schema adds a strict
+end-of-string guard; frozen v1/v2 schemas and preimages are unchanged. The SQL
+blueprint intentionally enforces storage class, length and posture, not the full
+character domain. Every successor writer must validate identifiers before mutation,
+the migration must validate existing identifiers before copying them, and the
+state decoder must validate before projecting or using a row for admission.
+Passing SQL CHECKs alone is insufficient. Invalid stored values fail closed under
+Section 10; migration aborts without copying them. Do not trim, normalize, repair
+or expose them. Valid existing configured identifiers remain byte-for-byte intact.
+
 Only an owner-creating trusted-local transaction may call the internal primitive.
 Validate actor, explicit owner references and command semantics using the owning
 command's precedence, resolve compatible replay, then validate identity/state and
@@ -359,12 +371,16 @@ not data rollback, and no automatic down-migration is defined.
 ## 11. Verification and implementation gates
 
 Offline witnesses prove only representation, finite epoch arithmetic, normalization,
-preimages and expected branch selection. The fixture manifest enumerates pending
-actual SQL obligations: both posture migrations with real account bindings,
+preimages and expected branch selection. The
+[capability descriptor](../contracts/local-ownership-bootstrap.v1.json) enumerates
+pending actual SQL obligations in `runtime_obligations` (`LOB-01`–`LOB-08`):
+both posture migrations with real account bindings,
 fault-injected rebuild/outer/savepoint rollback, configured preservation, explicit
 promotion and no-lockout, replay and no-op, old-writer refusal, bounded routine SQL,
 and physical two-connection first-owner/provisioning races. Each needs real
 implementation evidence; the wire corpus cannot close them.
+The [fixture manifest](../contracts/local-ownership-bootstrap-fixture-manifest.json)
+indexes the offline witnesses, not completion of those runtime obligations.
 
 Before activation publish packaged state/provisioning schemas and matching compiled
 contract requirements, coherent DDL/object fingerprints, actual runtime tests and
