@@ -1,0 +1,145 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cortext.local/spine/contracts/schemas/local-ownership-bootstrap/provisioning-plan-response.v3.schema.json",
+  "type": "object",
+  "properties": {
+    "contract_version": {
+      "const": "spine.trusted-web-provisioning.v3"
+    },
+    "ok": {
+      "const": true
+    },
+    "command": {
+      "const": "web_access.plan"
+    },
+    "normalized_plan": {
+      "$ref": "#/$defs/normalizedPlan"
+    },
+    "access_state_before": {
+      "$ref": "types.schema.json#/$defs/state"
+    },
+    "references": {
+      "$ref": "../trusted-web-provisioning-plan-response.v2.schema.json#/properties/references"
+    },
+    "plan_hash": {
+      "$ref": "../trusted-web-provisioning-plan-response.v2.schema.json#/properties/plan_hash"
+    },
+    "can_apply": {
+      "$ref": "../trusted-web-provisioning-plan-response.v2.schema.json#/properties/can_apply"
+    },
+    "warnings": {
+      "$ref": "../trusted-web-provisioning-plan-response.v2.schema.json#/properties/warnings"
+    },
+    "conflicts": {
+      "type": "array",
+      "maxItems": 100,
+      "items": {
+        "oneOf": [
+          {
+            "$ref": "../trusted-web-provisioning-plan-response.v2.schema.json#/properties/conflicts/items"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "const": "eligible_operator_required"
+              },
+              "operation_path": {
+                "const": "/operators"
+              }
+            },
+            "required": [
+              "code",
+              "operation_path"
+            ],
+            "additionalProperties": false
+          }
+        ]
+      }
+    }
+  },
+  "required": [
+    "contract_version",
+    "ok",
+    "command",
+    "normalized_plan",
+    "access_state_before",
+    "references",
+    "plan_hash",
+    "can_apply",
+    "warnings",
+    "conflicts"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "normalizedPlan": {
+      "type": "object",
+      "properties": {
+        "contract_version": {
+          "const": "spine.trusted-web-provisioning.v3"
+        },
+        "ledger_id": {
+          "$ref": "types.schema.json#/$defs/id"
+        },
+        "realm_id": {
+          "$ref": "types.schema.json#/$defs/id"
+        },
+        "expected_access_epoch": {
+          "$ref": "types.schema.json#/$defs/decimal"
+        },
+        "operators": {
+          "$ref": "../trusted-web-provisioning-plan-request.v2.schema.json#/properties/operators"
+        },
+        "memberships": {
+          "$ref": "../trusted-web-provisioning-plan-request.v2.schema.json#/properties/memberships"
+        },
+        "item_adoptions": {
+          "$ref": "../trusted-web-provisioning-plan-request.v2.schema.json#/properties/item_adoptions"
+        },
+        "grants": {
+          "$ref": "../trusted-web-provisioning-plan-request.v2.schema.json#/properties/grants"
+        },
+        "route_approvals": {
+          "$ref": "../trusted-web-provisioning-plan-request.v2.schema.json#/properties/route_approvals"
+        }
+      },
+      "required": [
+        "contract_version",
+        "ledger_id",
+        "realm_id",
+        "expected_access_epoch",
+        "operators",
+        "memberships",
+        "item_adoptions",
+        "grants",
+        "route_approvals"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "can_apply": {
+            "const": true
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "conflicts": {
+            "maxItems": 0
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "conflicts": {
+            "minItems": 1
+          }
+        }
+      }
+    }
+  ]
+}

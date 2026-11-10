@@ -454,6 +454,10 @@ is unchanged. `item_subject_roles.owner` and notification recipients are not acc
 - `ledger_access_state` binds one stable ledger/realm to `multi_user` /
   `trusted_identity`, canonical access epoch, and recovery epoch. No request selects
   these facts. Bootstrap is explicit; migration does not provision an operator.
+  The accepted [local ownership amendment](local-ownership-bootstrap.md) defines a
+  second, realm-absent storage posture for actual trusted-local owner mutations,
+  not another account/owner model. Its candidate machine package and migration
+  remain unimplemented; the existing schema-19 subset above stays the runtime truth.
 - `login_accounts`, `account_subject_bindings`, and `web_operators` separate an active
   account, its one active subject binding per ledger, and chooser eligibility. Unique
   active binding indexes prevent two accounts binding the same subject in one ledger.

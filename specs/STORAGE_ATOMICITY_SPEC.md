@@ -30,6 +30,11 @@ indexes and migration requirements. [Recurring related tasks](recurring-related-
 retains lifecycle/generation authority. This is delegation only: no runtime family,
 schema number or migration is activated by adding the leaf.
 
+The accepted [trusted-local ownership bootstrap leaf](local-ownership-bootstrap.md)
+owns the existing access-state table's proposed local posture, single epoch/rollback
+primitive and explicit promotion seam. Its source-only migration contract does not
+activate DDL, change this document's transaction authority or allocate a schema.
+
 ## 2. Shared persistence boundary
 
 - One canonical SQLite ledger owns coordination truth. Derived indexes and external

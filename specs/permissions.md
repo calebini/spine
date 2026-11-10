@@ -80,11 +80,12 @@ child's owner through a template edit. System catalog ownership is not legal
 item ownership. This proposal does not activate the family, alter existing
 trusted-local authoring commands or adopt legacy/unrelated tasks automatically.
 
-The operator-selected [trusted-local ownership bootstrap draft](local-ownership-bootstrap.md)
+The ratified [trusted-local ownership bootstrap](local-ownership-bootstrap.md)
 separates initialization of the existing ownership access epoch from web realm/
-account provisioning. It proposes one closed local posture in the existing state
-table, not another owner/epoch model or broader web authority. It is not yet
-ratified or implemented and does not change the current wire/storage contracts.
+account provisioning. It defines one closed local posture in the existing state
+table, not another owner/epoch model or broader web authority. The design is
+accepted; its source-only machine/migration package awaits review and implementation.
+Existing released wire/storage contracts remain unchanged until activation.
 
 Catalogs, bindings, and delivery targets reuse their existing canonical owner facts;
 do not duplicate those owners in a competing registry. System-owned catalogs require

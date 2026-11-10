@@ -1,0 +1,201 @@
+{
+  "contract_version": "spine.local-ownership-bootstrap-fixtures.v1",
+  "status": "candidate_source_only",
+  "runtime_verified": false,
+  "descriptor": "contracts/local-ownership-bootstrap.v1.json",
+  "fixtures": [
+    {
+      "fixture_id": "preimage_apply_local",
+      "fixture": "tests/fixtures/local_ownership_bootstrap/preimage_apply_local.json",
+      "schema": "contracts/schemas/local-ownership-bootstrap/apply-preimage.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "invalid_apply_effect",
+      "fixture": "tests/fixtures/local_ownership_bootstrap/invalid_apply_effect.json",
+      "schema": "contracts/schemas/local-ownership-bootstrap/provisioning-apply-response.v3.schema.json",
+      "valid": false
+    },
+    {
+      "fixture_id": "invalid_plan_caller_mode",
+      "fixture": "tests/fixtures/local_ownership_bootstrap/invalid_plan_caller_mode.json",
+      "schema": "contracts/schemas/local-ownership-bootstrap/provisioning-plan-request.v3.schema.json",
+      "valid": false
+    },
+    {
+      "fixture_id": "invalid_plan_missing_realm",
+      "fixture": "tests/fixtures/local_ownership_bootstrap/invalid_plan_missing_realm.json",
+      "schema": "contracts/schemas/local-ownership-bootstrap/provisioning-plan-request.v3.schema.json",
+      "valid": false
+    },
+    {
+      "fixture_id": "invalid_state_numeric_epoch",
+      "fixture": "tests/fixtures/local_ownership_bootstrap/invalid_state_numeric_epoch.json",
+      "schema": "contracts/schemas/local-ownership-bootstrap/state.schema.json",
+      "valid": false
+    },
+    {
+      "fixture_id": "invalid_state_overflow",
+      "fixture": "tests/fixtures/local_ownership_bootstrap/invalid_state_overflow.json",
+      "schema": "contracts/schemas/local-ownership-bootstrap/state.schema.json",
+      "valid": false
+    },
+    {
+      "fixture_id": "invalid_state_partial_web",
+      "fixture": "tests/fixtures/local_ownership_bootstrap/invalid_state_partial_web.json",
+      "schema": "contracts/schemas/local-ownership-bootstrap/state.schema.json",
+      "valid": false
+    },
+    {
+      "fixture_id": "invalid_state_realm_sentinel",
+      "fixture": "tests/fixtures/local_ownership_bootstrap/invalid_state_realm_sentinel.json",
+      "schema": "contracts/schemas/local-ownership-bootstrap/state.schema.json",
+      "valid": false
+    },
+    {
+      "fixture_id": "invalid_state_unknown_field",
+      "fixture": "tests/fixtures/local_ownership_bootstrap/invalid_state_unknown_field.json",
+      "schema": "contracts/schemas/local-ownership-bootstrap/state.schema.json",
+      "valid": false
+    },
+    {
+      "fixture_id": "invalid_state_zero_epoch",
+      "fixture": "tests/fixtures/local_ownership_bootstrap/invalid_state_zero_epoch.json",
+      "schema": "contracts/schemas/local-ownership-bootstrap/state.schema.json",
+      "valid": false
+    },
+    {
+      "fixture_id": "preimage_plan_absent",
+      "fixture": "tests/fixtures/local_ownership_bootstrap/preimage_plan_absent.json",
+      "schema": "contracts/schemas/local-ownership-bootstrap/plan-preimage.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "preimage_plan_configured",
+      "fixture": "tests/fixtures/local_ownership_bootstrap/preimage_plan_configured.json",
+      "schema": "contracts/schemas/local-ownership-bootstrap/plan-preimage.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "preimage_plan_local",
+      "fixture": "tests/fixtures/local_ownership_bootstrap/preimage_plan_local.json",
+      "schema": "contracts/schemas/local-ownership-bootstrap/plan-preimage.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "request_apply_local",
+      "fixture": "tests/fixtures/local_ownership_bootstrap/request_apply_local.json",
+      "schema": "contracts/schemas/local-ownership-bootstrap/provisioning-apply-request.v3.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "request_plan_absent",
+      "fixture": "tests/fixtures/local_ownership_bootstrap/request_plan_absent.json",
+      "schema": "contracts/schemas/local-ownership-bootstrap/provisioning-plan-request.v3.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "request_plan_configured",
+      "fixture": "tests/fixtures/local_ownership_bootstrap/request_plan_configured.json",
+      "schema": "contracts/schemas/local-ownership-bootstrap/provisioning-plan-request.v3.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "request_plan_local",
+      "fixture": "tests/fixtures/local_ownership_bootstrap/request_plan_local.json",
+      "schema": "contracts/schemas/local-ownership-bootstrap/provisioning-plan-request.v3.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "response_apply_local",
+      "fixture": "tests/fixtures/local_ownership_bootstrap/response_apply_local.json",
+      "schema": "contracts/schemas/local-ownership-bootstrap/provisioning-apply-response.v3.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "response_apply_replay",
+      "fixture": "tests/fixtures/local_ownership_bootstrap/response_apply_replay.json",
+      "schema": "contracts/schemas/local-ownership-bootstrap/provisioning-apply-response.v3.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "response_plan_absent",
+      "fixture": "tests/fixtures/local_ownership_bootstrap/response_plan_absent.json",
+      "schema": "contracts/schemas/local-ownership-bootstrap/provisioning-plan-response.v3.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "response_plan_configured",
+      "fixture": "tests/fixtures/local_ownership_bootstrap/response_plan_configured.json",
+      "schema": "contracts/schemas/local-ownership-bootstrap/provisioning-plan-response.v3.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "response_plan_local",
+      "fixture": "tests/fixtures/local_ownership_bootstrap/response_plan_local.json",
+      "schema": "contracts/schemas/local-ownership-bootstrap/provisioning-plan-response.v3.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "response_plan_no_operator",
+      "fixture": "tests/fixtures/local_ownership_bootstrap/response_plan_no_operator.json",
+      "schema": "contracts/schemas/local-ownership-bootstrap/provisioning-plan-response.v3.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "response_web_local_refused",
+      "fixture": "tests/fixtures/local_ownership_bootstrap/response_web_local_refused.json",
+      "schema": "contracts/schemas/trusted-web-error.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "state_absent",
+      "fixture": "tests/fixtures/local_ownership_bootstrap/state_absent.json",
+      "schema": "contracts/schemas/local-ownership-bootstrap/state.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "state_configured",
+      "fixture": "tests/fixtures/local_ownership_bootstrap/state_configured.json",
+      "schema": "contracts/schemas/local-ownership-bootstrap/state.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "state_local",
+      "fixture": "tests/fixtures/local_ownership_bootstrap/state_local.json",
+      "schema": "contracts/schemas/local-ownership-bootstrap/state.schema.json",
+      "valid": true
+    },
+    {
+      "fixture_id": "transition_vectors",
+      "fixture": "tests/fixtures/local_ownership_bootstrap/transition_vectors.json",
+      "schema": "contracts/schemas/local-ownership-bootstrap/transition-vectors.schema.json",
+      "valid": true
+    }
+  ],
+  "computed_apply_digests": [
+    {
+      "fixture": "tests/fixtures/local_ownership_bootstrap/preimage_apply_local.json",
+      "sha256": "91364104b8c23059c06bfe8a91d4c73a0140199e6bd616bc9ae7fe4accecb323"
+    }
+  ],
+  "computed_plan_digests": [
+    {
+      "fixture": "tests/fixtures/local_ownership_bootstrap/preimage_plan_absent.json",
+      "sha256": "90b4ef44d8802c0591c83465b7bd635fad21dd5304430ebc2f2040fb43e76584"
+    },
+    {
+      "fixture": "tests/fixtures/local_ownership_bootstrap/preimage_plan_local.json",
+      "sha256": "0ebf489076eec007527a67fdbf7fb230d178c495499a2bd2c38b911225c3679f"
+    },
+    {
+      "fixture": "tests/fixtures/local_ownership_bootstrap/preimage_plan_configured.json",
+      "sha256": "f89785be9ee56e35df7e0676473bf54fcbfcc948f5e66c2f94b9270c2cac1c59"
+    }
+  ],
+  "limitations": [
+    "Reference state hashes are synthetic declared facts; no SQL reference lookup was performed.",
+    "Transition vectors are finite offline witnesses, not storage/locking/migration implementation evidence.",
+    "v3 wire schemas are source-only candidates; v1/v2 and runtime declarations remain unchanged."
+  ]
+}

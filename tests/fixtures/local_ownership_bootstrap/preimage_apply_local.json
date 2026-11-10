@@ -1,0 +1,26 @@
+{
+  "contract_version": "spine.trusted-web-provisioning.v3",
+  "actor_subject_id": "operator-subject",
+  "action_timestamp_utc": "2026-11-10T12:00:00Z",
+  "expected_access_epoch": "1",
+  "normalized_plan": {
+    "contract_version": "spine.trusted-web-provisioning.v3",
+    "ledger_id": "ledger_instance_1111111111111111111111111111111111111111111111111111111111111111",
+    "realm_id": "explicit-realm",
+    "expected_access_epoch": "1",
+    "operators": [
+      {
+        "operation": "create",
+        "subject_id": "operator-subject",
+        "display_name": "Operator",
+        "activation_basis": "trusted_local_approval"
+      }
+    ],
+    "memberships": [],
+    "item_adoptions": [],
+    "grants": [],
+    "route_approvals": []
+  },
+  "plan_hash": "0ebf489076eec007527a67fdbf7fb230d178c495499a2bd2c38b911225c3679f",
+  "realm_id": "explicit-realm"
+}

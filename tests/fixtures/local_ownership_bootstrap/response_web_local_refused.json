@@ -1,0 +1,10 @@
+{
+  "contract_version": "spine.trusted-web-api.v1",
+  "ok": false,
+  "error": {
+    "code": "admission_unavailable",
+    "message": "admission unavailable"
+  },
+  "correlation_id": "example-correlation",
+  "selection_id": null
+}

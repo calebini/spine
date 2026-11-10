@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cortext.local/spine/contracts/schemas/local-ownership-bootstrap/transition-vectors.schema.json",
+  "type": "object",
+  "properties": {
+    "contract_version": {
+      "const": "spine.ownership-bootstrap-transition-vectors.v1"
+    },
+    "vectors": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "properties": {
+          "case_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "before": {
+            "$ref": "types.schema.json#/$defs/state"
+          },
+          "events": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "owner",
+                "savepoint",
+                "rollback_to_savepoint",
+                "release_savepoint",
+                "read",
+                "replay",
+                "no_op",
+                "outer_rollback"
+              ]
+            }
+          },
+          "dry_run": {
+            "type": "boolean"
+          },
+          "expected": {
+            "$ref": "types.schema.json#/$defs/state"
+          },
+          "error": {
+            "enum": [
+              null,
+              "epoch_overflow"
+            ]
+          }
+        },
+        "required": [
+          "case_id",
+          "before",
+          "events",
+          "dry_run",
+          "expected",
+          "error"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "contract_version",
+    "vectors"
+  ],
+  "additionalProperties": false
+}

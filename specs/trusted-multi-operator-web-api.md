@@ -102,6 +102,13 @@ API must not relabel old command receipts as account-authenticated.
 
 ## 4. Bounded Local Provisioning and Adoption
 
+The accepted [local ownership amendment](local-ownership-bootstrap.md#9-explicit-provisioning-successor-and-unchanged-admission)
+defines a source-only `spine.trusted-web-provisioning.v3` successor for explicit
+realm-absent to configured promotion. Its candidate schemas retain v2 operation
+definitions, add an explicit realm and bind the exact before-state into the plan
+hash. V1/v2 shapes/normalization stay frozen and cannot promote local state. No v3
+handler, schema migration or HTTP registry entry is activated by that definition.
+
 Provisioning is a trusted-local operation, not a web route. The proposed local command
 family is `web_access.plan` / `web_access.apply`, under
 `spine.trusted-web-provisioning.v1`; these names are not implemented today. Reuse the

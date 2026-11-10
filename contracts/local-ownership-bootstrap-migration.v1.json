@@ -1,0 +1,80 @@
+{
+  "contract_version": "spine.ownership-bootstrap-migration.v1",
+  "status": "candidate_source_only",
+  "runtime_verified": false,
+  "source_schema": "19",
+  "target_schema": null,
+  "activation": "Select one coherent unpublished boundary; folding into unactivated candidate 20 requires explicit disposable candidate recreation.",
+  "changed_objects": [
+    {
+      "object_type": "table",
+      "name": "ledger_access_state",
+      "target_definition_sql": "CREATE TABLE ledger_access_state (\n  singleton_id INTEGER PRIMARY KEY CHECK (singleton_id = 1),\n  ledger_id TEXT NOT NULL UNIQUE CHECK (typeof(ledger_id) = 'text' AND length(ledger_id) BETWEEN 1 AND 256),\n  realm_id TEXT,\n  mode TEXT NOT NULL,\n  identity_mode TEXT,\n  access_epoch INTEGER NOT NULL CHECK (typeof(access_epoch) = 'integer' AND access_epoch BETWEEN 1 AND 9223372036854775807),\n  recovery_epoch INTEGER NOT NULL CHECK (typeof(recovery_epoch) = 'integer' AND recovery_epoch BETWEEN 1 AND 9223372036854775807),\n  CHECK (\n    (mode = 'trusted_local' AND realm_id IS NULL AND identity_mode IS NULL AND\n     length(ledger_id) = 80 AND substr(ledger_id,1,16) = 'ledger_instance_' AND\n     substr(ledger_id,17) NOT GLOB '*[^0-9a-f]*')\n    OR\n    (mode = 'multi_user' AND typeof(realm_id) = 'text' AND length(realm_id) BETWEEN 1 AND 256 AND\n     typeof(identity_mode) = 'text' AND identity_mode = 'trusted_identity')\n  )\n)"
+    }
+  ],
+  "column_order": [
+    "singleton_id",
+    "ledger_id",
+    "realm_id",
+    "mode",
+    "identity_mode",
+    "access_epoch",
+    "recovery_epoch"
+  ],
+  "preserve_fk_targets": [
+    {
+      "table": "account_subject_bindings",
+      "column": "ledger_id",
+      "references_table": "ledger_access_state",
+      "references_column": "ledger_id"
+    }
+  ],
+  "preserve_explicit_indexes": [
+    "account_subject_bindings_active_account",
+    "account_subject_bindings_active_subject"
+  ],
+  "temporarily_drop_and_recreate_verbatim_triggers": [
+    "web_group_status_changed",
+    "web_route_security_changed",
+    "web_subject_status_changed"
+  ],
+  "preserve_rows": [
+    "login_accounts",
+    "account_subject_bindings",
+    "web_operators",
+    "adopted_access_groups",
+    "subject_memberships",
+    "subject_membership_revisions",
+    "item_access_owners",
+    "item_access_owner_revisions",
+    "access_grants",
+    "access_grant_revisions",
+    "access_grant_operations",
+    "route_member_use_approvals",
+    "route_member_use_approval_revisions",
+    "access_audit_log",
+    "command_receipts"
+  ],
+  "temporary_table": "ledger_access_state_bootstrap_new",
+  "procedure": [
+    "Validate predecessor object manifest and instance identity; quiesce writers; reject pre-existing temporary-name collisions.",
+    "Outside any transaction, disable foreign keys only on the migration connection; BEGIN IMMEDIATE.",
+    "Create the temporary table with the exact successor definition using its temporary name; validate and copy seven columns by explicit name; leave absent state absent.",
+    "Drop the three validated manifest-owned referencing triggers temporarily. Drop the predecessor parent without renaming it; rename the temporary table to ledger_access_state; recreate those triggers verbatim. Preserve canonical child FK targets; reject unsupported extra dependent objects rather than rewriting them.",
+    "Validate successor object fingerprints, row preservation, no temporary artifacts, explicit full foreign_key_check, instance identity and deep invariants before committing migration history.",
+    "On any failure rollback; always restore foreign_keys=ON before exposing a usable connection."
+  ],
+  "routine_sql": [
+    "SELECT * FROM ledger_access_state WHERE singleton_id=1",
+    "SELECT singleton,identity_contract,ledger_instance_id,origin FROM ledger_instance_metadata WHERE singleton=1"
+  ],
+  "routine_forbidden": [
+    "PRAGMA integrity_check",
+    "PRAGMA foreign_key_check",
+    "PRAGMA quick_check",
+    "owner/history scans",
+    "read-time repair"
+  ],
+  "rollback": "Pre-commit failure restores predecessor schema/data. After activation only an explicitly approved consistent backup restore permits rollback; no automatic down migration.",
+  "schema_object_manifest": "Fresh initialization and migration must produce byte-identical sqlite_schema.sql, including SQLite rename quoting, hashed as exact UTF-8 bytes. Publish matching DDL fingerprints at implementation/activation; existing schema-19 and migration-13 artifacts remain unchanged."
+}

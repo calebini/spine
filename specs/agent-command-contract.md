@@ -157,6 +157,13 @@ Together with the identifiers above, this is the closed implemented command set.
 
 ## 4. Common Request, Output, and Error Rules
 
+The accepted [trusted-local ownership bootstrap](local-ownership-bootstrap.md)
+defines a source-only internal state projection and proposed
+`spine.trusted-web-provisioning.v3` successor for the existing two local provisioning
+commands. Neither is implemented or added to the closed command/runtime registry
+by ratification; no public bootstrap command exists. Existing v1/v2 provisioning
+and protected admission retain their released shapes until explicit activation.
+
 Write commands require `command_id`, explicit `actor_subject_id`, and explicit UTC timestamps in `YYYY-MM-DDTHH:MM:SSZ` format. Except for the first-subject bootstrap rule, `actor_subject_id` must resolve before mutation. Unresolved actors fail with `referenced_row_not_found`, `field=actor_subject_id`, and CLI exit `4`.
 
 Every command validates its request object against that command required and optional top-level field set before mutation. Unknown top-level request keys fail with `ok=false`, `error.code=unsupported_field`, `error.field=<key>`, and CLI exit `2`, unless the command explicitly names an extension map or transport metadata location that may contain additional keys.

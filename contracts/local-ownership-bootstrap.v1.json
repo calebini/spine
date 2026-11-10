@@ -1,0 +1,139 @@
+{
+  "contract_version": "spine.local-ownership-bootstrap.v1",
+  "status": "candidate_machine_contracts_source_only",
+  "design_status": "ratified",
+  "runtime_verified": false,
+  "specification": "specs/local-ownership-bootstrap.md",
+  "canonical_json": "spine.canonical-json.v1",
+  "proposed_contract_versions": [
+    "spine.ownership-access-state.v1",
+    "spine.trusted-web-provisioning.v3"
+  ],
+  "public_bootstrap_command": null,
+  "web_registry_change": false,
+  "package_version_change": false,
+  "ledger_schema_change_activated": false,
+  "schemas": [
+    "contracts/schemas/local-ownership-bootstrap/apply-preimage.schema.json",
+    "contracts/schemas/local-ownership-bootstrap/types.schema.json",
+    "contracts/schemas/local-ownership-bootstrap/state.schema.json",
+    "contracts/schemas/local-ownership-bootstrap/provisioning-plan-request.v3.schema.json",
+    "contracts/schemas/local-ownership-bootstrap/provisioning-plan-response.v3.schema.json",
+    "contracts/schemas/local-ownership-bootstrap/provisioning-apply-request.v3.schema.json",
+    "contracts/schemas/local-ownership-bootstrap/provisioning-apply-response.v3.schema.json",
+    "contracts/schemas/local-ownership-bootstrap/transition-vectors.schema.json",
+    "contracts/schemas/local-ownership-bootstrap/plan-preimage.schema.json"
+  ],
+  "provisioning_commands": {
+    "web_access.plan": {
+      "request_schema": "contracts/schemas/local-ownership-bootstrap/provisioning-plan-request.v3.schema.json",
+      "response_schema": "contracts/schemas/local-ownership-bootstrap/provisioning-plan-response.v3.schema.json",
+      "access": "trusted_local_only"
+    },
+    "web_access.apply": {
+      "request_schema": "contracts/schemas/local-ownership-bootstrap/provisioning-apply-request.v3.schema.json",
+      "response_schema": "contracts/schemas/local-ownership-bootstrap/provisioning-apply-response.v3.schema.json",
+      "access": "trusted_local_only"
+    }
+  },
+  "plan_hash_fields": [
+    "contract_version",
+    "access_state_before",
+    "normalized_plan",
+    "references"
+  ],
+  "apply_semantic_hash_fields": [
+    "contract_version",
+    "actor_subject_id",
+    "action_timestamp_utc",
+    "expected_access_epoch",
+    "normalized_plan",
+    "plan_hash",
+    "realm_id"
+  ],
+  "unchanged_row_id_derivation": "contracts/trusted-web-normalization.v1.json",
+  "bounds": {
+    "maximum_epoch": "9223372036854775807",
+    "operation_count": "100",
+    "reference_count": "100",
+    "eligible_operators": "32",
+    "state_rows": "1"
+  },
+  "failure_mapping": [
+    {
+      "case": "owner_invalid_state_or_overflow",
+      "code": "environment_failure",
+      "field": "ownership",
+      "cli_exit": "7"
+    },
+    {
+      "case": "provisioning_invalid_state_identity_or_ledger_realm_mismatch",
+      "code": "admission_unavailable"
+    },
+    {
+      "case": "provisioning_epoch_overflow_on_required_advance",
+      "code": "admission_unavailable"
+    },
+    {
+      "case": "stale_expected_epoch",
+      "code": "access_changed"
+    },
+    {
+      "case": "changed_plan_or_references_or_conflicts",
+      "code": "domain_conflict"
+    },
+    {
+      "case": "incompatible_replay",
+      "code": "command_id_unavailable"
+    },
+    {
+      "case": "protected_local_or_absent",
+      "code": "admission_unavailable",
+      "http_status": "503"
+    }
+  ],
+  "migration_contract": "contracts/local-ownership-bootstrap-migration.v1.json",
+  "fixture_manifest": "contracts/local-ownership-bootstrap-fixture-manifest.json",
+  "runtime_obligations": [
+    {
+      "id": "LOB-01",
+      "requirement": "Real first-owner and multi-owner-page transactions: epoch 1; no account/membership/grant/disclosure creation.",
+      "status": "pending_runtime"
+    },
+    {
+      "id": "LOB-02",
+      "requirement": "Real outer/dry-run and each unit-savepoint fault boundary restore SQL and the transaction-local once marker.",
+      "status": "pending_runtime"
+    },
+    {
+      "id": "LOB-03",
+      "requirement": "Real configured realm preservation and exactly one epoch advance across combined authorization writers.",
+      "status": "pending_runtime"
+    },
+    {
+      "id": "LOB-04",
+      "requirement": "Actual v3 promotion, eligible-operator/no-lockout, stale witness and compatible/incompatible replay; frozen v1/v2 preservation.",
+      "status": "pending_runtime"
+    },
+    {
+      "id": "LOB-05",
+      "requirement": "Protected readiness/chooser/read/write refuses absent/local posture without unsupported modes or private state leakage.",
+      "status": "pending_runtime"
+    },
+    {
+      "id": "LOB-06",
+      "requirement": "Physical first-owner/first-owner and owner/provisioning interleavings; one singleton, monotone epochs, loser replans.",
+      "status": "pending_runtime"
+    },
+    {
+      "id": "LOB-07",
+      "requirement": "Actual rebuild with account FK children; row/object preservation; every migration fault, FK restoration and old-writer refusal.",
+      "status": "pending_runtime"
+    },
+    {
+      "id": "LOB-08",
+      "requirement": "Missing/malformed instance or access state, overflow and object drift fail closed; bounded routine SQL without deep scans.",
+      "status": "pending_runtime"
+    }
+  ]
+}

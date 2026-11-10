@@ -1,0 +1,19 @@
+{
+  "contract_version": "spine.trusted-web-provisioning.v3",
+  "ledger_id": "ledger_instance_1111111111111111111111111111111111111111111111111111111111111111",
+  "realm_id": "explicit-realm",
+  "expected_access_epoch": "1",
+  "operators": [
+    {
+      "operation": "create",
+      "subject_id": "operator-subject",
+      "display_name": "Operator",
+      "activation_basis": "trusted_local_approval"
+    }
+  ],
+  "memberships": [],
+  "item_adoptions": [],
+  "grants": [],
+  "route_approvals": [],
+  "identity_mode": "trusted_identity"
+}

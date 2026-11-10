@@ -1,0 +1,30 @@
+{
+  "contract_version": "spine.trusted-web-provisioning.v3",
+  "access_state_before": null,
+  "normalized_plan": {
+    "contract_version": "spine.trusted-web-provisioning.v3",
+    "ledger_id": "new-explicit-ledger",
+    "realm_id": "explicit-realm",
+    "expected_access_epoch": "0",
+    "operators": [
+      {
+        "operation": "create",
+        "subject_id": "operator-subject",
+        "display_name": "Operator",
+        "activation_basis": "trusted_local_approval"
+      }
+    ],
+    "memberships": [],
+    "item_adoptions": [],
+    "grants": [],
+    "route_approvals": []
+  },
+  "references": [
+    {
+      "kind": "subject",
+      "id": "operator-subject",
+      "revision": null,
+      "state_hash": "2222222222222222222222222222222222222222222222222222222222222222"
+    }
+  ]
+}

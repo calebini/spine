@@ -1,0 +1,269 @@
+{
+  "contract_version": "spine.ownership-bootstrap-transition-vectors.v1",
+  "vectors": [
+    {
+      "case_id": "first_owner",
+      "before": null,
+      "events": [
+        "owner"
+      ],
+      "dry_run": false,
+      "expected": {
+        "singleton_id": "1",
+        "ledger_id": "ledger_instance_1111111111111111111111111111111111111111111111111111111111111111",
+        "realm_id": null,
+        "mode": "trusted_local",
+        "identity_mode": null,
+        "access_epoch": "1",
+        "recovery_epoch": "1"
+      },
+      "error": null
+    },
+    {
+      "case_id": "several_owners",
+      "before": null,
+      "events": [
+        "owner",
+        "owner",
+        "owner"
+      ],
+      "dry_run": false,
+      "expected": {
+        "singleton_id": "1",
+        "ledger_id": "ledger_instance_1111111111111111111111111111111111111111111111111111111111111111",
+        "realm_id": null,
+        "mode": "trusted_local",
+        "identity_mode": null,
+        "access_epoch": "1",
+        "recovery_epoch": "1"
+      },
+      "error": null
+    },
+    {
+      "case_id": "later_page",
+      "before": {
+        "singleton_id": "1",
+        "ledger_id": "ledger_instance_1111111111111111111111111111111111111111111111111111111111111111",
+        "realm_id": null,
+        "mode": "trusted_local",
+        "identity_mode": null,
+        "access_epoch": "1",
+        "recovery_epoch": "1"
+      },
+      "events": [
+        "owner",
+        "owner"
+      ],
+      "dry_run": false,
+      "expected": {
+        "singleton_id": "1",
+        "ledger_id": "ledger_instance_1111111111111111111111111111111111111111111111111111111111111111",
+        "realm_id": null,
+        "mode": "trusted_local",
+        "identity_mode": null,
+        "access_epoch": "2",
+        "recovery_epoch": "1"
+      },
+      "error": null
+    },
+    {
+      "case_id": "observation_only",
+      "before": null,
+      "events": [
+        "read",
+        "replay",
+        "no_op"
+      ],
+      "dry_run": false,
+      "expected": null,
+      "error": null
+    },
+    {
+      "case_id": "dry_run",
+      "before": null,
+      "events": [
+        "owner"
+      ],
+      "dry_run": true,
+      "expected": null,
+      "error": null
+    },
+    {
+      "case_id": "outer_failure",
+      "before": null,
+      "events": [
+        "owner",
+        "outer_rollback"
+      ],
+      "dry_run": false,
+      "expected": null,
+      "error": null
+    },
+    {
+      "case_id": "unit_rollback",
+      "before": null,
+      "events": [
+        "savepoint",
+        "owner",
+        "rollback_to_savepoint",
+        "release_savepoint",
+        "no_op"
+      ],
+      "dry_run": false,
+      "expected": null,
+      "error": null
+    },
+    {
+      "case_id": "unit_retry_restores_marker",
+      "before": null,
+      "events": [
+        "savepoint",
+        "owner",
+        "rollback_to_savepoint",
+        "release_savepoint",
+        "owner"
+      ],
+      "dry_run": false,
+      "expected": {
+        "singleton_id": "1",
+        "ledger_id": "ledger_instance_1111111111111111111111111111111111111111111111111111111111111111",
+        "realm_id": null,
+        "mode": "trusted_local",
+        "identity_mode": null,
+        "access_epoch": "1",
+        "recovery_epoch": "1"
+      },
+      "error": null
+    },
+    {
+      "case_id": "prior_unit_survives",
+      "before": null,
+      "events": [
+        "owner",
+        "savepoint",
+        "owner",
+        "rollback_to_savepoint",
+        "release_savepoint"
+      ],
+      "dry_run": false,
+      "expected": {
+        "singleton_id": "1",
+        "ledger_id": "ledger_instance_1111111111111111111111111111111111111111111111111111111111111111",
+        "realm_id": null,
+        "mode": "trusted_local",
+        "identity_mode": null,
+        "access_epoch": "1",
+        "recovery_epoch": "1"
+      },
+      "error": null
+    },
+    {
+      "case_id": "configured_once",
+      "before": {
+        "singleton_id": "1",
+        "ledger_id": "configured-ledger",
+        "realm_id": "explicit-realm",
+        "mode": "multi_user",
+        "identity_mode": "trusted_identity",
+        "access_epoch": "9",
+        "recovery_epoch": "4"
+      },
+      "events": [
+        "owner",
+        "owner"
+      ],
+      "dry_run": false,
+      "expected": {
+        "singleton_id": "1",
+        "ledger_id": "configured-ledger",
+        "realm_id": "explicit-realm",
+        "mode": "multi_user",
+        "identity_mode": "trusted_identity",
+        "access_epoch": "10",
+        "recovery_epoch": "4"
+      },
+      "error": null
+    },
+    {
+      "case_id": "configured_rollback",
+      "before": {
+        "singleton_id": "1",
+        "ledger_id": "configured-ledger",
+        "realm_id": "explicit-realm",
+        "mode": "multi_user",
+        "identity_mode": "trusted_identity",
+        "access_epoch": "9",
+        "recovery_epoch": "4"
+      },
+      "events": [
+        "owner",
+        "outer_rollback"
+      ],
+      "dry_run": false,
+      "expected": {
+        "singleton_id": "1",
+        "ledger_id": "configured-ledger",
+        "realm_id": "explicit-realm",
+        "mode": "multi_user",
+        "identity_mode": "trusted_identity",
+        "access_epoch": "9",
+        "recovery_epoch": "4"
+      },
+      "error": null
+    },
+    {
+      "case_id": "overflow",
+      "before": {
+        "singleton_id": "1",
+        "ledger_id": "ledger_instance_1111111111111111111111111111111111111111111111111111111111111111",
+        "realm_id": null,
+        "mode": "trusted_local",
+        "identity_mode": null,
+        "access_epoch": "9223372036854775807",
+        "recovery_epoch": "1"
+      },
+      "events": [
+        "owner"
+      ],
+      "dry_run": false,
+      "expected": {
+        "singleton_id": "1",
+        "ledger_id": "ledger_instance_1111111111111111111111111111111111111111111111111111111111111111",
+        "realm_id": null,
+        "mode": "trusted_local",
+        "identity_mode": null,
+        "access_epoch": "9223372036854775807",
+        "recovery_epoch": "1"
+      },
+      "error": "epoch_overflow"
+    },
+    {
+      "case_id": "max_replay",
+      "before": {
+        "singleton_id": "1",
+        "ledger_id": "ledger_instance_1111111111111111111111111111111111111111111111111111111111111111",
+        "realm_id": null,
+        "mode": "trusted_local",
+        "identity_mode": null,
+        "access_epoch": "9223372036854775807",
+        "recovery_epoch": "1"
+      },
+      "events": [
+        "replay",
+        "read",
+        "no_op"
+      ],
+      "dry_run": false,
+      "expected": {
+        "singleton_id": "1",
+        "ledger_id": "ledger_instance_1111111111111111111111111111111111111111111111111111111111111111",
+        "realm_id": null,
+        "mode": "trusted_local",
+        "identity_mode": null,
+        "access_epoch": "9223372036854775807",
+        "recovery_epoch": "1"
+      },
+      "error": null
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "contract_version": "spine.trusted-web-provisioning.v3",
+  "ledger_id": "configured-ledger",
+  "realm_id": "explicit-realm",
+  "expected_access_epoch": "9",
+  "operators": [
+    {
+      "operation": "create",
+      "subject_id": "operator-subject",
+      "display_name": "Operator",
+      "activation_basis": "trusted_local_approval"
+    }
+  ]
+}

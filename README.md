@@ -416,6 +416,10 @@ frontend reviews SPINE-001–003 were withdrawn.
 
 Still deliberately separate or in design:
 
+- [trusted-local ownership bootstrap](specs/local-ownership-bootstrap.md): accepted
+  realm-independent ownership-epoch design with candidate source-only machine
+  contracts and fixtures; no web account provisioning, runtime or migration
+  activation is implied;
 - [recurring-source related tasks](specs/recurring-related-tasks.md): ratified rules
   generating one ordinary task per event occurrence, with explicit temporal
   following, cancellation reconciliation and per-task reminders; detailed

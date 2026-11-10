@@ -169,6 +169,14 @@ is intentionally conservative and uses a single indexed row, not a ledger-wide h
 
 ### 3.2 Item access ownership
 
+The accepted [trusted-local bootstrap amendment](local-ownership-bootstrap.md)
+owns the source-only local/posture union for the existing state table; it does not
+activate the broader deployment-state fields/modes proposed in Section 3.1. Its
+single access epoch is not a web session, realm or grant. Protected service
+admission still refuses absent/local state with `admission_unavailable`; explicit
+v3 local provisioning is the proposed promotion path. Existing released wire
+shapes and configured admission behavior remain unchanged pending implementation.
+
 `item_access_owners` has unique `item_id` FK to `coordination_items`, stable
 `item_access_owner_id` PK, and `current_revision`. `item_access_owner_revisions` has
 PK `(item_access_owner_id, revision)`, common revision fields, `owner_kind`

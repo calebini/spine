@@ -1,0 +1,49 @@
+{
+  "contract_version": "spine.trusted-web-provisioning.v3",
+  "ok": true,
+  "command": "web_access.plan",
+  "normalized_plan": {
+    "contract_version": "spine.trusted-web-provisioning.v3",
+    "ledger_id": "configured-ledger",
+    "realm_id": "explicit-realm",
+    "expected_access_epoch": "9",
+    "operators": [
+      {
+        "operation": "create",
+        "subject_id": "operator-subject",
+        "display_name": "Operator",
+        "activation_basis": "trusted_local_approval"
+      }
+    ],
+    "memberships": [],
+    "item_adoptions": [],
+    "grants": [],
+    "route_approvals": []
+  },
+  "access_state_before": {
+    "singleton_id": "1",
+    "ledger_id": "configured-ledger",
+    "realm_id": "explicit-realm",
+    "mode": "multi_user",
+    "identity_mode": "trusted_identity",
+    "access_epoch": "9",
+    "recovery_epoch": "4"
+  },
+  "references": [
+    {
+      "kind": "subject",
+      "id": "operator-subject",
+      "revision": null,
+      "state_hash": "2222222222222222222222222222222222222222222222222222222222222222"
+    }
+  ],
+  "plan_hash": "f89785be9ee56e35df7e0676473bf54fcbfcc948f5e66c2f94b9270c2cac1c59",
+  "can_apply": true,
+  "conflicts": [],
+  "warnings": [
+    {
+      "code": "new_account_unverified",
+      "operation_path": "/operators/0"
+    }
+  ]
+}

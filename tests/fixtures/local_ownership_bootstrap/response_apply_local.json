@@ -1,0 +1,24 @@
+{
+  "contract_version": "spine.trusted-web-provisioning.v3",
+  "ok": true,
+  "command": "web_access.apply",
+  "command_id": "bootstrap-promote-example",
+  "command_receipt_id": "command_receipt_0beef22750ca7a7da6a549e7fa6e175165b55623cf2d8013d0882bf47af35d1a",
+  "audit_id": "access_audit_7b2623eb64ddae2fa87be53f1cc327a65c8f27c0e288e2456e66f7d24f416c86",
+  "effect": "web_access_applied",
+  "changed": true,
+  "replayed": false,
+  "access_epoch": "2",
+  "plan_hash": "0ebf489076eec007527a67fdbf7fb230d178c495499a2bd2c38b911225c3679f",
+  "results": [
+    {
+      "operation_path": "/operators/0",
+      "effect": "created",
+      "row_ids": [
+        "account_61d895449faf37dc5890aa44c256a130a89a11a7bb0ef6321c356f01f2b9b2d4",
+        "account_subject_binding_b6e5c7727a73e119ebf74a7af4442d7c3793712ec4357774f70e68d326b93574"
+      ],
+      "current_revision": "1"
+    }
+  ]
+}

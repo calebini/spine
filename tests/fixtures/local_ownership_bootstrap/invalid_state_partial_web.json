@@ -1,0 +1,12 @@
+{
+  "contract_version": "spine.ownership-access-state.v1",
+  "state": {
+    "singleton_id": "1",
+    "ledger_id": "ledger_instance_1111111111111111111111111111111111111111111111111111111111111111",
+    "realm_id": null,
+    "mode": "multi_user",
+    "identity_mode": null,
+    "access_epoch": "1",
+    "recovery_epoch": "1"
+  }
+}

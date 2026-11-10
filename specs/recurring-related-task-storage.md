@@ -281,10 +281,11 @@ ownership evidence invalidate assignment freshness and require explicit resoluti
 not automatic restoration of a different owner or grants.
 
 The unconfigured-ledger epoch initialization seam is the subject of the separate
-[trusted-local ownership bootstrap draft](local-ownership-bootstrap.md). The
+[trusted-local ownership bootstrap](local-ownership-bootstrap.md). The
 operator selected realm-independent initialization on 2026-11-10. That amendment
-is not yet ratified or implemented; it must close its state/migration/provisioning
-contracts before changing this accepted family's runtime bootstrap behavior.
+was ratified on 2026-11-10; its state/migration/provisioning machine package is
+source-only pending review and implementation before changing this accepted
+family's runtime bootstrap behavior.
 
 The ordering is task/owner/history, then concrete child profile/presentation
 validation and policy/application rows, then selected work, audit/receipt, one

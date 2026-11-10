@@ -858,12 +858,35 @@ complete restoration/custom-policy and managed-set matrices, intent/coverage and
 error-precedence closure, replay evidence and physical concurrency tests. The local
 ownership epoch/bootstrap direction was selected by the operator: define
 realm-independent trusted-local initialization, not implicit web provisioning.
-The [bootstrap draft](../specs/local-ownership-bootstrap.md) is now written;
-ratification and machine/migration closure remain before its implementation.
+The [bootstrap leaf](../specs/local-ownership-bootstrap.md) is ratified as design
+v1.0.0 on 2026-11-10 following the clean review below. The operator selected
+machine/migration definition, not runtime activation, for the next increment.
+The manual-engine/draft increment is committed as `313a79e` (no push).
+Its [bounded bootstrap consistency audit](../whetstone_runs/local-ownership-bootstrap-contract-audit-001/audit-notes.md)
+completed against that checkpoint: seven exact specifications plus notes and
+built-in context, configured GPT-6.1 Sol/medium through pinned stable Whetstone.
+The operator explicitly approved that exact package on 2026-11-10; all
+payload/runtime pins were verified before and after launch. The persisted
+[report](../whetstone_runs/local-ownership-bootstrap-contract-audit-001/change_audit/change_audit_report.md)
+is **pass**, boundary preserved, zero blockers/majors/minors/nits. This is one
+bounded consistency assessment, not convergence; the subsequent explicit operator
+ratification is separate from that verdict.
+The [candidate machine package](../contracts/local-ownership-bootstrap.v1.json)
+and [fixture manifest](../contracts/local-ownership-bootstrap-fixture-manifest.json)
+define the closed state union, v3 explicit promotion, failure mapping, migration
+blueprint and offline witnesses. Package review and actual implementation evidence
+remain pending; no package/schema/runtime registry or public dispatch changed.
+**Bootstrap definition verification:** 47 selected contract tests pass, including
+eight new tests for 28 fixtures, 13 finite transition witnesses, canonical
+plan/apply digests, exact row-ID reuse, offline schema closure and non-activation.
+Focused Ruff, frozen web-copy synchronization, new local links and diff hygiene
+pass. No runtime code or ledger was changed; SQL/race/migration obligations remain
+explicitly pending, not satisfied by those offline tests.
 R2 is **not complete**; selected passing tests do not close an
 entire RRT obligation or authorize R3/R4.
 **Next:** Operator authorized the remaining R2 implementation on 2026-11-10.
-Continue the manual reconciliation/lifecycle engine against these tested
+Review the new bootstrap machine/migration package before its implementation,
+then continue the manual reconciliation/lifecycle engine against these tested
 foundations. Preserve immutable history and the R4-only public activation boundary.
 
 ### SPINE-094 — R3: recurring-task all-writer safety and automatic scheduling
