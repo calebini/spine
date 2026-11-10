@@ -790,7 +790,7 @@ activation boundary until R4, rather than treating ratification as runtime suppo
 ### SPINE-092 — R1: recurring-task persistence and source identity
 
 **Status:** Done, internal checkpoint (2026-11-10) — operator authorized R1 after
-ratification/plan commit `5ed85be`. Implementation remains uncommitted; no push.
+ratification/plan commit `5ed85be`. R1 committed as `bc96a1d`; no push.
 **Scope:** Exact physical records/constraints/indexes and ordered migration,
 canonical decoders/identities, authentic bounded source proof and lineage.
 Existing items/selectors/owners/bindings/notification tables retain authority;
@@ -813,14 +813,13 @@ source facts were repaired. RRT-01/04/05/18 receive foundation evidence only.
 run **105 passed**, including **25 R1 tests**; focused Ruff, strict mypy on the four
 new modules, documentation targets and `git diff --check` pass. See checkpoint
 notes for the final-run sequence and non-fatal diagnostics.
-**Next:** Checkpoint R1 if requested; obtain R2 kickoff including a narrow
-forward-only recurrence ancestry/COUNT-copy producer follow-up. No public command,
-automatic generation, delivery or environment-specific deployment is authorized.
+**Next:** R1 committed as `bc96a1d`; continue the operator-selected R2 work below.
+No public command, automatic generation, delivery or deployment is authorized.
 
 ### SPINE-093 — R2: recurring-task commands and manual reconciliation
 
-**Status:** Ready for operator selection after SPINE-092; not started or
-separately authorized. Retain the R1 producer-seam follow-up below.
+**Status:** In progress (2026-11-10) — operator authorized R1 checkpoint and R2,
+including the narrow prospective producer fixes. R1 committed as `bc96a1d`.
 **Scope:** All seven internal command handlers, configuration/enrollment,
 read/history/cursors, atomic ordinary task/owner/binding/policy/work creation,
 move/cancel/restore/suppress, both adoption scopes and all retirement dispositions.
@@ -830,10 +829,25 @@ strict-future commit and whole-unit budgets; distinct reminder identities and
 immutable ownership without grants; lifecycle/adoption/retirement and cursor
 positive/negative/race tests. Primary RRT-03/06/07/08/09/10/11/12/15/16/17 proof.
 See [R2](IMPLEMENTATION_PLAN.md#r2--command-engine-and-manual-reconciliation-spine-093).
-**Next:** Obtain R2 kickoff and explicitly include prospective recurrence copy
-ancestry/COUNT-copy evidence fixes identified by the
-[R1 checkpoint](design-notes/recurring-related-task-r1-checkpoint.md). Preserve
-existing immutable history; unsupported correspondence stays unresolved.
+**Progress:** First internal increment implements forward-only copied-segment
+ancestry, positive following/COUNT-copy lineage and the exposed COUNT authoring
+projection/counting fix. Actual public-command tests consume the new evidence;
+retained offline fixtures still reproduce without rewriting history. Internal
+create/update/retire/show/list handlers, immutable profile/archetype/route snapshots,
+receipt replay, dry-run rollback and purpose-separated cursor/read projections are
+implemented behind explicit source-contract injection. No public dispatch changed.
+See [R2 foundation](design-notes/recurring-related-task-r2-foundation.md).
+**Verification so far:** Full regression run **1,322 passed / one skipped**;
+final focused run **88 passed**, including 17 new foundation tests. Focused Ruff,
+changed pure-module mypy, documentation targets and diff hygiene pass. R2 changes
+remain uncommitted; no push, live migration, deployment or external audit.
+**Remaining:** Manual reconcile and assignment suppression, real task/owner/binding/
+policy/work generation, source-follow/cancel/restore, three-way adoption and cleanup,
+complete per-unit/page budgets, due-time commit cutoffs and their concurrency/
+rollback matrices. R2 is **not complete**; no R2 end-to-end obligation is closed
+merely by the foundation tests.
+**Next:** Continue the manual reconciliation/lifecycle engine against these tested
+foundations. Preserve immutable history and the R4-only public activation boundary.
 
 ### SPINE-094 — R3: recurring-task all-writer safety and automatic scheduling
 

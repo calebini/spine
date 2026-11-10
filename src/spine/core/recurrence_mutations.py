@@ -7,7 +7,7 @@ from collections.abc import Mapping, Sequence
 from spine.core.canonical_json import canonical_json_bytes
 from spine.core.hashing import hash_canonical_json
 from spine.core.recurrence_set import NormalizedRecurrenceSet, generated_id
-from spine.core.schedule import normalize_rule, parse_scheduled_fact
+from spine.core.schedule import _valid_candidate_count_between, normalize_rule, parse_scheduled_fact
 
 
 def build_successor_recurrence_revision(
@@ -28,7 +28,7 @@ def build_successor_recurrence_revision(
     revision_number = str(int(str(current["revision_number"])) + 1)
     segment_rows = _object_array(current["segments"])
     segment_preimages, segment_ref_by_id = _normalize_segments(
-        segments if segments is not None else segment_rows,
+        segments if segments is not None else [{**row, "source_revision_id": prior_revision_id} for row in segment_rows],
         prior_revision_id=prior_revision_id,
         command_id=command_id,
         explicit=segments is not None,
@@ -359,6 +359,7 @@ def derive_recurrence_lineage(
     *,
     command_id: str,
     effect: str,
+    include_stream_copies: bool = False,
 ) -> list[dict[str, object]]:
     """Derive deterministic, inspectable lineage for one changed revision."""
 
@@ -382,6 +383,8 @@ def derive_recurrence_lineage(
         prior_rows = _object_array(current[collection])
         for child in _object_array(successor[collection]):
             prior_id = _find_prior_child_id(child, prior_rows, id_field=id_field)
+            if prior_id is None and collection == "rules" and include_stream_copies:
+                prior_id = _split_rule_source(child, current, successor)
             drafts.append(
                 {
                     "lineage_role": collection[:-1] + "_revision",
@@ -410,6 +413,66 @@ def derive_recurrence_lineage(
             }
         )
     return result
+
+
+def _split_rule_source(child: Mapping[str, object], current: Mapping[str, object], successor: Mapping[str, object]) -> str | None:
+    """Positive unchanged-stream evidence for a bounded following rule copy.
+
+    Equal dates/ordinals are not a mapping. Require a real parent segment,
+    identical seed/phase/selectors and exact remaining COUNT arithmetic.
+    """
+    segment = next((s for s in _object_array(successor["segments"]) if s["segment_id"] == child["segment_id"]), None)
+    if segment is None or segment.get("source_revision_id") != current["recurrence_revision_id"]:
+        return None
+    parent = next(
+        (
+            s
+            for s in _object_array(current["segments"])
+            if s["segment_id"] == segment.get("lineage_parent_segment_id") and s["status"] == "active"
+        ),
+        None,
+    )
+    if parent is None or segment["status"] != "active" or str(segment["active_start"]) < str(parent["active_start"]):
+        return None
+    if parent.get("active_end") is not None and (
+        segment.get("active_end") is None or str(segment["active_end"]) > str(parent["active_end"])
+    ):
+        return None
+    ignored = {"rule_id", "segment_id", "start_bound", "end_condition"}
+    signature = {k: v for k, v in child.items() if k not in ignored}
+    matches = []
+    for prior in _object_array(current["rules"]):
+        if prior["segment_id"] != parent["segment_id"] or prior.get("status") != "active":
+            continue
+        if signature != {k: v for k, v in prior.items() if k not in ignored}:
+            continue
+        if child["start_bound"] != segment["active_start"] or str(child["start_bound"]) <= str(prior["start_bound"]):
+            continue
+        end = prior["end_condition"]
+        assert isinstance(end, Mapping)
+        expected = dict(end)
+        if end["kind"] == "count":
+            rule = normalize_rule(
+                {k: v for k, v in prior.items() if k not in {"rule_id", "segment_id", "status", "rule_duplicate_index"}},
+                time_basis=str(current["time_basis"]),
+            )
+            consumed = _valid_candidate_count_between(
+                rule,
+                start=max(rule.seed, rule.start_bound),
+                end=str(child["start_bound"]),
+                time_basis=str(current["time_basis"]),
+                timezone=str(current["timezone"]) if current.get("timezone") is not None else None,
+                timezone_database_version=(
+                    str(current["timezone_database_version"]) if current.get("timezone_database_version") is not None else None
+                ),
+            )
+            remaining = int(str(end["count"])) - consumed
+            if remaining <= 0:
+                continue
+            expected = {"kind": "count", "count": str(remaining)}
+        if child["end_condition"] == expected:
+            matches.append(str(prior["rule_id"]))
+    return matches[0] if len(matches) == 1 else None
 
 
 def _find_prior_child_id(

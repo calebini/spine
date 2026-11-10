@@ -82,7 +82,10 @@ Verification results:
   diagnostics and expected timezone-substitution diagnostics; unittest returned
   success. No unrelated warning cleanup was included.
 
-R1 implementation and tracking changes are uncommitted. No push was performed.
+R1 implementation and tracking changes were committed as `bc96a1d` after operator
+approval. No push was performed. The R1 producer findings below describe that
+checkpoint; the [R2 follow-up](recurring-related-task-r2-foundation.md) records
+prospective fixes separately, without rewriting those historical findings.
 
 ## Delegated producer seams retained for R2
 

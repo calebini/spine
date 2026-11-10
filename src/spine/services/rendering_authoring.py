@@ -55,7 +55,9 @@ def destination(db, policy):
     }
 
 
-def resolve(db, selection, *, policy, item_type, origin, permissions=None, budget=None):
+def resolve(db, selection, *, policy, item_type, origin, permissions=None, budget=None, prospective_owner=None):
+    if prospective_owner is not None:
+        invariant(permissions is None and policy.get("item_id") is None)
     selected = codec.normalize_selection(selection)
     if selected["kind"] == "ordinary":
         return selected
@@ -77,7 +79,14 @@ def resolve(db, selection, *, policy, item_type, origin, permissions=None, budge
         or item_type not in revision["revision"]["compatible_item_types"]
     ):
         codec.fail("rendering_definition_invalid", "presentation.definition")
-    owner = db.execute("SELECT * FROM item_access_owners WHERE item_id=?", (policy["item_id"],)).fetchone()
+    owner = db.execute("SELECT * FROM item_access_owners WHERE item_id=?", (policy.get("item_id"),)).fetchone()
+    if prospective_owner is not None:
+        # Internal trusted-local rule authoring validates a reusable owner scope,
+        # not a fabricated future item/application. Generation revalidates using
+        # the real persisted owner. Protected adapters never use this parameter.
+        invariant(permissions is None and policy.get("item_id") is None)
+        owner = {"owner_kind": prospective_owner["owner_kind"], "owner_subject_id": prospective_owner.get("owner_subject_id"),
+                 "owner_group_id": prospective_owner.get("owner_group_id")}
     if owner is None and permissions is not None and hasattr(permissions, 'prospective_owner_for'):
         # A protected create can admit its exact command-derived item owner
         # before insertion. This is service context, never a request-mode bypass;

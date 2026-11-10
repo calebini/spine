@@ -9,7 +9,7 @@ see [validation](TZDB_COMPATIBILITY_VALIDATION.md) and [operations](TZDB_COMPATI
 
 
 Role: Roadmap rationale and delivery history; current task status lives in [BACKLOG.md](BACKLOG.md)
-Last updated: 2026-11-10 (SPINE-092 internal persistence/source-identity checkpoint)
+Last updated: 2026-11-10 (SPINE-092 committed; SPINE-093 internal foundation in progress)
 
 This is a non-normative delivery plan. The specifications and machine-readable contracts remain authoritative.
 
@@ -56,9 +56,10 @@ needed for any checkpoint. Use disposable ledgers and fake adapters/clocks only.
 3. **R3 / SPINE-094:** all-writer/attempt safety and automatic scheduling.
 4. **R4 / SPINE-095:** public activation, packaged verification and operator handoff.
 
-R1 is now an implemented internal checkpoint; R2 remains unstarted and requires
-operator kickoff. Later slices depend on the earlier checkpoint and must retain
-its regression evidence. A plan entry alone is not implementation authorization.
+R1 is committed as `bc96a1d`; the operator authorized R2 and its prospective
+producer follow-up. R2 is in progress, not complete. Later slices depend on the
+earlier checkpoint and must retain its regression evidence. A plan entry alone
+is not implementation authorization.
 
 ### R1 — Persistence and source-identity foundation (SPINE-092)
 
@@ -106,6 +107,13 @@ registration, automatic generation or new delivery eligibility. Initial proof
 ownership: RRT-01/04/05/18; prerequisites for all later transactional tests.
 
 ### R2 — Command engine and manual reconciliation (SPINE-093)
+
+**Progress (2026-11-10):** The initial internal increment implements the prospective
+recurrence-producer fixes plus rule authoring/read/replay/cursor foundations.
+It does not yet implement reconcile, suppression or generated-task lifecycle.
+See [R2 foundation evidence and remaining work](design-notes/recurring-related-task-r2-foundation.md).
+The exit criteria below remain unchanged; five internal handlers are not a claim
+of an implemented seven-command family.
 
 Implement all seven command handlers internally using the shared command context
 and one outer transaction, not recursive public-command submissions or child

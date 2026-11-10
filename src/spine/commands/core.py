@@ -49,7 +49,7 @@ from spine.core.recurrence_set import (
     normalize_initial_recurrence_set,
 )
 from spine.core.schedule import (
-    expand_rule,
+    _valid_candidate_count_between,
     normalize_rule,
     parse_scheduled_fact,
     resolve_local_instant,
@@ -4724,7 +4724,9 @@ def _handle_recurrence_instance_mutation(command: str, request: Mapping[str, Any
         )
         produced["exdate_id"] = created_exdate["exdate_id"]
     audit_id = _derived_id(command, command_id, "audit", "/audit")
-    lineage = derive_recurrence_lineage(recurrence, successor.value, command_id=command_id, effect=effect)
+    lineage = derive_recurrence_lineage(
+        recurrence, successor.value, command_id=command_id, effect=effect, include_stream_copies=True
+    )
 
     facts = {
         "command_receipt_id": _receipt_id(command, command_id),
@@ -5307,7 +5309,8 @@ def _series_edit_following(
             if name in replacements:
                 continue
             if name == "rules":
-                following = _following_rule_copy(row, split=split, time_basis=str(recurrence["time_basis"]))
+                following = _following_rule_copy(row, split=split, time_basis=str(recurrence["time_basis"]),
+                    timezone=recurrence.get("timezone"), timezone_database_version=recurrence.get("timezone_database_version"))
                 if following is None:
                     continue
             elif scheduled < split:
@@ -5373,22 +5376,29 @@ def _recurrence_child_scheduled_fact(row: Mapping[str, object], *, name: str) ->
     return str(selector["scheduled_fact"])
 
 
-def _following_rule_copy(row: Mapping[str, object], *, split: str, time_basis: str) -> dict[str, object] | None:
+def _following_rule_copy(
+    row: Mapping[str, object], *, split: str, time_basis: str, timezone: object = None, timezone_database_version: object = None
+) -> dict[str, object] | None:
     result = dict(row)
     if str(result["start_bound"]) < split:
         result["start_bound"] = split
     end = result.get("end_condition")
     if isinstance(end, Mapping) and end.get("kind") == "count":
         original_count = int(str(end["count"]))
-        rule = normalize_rule(row, time_basis=time_basis, field="copied_rule")
-        produced = expand_rule(
-            rule,
+        rule = normalize_rule(
+            {k: v for k, v in row.items() if k not in {"rule_id", "segment_id", "status", "rule_duplicate_index"}},
             time_basis=time_basis,
-            range_start=str(row["start_bound"]),
-            range_end=split,
-            candidate_limit=max(original_count + 1, 10_000),
+            field="copied_rule",
         )
-        remaining = original_count - len(produced.candidates)
+        consumed = _valid_candidate_count_between(
+            rule,
+            start=max(rule.seed, rule.start_bound),
+            end=split,
+            time_basis=time_basis,
+            timezone=str(timezone) if timezone is not None else None,
+            timezone_database_version=str(timezone_database_version) if timezone_database_version is not None else None,
+        )
+        remaining = original_count - consumed
         if remaining <= 0:
             return None
         result["end_condition"] = {"kind": "count", "count": str(remaining)}
@@ -5462,7 +5472,9 @@ def _persist_series_edit_success(
 ) -> dict[str, Any]:
     command = "recurrence.series.edit"
     audit_id = _derived_id(command, command_id, "audit", "/audit")
-    lineage = derive_recurrence_lineage(recurrence, successor.value, command_id=command_id, effect=effect)
+    lineage = derive_recurrence_lineage(
+        recurrence, successor.value, command_id=command_id, effect=effect, include_stream_copies=True
+    )
 
     facts = {
         "command_receipt_id": _receipt_id(command, command_id),

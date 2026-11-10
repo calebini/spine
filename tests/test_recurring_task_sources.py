@@ -234,7 +234,7 @@ class RecurringTaskSourceTests(unittest.TestCase):
             with self.assertRaisesRegex(SpineValidationError, "per-occurrence retarget"):
                 continuity(self.db, current["recurrence_revision_id"], before["selector"], [self.hop(before, after, lines)], ProofBudget())
 
-    def test_current_public_add_producer_preserves_initial_ancestry_so_cannot_certify_copy(self):
+    def test_public_add_producer_emits_prospective_ancestry_and_certifiable_copy(self):
         event, current = self.event()
         added = handle(
             "recurrence.instance.add",
@@ -261,9 +261,50 @@ class RecurringTaskSourceTests(unittest.TestCase):
                     "SELECT * FROM recurrence_lineage WHERE new_recurrence_revision_id=?", (added["recurrence_revision_id"],)
                 )
             ]
-            self.assertEqual(after["segment"]["source_revision_id"], "initial")
-            with self.assertRaisesRegex(SpineValidationError, "incorrect ancestry"):
-                continuity(self.db, current["recurrence_revision_id"], before["selector"], [self.hop(before, after, lines)], ProofBudget())
+            self.assertEqual(before["segment"]["source_revision_id"], "initial")
+            self.assertEqual(after["segment"]["source_revision_id"], current["recurrence_revision_id"])
+            result = continuity(
+                self.db, current["recurrence_revision_id"], before["selector"], [self.hop(before, after, lines)], ProofBudget()
+            )
+            self.assertEqual(result["selector"], after["selector"])
+
+    def test_public_following_split_emits_valid_remaining_count_copy(self):
+        event, current = self.event()
+        with self.db.atomic_command(write=False):
+            split = candidate(self.db, current["recurrence_revision_id"], "2026-08-10T18:00:00Z", ProofBudget())
+        response = handle(
+            "recurrence.series.edit",
+            {
+                "command_id": "r2-count-copy",
+                "actor_subject_id": "owner",
+                "item_id": event["item_id"],
+                "target_version": "1",
+                "recurrence_set_id": current["recurrence_set_id"],
+                "recurrence_revision_id": current["recurrence_revision_id"],
+                "edited_at_utc": "2026-08-07T18:00:00Z",
+                "edit_scope": "this_and_following",
+                "target_occurrence_key": split["occurrence_key"],
+                "recurrence_patch": {"rdates": [{"scheduled_fact": "2026-08-20T18:00:00Z"}]},
+            },
+            self.context,
+        )
+        self.assertTrue(response["ok"], response)
+        with self.db.atomic_command(write=False):
+            before = candidate(self.db, current["recurrence_revision_id"], "2026-08-11T18:00:00Z", ProofBudget())
+            after = candidate(self.db, response["recurrence_revision_id"], "2026-08-11T18:00:00Z", ProofBudget())
+            lines = [
+                dict(r)
+                for r in self.db.execute(
+                    "SELECT * FROM recurrence_lineage WHERE new_recurrence_revision_id=?", (response["recurrence_revision_id"],)
+                )
+            ]
+            self.assertEqual(after["rules"][0][1]["end_condition"], {"kind": "count", "count": "4"})
+            self.assertEqual(
+                continuity(self.db, current["recurrence_revision_id"], before["selector"], [self.hop(before, after, lines)], ProofBudget())[
+                    "selector"
+                ],
+                after["selector"],
+            )
 
     def test_new_rdate_requires_novelty_actual_add_lineage_and_bounded_unchanged_history(self):
         event, initial = self.event()
