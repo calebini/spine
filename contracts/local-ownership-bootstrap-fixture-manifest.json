@@ -1,6 +1,7 @@
 {
   "contract_version": "spine.local-ownership-bootstrap-fixtures.v1",
-  "status": "candidate_source_only",
+  "status": "ratified_source_only",
+  "ratified": "2026-11-10",
   "runtime_verified": false,
   "descriptor": "contracts/local-ownership-bootstrap.v1.json",
   "fixtures": [
@@ -214,6 +215,6 @@
   "limitations": [
     "Reference state hashes are synthetic declared facts; no SQL reference lookup was performed.",
     "Transition vectors are finite offline witnesses, not storage/locking/migration implementation evidence.",
-    "v3 wire schemas are source-only candidates; v1/v2 and runtime declarations remain unchanged."
+    "v3 wire schemas are ratified source-only contracts; v1/v2 and runtime declarations remain unchanged."
   ]
 }

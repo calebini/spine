@@ -1,6 +1,7 @@
 {
   "contract_version": "spine.local-ownership-bootstrap.v1",
-  "status": "candidate_machine_contracts_source_only",
+  "status": "ratified_source_only",
+  "ratified": "2026-11-10",
   "design_status": "ratified",
   "runtime_verified": false,
   "specification": "specs/local-ownership-bootstrap.md",

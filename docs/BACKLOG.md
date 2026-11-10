@@ -914,10 +914,34 @@ with the fixture manifest retained as the offline witness index.
 files). Focused Ruff, frozen web-copy synchronization, local links and diff
 hygiene pass. No runtime, DDL execution, migration, new review, commit or push;
 the existing audit report remains evidence for its original exact payload.
+**Minor-fix checkpoint/recheck staging (2026-11-10):** Committed as `c4977c5`
+(nine files; no push; unrelated `AGENTS.md` change excluded). The
+[focused bounded recheck](../whetstone_runs/local-ownership-bootstrap-machine-audit-002/audit-notes.md)
+completed after explicit exact-payload operator approval on 2026-11-10:
+18 exact inputs plus notes, built-in consistency context
+and generated copies, GPT-6.1 Sol/medium through pinned stable Whetstone.
+Its five-schema touched-view closure, six positive/negative fixtures, full patch
+authorities and prior findings/report are included. Exact hashes, runtime/CLI and
+the 99,287-byte rendered prompt verified before and after launch. The persisted
+[report](../whetstone_runs/local-ownership-bootstrap-machine-audit-002/change_audit/change_audit_report.md)
+is **pass**, boundary preserved, zero blockers/majors/minors/nits. No residual
+F001/F002 finding was reported. This focused result closes that review debt; it
+does not constitute whole-bundle convergence, machine ratification or actual
+runtime/SQL/migration/admission proof. Source specifications and contracts were
+not changed during the recheck; pending LOB-01–08 implementation gates remain.
+**Machine ratification/implementation kickoff (2026-11-10):** The operator
+explicitly ratified the reviewed machine package and authorized the ownership
+bootstrap implementation within R2 after a separate ratification commit. Descriptor,
+fixture and migration acceptance metadata now say ratified source-only; reviewed
+wire shapes/preimages and all pending runtime obligations remain unchanged.
+Implement the coherent unpublished candidate migration, transaction/savepoint-safe
+primitive, internal v3 explicit promotion and actual fault/concurrency/admission
+tests. Public package/schema/HTTP activation remains R4; no live ledger, deployment
+or push is authorized. The unrelated `AGENTS.md` change remains excluded.
 R2 is **not complete**; selected passing tests do not close an
 entire RRT obligation or authorize R3/R4.
 **Next:** Operator authorized the remaining R2 implementation on 2026-11-10.
-Complete the candidate machine-contract acceptance/checkpoint before implementation,
+Commit the ratification checkpoint, then implement the ownership bootstrap internally,
 then continue the manual reconciliation/lifecycle engine against these tested
 foundations. Preserve immutable history and the R4-only public activation boundary.
 

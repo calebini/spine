@@ -126,8 +126,10 @@ The clean bounded consistency review is recorded under SPINE-093. The operator
 ratified the design on 2026-11-10 and selected machine/migration definition.
 The [source-only descriptor](../contracts/local-ownership-bootstrap.v1.json) and
 [fixture manifest](../contracts/local-ownership-bootstrap-fixture-manifest.json)
-now define candidate state/provisioning-v3 schemas, migration blueprint and offline
-witnesses. Review that package, then implement the migration/primitive/promotion
+define ratified source-only state/provisioning-v3 schemas, migration blueprint and
+offline witnesses. Following the clean focused recheck, the operator ratified the
+machine package on 2026-11-10 and selected its implementation within R2.
+Implement the migration/primitive/promotion
 and actual rollback/concurrency/admission tests before replacing the prototype's
 unconfigured-ledger refusal. Do not silently add a realm or activation flag.
 

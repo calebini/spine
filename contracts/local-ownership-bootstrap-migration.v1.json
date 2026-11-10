@@ -1,6 +1,7 @@
 {
   "contract_version": "spine.ownership-bootstrap-migration.v1",
-  "status": "candidate_source_only",
+  "status": "ratified_source_only",
+  "ratified": "2026-11-10",
   "runtime_verified": false,
   "source_schema": "19",
   "target_schema": null,

@@ -1,8 +1,9 @@
 # Trusted-Local Ownership Bootstrap
 
-Status: Accepted v1.0.0 — ratified design; source-only, not implemented
+Status: Accepted v1.0.0 — ratified design and machine contracts; source-only, not implemented
 Created: 2026-11-10
 Ratified: 2026-11-10, following the bounded consistency review
+Machine contracts ratified: 2026-11-10, following the full review and clean focused recheck
 
 ## 1. Purpose and authority
 
@@ -190,19 +191,19 @@ Required computed/actual cases include:
    drift and old-writer refusal: fail closed without full-ledger routine scans.
 
 Ratification closes the selected design direction, not runtime R2 or public-family
-activation. The new machine package below is a source-only candidate, not a claim
+activation. The reviewed machine package below is ratified source-only, not a claim
 that migration, locking, savepoint or admission tests have executed against it.
 
 ## 8. Machine package and exact representations
 
 [local-ownership-bootstrap.v1.json](../contracts/local-ownership-bootstrap.v1.json)
-indexes the source-only candidate, its schemas, migration contract and required
+indexes the ratified source-only package, its schemas, migration contract and required
 runtime obligations. The [fixture manifest](../contracts/local-ownership-bootstrap-fixture-manifest.json)
 separates positive/negative wire examples from finite transition witnesses.
 Schemas live in `contracts/schemas/local-ownership-bootstrap/`; they are not
 copied into the frozen web package or added to implemented declarations yet.
-The accepted Sections 1–7 own product policy; Sections 8–11 close its proposed
-machine representation pending review. No extra approval, executor or login model
+The accepted Sections 1–7 own product policy; ratified Sections 8–11 close its
+machine representation. No extra approval, executor or login model
 is introduced.
 
 `spine.ownership-access-state.v1` is an internal projection, not a new command:
