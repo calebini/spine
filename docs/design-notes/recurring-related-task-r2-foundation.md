@@ -9,7 +9,9 @@ The operator authorized committing R1 and beginning R2, including the previously
 identified prospective recurrence-producer fixes. R1 is committed as `bc96a1d`;
 AGENTS.md was excluded and preserved unchanged. No push was requested.
 
-R2 changes remain uncommitted. Normal schema/package declarations remain
+This foundation was committed as `250b4fa`. The next manual-engine increment is
+tracked separately in [R2 manual engine](recurring-related-task-r2-manual-engine.md).
+Normal schema/package declarations remain
 `19` / `0.11.2`; the new family remains source-only and unregistered. Internal
 tests use explicit candidate-20 disposable ledgers and injected source schemas.
 No web route, daemon invocation, deployed ledger or delivery adapter is added.

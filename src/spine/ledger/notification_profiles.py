@@ -270,6 +270,7 @@ def insert_application(
     actor_subject_id: str,
     command_id: str,
     created_at_utc: str,
+    identity_seed: str | None = None,
 ) -> dict[str, Any]:
     connection.execute(
         """
@@ -310,7 +311,7 @@ def insert_application(
         mapping_id = command_derived_id(
             prefix="notification_profile_application_policy",
             command="schedule.create",
-            command_id=command_id,
+            command_id=identity_seed or command_id,
             row_role="notification_profile_application_policy",
             request_path=f"/notification_plan/effective/{index}",
         )

@@ -12,7 +12,6 @@ from spine import IMPLEMENTED_CONTRACT_VERSIONS
 from spine.commands.facet_runtime import FacetBudget, install_budget
 from spine.commands.receipts import command_receipt, get_command_receipt, insert_command_receipt
 from spine.commands.recurring_task_runtime import (
-    CONTRACT,
     PREFIX,
     RESPONSE,
     RecurringTaskContracts,
@@ -26,17 +25,17 @@ from spine.commands.recurring_task_runtime import (
 from spine.core.canonical_json import canonical_json_bytes
 from spine.core.errors import SpineValidationError
 from spine.core.hashing import audit_log_payload_hash, command_derived_id, hash_canonical_json
-from spine.core.recurring_tasks import derive, payload_hash
+from spine.core.recurring_tasks import CONTRACT, derive, payload_hash
 from spine.ledger.identity import read_ledger_instance_id
 from spine.ledger.notification_profiles import require_owner_exists
-from spine.ledger.recurrence import load_current_recurrence_header
+from spine.ledger.recurrence import load_current_recurrence_header, load_current_recurrence_set
 from spine.ledger.recurring_task_migration import verify_candidate_schema
 from spine.ledger.recurring_tasks import compare_and_swap, insert_record, read_record
 from spine.ledger.transactions import LedgerConnection
 from spine.services.recurring_task_configuration import normalize_configuration
 
 DELIVERY = "not_attempted_by_command"
-INTERNAL_COMMANDS = frozenset(PREFIX + name for name in ("create", "update", "retire", "show", "list"))
+INTERNAL_COMMANDS = frozenset(PREFIX + name for name in ("create", "update", "retire", "show", "list", "reconcile", "assignment.suppress"))
 
 
 class Preview(Exception):
@@ -241,7 +240,9 @@ def create(db: Any, request: dict[str, Any], context: Any, contracts: Any, now: 
     if enrollment["kind"] == "selected_occurrence":
         from spine.commands import core
 
-        recurrence = core.load_current_recurrence_set(db, item_id=source["item_id"])
+        recurrence = load_current_recurrence_set(db, item_id=source["item_id"])
+        if recurrence is None:
+            fail("environment_failure", "source")
         occurrence = core._resolve_current_occurrence(recurrence, enrollment["occurrence_key"])
         enrollment.update(selector=occurrence["target_occurrence_selector"], recurrence_revision_id=source["recurrence_revision_id"])
     revision = configuration_record(db, identity, config, request, now)
@@ -385,13 +386,14 @@ def retire(db: Any, request: dict[str, Any], root: dict[str, Any], now: str) -> 
 
 
 def read(db: Any, command: str, request: dict[str, Any], context: Any, contracts: Any, now: str) -> dict[str, Any]:
-    query = {"contract_version": CONTRACT, "ledger_instance_id": read_ledger_instance_id(db)}
+    query: dict[str, Any] = {"contract_version": CONTRACT, "ledger_instance_id": read_ledger_instance_id(db)}
     config = context.facet_cursor_config
     if command.endswith("list"):
         query.update(
             owner=request.get("owner"), source_item_id=request.get("source_item_id"), status=request["status"], limit=request["limit"]
         )
-        clauses, args = [], []
+        clauses: list[str] = []
+        args: list[Any] = []
         if request.get("owner") is not None:
             clauses.append("owner_key=?")
             args.append(canonical_json_bytes(request["owner"]).decode())
@@ -445,13 +447,15 @@ def read(db: Any, command: str, request: dict[str, Any], context: Any, contracts
     records = db.execute(
         "SELECT * FROM " + table + " WHERE " + " AND ".join(clauses) + " ORDER BY " + key + " LIMIT ?", (*args, limit + 1)
     ).fetchall()
-    rows, last = [], after
+    rows: list[dict[str, Any]] = []
+    last = after
     for record in records[:limit]:
         if purpose == "list":
             value = rule_view(db, read_record(db, table, record[key]), summary=True)
         elif purpose == "assignments":
             from spine.services.recurring_task_reads import assignment_view
 
+            assert root is not None
             value = assignment_view(db, read_record(db, table, record["assignment_id"]), root)
         else:
             value = stored_projection(db, table, record["generation_id" if purpose == "generations" else "assignment_revision_id"])
@@ -491,6 +495,7 @@ def execute(
     db, timeout = context.ledger, None
     clock = clock or (lambda: wire(datetime.now(UTC)))
     fault = fault or (lambda stage: None)
+    runtime: dict[str, Any] = {"cutoffs": [], "audit_ids": []}
     try:
         if (
             not isinstance(db, LedgerConnection)
@@ -548,7 +553,7 @@ def execute(
                         fail("environment_failure", "receipt")
                 response["replayed"] = True
                 contracts.response(command, response)
-                return response
+                return dict(response)
             now = clock()
             try:
                 if not isinstance(now, str) or wire(instant(now)) != now:
@@ -564,11 +569,23 @@ def execute(
                 result, effect, changed = create(db, value, context, contracts, now)
             else:
                 root = lookup(db, "related_task_rules", value["related_task_rule_id"], "related_task_rule_id")
+                if command == PREFIX + "reconcile":
+                    from spine.services.recurring_task_reconcile import continuation
+
+                    continuation(db, value, root, context, contracts, now)
                 expected(db, value, root)
                 if command == PREFIX + "update":
                     result, effect, changed = update(db, value, root, context, contracts, now)
                 elif command == PREFIX + "retire":
                     result, effect, changed = retire(db, value, root, now)
+                elif command == PREFIX + "assignment.suppress":
+                    from spine.services.recurring_task_states import suppress
+
+                    result, effect, changed = suppress(db, value, root, now)
+                elif command == PREFIX + "reconcile":
+                    from spine.services.recurring_task_reconcile import reconcile
+
+                    result, effect, changed = reconcile(db, value, root, context, contracts, now, runtime, fault)
                 else:
                     fail(
                         "unsupported_command",
@@ -592,9 +609,10 @@ def execute(
                     row_role="command_receipt",
                     request_path="/command_receipt",
                 )
-                audit_ids = []
+                audit_ids = list(runtime["audit_ids"])
+                source_item_id = result["rule"]["source_item_id"] if "rule" in result else root["source_item_id"]
                 if changed:
-                    root_id = result["rule"]["source_item_id"]
+                    root_id = source_item_id
                     identity = command_derived_id(
                         prefix="audit", command=command, command_id=value["command_id"], row_role="audit", request_path="/audit"
                     )
@@ -612,7 +630,7 @@ def execute(
                             now,
                         ),
                     )
-                response.update(command_id=value["command_id"], command_receipt_id=receipt_id, audit_ids=audit_ids, replayed=False)
+                response.update(command_id=value["command_id"], command_receipt_id=receipt_id, audit_ids=sorted(audit_ids), replayed=False)
                 fault("audit")
                 if context.dry_run:
                     response.update(command_receipt_id=None, audit_ids=[], dry_run=True, commit_cutoff_recheck_required=True)
@@ -626,7 +644,7 @@ def execute(
                         semantic_facts={**semantic, "normalized_result": response},
                         result_identity_facts=response,
                         command_receipt_id=receipt_id,
-                        item_id=result["rule"]["source_item_id"],
+                        item_id=source_item_id,
                         created_at_utc=now,
                     )
                     insert_command_receipt(db, receipt)
@@ -634,8 +652,9 @@ def execute(
             else:
                 response["commit_cutoff_recheck_required"] = True
             contracts.response(command, response)
-            if len(canonical_json_bytes(response)) > 1048576:
-                fail("capacity_exceeded", "response_bytes")
+            response_limit = int(value["limits"]["response_bytes"]) if command == PREFIX + "reconcile" else 1048576
+            if len(canonical_json_bytes(response)) > response_limit:
+                fail("capacity_exceeded", "limits.response_bytes" if command == PREFIX + "reconcile" else "response_bytes")
             if context.dry_run and writes:
                 db._finalize_pending()
                 raise Preview(response)
@@ -644,6 +663,8 @@ def execute(
                     commit_now = clock()
                     if wire(instant(commit_now)) != commit_now or instant(commit_now) < instant(now):
                         fail("environment_failure", "clock")
+                    if any(due <= commit_now for due in runtime["cutoffs"]):
+                        fail("stale_evaluation", "evaluated_at_utc")
                 except (TypeError, ValueError) as exc:
                     raise SpineValidationError("environment_failure:clock", "invalid commit clock") from exc
             budget.check()

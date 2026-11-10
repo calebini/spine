@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import copy
 import sqlite3
 from collections.abc import Iterator
 from contextlib import contextmanager
@@ -251,6 +252,48 @@ class LedgerConnection(sqlite3.Connection):
         if self._command_transaction or (getattr(self, "_facets_enabled", False) and self.in_transaction):
             raise RuntimeError("scripts are forbidden inside command transactions")
         return super().executescript(sql_script)
+
+    @contextmanager
+    def command_unit(self) -> Iterator[None]:
+        """Rollback one trial unit without losing the owning command's trackers.
+
+        This savepoint cannot commit independently. Python finalizer state must
+        roll back with SQLite because TEMP trigger callbacks are not transactional.
+        """
+        if not self._command_transaction or not self.in_transaction or getattr(self, "_command_unit_active", False):
+            raise RuntimeError("unit savepoint requires an owning command and cannot nest")
+        tracked = (
+            "_recurring_task_rows",
+            "_rendering_pending",
+            "_rendering_versions",
+            "_rendering_catalog",
+            "_rendering_profiles",
+            "_rendering_attempts",
+            "_facet_versions",
+            "_facet_allocations",
+            "_facet_roots",
+            "_facet_items",
+            "_facet_bindings",
+            "_facet_definitions",
+        )
+        snapshot = {key: copy.deepcopy(getattr(self, key)) for key in tracked if hasattr(self, key)}
+        self.execute("SAVEPOINT spine_command_unit")
+        self._command_unit_active = True
+        try:
+            yield
+            self.execute("RELEASE SAVEPOINT spine_command_unit")
+        except BaseException:
+            # SQLITE_INTERRUPT can already have rolled back the entire SQLite
+            # transaction. Preserve that original error, not a missing-savepoint
+            # error from an attempted second rollback.
+            if self.in_transaction:
+                self.execute("ROLLBACK TO SAVEPOINT spine_command_unit")
+                self.execute("RELEASE SAVEPOINT spine_command_unit")
+            for key, value in snapshot.items():
+                setattr(self, key, value)
+            raise
+        finally:
+            self._command_unit_active = False
 
     @contextmanager
     def atomic_command(self, *, write: bool = True) -> Iterator[None]:

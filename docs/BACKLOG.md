@@ -840,13 +840,30 @@ See [R2 foundation](design-notes/recurring-related-task-r2-foundation.md).
 **Verification so far:** Full regression run **1,322 passed / one skipped**;
 final focused run **88 passed**, including 17 new foundation tests. Focused Ruff,
 changed pure-module mypy, documentation targets and diff hygiene pass. R2 changes
-remain uncommitted; no push, live migration, deployment or external audit.
-**Remaining:** Manual reconcile and assignment suppression, real task/owner/binding/
-policy/work generation, source-follow/cancel/restore, three-way adoption and cleanup,
-complete per-unit/page budgets, due-time commit cutoffs and their concurrency/
-rollback matrices. R2 is **not complete**; no R2 end-to-end obligation is closed
-merely by the foundation tests.
-**Next:** Continue the manual reconciliation/lifecycle engine against these tested
+were committed as `250b4fa`; no push, live migration, deployment or external audit.
+**Continued progress:** The subsequent increment executes internal manual
+reconcile/suppression and real ordinary child/owner/binding/profile/policy/work
+composition. Selected source move/exclusion/restoration, terminal veto, three-way
+adoption, intent conflict resolution and retirement cases now have real transaction
+tests. Whole-unit work boundaries restore SQLite and Python finalizer state together.
+See [manual-engine evidence and precise exit gaps](design-notes/recurring-related-task-r2-manual-engine.md).
+**Latest verification:** Full suite **1,344 tests, OK (one skipped)**; selected
+R1/R2/contracts/transactions **91 tests, OK**; overlapping writer parity/lifecycle
+selection **73 tests, OK**. All 80 offline artifacts reproduce. Focused Ruff,
+nine-file strict typing, compilation, documentation links and diff hygiene pass.
+New writer inventories have actual empty/eight-facet and people/rendering parity
+coverage. No normal schema/package/public activation changed.
+**Remaining:** Exact byte-driven continuation and combined-budget accounting,
+complete restoration/custom-policy and managed-set matrices, intent/coverage and
+error-precedence closure, replay evidence and physical concurrency tests. The local
+ownership epoch/bootstrap direction was selected by the operator: define
+realm-independent trusted-local initialization, not implicit web provisioning.
+The [bootstrap draft](../specs/local-ownership-bootstrap.md) is now written;
+ratification and machine/migration closure remain before its implementation.
+R2 is **not complete**; selected passing tests do not close an
+entire RRT obligation or authorize R3/R4.
+**Next:** Operator authorized the remaining R2 implementation on 2026-11-10.
+Continue the manual reconciliation/lifecycle engine against these tested
 foundations. Preserve immutable history and the R4-only public activation boundary.
 
 ### SPINE-094 — R3: recurring-task all-writer safety and automatic scheduling

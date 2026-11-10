@@ -5,6 +5,7 @@ from __future__ import annotations
 import calendar
 import re
 import struct
+from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import UTC, date, datetime, time, timedelta
 from functools import lru_cache
@@ -226,6 +227,7 @@ def expand_rule(
     timezone_database_version: str | None = None,
     segment_start: str | None = None,
     segment_end: str | None = None,
+    spend_work: Callable[[], None] | None = None,
 ) -> ExpandedRule:
     """Expand one normalized rule into a bounded original candidate stream."""
 
@@ -267,7 +269,11 @@ def expand_rule(
         return ExpandedRule(candidates=(), omitted_local_candidates=())
     stop_for_count = False
     for period in _active_periods(normalized, seek_bound, generation_end, time_basis):
+        if spend_work is not None:
+            spend_work()
         for scheduled_fact in _period_candidates(normalized, period, time_basis):
+            if spend_work is not None:
+                spend_work()
             if scheduled_fact >= range_end or scheduled_fact > generation_end:
                 continue
             if scheduled_fact < normalized.seed or scheduled_fact < normalized.start_bound:

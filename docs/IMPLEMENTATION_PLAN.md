@@ -110,10 +110,19 @@ ownership: RRT-01/04/05/18; prerequisites for all later transactional tests.
 
 **Progress (2026-11-10):** The initial internal increment implements the prospective
 recurrence-producer fixes plus rule authoring/read/replay/cursor foundations.
-It does not yet implement reconcile, suppression or generated-task lifecycle.
+That foundation was committed as `250b4fa`. The subsequent uncommitted increment
+adds internal reconciliation/suppression and actual generated-task lifecycle paths;
+see [manual-engine evidence and remaining exit work](design-notes/recurring-related-task-r2-manual-engine.md).
 See [R2 foundation evidence and remaining work](design-notes/recurring-related-task-r2-foundation.md).
-The exit criteria below remain unchanged; five internal handlers are not a claim
-of an implemented seven-command family.
+The exit criteria below remain unchanged; internal handler paths and selected
+passing cases are not a claim of a fully conforming or publicly implemented family.
+
+**Selected dependency (2026-11-10):** define realm-independent local ownership
+bootstrap so scheduling does not require web identity setup. The
+[bootstrap draft](../specs/local-ownership-bootstrap.md) reuses the canonical access
+epoch, forbids implicit accounts/grants and preserves explicit later web promotion.
+Close its source/machine/migration contract before replacing the prototype's
+unconfigured-ledger refusal; do not silently add a realm or activation flag.
 
 Implement all seven command handlers internally using the shared command context
 and one outer transaction, not recursive public-command submissions or child

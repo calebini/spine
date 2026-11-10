@@ -13,6 +13,7 @@
     "item_version_from_draft"
   ],
   "transaction_entrypoints": [
+    "spine.commands.recurring_tasks.execute",
     "spine.commands.facets.execute",
     "spine.commands.core._dispatch_atomic",
     "spine.commands.people_candidate.execute",
@@ -38,6 +39,20 @@
     "qualification": "Local writer parity only; PR-01 through PR-16 are not globally closed."
   },
   "producers": [
+    {
+      "producer_key": "src/spine/services/recurring_task_children.py:create",
+      "entrypoint": "internal schema-20 recurring-task generation; not public dispatch",
+      "allocation_calls": ["create_task_v1"],
+      "finalizer": "spine.ledger.facets.finalize",
+      "test_ids": ["tests/test_recurring_task_reconcile.py::RecurringTaskReconcileTests::test_moved_source_follows_same_task_and_binding"]
+    },
+    {
+      "producer_key": "src/spine/services/recurring_task_children.py:change",
+      "entrypoint": "internal schema-20 recurring-task successor; not public dispatch",
+      "allocation_calls": ["create_next_item_version"],
+      "finalizer": "spine.ledger.facets.finalize",
+      "test_ids": ["tests/test_recurring_task_reconcile.py::RecurringTaskReconcileTests::test_moved_source_follows_same_task_and_binding"]
+    },
     {
       "producer_key": "src/spine/ledger/people_authoring.py:replace_people",
       "entrypoint": "private people replacement (outer command transaction required)",

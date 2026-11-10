@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import base64
+from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import UTC, date, datetime, timedelta
 from typing import Any, NoReturn
@@ -35,6 +36,7 @@ def expand_recurrence_set(
     range_end: str,
     range_basis: str = "original_schedule",
     include_diagnostics: bool = False,
+    spend_work: Callable[[], None] | None = None,
 ) -> ExpandedRecurrenceSet:
     """Expand one normalized recurrence revision before item-detail decoration."""
 
@@ -62,6 +64,8 @@ def expand_recurrence_set(
     if not isinstance(rules, list):
         _invalid("rules", "must be an array")
     for rule_index, rule in enumerate(rules):
+        if spend_work is not None:
+            spend_work()
         if not isinstance(rule, dict) or rule.get("status") != "active":
             continue
         segment = _segment_for_child(rule, segments, field=f"rules[{rule_index}].segment_id")
@@ -78,6 +82,7 @@ def expand_recurrence_set(
                 timezone_database_version=timezone_version,
                 segment_start=_required_text(segment, "active_start"),
                 segment_end=_optional_text(segment.get("active_end")),
+                spend_work=spend_work,
             )
             for candidate in expanded.candidates:
                 bucket = _bucket(buckets, segment_ref, candidate.scheduled_fact, segment)
@@ -107,6 +112,8 @@ def expand_recurrence_set(
     if not isinstance(rdates, list):
         _invalid("rdates", "must be an array")
     for rdate_index, rdate in enumerate(rdates):
+        if spend_work is not None:
+            spend_work()
         if not isinstance(rdate, dict) or rdate.get("status") != "active":
             continue
         segment = _segment_for_child(rdate, segments, field=f"rdates[{rdate_index}].segment_id")

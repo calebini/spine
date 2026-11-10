@@ -1,0 +1,145 @@
+"""Three-way managed-field comparison and immutable bounded intent outcomes."""
+
+from __future__ import annotations
+
+import copy
+from typing import Any
+
+from spine.ledger.notification_profiles import current_assignment
+from spine.ledger.recurring_tasks import insert_record, read_record, row
+from spine.ledger.rendering_definitions import load_presentation
+from spine.services import recurring_task_children as children
+from spine.services.primary_locations import canonical_location_facts
+
+
+def fields(config: dict[str, Any]) -> dict[str, Any]:
+    item = config["task_template"]["item"]
+    return {
+        **{k: item[k] for k in ("title", "summary", "source_ref", "archetype", "primary_location")},
+        "priority": item["task_detail"]["priority"],
+        "assignees": config["task_template"]["people"]["assignees"],
+        "offset_seconds": config["offset_seconds"],
+        "materialization": config["materialization"],
+        "reminders": [config["notification_plan"], config["delivery"]],
+    }
+
+
+def policy_matches(db: Any, current: dict[str, Any], generation: dict[str, Any], config: dict[str, Any]) -> bool:
+    expected = {e["policy_key"]: e for e in (config["notification_plan"] or {}).get("resolved", {}).get("effective_templates", [])}
+    actual = children.mappings(db, "comparison-only", generation, config)
+    if {p["policy_key"] for p in actual} != set(expected):
+        return False
+    policies = {p["notification_policy_id"]: p for p in current["notification_policies"]}
+    route = (config["delivery"] or {}).get("resolved", {})
+    for mapping in actual:
+        policy, selected = policies[mapping["notification_policy_id"]], expected[mapping["policy_key"]]
+        if (
+            policy["schedule"] != selected["template"]["schedule"]
+            or policy["late_handling"] != selected["template"]["late_handling"]
+            or policy["delivery_target_id"] != route["delivery_target_id"]
+            or load_presentation(db, policy["notification_policy_id"]) != selected["presentation"]
+        ):
+            return False
+    return True
+
+
+def comparison(
+    page: Any,
+    assignment: dict[str, Any],
+    generation: dict[str, Any],
+    state: dict[str, Any],
+    current: dict[str, Any],
+    binding: dict[str, Any],
+    desired: dict[str, Any],
+) -> tuple[dict[str, Any], bool]:
+    """D=B first is deliberate: an unrelated update preserves individual exceptions."""
+    base = fields(state["managed_baseline"])
+    wanted = fields(desired)
+    observed = {
+        **{k: current["version"][k] for k in ("title", "summary", "source_ref")},
+        "priority": current["detail"]["priority"],
+        "assignees": sorted({r["subject_id"] for r in current["subject_roles"] if r["role"] == "assignee" and r["status"] == "active"}),
+        "offset_seconds": binding["latest_revision"]["offset_seconds"],
+        "materialization": base["materialization"],
+    }
+    archetype = current_assignment(page.db, item_id=generation["task_item_id"], item_version=int(current["current_version"]))
+    observed["archetype"] = (
+        None
+        if archetype is None
+        else {
+            "item_archetype_id": archetype["item_archetype_id"],
+            "item_archetype_revision_id": archetype["item_archetype_revision_id"],
+            "revision_resolution": "exact",
+        }
+    )
+    location = next((v for v in current["locations"] if v["role"] == "primary"), None)
+    observed["primary_location"] = None if location is None else {"mode": "reference", "location_id": location["location_id"]}
+    for expected in (base["primary_location"], wanted["primary_location"]):
+        if expected is not None and expected["mode"] == "inline" and location is not None:
+            normalized = {"mode": "inline", **canonical_location_facts(location)}
+            if normalized == expected:
+                observed["primary_location"] = copy.deepcopy(expected)
+    observed["reminders"] = (
+        base["reminders"]
+        if policy_matches(page.db, current, generation, state["managed_baseline"])
+        else (wanted["reminders"] if policy_matches(page.db, current, generation, desired) else {"independent_change": True})
+    )
+    patch = {}
+    for key, value in wanted.items():
+        if value == base[key]:
+            continue
+        if observed[key] != base[key] and observed[key] != value:
+            return {}, True
+        if observed[key] != value:
+            patch[key] = copy.deepcopy(value)
+    return patch, False
+
+
+def outcome(page: Any, intent: dict[str, Any], assignment: dict[str, Any], state_id: str, result: str, reason: str) -> None:
+    """Retain the first conflict fact; subsequent resolution is current-state evidence."""
+    if row(page.db, "related_task_intent_outcomes", intent["intent_id"], assignment["assignment_id"]) is None:
+        insert_record(
+            page.db,
+            "related_task_intent_outcomes",
+            {
+                "intent_id": intent["intent_id"],
+                "assignment_id": assignment["assignment_id"],
+                "assignment_revision_id": state_id,
+                "outcome": result,
+                "reason": reason,
+                "command_id": page.request["command_id"],
+                "created_at_utc": page.now,
+            },
+        )
+        page.changed = True
+
+
+def complete(page: Any, intent: dict[str, Any]) -> bool:
+    """Indexed missing-outcome seek, then bounded conflict-resolution evidence."""
+    unresolved = page.db.execute(
+        "SELECT 1 FROM related_task_assignments a LEFT JOIN related_task_intent_outcomes o "
+        "ON o.assignment_id=a.assignment_id AND o.intent_id=? WHERE a.related_task_rule_id=? AND a.assignment_seq<=? "
+        "AND o.assignment_id IS NULL LIMIT 1",
+        (intent["intent_id"], page.root["related_task_rule_id"], int(intent["assignment_high_water"])),
+    ).fetchone()
+    if unresolved:
+        return False
+    conflicts = page.db.execute(
+        "SELECT assignment_id FROM related_task_intent_outcomes WHERE intent_id=? AND outcome='conflict' LIMIT ?",
+        (intent["intent_id"], page.budget.steps + 1),
+    ).fetchall()
+    page.budget.spend(len(conflicts))
+    for conflict in conflicts:
+        assignment = read_record(page.db, "related_task_assignments", conflict["assignment_id"])
+        state = read_record(page.db, "related_task_assignment_revisions", assignment["current_assignment_revision_id"])["state_json"]
+        if state.get("pending_intent_id") != intent["intent_id"]:
+            return False
+        if (
+            state["adopted_rule_revision_id"] != intent["configuration_revision_id"]
+            and not state["restoration_veto"]
+            and state["reason"] != "due_not_future"
+        ):
+            return False
+    page.db.execute("UPDATE related_task_intents SET status='complete' WHERE intent_id=? AND status='pending'", (intent["intent_id"],))
+    page.changed = True
+    return True

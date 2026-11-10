@@ -52,6 +52,44 @@ class LedgerTransactionTests(unittest.TestCase):
         self.assertFalse(self.db.in_transaction)
         self.assertEqual(self.db.execute("SELECT value FROM values_for_test").fetchall(), [(2,)])
 
+    def test_unit_requires_outer_owner_and_never_commits_or_nests(self) -> None:
+        with self.assertRaisesRegex(RuntimeError, "owning command"), self.db.command_unit():
+            pass
+        with self.db.atomic_command():
+            self.db.execute("INSERT INTO values_for_test VALUES (1)")
+            with self.assertRaisesRegex(RuntimeError, "cannot nest"), self.db.command_unit(), self.db.command_unit():
+                pass
+            with self.assertRaisesRegex(RuntimeError, "outer command"), self.db.command_unit():
+                self.db.execute("INSERT INTO values_for_test VALUES (2)")
+                self.db.commit()
+            self.assertTrue(self.db.in_transaction)
+            self.assertEqual(self.db.execute("SELECT value FROM values_for_test").fetchall(), [(1,)])
+        self.assertEqual(self.db.execute("SELECT value FROM values_for_test").fetchall(), [(1,)])
+
+    def test_unit_restores_sql_and_python_trackers_after_exception(self) -> None:
+        self.db._facet_versions = {("old", 1)}
+        self.db._rendering_pending = {"old": {"kind": "ordinary"}}
+        with self.db.atomic_command():
+            self.db.execute("INSERT INTO values_for_test VALUES (1)")
+            with self.assertRaisesRegex(RuntimeError, "unit failed"), self.db.command_unit():
+                self.db.execute("INSERT INTO values_for_test VALUES (2)")
+                self.db._facet_versions.add(("rolled-back", 1))
+                self.db._rendering_pending["old"]["kind"] = "uncommitted"
+                raise RuntimeError("unit failed")
+            self.assertEqual(self.db._facet_versions, {("old", 1)})
+            self.assertEqual(self.db._rendering_pending, {"old": {"kind": "ordinary"}})
+        self.assertEqual(self.db.execute("SELECT value FROM values_for_test").fetchall(), [(1,)])
+
+    def test_interrupted_unit_preserves_original_sqlite_error(self) -> None:
+        with self.assertRaisesRegex(sqlite3.OperationalError, "interrupted"), self.db.atomic_command(), self.db.command_unit():
+            self.db.set_progress_handler(lambda: 1, 1)
+            try:
+                self.db.execute("INSERT INTO values_for_test VALUES (1)")
+            finally:
+                self.db.set_progress_handler(None, 0)
+        self.assertFalse(self.db.in_transaction)
+        self.assertEqual(self.db.execute("SELECT value FROM values_for_test").fetchall(), [])
+
 
 if __name__ == "__main__":
     unittest.main()

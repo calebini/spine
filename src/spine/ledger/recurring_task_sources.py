@@ -7,6 +7,7 @@ No item, selector or provenance repair is performed by these proof functions.
 from __future__ import annotations
 
 import sqlite3
+from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from typing import Any
@@ -22,9 +23,12 @@ from spine.core.schedule import _valid_candidate_count_between, expand_rule, nor
 class ProofBudget:
     steps: int = 10000
     hops: int = 64
+    on_exhausted: Callable[[bool], None] | None = None
 
     def spend(self, amount: int = 1, *, hop: bool = False) -> None:
         if amount < 0 or amount > self.steps or (hop and self.hops < 1):
+            if self.on_exhausted is not None:
+                self.on_exhausted(hop and self.hops < 1)
             raise SpineValidationError("source_continuity_unresolved", "bounded source proof exhausted")
         self.steps -= amount
         if hop:

@@ -175,7 +175,12 @@ class RenderingStorageTests(foundation.RenderingFoundationTests):
                 try:
                     type(case).setUpClass()
                     case.setUp()
-                    install_candidate(case.connection, disposable_test_ledger=True)
+                    if getattr(case.connection, "_recurring_tasks_enabled", False):
+                        # Candidate 20 is additive over rendering storage. Do not
+                        # run a predecessor migration backwards over that ledger.
+                        verify_candidate_schema(case.connection)
+                    else:
+                        install_candidate(case.connection, disposable_test_ledger=True)
                     getattr(case, method)()
                     verify_deep(case.connection)
                 finally:
