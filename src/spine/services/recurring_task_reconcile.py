@@ -551,8 +551,6 @@ def reconcile(
         )
         root = read_record(db, "related_task_rules", root["related_task_rule_id"])
         advance_catalog(db)
-    if page.owners and db.execute("UPDATE ledger_access_state SET access_epoch=access_epoch+1 WHERE singleton_id=1").rowcount != 1:
-        fail("environment_failure", "ownership", "existing ledger access state is required for an owner epoch")
     more, blocked = existing_more or source_more, any(v["outcome"] == "decision_required" for v in page.results)
     adoption = pending_adoption(db, root["related_task_rule_id"])
     intent = intent_view(db, selected_intent["intent_id"]) if selected_intent else None

@@ -17,6 +17,7 @@ from spine.ledger.common import TemporalAnchorInput
 from spine.ledger.items import create_next_item_version, create_task_v1
 from spine.ledger.notification_profiles import insert_application, insert_assignment, load_archetype, load_profile, require_owner_exists
 from spine.ledger.notifications import insert_notification_schedule_policy, load_notification_policies_at_version
+from spine.ledger.ownership import advance_ownership_epoch
 from spine.ledger.relations import create_item_relation
 from spine.ledger.rendering_definitions import select_presentation
 from spine.ledger.supporting import ItemLocationInput, ItemSubjectRoleInput
@@ -163,6 +164,8 @@ def create(
 
     def extension(connection: Any) -> None:
         fault("task")
+        advance_ownership_epoch(connection)
+        fault("ownership_state")
         connection.execute(
             "INSERT INTO item_access_owners VALUES(?,?,1,?,?,?,NULL,?)",
             (task_id, owner_id, owner["owner_kind"], owner.get("owner_subject_id"), owner.get("owner_group_id"), outer),

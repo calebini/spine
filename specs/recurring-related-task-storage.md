@@ -284,8 +284,8 @@ The unconfigured-ledger epoch initialization seam is the subject of the separate
 [trusted-local ownership bootstrap](local-ownership-bootstrap.md). The
 operator selected realm-independent initialization on 2026-11-10. That amendment
 was ratified on 2026-11-10; its state/migration/provisioning machine package is
-ratified source-only pending implementation before changing this accepted
-family's runtime bootstrap behavior.
+ratified and implemented behind the internal R2 candidate boundary. Public-family
+activation and the remaining R2/R3/R4 proofs are still separate gates.
 
 The ordering is task/owner/history, then concrete child profile/presentation
 validation and policy/application rows, then selected work, audit/receipt, one

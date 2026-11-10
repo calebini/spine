@@ -129,9 +129,12 @@ The [source-only descriptor](../contracts/local-ownership-bootstrap.v1.json) and
 define ratified source-only state/provisioning-v3 schemas, migration blueprint and
 offline witnesses. Following the clean focused recheck, the operator ratified the
 machine package on 2026-11-10 and selected its implementation within R2.
-Implement the migration/primitive/promotion
-and actual rollback/concurrency/admission tests before replacing the prototype's
-unconfigured-ledger refusal. Do not silently add a realm or activation flag.
+Ratification was committed as `232944b`. The internal candidate now implements
+the migration/primitive/promotion boundary with actual rollback, race and admission
+tests; see [ownership bootstrap checkpoint](design-notes/ownership-bootstrap-r2-checkpoint.md).
+No public package/schema or runtime registry activation is included. Remaining R2
+byte/combined-budget, restoration/custom-policy, intent/coverage, replay and wider
+concurrency matrices remain separate work; this does not close R2 or authorize R3.
 
 Implement all seven command handlers internally using the shared command context
 and one outer transaction, not recursive public-command submissions or child

@@ -938,11 +938,35 @@ Implement the coherent unpublished candidate migration, transaction/savepoint-sa
 primitive, internal v3 explicit promotion and actual fault/concurrency/admission
 tests. Public package/schema/HTTP activation remains R4; no live ledger, deployment
 or push is authorized. The unrelated `AGENTS.md` change remains excluded.
+**Ownership bootstrap implementation checkpoint (2026-11-10):** Ratification
+committed as `232944b`; the following runtime increment is uncommitted. Internal
+candidate 20 now rebuilds the existing access-state table atomically, preserves
+configured rows/FK targets/trigger definitions, and restores FK enforcement on
+every failure. The pre-owner primitive creates a local epoch without any realm,
+account or grant and consumes one epoch per outer transaction; unit/outer rollback
+restores its marker with SQL. The old page-end second increment is removed.
+Explicitly injected v3 planning/apply implements state-bound promotion, replay,
+freshness, no-lockout and bounded overflow handling; ordinary v1/v2/HTTP dispatch
+does not load or advertise v3. See [implementation evidence and limits](design-notes/ownership-bootstrap-r2-checkpoint.md).
+**Verification:** Final full regression: **1,370 tests, OK (one skipped)**,
+328.648 seconds. Selected actual/bootstrap/frozen-contract run: **65 passed**;
+final actual-bootstrap rerun: **16 passed**; final complete-tree selection including
+strict rendering parity: **66 passed**. Four new modules pass focused typing
+(uninstalled third-party JSON Schema stubs excluded); focused Ruff, frozen web
+copy, documentation links and diff hygiene pass. Initial full run exposed one
+rendering parity harness using the predecessor verifier on the new candidate;
+it now selects the strict recurring candidate verifier, and the full rerun passes.
+Standalone parity execution needs `PYTHONPATH=src:tests` for existing legacy test
+imports; no unrelated imports or verifiers were weakened. Existing non-fatal
+budget-trace/timezone-substitution diagnostics appeared. Wheel tooling is absent;
+only the existing candidate SQL package-data rule was verified, not an actual wheel.
+No public package/schema/declarations, old migration, live ledger, worker activation,
+delivery or deployment changed. R2's remaining exit work below is not closed.
 R2 is **not complete**; selected passing tests do not close an
 entire RRT obligation or authorize R3/R4.
 **Next:** Operator authorized the remaining R2 implementation on 2026-11-10.
-Commit the ratification checkpoint, then implement the ownership bootstrap internally,
-then continue the manual reconciliation/lifecycle engine against these tested
+The operator requested checkpointing the ownership-bootstrap increment and continuing
+the remaining R2 implementation. Continue the manual reconciliation/lifecycle engine exit work against these tested
 foundations. Preserve immutable history and the R4-only public activation boundary.
 
 ### SPINE-094 — R3: recurring-task all-writer safety and automatic scheduling

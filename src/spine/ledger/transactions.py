@@ -18,6 +18,8 @@ class LedgerConnection(sqlite3.Connection):
     """Normal SQLite behavior locally; an explicit service scope owns commit."""
 
     _command_transaction: bool = False
+    _command_write: bool = False
+    _ownership_epoch_consumed: bool = False
 
     def enable_recurring_tasks(self) -> None:
         """Internal candidate only: validate touched new-family rows at commit."""
@@ -163,6 +165,7 @@ class LedgerConnection(sqlite3.Connection):
             self._facet_producer = None
 
     def _clear_facets(self) -> None:
+        self._ownership_epoch_consumed = False
         if getattr(self, "_recurring_tasks_enabled", False):
             self._recurring_task_rows.clear()
         if getattr(self, "_renderings_enabled", False):
@@ -263,6 +266,7 @@ class LedgerConnection(sqlite3.Connection):
         if not self._command_transaction or not self.in_transaction or getattr(self, "_command_unit_active", False):
             raise RuntimeError("unit savepoint requires an owning command and cannot nest")
         tracked = (
+            "_ownership_epoch_consumed",
             "_recurring_task_rows",
             "_rendering_pending",
             "_rendering_versions",
@@ -301,6 +305,8 @@ class LedgerConnection(sqlite3.Connection):
             raise RuntimeError("command transaction requires an idle connection")
         self.execute("BEGIN IMMEDIATE" if write else "BEGIN")
         self._command_transaction = True
+        self._command_write = write
+        self._ownership_epoch_consumed = False
         try:
             yield
             # A deferred foreign key failure here also rolls the whole command back.
@@ -311,3 +317,5 @@ class LedgerConnection(sqlite3.Connection):
             raise
         finally:
             self._command_transaction = False
+            self._command_write = False
+            self._ownership_epoch_consumed = False

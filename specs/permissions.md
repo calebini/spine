@@ -84,7 +84,8 @@ The ratified [trusted-local ownership bootstrap](local-ownership-bootstrap.md)
 separates initialization of the existing ownership access epoch from web realm/
 account provisioning. It defines one closed local posture in the existing state
 table, not another owner/epoch model or broader web authority. The design is
-accepted; its source-only machine/migration package is ratified, not implemented.
+accepted; its machine/migration package is ratified and implemented behind the
+internal R2 candidate boundary, not publicly activated.
 Existing released wire/storage contracts remain unchanged until activation.
 
 Catalogs, bindings, and delivery targets reuse their existing canonical owner facts;

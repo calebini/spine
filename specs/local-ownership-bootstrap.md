@@ -1,6 +1,6 @@
 # Trusted-Local Ownership Bootstrap
 
-Status: Accepted v1.0.0 — ratified design and machine contracts; source-only, not implemented
+Status: Accepted v1.0.0 — ratified; internal R2 candidate implementation, public activation pending
 Created: 2026-11-10
 Ratified: 2026-11-10, following the bounded consistency review
 Machine contracts ratified: 2026-11-10, following the full review and clean focused recheck
@@ -21,10 +21,11 @@ continues to own generated task/owner/history ordering. This accepted leaf defin
 narrow amendment to their ownership-epoch initialization seam, not a second owner
 model, a second epoch authority or activation of a new command family.
 
-Existing implemented declarations, schema versions, source machine contracts and
-runtime behavior remain unchanged until this amendment's machine/migration gates
-are complete. The current internal recurring-task prototype still fails closed
-when access state is absent. Ratification does not activate its replacement.
+Released declarations, schema versions and public behavior remain unchanged.
+The explicit internal R2 candidate now implements the realm-independent bootstrap
+and injected v3 provisioning path. Its actual evidence and remaining activation
+boundary are recorded in the [R2 checkpoint](../docs/design-notes/ownership-bootstrap-r2-checkpoint.md).
+This does not activate a public migration, CLI/HTTP capability or automatic worker.
 
 ## 2. Invariants
 

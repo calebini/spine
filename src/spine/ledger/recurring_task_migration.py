@@ -9,7 +9,15 @@ from collections.abc import Callable
 from importlib import resources
 
 from spine.core.recurring_tasks import invariant
+from spine.ledger.facets import verify_all
+from spine.ledger.identity import read_ledger_instance_id
+from spine.ledger.ownership import read_access_state
+from spine.ledger.ownership_migration import RESOURCE as OWNERSHIP_RESOURCE
+from spine.ledger.ownership_migration import rebuild_access_state
 from spine.ledger.preflight import expected_schema_objects, verify_runtime_schema
+from spine.ledger.recurring_tasks import verify_deep
+from spine.ledger.rendering_definitions import verify_deep as verify_rendering_deep
+from spine.ledger.sqlite import assert_ledger_invariants
 from spine.ledger.transactions import LedgerConnection
 
 CANDIDATE_SCHEMA_VERSION = 20
@@ -40,6 +48,8 @@ def verify_candidate_schema(db: sqlite3.Connection) -> None:
     )
     migration = resources.files("spine.ledger.migrations").joinpath(MIGRATION).read_bytes()
     invariant(hashlib.sha256(migration).hexdigest() == manifest["migration_sha256"], "recurring-task migration drift")
+    ownership = resources.files("spine.ledger").joinpath(OWNERSHIP_RESOURCE).read_bytes()
+    invariant(hashlib.sha256(ownership).hexdigest() == manifest["ownership_bootstrap_sha256"], "ownership migration drift")
     expected = {obj.name: (obj.object_type, obj.definition_sha256) for obj in expected_schema_objects(version=19)}
     expected.update({obj["name"]: (obj["object_type"], obj["definition_sha256"]) for obj in manifest["objects"]})
     for name, (kind, digest) in expected.items():
@@ -72,7 +82,7 @@ def install_candidate(
     applied_at_utc: str = "1970-01-01T00:00:00Z",
     fault: Callable[[str], None] | None = None,
 ) -> None:
-    """One atomic additive migration, only on explicitly disposable test ledgers.
+    """One atomic candidate migration, only on explicitly disposable test ledgers.
 
     Normal initialization, CURRENT_SCHEMA_VERSION and migrate_schema remain 19.
     Recording candidate 20 ensures ordinary old writers refuse this ledger.
@@ -86,19 +96,28 @@ def install_candidate(
         return
     verify_runtime_schema(db, expected_version=19)
     inject = fault or (lambda stage: None)
-    db.execute("BEGIN EXCLUSIVE")
+    invariant(db.execute("PRAGMA foreign_keys").fetchone()[0] == 1, "foreign keys must be enabled")
+    db.execute("PRAGMA foreign_keys=OFF")
     try:
+        db.execute("BEGIN IMMEDIATE")
         verify_runtime_schema(db, expected_version=19)
-        invariant(db.execute("PRAGMA foreign_keys").fetchone()[0] == 1, "foreign keys must remain enabled")
         invariant(not db.execute("PRAGMA foreign_key_check").fetchall(), "predecessor foreign-key check failed")
         invariant(db.execute("PRAGMA integrity_check").fetchone()[0] == "ok", "predecessor integrity check failed")
         inject("preflight")
+        rebuild_access_state(db, inject)
         script = resources.files("spine.ledger.migrations").joinpath(MIGRATION).read_text()
         for statement in statements(script):
             db.execute(statement)
         inject("ddl")
         verify_candidate_schema(db)
+        read_ledger_instance_id(db)
+        read_access_state(db)
         invariant(not db.execute("PRAGMA foreign_key_check").fetchall(), "candidate foreign-key check failed")
+        invariant(db.execute("PRAGMA integrity_check").fetchone()[0] == "ok", "candidate integrity check failed")
+        assert_ledger_invariants(db)
+        verify_all(db)
+        verify_rendering_deep(db)
+        verify_deep(db)
         inject("verified")
         db.execute("INSERT INTO ledger_schema VALUES (?,?)", (CANDIDATE_SCHEMA_VERSION, applied_at_utc))
         inject("activation")
@@ -106,4 +125,7 @@ def install_candidate(
     except BaseException:
         db.rollback()
         raise
+    finally:
+        db.execute("PRAGMA foreign_keys=ON")
+        invariant(db.execute("PRAGMA foreign_keys").fetchone()[0] == 1, "foreign key enforcement restoration failed")
     attach_candidate(db)

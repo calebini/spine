@@ -3,8 +3,14 @@
   "predecessor_schema_version": "19",
   "candidate_schema_version": "20",
   "activation": "internal_candidate_only",
+  "ownership_bootstrap_sha256": "fade61fec3ccaacf0a3293dc248f7684143c2666c3fb5d7b579656833f83e39e",
   "migration_sha256": "210a00f24000f0d3711c18af1025c9b0dff1d844d4da6437256da7082448e19a",
   "objects": [
+    {
+      "name": "ledger_access_state",
+      "object_type": "table",
+      "definition_sha256": "e0c53b300b7a0347dd101fac753a762349d9ff83b16c08be752ebf95098648a8"
+    },
     {
       "name": "related_task_assignment_revisions",
       "object_type": "table",

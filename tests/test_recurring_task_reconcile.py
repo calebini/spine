@@ -434,14 +434,16 @@ class RecurringTaskReconcileTests(unittest.TestCase):
                 self.assertEqual((result["error"]["code"], result["error"]["field"]), ("capacity_exceeded", expected))
                 self.assertEqual(base.dump(self.db), before)
 
-    def test_generation_does_not_invent_access_realm(self):
+    def test_generation_bootstraps_epoch_without_inventing_access_realm(self):
         with self.db.atomic_command(write=True):
             self.db.execute("DELETE FROM ledger_access_state")
         rule = self.created()["result"]["rule"]
-        before = base.dump(self.db)
-        failed = self.run_command("reconcile", self.write("reconcile", rule, limits={}))
-        self.assertEqual(failed["error"]["field"], "ownership")
-        self.assertEqual(base.dump(self.db), before)
+        result = self.run_command("reconcile", self.write("reconcile", rule, limits={}))
+        self.assertTrue(result["ok"], result)
+        state = self.db.execute("SELECT mode,realm_id,identity_mode,access_epoch FROM ledger_access_state").fetchone()
+        self.assertEqual(tuple(state), ("trusted_local", None, None, 1))
+        for table in ("login_accounts", "web_operators", "subject_memberships", "access_grants"):
+            self.assertEqual(self.db.execute(f"SELECT COUNT(*) FROM {table}").fetchone()[0], 0)
 
     def test_work_budget_stops_between_units_and_rolls_back_finalizer_trackers(self):
         request = self.request()

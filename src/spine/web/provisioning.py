@@ -4,11 +4,12 @@ from __future__ import annotations
 
 import os
 import sqlite3
-from typing import Any
+from typing import Any, cast
 
 from spine.commands.receipts import command_derived_id, command_receipt, get_command_receipt, insert_command_receipt
 from spine.core.canonical_json import canonical_json_bytes
 from spine.core.hashing import hash_canonical_json
+from spine.ledger.transactions import LedgerConnection
 from spine.web.contracts import validate
 from spine.web.errors import WebError
 from spine.web.history import record
@@ -38,16 +39,30 @@ def epoch(db: sqlite3.Connection) -> int:
     return int(row[0]) if row else 0
 
 
-def plan(db: sqlite3.Connection, request: dict[str, Any], *, realm: str = "local") -> dict[str, Any]:
+def plan(db: sqlite3.Connection, request: dict[str, Any], *, realm: str = "local", bootstrap: Any = None) -> dict[str, Any]:
+    successor = request.get("contract_version") == "spine.trusted-web-provisioning.v3" and bootstrap is not None
     version = ".v2" if request.get("contract_version") == "spine.trusted-web-provisioning.v2" else ""
-    validate(f"trusted-web-provisioning-plan-request{version}.schema.json", request)
+    if successor:
+        bootstrap.admit(db)
+        bootstrap.validate("provisioning-plan-request.v3", request)
+        ledger = cast(LedgerConnection, db)  # admit() proved the candidate connection type.
+        if not ledger.in_transaction:
+            with ledger.atomic_command(write=False):
+                return plan(db, request, bootstrap=bootstrap)
+        if not ledger._command_transaction:
+            raise WebError("admission_unavailable")
+        realm = request["realm_id"]
+    else:
+        validate(f"trusted-web-provisioning-plan-request{version}.schema.json", request)
     normalized = dict(request)
     for key in ARRAYS:
         normalized[key] = sorted(request.get(key, []), key=canonical_json_bytes)
     if sum(len(normalized[k]) for k in ARRAYS) > 100:
         raise WebError("capacity_exceeded")
-    state = db.execute("SELECT * FROM ledger_access_state WHERE singleton_id=1").fetchone()
-    if state and (state["ledger_id"] != request["ledger_id"] or state["realm_id"] != realm):
+    state = bootstrap.state(db) if successor else db.execute("SELECT * FROM ledger_access_state WHERE singleton_id=1").fetchone()
+    if state and (state["ledger_id"] != request["ledger_id"]
+                  or (state["mode"] != "trusted_local" and state["realm_id"] != realm)
+                  or (not successor and state["mode"] == "trusted_local")):
         raise WebError("admission_unavailable")
     if int(request["expected_access_epoch"]) != epoch(db):
         raise WebError("access_changed")
@@ -228,8 +243,13 @@ def plan(db: sqlite3.Connection, request: dict[str, Any], *, realm: str = "local
         if group not in membership_changes and not db.execute("SELECT 1 FROM adopted_access_groups WHERE group_id=?", (group,)).fetchone():
             conflict("owner_required", path)
     referenced = [refs[k] for k in sorted(refs)]
-    digest = hash_canonical_json({"normalized_plan": normalized, "references": referenced})
-    return {
+    if successor:
+        bootstrap.check_operators(db, normalized, conflicts)
+    preimage = {"normalized_plan": normalized, "references": referenced}
+    if successor:
+        preimage.update(contract_version=request["contract_version"], access_state_before=bootstrap.witness(state))
+    digest = hash_canonical_json(preimage)
+    response = {
         "contract_version": request["contract_version"],
         "ok": True,
         "command": "web_access.plan",
@@ -240,11 +260,21 @@ def plan(db: sqlite3.Connection, request: dict[str, Any], *, realm: str = "local
         "conflicts": conflicts,
         "warnings": warnings,
     }
+    if successor:
+        response["access_state_before"] = bootstrap.witness(state)
+        bootstrap.validate("provisioning-plan-response.v3", response)
+    return response
 
 
-def apply(db: sqlite3.Connection, request: dict[str, Any], *, realm: str = "local") -> dict[str, Any]:
+def apply(db: sqlite3.Connection, request: dict[str, Any], *, realm: str = "local", bootstrap: Any = None) -> dict[str, Any]:
+    successor = request.get("contract_version") == "spine.trusted-web-provisioning.v3" and bootstrap is not None
     version = ".v2" if request.get("contract_version") == "spine.trusted-web-provisioning.v2" else ""
-    validate(f"trusted-web-provisioning-apply-request{version}.schema.json", request)
+    if successor:
+        bootstrap.admit(db)
+        bootstrap.validate("provisioning-apply-request.v3", request)
+        realm = request["plan"]["normalized_plan"]["realm_id"]
+    else:
+        validate(f"trusted-web-provisioning-apply-request{version}.schema.json", request)
     command_id, actor, at = request["command_id"], request["actor_subject_id"], request["action_timestamp_utc"]
     # atomic_command suppresses helper commits and owns rollback of the entire bundle.
     with db.atomic_command():
@@ -262,17 +292,23 @@ def apply(db: sqlite3.Connection, request: dict[str, Any], *, realm: str = "loca
         proposed = request["plan"]
         if request["expected_access_epoch"] != proposed["normalized_plan"]["expected_access_epoch"]:
             raise WebError("access_changed")
-        current = plan(db, proposed["normalized_plan"], realm=realm)
+        current = plan(db, proposed["normalized_plan"], realm=realm, bootstrap=bootstrap if successor else None)
         if not current["can_apply"] or current["plan_hash"] != proposed["plan_hash"] or current["references"] != proposed["references"]:
             raise WebError("domain_conflict")
         before = epoch(db)
-        if before == 0:
+        if successor and current["access_state_before"] != proposed["access_state_before"]:
+            raise WebError("domain_conflict")
+        state = bootstrap.state(db) if successor else None
+        planned_change = bootstrap.will_change(db, current["normalized_plan"], state) if successor else False
+        if successor and planned_change:
+            bootstrap.prepare_change(db, current["normalized_plan"], state)
+        elif before == 0:
             db.execute(
                 "INSERT INTO ledger_access_state VALUES(1,?,?,'multi_user','trusted_identity',1,1)",
                 (current["normalized_plan"]["ledger_id"], realm),
             )
         results = []
-        changed = before == 0
+        changed = before == 0 or bool(successor and state and state["mode"] == "trusted_local")
         for key in ARRAYS:
             for i, operation in enumerate(current["normalized_plan"][key]):
                 result = _apply_operation(db, key, operation, command_id, at, realm, f"/{key}/{i}", actor)
@@ -290,7 +326,11 @@ def apply(db: sqlite3.Connection, request: dict[str, Any], *, realm: str = "loca
                         record(
                             db, {"item_adoptions": "owner", "grants": "grant", "route_approvals": "route"}[key], ids[0], actor, at, receipt
                         )
-        if changed and before:
+        if successor:
+            if changed != planned_change:
+                raise WebError("domain_conflict")
+            bootstrap.fault("operations")
+        if changed and before and not successor:
             db.execute("UPDATE ledger_access_state SET access_epoch=? WHERE singleton_id=1", (before + 1,))
         if len(db.execute("SELECT account_id FROM web_operators WHERE eligible=1 LIMIT 33").fetchall()) > 32:
             raise WebError("capacity_exceeded")
@@ -312,6 +352,8 @@ def apply(db: sqlite3.Connection, request: dict[str, Any], *, realm: str = "loca
             "results": results,
         }
         db.execute("INSERT INTO access_audit_log VALUES(?,?,?,?,?,?)", (audit_id, command_id, actor, at, current["plan_hash"], after))
+        if successor:
+            bootstrap.fault("audit")
         insert_command_receipt(
             db,
             command_receipt(
@@ -325,6 +367,9 @@ def apply(db: sqlite3.Connection, request: dict[str, Any], *, realm: str = "loca
                 command_receipt_id=receipt_id,
             ),
         )
+        if successor:
+            bootstrap.fault("receipt")
+            bootstrap.validate("provisioning-apply-response.v3", response)
         return response
 
 
