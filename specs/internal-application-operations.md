@@ -1,7 +1,8 @@
 # Spine Internal Application Operations
 
-Status: Draft v0.1 — internal refactoring contract; not ratified or implemented
+Status: Accepted v1.0 — ratified internal refactoring contract; implementation pending
 Date: 2026-11-11
+Ratified: 2026-11-11
 Scope: Shared scheduling, binding and notification operations; complete item changes,
 transaction-local state and synchronous change propagation
 
@@ -12,8 +13,13 @@ This leaf develops the internal application boundary delegated by
 remains the Spine-wide persistence owner. Feature specifications retain authority
 over domain behavior, validation order, identities, permissions, budgets, effects
 and public contracts. If an extraction cannot preserve those requirements, stop and
-amend the owning contract separately; this draft is not permission to reinterpret it.
-The requirements below describe the proposed target, not current conformance.
+amend the owning contract separately; this contract is not permission to reinterpret it.
+The requirements below describe the accepted target, not current conformance.
+
+The operator ratified the reviewed design after the bounded buildability/preservation
+audit of `60e025e` reported pass with zero findings (SPINE-098). Ratification changes
+status and authority, not the reviewed requirements, feature behavior or public
+activation. Implementation evidence remains separately required by Section 8.
 
 The selected scope is the shared operations used by ordinary schedule authoring,
 single-occurrence related tasks and the internal recurring-task engine. It includes
@@ -282,7 +288,8 @@ RF1 extracts shared operations; RF2 establishes complete mutation and state owne
 RF3 establishes propagation before R3. R2 resumption requires RF0–RF2 evidence and
 explicit operator direction, while its original remaining functional tests still apply.
 R3 also needs RF3 and the original R2 exit; R4 alone activates the recurring family.
-This draft does not authorize any of those implementation steps or an external audit.
+Ratification alone does not authorize those implementation steps or an external audit;
+explicit operator kickoffs and their scope are recorded in the backlog.
 
 Unrelated module decomposition, shared codec frameworks, neutral read-module moves,
 test-builder cleanup and advisory utility placement remain later, demand-driven work.

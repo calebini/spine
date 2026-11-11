@@ -318,7 +318,7 @@ Core code MUST NOT depend on adapters.
 
 ### 10.1 Internal application-operation refinement
 
-The draft [internal application operations](internal-application-operations.md)
+The accepted [internal application operations](internal-application-operations.md)
 leaf specifies incremental extraction into the existing `services` layer, with
 `ledger` retaining concrete persistence and transaction ownership. It separates
 family-specific command/replay adaptation from shared scheduling/binding/notification

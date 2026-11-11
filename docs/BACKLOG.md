@@ -52,12 +52,14 @@ The operator selected the near-term direction and authorized its focused specifi
 under SPINE-097; the report remains rationale, not an accepted runtime contract.
 Deferred resilience work remains deferred; historical completion evidence below is
 unchanged.
-**Next:** Review the SPINE-097 draft before implementation; no automatic R2/R3 resumption.
+**Next:** The reviewed design is ratified; RF0/RF1 is selected under SPINE-099.
+No automatic R2/R3 resumption.
 
 ### SPINE-097 — Specify shared internal operations and mutation boundaries
 
 **Status:** Done — focused draft and local specification checks complete (2026-11-11).
-Ratification, external review and runtime refactoring remain pending.
+The SPINE-098 bounded review passed; the operator ratified v1.0 on 2026-11-11.
+Runtime conformance remains pending; RF0/RF1 is selected under SPINE-099.
 **Operator direction:** Proceed with the near-term priorities through a focused internal
 specification first. Preserve public contracts and the paused R2 work; later cleanup
 remains demand-driven rather than an implementation prerequisite.
@@ -78,9 +80,66 @@ worktree found only the five intended specification/index/tracking edits and the
 new leaf. Existing R2 runtime/test/docs changes, the assessment and unrelated
 `AGENTS.md` changes are byte-preserved. No runtime suite, ledger, external audit,
 commit or push was invoked.
-**Next:** Obtain a separately authorized bounded buildability/
-preservation review before ratification and implementation. No new product decision
-is proposed; concrete operation/type granularity remains an implementation design check.
+**Checkpoint:** Specification, assessment and related tracking committed as `60e025e`;
+R2 continuation/runtime/test evidence and unrelated `AGENTS.md` edits were excluded.
+**Ratification:** Accepted v1.0 changes status/delegation only, preserving the reviewed
+requirements and existing public contracts. The operator requested a design commit
+before RF0/RF1 implementation; RF2/RF3 and recurring R2/R3 remain separately gated.
+**Next:** Execute the selected RF0/RF1 work under SPINE-099. Concrete operation/type
+granularity remains an implementation design check, not a new product decision.
+
+### SPINE-098 — Review internal operations for buildability and preservation
+
+**Status:** Done — approved bounded review reports `pass`, `boundary_preserved=true`,
+zero blockers, majors, minors or nits (2026-11-11). No Editor or source mutation.
+**Scope:** One reviewer-only `audit-change` using the real built-in `buildability`
+profile, explicit preservation objectives and Codex `gpt-6.1-sol` at medium reasoning.
+Targets are the new internal-operation leaf and its architecture/storage delegations;
+other features are preservation references, not whole-feature redesign targets.
+**Package:** [Audit notes](../whetstone_runs/internal-application-operations-audit-001/audit-notes.md)
+and [exact prepared inputs](../whetstone_runs/internal-application-operations-audit-001/prepared-inputs.json)
+bind 18 full inputs: 15 current specifications, one explanatory assessment and two
+exact pre-amendment parent baselines. Source checkpoint `60e025e`; baseline `e540a91`.
+The rendered prompt is 678,398 characters / 678,624 UTF-8 bytes, including the notes
+and built-in reviewer/profile guidance. The complete raw input package is hash-bound.
+**Preparation evidence:** Stable Whetstone `0.1.0` at
+`6e19fe3e72dedda50a372781a43c08e5d7e7480a`, Codex CLI `0.167.0-alpha.3.2`, the
+medium-reasoning adapter and exact source/note/prompt hashes pass local verification.
+The launcher defaults to verify-only and refuses live execution without approval
+bound to the manifest/notes; no automatic retry or model fallback. JSON/launcher syntax
+checks pass. This is neither preservation-enforced editing nor a convergence run.
+**Authorization:** The operator approved the exact 18 inputs, notes, built-in context
+and generated copies to the configured Codex Reviewer using GPT-6.1 Sol/medium.
+Manifest/notes approval hashes are recorded in the run's authorization and status.
+**Result:** [Persisted report](../whetstone_runs/internal-application-operations-audit-001/change_audit/change_audit_report.md)
+and [feedback](../whetstone_runs/internal-application-operations-audit-001/change_audit/change_audit_feedback.json)
+contain no in-scope or out-of-scope findings. The one approved pass exited zero.
+Post-run verification confirms all source/note/prompt/runtime pins unchanged and
+the persisted brief/manifest/feedback/report schema and hash correspondence.
+Launch metadata selects GPT-6.1 Sol and the pinned adapter sets medium reasoning;
+the reviewer's matching model label is self-description, not independent attestation.
+This is a bounded design assessment, not convergence or proven runtime equivalence.
+**Next:** No patch was requested by this review. The operator subsequently ratified
+the design and selected RF0/RF1 under SPINE-099. Preserve all original feature gates;
+R2/R3 remain paused. No runtime work, ledger access, migration, deployment, commit or
+push was performed by the review itself.
+
+### SPINE-099 — RF0/RF1: preserve baseline and extract shared operations
+
+**Status:** In progress — operator authorized ratification/commit followed by RF0/RF1
+(2026-11-11). RF2/RF3 and recurring R2/R3 are not started/resumed by this kickoff.
+**Scope:** Preserve and identify the exact dirty-tree baseline, characterize selected
+ordinary schedule/binding and recurring callers, then extract shared helpers into
+their domain/persistence/service owners. Keep exact family error/replay/receipt and
+identity behavior; add a no-new reverse-dependency/private-command-call ratchet.
+**Acceptance:** IO-01/02 and applicable IO-06/08: shared callers exercise the same
+operations, extraction adds no child commands/commits/sends, touched behavior and
+historical evidence remain equivalent, focused and full regression checks pass.
+RF1 closes only when R2 services no longer call command internals; intermediate
+checkpoints must name remaining dependencies rather than claim complete conformance.
+**Next:** Commit ratification separately from the preserved R2/AGENTS changes, capture
+the RF0 worktree/helper inventory and run focused baseline characterization before
+the first behavior-preserving extraction. No public activation, migration or push.
 
 ## Selected feature design
 

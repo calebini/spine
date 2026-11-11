@@ -9,7 +9,7 @@ see [validation](TZDB_COMPATIBILITY_VALIDATION.md) and [operations](TZDB_COMPATI
 
 
 Role: Roadmap rationale and delivery history; current task status lives in [BACKLOG.md](BACKLOG.md)
-Last updated: 2026-11-11 (SPINE-097 internal-operation draft; R2/R3 implementation remains paused)
+Last updated: 2026-11-11 (internal-operation design ratified; RF0/RF1 selected; R2/R3 remains paused)
 
 This is a non-normative delivery plan. The specifications and machine-readable contracts remain authoritative.
 
@@ -21,17 +21,28 @@ internal architecture before more R2/R3 integration. The
 recommends scoped application-layer restructuring through targeted extractions,
 not a ledger redesign. The operator subsequently selected the near-term direction
 and authorized a focused specification first. The
-[internal application operations draft](../specs/internal-application-operations.md)
+[internal application operations contract](../specs/internal-application-operations.md)
 now defines shared operation, mutation-state and propagation boundaries and IO-01–08
 preservation gates. Architecture/storage delegation and the normative index are aligned.
-Status and evidence are in SPINE-096/097; the draft is not ratified, externally reviewed
-or implemented, and its creation does not authorize runtime refactoring.
+Status and evidence are in SPINE-096–099. The operator ratified v1.0 and explicitly
+selected RF0/RF1 after the bounded review below; runtime conformance is not yet
+established. RF2/RF3 and recurring R2/R3 remain separately gated.
+
+The draft, assessment and related tracking were committed as `60e025e`, excluding
+the preserved R2 continuation and unrelated `AGENTS.md` changes. SPINE-098 stages
+one [bounded buildability/preservation review](../whetstone_runs/internal-application-operations-audit-001/audit-notes.md)
+of that checkpoint. The exact 18-input payload was approved on 2026-11-11; the
+[completed pass](../whetstone_runs/internal-application-operations-audit-001/change_audit/change_audit_report.md)
+reports `pass`, boundary preserved, and zero findings. All input/runtime pins and
+persisted artifacts were reverified. No source changes or repeat pass occurred.
+The review itself was not ratification, runtime parity proof or an implementation
+kickoff; the subsequent operator instruction supplies ratification and RF0/RF1 scope.
 
 The intended sequence remains RF0 baseline/design acceptance, RF1 shared operation
 extraction, RF2 complete item-change/state ownership, then RF3 propagation before R3.
-Use the assessment for rationale and the draft for proposed requirements; do not
-duplicate or replace feature contracts. The next step is a separately authorized
-bounded buildability/preservation review. RF4 cleanup remains unselected and is not a
+Use the assessment for rationale and the accepted leaf for requirements; do not
+duplicate or replace feature contracts. SPINE-099 now owns RF0/RF1 execution after
+the ratification commit. RF4 cleanup remains unselected and is not a
 recurring-task resume gate. No new command contracts, migration or agent operations
 guide changes are planned by this internal-only scope.
 

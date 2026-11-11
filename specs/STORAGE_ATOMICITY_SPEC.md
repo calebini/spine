@@ -35,8 +35,8 @@ owns the existing access-state table's proposed local posture, single epoch/roll
 primitive and explicit promotion seam. Its source-only migration contract does not
 activate DDL, change this document's transaction authority or allocate a schema.
 
-The draft [internal application operations leaf](internal-application-operations.md)
-owns proposed composition and in-memory mutation-state interfaces for the selected
+The accepted [internal application operations leaf](internal-application-operations.md)
+owns composition and in-memory mutation-state requirements for the selected
 refactor. This document retains outer transaction, persistence and migration authority.
 The leaf preserves existing allocator/finalizer obligations and feature-owned evidence;
 it proposes no new tables, durable witness, public contract or migration.
