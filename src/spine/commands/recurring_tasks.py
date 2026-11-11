@@ -4,9 +4,9 @@ from __future__ import annotations
 
 import copy
 import sqlite3
-from collections.abc import Callable
+from collections.abc import Callable, Sequence
 from datetime import UTC, datetime
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from spine import IMPLEMENTED_CONTRACT_VERSIONS
 from spine.commands.facet_runtime import FacetBudget, install_budget
@@ -58,6 +58,9 @@ from spine.ledger.recurring_tasks import compare_and_swap, insert_record, read_r
 from spine.ledger.transactions import LedgerConnection
 from spine.services.recurring_task_configuration import normalize_configuration
 
+if TYPE_CHECKING:
+    from spine.services.recurring_task_reconcile import ResponseSizer
+
 DELIVERY = "not_attempted_by_command"
 INTERNAL_COMMANDS = frozenset(PREFIX + name for name in ("create", "update", "retire", "show", "list", "reconcile", "assignment.suppress"))
 
@@ -90,6 +93,20 @@ def success_response(
     if dry_run:
         response.update(command_receipt_id=None, audit_ids=[], dry_run=True, commit_cutoff_recheck_required=True)
     return response
+
+
+def response_sizer(command: str, request: dict[str, Any], now: str, *, dry_run: bool) -> ResponseSizer:
+    """Bind immutable outer identity; measure fresh accepted facts at each trial."""
+    command_id = request["command_id"]
+
+    def measure(*, result: dict[str, Any], effect: str, changed: bool, audit_ids: Sequence[str]) -> int:
+        response = success_response(
+            command, {"command_id": command_id}, result, effect, changed, now,
+            {"audit_ids": audit_ids}, dry_run=dry_run,
+        )
+        return len(canonical_json_bytes(response))
+
+    return measure
 
 
 def expected(db: Any, request: dict[str, Any], root: dict[str, Any]) -> None:
@@ -539,7 +556,10 @@ def execute(
                 elif command == PREFIX + "reconcile":
                     from spine.services.recurring_task_reconcile import reconcile
 
-                    result, effect, changed = reconcile(db, value, root, context, contracts, now, runtime, fault)
+                    result, effect, changed = reconcile(
+                        db, value, root, context, contracts, now, runtime, fault,
+                        response_size=response_sizer(command, value, now, dry_run=context.dry_run),
+                    )
                 else:
                     fail(
                         "unsupported_command",

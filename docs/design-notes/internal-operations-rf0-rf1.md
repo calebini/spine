@@ -1,7 +1,8 @@
 # Internal operations: RF0 baseline and first RF1 extraction
 
-Date: 2026-11-11. SPINE-099 remains in progress; this is an implementation
-checkpoint, not whole-RF1 conformance or recurring-family activation.
+Date: 2026-11-11. SPINE-099 RF0/RF1 is complete at the final checkpoint below.
+Earlier sections retain incremental evidence; RF2/RF3 conformance and recurring-family
+activation are not claimed. The final response-sizing increment is uncommitted.
 
 ## Authority and baseline
 
@@ -263,7 +264,7 @@ RF2/RF3 and recurring-family activation remain separate gates. No push requested
 
 ## Next slice: response-sizing capability
 
-Prepared, not implemented. The remaining RF1 edge is `_reconcile` importing and
+Selected and implemented in the following continuation. The remaining RF1 edge was `_reconcile` importing and
 calling `commands.recurring_tasks.success_response` during output-budget trials.
 
 1. Capture exact complete envelope bytes and page decisions before changing the
@@ -283,3 +284,71 @@ calling `commands.recurring_tasks.success_response` during output-budget trials.
 Run focused and full regression, frozen-contract/declaration checks, typing, lint
 and diff hygiene. Assess IO-01/02/06/08 before recording RF1 closure. This brief does
 not start RF2 state/mutation ownership, RF3 propagation or functional recurring R2/R3.
+
+## RF1 continuation: required response-sizing capability
+
+The runtime/catalog extraction and next-slice brief were committed as `8e887a3`.
+The operator then selected this final RF1 seam. `ResponseSizer` is a required,
+keyword-only internal capability on `reconcile` and `_reconcile`, not an optional
+fallback or a new public API. It accepts only result, effect, changed flag and an
+immutable snapshot of the currently accepted audit IDs, returning a byte count.
+The command adapter binds command ID, family, evaluation time and dry-run mode;
+its pure measuring closure uses the unchanged `success_response` and canonical JSON
+encoder. No response formula moved or was duplicated. Final response/receipt creation
+remains in the command adapter. No ledger, full request, mutable page, command
+dispatch, new clock sample or authority inference is supplied to the capability.
+
+The call remains inside the same tentative finalization savepoint, after `finish`
+and before the byte comparison. Suffix rollback, proof costs, audit accumulation,
+IDs, cursor limits, error mapping and outer transaction ownership are unchanged.
+The old exact body witness is retained: only the explicitly checked capability
+keyword is normalized out of `execute` for comparison with the two captured
+committed/dirty baselines. The preserved R2 admission/read continuation remains
+separate; the current tree is not represented as a clean committed baseline.
+
+### Preservation and exit evidence
+
+Before editing runtime code, four real disposable-ledger scenarios were captured
+twice with a fixed test-only ledger ID: changed generation, no-op, dry-run and
+byte-limited multi-page generation. Their complete response-trial/final/replay byte
+digests, exact lengths, assignment IDs and full ledger-dump digests were identical.
+The [pre-change witness](../../tests/fixtures/internal_operations/rf1_response_sizing_witness.json)
+is checked unchanged by [response-sizing tests](../../tests/test_recurring_response_sizing.py).
+
+- **IO-01:** Every recurring-task service has zero command imports/calls; the final
+  counted exception was removed and an explicit no-recurring-exceptions test was
+  added. Unrelated named people/read and scheduler invocation exceptions remain;
+  this is not a whole-repository decoupling claim.
+- **IO-02:** The four pre-change witnesses match after extraction, including
+  successive byte-rejection trials and replay. Earlier ordinary/single-binding/
+  recurring shared-operation and fixed-ID witnesses remain. The sizing callback
+  uses the same unchanged command envelope, with current (not stale captured) audits.
+- **Applicable IO-06:** Missing capability fails before ledger access. The internal
+  recurring entry still rejects web transport before replay; compatible trusted-local
+  replay does not invoke the sizer. Existing prospective-owner/disclosure and dry-run
+  tests remain. No recurring web admission or new authority path is introduced.
+- **IO-08:** Focused dirty-baseline regression passes **97 tests**, 60.450 seconds;
+  both actual command/service modules pass strict typing, and lint/diff hygiene pass.
+  Final documentation/declaration/frozen-contract/operation checks pass **36 tests**,
+  9.857 seconds, including the extended admission/replay guard. An isolated snapshot
+  of `8e887a3` plus only this refactor (without the dirty R2 continuation) passes
+  **84 focused tests**, 34.880 seconds, including the same byte/ledger witnesses.
+  All 389 local documentation targets resolve. Full regression passes **1,424 tests,
+  OK (one skipped)** in 384.057 seconds with installed pinned Tickerd v1. The known
+  non-failing capacity-limit trace and timezone-compatibility diagnostics appeared.
+
+New tests cover exact-at-limit and one-byte-under behavior for normal and dry-run
+responses, immutable outer identity with fresh audit snapshots, Unicode byte counts,
+missing-capability rejection, sizing failure rollback and connection reuse. The
+exact-limit test accounts for the response publishing its requested limit (whose
+decimal width changes envelope size); it finds the stable exact boundary. Initial
+test-harness attempts used an enclosing writer, correctly rejected by admission,
+and assumed the limit was absent from the response. Both assumptions were corrected
+in tests only; no runtime contract or expected golden output was relaxed.
+
+No public artifacts, schema/package versions, migrations, sends or deployment changed.
+No commit or push requested for this continuation. RF0/RF1's selected extraction
+exit is satisfied by the evidence above; SPINE-099 is complete. RF2 complete item-
+change/state ownership is the next separately authorized slice; RF3 and functional
+R2/R3 are not started by this work. This does not claim whole-repository decoupling
+or complete conformance to the later portions of the internal-operations contract.

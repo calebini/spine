@@ -4,10 +4,10 @@ from __future__ import annotations
 
 import copy
 import sys
-from collections.abc import Callable
+from collections.abc import Callable, Sequence
 from datetime import timedelta
 from functools import partial
-from typing import Any
+from typing import Any, Protocol
 
 from spine.core import occurrence_details
 from spine.core import temporal_bindings as binding_facts
@@ -15,7 +15,7 @@ from spine.core.canonical_json import canonical_json_bytes
 from spine.core.errors import SpineValidationError
 from spine.core.hashing import hash_canonical_json
 from spine.core.occurrences import expand_recurrence_set
-from spine.core.recurring_task_runtime import PREFIX, cursor_payload, fail, instant, sign_cursor, verify_cursor, wire
+from spine.core.recurring_task_runtime import cursor_payload, fail, instant, sign_cursor, verify_cursor, wire
 from spine.core.recurring_tasks import CONTRACT, derive, occurrence_key, payload_hash
 from spine.ledger import item_reads
 from spine.ledger.identity import read_ledger_instance_id
@@ -25,6 +25,14 @@ from spine.ledger.recurring_tasks import compare_and_swap, ensure_selector, inse
 from spine.ledger.temporal_bindings import target_from_source
 from spine.services import recurring_task_children as children
 from spine.services import recurring_task_proofs as proofs
+
+
+class ResponseSizer(Protocol):
+    """Command-owned canonical envelope sizing, with no persistence or dispatch."""
+
+    def __call__(
+        self, *, result: dict[str, Any], effect: str, changed: bool, audit_ids: Sequence[str]
+    ) -> int: ...
 
 
 class _PageBoundary(Exception):
@@ -481,19 +489,19 @@ class Page:
 
 
 def reconcile(
-    db: Any, request: dict[str, Any], root: dict[str, Any], context: Any, contracts: Any, now: str, runtime: dict[str, Any], fault: Any
+    db: Any, request: dict[str, Any], root: dict[str, Any], context: Any, contracts: Any, now: str, runtime: dict[str, Any], fault: Any,
+    *, response_size: ResponseSizer,
 ) -> tuple[dict[str, Any], str, bool]:
     page = Page(db, context, root, request, contracts, now, runtime, fault)
     try:
-        return _reconcile(page)
+        return _reconcile(page, response_size=response_size)
     finally:
         error = sys.exc_info()
         while page.units:
             page.units.pop()[0].__exit__(*error)
 
 
-def _reconcile(page: Page) -> tuple[dict[str, Any], str, bool]:
-    from spine.commands.recurring_tasks import success_response
+def _reconcile(page: Page, *, response_size: ResponseSizer) -> tuple[dict[str, Any], str, bool]:
     from spine.ledger.recurring_task_catalog import intent_view, pending_adoption
 
     db, request, root = page.db, page.request, page.root
@@ -584,11 +592,9 @@ def _reconcile(page: Page) -> tuple[dict[str, Any], str, bool]:
                     page, token, selected_intent, evaluation, start, end, original,
                     processed_assignments, existing_more, source_more,
                 )
-                response = success_response(
-                    PREFIX + "reconcile",
-                    request, result, effect, page.changed, now, page.runtime, dry_run=context.dry_run,
-                )
-                if len(canonical_json_bytes(response)) > page.limits["response_bytes"]:
+                if response_size(
+                    result=result, effect=effect, changed=page.changed, audit_ids=tuple(page.runtime["audit_ids"]),
+                ) > page.limits["response_bytes"]:
                     raise _PageBoundary()
             return result, effect, page.changed
         except _PageBoundary:

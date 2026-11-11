@@ -97,6 +97,11 @@ class InternalOperationBoundaryTests(unittest.TestCase):
         ):
             self.assertNotEqual(before, command_dependencies(original + added))
 
+    def test_recurring_services_have_no_command_imports_or_calls(self):
+        for path in sorted((ROOT / "src/spine/services").glob("recurring_task*.py")):
+            with self.subTest(path=path.name):
+                self.assertEqual(command_dependencies(path.read_text()), {})
+
     def test_extracted_service_import_does_not_load_commands_or_scheduler(self):
         # A fresh interpreter catches package-level cycles hidden by test import order.
         program = (

@@ -25,8 +25,9 @@ and authorized a focused specification first. The
 now defines shared operation, mutation-state and propagation boundaries and IO-01–08
 preservation gates. Architecture/storage delegation and the normative index are aligned.
 Status and evidence are in SPINE-096–099. The operator ratified v1.0 and explicitly
-selected RF0/RF1 after the bounded review below; runtime conformance is not yet
-established. RF2/RF3 and recurring R2/R3 remain separately gated.
+selected RF0/RF1 after the bounded review below. The selected RF0/RF1 extraction is
+now verified; full internal-operations conformance still requires RF2/RF3, which
+remain separately gated along with recurring R2/R3.
 
 The draft, assessment and related tracking were committed as `60e025e`, excluding
 the preserved R2 continuation and unrelated `AGENTS.md` changes. SPINE-098 stages
@@ -65,18 +66,21 @@ and differential preservation checks pass; full regression passes 1,413 tests
 (one skipped), with typing/lint and documentation checks clean; committed as `25ebada`.
 The next RF1 increment extracts recurring cursor/time/error primitives, receipt reads
 and catalog projections to lower owners, preserving pre-existing R2 admission/read
-bodies in the two overlapping command modules. The sole remaining recurring command
-dependency is exact response-size projection during reconciliation; RF1 stays open
-until that adapter seam is removed with parity checks. The 91-test focused suite,
+bodies in the two overlapping command modules. At that checkpoint the sole remaining
+recurring command dependency was exact response-size projection during reconciliation.
+The 91-test focused suite,
 30-test final documentation/frozen-contract/operation selection, strict typing,
 lint and links pass. Full regression passes 1,418 tests (one skipped), 361.648 seconds.
-This continuation is selected for checkpointing, excluding the dirty R2 changes.
-The next slice is the required response-sizing capability described in the
-[RF1 next-slice brief](design-notes/internal-operations-rf0-rf1.md#next-slice-response-sizing-capability).
-It keeps wire response ownership in commands while removing the last recurring
-service import. RF1 closure requires parity/budget/rollback evidence; RF2/RF3 and
-R2 functional resumption remain separately gated.
-SPINE-099 remains the status/evidence owner.
+That continuation was committed as `8e887a3`, excluding the dirty R2 changes.
+The subsequent required response-sizing capability described in the
+[RF1 next-slice brief](design-notes/internal-operations-rf0-rf1.md#next-slice-response-sizing-capability)
+keeps wire response ownership in commands while removing the last recurring service
+import. The 97-test focused suite, 84-test clean refactor-only snapshot, 36-test
+final selection, strict typing, lint and links pass. Full regression passes 1,424
+tests (one skipped), 384.057 seconds. Exact response/page/replay/ledger witnesses,
+byte-boundary rollback and applicable admission guards establish RF1 exit.
+SPINE-099 is complete; the final increment is uncommitted. RF2 complete mutation/
+state ownership needs a separate kickoff; RF3 and R2 functional resumption remain gated.
 
 Preserve `e540a91`, the uncommitted R2 admission/read continuation, unrelated
 `AGENTS.md` edits and all prior completion evidence. The delivery plan below remains

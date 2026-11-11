@@ -126,8 +126,9 @@ push was performed by the review itself.
 
 ### SPINE-099 — RF0/RF1: preserve baseline and extract shared operations
 
-**Status:** In progress — operator authorized ratification/commit followed by RF0/RF1
-(2026-11-11). RF2/RF3 and recurring R2/R3 are not started/resumed by this kickoff.
+**Status:** Done — RF0 baseline and selected RF1 extraction verified (2026-11-11);
+final response-sizing increment is uncommitted. RF2/RF3 and recurring R2/R3 are
+not started/resumed by this completion.
 **Scope:** Preserve and identify the exact dirty-tree baseline, characterize selected
 ordinary schedule/binding and recurring callers, then extract shared helpers into
 their domain/persistence/service owners. Keep exact family error/replay/receipt and
@@ -192,14 +193,27 @@ The exact staged tree passed **78 focused tests**, 28.937 seconds, in a disposab
 index export with no R2 dirty overlay; staged mixed-file lint and diff hygiene pass.
 The sole remaining recurring command dependency is exact response-size projection
 inside reconciliation. No R2 functional resumption or response-contract change.
-**Next:** Remove that response-budget adapter seam with exact parity evidence.
+**Response-sizing continuation:** Complete. The command now supplies a required,
+typed sizing capability; final envelope/receipt ownership stays in commands.
+All recurring-task services have zero command imports/calls. Four twice-captured
+pre-change response/page/replay/ledger witnesses match. Exact byte boundaries,
+failure rollback, required-capability and admission/replay guards have tests.
+The 97-test focused suite, strict typing and lint pass. The refactor-only clean
+snapshot passes 84 focused tests; final documentation/frozen-contract/operation
+checks pass 36 tests and all 389 local links resolve. Full regression passes
+**1,424 tests, OK (one skipped)** in 384.057 seconds. The known non-failing
+capacity-limit trace and timezone-compatibility diagnostics appeared.
+No RF2/RF3 or functional R2 resumption.
+**RF1 exit:** IO-01/02 and applicable IO-06/08 evidence is complete for the selected
+extraction. The dependency ratchet retains only explicitly unselected non-recurring
+exceptions. This is not complete conformance to the RF2/RF3 portions of the spec.
+**Next:** Checkpoint this verified increment; RF2 complete mutation/state ownership
+needs an explicit kickoff. No functional recurring R2/R3 resumption is implied.
 The [next-slice brief](design-notes/internal-operations-rf0-rf1.md#next-slice-response-sizing-capability)
-is ready; implementation has not started. Keep response assembly in commands and
-pass a required, narrow sizing capability into reconciliation. Verify exact normal/
-dry-run envelope bytes, boundary-sized pagination and rollback before removing the
-last named recurring command edge and assessing RF1 exit evidence.
-No whole-RF1 closure, RF2/RF3 kickoff or
-R2/R3 resumption is claimed. No public activation, migration, push or deployment.
+is implemented and verified at operator direction: response assembly stays in commands;
+a required, narrow sizing capability supplies exact normal/dry-run envelope bytes.
+Boundary-sized pagination, rollback and the final recurring command-edge removal
+are verified. No RF2/RF3 kickoff, public activation, migration, push or deployment.
 
 ## Selected feature design
 

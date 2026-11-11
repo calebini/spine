@@ -35,6 +35,17 @@ class SharedRecurringRuntimeTests(unittest.TestCase):
             for entry in variant:
                 nodes = ast.parse((ROOT / entry["path"]).read_text()).body
                 node = next((n for n in nodes if isinstance(n, (ast.FunctionDef, ast.ClassDef)) and n.name == entry["name"]), None)
+                if node is not None and node.name == "execute":
+                    # RF1's only approved adapter-body change: inject the required
+                    # byte-sizing capability. Keep the original body hashes intact.
+                    calls = [
+                        n for n in ast.walk(node) if isinstance(n, ast.Call) and isinstance(n.func, ast.Name) and n.func.id == "reconcile"
+                    ]
+                    self.assertEqual(len(calls), 1)
+                    sizing = [k for k in calls[0].keywords if k.arg == "response_size"]
+                    self.assertEqual(len(sizing), 1)
+                    self.assertEqual(ast.unparse(sizing[0].value), "response_sizer(command, value, now, dry_run=context.dry_run)")
+                    calls[0].keywords.remove(sizing[0])
                 body = ast.dump(ast.Module(body=node.body, type_ignores=[]), include_attributes=False) if node else "missing"
                 if hashlib.sha256(body.encode()).hexdigest() != entry["body_sha256"]:
                     failures.append((entry["path"], entry["name"]))

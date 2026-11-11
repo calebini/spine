@@ -185,13 +185,6 @@
         "page_roster|import|spine.commands.facet_runtime.parse_time": 1
       }
     },
-    "src/spine/services/recurring_task_reconcile.py": {
-      "removal_gate": "RF1: remove remaining R2 command internals before claiming RF1 closure.",
-      "remaining": {
-        "_reconcile|call|spine.commands.recurring_tasks.success_response": 1,
-        "_reconcile|import|spine.commands.recurring_tasks.success_response": 1
-      }
-    },
     "src/spine/services/schedule_readback.py": {
       "removal_gate": "Untouched read/permission machinery; no expansion allowed. Separate demanded cleanup, not RF1 completion evidence.",
       "remaining": {
