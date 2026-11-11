@@ -53,6 +53,8 @@ class TaskDraft:
     completed_by_subject_id: str | None = None
     item_locations: tuple[ItemLocationInput, ...] = ()
     subject_roles: tuple[ItemSubjectRoleInput, ...] = ()
+    # Internal new-generation copy only; no public task-create wire accepts this.
+    facet_entries: tuple[dict[str, Any], ...] = ()
 
 
 @dataclass(frozen=True)

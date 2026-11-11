@@ -71,6 +71,10 @@ no push or activation is authorized by that checkpoint.
 
 ## Remaining R2 exit work
 
+Subsequent restoration work is recorded in the
+[restoration follow-up](recurring-related-task-r2-restoration.md); use its newer
+evidence and remaining list rather than restarting the work below.
+
 Do not infer whole-family conformance from this checkpoint. Still required:
 
 - Full restoration customization and independent-policy matrix, including adopted

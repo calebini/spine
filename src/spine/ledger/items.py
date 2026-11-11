@@ -6,7 +6,7 @@ import sqlite3
 from collections.abc import Callable, Iterator
 from contextlib import contextmanager
 from dataclasses import dataclass
-from typing import cast
+from typing import Any, cast
 
 from spine.core import SpineValidationError
 from spine.core.hashing import (
@@ -270,6 +270,7 @@ def create_task_from_draft(
         source_ref=draft.source_ref,
         item_locations=draft.item_locations,
         subject_roles=draft.subject_roles,
+        facet_entries=draft.facet_entries,
         validate_prerequisites=validate_prerequisites,
         insert_anchors=insert_anchors,
         insert_detail=insert_detail,
@@ -299,6 +300,7 @@ def create_task_v1(
     completed_by_subject_id: str | None = None,
     item_locations: tuple[ItemLocationInput, ...] = (),
     subject_roles: tuple[ItemSubjectRoleInput, ...] = (),
+    facet_entries: tuple[dict[str, Any], ...] = (),
     validate_prerequisites: Callable[[sqlite3.Connection], None] | None = None,
     insert_canonical_extension: Callable[[sqlite3.Connection], None] | None = None,
     audit_action: str = "created",
@@ -326,6 +328,7 @@ def create_task_v1(
             completed_by_subject_id=completed_by_subject_id,
             item_locations=item_locations,
             subject_roles=subject_roles,
+            facet_entries=facet_entries,
         ),
         validate_prerequisites=validate_prerequisites,
         insert_canonical_extension=insert_canonical_extension,
@@ -768,6 +771,7 @@ def _create_item_v1(
     audit_action: str = "created",
     audit_reason_code: str = "created",
     audit_payload: dict[str, object] | None = None,
+    facet_entries: tuple[dict[str, Any], ...] = (),
 ) -> CreatedItem:
     try:
         with _item_transaction(connection):
@@ -791,7 +795,7 @@ def _create_item_v1(
                 created_at_utc=created_at_utc,
                 created_by_subject_id=created_by_subject_id,
             )
-            insert_snapshot(connection, item_id, 1, ())
+            insert_snapshot(connection, item_id, 1, facet_entries)
             insert_detail(connection)
             if insert_canonical_extension is not None:
                 insert_canonical_extension(connection)

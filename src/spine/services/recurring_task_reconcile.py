@@ -151,7 +151,8 @@ class Page:
         self.recurrence: dict[str, Any] = recurrence
         self.source_item = c._hydrated_item(db, root["source_item_id"])
 
-    def unit(self, operation: Callable[[], dict[str, Any]], selector: dict[str, Any]) -> dict[str, Any] | None:
+    def unit(self, operation: Callable[[], dict[str, Any]], selector: dict[str, Any], *,
+             assignment: dict[str, Any] | None = None) -> dict[str, Any] | None:
         """Try a complete unit; a page boundary rolls back that unit and its trackers."""
         snapshot = copy.deepcopy(
             {key: getattr(self, key) for key in ("root", "work", "mappings", "changed", "owners", "mutations", "runtime")}
@@ -196,12 +197,18 @@ class Page:
                 reason = "disclosure_unavailable"
             elif field == "configuration.delivery" or code in {"delivery_target_not_found", "delivery_target_inactive"}:
                 reason = "route_unavailable"
+            elif code == "semantic_conflict" and field == "configuration.task_template":
+                reason = "configuration_invalid"
             elif code == "source_continuity_unresolved":
                 reason = "source_continuity_unresolved"
             if reason:
                 scope = self.db.command_unit(nested=True)
                 scope.__enter__()
-                value = entry(selector, "decision_required", reason)
+                refs = references(self.db, assignment) if assignment else None
+                value = entry(selector, "decision_required", reason,
+                              assignment=assignment["assignment_id"] if assignment else None,
+                              generation=assignment["current_generation_id"] if assignment else None,
+                              before=refs, after=refs)
             else:
                 raise
         except BaseException:
@@ -290,6 +297,7 @@ class Page:
         config_id: str | None = None,
         proof_id: str | None = None,
         managed_baseline: dict[str, Any] | None = None,
+        restoration: Any = None,
     ) -> dict[str, Any]:
         config, config_id = config or self.config, config_id or self.root["current_revision_id"]
         selector = occurrence["target_occurrence_selector"]
@@ -345,7 +353,8 @@ class Page:
             self.db, self.root, self.recurrence, occurrence, self.now, persist=True, command_id=self.request["command_id"]
         )
         child = children.create(
-            self.db, self.context, self.root, config, assignment_id, generation_id, source, self.request, self.now, self.fault
+            self.db, self.context, self.root, config, assignment_id, generation_id, source, self.request, self.now, self.fault,
+            restoration=restoration,
         )
         self.runtime["cutoffs"].append(due)
         self.runtime["audit_ids"].append(child["audit_id"])
@@ -510,7 +519,7 @@ def _reconcile(page: Page) -> tuple[dict[str, Any], str, bool]:
         page.budget.hops = page.limits["lineage_hops"]
         assignment = read_record(db, "related_task_assignments", selected["assignment_id"])
         stored = read_record(db, "related_task_assignment_revisions", assignment["current_assignment_revision_id"])["state_json"]
-        value = page.unit(partial(process_existing, page, assignment), stored["selector"])
+        value = page.unit(partial(process_existing, page, assignment), stored["selector"], assignment=assignment)
         if value is None:
             break
         page.results.append(value)
@@ -917,16 +926,13 @@ def process_existing(page: Page, assignment: dict[str, Any]) -> dict[str, Any]:
                     outcome, reason = "retained", "rule_retired_keep_following"
                 else:
                     assert occurrence is not None
-                    restored = copy.deepcopy(config)
-                    for key in ("title", "summary", "source_ref"):
-                        restored["task_template"]["item"][key] = current["version"][key]
-                    restored["task_template"]["item"]["task_detail"]["priority"] = current["detail"]["priority"]
-                    restored["task_template"]["people"]["assignees"] = sorted(
-                        {r["subject_id"] for r in current["subject_roles"] if r["role"] == "assignee" and r["status"] == "active"}
-                    )
+                    from spine.services.recurring_task_restoration import prepare
+
+                    restoration = prepare(page, assignment, gen, current, binding, config)
                     return page.create(
-                        occurrence, assignment=assignment, config=restored, config_id=state["adopted_rule_revision_id"], proof_id=proof_id,
-                        managed_baseline=state["managed_baseline"],
+                        occurrence, assignment=assignment, config=restoration.configuration,
+                        config_id=state["adopted_rule_revision_id"], proof_id=proof_id,
+                        managed_baseline=state["managed_baseline"], restoration=restoration,
                     )
             else:
                 target = target_from_source(source, int(prior["offset_seconds"]))

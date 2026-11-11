@@ -9057,6 +9057,16 @@ def _persist_notification_successor(
             )
             target["target_occurrence_selector_ref"] = target_ref
         insert_notification_schedule_policy(connection, normalized=revised)
+        # Copy-forward already created this successor's application links. A
+        # direct edit/disable replaces the copied policy row, not its intent.
+        # Retarget only these uncommitted successor links; historical versions
+        # must continue to reference their own immutable policy rows.
+        connection.execute(
+            "UPDATE notification_profile_application_policies SET notification_policy_id=? "
+            "WHERE notification_intent_id=? AND notification_profile_application_id IN "
+            "(SELECT notification_profile_application_id FROM notification_profile_applications WHERE item_id=? AND item_version=?)",
+            (revised.value["notification_policy_id"], current["notification_intent_id"], item["item_id"], next_version),
+        )
         if context.rendering_authoring:
             context.rendering_authoring.persist(str(item["item_id"]), next_version)
         insert_command_receipt(connection, receipt)

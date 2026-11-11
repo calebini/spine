@@ -980,6 +980,26 @@ four-module typing, touched runtime/test Ruff, frozen web-contract synchronizati
 and timezone-substitution diagnostics appeared. The unrelated `AGENTS.md` SHA-256
 is unchanged. The operator requested committing this verified continuation and
 proceeding with R2; no push or public activation.
+**Page/lifecycle checkpoint:** Committed as `fa16c98` on 2026-11-11, excluding the
+unrelated `AGENTS.md` edit. The operator then selected continued R2 implementation.
+**Restoration continuation (2026-11-11):** Successors now copy actual predecessor
+roles/location/archetype/facet facts and active reminder choices rather than
+silently resetting to the rule template. Family keys remain distinct from
+independent reminder identity; disabled policies are not resurrected, active independent
+policies receive new item-scoped intents and preserve their grace windows, and
+newer rule/profile defaults are not reselected. Blocked existing units retain
+their actual assignment/generation references. A narrow shared direct policy
+edit/disable fix retargets only successor-version application links, preserving
+historical policy/application rows. See [restoration evidence and remaining work](design-notes/recurring-related-task-r2-restoration.md).
+**Verification:** 82 focused tests pass, plus shared writer/finalizer parity;
+five touched modules pass focused typing and touched files pass Ruff. Initial full
+run exposed one strict writer-inventory omission; the restoration caller/proof
+module is now registered, and the unchanged inventory/parity recheck passes both
+tests. Final full rerun: **1,389 tests, OK (one skipped)**, 337.050 seconds. Known
+non-fatal read-budget/timezone diagnostics appeared. Frozen web copies, 361 local
+documentation targets and diff hygiene pass; unrelated `AGENTS.md` hash preserved.
+The operator requested committing this verified continuation before proceeding;
+public activation, R3 and R4 remain separate gates.
 **Next:** Operator authorized the remaining R2 implementation on 2026-11-10.
 Continue the remaining restoration/custom-policy, proof/hop/read/error-precedence,
 intent/coverage, replay and wider concurrency matrices against these tested

@@ -135,6 +135,10 @@ tests; see [ownership bootstrap checkpoint](design-notes/ownership-bootstrap-r2-
 That implementation was committed as `3836bd9`. The 2026-11-11 continuation adds
 full-envelope byte-driven continuation and selected lifecycle/customization/race
 closure; see [page-boundary checkpoint and precise remaining work](design-notes/recurring-related-task-r2-page-closure.md).
+That increment was committed as `fa16c98`. The following
+[restoration increment](design-notes/recurring-related-task-r2-restoration.md)
+preserves actual child/reminder/facet choices on fresh generations and closes the
+narrow ordinary profile-policy successor-link prerequisite exposed by its tests.
 No public package/schema or runtime registry activation is included. Remaining R2
 combined-budget, restoration/custom-policy, intent/coverage, replay and wider
 concurrency matrices remain separate work; this does not close R2 or authorize R3.

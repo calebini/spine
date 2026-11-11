@@ -41,6 +41,41 @@ class NotificationProfileCommandTests(unittest.TestCase):
     def tearDown(self) -> None:
         self.connection.close()
 
+    def test_direct_profile_reminder_edit_and_disable_retarget_only_successor_application_links(self) -> None:
+        profile = self._create_profile()
+        request = json.loads((ROOT / "tests/fixtures/schedule_create/contracts/request_event_repeat_window_materialized.json").read_text())
+        request.update(contract_version="spine.schedule-create.v2", command_id="direct-profile-edit-target")
+        request["notification_plan"] = {
+            "mode": "explicit", "notification_profile_id": profile["notification_profile_id"], "revision_resolution": "current",
+            "suppress_template_keys": [], "replacements": [], "custom_additions": [],
+        }
+        created = handle("schedule.create", request, self.context)
+        self.assertTrue(created["ok"], created)
+        policy = created["policies"][0]
+        versions = [(1, policy["notification_policy_id"])]
+        for command, fields in (
+            ("reminder.edit", {"updated_at_utc": "2035-02-01T12:01:00Z", "patch": {
+                "schedule": {"kind": "once", "at": {"kind": "target_offset", "offset_basis": "elapsed", "offset_seconds": "-7200"}},
+            }}),
+            ("reminder.disable", {"disabled_at_utc": "2035-02-01T12:02:00Z"}),
+        ):
+            previous, policy_id = versions[-1]
+            result = handle(command, {
+                "command_id": "direct-profile-" + command, "actor_subject_id": "subject_agent", "item_id": created["item_id"],
+                "target_version": str(previous), "notification_intent_id": policy["notification_intent_id"],
+                "notification_policy_id": policy_id, **fields,
+            }, self.context)
+            self.assertTrue(result["ok"], result)
+            versions.append((previous + 1, result["notification_policy_id"]))
+            for version, expected in versions:
+                row = self.connection.execute(
+                    "SELECT p.notification_policy_id FROM notification_profile_applications a "
+                    "JOIN notification_profile_application_policies p USING(notification_profile_application_id) "
+                    "WHERE a.item_id=? AND a.item_version=?", (created["item_id"], version),
+                ).fetchone()
+                self.assertEqual(row[0], expected)
+            self.assertEqual(self.connection.execute("PRAGMA foreign_key_check").fetchall(), [])
+
     def test_dynamic_catalog_receipt_effect_vocabulary_is_normative(self) -> None:
         specification = (ROOT / "specs/notification-profiles.md").read_text(
             encoding="utf-8"

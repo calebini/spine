@@ -38,12 +38,14 @@ def child_id(seed: str, role: str, path: str, prefix: str | None = None) -> str:
     return command_derived_id(prefix=prefix or role, command=COMMAND, command_id=seed, row_role=role, request_path=path)
 
 
-def materialization(config: dict[str, Any], now: str) -> dict[str, Any]:
+def materialization(config: dict[str, Any], now: str, *, policies: list[dict[str, Any]] | None = None) -> dict[str, Any]:
     selected = config["materialization"]
     if selected["mode"] == "none":
         return dict(selected)
     entries = (config["notification_plan"] or {}).get("resolved", {}).get("effective_templates", [])
     grace = max((int(e["template"]["late_handling"].get("grace_seconds", "0")) for e in entries), default=0)
+    if policies is not None:
+        grace = max(grace, max((int(p["late_handling"].get("grace_seconds", "0")) for p in policies), default=0))
     return {
         "mode": "bounded",
         "evaluated_at_utc": now,
@@ -94,6 +96,7 @@ def create(
     request: dict[str, Any],
     now: str,
     fault: Any,
+    restoration: Any = None,
 ) -> dict[str, Any]:
     """Create task/owner first; then actual-item presentation and complete work."""
     seed, actor, outer = generation_id, request["actor_subject_id"], request["command_id"]
@@ -161,6 +164,12 @@ def create(
             ),
         )
     created, mappings, evidence = [], [], []
+    if restoration is not None:
+        from spine.services.recurring_task_restoration import extra_supporting
+
+        extra_roles, extra_locations = extra_supporting(restoration, seed, now)
+        roles += extra_roles
+        locations += extra_locations
 
     def extension(connection: Any) -> None:
         fault("task")
@@ -217,7 +226,15 @@ def create(
                 created_at_utc=now,
             )
         policies: tuple[tuple[str, NormalizedNotificationPolicy], ...] = ()
-        if config["notification_plan"] is not None:
+        if restoration is not None:
+            from spine.services.recurring_task_restoration import insert_policies
+
+            policies, restored_mappings = insert_policies(
+                connection, context, restoration, task_id=task_id, generation_id=seed, assignment_id=assignment_id,
+                archetype_assignment_id=archetype_id, request=request, now=now,
+            )
+            mappings.extend(restored_mappings)
+        elif config["notification_plan"] is not None:
             plan = config["notification_plan"]["resolved"]
             route = c._schedule_resolve_delivery(config["delivery"]["requested"], context)
             if {k: v for k, v in route["snapshot"].items() if k != "delivery_state"} != config["delivery"]["resolved"]:
@@ -315,7 +332,7 @@ def create(
             recurrence=None,
             policies=[p.value for _, p in policies],
             policy_key_by_intent={str(p.value["notification_intent_id"]): key for key, p in policies},
-            materialization=materialization(config, now),
+            materialization=materialization(config, now, policies=[cast(dict[str, Any], p.value) for _, p in policies]),
             command_id=outer,
             created_at=now,
         )
@@ -343,6 +360,7 @@ def create(
         ),
         subject_roles=roles,
         item_locations=locations,
+        facet_entries=restoration.facet_entries if restoration is not None else (),
         insert_canonical_extension=extension,
         audit_action="rule_page_applied",
         audit_reason_code="new_source_slot",
