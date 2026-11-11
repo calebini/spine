@@ -116,4 +116,39 @@ Original R2 functional gates and R4-only public activation remain intact.
 No public command/contract, package version, ledger schema/migration, frozen web
 artifact, permission model, operator guide or delivery behavior changes. All test
 ledgers are disposable. No operator ledger, external send, deployment, push or new
-Whetstone run is involved. The runtime increment is left uncommitted.
+Whetstone run is involved. The first runtime increment was subsequently committed
+as `02bfb03`, excluding the pre-existing R2/AGENTS changes and their tracking hunks.
+
+## RF1 continuation: policy preparation and work classification
+
+The operator requested committing the first increment and continuing RF1.
+`services.schedule_policies` now owns create/update/disable preparation and route
+copying, with ordinary command aliases and direct recurring callers. It preserves
+the existing `_UNSET` identity for copy-forward, explicit empty replacement, key and
+intent binding, sorted normalization, duplicate detection, and exact ID/preimage
+derivation. It performs no writes, admission, dispatch or new default resolution.
+
+`ledger.schedule_work.reconcile_work_plan` owns the existing SQL-backed read-only
+classification, including policy-specific lineage resolution, reason precedence,
+attempt evidence and eligible/unattempted cancellation candidates. It does not cancel
+or materialize anything itself. Owning callers retain their existing mutation and
+transaction ordering. This does not yet extract successor materialization.
+
+The four [policy witnesses](../../tests/fixtures/internal_operations/rf1_policy_witness.json)
+were computed from the committed `02bfb03` function definitions, not from rewritten
+expectations. Fixed create, carry-forward, empty clear and disable results include
+complete normalized facts/preimages. Existing boundary tests now cover both new
+owners, and the dependency inventory shrinks only removed calls.
+
+Verification: 67 focused schedule-update, single-binding successor, recurring page/
+restoration and policy-lineage tests pass; nine operation tests pass; both new
+owners pass strict typing and focused Ruff/diff hygiene pass. Full regression passes
+1,410 tests (one skipped), 364.845 seconds. The policy witness added after full-suite
+collection passes separately within the final 23-test documentation/declaration/
+frozen-web/operation selection. All 382 local links resolve. The same non-failing
+capacity trace and timezone-substitution diagnostics appeared. Five moved helper
+bodies match the baseline after name/local/type-only normalization.
+Existing R2/AGENTS files remain byte-identical. This continuation is
+uncommitted. RF1 remains open for materialization, timed binding-source resolution,
+and the named recurring runtime/catalog/receipt/read dependencies; no RF2/RF3 or
+functional R2/R3 resumption is implied.

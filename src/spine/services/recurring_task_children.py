@@ -15,7 +15,7 @@ from spine.core.hashing import command_derived_id, hash_canonical_json
 from spine.core.notification_profiles import compose_notification_plan
 from spine.core.notifications import NormalizedNotificationPolicy
 from spine.core.provenance import derive_occurrence_provenance
-from spine.ledger import item_reads
+from spine.ledger import item_reads, schedule_work
 from spine.ledger.common import TemporalAnchorInput
 from spine.ledger.items import create_next_item_version, create_task_v1
 from spine.ledger.notification_profiles import insert_application, insert_assignment, load_archetype, load_profile, require_owner_exists
@@ -32,7 +32,7 @@ from spine.ledger.temporal_bindings import (
     target_from_source,
 )
 from spine.ledger.work import cancel_work_instance
-from spine.services import schedule_delivery
+from spine.services import schedule_delivery, schedule_policies
 from spine.services.primary_locations import inline_location_inputs, reference_location_input
 from spine.services.rendering_authoring import resolve
 
@@ -252,7 +252,7 @@ def create(
                 for e in entries
             ]
             policies = (
-                c._schedule_normalize_policies(
+                schedule_policies.normalize_policies(
                     reminders, item_id=task_id, item_type="task", recurring=False, command_id=seed, created_at_utc=now, delivery=route
                 )
                 if entries
@@ -552,7 +552,7 @@ def reconcile_work(
     policies = [p for p in load_notification_policies_at_version(db, item_id=item_id, item_version=version) if p["status"] == "active"]
     status = db.execute("SELECT task_status FROM task_details WHERE item_id=? AND version=?", (item_id, version)).fetchone()
     terminal = terminal or status is None or status[0] != "open"
-    cancelled, retained, protected, reasons = c._schedule_reconcile_work_plan(
+    cancelled, retained, protected, reasons = schedule_work.reconcile_work_plan(
         db,
         item_id=item_id,
         active_policies=policies,
@@ -715,7 +715,7 @@ def adopt_supporting(
                     ),
                 }
             )
-        desired_policies, _, _ = c._schedule_update_normalize_policies(
+        desired_policies, _, _ = schedule_policies.update_policies(
             current_family,
             desired=desired,
             delivery=route,
@@ -768,7 +768,7 @@ def adopt_supporting(
         for prior in current_family:
             if prior["notification_intent_id"] not in active:
                 insert_notification_schedule_policy(
-                    db, normalized=c._schedule_disabled_policy(prior, item_version=version, command_id=command_id, updated_at=now)
+                    db, normalized=schedule_policies.disabled_policy(prior, item_version=version, command_id=command_id, updated_at=now)
                 )
         if plan.get("profile"):
             pin = plan["profile"]

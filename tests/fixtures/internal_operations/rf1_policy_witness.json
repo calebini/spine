@@ -1,0 +1,811 @@
+{
+  "baseline_commit": "02bfb03",
+  "cases": [
+    {
+      "name": "create",
+      "operation": "_schedule_normalize_policies",
+      "arguments": {
+        "value": [
+          {
+            "policy_key": "later",
+            "schedule": {
+              "kind": "once",
+              "at": {
+                "kind": "target_offset",
+                "offset_basis": "elapsed",
+                "offset_seconds": "-600"
+              }
+            },
+            "late_handling": {
+              "kind": "skip"
+            }
+          },
+          {
+            "policy_key": "earlier",
+            "schedule": {
+              "kind": "once",
+              "at": {
+                "kind": "target_offset",
+                "offset_basis": "elapsed",
+                "offset_seconds": "-3600"
+              }
+            },
+            "late_handling": {
+              "kind": "skip"
+            }
+          }
+        ],
+        "item_id": "item-fixed",
+        "item_type": "task",
+        "recurring": false,
+        "command_id": "seed-fixed",
+        "created_at_utc": "2026-11-01T10:00:00Z",
+        "delivery": {
+          "recipient_kind": "subject",
+          "recipient_id": "owner",
+          "channel": "test",
+          "delivery_target_id": "route"
+        }
+      },
+      "omitted": false,
+      "expected": [
+        [
+          "earlier",
+          {
+            "value": {
+              "contract_version": "spine.notification-schedule.contract.v1",
+              "normalization_version": "spine.notification-schedule.normalization.v1",
+              "canonical_json_version": "spine.canonical-json.v1",
+              "notification_intent_id": "notification_intent_281fa3312ce2166b755f6168d01c67d0c8e192d61b6e7f29cc636bbd7bfb530e",
+              "notification_policy_id": "notification_policy_1d89ba0dd018af663a57c5b3bd060a9f35a8e04f5378dfc4cb032f195e0aafbc",
+              "notification_schedule_id": "notification_schedule_e9f53b6f42787e5836837133e8c2bbe34dff23007d16c13094c232d02ae5a783",
+              "item_id": "item-fixed",
+              "item_version": "1",
+              "intent_created_item_version": "1",
+              "intent_created_by_command_id": "seed-fixed:earlier",
+              "recipient_kind": "subject",
+              "channel": "test",
+              "delivery_target_id": "route",
+              "target": {
+                "anchor_role": "task_due",
+                "application_scope": "item"
+              },
+              "schedule": {
+                "kind": "once",
+                "at": {
+                  "kind": "target_offset",
+                  "offset_basis": "elapsed",
+                  "offset_seconds": "-3600"
+                }
+              },
+              "normalized_notification_schedule_hash": "a874fc3953a2fb5e9ed5ed8cf8912665787c09876a18bffca2f573f411a4e0e2",
+              "late_handling": {
+                "kind": "skip"
+              },
+              "status": "active",
+              "created_at_utc": "2026-11-01T10:00:00Z",
+              "created_by_command_id": "seed-fixed:earlier",
+              "recipient_subject_id": "owner"
+            },
+            "intent_id_preimage": {
+              "derivation_version": "spine.notification-intent-id.v1",
+              "contract_version": "spine.notification-schedule.contract.v1",
+              "normalization_version": "spine.notification-schedule.normalization.v1",
+              "canonical_json_version": "spine.canonical-json.v1",
+              "item_id": "item-fixed",
+              "intent_created_item_version": "1",
+              "intent_created_by_command_id": "seed-fixed:earlier"
+            },
+            "schedule_hash_preimage": {
+              "derivation_version": "spine.normalized-notification-schedule-hash.v1",
+              "contract_version": "spine.notification-schedule.contract.v1",
+              "normalization_version": "spine.notification-schedule.normalization.v1",
+              "canonical_json_version": "spine.canonical-json.v1",
+              "target": {
+                "anchor_role": "task_due",
+                "application_scope": "item"
+              },
+              "schedule": {
+                "kind": "once",
+                "at": {
+                  "kind": "target_offset",
+                  "offset_basis": "elapsed",
+                  "offset_seconds": "-3600"
+                }
+              },
+              "late_handling": {
+                "kind": "skip"
+              }
+            },
+            "schedule_id_preimage": {
+              "derivation_version": "spine.notification-schedule-id.v1",
+              "contract_version": "spine.notification-schedule.contract.v1",
+              "normalization_version": "spine.notification-schedule.normalization.v1",
+              "canonical_json_version": "spine.canonical-json.v1",
+              "notification_intent_id": "notification_intent_281fa3312ce2166b755f6168d01c67d0c8e192d61b6e7f29cc636bbd7bfb530e",
+              "item_id": "item-fixed",
+              "item_version": "1",
+              "normalized_notification_schedule_hash": "a874fc3953a2fb5e9ed5ed8cf8912665787c09876a18bffca2f573f411a4e0e2"
+            },
+            "policy_id_preimage": {
+              "derivation_version": "spine.notification-policy-id.v1",
+              "contract_version": "spine.notification-schedule.contract.v1",
+              "normalization_version": "spine.notification-schedule.normalization.v1",
+              "canonical_json_version": "spine.canonical-json.v1",
+              "notification_intent_id": "notification_intent_281fa3312ce2166b755f6168d01c67d0c8e192d61b6e7f29cc636bbd7bfb530e",
+              "intent_created_item_version": "1",
+              "intent_created_by_command_id": "seed-fixed:earlier",
+              "item_id": "item-fixed",
+              "item_version": "1",
+              "notification_schedule_id": "notification_schedule_e9f53b6f42787e5836837133e8c2bbe34dff23007d16c13094c232d02ae5a783",
+              "recipient_kind": "subject",
+              "channel": "test",
+              "delivery_target_id": "route",
+              "target": {
+                "anchor_role": "task_due",
+                "application_scope": "item"
+              },
+              "normalized_notification_schedule_hash": "a874fc3953a2fb5e9ed5ed8cf8912665787c09876a18bffca2f573f411a4e0e2",
+              "status": "active",
+              "created_at_utc": "2026-11-01T10:00:00Z",
+              "created_by_command_id": "seed-fixed:earlier",
+              "recipient_subject_id": "owner"
+            }
+          }
+        ],
+        [
+          "later",
+          {
+            "value": {
+              "contract_version": "spine.notification-schedule.contract.v1",
+              "normalization_version": "spine.notification-schedule.normalization.v1",
+              "canonical_json_version": "spine.canonical-json.v1",
+              "notification_intent_id": "notification_intent_a662f673eb8180320654b90a6b076dbf56caa24398b7e29cde4f26415c9a888e",
+              "notification_policy_id": "notification_policy_d16127ccdc6535a5ab4f7e51f537cbe2dd7aa2f5ab5c1ebb47f4adaa87216d91",
+              "notification_schedule_id": "notification_schedule_f500e1eaf9f6569f6b918dcebb1c651097c910ac3fbf0781f1cdae34812ffa23",
+              "item_id": "item-fixed",
+              "item_version": "1",
+              "intent_created_item_version": "1",
+              "intent_created_by_command_id": "seed-fixed:later",
+              "recipient_kind": "subject",
+              "channel": "test",
+              "delivery_target_id": "route",
+              "target": {
+                "anchor_role": "task_due",
+                "application_scope": "item"
+              },
+              "schedule": {
+                "kind": "once",
+                "at": {
+                  "kind": "target_offset",
+                  "offset_basis": "elapsed",
+                  "offset_seconds": "-600"
+                }
+              },
+              "normalized_notification_schedule_hash": "9267a64536de1c9e1f1f6c432e5c553e412f193387b298e91859140ee749fc3f",
+              "late_handling": {
+                "kind": "skip"
+              },
+              "status": "active",
+              "created_at_utc": "2026-11-01T10:00:00Z",
+              "created_by_command_id": "seed-fixed:later",
+              "recipient_subject_id": "owner"
+            },
+            "intent_id_preimage": {
+              "derivation_version": "spine.notification-intent-id.v1",
+              "contract_version": "spine.notification-schedule.contract.v1",
+              "normalization_version": "spine.notification-schedule.normalization.v1",
+              "canonical_json_version": "spine.canonical-json.v1",
+              "item_id": "item-fixed",
+              "intent_created_item_version": "1",
+              "intent_created_by_command_id": "seed-fixed:later"
+            },
+            "schedule_hash_preimage": {
+              "derivation_version": "spine.normalized-notification-schedule-hash.v1",
+              "contract_version": "spine.notification-schedule.contract.v1",
+              "normalization_version": "spine.notification-schedule.normalization.v1",
+              "canonical_json_version": "spine.canonical-json.v1",
+              "target": {
+                "anchor_role": "task_due",
+                "application_scope": "item"
+              },
+              "schedule": {
+                "kind": "once",
+                "at": {
+                  "kind": "target_offset",
+                  "offset_basis": "elapsed",
+                  "offset_seconds": "-600"
+                }
+              },
+              "late_handling": {
+                "kind": "skip"
+              }
+            },
+            "schedule_id_preimage": {
+              "derivation_version": "spine.notification-schedule-id.v1",
+              "contract_version": "spine.notification-schedule.contract.v1",
+              "normalization_version": "spine.notification-schedule.normalization.v1",
+              "canonical_json_version": "spine.canonical-json.v1",
+              "notification_intent_id": "notification_intent_a662f673eb8180320654b90a6b076dbf56caa24398b7e29cde4f26415c9a888e",
+              "item_id": "item-fixed",
+              "item_version": "1",
+              "normalized_notification_schedule_hash": "9267a64536de1c9e1f1f6c432e5c553e412f193387b298e91859140ee749fc3f"
+            },
+            "policy_id_preimage": {
+              "derivation_version": "spine.notification-policy-id.v1",
+              "contract_version": "spine.notification-schedule.contract.v1",
+              "normalization_version": "spine.notification-schedule.normalization.v1",
+              "canonical_json_version": "spine.canonical-json.v1",
+              "notification_intent_id": "notification_intent_a662f673eb8180320654b90a6b076dbf56caa24398b7e29cde4f26415c9a888e",
+              "intent_created_item_version": "1",
+              "intent_created_by_command_id": "seed-fixed:later",
+              "item_id": "item-fixed",
+              "item_version": "1",
+              "notification_schedule_id": "notification_schedule_f500e1eaf9f6569f6b918dcebb1c651097c910ac3fbf0781f1cdae34812ffa23",
+              "recipient_kind": "subject",
+              "channel": "test",
+              "delivery_target_id": "route",
+              "target": {
+                "anchor_role": "task_due",
+                "application_scope": "item"
+              },
+              "normalized_notification_schedule_hash": "9267a64536de1c9e1f1f6c432e5c553e412f193387b298e91859140ee749fc3f",
+              "status": "active",
+              "created_at_utc": "2026-11-01T10:00:00Z",
+              "created_by_command_id": "seed-fixed:later",
+              "recipient_subject_id": "owner"
+            }
+          }
+        ]
+      ]
+    },
+    {
+      "name": "carry_forward",
+      "operation": "_schedule_update_normalize_policies",
+      "arguments": {
+        "current": [
+          {
+            "contract_version": "spine.notification-schedule.contract.v1",
+            "normalization_version": "spine.notification-schedule.normalization.v1",
+            "canonical_json_version": "spine.canonical-json.v1",
+            "notification_intent_id": "notification_intent_281fa3312ce2166b755f6168d01c67d0c8e192d61b6e7f29cc636bbd7bfb530e",
+            "notification_policy_id": "notification_policy_1d89ba0dd018af663a57c5b3bd060a9f35a8e04f5378dfc4cb032f195e0aafbc",
+            "notification_schedule_id": "notification_schedule_e9f53b6f42787e5836837133e8c2bbe34dff23007d16c13094c232d02ae5a783",
+            "item_id": "item-fixed",
+            "item_version": "1",
+            "intent_created_item_version": "1",
+            "intent_created_by_command_id": "seed-fixed:earlier",
+            "recipient_kind": "subject",
+            "channel": "test",
+            "delivery_target_id": "route",
+            "target": {
+              "anchor_role": "task_due",
+              "application_scope": "item"
+            },
+            "schedule": {
+              "kind": "once",
+              "at": {
+                "kind": "target_offset",
+                "offset_basis": "elapsed",
+                "offset_seconds": "-3600"
+              }
+            },
+            "normalized_notification_schedule_hash": "a874fc3953a2fb5e9ed5ed8cf8912665787c09876a18bffca2f573f411a4e0e2",
+            "late_handling": {
+              "kind": "skip"
+            },
+            "status": "active",
+            "created_at_utc": "2026-11-01T10:00:00Z",
+            "created_by_command_id": "seed-fixed:earlier",
+            "recipient_subject_id": "owner"
+          },
+          {
+            "contract_version": "spine.notification-schedule.contract.v1",
+            "normalization_version": "spine.notification-schedule.normalization.v1",
+            "canonical_json_version": "spine.canonical-json.v1",
+            "notification_intent_id": "notification_intent_a662f673eb8180320654b90a6b076dbf56caa24398b7e29cde4f26415c9a888e",
+            "notification_policy_id": "notification_policy_d16127ccdc6535a5ab4f7e51f537cbe2dd7aa2f5ab5c1ebb47f4adaa87216d91",
+            "notification_schedule_id": "notification_schedule_f500e1eaf9f6569f6b918dcebb1c651097c910ac3fbf0781f1cdae34812ffa23",
+            "item_id": "item-fixed",
+            "item_version": "1",
+            "intent_created_item_version": "1",
+            "intent_created_by_command_id": "seed-fixed:later",
+            "recipient_kind": "subject",
+            "channel": "test",
+            "delivery_target_id": "route",
+            "target": {
+              "anchor_role": "task_due",
+              "application_scope": "item"
+            },
+            "schedule": {
+              "kind": "once",
+              "at": {
+                "kind": "target_offset",
+                "offset_basis": "elapsed",
+                "offset_seconds": "-600"
+              }
+            },
+            "normalized_notification_schedule_hash": "9267a64536de1c9e1f1f6c432e5c553e412f193387b298e91859140ee749fc3f",
+            "late_handling": {
+              "kind": "skip"
+            },
+            "status": "active",
+            "created_at_utc": "2026-11-01T10:00:00Z",
+            "created_by_command_id": "seed-fixed:later",
+            "recipient_subject_id": "owner"
+          }
+        ],
+        "delivery": null,
+        "item": {
+          "item_id": "item-fixed",
+          "item_type": "task"
+        },
+        "next_version": 2,
+        "command_id": "change-fixed",
+        "updated_at": "2026-11-02T10:00:00Z",
+        "policy_keys": {
+          "notification_intent_281fa3312ce2166b755f6168d01c67d0c8e192d61b6e7f29cc636bbd7bfb530e": "earlier",
+          "notification_intent_a662f673eb8180320654b90a6b076dbf56caa24398b7e29cde4f26415c9a888e": "later"
+        },
+        "established_policy_intents": [
+          "notification_intent_281fa3312ce2166b755f6168d01c67d0c8e192d61b6e7f29cc636bbd7bfb530e",
+          "notification_intent_a662f673eb8180320654b90a6b076dbf56caa24398b7e29cde4f26415c9a888e"
+        ],
+        "recurring": false
+      },
+      "omitted": true,
+      "expected": [
+        [
+          [
+            "earlier",
+            {
+              "value": {
+                "contract_version": "spine.notification-schedule.contract.v1",
+                "normalization_version": "spine.notification-schedule.normalization.v1",
+                "canonical_json_version": "spine.canonical-json.v1",
+                "notification_intent_id": "notification_intent_281fa3312ce2166b755f6168d01c67d0c8e192d61b6e7f29cc636bbd7bfb530e",
+                "intent_created_item_version": "1",
+                "intent_created_by_command_id": "seed-fixed:earlier",
+                "item_id": "item-fixed",
+                "item_version": "2",
+                "notification_schedule_id": "notification_schedule_3172a1e205d6003d83708e940cd809c7bb242844d49775c3eae78ef74004c092",
+                "recipient_kind": "subject",
+                "channel": "test",
+                "delivery_target_id": "route",
+                "target": {
+                  "anchor_role": "task_due",
+                  "application_scope": "item"
+                },
+                "normalized_notification_schedule_hash": "a874fc3953a2fb5e9ed5ed8cf8912665787c09876a18bffca2f573f411a4e0e2",
+                "status": "active",
+                "created_at_utc": "2026-11-02T10:00:00Z",
+                "created_by_command_id": "change-fixed",
+                "source_notification_policy_id": "notification_policy_1d89ba0dd018af663a57c5b3bd060a9f35a8e04f5378dfc4cb032f195e0aafbc",
+                "recipient_subject_id": "owner",
+                "notification_policy_id": "notification_policy_a3aa9af46fd251a129d9f15d568043b3a4aa8eed72ceaf295d22ebf7bef6ce62",
+                "schedule": {
+                  "kind": "once",
+                  "at": {
+                    "kind": "target_offset",
+                    "offset_basis": "elapsed",
+                    "offset_seconds": "-3600"
+                  }
+                },
+                "late_handling": {
+                  "kind": "skip"
+                }
+              },
+              "intent_id_preimage": {},
+              "schedule_hash_preimage": {
+                "derivation_version": "spine.normalized-notification-schedule-hash.v1",
+                "contract_version": "spine.notification-schedule.contract.v1",
+                "normalization_version": "spine.notification-schedule.normalization.v1",
+                "canonical_json_version": "spine.canonical-json.v1",
+                "target": {
+                  "anchor_role": "task_due",
+                  "application_scope": "item"
+                },
+                "schedule": {
+                  "kind": "once",
+                  "at": {
+                    "kind": "target_offset",
+                    "offset_basis": "elapsed",
+                    "offset_seconds": "-3600"
+                  }
+                },
+                "late_handling": {
+                  "kind": "skip"
+                }
+              },
+              "schedule_id_preimage": {
+                "derivation_version": "spine.notification-schedule-id.v1",
+                "contract_version": "spine.notification-schedule.contract.v1",
+                "normalization_version": "spine.notification-schedule.normalization.v1",
+                "canonical_json_version": "spine.canonical-json.v1",
+                "notification_intent_id": "notification_intent_281fa3312ce2166b755f6168d01c67d0c8e192d61b6e7f29cc636bbd7bfb530e",
+                "item_id": "item-fixed",
+                "item_version": "2",
+                "normalized_notification_schedule_hash": "a874fc3953a2fb5e9ed5ed8cf8912665787c09876a18bffca2f573f411a4e0e2"
+              },
+              "policy_id_preimage": {
+                "derivation_version": "spine.notification-policy-id.v1",
+                "contract_version": "spine.notification-schedule.contract.v1",
+                "normalization_version": "spine.notification-schedule.normalization.v1",
+                "canonical_json_version": "spine.canonical-json.v1",
+                "notification_intent_id": "notification_intent_281fa3312ce2166b755f6168d01c67d0c8e192d61b6e7f29cc636bbd7bfb530e",
+                "intent_created_item_version": "1",
+                "intent_created_by_command_id": "seed-fixed:earlier",
+                "item_id": "item-fixed",
+                "item_version": "2",
+                "notification_schedule_id": "notification_schedule_3172a1e205d6003d83708e940cd809c7bb242844d49775c3eae78ef74004c092",
+                "recipient_kind": "subject",
+                "channel": "test",
+                "delivery_target_id": "route",
+                "target": {
+                  "anchor_role": "task_due",
+                  "application_scope": "item"
+                },
+                "normalized_notification_schedule_hash": "a874fc3953a2fb5e9ed5ed8cf8912665787c09876a18bffca2f573f411a4e0e2",
+                "status": "active",
+                "created_at_utc": "2026-11-02T10:00:00Z",
+                "created_by_command_id": "change-fixed",
+                "source_notification_policy_id": "notification_policy_1d89ba0dd018af663a57c5b3bd060a9f35a8e04f5378dfc4cb032f195e0aafbc",
+                "recipient_subject_id": "owner"
+              }
+            }
+          ],
+          [
+            "later",
+            {
+              "value": {
+                "contract_version": "spine.notification-schedule.contract.v1",
+                "normalization_version": "spine.notification-schedule.normalization.v1",
+                "canonical_json_version": "spine.canonical-json.v1",
+                "notification_intent_id": "notification_intent_a662f673eb8180320654b90a6b076dbf56caa24398b7e29cde4f26415c9a888e",
+                "intent_created_item_version": "1",
+                "intent_created_by_command_id": "seed-fixed:later",
+                "item_id": "item-fixed",
+                "item_version": "2",
+                "notification_schedule_id": "notification_schedule_a2705e7c526530c69887ebb7695e4cf8c108d5595a2b992cb27a43d9d268468e",
+                "recipient_kind": "subject",
+                "channel": "test",
+                "delivery_target_id": "route",
+                "target": {
+                  "anchor_role": "task_due",
+                  "application_scope": "item"
+                },
+                "normalized_notification_schedule_hash": "9267a64536de1c9e1f1f6c432e5c553e412f193387b298e91859140ee749fc3f",
+                "status": "active",
+                "created_at_utc": "2026-11-02T10:00:00Z",
+                "created_by_command_id": "change-fixed",
+                "source_notification_policy_id": "notification_policy_d16127ccdc6535a5ab4f7e51f537cbe2dd7aa2f5ab5c1ebb47f4adaa87216d91",
+                "recipient_subject_id": "owner",
+                "notification_policy_id": "notification_policy_5e5dfb852c0df3d6fdeaf908844e13b23b83e9a707e9ee9b29fe572121ff148e",
+                "schedule": {
+                  "kind": "once",
+                  "at": {
+                    "kind": "target_offset",
+                    "offset_basis": "elapsed",
+                    "offset_seconds": "-600"
+                  }
+                },
+                "late_handling": {
+                  "kind": "skip"
+                }
+              },
+              "intent_id_preimage": {},
+              "schedule_hash_preimage": {
+                "derivation_version": "spine.normalized-notification-schedule-hash.v1",
+                "contract_version": "spine.notification-schedule.contract.v1",
+                "normalization_version": "spine.notification-schedule.normalization.v1",
+                "canonical_json_version": "spine.canonical-json.v1",
+                "target": {
+                  "anchor_role": "task_due",
+                  "application_scope": "item"
+                },
+                "schedule": {
+                  "kind": "once",
+                  "at": {
+                    "kind": "target_offset",
+                    "offset_basis": "elapsed",
+                    "offset_seconds": "-600"
+                  }
+                },
+                "late_handling": {
+                  "kind": "skip"
+                }
+              },
+              "schedule_id_preimage": {
+                "derivation_version": "spine.notification-schedule-id.v1",
+                "contract_version": "spine.notification-schedule.contract.v1",
+                "normalization_version": "spine.notification-schedule.normalization.v1",
+                "canonical_json_version": "spine.canonical-json.v1",
+                "notification_intent_id": "notification_intent_a662f673eb8180320654b90a6b076dbf56caa24398b7e29cde4f26415c9a888e",
+                "item_id": "item-fixed",
+                "item_version": "2",
+                "normalized_notification_schedule_hash": "9267a64536de1c9e1f1f6c432e5c553e412f193387b298e91859140ee749fc3f"
+              },
+              "policy_id_preimage": {
+                "derivation_version": "spine.notification-policy-id.v1",
+                "contract_version": "spine.notification-schedule.contract.v1",
+                "normalization_version": "spine.notification-schedule.normalization.v1",
+                "canonical_json_version": "spine.canonical-json.v1",
+                "notification_intent_id": "notification_intent_a662f673eb8180320654b90a6b076dbf56caa24398b7e29cde4f26415c9a888e",
+                "intent_created_item_version": "1",
+                "intent_created_by_command_id": "seed-fixed:later",
+                "item_id": "item-fixed",
+                "item_version": "2",
+                "notification_schedule_id": "notification_schedule_a2705e7c526530c69887ebb7695e4cf8c108d5595a2b992cb27a43d9d268468e",
+                "recipient_kind": "subject",
+                "channel": "test",
+                "delivery_target_id": "route",
+                "target": {
+                  "anchor_role": "task_due",
+                  "application_scope": "item"
+                },
+                "normalized_notification_schedule_hash": "9267a64536de1c9e1f1f6c432e5c553e412f193387b298e91859140ee749fc3f",
+                "status": "active",
+                "created_at_utc": "2026-11-02T10:00:00Z",
+                "created_by_command_id": "change-fixed",
+                "source_notification_policy_id": "notification_policy_d16127ccdc6535a5ab4f7e51f537cbe2dd7aa2f5ab5c1ebb47f4adaa87216d91",
+                "recipient_subject_id": "owner"
+              }
+            }
+          ]
+        ],
+        {
+          "notification_intent_281fa3312ce2166b755f6168d01c67d0c8e192d61b6e7f29cc636bbd7bfb530e": "retained",
+          "notification_intent_a662f673eb8180320654b90a6b076dbf56caa24398b7e29cde4f26415c9a888e": "retained"
+        },
+        []
+      ]
+    },
+    {
+      "name": "clear",
+      "operation": "_schedule_update_normalize_policies",
+      "arguments": {
+        "current": [
+          {
+            "contract_version": "spine.notification-schedule.contract.v1",
+            "normalization_version": "spine.notification-schedule.normalization.v1",
+            "canonical_json_version": "spine.canonical-json.v1",
+            "notification_intent_id": "notification_intent_281fa3312ce2166b755f6168d01c67d0c8e192d61b6e7f29cc636bbd7bfb530e",
+            "notification_policy_id": "notification_policy_1d89ba0dd018af663a57c5b3bd060a9f35a8e04f5378dfc4cb032f195e0aafbc",
+            "notification_schedule_id": "notification_schedule_e9f53b6f42787e5836837133e8c2bbe34dff23007d16c13094c232d02ae5a783",
+            "item_id": "item-fixed",
+            "item_version": "1",
+            "intent_created_item_version": "1",
+            "intent_created_by_command_id": "seed-fixed:earlier",
+            "recipient_kind": "subject",
+            "channel": "test",
+            "delivery_target_id": "route",
+            "target": {
+              "anchor_role": "task_due",
+              "application_scope": "item"
+            },
+            "schedule": {
+              "kind": "once",
+              "at": {
+                "kind": "target_offset",
+                "offset_basis": "elapsed",
+                "offset_seconds": "-3600"
+              }
+            },
+            "normalized_notification_schedule_hash": "a874fc3953a2fb5e9ed5ed8cf8912665787c09876a18bffca2f573f411a4e0e2",
+            "late_handling": {
+              "kind": "skip"
+            },
+            "status": "active",
+            "created_at_utc": "2026-11-01T10:00:00Z",
+            "created_by_command_id": "seed-fixed:earlier",
+            "recipient_subject_id": "owner"
+          },
+          {
+            "contract_version": "spine.notification-schedule.contract.v1",
+            "normalization_version": "spine.notification-schedule.normalization.v1",
+            "canonical_json_version": "spine.canonical-json.v1",
+            "notification_intent_id": "notification_intent_a662f673eb8180320654b90a6b076dbf56caa24398b7e29cde4f26415c9a888e",
+            "notification_policy_id": "notification_policy_d16127ccdc6535a5ab4f7e51f537cbe2dd7aa2f5ab5c1ebb47f4adaa87216d91",
+            "notification_schedule_id": "notification_schedule_f500e1eaf9f6569f6b918dcebb1c651097c910ac3fbf0781f1cdae34812ffa23",
+            "item_id": "item-fixed",
+            "item_version": "1",
+            "intent_created_item_version": "1",
+            "intent_created_by_command_id": "seed-fixed:later",
+            "recipient_kind": "subject",
+            "channel": "test",
+            "delivery_target_id": "route",
+            "target": {
+              "anchor_role": "task_due",
+              "application_scope": "item"
+            },
+            "schedule": {
+              "kind": "once",
+              "at": {
+                "kind": "target_offset",
+                "offset_basis": "elapsed",
+                "offset_seconds": "-600"
+              }
+            },
+            "normalized_notification_schedule_hash": "9267a64536de1c9e1f1f6c432e5c553e412f193387b298e91859140ee749fc3f",
+            "late_handling": {
+              "kind": "skip"
+            },
+            "status": "active",
+            "created_at_utc": "2026-11-01T10:00:00Z",
+            "created_by_command_id": "seed-fixed:later",
+            "recipient_subject_id": "owner"
+          }
+        ],
+        "delivery": null,
+        "item": {
+          "item_id": "item-fixed",
+          "item_type": "task"
+        },
+        "next_version": 2,
+        "command_id": "change-fixed",
+        "updated_at": "2026-11-02T10:00:00Z",
+        "policy_keys": {
+          "notification_intent_281fa3312ce2166b755f6168d01c67d0c8e192d61b6e7f29cc636bbd7bfb530e": "earlier",
+          "notification_intent_a662f673eb8180320654b90a6b076dbf56caa24398b7e29cde4f26415c9a888e": "later"
+        },
+        "established_policy_intents": [
+          "notification_intent_281fa3312ce2166b755f6168d01c67d0c8e192d61b6e7f29cc636bbd7bfb530e",
+          "notification_intent_a662f673eb8180320654b90a6b076dbf56caa24398b7e29cde4f26415c9a888e"
+        ],
+        "recurring": false,
+        "desired": []
+      },
+      "omitted": false,
+      "expected": [
+        [],
+        {},
+        [
+          "notification_intent_281fa3312ce2166b755f6168d01c67d0c8e192d61b6e7f29cc636bbd7bfb530e",
+          "notification_intent_a662f673eb8180320654b90a6b076dbf56caa24398b7e29cde4f26415c9a888e"
+        ]
+      ]
+    },
+    {
+      "name": "disable",
+      "operation": "_schedule_disabled_policy",
+      "arguments": {
+        "prior": {
+          "contract_version": "spine.notification-schedule.contract.v1",
+          "normalization_version": "spine.notification-schedule.normalization.v1",
+          "canonical_json_version": "spine.canonical-json.v1",
+          "notification_intent_id": "notification_intent_281fa3312ce2166b755f6168d01c67d0c8e192d61b6e7f29cc636bbd7bfb530e",
+          "notification_policy_id": "notification_policy_1d89ba0dd018af663a57c5b3bd060a9f35a8e04f5378dfc4cb032f195e0aafbc",
+          "notification_schedule_id": "notification_schedule_e9f53b6f42787e5836837133e8c2bbe34dff23007d16c13094c232d02ae5a783",
+          "item_id": "item-fixed",
+          "item_version": "1",
+          "intent_created_item_version": "1",
+          "intent_created_by_command_id": "seed-fixed:earlier",
+          "recipient_kind": "subject",
+          "channel": "test",
+          "delivery_target_id": "route",
+          "target": {
+            "anchor_role": "task_due",
+            "application_scope": "item"
+          },
+          "schedule": {
+            "kind": "once",
+            "at": {
+              "kind": "target_offset",
+              "offset_basis": "elapsed",
+              "offset_seconds": "-3600"
+            }
+          },
+          "normalized_notification_schedule_hash": "a874fc3953a2fb5e9ed5ed8cf8912665787c09876a18bffca2f573f411a4e0e2",
+          "late_handling": {
+            "kind": "skip"
+          },
+          "status": "active",
+          "created_at_utc": "2026-11-01T10:00:00Z",
+          "created_by_command_id": "seed-fixed:earlier",
+          "recipient_subject_id": "owner"
+        },
+        "item_version": 2,
+        "command_id": "disable-fixed",
+        "updated_at": "2026-11-02T10:00:00Z"
+      },
+      "omitted": false,
+      "expected": {
+        "value": {
+          "contract_version": "spine.notification-schedule.contract.v1",
+          "normalization_version": "spine.notification-schedule.normalization.v1",
+          "canonical_json_version": "spine.canonical-json.v1",
+          "notification_intent_id": "notification_intent_281fa3312ce2166b755f6168d01c67d0c8e192d61b6e7f29cc636bbd7bfb530e",
+          "intent_created_item_version": "1",
+          "intent_created_by_command_id": "seed-fixed:earlier",
+          "item_id": "item-fixed",
+          "item_version": "2",
+          "notification_schedule_id": "notification_schedule_3172a1e205d6003d83708e940cd809c7bb242844d49775c3eae78ef74004c092",
+          "recipient_kind": "subject",
+          "channel": "test",
+          "delivery_target_id": "route",
+          "target": {
+            "anchor_role": "task_due",
+            "application_scope": "item"
+          },
+          "normalized_notification_schedule_hash": "a874fc3953a2fb5e9ed5ed8cf8912665787c09876a18bffca2f573f411a4e0e2",
+          "status": "disabled",
+          "created_at_utc": "2026-11-02T10:00:00Z",
+          "created_by_command_id": "disable-fixed",
+          "source_notification_policy_id": "notification_policy_1d89ba0dd018af663a57c5b3bd060a9f35a8e04f5378dfc4cb032f195e0aafbc",
+          "recipient_subject_id": "owner",
+          "disabled_at_utc": "2026-11-02T10:00:00Z",
+          "notification_policy_id": "notification_policy_b3518e5d256aca89afb539d744239ac244036916bf15423f315d02b4e1fec16a",
+          "schedule": {
+            "kind": "once",
+            "at": {
+              "kind": "target_offset",
+              "offset_basis": "elapsed",
+              "offset_seconds": "-3600"
+            }
+          },
+          "late_handling": {
+            "kind": "skip"
+          }
+        },
+        "intent_id_preimage": {},
+        "schedule_hash_preimage": {
+          "derivation_version": "spine.normalized-notification-schedule-hash.v1",
+          "contract_version": "spine.notification-schedule.contract.v1",
+          "normalization_version": "spine.notification-schedule.normalization.v1",
+          "canonical_json_version": "spine.canonical-json.v1",
+          "target": {
+            "anchor_role": "task_due",
+            "application_scope": "item"
+          },
+          "schedule": {
+            "kind": "once",
+            "at": {
+              "kind": "target_offset",
+              "offset_basis": "elapsed",
+              "offset_seconds": "-3600"
+            }
+          },
+          "late_handling": {
+            "kind": "skip"
+          }
+        },
+        "schedule_id_preimage": {
+          "derivation_version": "spine.notification-schedule-id.v1",
+          "contract_version": "spine.notification-schedule.contract.v1",
+          "normalization_version": "spine.notification-schedule.normalization.v1",
+          "canonical_json_version": "spine.canonical-json.v1",
+          "notification_intent_id": "notification_intent_281fa3312ce2166b755f6168d01c67d0c8e192d61b6e7f29cc636bbd7bfb530e",
+          "item_id": "item-fixed",
+          "item_version": "2",
+          "normalized_notification_schedule_hash": "a874fc3953a2fb5e9ed5ed8cf8912665787c09876a18bffca2f573f411a4e0e2"
+        },
+        "policy_id_preimage": {
+          "derivation_version": "spine.notification-policy-id.v1",
+          "contract_version": "spine.notification-schedule.contract.v1",
+          "normalization_version": "spine.notification-schedule.normalization.v1",
+          "canonical_json_version": "spine.canonical-json.v1",
+          "notification_intent_id": "notification_intent_281fa3312ce2166b755f6168d01c67d0c8e192d61b6e7f29cc636bbd7bfb530e",
+          "intent_created_item_version": "1",
+          "intent_created_by_command_id": "seed-fixed:earlier",
+          "item_id": "item-fixed",
+          "item_version": "2",
+          "notification_schedule_id": "notification_schedule_3172a1e205d6003d83708e940cd809c7bb242844d49775c3eae78ef74004c092",
+          "recipient_kind": "subject",
+          "channel": "test",
+          "delivery_target_id": "route",
+          "target": {
+            "anchor_role": "task_due",
+            "application_scope": "item"
+          },
+          "normalized_notification_schedule_hash": "a874fc3953a2fb5e9ed5ed8cf8912665787c09876a18bffca2f573f411a4e0e2",
+          "status": "disabled",
+          "created_at_utc": "2026-11-02T10:00:00Z",
+          "created_by_command_id": "disable-fixed",
+          "source_notification_policy_id": "notification_policy_1d89ba0dd018af663a57c5b3bd060a9f35a8e04f5378dfc4cb032f195e0aafbc",
+          "recipient_subject_id": "owner",
+          "disabled_at_utc": "2026-11-02T10:00:00Z"
+        }
+      }
+    }
+  ]
+}

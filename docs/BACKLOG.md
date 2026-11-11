@@ -150,8 +150,20 @@ RF0/RF1 tests pass. Strict typing of seven shared-boundary modules, focused Ruff
 Full regression passes **1,410 tests, OK (one skipped)** in 375.428 seconds using the
 installed pinned Tickerd v1, without the incompatible sibling development override.
 All 381 local documentation targets resolve. Public artifacts and the seven
-pre-existing R2/AGENTS files are hash-preserved. New runtime changes remain uncommitted.
-**Next:** Continue RF1 policy/work operations and the
+pre-existing R2/AGENTS files are hash-preserved. The first increment was committed
+as `02bfb03`, excluding those pre-existing changes and their tracking hunks.
+**RF1 continuation:** Shared policy create/update/disable preparation and read-only
+work classification now have lower owners; recurring callers no longer borrow those
+command helpers. Four fixed-output policy witnesses from `02bfb03` cover creation,
+copy-forward, explicit empty clear and disable, including IDs and preimages. The
+dependency ratchet is reduced without permitting new reverse calls. Focused update/
+binding/recurring/lineage checks pass 67 tests, nine operation tests pass, and the two
+new owners pass strict typing. Full regression passes **1,410 tests, one skipped**
+in 364.845 seconds; the newly added policy witness also passes in the separate
+23-test documentation/frozen-contract/operation selection. All 382 local links and
+diff hygiene pass. This continuation is
+uncommitted and does not complete RF1.
+**Next:** Continue RF1 successor materialization and the
 remaining named R2 command dependencies. No whole-RF1 closure, RF2/RF3 kickoff or
 R2/R3 resumption is claimed. No public activation, migration, push or deployment.
 

@@ -111,6 +111,7 @@ class InternalOperationBoundaryTests(unittest.TestCase):
         paths = (
             "core/request_values.py", "core/temporal_bindings.py", "ledger/catalog_reads.py",
             "ledger/item_reads.py", "ledger/provenance.py", "services/schedule_delivery.py",
+            "services/schedule_policies.py", "ledger/schedule_work.py",
         )
         for relative in paths:
             with self.subTest(path=relative):
@@ -126,8 +127,8 @@ class InternalOperationBoundaryTests(unittest.TestCase):
         from spine.commands import core, temporal_bindings
         from spine.core import occurrence_details, request_values
         from spine.core import temporal_bindings as facts
-        from spine.ledger import catalog_reads, item_reads, provenance
-        from spine.services import scheduling
+        from spine.ledger import catalog_reads, item_reads, provenance, schedule_work
+        from spine.services import schedule_policies, scheduling
 
         for name in ("revision_value", "source_from_occurrence", "source_from_prior"):
             self.assertIs(getattr(temporal_bindings, "_" + name), getattr(facts, name))
@@ -136,6 +137,10 @@ class InternalOperationBoundaryTests(unittest.TestCase):
         self.assertIs(core._decorate_occurrence, occurrence_details.decorate_occurrence)
         self.assertIs(core._schedule_object, request_values.object_value)
         self.assertIs(core._delivery_target, catalog_reads.delivery_target)
+        self.assertIs(core._schedule_normalize_policies, schedule_policies.normalize_policies)
+        self.assertIs(core._schedule_update_normalize_policies, schedule_policies.update_policies)
+        self.assertIs(core._schedule_disabled_policy, schedule_policies.disabled_policy)
+        self.assertIs(core._schedule_reconcile_work_plan, schedule_work.reconcile_work_plan)
         self.assertIs(services.materialize_notification_horizon, scheduling.materialize_notification_horizon)
         self.assertIs(services.SchedulingCycleResult, scheduling.SchedulingCycleResult)
 

@@ -55,7 +55,12 @@ incremental extraction, not RF1 closure: policy/work composition and remaining R
 command dependencies are still next. Focused verification and full regression pass
 (1,410 tests, one skipped, installed Tickerd v1). Existing R2/AGENTS changes are
 preserved and the runtime increment is
-uncommitted. SPINE-099 remains the status/evidence owner.
+now committed as `02bfb03`. The next RF1 increment extracts policy preparation and
+read-only work classification, preserving omitted-versus-empty policy sets and
+policy-specific work lineage. Focused checks pass; full regression passes 1,410 tests
+(one skipped), plus the separate new policy-witness check.
+Materialization and the remaining R2 command-helper dependencies are still open.
+SPINE-099 remains the status/evidence owner.
 
 Preserve `e540a91`, the uncommitted R2 admission/read continuation, unrelated
 `AGENTS.md` edits and all prior completion evidence. The delivery plan below remains

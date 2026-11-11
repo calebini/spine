@@ -55,7 +55,7 @@ from spine.core.schedule import (
     resolve_local_instant,
     system_timezone_database_version,
 )
-from spine.ledger import catalog_reads, item_reads
+from spine.ledger import catalog_reads, item_reads, schedule_work
 from spine.ledger.common import TemporalAnchorInput, copy_id, insert_temporal_anchor, require_utc_z
 from spine.ledger.item_drafts import _UNSET
 from spine.ledger.items import (
@@ -98,7 +98,7 @@ from spine.ledger.supporting import (
 )
 from spine.ledger.transactions import LedgerConnection
 from spine.ledger.work import assert_work_instance_not_stale, cancel_work_instance, create_work_instance
-from spine.services import schedule_delivery
+from spine.services import schedule_delivery, schedule_policies
 from spine.timezones import timezone_for_version
 
 # Preserve command helper imports while core and ledger own the shared implementation.
@@ -120,6 +120,11 @@ _subject_exists = catalog_reads.subject_exists
 _subject_group_exists = catalog_reads.subject_group_exists
 _delivery_target = catalog_reads.delivery_target
 _hydrated_item = item_reads.hydrated_item
+_schedule_normalize_policies = schedule_policies.normalize_policies
+_schedule_update_normalize_policies = schedule_policies.update_policies
+_schedule_disabled_policy = schedule_policies.disabled_policy
+_schedule_policy_route = schedule_policies.policy_route
+_schedule_reconcile_work_plan = schedule_work.reconcile_work_plan
 
 
 def handle(command: str, request: Mapping[str, Any], context: CommandContext) -> dict[str, Any]:
@@ -5879,78 +5884,6 @@ def _schedule_resolve_range_boundary(value: str, name: str, scheduled: Mapping[s
     return _parse_utc_datetime(resolution.utc_instant)
 
 
-def _schedule_normalize_policies(
-    value: object,
-    *,
-    item_id: str,
-    item_type: str,
-    recurring: bool,
-    command_id: str,
-    created_at_utc: str,
-    delivery: Mapping[str, Any],
-) -> tuple[tuple[str, NormalizedNotificationPolicy], ...]:
-    if not isinstance(value, Sequence) or isinstance(value, (str, bytes, bytearray)):
-        raise SpineValidationError(
-            "invalid_request:notification_plan.custom_additions",
-            "custom_additions must be an array",
-        )
-    if not 1 <= len(value) <= 32:
-        raise SpineValidationError(
-            "invalid_request:notification_plan.custom_additions",
-            "custom_additions must contain 1 through 32 policies",
-        )
-    keyed: list[tuple[str, int, Mapping[str, Any]]] = []
-    seen_keys: set[str] = set()
-    for index, raw in enumerate(value):
-        field = f"notification_plan.custom_additions[{index}]"
-        reminder = _schedule_object(raw, field)
-        _schedule_exact_fields(reminder, {"policy_key", "schedule", "late_handling"}, field)
-        policy_key = _nested_required_str(reminder, "policy_key", f"{field}.policy_key")
-        if re.fullmatch(r"[a-z][a-z0-9_-]{0,63}", policy_key) is None:
-            raise SpineValidationError(
-                f"invalid_request:{field}.policy_key",
-                "policy_key has an invalid format",
-            )
-        if policy_key in seen_keys:
-            raise SpineValidationError(
-                f"semantic_conflict:{field}.policy_key",
-                "policy_key must be unique",
-            )
-        seen_keys.add(policy_key)
-        keyed.append((policy_key, index, reminder))
-    result: list[tuple[str, NormalizedNotificationPolicy]] = []
-    seen_schedules: set[str] = set()
-    for policy_key, index, reminder in sorted(keyed, key=lambda entry: entry[0]):
-        normalized = normalize_notification_policy(
-            {
-                "authoring_contract": "spine.notification-schedule-authoring.v1",
-                "target": {
-                    "anchor_role": "event_start" if item_type == "event" else "task_due",
-                    "application_scope": "each_occurrence" if recurring else "item",
-                },
-                "schedule": reminder.get("schedule"),
-                "late_handling": reminder.get("late_handling"),
-            },
-            item_id=item_id,
-            item_version="1",
-            command_id=f"{command_id}:{policy_key}",
-            created_at_utc=created_at_utc,
-            recipient_kind=str(delivery["recipient_kind"]),
-            recipient_id=str(delivery["recipient_id"]),
-            channel=str(delivery["channel"]),
-            delivery_target_id=str(delivery["delivery_target_id"]),
-        )
-        schedule_hash = str(normalized.value["normalized_notification_schedule_hash"])
-        if schedule_hash in seen_schedules:
-            raise SpineValidationError(
-                f"semantic_conflict:notification_plan.custom_additions[{index}]",
-                "reminder duplicates another normalized policy",
-            )
-        seen_schedules.add(schedule_hash)
-        result.append((policy_key, normalized))
-    return tuple(result)
-
-
 def _schedule_recurrence_source_range(
     recurrence: Mapping[str, object],
     *,
@@ -6296,147 +6229,6 @@ def _schedule_established_policy_intents(connection: sqlite3.Connection, *, item
     return set()
 
 
-def _schedule_policy_route(policy: Mapping[str, object], delivery: Mapping[str, Any] | None) -> dict[str, str]:
-    if delivery is not None:
-        return {
-            "recipient_kind": str(delivery["recipient_kind"]),
-            "recipient_id": str(delivery["recipient_id"]),
-            "channel": str(delivery["channel"]),
-            "delivery_target_id": str(delivery["delivery_target_id"]),
-        }
-    recipient_kind = str(policy["recipient_kind"])
-    recipient_field = "recipient_subject_id" if recipient_kind == "subject" else "recipient_group_id"
-    return {
-        "recipient_kind": recipient_kind,
-        "recipient_id": str(policy[recipient_field]),
-        "channel": str(policy["channel"]),
-        "delivery_target_id": str(policy["delivery_target_id"]),
-    }
-
-
-def _schedule_update_normalize_policies(
-    current: Sequence[Mapping[str, object]],
-    *,
-    desired: object,
-    delivery: Mapping[str, Any] | None,
-    item: Mapping[str, Any],
-    next_version: int,
-    command_id: str,
-    updated_at: str,
-    policy_keys: Mapping[str, str],
-    established_policy_intents: set[str],
-    recurring: bool,
-) -> tuple[tuple[tuple[str, NormalizedNotificationPolicy], ...], dict[str, str], list[str]]:
-    by_intent = {str(value["notification_intent_id"]): value for value in current}
-    keyed: list[tuple[str, Mapping[str, Any] | None, Mapping[str, object] | None]] = []
-    if desired is _UNSET:
-        for prior in current:
-            keyed.append((policy_keys[str(prior["notification_intent_id"])], None, prior))
-    else:
-        if not isinstance(desired, Sequence) or isinstance(desired, (str, bytes, bytearray)) or len(desired) > 32:
-            raise SpineValidationError(
-                "invalid_request:patch.notification_plan.custom_additions",
-                "custom_additions must contain zero through 32 entries",
-            )
-        seen_keys: set[str] = set()
-        seen_intents: set[str] = set()
-        for index, raw in enumerate(desired):
-            field = f"patch.notification_plan.custom_additions[{index}]"
-            entry = _schedule_object(raw, field)
-            _schedule_exact_fields(
-                entry,
-                {"policy_key", "notification_intent_id", "notification_policy_id", "schedule", "late_handling"},
-                field,
-            )
-            key = _nested_required_str(entry, "policy_key", f"{field}.policy_key")
-            if re.fullmatch(r"[a-z][a-z0-9_-]{0,63}", key) is None or key in seen_keys:
-                raise SpineValidationError(f"semantic_conflict:{field}.policy_key", "policy_key is invalid or duplicated")
-            seen_keys.add(key)
-            intent_id = entry.get("notification_intent_id")
-            policy_id = entry.get("notification_policy_id")
-            if (intent_id is None) != (policy_id is None):
-                missing = "notification_intent_id" if intent_id is None else "notification_policy_id"
-                raise SpineValidationError(f"invalid_request:{field}.{missing}", "both reminder identities are required")
-            prior = None
-            if intent_id is not None:
-                if not isinstance(intent_id, str) or not isinstance(policy_id, str):
-                    raise SpineValidationError(f"invalid_request:{field}", "reminder identities must be strings")
-                prior = by_intent.get(intent_id)
-                if prior is None or prior["notification_policy_id"] != policy_id:
-                    raise SpineValidationError(
-                        f"semantic_conflict:{field}.notification_policy_id",
-                        "policy is not current",
-                    )
-                if intent_id in seen_intents:
-                    raise SpineValidationError(f"semantic_conflict:{field}.notification_intent_id", "intent is duplicated")
-                seen_intents.add(intent_id)
-                established = policy_keys.get(intent_id)
-                if intent_id in established_policy_intents and established is not None and established != key:
-                    raise SpineValidationError(
-                        f"semantic_conflict:{field}.policy_key",
-                        "policy_key is bound to another intent",
-                    )
-            elif delivery is None:
-                raise SpineValidationError("missing_patch.delivery", "new reminders require patch.delivery")
-            keyed.append((key, entry, prior))
-    result: list[tuple[str, NormalizedNotificationPolicy]] = []
-    effects: dict[str, str] = {}
-    schedule_hashes: set[str] = set()
-    for key, entry, prior in sorted(keyed, key=lambda value: value[0]):
-        if prior is not None:
-            route = _schedule_policy_route(prior, delivery)
-            normalized = revise_notification_policy(
-                prior,
-                item_version=str(next_version),
-                command_id=command_id,
-                changed_at_utc=updated_at,
-                recipient_kind=route["recipient_kind"],
-                recipient_id=route["recipient_id"],
-                channel=route["channel"],
-                delivery_target_id=route["delivery_target_id"],
-                target=prior["target"],
-                schedule=entry["schedule"] if entry is not None else prior["schedule"],
-                late_handling=entry["late_handling"] if entry is not None else prior["late_handling"],
-            )
-            changed = (
-                normalized.value["normalized_notification_schedule_hash"] != prior["normalized_notification_schedule_hash"]
-                or normalized.value["delivery_target_id"] != prior["delivery_target_id"]
-                or normalized.value["recipient_kind"] != prior["recipient_kind"]
-                or normalized.value["channel"] != prior["channel"]
-            )
-            effects[str(prior["notification_intent_id"])] = "updated" if changed else "retained"
-        else:
-            assert entry is not None and delivery is not None
-            normalized = normalize_notification_policy(
-                {
-                    "authoring_contract": "spine.notification-schedule-authoring.v1",
-                    "target": {
-                        "anchor_role": "event_start" if item["item_type"] == "event" else "task_due",
-                        "application_scope": "each_occurrence" if recurring else "item",
-                    },
-                    "schedule": entry["schedule"],
-                    "late_handling": entry["late_handling"],
-                },
-                item_id=str(item["item_id"]),
-                item_version=str(next_version),
-                command_id=f"{command_id}:{key}",
-                created_at_utc=updated_at,
-                recipient_kind=str(delivery["recipient_kind"]),
-                recipient_id=str(delivery["recipient_id"]),
-                channel=str(delivery["channel"]),
-                delivery_target_id=str(delivery["delivery_target_id"]),
-            )
-            effects[str(normalized.value["notification_intent_id"])] = "created"
-        schedule_hash = str(normalized.value["normalized_notification_schedule_hash"])
-        if schedule_hash in schedule_hashes:
-            raise SpineValidationError("semantic_conflict:patch.notification_plan", "two reminders normalize to the same policy")
-        schedule_hashes.add(schedule_hash)
-        result.append((key, normalized))
-    resulting_intents = {str(value.value["notification_intent_id"]) for _, value in result}
-    disabled = sorted(set(by_intent) - resulting_intents)
-    return tuple(result), effects, disabled
-
-
 def _schedule_delivery_changes(current: Sequence[Mapping[str, object]], delivery: Mapping[str, Any]) -> bool:
     return any(
         str(policy["delivery_target_id"]) != str(delivery["delivery_target_id"])
@@ -6570,87 +6362,6 @@ def _schedule_recurrence_semantics(value: Mapping[str, Any]) -> dict[str, Any]:
         "exdates": rows("exdates", "exdate_id"),
         "overrides": rows("overrides", "override_id"),
     }
-
-
-def _schedule_disabled_policy(
-    prior: Mapping[str, object],
-    *,
-    item_version: int,
-    command_id: str,
-    updated_at: str,
-) -> NormalizedNotificationPolicy:
-    route = _schedule_policy_route(prior, None)
-    return revise_notification_policy(
-        prior,
-        item_version=str(item_version),
-        command_id=command_id,
-        changed_at_utc=updated_at,
-        recipient_kind=route["recipient_kind"],
-        recipient_id=route["recipient_id"],
-        channel=route["channel"],
-        delivery_target_id=route["delivery_target_id"],
-        target=prior["target"],
-        schedule=prior["schedule"],
-        late_handling=prior["late_handling"],
-        status="disabled",
-        disabled_at_utc=updated_at,
-    )
-
-
-def _schedule_reconcile_work_plan(
-    connection: sqlite3.Connection,
-    *,
-    item_id: str,
-    active_policies: Sequence[Mapping[str, object]],
-    target_changed: bool,
-    recurrence_changed: bool,
-    temporal_binding_stale: bool = False,
-    parent_terminal: bool = False,
-) -> tuple[list[str], list[str], list[str], dict[str, str]]:
-    policy_resolver = NotificationPolicyResolver(connection, active_policies)
-    rows = connection.execute(
-        """
-        SELECT w.*,
-               EXISTS (
-                 SELECT 1 FROM side_effect_attempts AS a
-                 WHERE a.work_instance_id = w.work_instance_id
-               ) AS has_attempt
-        FROM work_instances AS w
-        WHERE w.item_id = ?
-        ORDER BY w.work_instance_id
-        """,
-        (item_id,),
-    ).fetchall()
-    cancelled: list[str] = []
-    retained: list[str] = []
-    protected: list[str] = []
-    reasons: dict[str, str] = {}
-    for row in rows:
-        policy = policy_resolver.resolve(str(row["notification_policy_id"]))
-        reason = None
-        if policy is not None and row["normalized_notification_schedule_hash"] != policy["normalized_notification_schedule_hash"]:
-            reason = "notification_schedule_superseded"
-        elif target_changed:
-            reason = "notification_target_changed"
-        elif recurrence_changed:
-            reason = "notification_occurrence_stale"
-        elif temporal_binding_stale:
-            reason = "notification_temporal_binding_stale"
-        elif policy is not None and row["delivery_target_id"] != policy["delivery_target_id"]:
-            reason = "notification_routing_changed"
-        elif policy is None:
-            reason = "notification_policy_disabled"
-        elif parent_terminal:
-            reason = "parent_lifecycle_terminal"
-        work_id = str(row["work_instance_id"])
-        if reason is None:
-            retained.append(work_id)
-        elif row["status"] == "eligible" and int(row["attempt_count"]) == 0 and not bool(row["has_attempt"]):
-            cancelled.append(work_id)
-            reasons[work_id] = reason
-        else:
-            protected.append(work_id)
-    return cancelled, retained, protected, reasons
 
 
 def _schedule_update_effect(*, truth_changed: bool, work_changed: bool) -> str:

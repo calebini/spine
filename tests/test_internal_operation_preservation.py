@@ -5,6 +5,7 @@ Only disposable ledgers are used. These fixtures pin results, not a public contr
 
 from __future__ import annotations
 
+import dataclasses
 import json
 import unittest
 from dataclasses import replace
@@ -28,6 +29,27 @@ def observed(call):
 
 
 class InternalOperationPreservationTests(unittest.TestCase):
+    def test_policy_create_copy_clear_disable_match_committed_baseline(self):
+        def wire(value):
+            if dataclasses.is_dataclass(value):
+                return wire(dataclasses.asdict(value))
+            if isinstance(value, dict):
+                return {key: wire(child) for key, child in value.items()}
+            if isinstance(value, (list, tuple)):
+                return [wire(child) for child in value]
+            return value
+
+        fixture = FIXTURE.with_name("rf1_policy_witness.json")
+        for case in json.loads(fixture.read_text())["cases"]:
+            with self.subTest(case=case["name"]):
+                arguments = dict(case["arguments"])
+                if "established_policy_intents" in arguments:
+                    arguments["established_policy_intents"] = set(arguments["established_policy_intents"])
+                if case["omitted"]:
+                    arguments["desired"] = core._UNSET
+                result = getattr(core, case["operation"])(**arguments)
+                self.assertEqual(canonical_json_bytes(wire(result)), canonical_json_bytes(case["expected"]))
+
     def test_delivery_routes_preserve_exact_results_and_error_precedence(self):
         cases = json.loads(FIXTURE.read_text())["delivery"]
         for case in cases:
