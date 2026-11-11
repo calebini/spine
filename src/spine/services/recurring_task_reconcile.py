@@ -3,13 +3,14 @@
 from __future__ import annotations
 
 import copy
+import sys
 from collections.abc import Callable
 from datetime import timedelta
 from functools import partial
 from typing import Any
 
 from spine.commands import core as c
-from spine.commands.recurring_task_runtime import cursor_payload, fail, instant, sign_cursor, verify_cursor, wire
+from spine.commands.recurring_task_runtime import PREFIX, cursor_payload, fail, instant, sign_cursor, verify_cursor, wire
 from spine.core.canonical_json import canonical_json_bytes
 from spine.core.errors import SpineValidationError
 from spine.core.hashing import hash_canonical_json
@@ -22,6 +23,10 @@ from spine.ledger.recurring_tasks import compare_and_swap, ensure_selector, inse
 from spine.ledger.temporal_bindings import target_from_source
 from spine.services import recurring_task_children as children
 from spine.services import recurring_task_proofs as proofs
+
+
+class _PageBoundary(Exception):
+    """Rollback a tentative whole unit or final response projection."""
 
 
 def continuation(db: Any, request: dict[str, Any], root: dict[str, Any], context: Any, contracts: Any, now: str) -> dict[str, Any] | None:
@@ -130,6 +135,9 @@ class Page:
         self.changed = False
         self.owners = False
         self.mutations = 0
+        self.units: list[tuple[Any, dict[str, Any], int, dict[str, Any], str]] = []
+        self.position: dict[str, Any] = {}
+        self.lane = "assignments"
         # Bound loading before the existing recurrence projection constructs lists.
         for table in ("recurrence_rules", "recurrence_segments", "recurrence_rdates", "recurrence_exdates", "recurrence_overrides"):
             rows = db.execute(
@@ -151,18 +159,19 @@ class Page:
         prior_work = sum(len(values) for values in self.work.values())
         unit_work = 0
         self.unit_oversized = False
+        scope = self.db.command_unit(nested=True)
+        scope.__enter__()
         try:
-            with self.db.command_unit():
-                before = self.db.total_changes
-                value = operation()
-                self.mutations = snapshot["mutations"] + int(self.db.total_changes != before)
-                unit_work = sum(len(values) for values in self.work.values()) - prior_work
-                if self.mutations > self.limits["mutations"]:
-                    fail("capacity_exceeded", "limits.mutations")
-                if prior_work + unit_work > self.limits["work_rows"]:
-                    fail("capacity_exceeded", "limits.work_rows")
-                return value
+            before = self.db.total_changes
+            value = operation()
+            self.mutations = snapshot["mutations"] + int(self.db.total_changes != before)
+            unit_work = sum(len(values) for values in self.work.values()) - prior_work
+            if self.mutations > self.limits["mutations"]:
+                fail("capacity_exceeded", "limits.mutations")
+            if prior_work + unit_work > self.limits["work_rows"]:
+                fail("capacity_exceeded", "limits.work_rows")
         except SpineValidationError as error:
+            scope.__exit__(*sys.exc_info())
             # The caller still owns one outer transaction. Never restore SQL by
             # deleting history or clear trackers for already-accepted units.
             for key, value in snapshot.items():
@@ -187,9 +196,34 @@ class Page:
                 reason = "disclosure_unavailable"
             elif field == "configuration.delivery" or code in {"delivery_target_not_found", "delivery_target_inactive"}:
                 reason = "route_unavailable"
+            elif code == "source_continuity_unresolved":
+                reason = "source_continuity_unresolved"
             if reason:
-                return entry(selector, "decision_required", reason)
+                scope = self.db.command_unit(nested=True)
+                scope.__enter__()
+                value = entry(selector, "decision_required", reason)
+            else:
+                raise
+        except BaseException:
+            scope.__exit__(*sys.exc_info())
             raise
+        self.units.append((scope, snapshot, len(self.results), copy.deepcopy(self.position), self.lane))
+        return value
+
+    def rollback_unit(self) -> str:
+        scope, snapshot, count, position, lane = self.units.pop()
+        scope.__exit__(_PageBoundary, _PageBoundary(), None)
+        for key, value in snapshot.items():
+            current = getattr(self, key)
+            if isinstance(current, dict):
+                current.clear()
+                current.update(value)
+            else:
+                setattr(self, key, value)
+        del self.results[count:]
+        self.position.clear()
+        self.position.update(position)
+        return lane
 
     def spend(self) -> None:
         try:
@@ -255,6 +289,7 @@ class Page:
         config: dict[str, Any] | None = None,
         config_id: str | None = None,
         proof_id: str | None = None,
+        managed_baseline: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
         config, config_id = config or self.config, config_id or self.root["current_revision_id"]
         selector = occurrence["target_occurrence_selector"]
@@ -327,7 +362,7 @@ class Page:
             "task_item_version": "1",
             "temporal_binding_revision_id": child["temporal_binding_revision_id"],
             "adopted_rule_revision_id": config_id,
-            "managed_baseline": baseline(config),
+            "managed_baseline": copy.deepcopy(managed_baseline) if managed_baseline is not None else baseline(config),
             "disposition": "governed",
             "restoration_veto": False,
             "reason": "new_source_slot" if first else "source_restored",
@@ -435,9 +470,20 @@ class Page:
 def reconcile(
     db: Any, request: dict[str, Any], root: dict[str, Any], context: Any, contracts: Any, now: str, runtime: dict[str, Any], fault: Any
 ) -> tuple[dict[str, Any], str, bool]:
-    from spine.commands.recurring_tasks import advance_catalog, catalog, intent_view, pending_adoption, rule_view
-
     page = Page(db, context, root, request, contracts, now, runtime, fault)
+    try:
+        return _reconcile(page)
+    finally:
+        error = sys.exc_info()
+        while page.units:
+            page.units.pop()[0].__exit__(*error)
+
+
+def _reconcile(page: Page) -> tuple[dict[str, Any], str, bool]:
+    from spine.commands.recurring_tasks import intent_view, pending_adoption, success_response
+
+    db, request, root = page.db, page.request, page.root
+    context, contracts, now = page.context, page.contracts, page.now
     token = continuation(db, request, root, context, contracts, now)
     selected_intent = (
         intent_view(db, token["intent_id"])
@@ -448,6 +494,7 @@ def reconcile(
     start = token["range_start_utc"] if token else wire(instant(evaluation) - timedelta(seconds=max(0, int(page.config["offset_seconds"]))))
     end = token["range_end_utc"] if token else wire(instant(evaluation) + timedelta(seconds=int(page.config["generation_horizon_seconds"])))
     position: dict[str, Any] = copy.deepcopy(token["after"] if token else {"assignment_after_seq": "0", "source_after": None})
+    page.position = position
     original = copy.deepcopy(position)
     assignments = db.execute(
         "SELECT assignment_id,assignment_seq FROM related_task_assignments WHERE related_task_rule_id=? "
@@ -471,6 +518,7 @@ def reconcile(
         processed_assignments += 1
     existing_more = len(assignments) > processed_assignments
     source_more = False
+    page.lane = "source"
     if root["status"] == "active":
         candidates = page.candidates(start, end)
         candidates = [
@@ -512,10 +560,45 @@ def reconcile(
                         raise
                     page.results.append(entry(selector, "decision_required", "source_continuity_unresolved"))
             position["source_after"] = {"scheduled_fact": selector["scheduled_fact"], "selector": selector}
-    if sum(len(values) for values in page.work.values()) > page.limits["work_rows"]:
-        fail("capacity_exceeded", "limits.work_rows")
+    # Hold whole-unit savepoints until the *complete receipt* fits. Rolling back
+    # a suffix never reruns accepted work, mints another ID or refunds proof work.
+    while True:
+        changed = page.changed
+        try:
+            with db.command_unit(nested=True):
+                result, effect, _ = finish(
+                    page, token, selected_intent, evaluation, start, end, original,
+                    processed_assignments, existing_more, source_more,
+                )
+                response = success_response(
+                    PREFIX + "reconcile",
+                    request, result, effect, page.changed, now, page.runtime, dry_run=context.dry_run,
+                )
+                if len(canonical_json_bytes(response)) > page.limits["response_bytes"]:
+                    raise _PageBoundary()
+            return result, effect, page.changed
+        except _PageBoundary:
+            page.changed = changed
+            if len(page.results) <= 1 or not page.units:
+                fail("capacity_exceeded", "limits.response_bytes")
+            lane = page.rollback_unit()
+            if lane == "assignments":
+                processed_assignments -= 1
+                existing_more = True
+            else:
+                source_more = True
+
+
+def finish(
+    page: Page, token: dict[str, Any] | None, selected_intent: dict[str, Any] | None,
+    evaluation: str, start: str, end: str, original: dict[str, Any],
+    processed_assignments: int, existing_more: bool, source_more: bool,
+) -> tuple[dict[str, Any], str, bool]:
+    from spine.commands.recurring_tasks import advance_catalog, catalog, intent_view, pending_adoption, rule_view
     from spine.services.recurring_task_adoption import complete
 
+    db, request, root = page.db, page.request, page.root
+    context, contracts, now, position = page.context, page.contracts, page.now, page.position
     for intent in (pending_adoption(db, root["related_task_rule_id"]), intent_view(db, root["retirement_intent_id"])):
         if intent and intent["status"] == "pending":
             complete(page, intent)
@@ -650,8 +733,6 @@ def reconcile(
         "next_cursor": cursor,
         "delivery": "not_attempted_by_command",
     }
-    if len(canonical_json_bytes(result)) > page.limits["response_bytes"]:
-        fail("capacity_exceeded", "limits.response_bytes")
     return result, "rule_page_applied" if page.changed else "rule_page_decision_required" if blocked else "rule_page_noop", page.changed
 
 
@@ -844,7 +925,8 @@ def process_existing(page: Page, assignment: dict[str, Any]) -> dict[str, Any]:
                         {r["subject_id"] for r in current["subject_roles"] if r["role"] == "assignee" and r["status"] == "active"}
                     )
                     return page.create(
-                        occurrence, assignment=assignment, config=restored, config_id=state["adopted_rule_revision_id"], proof_id=proof_id
+                        occurrence, assignment=assignment, config=restored, config_id=state["adopted_rule_revision_id"], proof_id=proof_id,
+                        managed_baseline=state["managed_baseline"],
                     )
             else:
                 target = target_from_source(source, int(prior["offset_seconds"]))

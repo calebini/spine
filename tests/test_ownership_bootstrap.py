@@ -96,6 +96,26 @@ class OwnershipBootstrapTests(unittest.TestCase):
             advance_ownership_epoch(self.db)
             raise RuntimeError("outer rollback")
         self.assertEqual(dump(self.db), before)
+
+    def test_nested_unit_opt_in_rolls_back_only_its_own_epoch_and_finalizer_state(self):
+        self.install()
+        with self.db.atomic_command(), self.db.command_unit():
+            with self.assertRaisesRegex(RuntimeError, "cannot nest"), self.db.command_unit():
+                self.fail("ordinary unit nesting must remain forbidden")
+            with self.assertRaisesRegex(RuntimeError, "inner"), self.db.command_unit(nested=True):
+                advance_ownership_epoch(self.db)
+                raise RuntimeError("inner")
+            self.assertIsNone(read_access_state(self.db))
+            self.assertFalse(self.db._ownership_epoch_consumed)
+            self.assertEqual(self.db._command_unit_depth, 1)
+            advance_ownership_epoch(self.db)
+            with self.assertRaisesRegex(RuntimeError, "second"), self.db.command_unit(nested=True):
+                self.assertEqual(advance_ownership_epoch(self.db), 1)
+                raise RuntimeError("second")
+            self.assertEqual(read_access_state(self.db)["access_epoch"], 1)
+            self.assertTrue(self.db._ownership_epoch_consumed)
+        self.assertEqual(self.db._command_unit_depth, 0)
+        self.assertFalse(self.db._command_unit_active)
         self.assertFalse(self.db._ownership_epoch_consumed)
         for table in ("login_accounts", "web_operators", "subject_memberships", "access_grants"):
             self.assertEqual(self.db.execute(f"SELECT COUNT(*) FROM {table}").fetchone()[0], 0)

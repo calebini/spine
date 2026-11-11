@@ -87,6 +87,13 @@ and expected timezone substitution diagnostics remain visible.
 
 ## Remaining exit work
 
+This is the historical manual-engine checkpoint. Ownership bootstrap has since
+been implemented and committed as `3836bd9`; see the
+[bootstrap evidence](ownership-bootstrap-r2-checkpoint.md). The
+[2026-11-11 page/lifecycle follow-up](recurring-related-task-r2-page-closure.md)
+implements full-envelope byte-driven continuation and records the current,
+narrower exit list. The original checkpoint's remaining list follows for history.
+
 - Finish exact between-unit **response-byte** continuation and all combined
   proof/hop/candidate budgets. The current hard byte cap safely rolls back an
   oversized page; that is not yet complete byte-driven pagination.

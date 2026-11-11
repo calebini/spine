@@ -70,13 +70,15 @@ def comparison(
             "item_archetype_id": archetype["item_archetype_id"],
             "item_archetype_revision_id": archetype["item_archetype_revision_id"],
             "revision_resolution": "exact",
+            "selection_source": archetype["selection_source"],
+            **({"source_ref": archetype["source_ref"]} if archetype["source_ref"] is not None else {}),
         }
     )
     location = next((v for v in current["locations"] if v["role"] == "primary"), None)
     observed["primary_location"] = None if location is None else {"mode": "reference", "location_id": location["location_id"]}
     for expected in (base["primary_location"], wanted["primary_location"]):
-        if expected is not None and expected["mode"] == "inline" and location is not None:
-            normalized = {"mode": "inline", **canonical_location_facts(location)}
+        if expected is not None and expected["mode"] == "create" and location is not None:
+            normalized = {"mode": "create", **canonical_location_facts(location)}
             if normalized == expected:
                 observed["primary_location"] = copy.deepcopy(expected)
     observed["reminders"] = (

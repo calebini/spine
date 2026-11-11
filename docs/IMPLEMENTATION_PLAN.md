@@ -132,8 +132,11 @@ machine package on 2026-11-10 and selected its implementation within R2.
 Ratification was committed as `232944b`. The internal candidate now implements
 the migration/primitive/promotion boundary with actual rollback, race and admission
 tests; see [ownership bootstrap checkpoint](design-notes/ownership-bootstrap-r2-checkpoint.md).
+That implementation was committed as `3836bd9`. The 2026-11-11 continuation adds
+full-envelope byte-driven continuation and selected lifecycle/customization/race
+closure; see [page-boundary checkpoint and precise remaining work](design-notes/recurring-related-task-r2-page-closure.md).
 No public package/schema or runtime registry activation is included. Remaining R2
-byte/combined-budget, restoration/custom-policy, intent/coverage, replay and wider
+combined-budget, restoration/custom-policy, intent/coverage, replay and wider
 concurrency matrices remain separate work; this does not close R2 or authorize R3.
 
 Implement all seven command handlers internally using the shared command context

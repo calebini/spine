@@ -51,6 +51,31 @@ def advance_catalog(db: Any) -> None:
     db.execute("UPDATE related_task_catalog_state SET catalog_generation=catalog_generation+1 WHERE singleton_id=1")
 
 
+def success_response(
+    command: str, request: dict[str, Any], result: dict[str, Any], effect: str,
+    changed: bool, now: str, runtime: dict[str, Any], *, dry_run: bool = False,
+) -> dict[str, Any]:
+    """One projection for byte planning and the persisted write receipt."""
+    audits = list(runtime["audit_ids"])
+    if changed:
+        audits.append(command_derived_id(
+            prefix="audit", command=command, command_id=request["command_id"], row_role="audit", request_path="/audit"
+        ))
+    response = {
+        "ok": True, "response_contract": RESPONSE, "command": command,
+        "changed": changed, "effect": effect, "evaluated_at_utc": now, "result": result,
+        "command_id": request["command_id"],
+        "command_receipt_id": command_derived_id(
+            prefix="command_receipt", command=command, command_id=request["command_id"],
+            row_role="command_receipt", request_path="/command_receipt",
+        ),
+        "audit_ids": sorted(audits), "replayed": False,
+    }
+    if dry_run:
+        response.update(command_receipt_id=None, audit_ids=[], dry_run=True, commit_cutoff_recheck_required=True)
+    return response
+
+
 def lookup(db: Any, table: str, key: str, field: str) -> dict[str, Any]:
     from spine.ledger.recurring_tasks import row
 
@@ -529,7 +554,7 @@ def execute(
                     or prior["semantic_facts"].get("normalized_result") != prior["result_identity_facts"]
                 ):
                     fail("environment_failure", "receipt")
-                response = copy.deepcopy(prior["result_identity_facts"])
+                response: dict[str, Any] = copy.deepcopy(prior["result_identity_facts"])
                 receipt_id = command_derived_id(
                     prefix="command_receipt",
                     command=command,
@@ -630,11 +655,9 @@ def execute(
                             now,
                         ),
                     )
-                response.update(command_id=value["command_id"], command_receipt_id=receipt_id, audit_ids=sorted(audit_ids), replayed=False)
+                response = success_response(command, value, result, effect, changed, now, runtime, dry_run=context.dry_run)
                 fault("audit")
-                if context.dry_run:
-                    response.update(command_receipt_id=None, audit_ids=[], dry_run=True, commit_cutoff_recheck_required=True)
-                else:
+                if not context.dry_run:
                     receipt = command_receipt(
                         command=command,
                         command_id=value["command_id"],

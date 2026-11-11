@@ -939,7 +939,8 @@ primitive, internal v3 explicit promotion and actual fault/concurrency/admission
 tests. Public package/schema/HTTP activation remains R4; no live ledger, deployment
 or push is authorized. The unrelated `AGENTS.md` change remains excluded.
 **Ownership bootstrap implementation checkpoint (2026-11-10):** Ratification
-committed as `232944b`; the following runtime increment is uncommitted. Internal
+committed as `232944b`; the runtime increment was subsequently committed as
+`3836bd9` at operator request (no push; unrelated `AGENTS.md` excluded). Internal
 candidate 20 now rebuilds the existing access-state table atomically, preserves
 configured rows/FK targets/trigger definitions, and restores FK enforcement on
 every failure. The pre-owner primitive creates a local epoch without any realm,
@@ -964,10 +965,26 @@ No public package/schema/declarations, old migration, live ledger, worker activa
 delivery or deployment changed. R2's remaining exit work below is not closed.
 R2 is **not complete**; selected passing tests do not close an
 entire RRT obligation or authorize R3/R4.
+**R2 continuation (2026-11-11):** Exact full-envelope response-byte continuation
+now rolls back whole suffix units, including intent/progress/catalog/cursor and
+SQL/Python finalizer state. New regressions cover combined reminder/work budgets,
+restoration/adoption cutoff equality, physical-connection restoration and
+suppression interleavings, complete managed-set clears with independent policy
+preservation, and restoration's original three-way baseline. Archetype attribution
+and primary-location comparison are corrected to their owning contracts.
+See [current evidence and remaining exit work](design-notes/recurring-related-task-r2-page-closure.md).
+**Verification:** Full suite **1,380 tests, OK (one skipped)**, 348.468 seconds;
+final command/page/bootstrap selection **60 tests, OK**, 23.138 seconds. Focused
+four-module typing, touched runtime/test Ruff, frozen web-contract synchronization,
+362 local documentation targets and diff hygiene pass. Known non-fatal read-budget
+and timezone-substitution diagnostics appeared. The unrelated `AGENTS.md` SHA-256
+is unchanged. The operator requested committing this verified continuation and
+proceeding with R2; no push or public activation.
 **Next:** Operator authorized the remaining R2 implementation on 2026-11-10.
-The operator requested checkpointing the ownership-bootstrap increment and continuing
-the remaining R2 implementation. Continue the manual reconciliation/lifecycle engine exit work against these tested
-foundations. Preserve immutable history and the R4-only public activation boundary.
+Continue the remaining restoration/custom-policy, proof/hop/read/error-precedence,
+intent/coverage, replay and wider concurrency matrices against these tested
+foundations. Preserve immutable history and the R4-only public activation boundary;
+R2 is not complete from the selected passing cases.
 
 ### SPINE-094 — R3: recurring-task all-writer safety and automatic scheduling
 

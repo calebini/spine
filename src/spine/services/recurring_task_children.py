@@ -210,8 +210,8 @@ def create(
                 item_id=task_id,
                 item_version=1,
                 archetype=archetype,
-                selection_source="explicit",
-                source_ref=None,
+                selection_source=a["selection_source"],
+                source_ref=a.get("source_ref"),
                 actor_subject_id=actor,
                 command_id=outer,
                 created_at_utc=now,
@@ -645,8 +645,8 @@ def adopt_supporting(
         desired_assignment = {
             "item_archetype_assignment_id": child_id(command_id, "item_archetype_assignment", path + "/archetype"),
             "archetype": archetype,
-            "selection_source": "explicit",
-            "source_ref": None,
+            "selection_source": selected_archetype["selection_source"],
+            "source_ref": selected_archetype.get("source_ref"),
         }
         if "archetype" not in patch and old is not None:
             # Let the existing owner retain the copied assignment. Only its ID
