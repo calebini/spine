@@ -96,13 +96,24 @@ strict typing/lint. Full regression passes 1,435 tests (one skipped), 392.707 se
 That increment is committed as `7423052`, excluding older R2 edits. The operator
 selected recurring-page state ownership next: rollbackable outputs and retained
 checkpoints get one owner; proof/hop/time consumption remains outside rollback.
-That continuation is now verified and uncommitted: 51 before/after preservation
+That continuation is verified and committed as `07fc937`: 51 before/after preservation
 tests, 61 isolated refactor-only tests, 12 new page regressions, retained RF0/RF1
 witnesses, documentation/declaration checks and strict typing/lint pass. Full
-regression passes 1,447 tests (one skipped), 373.476 seconds. Complete prepared
-create/change/restore composition and narrower child-operation inputs/results
-remain the next RF2 increment.
-RF2 is not yet complete. RF3 and functional R2 resumption remain gated.
+regression passes 1,447 tests (one skipped), 373.476 seconds. The subsequent complete
+create/change/restore composition now uses typed intent/evidence and explicit local
+authority/transaction inputs, not mutable page or full command-context inputs.
+Private allocator assembly preserves supporting-set order and exact predecessor
+restoration; the page retains source/generation lineage and outer receipt ownership.
+The closed facet writer inventory was updated for the private creation callsite.
+Seven full lifecycle witnesses captured from `07fc937` match current output and SQL.
+The 80-test pre/post baseline, 102-test focused continuation, 26-test final
+child/page/witness selection, 104-test isolated refactor-only selection, writer
+matrices, declaration/permission/policy-lineage checks and strict typing/lint pass.
+Full regression passes **1,461 tests, one skipped**, 366.240 seconds, after correcting
+the single stale inventory key detected in the first run. Public contracts and
+schema are unchanged. SPINE-100/RF2 is complete; the composition increment is
+verified and included in this checkpoint. Next is explicit functional R2 resumption,
+not automatic activation. RF3 and the original functional gates still precede R3.
 
 Preserve `e540a91`, the uncommitted R2 admission/read continuation, unrelated
 `AGENTS.md` edits and all prior completion evidence. The delivery plan below remains

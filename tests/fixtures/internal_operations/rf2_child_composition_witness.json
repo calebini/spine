@@ -1,0 +1,54 @@
+{
+  "cases": {
+    "adopt_clear": {
+      "changed": true,
+      "effect": "rule_page_applied",
+      "ledger_sha256": "d38f04f24633d4812d6191c3cc808a7491687474dba8d703d0edced7838867dc",
+      "response_bytes": 29873,
+      "response_sha256": "bb8b0c233852c9ce976e786e23787cb0906b67c1313273637bb6f59143b2feee"
+    },
+    "cancel": {
+      "changed": true,
+      "effect": "rule_page_applied",
+      "ledger_sha256": "9a55986dad2f23e8ae3032f45be80bd463ffbd8c415cad982973e368f242f40b",
+      "response_bytes": 35254,
+      "response_sha256": "13002f7631616420a18285f3247b72b0cefde4682580f9a368a2a899f2a80384"
+    },
+    "create": {
+      "changed": true,
+      "effect": "rule_page_applied",
+      "ledger_sha256": "4eeecd4ae0e5798c67a564623b98c721838fad385d1fcf2029ff2e7cea85be16",
+      "response_bytes": 31690,
+      "response_sha256": "2dd8cc0fc76d034535cccdfc9b6c69998c9eabafa82a4b290470189353fec7de"
+    },
+    "move": {
+      "changed": true,
+      "effect": "rule_page_applied",
+      "ledger_sha256": "554e9ad2c758aea386e69c1d4fc0c704a1a7db67597ae8d6afa0a96b1c8e7d7d",
+      "response_bytes": 35232,
+      "response_sha256": "2a64c786e1cb3ea2bf2a6e00baeb42d935e3dcf61232b2f161541758bcfd1644"
+    },
+    "noop": {
+      "changed": false,
+      "effect": "rule_page_noop",
+      "ledger_sha256": "8e83bd66bd5967fcdfcc2ca9cbade6caeb57fa6f602e4950eff816838d1249ba",
+      "response_bytes": 28997,
+      "response_sha256": "9d44633a55d11d53f1d2c907b8797255d9e5843fddcf2c71c9b2a705eb7876ad"
+    },
+    "replay": {
+      "changed": false,
+      "effect": "rule_page_noop",
+      "ledger_sha256": "8e83bd66bd5967fcdfcc2ca9cbade6caeb57fa6f602e4950eff816838d1249ba",
+      "response_bytes": 28996,
+      "response_sha256": "431ae1dbb43c279d0ab453d9688122ef8ccd47fea267e7ade53665a3528328fb"
+    },
+    "restore": {
+      "changed": true,
+      "effect": "rule_page_applied",
+      "ledger_sha256": "d70567613fa7dd3762c5015bca223e8a2f53e83a3b33c027ee288dfd3eedaa57",
+      "response_bytes": 35241,
+      "response_sha256": "6a671a7bdd963a0bca7e26179d4d632e27e151e94cfbd04a17ce4ecfac88fa79"
+    }
+  },
+  "source_commit": "07fc937"
+}

@@ -218,10 +218,11 @@ migration, push or deployment; RF2 was selected separately below.
 
 ### SPINE-100 — RF2: complete item-change and transaction/page-state ownership
 
-**Status:** In progress — operator selected RF2 after RF1 checkpoint `9e50c1c`
-(2026-11-11); first transaction-state increment committed as `7423052`.
-Recurring-page ownership continuation is verified, uncommitted. Existing
-R2 admission/read and `AGENTS.md` edits remain preserved.
+**Status:** Done — selected RF2 state/composition gates verified (2026-11-11).
+Transaction-state ownership is committed as `7423052`; recurring-page ownership
+as `07fc937`. Complete create/change/restore composition is verified and included
+in this RF2 composition checkpoint.
+Existing R2 admission/read and `AGENTS.md` edits remain preserved.
 **Scope:** Implement §§5–6 of the accepted internal-operations contract in bounded
 increments. First centralize the closed transaction mutation state and migrate its
 consumers; then own recurring page checkpoints and complete item-change composition.
@@ -243,10 +244,10 @@ preservation checks, strict typing and lint pass. Full regression passes **1,435
 tests, OK (one skipped)** in 392.707 seconds with installed pinned Tickerd v1.
 Known non-failing capacity-limit/timezone diagnostics appeared. All 456 local link
 targets and 36 cross-document heading fragments resolve; diff hygiene passes.
-**Evidence/next:** [RF2 state-owner evidence and remaining scope](design-notes/internal-operations-rf2.md).
-The operator requested checkpointing and explicitly selected page-state ownership.
-Complete prepared item-change composition remains the following RF2 increment.
-RF2 remains open; no push or deployment.
+**Evidence/next:** [RF2 state/composition evidence and gate map](design-notes/internal-operations-rf2.md).
+The operator selected the final composition checkpoint. Functional R2 still requires explicit
+resumption; RF3 propagation and the original functional gates remain before R3.
+No push or deployment.
 **Page-state continuation:** Implemented one typed owner for rollbackable page data
 and retained SQL/Python unit checkpoints. Final projections use the same paired
 trial boundary; LIFO closure and recovery-path exceptions cannot strand entered
@@ -258,9 +259,25 @@ snapshot excluding older R2 edits passes **61 tests**, 26.330 seconds. All 444
 checked local links and 40 heading fragments resolve. Full regression passes
 **1,447 tests, OK (one skipped)** in 373.476 seconds with installed pinned Tickerd v1;
 known non-failing capacity-limit and timezone diagnostics appeared. The continuation
-is uncommitted and does not close full RF2 composition. Next: closed prepared
-create/change/restore operations and narrow child inputs/results; preserve the
-allocator's order and all supporting-set/fault/budget/replay gates.
+is committed as `07fc937`; by itself it did not close full RF2 composition.
+**Complete composition:** Separate typed create/change/restore inputs and evidence
+replace whole-page/request/context child inputs. Explicit local authority and the
+owned transaction are required; private allocator assemblies preserve SQL order,
+supporting sets, histories, policies/presentations and selected work. The page owns
+the same source/assignment/generation unit and outer receipt. Restoration pins actual
+predecessor choices; work overflow cannot become prefix success. The internal facet
+producer inventory names the new private allocator callsite exactly.
+The 80-test before/after baseline, 102-test focused continuation, 26-test final
+child/page/witness selection and 104-test isolated refactor-only selection pass.
+Seven new lifecycle envelope/SQL witnesses match committed `07fc937`; no RF0/RF1
+goldens changed. Both real facet/people writer matrices pass (four tests locally
+and in the isolated snapshot); 36 documentation/declaration/policy-lineage/permission
+checks pass. Strict typing, focused lint, 454 local links/40 fragments, preserved
+pre-existing hashes and diff hygiene pass. After correcting the sole first-run
+inventory mismatch, full regression passes **1,461 tests, OK (one skipped)**,
+366.240 seconds, with installed pinned Tickerd v1 and only the known non-failing
+capacity-limit/timezone diagnostics. IO-03–06 and IO-08 are closed for the selected
+RF2 scope. No public contracts, persistent schema, agent workflow or activation changed.
 
 ## Selected feature design
 

@@ -25,6 +25,16 @@ from spine.ledger.recurring_tasks import compare_and_swap, ensure_selector, inse
 from spine.ledger.temporal_bindings import target_from_source
 from spine.services import recurring_task_children as children
 from spine.services import recurring_task_proofs as proofs
+from spine.services.recurring_task_operations import (
+    ChangeChild,
+    ChildDisposition,
+    ChildInvocation,
+    ChildWorkOverflow,
+    CreateChild,
+    LocalAuthority,
+    RestoreChild,
+    WorkEvidence,
+)
 from spine.services.recurring_task_page_state import PageBoundary as _PageBoundary
 from spine.services.recurring_task_page_state import PageState
 
@@ -130,6 +140,13 @@ class Page:
         self.db, self.context, self.request, self.contracts, self.now = db, context, request, contracts, now
         self.state = PageState(root=root, runtime=runtime)
         self.fault = fault
+        # The internal command adapter has already admitted trusted-local CLI
+        # transport. Authority is selected here, never from client JSON.
+        self.invocation = ChildInvocation(
+            authority=LocalAuthority.TRUSTED_LOCAL, command_id=request["command_id"],
+            actor_subject_id=request["actor_subject_id"], now=now,
+            delivery_target_defaults=context.delivery_target_defaults, fault=fault,
+        )
         self.snapshot = source_snapshot(db, root)
         self.config = read_record(db, "related_task_rule_revisions", root["current_revision_id"])["configuration_json"]
         self.limits = {k: int(v) for k, v in request["limits"].items()}
@@ -168,6 +185,7 @@ class Page:
             if prior_work + unit_work > self.limits["work_rows"]:
                 fail("capacity_exceeded", "limits.work_rows")
         except SpineValidationError as error:
+            self.unit_oversized = self.unit_oversized or isinstance(error, ChildWorkOverflow)
             self.state.rollback(unit, sys.exc_info())
             # The caller still owns one outer transaction. Never restore SQL by
             # deleting history or clear trackers for already-accepted units.
@@ -203,6 +221,30 @@ class Page:
             self.state.rollback(unit, sys.exc_info())
             raise
         return value
+
+    def apply_work(self, work: WorkEvidence) -> None:
+        for kind in ("created", "cancelled", "retained", "protected_stale"):
+            self.state.work[kind].extend(getattr(work, kind))
+        self.state.changed = self.state.changed or work.changed
+
+    def change(
+        self, assignment: dict[str, Any], generation: dict[str, Any], binding: dict[str, Any],
+        current: dict[str, Any], source: dict[str, Any], config: dict[str, Any], *,
+        target: dict[str, Any] | None = None, disposition: ChildDisposition = ChildDisposition.FOLLOW,
+        managed: dict[str, Any] | None = None,
+    ) -> dict[str, str]:
+        result = children.change(self.db, self.invocation, ChangeChild(
+            assignment_id=assignment["assignment_id"], generation=generation, binding=binding,
+            current=current, source=source, configuration=config, work_limit=self.limits["work_rows"],
+            target=target, disposition=disposition, managed=managed,
+        ))
+        self.apply_work(result.work)
+        self.state.runtime["audit_ids"].extend(result.audit_ids)
+        self.state.mappings.extend(result.policy_mappings)
+        self.state.changed = True
+        self.state.mutations += 1
+        return {"task_item_version": result.task_item_version,
+                "temporal_binding_revision_id": result.temporal_binding_revision_id}
 
     def spend(self) -> None:
         try:
@@ -326,9 +368,15 @@ class Page:
         source = children.source_facts(
             self.db, self.state.root, self.recurrence, occurrence, self.now, persist=True, command_id=self.request["command_id"]
         )
-        child = children.create(
-            self.db, self.context, self.state.root, config, assignment_id, generation_id, source, self.request, self.now, self.fault,
-            restoration=restoration,
+        creation = CreateChild(
+            source_item_id=self.state.root["source_item_id"], configuration=config,
+            assignment_id=assignment_id, generation_id=generation_id, source=source,
+            work_limit=self.limits["work_rows"],
+        )
+        child = (
+            children.create(self.db, self.invocation, creation)
+            if restoration is None
+            else children.restore(self.db, self.invocation, RestoreChild(creation=creation, predecessor=restoration))
         )
         self.state.runtime["cutoffs"].append(due)
         self.state.runtime["audit_ids"].append(child["audit_id"])
@@ -579,7 +627,10 @@ def finish(
     context, contracts, now, position = page.context, page.contracts, page.now, page.state.position
     for intent in (pending_adoption(db, root["related_task_rule_id"]), intent_view(db, root["retirement_intent_id"])):
         if intent and intent["status"] == "pending":
-            complete(page, intent)
+            completed = complete(
+                db, page.invocation, rule_id=page.state.root["related_task_rule_id"], budget=page.budget, intent=intent,
+            )
+            page.state.changed = page.state.changed or completed
     if page.state.changed:
         coverage_json = {
             "range_start_utc": start,
@@ -773,16 +824,14 @@ def process_existing(page: Page, assignment: dict[str, Any]) -> dict[str, Any]:
     elif retirement and retirement["disposition"] in {"cancel_open", "detach_open"}:
         reason = "rule_retired_cancel" if retirement["disposition"] == "cancel_open" else "rule_retired_detach"
         if current["detail"]["task_status"] == "open":
-            change = children.change(
-                page,
+            change = page.change(
                 assignment,
                 gen,
                 binding,
                 current,
                 source,
                 config,
-                cancel=retirement["disposition"] == "cancel_open",
-                detach=retirement["disposition"] == "detach_open",
+                disposition=ChildDisposition.CANCEL if retirement["disposition"] == "cancel_open" else ChildDisposition.DETACH,
             )
             state.update(
                 change, disposition="manual_cancelled" if retirement["disposition"] == "cancel_open" else "detached", restoration_veto=True
@@ -879,7 +928,7 @@ def process_existing(page: Page, assignment: dict[str, Any]) -> dict[str, Any]:
                         source_occurrence_selector_ref="recurrence_target_selector_" + hash_canonical_json(state["selector"]),
                         target_occurrence_selector=state["selector"],
                     )
-                    state.update(children.change(page, assignment, gen, binding, current, source, config, cancel=True))
+                    state.update(page.change( assignment, gen, binding, current, source, config, disposition=ChildDisposition.CANCEL))
                     state.update(
                         disposition="source_cancelled",
                         reason=cancel_reason,
@@ -897,7 +946,10 @@ def process_existing(page: Page, assignment: dict[str, Any]) -> dict[str, Any]:
                     assert occurrence is not None
                     from spine.services.recurring_task_restoration import prepare
 
-                    restoration = prepare(page, assignment, gen, current, binding, config)
+                    restoration = prepare(
+                        db, command_id=page.request["command_id"], budget=page.budget, assignment_id=assignment["assignment_id"],
+                        generation=gen, current=current, binding=binding, config=config,
+                    )
                     return page.create(
                         occurrence, assignment=assignment, config=restoration.configuration,
                         config_id=state["adopted_rule_revision_id"], proof_id=proof_id,
@@ -917,7 +969,7 @@ def process_existing(page: Page, assignment: dict[str, Any]) -> dict[str, Any]:
                         outcome, reason, actions = "skipped_due", "due_not_future", ["intent_skipped"]
                         moved = False
                     else:
-                        managed, conflict = adoption.comparison(page, assignment, gen, state, current, binding, desired)
+                        managed, conflict = adoption.comparison(db, gen, state, current, binding, desired)
                         if conflict:
                             intent_result, intent_reason = "conflict", "configuration_conflict"
                             outcome, reason = "decision_required", "configuration_conflict"
@@ -943,8 +995,7 @@ def process_existing(page: Page, assignment: dict[str, Any]) -> dict[str, Any]:
                     pass
                 elif moved or changed_source or adopting or int(state["task_item_version"]) != int(current["current_version"]):
                     state.update(
-                        children.change(
-                            page, assignment, gen, binding, current, source, config, target=target if moved else None, managed=managed
+                        page.change( assignment, gen, binding, current, source, config, target=target if moved else None, managed=managed
                         )
                     )
                     state.update(
@@ -962,7 +1013,10 @@ def process_existing(page: Page, assignment: dict[str, Any]) -> dict[str, Any]:
                     )
                     actions = (["configuration_adopted"] if adopting else []) + (["task_rescheduled"] if moved else ["witness_refreshed"])
                 else:
-                    children.reconcile_work(page, gen["task_item_id"], int(current["current_version"]), config)
+                    page.apply_work(children.reconcile_work(
+                        db, page.invocation, gen["task_item_id"], int(current["current_version"]), config,
+                        work_limit=page.limits["work_rows"],
+                    ))
         except SpineValidationError as error:
             if error.code != "source_continuity_unresolved":
                 raise
@@ -976,7 +1030,7 @@ def process_existing(page: Page, assignment: dict[str, Any]) -> dict[str, Any]:
         state["reason"] = reason
     # A manually advanced task needs an exact binding witness even for a terminal veto.
     if outcome != "decision_required" and int(state["task_item_version"]) < int(current["current_version"]):
-        state.update(children.change(page, assignment, gen, binding, current, source, config))
+        state.update(page.change( assignment, gen, binding, current, source, config))
     state_id = None
     if state != original:
         state_id = append_state(db, assignment, state, request, page.now)
@@ -991,14 +1045,16 @@ def process_existing(page: Page, assignment: dict[str, Any]) -> dict[str, Any]:
                 state_id = append_state(db, current_assignment, state, request, page.now)
                 page.state.changed = True
         if intent_result:
-            adoption.outcome(
-                page, intent, assignment, state_id or assignment["current_assignment_revision_id"], intent_result, intent_reason or reason
+            recorded = adoption.outcome(
+                db, page.invocation, intent, assignment["assignment_id"],
+                state_id or assignment["current_assignment_revision_id"], intent_result, intent_reason or reason
             )
+            page.state.changed = page.state.changed or recorded
     if retirement and assignment["assignment_seq"] <= int(retirement["assignment_high_water"]):
-        adoption.outcome(
-            page,
+        recorded = adoption.outcome(
+            db, page.invocation,
             retirement,
-            assignment,
+            assignment["assignment_id"],
             state_id or assignment["current_assignment_revision_id"],
             "skipped_terminal"
             if current["detail"]["task_status"] != "open"
@@ -1007,6 +1063,7 @@ def process_existing(page: Page, assignment: dict[str, Any]) -> dict[str, Any]:
             else "retained_equal",
             reason,
         )
+        page.state.changed = page.state.changed or recorded
     if outcome == "cancelled" and reason in {"source_excluded", "source_occurrence_cancelled", "source_cancelled"} and cause is None:
         insert_record(
             db,

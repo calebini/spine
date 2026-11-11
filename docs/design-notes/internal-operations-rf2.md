@@ -3,7 +3,7 @@
 Date: 2026-11-11. Selected by the operator after RF1 checkpoint `9e50c1c`.
 Tracking: [SPINE-100](../BACKLOG.md#spine-100--rf2-complete-item-change-and-transactionpage-state-ownership).
 Authority: [internal application operations §§5–6](../../specs/internal-application-operations.md).
-This is implementation evidence, not a new feature contract or whole-RF2 closure.
+This is implementation evidence, not a new feature contract or public activation.
 
 ## Baseline and preservation boundary
 
@@ -118,25 +118,103 @@ The isolated HEAD-plus-page snapshot without dirty R2 edits passes **61 tests**,
 local links and 40 heading fragments resolve. Full regression passes **1,447 tests,
 OK (one skipped)** in 373.476 seconds, using installed pinned Tickerd v1. The known
 non-failing capacity-limit and timezone diagnostics appeared. Final lint and diff
-hygiene pass. This page-state continuation is verified and uncommitted.
+hygiene pass. This page-state continuation is committed as `07fc937`.
 
-Full item-change composition remains the next RF2 increment. Existing whole-Page
-child signatures have not yet been replaced by closed prepared operations and
-narrow results; they remain a named RF2 obligation, not a newly approved interface.
+## Complete child composition continuation
 
-## Remaining RF2 work (not claimed complete)
+Selected after checkpoint `07fc937`. The internal operation boundary now has
+separate `CreateChild`, `ChangeChild` and `RestoreChild` inputs, a required
+`ChildInvocation`, and typed created/changed/work evidence. It is not a new public
+command or a universal mutation object. The exact recurring contract and outer
+command identities remain fixed; generation-scoped identities retain their existing
+preimages. Cancel and detach are mutually exclusive dispositions, not independently
+combinable booleans. A terminal disposition cannot also request a move or adoption.
 
-1. Introduce closed prepared create/change/restore operations with typed results;
-   stop passing the whole mutable page to child operations.
-   Preserve the allocator's SQL order/prospective successor view, authority rechecks,
-   explicit owner/binding changes, policies/applications/presentations, facets/roles,
-   selected work behavior and evidence returned to the command owner.
-2. Close IO-03–06/08 across that composition: faults after every owned stage,
-   zero/eight facets, opposite roles and clears, shared-intent independent policies,
-   customized restoration and terminal/suppression vetoes, exact budget accounting,
-   protected replay/admission and full regression. This first increment only
-   establishes the transaction/page-state portion of those gates.
+The admitted trusted-local composer explicitly selects authority. Child entrypoints
+require both that authority and the existing owned `LedgerConnection` transaction;
+missing authority, a raw connection or an invocation outside that transaction cannot
+fall through to the allocator's standalone transaction convenience. This is internal
+composition discipline, **not** new authentication or protection from a trusted local
+process with direct ledger access. Protected transport remains denied at the existing
+command admission boundary; no protected recurring entrypoint is introduced.
+
+| Intent | Complete owned work | Deliberately unaffected / separately owned |
+| --- | --- | --- |
+| Create | Guarded task v1, due anchor, selected roles/location/archetype, owner/history/epoch, relation, binding/revision, exact policies/application/presentations, selected work and returned identities | No inherited facets or predecessor unless the explicit restore intent is used |
+| Change | Existing allocator/CAS/audit, prospective successor supporting sets, selected named-role clears/adoption, binding freshness or retirement, bounded work classification/materialization | Owner/relation identity retained; unselected supporting fields copy forward; binding-only refresh does not manufacture an item version |
+| Restore | New generation identity with actual predecessor configuration, exact facet entries and reference history, additional roles/locations, active family **and independent** policies, pinned application/presentation, new work | No current-default re-resolution; terminal/manual/detach/suppression and source-only eligibility remain the recurring feature's decisions |
+
+The page application still owns source proof, selector reservation, assignment and
+generation lineage and their cutoff/intent checks. Those feature-specific steps and
+the complete child operation share the same retained SQL/Python unit, transaction
+finalizers and outer receipt. There is no newly independent child transaction or
+receipt. The allocator's private prerequisite/extension closures remain inside the
+operation; callers cannot supply a callback that skips supporting work. Existing SQL
+write ordering and the prospective successor view are preserved.
+
+Children, restoration helpers and adoption helpers no longer accept a `Page`, CLI
+request or command context. Route resolution receives only configured delivery
+defaults; restoration preparation and intent completion receive the same shared
+`ProofBudget`, never a replacement allowance. Work and mapping/audit evidence return
+to the owning page, which alone folds it into checkpointed accumulators. Intent
+helpers return whether they changed state instead of mutating page flags.
+
+Work selection retains its `limit + 1` bounded query. Create also checks its complete
+indivisible work result before returning. `ChildWorkOverflow` carries the existing
+code/message but tells the page that this is an oversized child, not a removable
+suffix that permits prefix success. Whole-page aggregate budgets, exact response
+sizing, shared proof/hop consumption and commit-time clock checks remain unchanged.
+
+### Composition verification
+
+- The same 80 pre/post-refactor command, page, restoration, admission and response
+  tests pass (53.644 and 53.496 seconds). The subsequent 102-test composition and
+  dependency/body selection passes in 60.486 seconds.
+- Twelve new child tests cover closed inputs, explicit authority/transaction
+  failure, complete create/change/restore, no child receipt or replay re-entry,
+  invalid intent combinations, real change-stage fault rollback, indivisible work
+  capacity, empty assignee clear retaining a participant, protected started work,
+  and non-queryable location references through move/cancel/restore. The added page
+  regression proves child overflow cannot return a successful prefix or refund work.
+- Seven new complete-envelope and ledger-dump witnesses were captured from the
+  **committed pre-refactor `07fc937` source** with fixed clock/IDs. A second baseline
+  run and the new implementation both match: create, move, cancel, restore, adoption
+  with supporting-set clears, no-op and replay. The existing RF0/RF1 artifacts are
+  untouched. See [lifecycle witness](../../tests/fixtures/internal_operations/rf2_child_composition_witness.json).
+- The final 26-test child/page/witness selection passes (6.494 seconds), strict
+  mypy passes six operation/page modules and focused Ruff passes. The isolated
+  checkpoint-plus-refactor snapshot, excluding older R2 edits, passes **104 tests**
+  (37.945 seconds), including transaction finalizers and unchanged body witnesses.
+- The first full run (1,461 tests, 374.881 seconds) exposed exactly one stale
+  internal producer inventory key: creation now allocates in `_create`, shared
+  privately by create/restore. The exact entry in `facet_writer_inventory.v1.json`
+  is updated; no allocator registration, table, DDL fingerprint or public contract
+  changes. Both real facet/people writer matrices pass with discovery's test-root
+  import path (four tests, 22.872 seconds), also in the isolated refactor-only
+  snapshot (four tests, 23.623 seconds). No test expectation was weakened.
+- Documentation, frozen declarations, RF0/RF1 preservation, shared-intent policy
+  lineage and rendering permissions pass **36 tests**, 5.834 seconds. All 454
+  selected local link targets and 40 heading fragments resolve; the five untouched
+  pre-existing files retain their RF0 hashes. The older command/core R2 continuation
+  is preserved separately and is not part of this implementation increment.
+- The fresh complete regression run after the inventory correction passes
+  **1,461 tests, OK (one skipped)** in 366.240 seconds, using installed pinned
+  Tickerd v1. Only the established non-failing capacity-limit and timezone
+  compatibility diagnostics appeared. Final diff hygiene passes. RF2 is complete
+  for the selected migrated paths; the final composition increment is included in
+  this operator-selected checkpoint.
+  No functional R2 resumption is claimed.
+
+### RF2 gate evidence map
+
+| Gate | Evidence |
+| --- | --- |
+| IO-03 | Real create/restoration stage faults, new move-stage faults, prior transaction finalizer/interrupt tests and paired page-unit recovery tests |
+| IO-04 | Real zero/eight-facet writer matrix, customized restoration, explicit opposite-role clear, non-queryable location references, terminal/suppression cases and shared-intent notification lineage tests |
+| IO-05 | Existing bounded page/response/cutoff/concurrent restoration tests, paired checkpoint tests and the new typed child-overflow test; proof/hops are never refunded |
+| IO-06 | Existing protected transport/replay/release and rendering permission tests, new explicit local-authority/owned-transaction rejection, retained dry-run ledger witness |
+| IO-08 | Frozen RF0/RF1 and seven RF2 lifecycle witnesses, isolated refactor-only verification, strict typing/lint, unchanged public contracts and passing final full regression |
 
 RF3 propagation and functional recurring R2/R3 resumption need their existing
-separate authorization/exit gates. No new policy decision is required for the
-transaction-state extraction.
+separate authorization/exit gates. No new policy decision is required for this
+internal composition refactor.

@@ -6,10 +6,13 @@ import copy
 from typing import Any
 
 from spine.ledger.notification_profiles import current_assignment
+from spine.ledger.recurring_task_sources import ProofBudget
 from spine.ledger.recurring_tasks import insert_record, read_record, row
 from spine.ledger.rendering_definitions import load_presentation
+from spine.ledger.transactions import LedgerConnection
 from spine.services import recurring_task_children as children
 from spine.services.primary_locations import canonical_location_facts
+from spine.services.recurring_task_operations import ChildInvocation
 
 
 def fields(config: dict[str, Any]) -> dict[str, Any]:
@@ -44,8 +47,7 @@ def policy_matches(db: Any, current: dict[str, Any], generation: dict[str, Any],
 
 
 def comparison(
-    page: Any,
-    assignment: dict[str, Any],
+    db: LedgerConnection,
     generation: dict[str, Any],
     state: dict[str, Any],
     current: dict[str, Any],
@@ -62,7 +64,7 @@ def comparison(
         "offset_seconds": binding["latest_revision"]["offset_seconds"],
         "materialization": base["materialization"],
     }
-    archetype = current_assignment(page.db, item_id=generation["task_item_id"], item_version=int(current["current_version"]))
+    archetype = current_assignment(db, item_id=generation["task_item_id"], item_version=int(current["current_version"]))
     observed["archetype"] = (
         None
         if archetype is None
@@ -83,8 +85,8 @@ def comparison(
                 observed["primary_location"] = copy.deepcopy(expected)
     observed["reminders"] = (
         base["reminders"]
-        if policy_matches(page.db, current, generation, state["managed_baseline"])
-        else (wanted["reminders"] if policy_matches(page.db, current, generation, desired) else {"independent_change": True})
+        if policy_matches(db, current, generation, state["managed_baseline"])
+        else (wanted["reminders"] if policy_matches(db, current, generation, desired) else {"independent_change": True})
     )
     patch = {}
     for key, value in wanted.items():
@@ -97,43 +99,48 @@ def comparison(
     return patch, False
 
 
-def outcome(page: Any, intent: dict[str, Any], assignment: dict[str, Any], state_id: str, result: str, reason: str) -> None:
+def outcome(db: LedgerConnection, invocation: ChildInvocation, intent: dict[str, Any], assignment_id: str,
+            state_id: str, result: str, reason: str) -> bool:
     """Retain the first conflict fact; subsequent resolution is current-state evidence."""
-    if row(page.db, "related_task_intent_outcomes", intent["intent_id"], assignment["assignment_id"]) is None:
+    invocation.require_transaction(db)
+    if row(db, "related_task_intent_outcomes", intent["intent_id"], assignment_id) is None:
         insert_record(
-            page.db,
+            db,
             "related_task_intent_outcomes",
             {
                 "intent_id": intent["intent_id"],
-                "assignment_id": assignment["assignment_id"],
+                "assignment_id": assignment_id,
                 "assignment_revision_id": state_id,
                 "outcome": result,
                 "reason": reason,
-                "command_id": page.request["command_id"],
-                "created_at_utc": page.now,
+                "command_id": invocation.command_id,
+                "created_at_utc": invocation.now,
             },
         )
-        page.state.changed = True
+        return True
+    return False
 
 
-def complete(page: Any, intent: dict[str, Any]) -> bool:
+def complete(db: LedgerConnection, invocation: ChildInvocation, *, rule_id: str,
+             budget: ProofBudget, intent: dict[str, Any]) -> bool:
     """Indexed missing-outcome seek, then bounded conflict-resolution evidence."""
-    unresolved = page.db.execute(
+    invocation.require_transaction(db)
+    unresolved = db.execute(
         "SELECT 1 FROM related_task_assignments a LEFT JOIN related_task_intent_outcomes o "
         "ON o.assignment_id=a.assignment_id AND o.intent_id=? WHERE a.related_task_rule_id=? AND a.assignment_seq<=? "
         "AND o.assignment_id IS NULL LIMIT 1",
-        (intent["intent_id"], page.state.root["related_task_rule_id"], int(intent["assignment_high_water"])),
+        (intent["intent_id"], rule_id, int(intent["assignment_high_water"])),
     ).fetchone()
     if unresolved:
         return False
-    conflicts = page.db.execute(
+    conflicts = db.execute(
         "SELECT assignment_id FROM related_task_intent_outcomes WHERE intent_id=? AND outcome='conflict' LIMIT ?",
-        (intent["intent_id"], page.budget.steps + 1),
+        (intent["intent_id"], budget.steps + 1),
     ).fetchall()
-    page.budget.spend(len(conflicts))
+    budget.spend(len(conflicts))
     for conflict in conflicts:
-        assignment = read_record(page.db, "related_task_assignments", conflict["assignment_id"])
-        state = read_record(page.db, "related_task_assignment_revisions", assignment["current_assignment_revision_id"])["state_json"]
+        assignment = read_record(db, "related_task_assignments", conflict["assignment_id"])
+        state = read_record(db, "related_task_assignment_revisions", assignment["current_assignment_revision_id"])["state_json"]
         if state.get("pending_intent_id") != intent["intent_id"]:
             return False
         if (
@@ -142,6 +149,5 @@ def complete(page: Any, intent: dict[str, Any]) -> bool:
             and state["reason"] != "due_not_future"
         ):
             return False
-    page.db.execute("UPDATE related_task_intents SET status='complete' WHERE intent_id=? AND status='pending'", (intent["intent_id"],))
-    page.state.changed = True
+    db.execute("UPDATE related_task_intents SET status='complete' WHERE intent_id=? AND status='pending'", (intent["intent_id"],))
     return True

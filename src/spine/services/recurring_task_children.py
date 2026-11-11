@@ -29,9 +29,22 @@ from spine.ledger.temporal_bindings import (
     insert_temporal_binding_revision,
     target_from_source,
 )
+from spine.ledger.transactions import LedgerConnection
 from spine.ledger.work import cancel_work_instance
 from spine.services import schedule_delivery, schedule_materialization, schedule_policies
 from spine.services.primary_locations import inline_location_inputs, reference_location_input
+from spine.services.recurring_task_operations import (
+    ChangeChild,
+    ChangedChild,
+    ChildDisposition,
+    ChildInvocation,
+    ChildWorkOverflow,
+    CreateChild,
+    CreatedChild,
+    RestoreChild,
+    WorkEvidence,
+)
+from spine.services.recurring_task_restoration import Restoration
 from spine.services.rendering_authoring import resolve
 
 COMMAND = PREFIX + "reconcile"
@@ -88,21 +101,26 @@ def source_facts(
     }
 
 
-def create(
-    db: Any,
-    context: Any,
-    root: dict[str, Any],
-    config: dict[str, Any],
-    assignment_id: str,
-    generation_id: str,
-    source: dict[str, Any],
-    request: dict[str, Any],
-    now: str,
-    fault: Any,
-    restoration: Any = None,
-) -> dict[str, Any]:
-    """Create task/owner first; then actual-item presentation and complete work."""
-    seed, actor, outer = generation_id, request["actor_subject_id"], request["command_id"]
+def create(db: LedgerConnection, invocation: ChildInvocation, plan: CreateChild) -> CreatedChild:
+    """Complete new task composition, under the admitted outer transaction."""
+    return _create(db, invocation, plan)
+
+
+def restore(db: LedgerConnection, invocation: ChildInvocation, plan: RestoreChild) -> CreatedChild:
+    """Complete new generation from the actual, exactly pinned predecessor."""
+    invocation.require_transaction(db)
+    if plan.creation.configuration != plan.predecessor.configuration:
+        raise ValueError("restoration must use the prepared actual predecessor configuration")
+    return _create(db, invocation, plan.creation, restoration=plan.predecessor)
+
+
+def _create(
+    db: LedgerConnection, invocation: ChildInvocation, creation: CreateChild, *, restoration: Restoration | None = None,
+) -> CreatedChild:
+    invocation.require_transaction(db)
+    config, assignment_id, source = creation.configuration, creation.assignment_id, creation.source
+    now, fault = invocation.now, invocation.fault
+    seed, actor, outer = creation.generation_id, invocation.actor_subject_id, invocation.command_id
     item, template = config["task_template"]["item"], config["task_template"]
     owner = config["task_owner"]
     require_owner_exists(db, owner)
@@ -120,7 +138,7 @@ def create(
         "binding_contract": "spine.relative-temporal-binding.v1",
         "target_item_id": task_id,
         "target_anchor_role": "task_due",
-        "source_item_id": root["source_item_id"],
+        "source_item_id": creation.source_item_id,
         "source_anchor_role": "event_start",
         "relationship_id": relation_id,
         "binding_mode": "follow_source",
@@ -201,7 +219,7 @@ def create(
             connection,
             relation_id=relation_id,
             source_item_id=task_id,
-            target_item_id=root["source_item_id"],
+            target_item_id=creation.source_item_id,
             relation_type="part_of",
             created_at_utc=now,
             created_by_subject_id=actor,
@@ -233,14 +251,14 @@ def create(
             from spine.services.recurring_task_restoration import insert_policies
 
             policies, restored_mappings = insert_policies(
-                connection, context, restoration, task_id=task_id, generation_id=seed, assignment_id=assignment_id,
-                archetype_assignment_id=archetype_id, request=request, now=now,
+                connection, invocation, restoration, task_id=task_id, generation_id=seed, assignment_id=assignment_id,
+                archetype_assignment_id=archetype_id,
             )
             mappings.extend(restored_mappings)
         elif config["notification_plan"] is not None:
             plan = config["notification_plan"]["resolved"]
             route = schedule_delivery.resolve_delivery(
-                config["delivery"]["requested"], ledger=db, defaults=context.delivery_target_defaults
+                config["delivery"]["requested"], ledger=db, defaults=invocation.delivery_target_defaults
             )
             if {k: v for k, v in route["snapshot"].items() if k != "delivery_state"} != config["delivery"]["resolved"]:
                 fail("semantic_conflict", "configuration.delivery", "resolved destination changed")
@@ -343,6 +361,8 @@ def create(
         )
         created.extend(work)
         evidence.extend(refs)
+        if len(created) > creation.work_limit:
+            raise ChildWorkOverflow()
         fault("work")
 
     create_task_v1(
@@ -385,36 +405,30 @@ def create(
     }
 
 
-def change(
-    page: Any,
-    assignment: dict[str, Any],
-    generation: dict[str, Any],
-    binding: dict[str, Any],
-    current: dict[str, Any],
-    source: dict[str, Any],
-    config: dict[str, Any],
-    *,
-    target: dict[str, Any] | None = None,
-    cancel: bool = False,
-    detach: bool = False,
-    managed: dict[str, Any] | None = None,
-) -> dict[str, Any]:
-    """One ordinary successor, or a binding-only freshness witness. No child receipt."""
-    db, request, now = page.db, page.request, page.now
+def change(db: LedgerConnection, invocation: ChildInvocation, plan: ChangeChild) -> ChangedChild:
+    """Complete successor or binding-only witness; return evidence, never page state."""
+    invocation.require_transaction(db)
+    generation, binding, current, source = plan.generation, plan.binding, plan.current, plan.source
+    config, target, managed = plan.configuration, plan.target, plan.managed
+    cancel = plan.disposition is ChildDisposition.CANCEL
+    detach = plan.disposition is ChildDisposition.DETACH
+    now = invocation.now
+    policy_mappings: list[dict[str, Any]] = []
+    work = WorkEvidence()
     task_id, version = generation["task_item_id"], int(current["current_version"])
     prior = binding["latest_revision"]
     creates_version = target is not None or cancel or bool(managed)
     next_version = version + 1 if creates_version else version
-    audit_id = child_id(request["command_id"], "audit", "/assignments/" + assignment["assignment_id"] + "/audit")
+    audit_id = child_id(invocation.command_id, "audit", "/assignments/" + plan.assignment_id + "/audit")
     anchor_id = current["detail"]["due_anchor_id"]
     if target is not None:
-        anchor_id = child_id(request["command_id"], "due_anchor", "/assignments/" + assignment["assignment_id"] + "/due", "anchor")
+        anchor_id = child_id(invocation.command_id, "due_anchor", "/assignments/" + plan.assignment_id + "/due", "anchor")
     target_facts = target or binding_facts.scheduled_for_target(current)
     revision = binding_facts.revision_value(
         command=COMMAND,
-        command_id=request["command_id"],
+        command_id=invocation.command_id,
         revision_id=child_id(
-            request["command_id"], "temporal_binding_revision", "/assignments/" + assignment["assignment_id"] + "/binding"
+            invocation.command_id, "temporal_binding_revision", "/assignments/" + plan.assignment_id + "/binding"
         ),
         binding=binding,
         prior=prior,
@@ -454,23 +468,27 @@ def change(
             )
 
     def extension(connection: Any, successor: int) -> None:
+        nonlocal work
         from spine.ledger.temporal_bindings import retire_temporal_binding
 
         if managed:
-            adopt_supporting(page, assignment, generation, current, successor, config, managed)
+            policy_mappings.extend(_adopt_supporting(
+                connection, invocation, plan.assignment_id, generation, current, successor, config, managed
+            ))
 
         insert_temporal_binding_revision(connection, value=revision)
         if (cancel or detach) and binding["binding_status"] == "active":
             retire_temporal_binding(
-                connection, temporal_binding_id=binding["temporal_binding_id"], command_id=request["command_id"], retired_at_utc=now
+                connection, temporal_binding_id=binding["temporal_binding_id"], command_id=invocation.command_id, retired_at_utc=now
             )
         increment_binding_catalog_generation(connection)
-        page.fault("binding")
-        reconcile_work(
-            page,
+        invocation.fault("binding")
+        work = reconcile_work(
+            connection, invocation,
             task_id,
             successor,
             config,
+            work_limit=plan.work_limit,
             target_changed=target is not None,
             terminal=cancel,
             stale=detach,
@@ -493,9 +511,9 @@ def change(
                             subject_id=s,
                             role="assignee",
                             item_subject_role_id=child_id(
-                                request["command_id"],
+                                invocation.command_id,
                                 "item_subject_role",
-                                "/assignments/" + assignment["assignment_id"] + "/assignees/" + str(i),
+                                "/assignments/" + plan.assignment_id + "/assignees/" + str(i),
                             ),
                             created_at_utc=now,
                         )
@@ -507,46 +525,47 @@ def change(
             item_id=task_id,
             target_version=version,
             created_at_utc=now,
-            created_by_subject_id=request["actor_subject_id"],
+            created_by_subject_id=invocation.actor_subject_id,
             audit_id=audit_id,
             task_detail=detail,
             **edits,
             audit_action="rule_page_applied",
             reason_code="source_cancelled" if cancel else "source_moved",
-            audit_payload={"assignment_id": assignment["assignment_id"]},
+            audit_payload={"assignment_id": plan.assignment_id},
             insert_prerequisites=prerequisites,
             insert_canonical_extension=extension,
-            supporting_command_id=request["command_id"],
+            supporting_command_id=invocation.command_id,
         )
-        page.state.runtime["audit_ids"].append(audit_id)
-        page.fault("task")
+        invocation.fault("task")
     else:
         extension(db, version)
-    page.state.changed = True
-    page.state.mutations += 1
-    return {"task_item_version": str(next_version), "temporal_binding_revision_id": revision["temporal_binding_revision_id"]}
+    return ChangedChild(
+        task_item_version=str(next_version), temporal_binding_revision_id=str(revision["temporal_binding_revision_id"]),
+        audit_ids=(audit_id,) if creates_version else (), policy_mappings=tuple(policy_mappings), work=work,
+    )
 
 
 def reconcile_work(
-    page: Any,
+    db: LedgerConnection,
+    invocation: ChildInvocation,
     item_id: str,
     version: int,
     config: dict[str, Any],
     *,
+    work_limit: int,
     target_changed: bool = False,
     terminal: bool = False,
     stale: bool = False,
     materialize: bool = True,
-) -> None:
+) -> WorkEvidence:
     """Bound complete ordinary work history before delegating classification."""
-    db = page.db
-    remaining = page.limits["work_rows"]
+    invocation.require_transaction(db)
+    remaining = work_limit
     rows = db.execute(
         "SELECT work_instance_id FROM work_instances WHERE item_id=? ORDER BY work_instance_id LIMIT ?", (item_id, remaining + 1)
     ).fetchall()
     if len(rows) > remaining:
-        page.unit_oversized = True
-        fail("capacity_exceeded", "limits.work_rows")
+        raise ChildWorkOverflow()
     policies = [p for p in load_notification_policies_at_version(db, item_id=item_id, item_version=version) if p["status"] == "active"]
     status = db.execute("SELECT task_status FROM task_details WHERE item_id=? AND version=?", (item_id, version)).fetchone()
     terminal = terminal or status is None or status[0] != "open"
@@ -560,12 +579,10 @@ def reconcile_work(
         parent_terminal=terminal,
     )
     for identity in cancelled:
-        cancel_work_instance(db, work_instance_id=identity, cancelled_at_utc=page.now, reason_code=reasons[identity], require_fresh=False)
-    page.state.work["cancelled"].extend(cancelled)
-    page.state.work["retained"].extend(retained)
-    page.state.work["protected_stale"].extend(protected)
-    if cancelled:
-        page.state.changed = True
+        cancel_work_instance(
+            db, work_instance_id=identity, cancelled_at_utc=invocation.now, reason_code=reasons[identity], require_fresh=False,
+        )
+    created: list[str] = []
     if materialize and not terminal:
         created, _, _ = schedule_materialization.materialize_successor(
             db,
@@ -574,14 +591,12 @@ def reconcile_work(
             recurrence=None,
             policies=policies,
             policy_key_by_intent={str(p["notification_intent_id"]): str(p["notification_intent_id"]) for p in policies},
-            materialization=materialization(config, page.now),
-            command_id=page.request["command_id"],
-            created_at=page.now,
+            materialization=materialization(config, invocation.now),
+            command_id=invocation.command_id,
+            created_at=invocation.now,
         )
-        page.state.work["created"].extend(created)
-        if created:
-            page.state.changed = True
-    page.fault("work")
+    invocation.fault("work")
+    return WorkEvidence(tuple(created), tuple(cancelled), tuple(retained), tuple(protected))
 
 
 def mappings(db: Any, assignment_id: str, generation: dict[str, Any], config: dict[str, Any]) -> list[dict[str, Any]]:
@@ -622,24 +637,26 @@ def mappings(db: Any, assignment_id: str, generation: dict[str, Any], config: di
     return result
 
 
-def adopt_supporting(
-    page: Any,
-    assignment: dict[str, Any],
+def _adopt_supporting(
+    db: LedgerConnection,
+    invocation: ChildInvocation,
+    assignment_id: str,
     generation: dict[str, Any],
     current: dict[str, Any],
     version: int,
     config: dict[str, Any],
     patch: dict[str, Any],
-) -> None:
+) -> list[dict[str, Any]]:
     """Replace only fresh successor supporting rows, retaining historical rows."""
     from spine.ledger.notification_profiles import current_assignment
     from spine.ledger.notifications import remove_copied_notification_policy
     from spine.ledger.supporting import insert_item_location
     from spine.services.notification_profile_application import persist_schedule_update_profile
 
-    db, request, now = page.db, page.request, page.now
-    task_id, command_id = generation["task_item_id"], request["command_id"]
-    path = "/assignments/" + assignment["assignment_id"]
+    now = invocation.now
+    policy_mappings: list[dict[str, Any]] = []
+    task_id, command_id = generation["task_item_id"], invocation.command_id
+    path = "/assignments/" + assignment_id
     if "primary_location" in patch:
         db.execute("DELETE FROM item_locations WHERE item_id=? AND version=? AND role='primary'", (task_id, version))
         location = patch["primary_location"]
@@ -657,7 +674,7 @@ def adopt_supporting(
             )
             insert_item_location(db, item_id=task_id, version=version, item_location=selected, default_created_at_utc=now)
     if "archetype" not in patch and "reminders" not in patch:
-        return
+        return policy_mappings
     selected_archetype = config["task_template"]["item"]["archetype"]
     old = current_assignment(db, item_id=task_id, item_version=int(current["current_version"]))
     desired_assignment = None
@@ -685,12 +702,12 @@ def adopt_supporting(
         entries = plan.get("effective_templates", [])
         route = (
             schedule_delivery.resolve_delivery(
-                config["delivery"]["requested"], ledger=db, defaults=page.context.delivery_target_defaults
+                config["delivery"]["requested"], ledger=db, defaults=invocation.delivery_target_defaults
             ) if entries else None
         )
         if route and {k: v for k, v in route["snapshot"].items() if k != "delivery_state"} != config["delivery"]["resolved"]:
             fail("semantic_conflict", "configuration.delivery")
-        family = mappings(db, assignment["assignment_id"], generation, config)
+        family = mappings(db, assignment_id, generation, config)
         family_ids = {p["notification_intent_id"] for p in family}
         current_family = [p for p in current["notification_policies"] if p["notification_intent_id"] in family_ids]
         by_key = {p["policy_key"]: p for p in family}
@@ -751,9 +768,9 @@ def adopt_supporting(
             resolved = cast(Callable[..., dict[str, Any]], resolve)(db, selection, policy=policy.value, item_type="task", origin=origin)
             insert_notification_schedule_policy(db, normalized=policy)
             select_presentation(db, str(policy.value["notification_policy_id"]), resolved)
-            page.state.mappings.append(
+            policy_mappings.append(
                 {
-                    "assignment_id": assignment["assignment_id"],
+                    "assignment_id": assignment_id,
                     "generation_id": generation["generation_id"],
                     "task_item_id": task_id,
                     "policy_key": selected["policy_key"],
@@ -799,7 +816,8 @@ def adopt_supporting(
         item_id=task_id,
         item_version=version,
         command_id=command_id,
-        actor_subject_id=request["actor_subject_id"],
+        actor_subject_id=invocation.actor_subject_id,
         updated_at_utc=now,
         policies=[(k, p.value) for k, p in desired_policies],
     )
+    return policy_mappings

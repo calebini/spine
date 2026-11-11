@@ -40,7 +40,7 @@
   },
   "producers": [
     {
-      "producer_key": "src/spine/services/recurring_task_children.py:create",
+      "producer_key": "src/spine/services/recurring_task_children.py:_create",
       "entrypoint": "internal schema-20 recurring-task generation; not public dispatch",
       "allocation_calls": ["create_task_v1"],
       "finalizer": "spine.ledger.facets.finalize",

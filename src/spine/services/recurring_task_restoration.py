@@ -14,12 +14,15 @@ from spine.core.recurring_task_runtime import fail
 from spine.ledger import facets
 from spine.ledger.notification_profiles import current_application, current_assignment, insert_application
 from spine.ledger.notifications import insert_notification_schedule_policy
+from spine.ledger.recurring_task_sources import ProofBudget
 from spine.ledger.rendering_definitions import load_presentation, select_presentation
 from spine.ledger.supporting import ItemLocationInput, ItemSubjectRoleInput
+from spine.ledger.transactions import LedgerConnection
 from spine.services import rendering_authoring, schedule_delivery
+from spine.services.recurring_task_operations import ChildInvocation
 
 
-@dataclass
+@dataclass(frozen=True)
 class Restoration:
     current: dict[str, Any]
     configuration: dict[str, Any]
@@ -28,12 +31,13 @@ class Restoration:
     application: dict[str, Any] | None
 
 
-def prepare(page: Any, assignment: dict[str, Any], generation: dict[str, Any], current: dict[str, Any],
-            binding: dict[str, Any], config: dict[str, Any]) -> Restoration:
+def prepare(db: LedgerConnection, *, command_id: str, budget: ProofBudget, assignment_id: str,
+            generation: dict[str, Any], current: dict[str, Any], binding: dict[str, Any],
+            config: dict[str, Any]) -> Restoration:
     from spine.services.recurring_task_children import child_id, mappings
 
-    db, item_id, version = page.db, generation["task_item_id"], int(current["current_version"])
-    page.budget.spend(len(current["subject_roles"]) + len(current["locations"]) + len(current["notification_policies"]))
+    item_id, version = generation["task_item_id"], int(current["current_version"])
+    budget.spend(len(current["subject_roles"]) + len(current["locations"]) + len(current["notification_policies"]))
     restored = copy.deepcopy(config)
     item = restored["task_template"]["item"]
     for key in ("title", "summary", "source_ref"):
@@ -57,10 +61,10 @@ def prepare(page: Any, assignment: dict[str, Any], generation: dict[str, Any], c
         "revision_resolution": "exact", "selection_source": archetype["selection_source"],
         **({"source_ref": archetype["source_ref"]} if archetype["source_ref"] is not None else {}),
     }
-    receipt = child_id(page.request["command_id"], "command_receipt", "/command_receipt")
+    receipt = child_id(command_id, "command_receipt", "/command_receipt")
     entries = []
     for prior in facets.load_snapshot(db, item_id, version):
-        page.budget.spend()
+        budget.spend()
         definition = facets.load_definition(db, prior["facet_schema_revision_id"])
         values = facet_codec.decode_values(definition, prior["values_json"], contract=prior["value_contract_version"])
         try:
@@ -73,7 +77,7 @@ def prepare(page: Any, assignment: dict[str, Any], generation: dict[str, Any], c
         if any(prior[key] != entry[key] for key in facets.ENTRY_COLUMNS if key != "source_command_receipt_id"):
             fail("semantic_conflict", "configuration.task_template", "restoration cannot migrate a facet revision")
         entries.append(entry)
-    family = {row["notification_intent_id"]: row["policy_key"] for row in mappings(db, assignment["assignment_id"], generation, config)}
+    family = {row["notification_intent_id"]: row["policy_key"] for row in mappings(db, assignment_id, generation, config)}
     return Restoration(current, restored, family, tuple(entries), current_application(db, item_id=item_id, item_version=version))
 
 
@@ -93,11 +97,12 @@ def extra_supporting(snapshot: Restoration, seed: str, now: str) -> tuple[tuple[
     return roles, locations
 
 
-def insert_policies(db: Any, context: Any, snapshot: Restoration, *, task_id: str, generation_id: str,
-                    assignment_id: str, archetype_assignment_id: str | None, request: dict[str, Any], now: str
+def insert_policies(db: LedgerConnection, invocation: ChildInvocation, snapshot: Restoration, *, task_id: str, generation_id: str,
+                    assignment_id: str, archetype_assignment_id: str | None
                     ) -> tuple[tuple[tuple[str, NormalizedNotificationPolicy], ...], list[dict[str, Any]]]:
     from spine.services.recurring_task_children import child_id
 
+    now = invocation.now
     policies, mappings, by_prior = [], [], {}
     for prior in snapshot.current["notification_policies"]:
         if prior["status"] != "active":
@@ -117,7 +122,7 @@ def insert_policies(db: Any, context: Any, snapshot: Restoration, *, task_id: st
             route = schedule_delivery.resolve_delivery({
                 "recipient_kind": prior["recipient_kind"], recipient_field: prior[recipient_field], "channel": prior["channel"],
                 "target": {"resolution": "explicit", "delivery_target_id": prior["delivery_target_id"]},
-            }, ledger=db, defaults=context.delivery_target_defaults)
+            }, ledger=db, defaults=invocation.delivery_target_defaults)
         except SpineValidationError:
             fail("semantic_conflict", "configuration.delivery", "restored destination is unavailable")
         normalized = normalize_notification_policy({
@@ -165,6 +170,6 @@ def insert_policies(db: Any, context: Any, snapshot: Restoration, *, task_id: st
             binding_id=application["notification_profile_binding_id"], suppress_template_keys=application["suppress_template_keys"],
             replacements=application["replacements"], additions=application["additions"],
             effective_hash=application["normalized_effective_policy_set_hash"], origins=origins, policies=linked,
-            actor_subject_id=request["actor_subject_id"], command_id=request["command_id"], identity_seed=generation_id, created_at_utc=now,
+            actor_subject_id=invocation.actor_subject_id, command_id=invocation.command_id, identity_seed=generation_id, created_at_utc=now,
         )
     return tuple(policies), mappings

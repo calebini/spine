@@ -14,6 +14,7 @@ from spine.core.errors import SpineValidationError
 from spine.ledger.mutation_state import TransactionMutationState
 from spine.ledger.recurring_task_sources import ProofBudget
 from spine.ledger.transactions import LedgerConnection
+from spine.services.recurring_task_operations import ChildWorkOverflow
 from spine.services.recurring_task_page_state import PageBoundary, PageCheckpoint, PageState
 from spine.services.recurring_task_reconcile import Page
 
@@ -234,6 +235,24 @@ class RecurringPageStateTests(unittest.TestCase):
             self.assertTrue(self.page.unit_oversized)
             self.assertEqual(self.values(), ["accepted"])
             self.state.close((None, None, None))
+
+    def test_child_overflow_evidence_cannot_become_a_successful_prefix_page(self):
+        initial = self.state.checkpoint()
+        with self.assertRaises(ChildWorkOverflow), self.db.atomic_command():
+            try:
+                self.accept("accepted")
+
+                def operation():
+                    self.mutate("oversized-child")
+                    raise ChildWorkOverflow()
+
+                self.page.unit(operation, self.selector)
+            finally:
+                self.state.close(sys.exc_info())
+        self.assertEqual(self.values(), [])
+        self.assertEqual(self.state.checkpoint(), initial)
+        self.assertEqual(self.budget.steps, 94)
+        self.assertEqual(self.db._command_unit_depth, 0)
 
     def test_interrupt_unwinds_all_units_without_masking_original_error(self):
         initial = self.state.checkpoint()
