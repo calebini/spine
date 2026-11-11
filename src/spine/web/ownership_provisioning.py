@@ -107,7 +107,7 @@ class OwnershipProvisioningContracts:
             if state is None:
                 db.execute("INSERT INTO ledger_access_state VALUES(1,?,?,'multi_user','trusted_identity',1,1)",
                            (normalized["ledger_id"], normalized["realm_id"]))
-                db._ownership_epoch_consumed = True
+                db.mutation_state.ownership.epoch_consumed = True
             else:
                 advance_ownership_epoch(db)
                 if state["mode"] == "trusted_local":

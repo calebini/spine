@@ -127,8 +127,8 @@ push was performed by the review itself.
 ### SPINE-099 — RF0/RF1: preserve baseline and extract shared operations
 
 **Status:** Done — RF0 baseline and selected RF1 extraction verified (2026-11-11);
-final response-sizing increment is uncommitted. RF2/RF3 and recurring R2/R3 are
-not started/resumed by this completion.
+final response-sizing increment committed as `9e50c1c`. The operator subsequently
+selected RF2 under SPINE-100; recurring R2/R3 remain paused.
 **Scope:** Preserve and identify the exact dirty-tree baseline, characterize selected
 ordinary schedule/binding and recurring callers, then extract shared helpers into
 their domain/persistence/service owners. Keep exact family error/replay/receipt and
@@ -207,13 +207,45 @@ No RF2/RF3 or functional R2 resumption.
 **RF1 exit:** IO-01/02 and applicable IO-06/08 evidence is complete for the selected
 extraction. The dependency ratchet retains only explicitly unselected non-recurring
 exceptions. This is not complete conformance to the RF2/RF3 portions of the spec.
-**Next:** Checkpoint this verified increment; RF2 complete mutation/state ownership
-needs an explicit kickoff. No functional recurring R2/R3 resumption is implied.
+**Next:** RF2 complete mutation/state ownership is explicitly selected under
+SPINE-100. No functional recurring R2/R3 resumption is implied.
 The [next-slice brief](design-notes/internal-operations-rf0-rf1.md#next-slice-response-sizing-capability)
 is implemented and verified at operator direction: response assembly stays in commands;
 a required, narrow sizing capability supplies exact normal/dry-run envelope bytes.
 Boundary-sized pagination, rollback and the final recurring command-edge removal
-are verified. No RF2/RF3 kickoff, public activation, migration, push or deployment.
+are verified. That increment did not start RF2/RF3 or perform public activation,
+migration, push or deployment; RF2 was selected separately below.
+
+### SPINE-100 — RF2: complete item-change and transaction/page-state ownership
+
+**Status:** In progress — operator selected RF2 after RF1 checkpoint `9e50c1c`
+(2026-11-11); first transaction-state increment verified, uncommitted. Existing
+R2 admission/read and `AGENTS.md` edits remain preserved.
+**Scope:** Implement §§5–6 of the accepted internal-operations contract in bounded
+increments. First centralize the closed transaction mutation state and migrate its
+consumers; then own recurring page checkpoints and complete item-change composition.
+Keep feature enablement/allocation guards connection-owned, finalizers ordered
+recurring → rendering → facets, and existing SQL, receipt and budget semantics intact.
+**Acceptance:** IO-03–06 and IO-08: real fault/rollback/interrupt/finalizer tests,
+complete supporting-set preservation, non-refundable proof accounting, protected
+admission/replay, exact baseline witnesses, typed boundaries and full regression.
+The first state-owner increment alone does not close RF2. No new public command,
+schema migration, automatic recurring generation, RF3 or functional R2 resumption.
+**First increment:** Implemented the typed, closed transaction-state owner and
+migrated all thirteen former connection tracker fields and their runtime consumers.
+Component registration drives checkpoint/restore/reset/finalization; deep rollback
+keeps accepted prior units and clears interrupted/failed transactions. The same
+95-test baseline passes before/after, and the isolated HEAD-plus-RF2 snapshot without
+the older dirty R2 continuation passes **106 tests** (36.451 seconds). Eleven new
+state tests plus twelve RF1 boundary/body checks pass; 24 documentation/declaration/
+preservation checks, strict typing and lint pass. Full regression passes **1,435
+tests, OK (one skipped)** in 392.707 seconds with installed pinned Tickerd v1.
+Known non-failing capacity-limit/timezone diagnostics appeared. All 456 local link
+targets and 36 cross-document heading fragments resolve; diff hygiene passes.
+**Evidence/next:** [RF2 state-owner evidence and remaining scope](design-notes/internal-operations-rf2.md).
+Checkpoint the verified increment when requested, then continue page-state ownership
+and complete prepared item-change composition with their separate preservation gates.
+RF2 remains open; no push or deployment.
 
 ## Selected feature design
 

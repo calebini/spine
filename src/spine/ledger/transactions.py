@@ -2,14 +2,14 @@
 
 from __future__ import annotations
 
-import copy
 import sqlite3
 from collections.abc import Iterator
 from contextlib import contextmanager
 from types import TracebackType
-from typing import Literal
+from typing import Any, Literal
 
 from spine.core.errors import SpineValidationError
+from spine.ledger.mutation_state import TransactionMutationState
 
 REGISTERED_VERSION_PRODUCERS = frozenset({"item_create", "item_version_from_draft"})
 
@@ -19,7 +19,15 @@ class LedgerConnection(sqlite3.Connection):
 
     _command_transaction: bool = False
     _command_write: bool = False
-    _ownership_epoch_consumed: bool = False
+
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        super().__init__(*args, **kwargs)
+        self._mutation_state = TransactionMutationState()
+
+    @property
+    def mutation_state(self) -> TransactionMutationState:
+        """The one state owner; callers cannot replace it across checkpoints."""
+        return self._mutation_state
 
     def enable_recurring_tasks(self) -> None:
         """Internal candidate only: validate touched new-family rows at commit."""
@@ -28,7 +36,6 @@ class LedgerConnection(sqlite3.Connection):
         from spine.ledger.recurring_tasks import TABLE_KEYS
 
         self._recurring_tasks_enabled = True
-        self._recurring_task_rows: set[tuple[str, str, str | None]] = set()
         self.create_function("spine_touch_recurring_task", 3, self._touch_recurring_task)
         for table, keys in TABLE_KEYS.items():
             for operation in ("INSERT", "UPDATE", "DELETE"):
@@ -38,7 +45,7 @@ class LedgerConnection(sqlite3.Connection):
                     BEGIN SELECT spine_touch_recurring_task('{table}',{record}.{keys[0]},{second}); END""")
 
     def _touch_recurring_task(self, table: str, first: str, second: str | None) -> int:
-        self._recurring_task_rows.add((table, str(first), None if second is None else str(second)))
+        self.mutation_state.recurring.rows.add((table, str(first), None if second is None else str(second)))
         return 0
 
     def enable_renderings(self) -> None:
@@ -47,15 +54,10 @@ class LedgerConnection(sqlite3.Connection):
             return
         self.enable_facets()
         self._renderings_enabled = True
-        self._rendering_pending: dict[str, dict] = {}
-        self._rendering_versions: set[tuple[str, int]] = set()
-        self._rendering_catalog: set[tuple[str, str]] = set()
-        self._rendering_profiles: set[str] = set()
-        self._rendering_attempts: set[str] = set()
         self.create_function("spine_touch_policy", 2, self._touch_policy)
         self.create_function("spine_touch_rendering", 2, self._touch_rendering)
-        self.create_function("spine_touch_rendering_profile", 1, lambda identity: self._rendering_profiles.add(identity) or 0)
-        self.create_function("spine_touch_rendering_attempt", 1, lambda identity: self._rendering_attempts.add(identity) or 0)
+        self.create_function("spine_touch_rendering_profile", 1, self._touch_rendering_profile)
+        self.create_function("spine_touch_rendering_attempt", 1, self._touch_rendering_attempt)
         self.execute("""CREATE TEMP TRIGGER spine_rendering_attempt_insert AFTER INSERT ON main.notification_renderings
             BEGIN SELECT spine_touch_rendering_attempt(NEW.attempt_id); END""")
         self.execute("""CREATE TEMP TRIGGER spine_rendering_profile_insert AFTER INSERT ON main.notification_profile_revisions
@@ -79,11 +81,19 @@ class LedgerConnection(sqlite3.Connection):
                     BEGIN SELECT spine_touch_rendering('{kind}',NEW.{column}); END""")
 
     def _touch_policy(self, item_id: str, version: int) -> int:
-        self._rendering_versions.add((item_id, version))
+        self.mutation_state.renderings.versions.add((item_id, version))
         return 0
 
     def _touch_rendering(self, kind: str, identity: str) -> int:
-        self._rendering_catalog.add((kind, identity))
+        self.mutation_state.renderings.catalog.add((kind, identity))
+        return 0
+
+    def _touch_rendering_profile(self, identity: str) -> int:
+        self.mutation_state.renderings.profiles.add(identity)
+        return 0
+
+    def _touch_rendering_attempt(self, identity: str) -> int:
+        self.mutation_state.renderings.attempts.add(identity)
         return 0
 
     def enable_facets(self) -> None:
@@ -91,12 +101,6 @@ class LedgerConnection(sqlite3.Connection):
         if getattr(self, "_facets_enabled", False):
             return
         self._facets_enabled = True
-        self._facet_versions: set[tuple[str, int]] = set()
-        self._facet_allocations: set[tuple[str, int]] = set()
-        self._facet_roots: set[str] = set()
-        self._facet_items: set[str] = set()
-        self._facet_bindings: set[str] = set()
-        self._facet_definitions: set[str] = set()
         self._facet_producer: str | None = None
         self._allow_commit = False
         self.create_function("spine_track_version", 2, self._track_version)
@@ -138,20 +142,19 @@ class LedgerConnection(sqlite3.Connection):
     def _track_version(self, item_id: str, version: int) -> int:
         if self._facet_producer is None:
             raise SpineValidationError("environment_failure:facets", "unregistered item version allocation")
-        self._facet_versions.add((item_id, version))
-        self._facet_allocations.add((item_id, version))
-        self._facet_items.add(item_id)
+        self.mutation_state.facets.versions.add((item_id, version))
+        self.mutation_state.facets.allocations.add((item_id, version))
+        self.mutation_state.facets.items.add(item_id)
         return 0
 
     def _touch_snapshot(self, item_id: str, version: int) -> int:
-        self._facet_versions.add((item_id, version))
-        self._facet_items.add(item_id)
+        self.mutation_state.facets.versions.add((item_id, version))
+        self.mutation_state.facets.items.add(item_id)
         return 0
 
     def _track_facet(self, kind: str, identity: str) -> int:
-        {"root": self._facet_roots, "item": self._facet_items, "binding": self._facet_bindings, "definition": self._facet_definitions}[
-            kind
-        ].add(identity)
+        facets = self.mutation_state.facets
+        {"root": facets.roots, "item": facets.items, "binding": facets.bindings, "definition": facets.definitions}[kind].add(identity)
         return 0
 
     @contextmanager
@@ -164,49 +167,9 @@ class LedgerConnection(sqlite3.Connection):
         finally:
             self._facet_producer = None
 
-    def _clear_facets(self) -> None:
-        self._ownership_epoch_consumed = False
-        if getattr(self, "_recurring_tasks_enabled", False):
-            self._recurring_task_rows.clear()
-        if getattr(self, "_renderings_enabled", False):
-            self._rendering_pending.clear()
-            self._rendering_versions.clear()
-            self._rendering_catalog.clear()
-            self._rendering_profiles.clear()
-            self._rendering_attempts.clear()
-        if getattr(self, "_facets_enabled", False):
-            self._facet_versions.clear()
-            self._facet_allocations.clear()
-            self._facet_roots.clear()
-            self._facet_items.clear()
-            self._facet_bindings.clear()
-            self._facet_definitions.clear()
-
     def _finalize_pending(self) -> None:
         """Validate touched state without granting commit (also used by previews)."""
-        if getattr(self, "_recurring_tasks_enabled", False):
-            from spine.ledger.recurring_tasks import finalize as finalize_recurring_tasks
-
-            finalize_recurring_tasks(self, frozenset(self._recurring_task_rows))
-        if getattr(self, "_renderings_enabled", False):
-            from spine.ledger.rendering_definitions import finalize as finalize_renderings
-
-            finalize_renderings(self)
-        if getattr(self, "_facets_enabled", False):
-            from spine.ledger.facets import finalize
-
-            if not self._facet_allocations <= self._facet_versions:
-                raise SpineValidationError("environment_failure:facets", "unfinalized item version")
-            expected = (
-                frozenset(self._facet_versions),
-                frozenset(self._facet_items),
-                frozenset(self._facet_roots),
-                frozenset(self._facet_bindings),
-                frozenset(self._facet_definitions),
-            )
-            proof = finalize(self, *expected)
-            if proof != expected:
-                raise SpineValidationError("environment_failure:facets", "facet finalization incomplete")
+        self.mutation_state.finalize(self)
 
     def _commit_checked(self) -> None:
         try:
@@ -222,7 +185,7 @@ class LedgerConnection(sqlite3.Connection):
             if getattr(self, "_facets_enabled", False):
                 self._allow_commit = False
                 self.set_authorizer(self._authorize_commit)
-                self._clear_facets()
+            self.mutation_state.reset()
 
     def __exit__(
         self,
@@ -238,7 +201,10 @@ class LedgerConnection(sqlite3.Connection):
             else:
                 self._commit_checked()
             return False
-        return super().__exit__(exc_type, exc, traceback)
+        try:
+            return super().__exit__(exc_type, exc, traceback)
+        finally:
+            self.mutation_state.reset()
 
     def commit(self) -> None:
         if self._command_transaction:
@@ -249,7 +215,7 @@ class LedgerConnection(sqlite3.Connection):
         if self._command_transaction:
             raise RuntimeError("only the outer command transaction may roll back")
         super().rollback()
-        self._clear_facets()
+        self.mutation_state.reset()
 
     def executescript(self, sql_script: str, /) -> sqlite3.Cursor:
         if self._command_transaction or (getattr(self, "_facets_enabled", False) and self.in_transaction):
@@ -268,22 +234,7 @@ class LedgerConnection(sqlite3.Connection):
         depth = getattr(self, "_command_unit_depth", 0)
         if not self._command_transaction or not self.in_transaction or (depth and not nested):
             raise RuntimeError("unit savepoint requires an owning command and cannot nest")
-        tracked = (
-            "_ownership_epoch_consumed",
-            "_recurring_task_rows",
-            "_rendering_pending",
-            "_rendering_versions",
-            "_rendering_catalog",
-            "_rendering_profiles",
-            "_rendering_attempts",
-            "_facet_versions",
-            "_facet_allocations",
-            "_facet_roots",
-            "_facet_items",
-            "_facet_bindings",
-            "_facet_definitions",
-        )
-        snapshot = {key: copy.deepcopy(getattr(self, key)) for key in tracked if hasattr(self, key)}
+        snapshot = self.mutation_state.checkpoint()
         name = f"spine_command_unit_{depth}"
         self.execute(f"SAVEPOINT {name}")
         self._command_unit_depth = depth + 1
@@ -298,8 +249,9 @@ class LedgerConnection(sqlite3.Connection):
             if self.in_transaction:
                 self.execute(f"ROLLBACK TO SAVEPOINT {name}")
                 self.execute(f"RELEASE SAVEPOINT {name}")
-            for key, value in snapshot.items():
-                setattr(self, key, value)
+                self.mutation_state.restore(snapshot)
+            else:
+                self.mutation_state.reset()
             raise
         finally:
             self._command_unit_depth = depth
@@ -312,16 +264,16 @@ class LedgerConnection(sqlite3.Connection):
         self.execute("BEGIN IMMEDIATE" if write else "BEGIN")
         self._command_transaction = True
         self._command_write = write
-        self._ownership_epoch_consumed = False
+        self.mutation_state.ownership.epoch_consumed = False
         try:
             yield
             # A deferred foreign key failure here also rolls the whole command back.
             self._commit_checked()
         except BaseException:
             super().rollback()
-            self._clear_facets()
+            self.mutation_state.reset()
             raise
         finally:
             self._command_transaction = False
             self._command_write = False
-            self._ownership_epoch_consumed = False
+            self.mutation_state.ownership.epoch_consumed = False

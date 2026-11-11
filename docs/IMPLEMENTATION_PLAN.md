@@ -9,7 +9,7 @@ see [validation](TZDB_COMPATIBILITY_VALIDATION.md) and [operations](TZDB_COMPATI
 
 
 Role: Roadmap rationale and delivery history; current task status lives in [BACKLOG.md](BACKLOG.md)
-Last updated: 2026-11-11 (internal-operation design ratified; RF0/first RF1 increment; R2/R3 remains paused)
+Last updated: 2026-11-11 (RF1 checkpointed; RF2 transaction-state ownership selected; R2/R3 remains paused)
 
 This is a non-normative delivery plan. The specifications and machine-readable contracts remain authoritative.
 
@@ -24,10 +24,10 @@ and authorized a focused specification first. The
 [internal application operations contract](../specs/internal-application-operations.md)
 now defines shared operation, mutation-state and propagation boundaries and IO-01–08
 preservation gates. Architecture/storage delegation and the normative index are aligned.
-Status and evidence are in SPINE-096–099. The operator ratified v1.0 and explicitly
+Status and evidence are in SPINE-096–100. The operator ratified v1.0 and explicitly
 selected RF0/RF1 after the bounded review below. The selected RF0/RF1 extraction is
-now verified; full internal-operations conformance still requires RF2/RF3, which
-remain separately gated along with recurring R2/R3.
+now verified and checkpointed. The operator subsequently selected RF2; RF3 and
+functional recurring R2/R3 remain separately gated.
 
 The draft, assessment and related tracking were committed as `60e025e`, excluding
 the preserved R2 continuation and unrelated `AGENTS.md` changes. SPINE-098 stages
@@ -79,8 +79,22 @@ import. The 97-test focused suite, 84-test clean refactor-only snapshot, 36-test
 final selection, strict typing, lint and links pass. Full regression passes 1,424
 tests (one skipped), 384.057 seconds. Exact response/page/replay/ledger witnesses,
 byte-boundary rollback and applicable admission guards establish RF1 exit.
-SPINE-099 is complete; the final increment is uncommitted. RF2 complete mutation/
-state ownership needs a separate kickoff; RF3 and R2 functional resumption remain gated.
+SPINE-099 is complete; the final increment is committed as `9e50c1c`, excluding
+the older R2 admission/read and `AGENTS.md` edits.
+
+The operator selected RF2 under SPINE-100 after that checkpoint. Its first bounded
+increment centralizes transaction mutation obligations into one typed owner,
+replacing the independent connection-attribute/savepoint/reset lists. Existing
+finalizer order and feature-specific proof/error semantics remain intact; feature
+enablement and allocation guards remain connection configuration. This increment
+does not close RF2: recurring page-state ownership and complete prepared item-change
+composition, including support-set/fault/budget preservation, follow separately.
+See [RF2 evidence and remaining scope](design-notes/internal-operations-rf2.md).
+The first increment passes 95 before/after preservation tests, 106 tests in an
+isolated refactor-only snapshot, focused state/boundary/documentation checks and
+strict typing/lint. Full regression passes 1,435 tests (one skipped), 392.707 seconds.
+It remains uncommitted; RF2 is not yet complete. RF3 and functional R2 resumption
+remain gated.
 
 Preserve `e540a91`, the uncommitted R2 admission/read continuation, unrelated
 `AGENTS.md` edits and all prior completion evidence. The delivery plan below remains

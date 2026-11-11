@@ -14,6 +14,7 @@ from typing import Any
 from spine.core import rendering_definitions as codec
 from spine.core.canonical_json import canonical_json_text
 from spine.core.errors import SpineValidationError
+from spine.ledger.mutation_state import TransactionMutationState
 
 
 def invariant(condition: bool, message: str = "rendering persistence invariant failed") -> None:
@@ -92,7 +93,8 @@ def load_disclosure(db: sqlite3.Connection, authorization_id: str) -> dict[str, 
 
 
 def load_presentation(db: sqlite3.Connection, policy_id: str, *, pending: bool = True) -> dict[str, Any]:
-    staged = getattr(db, "_rendering_pending", {})
+    state = getattr(db, "mutation_state", None)
+    staged = state.renderings.pending if isinstance(state, TransactionMutationState) else {}
     if pending and policy_id in staged:
         return dict(staged[policy_id])
     row = db.execute("SELECT * FROM notification_policy_presentations WHERE notification_policy_id=?", (policy_id,)).fetchone()
@@ -138,15 +140,15 @@ def stage_policy(db: sqlite3.Connection, policy: Mapping[str, Any]) -> None:
     if not getattr(db, "_renderings_enabled", False):
         return
     identity = str(policy["notification_policy_id"])
-    invariant(identity not in db._rendering_pending, "duplicate policy producer")
+    invariant(identity not in db.mutation_state.renderings.pending, "duplicate policy producer")
     source = policy.get("source_notification_policy_id")
-    db._rendering_pending[identity] = load_presentation(db, str(source)) if source else {"kind": "ordinary"}
+    db.mutation_state.renderings.pending[identity] = load_presentation(db, str(source)) if source else {"kind": "ordinary"}
 
 
 def select_presentation(db: sqlite3.Connection, policy_id: str, presentation: object) -> None:
     invariant(getattr(db, "_renderings_enabled", False) and db.in_transaction)
-    invariant(policy_id in db._rendering_pending, "presentation can only be selected for a fresh policy")
-    db._rendering_pending[policy_id] = codec.normalize_presentation(presentation)
+    invariant(policy_id in db.mutation_state.renderings.pending, "presentation can only be selected for a fresh policy")
+    db.mutation_state.renderings.pending[policy_id] = codec.normalize_presentation(presentation)
 
 
 def insert_presentation(db: sqlite3.Connection, policy: Mapping[str, Any], presentation: Mapping[str, Any]) -> None:
@@ -173,7 +175,7 @@ def insert_presentation(db: sqlite3.Connection, policy: Mapping[str, Any], prese
 def finalize(db: sqlite3.Connection) -> None:
     """Check only transaction-owned versions and catalog objects, never history."""
     invariant(getattr(db, "_renderings_enabled", False))
-    versions = set(db._facet_versions) | set(db._rendering_versions)
+    versions = set(db.mutation_state.facets.versions) | set(db.mutation_state.renderings.versions)
     for item_id, version in sorted(versions):
         policies = db.execute(
             "SELECT * FROM notification_policies WHERE item_id=? AND version=? ORDER BY policy_id LIMIT 101", (item_id, version)
@@ -184,8 +186,8 @@ def finalize(db: sqlite3.Connection) -> None:
             policy_id, source = row["policy_id"], row["source_notification_policy_id"]
             existing = db.execute("SELECT 1 FROM notification_policy_presentations WHERE notification_policy_id=?", (policy_id,)).fetchone()
             if not existing:
-                invariant(policy_id in db._rendering_pending, "unregistered policy writer or missing presentation")
-                insert_presentation(db, row, db._rendering_pending[policy_id])
+                invariant(policy_id in db.mutation_state.renderings.pending, "unregistered policy writer or missing presentation")
+                insert_presentation(db, row, db.mutation_state.renderings.pending[policy_id])
             presentation = load_presentation(db, policy_id, pending=False)
             if source:
                 predecessor = db.execute(
@@ -207,7 +209,7 @@ def finalize(db: sqlite3.Connection) -> None:
             "SELECT COUNT(*) FROM notification_policy_presentations WHERE item_id=? AND item_version=?", (item_id, version)
         ).fetchone()[0]
         invariant(count == len(policies), "policy presentation set mismatch")
-    for kind, identity in sorted(db._rendering_catalog):
+    for kind, identity in sorted(db.mutation_state.renderings.catalog):
         if kind == "root":
             root = db.execute(
                 "SELECT * FROM notification_rendering_definitions WHERE notification_rendering_definition_id=?", (identity,)
@@ -226,16 +228,16 @@ def finalize(db: sqlite3.Connection) -> None:
             load_disclosure(db, identity)
     from spine.ledger.notification_profiles import load_profile
 
-    for identity in sorted(db._rendering_profiles):
+    for identity in sorted(db.mutation_state.renderings.profiles):
         parent = db.execute(
             "SELECT notification_profile_id FROM notification_profile_revisions WHERE notification_profile_revision_id=?", (identity,)
         ).fetchone()
         invariant(parent is not None)
         load_profile(db, parent[0], revision_id=identity)
     from spine.ledger.notification_renderings import get_notification_rendering
-    for attempt_id in sorted(db._rendering_attempts):
+    for attempt_id in sorted(db.mutation_state.renderings.attempts):
         invariant(get_notification_rendering(db, attempt_id=attempt_id) is not None, "missing attempt rendering")
-    if db._rendering_catalog:
+    if db.mutation_state.renderings.catalog:
         db.execute(
             "UPDATE notification_rendering_catalog_state SET generation=generation+1 WHERE singleton=1 AND generation<?",
             (codec.MAX_INTEGER,),

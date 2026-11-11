@@ -67,17 +67,17 @@ class LedgerTransactionTests(unittest.TestCase):
         self.assertEqual(self.db.execute("SELECT value FROM values_for_test").fetchall(), [(1,)])
 
     def test_unit_restores_sql_and_python_trackers_after_exception(self) -> None:
-        self.db._facet_versions = {("old", 1)}
-        self.db._rendering_pending = {"old": {"kind": "ordinary"}}
+        self.db.mutation_state.facets.versions = {("old", 1)}
+        self.db.mutation_state.renderings.pending = {"old": {"kind": "ordinary"}}
         with self.db.atomic_command():
             self.db.execute("INSERT INTO values_for_test VALUES (1)")
             with self.assertRaisesRegex(RuntimeError, "unit failed"), self.db.command_unit():
                 self.db.execute("INSERT INTO values_for_test VALUES (2)")
-                self.db._facet_versions.add(("rolled-back", 1))
-                self.db._rendering_pending["old"]["kind"] = "uncommitted"
+                self.db.mutation_state.facets.versions.add(("rolled-back", 1))
+                self.db.mutation_state.renderings.pending["old"]["kind"] = "uncommitted"
                 raise RuntimeError("unit failed")
-            self.assertEqual(self.db._facet_versions, {("old", 1)})
-            self.assertEqual(self.db._rendering_pending, {"old": {"kind": "ordinary"}})
+            self.assertEqual(self.db.mutation_state.facets.versions, {("old", 1)})
+            self.assertEqual(self.db.mutation_state.renderings.pending, {"old": {"kind": "ordinary"}})
         self.assertEqual(self.db.execute("SELECT value FROM values_for_test").fetchall(), [(1,)])
 
     def test_interrupted_unit_preserves_original_sqlite_error(self) -> None:

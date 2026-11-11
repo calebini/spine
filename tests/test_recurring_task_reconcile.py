@@ -508,8 +508,8 @@ class RecurringTaskReconcileTests(unittest.TestCase):
         # An unrelated ordinary transaction still finalizes cleanly: no rolled-
         # back task/version/presentation can remain in the Python tracker sets.
         with self.db.atomic_command(write=True):
-            self.assertFalse(self.db._facet_versions)
-            self.assertFalse(self.db._rendering_pending)
+            self.assertFalse(self.db.mutation_state.facets.versions)
+            self.assertFalse(self.db.mutation_state.renderings.pending)
 
     def test_response_byte_pages_commit_only_whole_units_and_continue_without_duplicates(self):
         rule = self.created()["result"]["rule"]
@@ -551,8 +551,8 @@ class RecurringTaskReconcileTests(unittest.TestCase):
         self.assertEqual(len(set(seen)), 6)
         self.assertEqual(self.db.execute("SELECT COUNT(*) FROM related_task_generations").fetchone()[0], 6)
         with self.db.atomic_command(write=True):
-            self.assertFalse(self.db._facet_versions)
-            self.assertFalse(self.db._recurring_task_rows)
+            self.assertFalse(self.db.mutation_state.facets.versions)
+            self.assertFalse(self.db.mutation_state.recurring.rows)
 
     def test_byte_boundary_existing_lane_and_dry_run_leave_no_partial_intent(self):
         initial = self.reconcile(self.created()["result"]["rule"])

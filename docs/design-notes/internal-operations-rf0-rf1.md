@@ -2,7 +2,9 @@
 
 Date: 2026-11-11. SPINE-099 RF0/RF1 is complete at the final checkpoint below.
 Earlier sections retain incremental evidence; RF2/RF3 conformance and recurring-family
-activation are not claimed. The final response-sizing increment is uncommitted.
+activation are not claimed. The final response-sizing increment is committed as
+`9e50c1c`; the operator subsequently selected RF2 under SPINE-100. Its separate
+[evidence record](internal-operations-rf2.md) does not amend the RF1 baseline.
 
 ## Authority and baseline
 

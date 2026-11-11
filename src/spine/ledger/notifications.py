@@ -299,7 +299,7 @@ def remove_copied_notification_policy(
     connection.execute("DELETE FROM notification_schedules WHERE schedule_id = ?", (row["schedule_id"],))
     connection.execute("DELETE FROM notification_policies WHERE policy_id = ?", (row["policy_id"],))
     if getattr(connection, "_renderings_enabled", False):
-        connection._rendering_pending.pop(row["policy_id"], None)
+        connection.mutation_state.renderings.pending.pop(row["policy_id"], None)
 
 
 def copy_forward_notification_policies(

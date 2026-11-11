@@ -79,12 +79,12 @@ class OwnershipBootstrapTests(unittest.TestCase):
                 self.assertEqual(advance_ownership_epoch(self.db), 1)
                 raise RuntimeError("unit")
             self.assertIsNone(read_access_state(self.db))
-            self.assertFalse(self.db._ownership_epoch_consumed)
+            self.assertFalse(self.db.mutation_state.ownership.epoch_consumed)
             self.assertEqual(advance_ownership_epoch(self.db), 1)
             with self.assertRaises(RuntimeError), self.db.command_unit():
                 self.assertEqual(advance_ownership_epoch(self.db), 1)
                 raise RuntimeError("later unit")
-            self.assertTrue(self.db._ownership_epoch_consumed)
+            self.assertTrue(self.db.mutation_state.ownership.epoch_consumed)
         state = read_access_state(self.db)
         self.assertEqual(project_access_state(state), dict(singleton_id="1", ledger_id=identity, realm_id=None,
                          mode="trusted_local", identity_mode=None, access_epoch="1", recovery_epoch="1"))
@@ -106,17 +106,17 @@ class OwnershipBootstrapTests(unittest.TestCase):
                 advance_ownership_epoch(self.db)
                 raise RuntimeError("inner")
             self.assertIsNone(read_access_state(self.db))
-            self.assertFalse(self.db._ownership_epoch_consumed)
+            self.assertFalse(self.db.mutation_state.ownership.epoch_consumed)
             self.assertEqual(self.db._command_unit_depth, 1)
             advance_ownership_epoch(self.db)
             with self.assertRaisesRegex(RuntimeError, "second"), self.db.command_unit(nested=True):
                 self.assertEqual(advance_ownership_epoch(self.db), 1)
                 raise RuntimeError("second")
             self.assertEqual(read_access_state(self.db)["access_epoch"], 1)
-            self.assertTrue(self.db._ownership_epoch_consumed)
+            self.assertTrue(self.db.mutation_state.ownership.epoch_consumed)
         self.assertEqual(self.db._command_unit_depth, 0)
         self.assertFalse(self.db._command_unit_active)
-        self.assertFalse(self.db._ownership_epoch_consumed)
+        self.assertFalse(self.db.mutation_state.ownership.epoch_consumed)
         for table in ("login_accounts", "web_operators", "subject_memberships", "access_grants"):
             self.assertEqual(self.db.execute(f"SELECT COUNT(*) FROM {table}").fetchone()[0], 0)
 
@@ -213,7 +213,7 @@ class OwnershipBootstrapTests(unittest.TestCase):
                 with self.subTest(local=local, stage=stage), self.assertRaisesRegex(RuntimeError, stage):
                     apply(self.db, request, bootstrap=contracts(fault))
                 self.assertEqual(dump(self.db), before)
-                self.assertFalse(self.db._ownership_epoch_consumed)
+                self.assertFalse(self.db.mutation_state.ownership.epoch_consumed)
 
     def test_migration_preserves_real_configured_accounts_and_triggers(self):
         legacy = dict(contract_version="spine.trusted-web-provisioning.v2", ledger_id="separate-logical-ledger",

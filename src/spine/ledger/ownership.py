@@ -54,7 +54,7 @@ def advance_ownership_epoch(db: LedgerConnection) -> int:
         invalid()
     identity = read_ledger_instance_id(db)
     state = read_access_state(db)
-    if db._ownership_epoch_consumed:
+    if db.mutation_state.ownership.epoch_consumed:
         if state is None:
             invalid()
         assert state is not None
@@ -69,5 +69,5 @@ def advance_ownership_epoch(db: LedgerConnection) -> int:
         if db.execute("UPDATE ledger_access_state SET access_epoch=? WHERE singleton_id=1 AND access_epoch=?",
                       (epoch, state["access_epoch"])).rowcount != 1:
             invalid()
-    db._ownership_epoch_consumed = True
+    db.mutation_state.ownership.epoch_consumed = True
     return epoch

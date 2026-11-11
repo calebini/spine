@@ -131,7 +131,7 @@ class FacetStorageTests(unittest.TestCase):
             self.next(title="First")
             self.create("second", seeded=False)
             receipt(self.db, "rollback-receipt")
-            self.db._facet_versions.remove(("second", 1))
+            self.db.mutation_state.facets.versions.remove(("second", 1))
         self.assertEqual(all_rows(self.db), before)
         with self.assertRaises(SpineValidationError), self.db.atomic_command():
             self.next(title="Index mismatch")

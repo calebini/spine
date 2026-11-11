@@ -165,13 +165,14 @@ def execute(command: str, request: Mapping[str, Any], context: CommandContext) -
                         from spine.ledger.facets import finalize
 
                         expected = (
-                            frozenset(db._facet_versions),
-                            frozenset(db._facet_items),
-                            frozenset(db._facet_roots),
-                            frozenset(db._facet_bindings),
-                            frozenset(db._facet_definitions),
+                            frozenset(db.mutation_state.facets.versions),
+                            frozenset(db.mutation_state.facets.items),
+                            frozenset(db.mutation_state.facets.roots),
+                            frozenset(db.mutation_state.facets.bindings),
+                            frozenset(db.mutation_state.facets.definitions),
                         )
-                        if finalize(db, *expected) != expected or not db._facet_allocations <= db._facet_versions:
+                        if (finalize(db, *expected) != expected
+                                or not db.mutation_state.facets.allocations <= db.mutation_state.facets.versions):
                             failure("environment_failure", "facets")
                         if command == "item.facets.update":
                             response["reconciliation_performed"] = False

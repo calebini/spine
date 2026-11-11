@@ -466,7 +466,7 @@ class RecurringTaskStorageTests(unittest.TestCase):
                 record[field] = bad
                 insert_record(self.db, "related_task_rule_revisions", record)
         self.assertEqual(self.db.execute("SELECT COUNT(*) FROM related_task_rules").fetchone()[0], 0)
-        self.assertEqual(self.db._recurring_task_rows, set())
+        self.assertEqual(self.db.mutation_state.recurring.rows, set())
         with self.db.atomic_command(write=True):
             self.seed_root()
 
