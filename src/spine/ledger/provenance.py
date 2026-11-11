@@ -334,3 +334,18 @@ def record_stale_work_provenance_report(
         ),
     )
     return report_id
+
+
+def persist_binding_provenance(connection: sqlite3.Connection, derived: DerivedOccurrenceProvenance, *, command_id: str, at: str) -> None:
+    current = active_provenance_for_slot(connection, slot_key=str(derived.value["occurrence_provenance_slot_key"]))
+    if current is not None and current["content_hash"] == derived.value["content_hash"]:
+        return
+    if current is not None:
+        supersede_occurrence_provenance(
+            connection,
+            occurrence_provenance_id=str(current["occurrence_provenance_id"]),
+            command_id=command_id,
+            superseded_at_utc=at,
+            replacement_occurrence_provenance_id=str(derived.value["occurrence_provenance_id"]),
+        )
+    insert_occurrence_provenance(connection, derived=derived)

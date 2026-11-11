@@ -1,0 +1,759 @@
+{
+  "baseline_commit": "01d5fc9859f158f9e612da23f3a368f4467946fc",
+  "baseline": "Includes the separately preserved uncommitted R2 continuation. Captured before RF1 runtime edits.",
+  "delivery": [
+    {
+      "name": "explicit",
+      "request": {
+        "recipient_kind": "subject",
+        "recipient_subject_id": "owner",
+        "channel": "whatsapp",
+        "target": {
+          "resolution": "explicit",
+          "delivery_target_id": "whatsapp-owner"
+        }
+      },
+      "defaults": {},
+      "expected": {
+        "result": {
+          "recipient_kind": "subject",
+          "recipient_id": "owner",
+          "recipient_subject_id": "owner",
+          "recipient_group_id": null,
+          "channel": "whatsapp",
+          "delivery_target_id": "whatsapp-owner",
+          "snapshot": {
+            "delivery_target_id": "whatsapp-owner",
+            "resolution_source": "explicit",
+            "recipient_kind": "subject",
+            "channel": "whatsapp",
+            "adapter_name": "openclaw",
+            "target_ref": "owner@example",
+            "delivery_state": "not_attempted_by_command",
+            "recipient_subject_id": "owner"
+          }
+        }
+      }
+    },
+    {
+      "name": "non_object",
+      "request": null,
+      "defaults": {},
+      "expected": {
+        "error": {
+          "code": "invalid_request:delivery",
+          "message": "delivery must be an object"
+        }
+      }
+    },
+    {
+      "name": "unknown_fields_lexical_before_recipient",
+      "request": {
+        "z": 1,
+        "a": 1
+      },
+      "defaults": {},
+      "expected": {
+        "error": {
+          "code": "unsupported_field:delivery.a",
+          "message": "unsupported field for delivery: a"
+        }
+      }
+    },
+    {
+      "name": "unsupported_recipient_before_channel",
+      "request": {
+        "recipient_kind": "nobody"
+      },
+      "defaults": {},
+      "expected": {
+        "error": {
+          "code": "unsupported_delivery.recipient_kind",
+          "message": "delivery.recipient_kind must be one of ['subject', 'subject_group']"
+        }
+      }
+    },
+    {
+      "name": "missing_channel_before_recipient_lookup",
+      "request": {
+        "recipient_kind": "subject",
+        "recipient_subject_id": "missing"
+      },
+      "defaults": {},
+      "expected": {
+        "error": {
+          "code": "invalid_request:delivery.channel",
+          "message": "delivery.channel must be a non-empty string"
+        }
+      }
+    },
+    {
+      "name": "invalid_subject_type",
+      "request": {
+        "recipient_kind": "subject",
+        "recipient_subject_id": 42,
+        "channel": "whatsapp",
+        "target": {
+          "resolution": "explicit",
+          "delivery_target_id": "whatsapp-owner"
+        }
+      },
+      "defaults": {},
+      "expected": {
+        "error": {
+          "code": "invalid_request:delivery.recipient_subject_id",
+          "message": "delivery.recipient_subject_id must be a string"
+        }
+      }
+    },
+    {
+      "name": "subject_xor_group",
+      "request": {
+        "recipient_kind": "subject",
+        "recipient_subject_id": "owner",
+        "channel": "whatsapp",
+        "target": {
+          "resolution": "explicit",
+          "delivery_target_id": "whatsapp-owner"
+        },
+        "recipient_group_id": "group"
+      },
+      "defaults": {},
+      "expected": {
+        "error": {
+          "code": "invalid_request:delivery.recipient_subject_id",
+          "message": "subject recipient requires recipient_subject_id only"
+        }
+      }
+    },
+    {
+      "name": "missing_subject_before_target",
+      "request": {
+        "recipient_kind": "subject",
+        "recipient_subject_id": "missing",
+        "channel": "whatsapp",
+        "target": null
+      },
+      "defaults": {},
+      "expected": {
+        "error": {
+          "code": "referenced_row_not_found:delivery.recipient_subject_id",
+          "message": "recipient subject not found"
+        }
+      }
+    },
+    {
+      "name": "missing_group",
+      "request": {
+        "recipient_kind": "subject_group",
+        "recipient_subject_id": null,
+        "channel": "whatsapp",
+        "target": {
+          "resolution": "explicit",
+          "delivery_target_id": "whatsapp-owner"
+        },
+        "recipient_group_id": "missing"
+      },
+      "defaults": {},
+      "expected": {
+        "error": {
+          "code": "referenced_row_not_found:delivery.recipient_group_id",
+          "message": "recipient group not found"
+        }
+      }
+    },
+    {
+      "name": "target_object",
+      "request": {
+        "recipient_kind": "subject",
+        "recipient_subject_id": "owner",
+        "channel": "whatsapp",
+        "target": null
+      },
+      "defaults": {},
+      "expected": {
+        "error": {
+          "code": "invalid_request:delivery.target",
+          "message": "delivery.target must be an object"
+        }
+      }
+    },
+    {
+      "name": "target_unknown_before_id",
+      "request": {
+        "recipient_kind": "subject",
+        "recipient_subject_id": "owner",
+        "channel": "whatsapp",
+        "target": {
+          "resolution": "explicit",
+          "x": 0
+        }
+      },
+      "defaults": {},
+      "expected": {
+        "error": {
+          "code": "unsupported_field:delivery.target.x",
+          "message": "unsupported field for delivery.target: x"
+        }
+      }
+    },
+    {
+      "name": "target_empty_id",
+      "request": {
+        "recipient_kind": "subject",
+        "recipient_subject_id": "owner",
+        "channel": "whatsapp",
+        "target": {
+          "resolution": "explicit",
+          "delivery_target_id": ""
+        }
+      },
+      "defaults": {},
+      "expected": {
+        "error": {
+          "code": "invalid_request:delivery.target.delivery_target_id",
+          "message": "delivery.target.delivery_target_id must be a non-empty string"
+        }
+      }
+    },
+    {
+      "name": "missing_target",
+      "request": {
+        "recipient_kind": "subject",
+        "recipient_subject_id": "owner",
+        "channel": "whatsapp",
+        "target": {
+          "resolution": "explicit",
+          "delivery_target_id": "missing"
+        }
+      },
+      "defaults": {},
+      "expected": {
+        "error": {
+          "code": "referenced_row_not_found:delivery.target.delivery_target_id",
+          "message": "delivery target not found"
+        }
+      }
+    },
+    {
+      "name": "channel_mismatch",
+      "request": {
+        "recipient_kind": "subject",
+        "recipient_subject_id": "owner",
+        "channel": "email",
+        "target": {
+          "resolution": "explicit",
+          "delivery_target_id": "whatsapp-owner"
+        }
+      },
+      "defaults": {},
+      "expected": {
+        "error": {
+          "code": "semantic_conflict:delivery.channel",
+          "message": "delivery target channel does not match delivery.channel"
+        }
+      }
+    },
+    {
+      "name": "target_bad_resolution",
+      "request": {
+        "recipient_kind": "subject",
+        "recipient_subject_id": "owner",
+        "channel": "whatsapp",
+        "target": {
+          "resolution": "other"
+        }
+      },
+      "defaults": {},
+      "expected": {
+        "error": {
+          "code": "invalid_request:delivery.target.resolution",
+          "message": "delivery.target.resolution must be explicit or context_default"
+        }
+      }
+    },
+    {
+      "name": "default_missing",
+      "request": {
+        "recipient_kind": "subject",
+        "recipient_subject_id": "owner",
+        "channel": "whatsapp",
+        "target": {
+          "resolution": "context_default",
+          "default_key": "route"
+        }
+      },
+      "defaults": {},
+      "expected": {
+        "error": {
+          "code": "referenced_row_not_found:delivery.target.default_key",
+          "message": "delivery target default not found"
+        }
+      }
+    },
+    {
+      "name": "default_string",
+      "request": {
+        "recipient_kind": "subject",
+        "recipient_subject_id": "owner",
+        "channel": "whatsapp",
+        "target": {
+          "resolution": "context_default",
+          "default_key": "route"
+        }
+      },
+      "defaults": {
+        "route": "whatsapp-owner"
+      },
+      "expected": {
+        "result": {
+          "recipient_kind": "subject",
+          "recipient_id": "owner",
+          "recipient_subject_id": "owner",
+          "recipient_group_id": null,
+          "channel": "whatsapp",
+          "delivery_target_id": "whatsapp-owner",
+          "snapshot": {
+            "delivery_target_id": "whatsapp-owner",
+            "resolution_source": "context_default",
+            "recipient_kind": "subject",
+            "channel": "whatsapp",
+            "adapter_name": "openclaw",
+            "target_ref": "owner@example",
+            "delivery_state": "not_attempted_by_command",
+            "recipient_subject_id": "owner",
+            "default_key": "route"
+          }
+        }
+      }
+    },
+    {
+      "name": "default_single_filtered_sequence",
+      "request": {
+        "recipient_kind": "subject",
+        "recipient_subject_id": "owner",
+        "channel": "whatsapp",
+        "target": {
+          "resolution": "context_default",
+          "default_key": "route"
+        }
+      },
+      "defaults": {
+        "route": [
+          null,
+          0,
+          "",
+          "whatsapp-owner"
+        ]
+      },
+      "expected": {
+        "result": {
+          "recipient_kind": "subject",
+          "recipient_id": "owner",
+          "recipient_subject_id": "owner",
+          "recipient_group_id": null,
+          "channel": "whatsapp",
+          "delivery_target_id": "whatsapp-owner",
+          "snapshot": {
+            "delivery_target_id": "whatsapp-owner",
+            "resolution_source": "context_default",
+            "recipient_kind": "subject",
+            "channel": "whatsapp",
+            "adapter_name": "openclaw",
+            "target_ref": "owner@example",
+            "delivery_state": "not_attempted_by_command",
+            "recipient_subject_id": "owner",
+            "default_key": "route"
+          }
+        }
+      }
+    },
+    {
+      "name": "default_empty_sequence",
+      "request": {
+        "recipient_kind": "subject",
+        "recipient_subject_id": "owner",
+        "channel": "whatsapp",
+        "target": {
+          "resolution": "context_default",
+          "default_key": "route"
+        }
+      },
+      "defaults": {
+        "route": [
+          null,
+          0,
+          ""
+        ]
+      },
+      "expected": {
+        "error": {
+          "code": "referenced_row_not_found:delivery.target.default_key",
+          "message": "delivery target default not found"
+        }
+      }
+    },
+    {
+      "name": "default_duplicate_ambiguous",
+      "request": {
+        "recipient_kind": "subject",
+        "recipient_subject_id": "owner",
+        "channel": "whatsapp",
+        "target": {
+          "resolution": "context_default",
+          "default_key": "route"
+        }
+      },
+      "defaults": {
+        "route": [
+          "whatsapp-owner",
+          "whatsapp-owner"
+        ]
+      },
+      "expected": {
+        "error": {
+          "code": "semantic_conflict:delivery.target.default_key",
+          "message": "delivery target default is ambiguous"
+        }
+      }
+    },
+    {
+      "name": "default_invalid",
+      "request": {
+        "recipient_kind": "subject",
+        "recipient_subject_id": "owner",
+        "channel": "whatsapp",
+        "target": {
+          "resolution": "context_default",
+          "default_key": "route"
+        }
+      },
+      "defaults": {
+        "route": {
+          "id": "whatsapp-owner"
+        }
+      },
+      "expected": {
+        "error": {
+          "code": "semantic_conflict:delivery.target.default_key",
+          "message": "delivery target default is invalid"
+        }
+      }
+    },
+    {
+      "name": "default_missing_row",
+      "request": {
+        "recipient_kind": "subject",
+        "recipient_subject_id": "owner",
+        "channel": "whatsapp",
+        "target": {
+          "resolution": "context_default",
+          "default_key": "route"
+        }
+      },
+      "defaults": {
+        "route": "missing"
+      },
+      "expected": {
+        "error": {
+          "code": "referenced_row_not_found:delivery.target.default_key",
+          "message": "delivery target not found"
+        }
+      }
+    },
+    {
+      "name": "default_bad_key",
+      "request": {
+        "recipient_kind": "subject",
+        "recipient_subject_id": "owner",
+        "channel": "whatsapp",
+        "target": {
+          "resolution": "context_default",
+          "default_key": "UPPER"
+        }
+      },
+      "defaults": {},
+      "expected": {
+        "error": {
+          "code": "invalid_request:delivery.target.default_key",
+          "message": "default_key has an invalid format"
+        }
+      }
+    }
+  ],
+  "binding": [
+    {
+      "name": "item_revision",
+      "operation": "_revision_value",
+      "arguments": {
+        "command": "schedule.related_task.create",
+        "command_id": "command-fixed",
+        "revision_id": "revision-fixed",
+        "binding": {
+          "temporal_binding_id": "binding-fixed",
+          "source_item_id": "event-fixed",
+          "target_item_id": "task-fixed",
+          "relationship_id": "relation-fixed",
+          "binding_mode": "follow_source",
+          "source_terminal_behavior": "cancel_target"
+        },
+        "prior": null,
+        "revision_index": 1,
+        "source": {
+          "source_target_version": "3",
+          "source_anchor_id": "anchor-source",
+          "source_scheduled_fact": "2026-08-15T11:30:00",
+          "resolved_source_utc": "2026-08-15T15:30:00Z",
+          "timezone": "America/Toronto",
+          "timezone_database_version": "2026c"
+        },
+        "source_scope": "item",
+        "offset": 5400,
+        "target": {
+          "utc_instant": "2026-08-15T17:00:00Z",
+          "local_date": "2026-08-15",
+          "local_time": "13:00:00",
+          "timezone": "America/Toronto",
+          "timezone_database_version": "2026c"
+        },
+        "target_item_version": 1,
+        "target_anchor_id": "anchor-target",
+        "resolution_kind": "resolved",
+        "created_at": "2026-08-10T10:00:00Z"
+      },
+      "expected": {
+        "result": {
+          "temporal_binding_revision_id": "revision-fixed",
+          "temporal_binding_id": "binding-fixed",
+          "revision_index": "1",
+          "source_target_version": "3",
+          "source_scope": "item",
+          "source_anchor_id": "anchor-source",
+          "source_recurrence_revision_id": null,
+          "source_occurrence_key": null,
+          "source_occurrence_selector_ref": null,
+          "source_occurrence_provenance_id": null,
+          "source_scheduled_fact": "2026-08-15T11:30:00",
+          "offset_basis": "elapsed",
+          "offset_seconds": "5400",
+          "resolved_source_utc": "2026-08-15T15:30:00Z",
+          "resolved_target_utc": "2026-08-15T17:00:00Z",
+          "target_local_date": "2026-08-15",
+          "target_local_time": "13:00:00",
+          "target_timezone": "America/Toronto",
+          "target_timezone_database_version": "2026c",
+          "target_item_version": "1",
+          "target_anchor_id": "anchor-target",
+          "resolution_kind": "resolved",
+          "normalized_temporal_binding_revision_hash": "b34fdf61f44d710ee997ec5fcfe817e2a2f01c4818ba82bb70883f9176aaa291",
+          "created_by_command_id": "command-fixed",
+          "created_at_utc": "2026-08-10T10:00:00Z"
+        }
+      }
+    },
+    {
+      "name": "occurrence_prior_fallback",
+      "operation": "_revision_value",
+      "arguments": {
+        "command": "schedule.related_task.create",
+        "command_id": "command-fixed",
+        "revision_id": "revision-fixed",
+        "binding": {
+          "temporal_binding_id": "binding-fixed",
+          "source_item_id": "event-fixed",
+          "target_item_id": "task-fixed",
+          "relationship_id": "relation-fixed",
+          "binding_mode": "follow_source",
+          "source_terminal_behavior": "cancel_target"
+        },
+        "prior": {
+          "temporal_binding_revision_id": "revision-prior",
+          "source_occurrence_selector_ref": "selector-prior",
+          "source_occurrence_provenance_id": "provenance-prior"
+        },
+        "revision_index": 2,
+        "source": {
+          "source_target_version": "3",
+          "source_anchor_id": "anchor-source",
+          "source_scheduled_fact": "2026-08-15T11:30:00",
+          "resolved_source_utc": "2026-08-15T15:30:00Z",
+          "timezone": "America/Toronto",
+          "timezone_database_version": "2026c",
+          "source_recurrence_revision_id": "recurrence-fixed",
+          "source_occurrence_key": "occurrence-fixed",
+          "target_occurrence_selector": {
+            "original_scheduled_fact": "2026-08-15T11:30:00"
+          }
+        },
+        "source_scope": "selected_occurrence",
+        "offset": 5400,
+        "target": {
+          "utc_instant": "2026-08-15T17:00:00Z",
+          "local_date": "2026-08-15",
+          "local_time": "13:00:00",
+          "timezone": "America/Toronto",
+          "timezone_database_version": "2026c"
+        },
+        "target_item_version": 2,
+        "target_anchor_id": "anchor-target",
+        "resolution_kind": "resolved",
+        "created_at": "2026-08-10T10:00:00Z"
+      },
+      "expected": {
+        "result": {
+          "temporal_binding_revision_id": "revision-fixed",
+          "temporal_binding_id": "binding-fixed",
+          "revision_index": "2",
+          "source_temporal_binding_revision_id": "revision-prior",
+          "source_target_version": "3",
+          "source_scope": "selected_occurrence",
+          "source_anchor_id": "anchor-source",
+          "source_recurrence_revision_id": "recurrence-fixed",
+          "source_occurrence_key": "occurrence-fixed",
+          "source_occurrence_selector_ref": "selector-prior",
+          "source_occurrence_provenance_id": "provenance-prior",
+          "source_scheduled_fact": "2026-08-15T11:30:00",
+          "offset_basis": "elapsed",
+          "offset_seconds": "5400",
+          "resolved_source_utc": "2026-08-15T15:30:00Z",
+          "resolved_target_utc": "2026-08-15T17:00:00Z",
+          "target_local_date": "2026-08-15",
+          "target_local_time": "13:00:00",
+          "target_timezone": "America/Toronto",
+          "target_timezone_database_version": "2026c",
+          "target_item_version": "2",
+          "target_anchor_id": "anchor-target",
+          "resolution_kind": "resolved",
+          "normalized_temporal_binding_revision_hash": "e38ee4538b2caf805f8b212deedacc12731dcfb80502ad7575f4a2bdd5bd20c4",
+          "created_by_command_id": "command-fixed",
+          "created_at_utc": "2026-08-10T10:00:00Z"
+        }
+      }
+    },
+    {
+      "name": "source_from_prior",
+      "operation": "_source_from_prior",
+      "arguments": {
+        "prior": {
+          "temporal_binding_revision_id": "revision-fixed",
+          "temporal_binding_id": "binding-fixed",
+          "revision_index": "2",
+          "source_temporal_binding_revision_id": "revision-prior",
+          "source_target_version": "3",
+          "source_scope": "selected_occurrence",
+          "source_anchor_id": "anchor-source",
+          "source_recurrence_revision_id": "recurrence-fixed",
+          "source_occurrence_key": "occurrence-fixed",
+          "source_occurrence_selector_ref": "selector-prior",
+          "source_occurrence_provenance_id": "provenance-prior",
+          "source_scheduled_fact": "2026-08-15T11:30:00",
+          "offset_basis": "elapsed",
+          "offset_seconds": "5400",
+          "resolved_source_utc": "2026-08-15T15:30:00Z",
+          "resolved_target_utc": "2026-08-15T17:00:00Z",
+          "target_local_date": "2026-08-15",
+          "target_local_time": "13:00:00",
+          "target_timezone": "America/Toronto",
+          "target_timezone_database_version": "2026c",
+          "target_item_version": "2",
+          "target_anchor_id": "anchor-target",
+          "resolution_kind": "resolved",
+          "normalized_temporal_binding_revision_hash": "e38ee4538b2caf805f8b212deedacc12731dcfb80502ad7575f4a2bdd5bd20c4",
+          "created_by_command_id": "command-fixed",
+          "created_at_utc": "2026-08-10T10:00:00Z"
+        }
+      },
+      "expected": {
+        "result": {
+          "source_target_version": "3",
+          "source_anchor_id": "anchor-source",
+          "source_recurrence_revision_id": "recurrence-fixed",
+          "source_occurrence_key": "occurrence-fixed",
+          "source_occurrence_selector_ref": "selector-prior",
+          "source_occurrence_provenance_id": "provenance-prior",
+          "target_occurrence_selector": null,
+          "source_scheduled_fact": "2026-08-15T11:30:00",
+          "resolved_source_utc": "2026-08-15T15:30:00Z",
+          "timezone": "America/Toronto",
+          "timezone_database_version": "2026c"
+        }
+      }
+    },
+    {
+      "name": "local_source",
+      "operation": "_source_from_occurrence",
+      "arguments": {
+        "recurrence": {
+          "time_basis": "local_instant",
+          "source_item_version": "3",
+          "timezone": "America/Toronto",
+          "timezone_database_version": "2026c"
+        },
+        "occurrence": {
+          "original_scheduled_fact": "2026-08-15T11:30:00",
+          "expressed_scheduled_fact": "2026-08-15T12:30:00",
+          "timezone_resolution": {
+            "utc_instant": "2026-08-15T16:30:00Z"
+          }
+        }
+      },
+      "expected": {
+        "result": {
+          "source_target_version": "3",
+          "source_scheduled_fact": "2026-08-15T11:30:00",
+          "resolved_source_utc": "2026-08-15T16:30:00Z",
+          "timezone": "America/Toronto",
+          "timezone_database_version": "2026c"
+        }
+      }
+    },
+    {
+      "name": "local_source_no_resolution",
+      "operation": "_source_from_occurrence",
+      "arguments": {
+        "recurrence": {
+          "time_basis": "local_instant",
+          "source_item_version": "3",
+          "timezone": "America/Toronto",
+          "timezone_database_version": "2026c"
+        },
+        "occurrence": {
+          "original_scheduled_fact": "2026-08-15T11:30:00",
+          "expressed_scheduled_fact": "2026-08-15T12:30:00",
+          "timezone_resolution": null
+        }
+      },
+      "expected": {
+        "error": {
+          "code": "semantic_conflict:source.target_occurrence_key",
+          "message": "selected occurrence has no UTC resolution"
+        }
+      }
+    },
+    {
+      "name": "utc_source",
+      "operation": "_source_from_occurrence",
+      "arguments": {
+        "recurrence": {
+          "time_basis": "instant_utc",
+          "source_item_version": "3",
+          "timezone": "America/Toronto",
+          "timezone_database_version": "2026c"
+        },
+        "occurrence": {
+          "original_scheduled_fact": "2026-08-15T15:30:00Z",
+          "expressed_scheduled_fact": "2026-08-15T16:30:00Z"
+        }
+      },
+      "expected": {
+        "result": {
+          "source_target_version": "3",
+          "source_scheduled_fact": "2026-08-15T15:30:00Z",
+          "resolved_source_utc": "2026-08-15T16:30:00Z",
+          "timezone": "UTC",
+          "timezone_database_version": "2026c"
+        }
+      }
+    }
+  ]
+}

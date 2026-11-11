@@ -5,13 +5,13 @@ from __future__ import annotations
 import copy
 from typing import Any
 
-from spine.commands import core
 from spine.commands.recurring_task_runtime import fail
 from spine.core.canonical_json import canonical_json_bytes
 from spine.core.errors import SpineValidationError
 from spine.core.notification_profiles import compose_notification_plan, normalize_catalog_key
 from spine.core.notifications import normalize_notification_policy
 from spine.ledger.notification_profiles import load_archetype, load_profile, require_owner_exists, resolve_default_profile
+from spine.services import schedule_delivery
 from spine.services.primary_locations import load_referenced_location, normalize_primary_location
 from spine.services.rendering_authoring import resolve
 
@@ -50,7 +50,7 @@ def normalize_configuration(value: dict[str, Any], context: Any, contracts: Any)
         if result["delivery"] is not None or result["materialization"] != {"mode": "none"}:
             fail("invalid_request", "configuration.delivery")
     else:
-        route = core._schedule_resolve_delivery(result["delivery"], context)
+        route = schedule_delivery.resolve_delivery(result["delivery"], ledger=db, defaults=context.delivery_target_defaults)
         snapshot = {k: v for k, v in route["snapshot"].items() if k != "delivery_state"}
         result["delivery"] = {"requested": result["delivery"], "resolved": snapshot}
         profile, binding, scopes = None, None, []

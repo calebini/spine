@@ -7,7 +7,6 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from typing import Any, cast
 
-from spine.commands import core as c
 from spine.commands.recurring_task_runtime import fail
 from spine.core import facets as facet_codec
 from spine.core.errors import SpineValidationError
@@ -17,7 +16,7 @@ from spine.ledger.notification_profiles import current_application, current_assi
 from spine.ledger.notifications import insert_notification_schedule_policy
 from spine.ledger.rendering_definitions import load_presentation, select_presentation
 from spine.ledger.supporting import ItemLocationInput, ItemSubjectRoleInput
-from spine.services import rendering_authoring
+from spine.services import rendering_authoring, schedule_delivery
 
 
 @dataclass
@@ -115,10 +114,10 @@ def insert_policies(db: Any, context: Any, snapshot: Restoration, *, task_id: st
         )
         recipient_field = "recipient_subject_id" if prior["recipient_kind"] == "subject" else "recipient_group_id"
         try:
-            route = c._schedule_resolve_delivery({
+            route = schedule_delivery.resolve_delivery({
                 "recipient_kind": prior["recipient_kind"], recipient_field: prior[recipient_field], "channel": prior["channel"],
                 "target": {"resolution": "explicit", "delivery_target_id": prior["delivery_target_id"]},
-            }, context)
+            }, ledger=db, defaults=context.delivery_target_defaults)
         except SpineValidationError:
             fail("semantic_conflict", "configuration.delivery", "restored destination is unavailable")
         normalized = normalize_notification_policy({

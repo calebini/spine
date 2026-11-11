@@ -9,13 +9,16 @@ from datetime import timedelta
 from functools import partial
 from typing import Any
 
-from spine.commands import core as c
+from spine.commands import temporal_bindings as bindings
 from spine.commands.recurring_task_runtime import PREFIX, cursor_payload, fail, instant, sign_cursor, verify_cursor, wire
+from spine.core import occurrence_details
+from spine.core import temporal_bindings as binding_facts
 from spine.core.canonical_json import canonical_json_bytes
 from spine.core.errors import SpineValidationError
 from spine.core.hashing import hash_canonical_json
 from spine.core.occurrences import expand_recurrence_set
 from spine.core.recurring_tasks import CONTRACT, derive, occurrence_key, payload_hash
+from spine.ledger import item_reads
 from spine.ledger.identity import read_ledger_instance_id
 from spine.ledger.recurrence import load_current_recurrence_set
 from spine.ledger.recurring_task_sources import ProofBudget, _calendar_cost
@@ -149,7 +152,7 @@ class Page:
         if recurrence is None:
             fail("environment_failure", "source")
         self.recurrence: dict[str, Any] = recurrence
-        self.source_item = c._hydrated_item(db, root["source_item_id"])
+        self.source_item = item_reads.hydrated_item(db, root["source_item_id"])
 
     def unit(self, operation: Callable[[], dict[str, Any]], selector: dict[str, Any], *,
              assignment: dict[str, Any] | None = None) -> dict[str, Any] | None:
@@ -248,7 +251,9 @@ class Page:
 
     def occurrence(self, selector: dict[str, Any]) -> dict[str, Any] | None:
         fact = selector["scheduled_fact"]
-        values = self.expand(fact, c._next_scheduled_fact(fact, time_basis=self.recurrence["time_basis"]), basis="original_schedule")
+        values = self.expand(
+            fact, occurrence_details.next_scheduled_fact(fact, time_basis=self.recurrence["time_basis"]), basis="original_schedule"
+        )
         matched = [v for v in values if v["target_occurrence_selector"] == selector]
         return matched[0] if len(matched) == 1 else None
 
@@ -747,7 +752,6 @@ def finish(
 
 def process_existing(page: Page, assignment: dict[str, Any]) -> dict[str, Any]:
     """Maintain an existing reservation independently of new-generation coverage."""
-    from spine.commands import temporal_bindings as bindings
     from spine.commands.recurring_tasks import intent_view, pending_adoption
     from spine.ledger.temporal_bindings import load_temporal_binding
     from spine.services import recurring_task_adoption as adoption
@@ -758,7 +762,7 @@ def process_existing(page: Page, assignment: dict[str, Any]) -> dict[str, Any]:
     state = copy.deepcopy(state)
     gen = read_record(db, "related_task_generations", assignment["current_generation_id"])
     config = read_record(db, "related_task_rule_revisions", state["adopted_rule_revision_id"])["configuration_json"]
-    current = c._hydrated_item(db, gen["task_item_id"])
+    current = item_reads.hydrated_item(db, gen["task_item_id"])
     binding: dict[str, Any] = load_temporal_binding(db, gen["temporal_binding_id"])
     prior = binding["latest_revision"]
     refs = references(db, assignment)
@@ -771,7 +775,7 @@ def process_existing(page: Page, assignment: dict[str, Any]) -> dict[str, Any]:
         intent = None
     intent_result, intent_reason, adopting, managed = None, None, False, None
     reason, outcome, actions = "already_current", "retained", []
-    source = bindings._source_from_prior(prior)
+    source = binding_facts.source_from_prior(prior)
     source["target_occurrence_selector"] = state["selector"]
     source_only = (
         cause is not None

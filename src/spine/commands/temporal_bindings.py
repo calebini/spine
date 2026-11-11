@@ -9,11 +9,11 @@ from typing import Any
 
 from spine import IMPLEMENTED_CONTRACT_VERSIONS, IMPLEMENTED_LEDGER_SCHEMA_VERSION
 from spine.commands.context import CommandContext
+from spine.core import temporal_bindings as binding_facts
 from spine.core.canonical_json import canonical_json_bytes
 from spine.core.errors import SpineValidationError
 from spine.core.hashing import hash_canonical_json
 from spine.core.provenance import DerivedOccurrenceProvenance, derive_occurrence_provenance
-from spine.core.temporal_bindings import binding_revision_preimage
 from spine.ledger.common import TemporalAnchorInput, insert_temporal_anchor
 from spine.ledger.items import create_next_item_version, create_task_v1
 from spine.ledger.notifications import (
@@ -21,7 +21,7 @@ from spine.ledger.notifications import (
     load_current_notification_policies,
     load_notification_policies_at_version,
 )
-from spine.ledger.provenance import active_provenance_for_slot, insert_occurrence_provenance, supersede_occurrence_provenance
+from spine.ledger.provenance import persist_binding_provenance as _persist_provenance
 from spine.ledger.recurrence import load_current_recurrence_set
 from spine.ledger.relations import create_item_relation
 from spine.ledger.temporal_bindings import (
@@ -37,6 +37,10 @@ from spine.ledger.temporal_bindings import (
     target_from_source,
 )
 from spine.ledger.work import cancel_work_instance
+
+_revision_value = binding_facts.revision_value
+_source_from_occurrence = binding_facts.source_from_occurrence
+_source_from_prior = binding_facts.source_from_prior
 
 CREATE_CONTRACT = "spine.schedule-related-task-create.v1"
 LIST_CONTRACT = "spine.schedule-binding-list.v1"
@@ -1095,64 +1099,6 @@ def _store_reconcile_receipt(
     return receipt
 
 
-def _revision_value(
-    *,
-    command: str,
-    command_id: str,
-    revision_id: str,
-    binding: Mapping[str, object],
-    prior: Mapping[str, object] | None,
-    revision_index: int,
-    source: Mapping[str, object],
-    source_scope: str,
-    offset: int,
-    target: Mapping[str, str],
-    target_item_version: int,
-    target_anchor_id: str,
-    resolution_kind: str,
-    created_at: str,
-) -> dict[str, object]:
-    preimage = binding_revision_preimage(
-        binding=binding,
-        source=source,
-        source_scope=source_scope,
-        offset_seconds=offset,
-        target=target,
-        target_item_version=target_item_version,
-        resolution_kind=resolution_kind,
-    )
-    return {
-        "temporal_binding_revision_id": revision_id,
-        "temporal_binding_id": binding["temporal_binding_id"],
-        "revision_index": str(revision_index),
-        **({"source_temporal_binding_revision_id": prior["temporal_binding_revision_id"]} if prior is not None else {}),
-        "source_target_version": str(source["source_target_version"]),
-        "source_scope": source_scope,
-        "source_anchor_id": source.get("source_anchor_id"),
-        "source_recurrence_revision_id": source.get("source_recurrence_revision_id"),
-        "source_occurrence_key": source.get("source_occurrence_key"),
-        "source_occurrence_selector_ref": source.get("source_occurrence_selector_ref")
-        or (prior or {}).get("source_occurrence_selector_ref"),
-        "source_occurrence_provenance_id": source.get("source_occurrence_provenance_id")
-        or (prior or {}).get("source_occurrence_provenance_id"),
-        "source_scheduled_fact": source["source_scheduled_fact"],
-        "offset_basis": "elapsed",
-        "offset_seconds": str(offset),
-        "resolved_source_utc": source["resolved_source_utc"],
-        "resolved_target_utc": target["utc_instant"],
-        "target_local_date": target["local_date"],
-        "target_local_time": target["local_time"],
-        "target_timezone": target["timezone"],
-        "target_timezone_database_version": target["timezone_database_version"],
-        "target_item_version": str(target_item_version),
-        "target_anchor_id": target_anchor_id,
-        "resolution_kind": resolution_kind,
-        "normalized_temporal_binding_revision_hash": hash_canonical_json(preimage),
-        "created_by_command_id": command_id,
-        "created_at_utc": created_at,
-    }
-
-
 def _source_from_item(item: Mapping[str, Any]) -> dict[str, object]:
     from spine.commands import core as c
 
@@ -1192,45 +1138,6 @@ def _source_from_item(item: Mapping[str, Any]) -> dict[str, object]:
     }
 
 
-def _source_from_occurrence(recurrence: Mapping[str, object], occurrence: Mapping[str, object]) -> dict[str, object]:
-    if recurrence["time_basis"] == "instant_utc":
-        from spine.core.schedule import system_timezone_database_version
-
-        return {
-            "source_target_version": recurrence["source_item_version"],
-            "source_scheduled_fact": occurrence["original_scheduled_fact"],
-            "resolved_source_utc": occurrence["expressed_scheduled_fact"],
-            "timezone": "UTC",
-            "timezone_database_version": system_timezone_database_version(),
-        }
-    resolution = occurrence.get("timezone_resolution")
-    if not isinstance(resolution, Mapping):
-        raise SpineValidationError("semantic_conflict:source.target_occurrence_key", "selected occurrence has no UTC resolution")
-    return {
-        "source_target_version": recurrence["source_item_version"],
-        "source_scheduled_fact": occurrence["original_scheduled_fact"],
-        "resolved_source_utc": resolution["utc_instant"],
-        "timezone": recurrence["timezone"],
-        "timezone_database_version": recurrence["timezone_database_version"],
-    }
-
-
-def _source_from_prior(prior: Mapping[str, object]) -> dict[str, object]:
-    return {
-        "source_target_version": prior["source_target_version"],
-        "source_anchor_id": prior.get("source_anchor_id"),
-        "source_recurrence_revision_id": prior.get("source_recurrence_revision_id"),
-        "source_occurrence_key": prior.get("source_occurrence_key"),
-        "source_occurrence_selector_ref": prior.get("source_occurrence_selector_ref"),
-        "source_occurrence_provenance_id": prior.get("source_occurrence_provenance_id"),
-        "target_occurrence_selector": prior.get("target_occurrence_selector"),
-        "source_scheduled_fact": prior["source_scheduled_fact"],
-        "resolved_source_utc": prior["resolved_source_utc"],
-        "timezone": prior["target_timezone"],
-        "timezone_database_version": prior["target_timezone_database_version"],
-    }
-
-
 def _scheduled_for_target(item: Mapping[str, Any]) -> dict[str, str]:
     from spine.commands import core as c
 
@@ -1255,21 +1162,6 @@ def _scheduled_for_target(item: Mapping[str, Any]) -> dict[str, str]:
         "resolution_kind": "unambiguous",
         "offset_seconds": str(resolved["offset_seconds"]),
     }
-
-
-def _persist_provenance(connection: sqlite3.Connection, derived: DerivedOccurrenceProvenance, *, command_id: str, at: str) -> None:
-    current = active_provenance_for_slot(connection, slot_key=str(derived.value["occurrence_provenance_slot_key"]))
-    if current is not None and current["content_hash"] == derived.value["content_hash"]:
-        return
-    if current is not None:
-        supersede_occurrence_provenance(
-            connection,
-            occurrence_provenance_id=str(current["occurrence_provenance_id"]),
-            command_id=command_id,
-            superseded_at_utc=at,
-            replacement_occurrence_provenance_id=str(derived.value["occurrence_provenance_id"]),
-        )
-    insert_occurrence_provenance(connection, derived=derived)
 
 
 def _refresh_selected_provenance(

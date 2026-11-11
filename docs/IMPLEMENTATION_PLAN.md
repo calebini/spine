@@ -9,7 +9,7 @@ see [validation](TZDB_COMPATIBILITY_VALIDATION.md) and [operations](TZDB_COMPATI
 
 
 Role: Roadmap rationale and delivery history; current task status lives in [BACKLOG.md](BACKLOG.md)
-Last updated: 2026-11-11 (internal-operation design ratified; RF0/RF1 selected; R2/R3 remains paused)
+Last updated: 2026-11-11 (internal-operation design ratified; RF0/first RF1 increment; R2/R3 remains paused)
 
 This is a non-normative delivery plan. The specifications and machine-readable contracts remain authoritative.
 
@@ -45,6 +45,17 @@ duplicate or replace feature contracts. SPINE-099 now owns RF0/RF1 execution aft
 the ratification commit. RF4 cleanup remains unselected and is not a
 recurring-task resume gate. No new command contracts, migration or agent operations
 guide changes are planned by this internal-only scope.
+
+Ratification was committed separately as `01d5fc9`. The
+[RF0/first RF1 checkpoint](design-notes/internal-operations-rf0-rf1.md) records the
+exact dirty baseline and fixed-input witnesses, then moves route, binding fact,
+provenance, hydration and keyed lookup helpers to shared owners. Named/count-bound
+dependency tests reduce and constrain the remaining reverse calls. This is an
+incremental extraction, not RF1 closure: policy/work composition and remaining R2
+command dependencies are still next. Focused verification and full regression pass
+(1,410 tests, one skipped, installed Tickerd v1). Existing R2/AGENTS changes are
+preserved and the runtime increment is
+uncommitted. SPINE-099 remains the status/evidence owner.
 
 Preserve `e540a91`, the uncommitted R2 admission/read continuation, unrelated
 `AGENTS.md` edits and all prior completion evidence. The delivery plan below remains

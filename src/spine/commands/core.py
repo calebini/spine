@@ -27,7 +27,7 @@ from spine.commands.responses import (
     item_show_response,
     task_update_response,
 )
-from spine.core import SpineValidationError, occurrence_details
+from spine.core import SpineValidationError, occurrence_details, request_values
 from spine.core.canonical_json import canonical_json_bytes
 from spine.core.hashing import audit_log_payload_hash, hash_canonical_json
 from spine.core.notifications import (
@@ -55,7 +55,7 @@ from spine.core.schedule import (
     resolve_local_instant,
     system_timezone_database_version,
 )
-from spine.ledger import item_reads
+from spine.ledger import catalog_reads, item_reads
 from spine.ledger.common import TemporalAnchorInput, copy_id, insert_temporal_anchor, require_utc_z
 from spine.ledger.item_drafts import _UNSET
 from spine.ledger.items import (
@@ -66,7 +66,6 @@ from spine.ledger.items import (
     create_event_v1,
     create_next_item_version,
     create_task_v1,
-    get_current_item,
 )
 from spine.ledger.migrate import current_schema_version
 from spine.ledger.notifications import (
@@ -99,6 +98,7 @@ from spine.ledger.supporting import (
 )
 from spine.ledger.transactions import LedgerConnection
 from spine.ledger.work import assert_work_instance_not_stale, cancel_work_instance, create_work_instance
+from spine.services import schedule_delivery
 from spine.timezones import timezone_for_version
 
 # Preserve command helper imports while core and ledger own the shared implementation.
@@ -111,6 +111,15 @@ _next_scheduled_fact = occurrence_details.next_scheduled_fact
 _hydrated_item_at_version = item_reads.hydrated_item_at_version
 _detail_at_version = item_reads.detail_at_version
 _anchor_row = item_reads.anchor_row
+_schedule_object = request_values.object_value
+_schedule_exact_fields = request_values.exact_fields
+_nested_required_str = request_values.required_string
+_nested_optional_str = request_values.optional_string
+_enum = request_values.enum_value
+_subject_exists = catalog_reads.subject_exists
+_subject_group_exists = catalog_reads.subject_group_exists
+_delivery_target = catalog_reads.delivery_target
+_hydrated_item = item_reads.hydrated_item
 
 
 def handle(command: str, request: Mapping[str, Any], context: CommandContext) -> dict[str, Any]:
@@ -5663,37 +5672,6 @@ def _schedule_semantic_request(
     return semantic
 
 
-def _schedule_object(value: object, field: str) -> dict[str, Any]:
-    if not isinstance(value, Mapping):
-        raise SpineValidationError(f"invalid_request:{field}", f"{field} must be an object")
-    return dict(value)
-
-
-def _schedule_exact_fields(value: Mapping[str, Any], allowed: set[str], field: str) -> None:
-    unknown = sorted(set(value) - allowed)
-    if unknown:
-        raise SpineValidationError(
-            f"unsupported_field:{field}.{unknown[0]}",
-            f"unsupported field for {field}: {unknown[0]}",
-        )
-
-
-def _nested_required_str(value: Mapping[str, Any], key: str, field: str) -> str:
-    result = value.get(key)
-    if not isinstance(result, str) or result == "":
-        raise SpineValidationError(f"invalid_request:{field}", f"{field} must be a non-empty string")
-    return result
-
-
-def _nested_optional_str(value: Mapping[str, Any], key: str, field: str) -> str | None:
-    result = value.get(key)
-    if result is None:
-        return None
-    if not isinstance(result, str):
-        raise SpineValidationError(f"invalid_request:{field}", f"{field} must be a string")
-    return result
-
-
 def _schedule_validate_item_fields(item: Mapping[str, Any], *, item_type: str) -> None:
     allowed = {
         "item_type",
@@ -5784,105 +5762,9 @@ def _schedule_resolve_initial_time(value: Mapping[str, Any]) -> dict[str, str]:
 
 
 def _schedule_resolve_delivery(value: object, context: CommandContext) -> dict[str, Any]:
-    delivery = _schedule_object(value, "delivery")
-    _schedule_exact_fields(
-        delivery,
-        {"recipient_kind", "recipient_subject_id", "recipient_group_id", "channel", "target"},
-        "delivery",
-    )
-    recipient_kind = _enum(delivery.get("recipient_kind"), "delivery.recipient_kind", {"subject", "subject_group"})
-    channel = _nested_required_str(delivery, "channel", "delivery.channel")
-    subject_id = _nested_optional_str(delivery, "recipient_subject_id", "delivery.recipient_subject_id")
-    group_id = _nested_optional_str(delivery, "recipient_group_id", "delivery.recipient_group_id")
-    if recipient_kind == "subject":
-        if subject_id is None or group_id is not None:
-            raise SpineValidationError(
-                "invalid_request:delivery.recipient_subject_id",
-                "subject recipient requires recipient_subject_id only",
-            )
-        if not _subject_exists(context.ledger, subject_id):
-            raise SpineValidationError("referenced_row_not_found:delivery.recipient_subject_id", "recipient subject not found")
-        recipient_id = subject_id
-    else:
-        if group_id is None or subject_id is not None:
-            raise SpineValidationError(
-                "invalid_request:delivery.recipient_group_id",
-                "subject_group recipient requires recipient_group_id only",
-            )
-        if not _subject_group_exists(context.ledger, group_id):
-            raise SpineValidationError("referenced_row_not_found:delivery.recipient_group_id", "recipient group not found")
-        recipient_id = group_id
-
-    target_request = _schedule_object(delivery.get("target"), "delivery.target")
-    resolution_source = target_request.get("resolution")
-    default_key: str | None = None
-    if resolution_source == "explicit":
-        _schedule_exact_fields(target_request, {"resolution", "delivery_target_id"}, "delivery.target")
-        delivery_target_id = _nested_required_str(
-            target_request,
-            "delivery_target_id",
-            "delivery.target.delivery_target_id",
-        )
-    elif resolution_source == "context_default":
-        _schedule_exact_fields(target_request, {"resolution", "default_key"}, "delivery.target")
-        default_key = _nested_required_str(target_request, "default_key", "delivery.target.default_key")
-        if re.fullmatch(r"[a-z][a-z0-9_-]{0,63}", default_key) is None:
-            raise SpineValidationError("invalid_request:delivery.target.default_key", "default_key has an invalid format")
-        default_value = context.delivery_target_defaults.get(default_key)
-        if default_value is None:
-            raise SpineValidationError("referenced_row_not_found:delivery.target.default_key", "delivery target default not found")
-        if isinstance(default_value, str):
-            delivery_target_id = default_value
-        elif isinstance(default_value, Sequence) and not isinstance(default_value, (bytes, bytearray, str)):
-            matches = [candidate for candidate in default_value if isinstance(candidate, str) and candidate]
-            if len(matches) == 0:
-                raise SpineValidationError("referenced_row_not_found:delivery.target.default_key", "delivery target default not found")
-            if len(matches) != 1:
-                raise SpineValidationError("semantic_conflict:delivery.target.default_key", "delivery target default is ambiguous")
-            delivery_target_id = matches[0]
-        else:
-            raise SpineValidationError("semantic_conflict:delivery.target.default_key", "delivery target default is invalid")
-    else:
-        raise SpineValidationError(
-            "invalid_request:delivery.target.resolution",
-            "delivery.target.resolution must be explicit or context_default",
-        )
-
-    target = _delivery_target(context.ledger, delivery_target_id, required=False)
-    missing_field = "delivery.target.delivery_target_id" if resolution_source == "explicit" else "delivery.target.default_key"
-    if target is None:
-        raise SpineValidationError(f"referenced_row_not_found:{missing_field}", "delivery target not found")
-    if target["status"] != "active":
-        raise SpineValidationError(f"semantic_conflict:{missing_field}", "delivery target is inactive")
-    if target["channel"] != channel:
-        raise SpineValidationError("semantic_conflict:delivery.channel", "delivery target channel does not match delivery.channel")
-    expected_owner = target["owner_subject_id"] if recipient_kind == "subject" else target["owner_group_id"]
-    if target["owner_kind"] != recipient_kind or expected_owner != recipient_id:
-        raise SpineValidationError(
-            f"semantic_conflict:delivery.{'recipient_subject_id' if recipient_kind == 'subject' else 'recipient_group_id'}",
-            "delivery target owner does not match recipient",
-        )
-    snapshot: dict[str, object] = {
-        "delivery_target_id": delivery_target_id,
-        "resolution_source": resolution_source,
-        "recipient_kind": recipient_kind,
-        "channel": channel,
-        "adapter_name": target["adapter_name"],
-        "target_ref": target["target_ref"],
-        "delivery_state": "not_attempted_by_command",
-        ("recipient_subject_id" if recipient_kind == "subject" else "recipient_group_id"): recipient_id,
-    }
-    if default_key is not None:
-        snapshot["default_key"] = default_key
-    return {
-        "recipient_kind": recipient_kind,
-        "recipient_id": recipient_id,
-        "recipient_subject_id": subject_id,
-        "recipient_group_id": group_id,
-        "channel": channel,
-        "delivery_target_id": delivery_target_id,
-        "snapshot": snapshot,
-    }
+    return dict(schedule_delivery.resolve_delivery(
+        value, ledger=context.ledger, defaults=context.delivery_target_defaults
+    ))
 
 
 def _schedule_normalize_materialization(value: object, *, scheduled: Mapping[str, str]) -> dict[str, object]:
@@ -8033,12 +7915,6 @@ def _limit_sequence(values: Any, limit: int) -> tuple[list[Any], bool]:
     return sequence[:limit], len(sequence) > limit
 
 
-def _enum(value: Any, field: str, allowed: set[str]) -> str:
-    if not isinstance(value, str) or value not in allowed:
-        raise SpineValidationError(f"unsupported_{field}", f"{field} must be one of {sorted(allowed)}")
-    return value
-
-
 def _patch(value: Any, *, allow_subject_roles: bool = False) -> dict[str, Any]:
     if not isinstance(value, Mapping):
         raise SpineValidationError("invalid_patch", "patch must be an object")
@@ -8606,10 +8482,6 @@ def _check_fields(command: str, request: Mapping[str, Any], allowed: set[str]) -
             raise SpineValidationError(f"unsupported_field:{key}", f"unsupported field for {command}: {key}")
 
 
-def _subject_exists(connection: sqlite3.Connection, subject_id: str) -> bool:
-    return connection.execute("SELECT 1 FROM subjects WHERE subject_id = ?", (subject_id,)).fetchone() is not None
-
-
 def _task_subject_roles(
     connection: sqlite3.Connection,
     *,
@@ -8703,10 +8575,6 @@ def _subject_response(subject: Mapping[str, Any] | None, *, created: bool, updat
     }
 
 
-def _subject_group_exists(connection: sqlite3.Connection, group_id: str) -> bool:
-    return connection.execute("SELECT 1 FROM subject_groups WHERE group_id = ?", (group_id,)).fetchone() is not None
-
-
 def _subject_group(connection: sqlite3.Connection, group_id: str, *, required: bool = True) -> dict[str, Any] | None:
     row = connection.execute("SELECT * FROM subject_groups WHERE group_id = ?", (group_id,)).fetchone()
     if row is None:
@@ -8730,15 +8598,6 @@ def _subject_group_response(group: Mapping[str, Any] | None, *, created: bool, u
         "updated_at_utc": group["updated_at_utc"],
         "command_receipt_id": receipt_id,
     }
-
-
-def _delivery_target(connection: sqlite3.Connection, delivery_target_id: str, *, required: bool = True) -> dict[str, Any] | None:
-    row = connection.execute("SELECT * FROM delivery_targets WHERE delivery_target_id = ?", (delivery_target_id,)).fetchone()
-    if row is None:
-        if required:
-            raise SpineValidationError("delivery_target_not_found", f"delivery target not found: {delivery_target_id}")
-        return None
-    return dict(row)
 
 
 def _delivery_target_routing_changed(existing: Mapping[str, Any], desired: Mapping[str, Any]) -> bool:
@@ -8782,16 +8641,6 @@ def _delivery_target_response(target: Mapping[str, Any] | None, *, created: bool
         "command_receipt_id": receipt_id,
     }
     return {key: value for key, value in response.items() if value is not None}
-
-
-def _hydrated_item(connection: sqlite3.Connection, item_id: str) -> dict[str, Any]:
-    item = get_current_item(connection, item_id)
-    detail = dict(item["detail"])
-    for key in ("start_anchor_id", "end_anchor_id", "due_anchor_id", "defer_until_anchor_id"):
-        if detail.get(key) is not None:
-            detail[key.removesuffix("_id")] = _anchor_row(connection, str(detail[key]), field=key)
-    item["detail"] = detail
-    return item
 
 
 def _receipt_item(connection: sqlite3.Connection, receipt: Mapping[str, Any]) -> dict[str, Any]:

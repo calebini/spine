@@ -1,0 +1,37 @@
+{
+  "baseline_commit": "01d5fc9859f158f9e612da23f3a368f4467946fc",
+  "source_sha256": {
+    "src/spine/commands/core.py": "32f632f61b1a213ecf8b76f914f693241307aa46a66838985657e5c9dd500469",
+    "src/spine/commands/temporal_bindings.py": "d7081ab7e39ae389a9616cd65e404e843c397d98670b32d98fef3af9c7880965",
+    "src/spine/services/recurring_task_adoption.py": "4b33a4323bc642e7d593d5e3deea06b6b68c989e97e8e86c8939bdc3176d05dc",
+    "src/spine/services/recurring_task_children.py": "97edb9f01f204584c4c057f293506a551503728ae3f46c447d15989f21f6d817",
+    "src/spine/services/recurring_task_configuration.py": "4d0f68c0ce969077812afe3674bc4164ce01912102fe72dd987ae781494b6048",
+    "src/spine/services/recurring_task_proofs.py": "a457da6e80cb1fb8737ae905115e3933e2eff97a188e950cdaeaaf780d41aaaa",
+    "src/spine/services/recurring_task_reads.py": "e46a1bd04cafe9b689ff8fc03deacd0e2081ba2f5be9a830bdb1f1c9ccab0566",
+    "src/spine/services/recurring_task_reconcile.py": "9fdc1d7795b0fff85ab3191315538f74dcde256e0da4e2d4237942f2780557d0",
+    "src/spine/services/recurring_task_restoration.py": "e5d6811bdc0a0c26b0761709c7a0737c274dec079f6ccc396fbf2a74e490e9d0",
+    "src/spine/services/recurring_task_states.py": "7d71f0c8b2a2848837f085ffcfcdc3db9c971f0c13c3930b118d7af28af1bf1d"
+  },
+  "worktree_before_runtime_extraction_including_new_RF0_characterization": [
+    " M AGENTS.md",
+    " M docs/BACKLOG.md",
+    " M docs/IMPLEMENTATION_PLAN.md",
+    " M docs/design-notes/recurring-related-task-r2-restoration.md",
+    " M src/spine/commands/recurring_task_runtime.py",
+    " M src/spine/commands/recurring_tasks.py",
+    "?? docs/design-notes/recurring-related-task-r2-admission-reads.md",
+    "?? src/spine/commands/recurring_task_references.py",
+    "?? tests/fixtures/internal_operations/",
+    "?? tests/test_internal_operation_preservation.py",
+    "?? tests/test_recurring_task_admission_reads.py"
+  ],
+  "preexisting_preserved_sha256": {
+    "AGENTS.md": "fa4b49c7fcad79cf0e94c70fd5ee4b7dc55ab8c6a3987371577214edbe8e4570",
+    "docs/design-notes/recurring-related-task-r2-restoration.md": "3fd7bee35e9834aaa9905aa70c2ed7f45dc8c6a9afccec39fc131bb768e26a76",
+    "src/spine/commands/recurring_task_runtime.py": "5b502ea43d7c5d6124498fd45454fb98bb8f0b0f39ad368f807a7034edb09af4",
+    "src/spine/commands/recurring_tasks.py": "b7ebedb29ce784ec23bd26b235ae6d4b31bd695ae9346d2c1057a25b6d9f309b",
+    "docs/design-notes/recurring-related-task-r2-admission-reads.md": "02a81ed1579049442654d4a22aa99438782e361afd9626080e5972ee6ae5651f",
+    "src/spine/commands/recurring_task_references.py": "acf336bd63e91fac37b3c81b23bc49592b0b24670dc17ef04849229d0e7adcfc",
+    "tests/test_recurring_task_admission_reads.py": "eba195fbf972c23a91bcf9729266eca03ebd7ca546ae1f86619532b5e255eda3"
+  }
+}

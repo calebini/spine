@@ -6,6 +6,8 @@ ledger passthroughs should import from ``spine.ledger`` directly instead of
 accumulating here.
 """
 
+from typing import TYPE_CHECKING, Any
+
 from spine.services.attempts import (
     AttemptGate,
     prepare_candidate_action_attempt,
@@ -17,7 +19,6 @@ from spine.services.attempts import (
 )
 from spine.services.notification_rendering import resolve_notification_rendering
 from spine.services.projections import plan_projection_sync
-from spine.services.scheduling import SchedulingCycleResult, materialize_notification_horizon
 from spine.services.work import (
     cancel_work,
     fail_work,
@@ -27,6 +28,19 @@ from spine.services.work import (
     start_work,
     succeed_work,
 )
+
+if TYPE_CHECKING:
+    from spine.services.scheduling import SchedulingCycleResult, materialize_notification_horizon
+
+
+def __getattr__(name: str) -> Any:
+    # The scheduler is a command-invocation adapter, not a dependency of every
+    # service operation. Preserve its exports without eagerly importing commands.
+    if name in {"SchedulingCycleResult", "materialize_notification_horizon"}:
+        from spine.services import scheduling
+
+        return getattr(scheduling, name)
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
 __all__ = [
     "AttemptGate",

@@ -3,9 +3,10 @@
 from __future__ import annotations
 
 import sqlite3
-from typing import Any
+from typing import Any, cast
 
 from spine.core.errors import SpineValidationError
+from spine.ledger.items import get_current_item
 from spine.ledger.supporting import current_locations, current_notification_policies, current_subject_roles
 
 
@@ -108,3 +109,13 @@ def anchor_row(connection: sqlite3.Connection, anchor_id: str, *, field: str) ->
     if recurrence is not None:
         result["recurrence_set_id"] = recurrence["recurrence_set_id"]
     return result
+
+
+def hydrated_item(connection: sqlite3.Connection, item_id: str) -> dict[str, Any]:
+    item = cast(dict[str, Any], get_current_item(connection, item_id))
+    detail = dict(item["detail"])
+    for key in ("start_anchor_id", "end_anchor_id", "due_anchor_id", "defer_until_anchor_id"):
+        if detail.get(key) is not None:
+            detail[key.removesuffix("_id")] = anchor_row(connection, str(detail[key]), field=key)
+    item["detail"] = detail
+    return item

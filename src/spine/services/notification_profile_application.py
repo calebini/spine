@@ -6,8 +6,8 @@ import sqlite3
 from collections.abc import Mapping, Sequence
 from typing import Any
 
-from spine.commands.receipts import command_derived_id
 from spine.core import SpineValidationError
+from spine.core.hashing import command_derived_id
 from spine.core.notification_profiles import compose_notification_plan
 from spine.ledger.notification_profiles import (
     current_application,

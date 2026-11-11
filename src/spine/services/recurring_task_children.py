@@ -9,15 +9,19 @@ from typing import Any, cast
 from spine.commands import core as c
 from spine.commands import temporal_bindings as bindings
 from spine.commands.recurring_task_runtime import PREFIX, fail, instant, wire
+from spine.core import occurrence_details
+from spine.core import temporal_bindings as binding_facts
 from spine.core.hashing import command_derived_id, hash_canonical_json
 from spine.core.notification_profiles import compose_notification_plan
 from spine.core.notifications import NormalizedNotificationPolicy
 from spine.core.provenance import derive_occurrence_provenance
+from spine.ledger import item_reads
 from spine.ledger.common import TemporalAnchorInput
 from spine.ledger.items import create_next_item_version, create_task_v1
 from spine.ledger.notification_profiles import insert_application, insert_assignment, load_archetype, load_profile, require_owner_exists
 from spine.ledger.notifications import insert_notification_schedule_policy, load_notification_policies_at_version
 from spine.ledger.ownership import advance_ownership_epoch
+from spine.ledger.provenance import persist_binding_provenance
 from spine.ledger.relations import create_item_relation
 from spine.ledger.rendering_definitions import select_presentation
 from spine.ledger.supporting import ItemLocationInput, ItemSubjectRoleInput
@@ -28,6 +32,7 @@ from spine.ledger.temporal_bindings import (
     target_from_source,
 )
 from spine.ledger.work import cancel_work_instance
+from spine.services import schedule_delivery
 from spine.services.primary_locations import inline_location_inputs, reference_location_input
 from spine.services.rendering_authoring import resolve
 
@@ -58,8 +63,8 @@ def materialization(config: dict[str, Any], now: str, *, policies: list[dict[str
 def source_facts(
     db: Any, root: dict[str, Any], recurrence: dict[str, Any], occurrence: dict[str, Any], now: str, *, persist: bool, command_id: str
 ) -> dict[str, Any]:
-    item = c._hydrated_item(db, root["source_item_id"])
-    occurrence = c._decorate_occurrence(item, recurrence, dict(occurrence), include_internal=True)
+    item = item_reads.hydrated_item(db, root["source_item_id"])
+    occurrence = occurrence_details.decorate_occurrence(item, recurrence, dict(occurrence), include_internal=True)
     original = occurrence["original_scheduled_fact"]
     derived = derive_occurrence_provenance(
         occurrence=occurrence,
@@ -69,13 +74,13 @@ def source_facts(
         producer=COMMAND,
         range_basis="original_schedule",
         range_start=original,
-        range_end=c._next_scheduled_fact(original, time_basis=recurrence["time_basis"]),
+        range_end=occurrence_details.next_scheduled_fact(original, time_basis=recurrence["time_basis"]),
         created_at_utc=now,
     )
     if persist:
-        bindings._persist_provenance(db, derived, command_id=command_id, at=now)
+        persist_binding_provenance(db, derived, command_id=command_id, at=now)
     return {
-        **bindings._source_from_occurrence(recurrence, occurrence),
+        **binding_facts.source_from_occurrence(recurrence, occurrence),
         "source_target_version": str(item["current_version"]),
         "source_recurrence_revision_id": recurrence["recurrence_revision_id"],
         "source_occurrence_key": occurrence["occurrence_key"],
@@ -127,7 +132,7 @@ def create(
         "created_at_utc": now,
         "binding_status": "active",
     }
-    revision = bindings._revision_value(
+    revision = binding_facts.revision_value(
         command=COMMAND,
         command_id=outer,
         revision_id=revision_id,
@@ -236,7 +241,9 @@ def create(
             mappings.extend(restored_mappings)
         elif config["notification_plan"] is not None:
             plan = config["notification_plan"]["resolved"]
-            route = c._schedule_resolve_delivery(config["delivery"]["requested"], context)
+            route = schedule_delivery.resolve_delivery(
+                config["delivery"]["requested"], ledger=db, defaults=context.delivery_target_defaults
+            )
             if {k: v for k, v in route["snapshot"].items() if k != "delivery_state"} != config["delivery"]["resolved"]:
                 fail("semantic_conflict", "configuration.delivery", "resolved destination changed")
             entries = plan["effective_templates"]
@@ -405,7 +412,7 @@ def change(
     if target is not None:
         anchor_id = child_id(request["command_id"], "due_anchor", "/assignments/" + assignment["assignment_id"] + "/due", "anchor")
     target_facts = target or bindings._scheduled_for_target(current)
-    revision = bindings._revision_value(
+    revision = binding_facts.revision_value(
         command=COMMAND,
         command_id=request["command_id"],
         revision_id=child_id(
@@ -678,7 +685,11 @@ def adopt_supporting(
     if "reminders" in patch:
         plan = (config["notification_plan"] or {}).get("resolved", {})
         entries = plan.get("effective_templates", [])
-        route = c._schedule_resolve_delivery(config["delivery"]["requested"], page.context) if entries else None
+        route = (
+            schedule_delivery.resolve_delivery(
+                config["delivery"]["requested"], ledger=db, defaults=page.context.delivery_target_defaults
+            ) if entries else None
+        )
         if route and {k: v for k, v in route["snapshot"].items() if k != "delivery_state"} != config["delivery"]["resolved"]:
             fail("semantic_conflict", "configuration.delivery")
         family = mappings(db, assignment["assignment_id"], generation, config)

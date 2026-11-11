@@ -137,9 +137,23 @@ operations, extraction adds no child commands/commits/sends, touched behavior an
 historical evidence remain equivalent, focused and full regression checks pass.
 RF1 closes only when R2 services no longer call command internals; intermediate
 checkpoints must name remaining dependencies rather than claim complete conformance.
-**Next:** Commit ratification separately from the preserved R2/AGENTS changes, capture
-the RF0 worktree/helper inventory and run focused baseline characterization before
-the first behavior-preserving extraction. No public activation, migration or push.
+**Checkpoint:** Ratification committed as `01d5fc9`, excluding the existing R2 and
+`AGENTS.md` changes. [RF0/first RF1 evidence](design-notes/internal-operations-rf0-rf1.md)
+records exact source hashes, 29 pre-extraction fixed-input witnesses, the original
+82-test baseline and a counted helper/caller inventory. The first runtime increment
+extracts shared route resolution, scalar checks, keyed catalog reads, current-item
+hydration and binding revision/provenance facts; ordinary and recurring callers use
+the same owners. Scheduler exports remain compatible without eager command loading.
+**Verification:** Focused ordinary/binding/R2 selection passes 84 tests; eight new
+RF0/RF1 tests pass. Strict typing of seven shared-boundary modules, focused Ruff,
+20 documentation/declaration/frozen-web/boundary tests and diff hygiene pass.
+Full regression passes **1,410 tests, OK (one skipped)** in 375.428 seconds using the
+installed pinned Tickerd v1, without the incompatible sibling development override.
+All 381 local documentation targets resolve. Public artifacts and the seven
+pre-existing R2/AGENTS files are hash-preserved. New runtime changes remain uncommitted.
+**Next:** Continue RF1 policy/work operations and the
+remaining named R2 command dependencies. No whole-RF1 closure, RF2/RF3 kickoff or
+R2/R3 resumption is claimed. No public activation, migration, push or deployment.
 
 ## Selected feature design
 
