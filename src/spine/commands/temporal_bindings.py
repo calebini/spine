@@ -38,6 +38,8 @@ from spine.ledger.temporal_bindings import (
 )
 from spine.ledger.work import cancel_work_instance
 
+_source_from_item = binding_facts.source_from_item
+_scheduled_for_target = binding_facts.scheduled_for_target
 _revision_value = binding_facts.revision_value
 _source_from_occurrence = binding_facts.source_from_occurrence
 _source_from_prior = binding_facts.source_from_prior
@@ -1097,71 +1099,6 @@ def _store_reconcile_receipt(
     )
     c.insert_command_receipt(connection, receipt)
     return receipt
-
-
-def _source_from_item(item: Mapping[str, Any]) -> dict[str, object]:
-    from spine.commands import core as c
-
-    anchor = item["detail"].get("start_anchor")
-    if not isinstance(anchor, Mapping):
-        raise SpineValidationError("semantic_conflict:source.item_id", "source event requires an exactly timed start")
-    if anchor.get("anchor_kind") == "instant_utc":
-        from spine.core.schedule import system_timezone_database_version
-
-        instant = str(anchor["utc_instant"])
-        return {
-            "source_target_version": str(item["current_version"]),
-            "source_anchor_id": anchor["anchor_id"],
-            "source_scheduled_fact": instant,
-            "resolved_source_utc": instant,
-            "timezone": "UTC",
-            "timezone_database_version": system_timezone_database_version(),
-        }
-    if anchor.get("anchor_kind") != "local_instant":
-        raise SpineValidationError("semantic_conflict:source.item_id", "source event requires an exactly timed start")
-    resolution = c._schedule_resolve_initial_time(
-        {
-            "time_basis": "local_instant",
-            "local_date": anchor["local_date"],
-            "local_time": anchor["local_time"],
-            "timezone": anchor["timezone"],
-            "timezone_database_version": {"kind": "explicit", "version": anchor["timezone_database_version"]},
-        }
-    )
-    return {
-        "source_target_version": str(item["current_version"]),
-        "source_anchor_id": anchor["anchor_id"],
-        "source_scheduled_fact": f"{anchor['local_date']}T{anchor['local_time']}",
-        "resolved_source_utc": resolution["utc_instant"],
-        "timezone": anchor["timezone"],
-        "timezone_database_version": anchor["timezone_database_version"],
-    }
-
-
-def _scheduled_for_target(item: Mapping[str, Any]) -> dict[str, str]:
-    from spine.commands import core as c
-
-    anchor = item["detail"].get("due_anchor")
-    if not isinstance(anchor, Mapping) or anchor.get("anchor_kind") != "local_instant":
-        raise SpineValidationError("semantic_conflict:target_item_id", "target task has no local-instant due anchor")
-    resolved = c._schedule_resolve_initial_time(
-        {
-            "time_basis": "local_instant",
-            "local_date": anchor["local_date"],
-            "local_time": anchor["local_time"],
-            "timezone": anchor["timezone"],
-            "timezone_database_version": {"kind": "explicit", "version": anchor["timezone_database_version"]},
-        }
-    )
-    return {
-        "local_date": str(anchor["local_date"]),
-        "local_time": str(anchor["local_time"]),
-        "timezone": str(anchor["timezone"]),
-        "timezone_database_version": str(anchor["timezone_database_version"]),
-        "utc_instant": str(resolved["utc_instant"]),
-        "resolution_kind": "unambiguous",
-        "offset_seconds": str(resolved["offset_seconds"]),
-    }
 
 
 def _refresh_selected_provenance(

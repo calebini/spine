@@ -112,6 +112,7 @@ class InternalOperationBoundaryTests(unittest.TestCase):
             "core/request_values.py", "core/temporal_bindings.py", "ledger/catalog_reads.py",
             "ledger/item_reads.py", "ledger/provenance.py", "services/schedule_delivery.py",
             "services/schedule_policies.py", "ledger/schedule_work.py",
+            "services/schedule_materialization.py", "core/notification_targets.py",
         )
         for relative in paths:
             with self.subTest(path=relative):
@@ -128,7 +129,7 @@ class InternalOperationBoundaryTests(unittest.TestCase):
         from spine.core import occurrence_details, request_values
         from spine.core import temporal_bindings as facts
         from spine.ledger import catalog_reads, item_reads, provenance, schedule_work
-        from spine.services import schedule_policies, scheduling
+        from spine.services import schedule_materialization, schedule_policies, scheduling
 
         for name in ("revision_value", "source_from_occurrence", "source_from_prior"):
             self.assertIs(getattr(temporal_bindings, "_" + name), getattr(facts, name))
@@ -141,6 +142,7 @@ class InternalOperationBoundaryTests(unittest.TestCase):
         self.assertIs(core._schedule_update_normalize_policies, schedule_policies.update_policies)
         self.assertIs(core._schedule_disabled_policy, schedule_policies.disabled_policy)
         self.assertIs(core._schedule_reconcile_work_plan, schedule_work.reconcile_work_plan)
+        self.assertIs(core._schedule_materialize_successor, schedule_materialization.materialize_successor)
         self.assertIs(services.materialize_notification_horizon, scheduling.materialize_notification_horizon)
         self.assertIs(services.SchedulingCycleResult, scheduling.SchedulingCycleResult)
 

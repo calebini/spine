@@ -9,7 +9,6 @@ from datetime import timedelta
 from functools import partial
 from typing import Any
 
-from spine.commands import temporal_bindings as bindings
 from spine.commands.recurring_task_runtime import PREFIX, cursor_payload, fail, instant, sign_cursor, verify_cursor, wire
 from spine.core import occurrence_details
 from spine.core import temporal_bindings as binding_facts
@@ -940,14 +939,14 @@ def process_existing(page: Page, assignment: dict[str, Any]) -> dict[str, Any]:
                     )
             else:
                 target = target_from_source(source, int(prior["offset_seconds"]))
-                moved = target["utc_instant"] != bindings._scheduled_for_target(current)["utc_instant"]
+                moved = target["utc_instant"] != binding_facts.scheduled_for_target(current)["utc_instant"]
                 if intent and (
                     state["adopted_rule_revision_id"] != intent["configuration_revision_id"]
                     or state.get("pending_intent_id") != intent["intent_id"]
                 ):
                     desired = read_record(db, "related_task_rule_revisions", intent["configuration_revision_id"])["configuration_json"]
                     state["pending_intent_id"] = intent["intent_id"]
-                    if bindings._scheduled_for_target(current)["utc_instant"] <= page.now:
+                    if binding_facts.scheduled_for_target(current)["utc_instant"] <= page.now:
                         intent_result, intent_reason = "skipped_overdue", "due_not_future"
                         outcome, reason, actions = "skipped_due", "due_not_future", ["intent_skipped"]
                         moved = False
@@ -969,7 +968,7 @@ def process_existing(page: Page, assignment: dict[str, Any]) -> dict[str, Any]:
                             else:
                                 adopting = True
                                 page.runtime["cutoffs"].append(target["utc_instant"])
-                                moved = target["utc_instant"] != bindings._scheduled_for_target(current)["utc_instant"]
+                                moved = target["utc_instant"] != binding_facts.scheduled_for_target(current)["utc_instant"]
                                 state.update(
                                     adopted_rule_revision_id=intent["configuration_revision_id"], managed_baseline=baseline(desired)
                                 )

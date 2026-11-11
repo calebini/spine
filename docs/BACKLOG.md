@@ -162,8 +162,19 @@ new owners pass strict typing. Full regression passes **1,410 tests, one skipped
 in 364.845 seconds; the newly added policy witness also passes in the separate
 23-test documentation/frozen-contract/operation selection. All 382 local links and
 diff hygiene pass. This continuation is
-uncommitted and does not complete RF1.
-**Next:** Continue RF1 successor materialization and the
+committed as `f9fd18a` and does not complete RF1.
+**Materialization continuation:** Successor work composition now lives in a shared
+service; target/range/time calculations are pure core helpers and SQL lookups stay
+in the ledger layer. Timed binding resolution is shared without command imports.
+Recurring child/reconcile services no longer import command-core or temporal-binding
+command modules. The exact dependency ratchet shrinks again. Two new tests cover
+no-op mode, deduplication and caller rollback. A disposable differential run against
+`f9fd18a` matches complete results and SQL dumps. The selected 77-test suite and
+strict typing of four shared modules pass; full regression passes **1,413 tests,
+one skipped**, 369.823 seconds. The final 25-test documentation/frozen-contract/
+operation selection, Ruff, diff hygiene and 383 link targets pass. This
+continuation is uncommitted; public contracts and pre-existing R2 edits are preserved.
+**Next:** Continue the
 remaining named R2 command dependencies. No whole-RF1 closure, RF2/RF3 kickoff or
 R2/R3 resumption is claimed. No public activation, migration, push or deployment.
 

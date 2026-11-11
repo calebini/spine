@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import sqlite3
 from collections.abc import Mapping, Sequence
+from typing import cast
 
 from spine.ledger.notifications import NotificationPolicyResolver
 
@@ -61,3 +62,20 @@ def reconcile_work_plan(
         else:
             protected.append(work_id)
     return cancelled, retained, protected, reasons
+
+
+def provenance_exists(connection: sqlite3.Connection, provenance_id: str) -> bool:
+    return connection.execute(
+        "SELECT 1 FROM occurrence_provenance WHERE occurrence_provenance_id = ?", (provenance_id,)
+    ).fetchone() is not None
+
+
+def work_exists(connection: sqlite3.Connection, work_id: str) -> bool:
+    return connection.execute("SELECT 1 FROM work_instances WHERE work_instance_id = ?", (work_id,)).fetchone() is not None
+
+
+def provenance_scheduled_facts(connection: sqlite3.Connection, provenance_id: str) -> sqlite3.Row | None:
+    return cast(sqlite3.Row | None, connection.execute(
+        "SELECT original_scheduled_fact, expressed_scheduled_fact FROM occurrence_provenance WHERE occurrence_provenance_id = ?",
+        (provenance_id,),
+    ).fetchone())

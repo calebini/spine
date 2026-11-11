@@ -59,7 +59,11 @@ now committed as `02bfb03`. The next RF1 increment extracts policy preparation a
 read-only work classification, preserving omitted-versus-empty policy sets and
 policy-specific work lineage. Focused checks pass; full regression passes 1,410 tests
 (one skipped), plus the separate new policy-witness check.
-Materialization and the remaining R2 command-helper dependencies are still open.
+That increment was committed as `f9fd18a`. The next continuation extracts successor
+materialization, its target/range calculations and timed binding resolution. Focused
+and differential preservation checks pass; full regression passes 1,413 tests
+(one skipped), with typing/lint and documentation checks clean. Remaining
+R2 runtime/catalog/receipt/read command-helper dependencies are still open.
 SPINE-099 remains the status/evidence owner.
 
 Preserve `e540a91`, the uncommitted R2 admission/read continuation, unrelated

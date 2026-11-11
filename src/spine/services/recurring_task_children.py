@@ -6,8 +6,6 @@ from collections.abc import Callable
 from datetime import timedelta
 from typing import Any, cast
 
-from spine.commands import core as c
-from spine.commands import temporal_bindings as bindings
 from spine.commands.recurring_task_runtime import PREFIX, fail, instant, wire
 from spine.core import occurrence_details
 from spine.core import temporal_bindings as binding_facts
@@ -32,7 +30,7 @@ from spine.ledger.temporal_bindings import (
     target_from_source,
 )
 from spine.ledger.work import cancel_work_instance
-from spine.services import schedule_delivery, schedule_policies
+from spine.services import schedule_delivery, schedule_materialization, schedule_policies
 from spine.services.primary_locations import inline_location_inputs, reference_location_input
 from spine.services.rendering_authoring import resolve
 
@@ -332,7 +330,7 @@ def create(
                     created_at_utc=now,
                 )
         fault("policies")
-        work, refs, _ = c._schedule_materialize_successor(
+        work, refs, _ = schedule_materialization.materialize_successor(
             connection,
             item_id=task_id,
             item_version=1,
@@ -411,7 +409,7 @@ def change(
     anchor_id = current["detail"]["due_anchor_id"]
     if target is not None:
         anchor_id = child_id(request["command_id"], "due_anchor", "/assignments/" + assignment["assignment_id"] + "/due", "anchor")
-    target_facts = target or bindings._scheduled_for_target(current)
+    target_facts = target or binding_facts.scheduled_for_target(current)
     revision = binding_facts.revision_value(
         command=COMMAND,
         command_id=request["command_id"],
@@ -569,7 +567,7 @@ def reconcile_work(
     if cancelled:
         page.changed = True
     if materialize and not terminal:
-        created, _, _ = c._schedule_materialize_successor(
+        created, _, _ = schedule_materialization.materialize_successor(
             db,
             item_id=item_id,
             item_version=version,

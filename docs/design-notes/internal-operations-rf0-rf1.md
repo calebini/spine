@@ -149,6 +149,39 @@ frozen-web/operation selection. All 382 local links resolve. The same non-failin
 capacity trace and timezone-substitution diagnostics appeared. Five moved helper
 bodies match the baseline after name/local/type-only normalization.
 Existing R2/AGENTS files remain byte-identical. This continuation is
-uncommitted. RF1 remains open for materialization, timed binding-source resolution,
+now committed as `f9fd18a`. RF1 remained open for materialization, timed binding-source resolution,
 and the named recurring runtime/catalog/receipt/read dependencies; no RF2/RF3 or
 functional R2/R3 resumption is implied.
+
+## RF1 continuation: successor materialization and timed bindings
+
+The operator requested committing the policy/classification increment and continuing.
+`services.schedule_materialization.materialize_successor` now composes the existing
+successor work operation. `core.notification_targets` owns deterministic target,
+range, offset and initial-time calculations. `ledger.schedule_work` owns the exact
+existence/evidence SQL lookups. `core.temporal_bindings` now also owns item-source
+and target-time resolution. Existing command aliases point downward; recurring
+child/reconcile services call these owners directly and have no remaining import of
+command-core or temporal-binding command modules.
+
+No generation identity, producer label, opportunity ordering, policy limit, prospective
+item-version hydration, provenance fact, work creation flag or transaction ownership
+changes. In particular, existing producer `schedule.update` and `manage_transaction=False`
+remain untouched; naming cleanup is not permission to change historical evidence.
+No external send, child receipt, commit, or additional automatic materialization.
+
+Verification so far: 77 selected ordinary/binding/recurring and boundary tests pass;
+four shared modules pass strict typing. The exact dependency ratchet is reduced,
+not broadened. Two new tests in [shared materialization](../../tests/test_shared_materialization.py)
+prove no-op mode touches no ledger, repeated execution creates no duplicate work,
+and caller rollback restores the complete database. A local differential experiment
+executed the committed `f9fd18a` materializer and the extracted operation on the same
+disposable ledger: complete result tuples, repeat results and in-transaction SQL
+dumps matched exactly, and both outer rollbacks restored the baseline. Full regression
+passes **1,413 tests, OK (one skipped)** in 369.823 seconds using installed Tickerd v1.
+The final 25-test documentation/declaration/frozen-web/operation selection, strict
+typing, focused Ruff, diff hygiene and 383 link targets pass. The known non-failing
+capacity trace and timezone-substitution diagnostics appeared. This continuation
+remains uncommitted, with existing R2/AGENTS edits
+preserved. Remaining RF1 work is the named recurring runtime/catalog/receipt/read
+dependencies; RF1 closure and RF2/RF3 are not claimed.

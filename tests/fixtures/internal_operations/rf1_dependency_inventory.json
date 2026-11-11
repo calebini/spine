@@ -188,21 +188,16 @@
     "src/spine/services/recurring_task_children.py": {
       "removal_gate": "RF1: remove remaining R2 command internals before claiming RF1 closure.",
       "remaining": {
-        "<module>|import|spine.commands.core": 1,
         "<module>|import|spine.commands.recurring_task_runtime.PREFIX": 1,
         "<module>|import|spine.commands.recurring_task_runtime.fail": 1,
         "<module>|import|spine.commands.recurring_task_runtime.instant": 1,
         "<module>|import|spine.commands.recurring_task_runtime.wire": 1,
-        "<module>|import|spine.commands.temporal_bindings": 1,
         "adopt_supporting|call|spine.commands.recurring_task_runtime.fail": 2,
-        "change|call|spine.commands.temporal_bindings._scheduled_for_target": 1,
-        "create.extension|call|spine.commands.core._schedule_materialize_successor": 1,
         "create.extension|call|spine.commands.recurring_task_runtime.fail": 1,
         "mappings|call|spine.commands.receipts.get_command_receipt": 1,
         "mappings|import|spine.commands.receipts.get_command_receipt": 1,
         "materialization|call|spine.commands.recurring_task_runtime.instant": 2,
         "materialization|call|spine.commands.recurring_task_runtime.wire": 2,
-        "reconcile_work|call|spine.commands.core._schedule_materialize_successor": 1,
         "reconcile_work|call|spine.commands.recurring_task_runtime.fail": 1
       }
     },
@@ -236,7 +231,6 @@
         "<module>|import|spine.commands.recurring_task_runtime.sign_cursor": 1,
         "<module>|import|spine.commands.recurring_task_runtime.verify_cursor": 1,
         "<module>|import|spine.commands.recurring_task_runtime.wire": 1,
-        "<module>|import|spine.commands.temporal_bindings": 1,
         "Page.__init__|call|spine.commands.recurring_task_runtime.fail": 2,
         "Page.__init__|call|spine.commands.recurring_tasks.source_snapshot": 1,
         "Page.__init__|import|spine.commands.recurring_tasks.source_snapshot": 1,
@@ -275,7 +269,6 @@
         "process_existing|call|spine.commands.recurring_task_runtime.fail": 1,
         "process_existing|call|spine.commands.recurring_tasks.intent_view": 1,
         "process_existing|call|spine.commands.recurring_tasks.pending_adoption": 1,
-        "process_existing|call|spine.commands.temporal_bindings._scheduled_for_target": 3,
         "process_existing|import|spine.commands.recurring_tasks.intent_view": 1,
         "process_existing|import|spine.commands.recurring_tasks.pending_adoption": 1,
         "references|call|spine.commands.recurring_task_runtime.fail": 1
