@@ -5,8 +5,8 @@ from __future__ import annotations
 import copy
 from typing import Any
 
-from spine.commands.recurring_task_runtime import fail
 from spine.core.hashing import hash_canonical_json
+from spine.core.recurring_task_runtime import fail
 from spine.core.recurring_tasks import derive, payload_hash
 from spine.ledger.recurring_tasks import compare_and_swap, insert_record, read_record, row
 
@@ -67,7 +67,7 @@ def append_state(db: Any, assignment: dict[str, Any], state: dict[str, Any], req
 
 
 def suppress(db: Any, request: dict[str, Any], root: dict[str, Any], now: str) -> tuple[dict[str, Any], str, bool]:
-    from spine.commands.recurring_tasks import advance_catalog, lookup
+    from spine.ledger.recurring_task_catalog import advance_catalog, lookup
     from spine.services.recurring_task_reads import assignment_view
 
     assignment = lookup(db, "related_task_assignments", request["assignment_id"], "assignment_id")

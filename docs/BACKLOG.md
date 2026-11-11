@@ -173,9 +173,32 @@ no-op mode, deduplication and caller rollback. A disposable differential run aga
 strict typing of four shared modules pass; full regression passes **1,413 tests,
 one skipped**, 369.823 seconds. The final 25-test documentation/frozen-contract/
 operation selection, Ruff, diff hygiene and 383 link targets pass. This
-continuation is uncommitted; public contracts and pre-existing R2 edits are preserved.
-**Next:** Continue the
-remaining named R2 command dependencies. No whole-RF1 closure, RF2/RF3 kickoff or
+continuation was committed as `25ebada`; public contracts and pre-existing R2 edits are preserved.
+**Runtime/catalog continuation:** Shared recurring cursor/time/error primitives,
+keyed receipt decoding and recurring catalog/read helpers now have lower owners.
+Two previously dirty command modules use forwarding aliases; fixed witnesses confirm
+all 36 original function/class bodies at their retained/extracted owners, including
+unchanged R2 admission/read behavior. Five untouched pre-existing files remain
+byte-identical. The corrected focused suite passes **91 tests**; final documentation/
+declarations/frozen-web/operation selection passes **30 tests**, strict typing and
+Ruff pass, and all 385 local links resolve. Full regression passes **1,418 tests,
+OK (one skipped)** in 361.648 seconds with installed pinned Tickerd v1. Known
+non-failing capacity-limit and timezone-compatibility diagnostics appeared.
+The operator selected this continuation for checkpointing. The overlapping R2
+admission/read changes remain excluded; their cursor-generation validation change
+is preserved unstaged at its extracted core owner. The body witness records both
+complete baselines so the refactor commit does not require the dirty R2 continuation.
+The exact staged tree passed **78 focused tests**, 28.937 seconds, in a disposable
+index export with no R2 dirty overlay; staged mixed-file lint and diff hygiene pass.
+The sole remaining recurring command dependency is exact response-size projection
+inside reconciliation. No R2 functional resumption or response-contract change.
+**Next:** Remove that response-budget adapter seam with exact parity evidence.
+The [next-slice brief](design-notes/internal-operations-rf0-rf1.md#next-slice-response-sizing-capability)
+is ready; implementation has not started. Keep response assembly in commands and
+pass a required, narrow sizing capability into reconciliation. Verify exact normal/
+dry-run envelope bytes, boundary-sized pagination and rollback before removing the
+last named recurring command edge and assessing RF1 exit evidence.
+No whole-RF1 closure, RF2/RF3 kickoff or
 R2/R3 resumption is claimed. No public activation, migration, push or deployment.
 
 ## Selected feature design

@@ -1,0 +1,368 @@
+{
+  "baseline_commit": "25ebada",
+  "baseline_note": "Includes the preserved uncommitted R2 admission/read changes; source hashes identify that exact baseline.",
+  "source_sha256": {
+    "src/spine/commands/recurring_task_runtime.py": "5b502ea43d7c5d6124498fd45454fb98bb8f0b0f39ad368f807a7034edb09af4",
+    "src/spine/commands/recurring_tasks.py": "b7ebedb29ce784ec23bd26b235ae6d4b31bd695ae9346d2c1057a25b6d9f309b",
+    "src/spine/commands/receipts.py": "6914e0f7e5df29881e6570c0318259b623ea8e0a32ee177802c0ab4f38244f5e"
+  },
+  "bodies": [
+    {
+      "name": "fail",
+      "path": "src/spine/core/recurring_task_runtime.py",
+      "body_sha256": "7cc6b7b3efe08be3e67b5924ec6a4dd7edd2c4ba34dd739cad1237bf31993ae7"
+    },
+    {
+      "name": "instant",
+      "path": "src/spine/core/recurring_task_runtime.py",
+      "body_sha256": "35bdcd6a2760349584519e6f4f885861462ae35660a81bdfc8966a36787e90d3"
+    },
+    {
+      "name": "wire",
+      "path": "src/spine/core/recurring_task_runtime.py",
+      "body_sha256": "34f26bcb004d393e9fde24feaa2c08bd81e9e87b5ecec39cae8de9f9f3d59f89"
+    },
+    {
+      "name": "unicode_errors",
+      "path": "src/spine/commands/recurring_task_runtime.py",
+      "body_sha256": "f67112b94572fc4618726f8f27e9ef39d44f6b1a5c0c2b925dc09dc2bd8de53a"
+    },
+    {
+      "name": "_datetime",
+      "path": "src/spine/commands/recurring_task_runtime.py",
+      "body_sha256": "ea3a6077abb090a5b88b96be3180de54a045d0bcc366ea07eb3cb27f813a4de1"
+    },
+    {
+      "name": "RecurringTaskContracts",
+      "path": "src/spine/commands/recurring_task_runtime.py",
+      "body_sha256": "41452bd6782ccc829153e630f25024ffbf11426712fb0632d19b3f2b5da7801e"
+    },
+    {
+      "name": "_b64",
+      "path": "src/spine/core/recurring_task_runtime.py",
+      "body_sha256": "2eb56dee4fb4897ceb0fc20764757bf6b7f213b977c157fa8d5790d468ceda7e"
+    },
+    {
+      "name": "_unb64",
+      "path": "src/spine/core/recurring_task_runtime.py",
+      "body_sha256": "4dd71b8d8117027c11da63810e23e74a431f1e2e6fe271b37f0e79a5e9e6a666"
+    },
+    {
+      "name": "cursor_config",
+      "path": "src/spine/core/recurring_task_runtime.py",
+      "body_sha256": "5c2914828768544fd03b8978af378999504c25892680aa5c4984ea4f60ffb1cc"
+    },
+    {
+      "name": "sign_cursor",
+      "path": "src/spine/core/recurring_task_runtime.py",
+      "body_sha256": "28fddc1421c3a7ddd80281451de6dd102596ddf934f9025b9884840e5b8573e0"
+    },
+    {
+      "name": "verify_cursor",
+      "path": "src/spine/core/recurring_task_runtime.py",
+      "body_sha256": "257a08dd3e47a832c2b54b176988efc43f6edd135d0ee72ee0829266f47bd0c5"
+    },
+    {
+      "name": "cursor_payload",
+      "path": "src/spine/core/recurring_task_runtime.py",
+      "body_sha256": "13438f5364a96b977d80eac651bd18a32275199491cd6d4929ac4b2a307e8b9e"
+    },
+    {
+      "name": "Preview",
+      "path": "src/spine/commands/recurring_tasks.py",
+      "body_sha256": "08ff0c42a49f1598bf088c65462a9b0a8adb1c22b1e8181a89d1e5c9dc0b2ba0"
+    },
+    {
+      "name": "catalog",
+      "path": "src/spine/ledger/recurring_task_catalog.py",
+      "body_sha256": "cb5049e5d7940043832294de2c94c3939afce7946acf53d84cb3294096675a39"
+    },
+    {
+      "name": "advance_catalog",
+      "path": "src/spine/ledger/recurring_task_catalog.py",
+      "body_sha256": "6b1406a4bfdec4eea94b1ff6095e47c3321bc08d0553d3995d52ca79d4c1a588"
+    },
+    {
+      "name": "response_envelope",
+      "path": "src/spine/commands/recurring_tasks.py",
+      "body_sha256": "62d5a066f69deba8347bfce460d934e72089dd7021f27c82802f9456363d3a2a"
+    },
+    {
+      "name": "success_response",
+      "path": "src/spine/commands/recurring_tasks.py",
+      "body_sha256": "216826c7ae9f36f36178bccbcd03e31928cbfe329d63e62cfc072820b3152ede"
+    },
+    {
+      "name": "lookup",
+      "path": "src/spine/ledger/recurring_task_catalog.py",
+      "body_sha256": "91ff1db8c41deb0d27a0952d358d66abfc0ff8266ea2d1ae585de6174d392c27"
+    },
+    {
+      "name": "source_snapshot",
+      "path": "src/spine/ledger/recurring_task_catalog.py",
+      "body_sha256": "198fe4d770f648011dbf2c2bdeb4b2714c3528953ca3c8dedc00ad476277bd63"
+    },
+    {
+      "name": "intent_view",
+      "path": "src/spine/ledger/recurring_task_catalog.py",
+      "body_sha256": "893c9c06a31eaa9bd82726b78ccbbb81003c3a6d6b0a287596751b1f69e736ed"
+    },
+    {
+      "name": "pending_adoption",
+      "path": "src/spine/ledger/recurring_task_catalog.py",
+      "body_sha256": "24d9e9be152fb9b021c56b4bb1bc8ed9bbc093e32349c7dd5b46586bd531813f"
+    },
+    {
+      "name": "stored_projection",
+      "path": "src/spine/ledger/recurring_task_catalog.py",
+      "body_sha256": "9306e1d770a96037609fc819341c055ee27837cedc61df573fdc0b5ff30140f2"
+    },
+    {
+      "name": "rule_view",
+      "path": "src/spine/ledger/recurring_task_catalog.py",
+      "body_sha256": "720dcb1ec024be244430c898fabebb0239a2a36f3929a0e2fa19dc1dd7648f7d"
+    },
+    {
+      "name": "expected",
+      "path": "src/spine/commands/recurring_tasks.py",
+      "body_sha256": "efd9dda1c41ba46f1e669e5e8e773340f520949f15aa40e0472a0e2438c55da3"
+    },
+    {
+      "name": "configuration_record",
+      "path": "src/spine/commands/recurring_tasks.py",
+      "body_sha256": "d863d8d8da80e3c40486b79bbef9b2b845333a1615e7537cf7f231a9460d2947"
+    },
+    {
+      "name": "new_intent",
+      "path": "src/spine/commands/recurring_tasks.py",
+      "body_sha256": "bbcf8d6f635cf2d0ff7eb3ec140a5836f46411a685971c7030f8451bc9314330"
+    },
+    {
+      "name": "create",
+      "path": "src/spine/commands/recurring_tasks.py",
+      "body_sha256": "b20baf54a4c2c7263a19debb6bd336d5cdd89345064403a7dd5ebcb6ae069c2b"
+    },
+    {
+      "name": "update",
+      "path": "src/spine/commands/recurring_tasks.py",
+      "body_sha256": "827b705ec2aa760e4104d098f5bb3a2d9e082d25d07b77fedf0479ccf84dbe23"
+    },
+    {
+      "name": "retire",
+      "path": "src/spine/commands/recurring_tasks.py",
+      "body_sha256": "7ee995e19938fb08141f042313e5eea5e731fb5105fc3dbb1d6d4e6d770d0e98"
+    },
+    {
+      "name": "read",
+      "path": "src/spine/commands/recurring_tasks.py",
+      "body_sha256": "c7e1bb95ea22f01b7d97058e8b8050290c374040bdacf8b707770a80e8b79bea"
+    },
+    {
+      "name": "execute",
+      "path": "src/spine/commands/recurring_tasks.py",
+      "body_sha256": "444f6ffe6f0ee7881100180b8a57abc1392b85782923044a4e175de5a24ee339"
+    },
+    {
+      "name": "command_receipt",
+      "path": "src/spine/commands/receipts.py",
+      "body_sha256": "e8e386fe6dcdbe4734a2a0f0b47c085e0fbc31b0e58346331d4303055ac2f98d"
+    },
+    {
+      "name": "insert_command_receipt",
+      "path": "src/spine/commands/receipts.py",
+      "body_sha256": "19a14cef78f39ae33d1fc5debd700f0d73010963d1fcd587fbf68eeac1db4a7a"
+    },
+    {
+      "name": "get_command_receipt",
+      "path": "src/spine/ledger/receipts.py",
+      "body_sha256": "66aa9cbf03b3250bbfb960ebab963d4f4c30cabec37b3314b5905deb7033f185"
+    },
+    {
+      "name": "receipt_from_row",
+      "path": "src/spine/ledger/receipts.py",
+      "body_sha256": "35cfc0f6545d50957c8a082c31edd88a8afd6295d28e4454ad03abd0498b1c4a"
+    },
+    {
+      "name": "_mapping",
+      "path": "src/spine/commands/receipts.py",
+      "body_sha256": "799f450c5d29855322a611b0982c60a85c2db18e622d6a1ecbc86f01fb9135e0"
+    }
+  ],
+  "committed_source_sha256": {
+    "src/spine/commands/recurring_task_runtime.py": "7896ff940520bec99ae28d46493fcfd629c3c8725d649e66cbbcd027a14f5937",
+    "src/spine/commands/receipts.py": "6914e0f7e5df29881e6570c0318259b623ea8e0a32ee177802c0ab4f38244f5e",
+    "src/spine/commands/recurring_tasks.py": "48e5986be411fe104eed7fb7471c3c1a30593f4adaf9283108dc3945b960f98b"
+  },
+  "committed_bodies": [
+    {
+      "name": "fail",
+      "path": "src/spine/core/recurring_task_runtime.py",
+      "body_sha256": "7cc6b7b3efe08be3e67b5924ec6a4dd7edd2c4ba34dd739cad1237bf31993ae7"
+    },
+    {
+      "name": "instant",
+      "path": "src/spine/core/recurring_task_runtime.py",
+      "body_sha256": "35bdcd6a2760349584519e6f4f885861462ae35660a81bdfc8966a36787e90d3"
+    },
+    {
+      "name": "wire",
+      "path": "src/spine/core/recurring_task_runtime.py",
+      "body_sha256": "34f26bcb004d393e9fde24feaa2c08bd81e9e87b5ecec39cae8de9f9f3d59f89"
+    },
+    {
+      "name": "_datetime",
+      "path": "src/spine/commands/recurring_task_runtime.py",
+      "body_sha256": "ea3a6077abb090a5b88b96be3180de54a045d0bcc366ea07eb3cb27f813a4de1"
+    },
+    {
+      "name": "RecurringTaskContracts",
+      "path": "src/spine/commands/recurring_task_runtime.py",
+      "body_sha256": "5abf08ae03ec4b47817b5c5fb304e1118194ed4eca174fbcb9601345f4d8a331"
+    },
+    {
+      "name": "_b64",
+      "path": "src/spine/core/recurring_task_runtime.py",
+      "body_sha256": "2eb56dee4fb4897ceb0fc20764757bf6b7f213b977c157fa8d5790d468ceda7e"
+    },
+    {
+      "name": "_unb64",
+      "path": "src/spine/core/recurring_task_runtime.py",
+      "body_sha256": "4dd71b8d8117027c11da63810e23e74a431f1e2e6fe271b37f0e79a5e9e6a666"
+    },
+    {
+      "name": "cursor_config",
+      "path": "src/spine/core/recurring_task_runtime.py",
+      "body_sha256": "992fffc5c88ae837086fe38a1a509bc903a56d5393899f8d47717b31204884b5"
+    },
+    {
+      "name": "sign_cursor",
+      "path": "src/spine/core/recurring_task_runtime.py",
+      "body_sha256": "28fddc1421c3a7ddd80281451de6dd102596ddf934f9025b9884840e5b8573e0"
+    },
+    {
+      "name": "verify_cursor",
+      "path": "src/spine/core/recurring_task_runtime.py",
+      "body_sha256": "257a08dd3e47a832c2b54b176988efc43f6edd135d0ee72ee0829266f47bd0c5"
+    },
+    {
+      "name": "cursor_payload",
+      "path": "src/spine/core/recurring_task_runtime.py",
+      "body_sha256": "13438f5364a96b977d80eac651bd18a32275199491cd6d4929ac4b2a307e8b9e"
+    },
+    {
+      "name": "command_receipt",
+      "path": "src/spine/commands/receipts.py",
+      "body_sha256": "e8e386fe6dcdbe4734a2a0f0b47c085e0fbc31b0e58346331d4303055ac2f98d"
+    },
+    {
+      "name": "insert_command_receipt",
+      "path": "src/spine/commands/receipts.py",
+      "body_sha256": "19a14cef78f39ae33d1fc5debd700f0d73010963d1fcd587fbf68eeac1db4a7a"
+    },
+    {
+      "name": "get_command_receipt",
+      "path": "src/spine/ledger/receipts.py",
+      "body_sha256": "66aa9cbf03b3250bbfb960ebab963d4f4c30cabec37b3314b5905deb7033f185"
+    },
+    {
+      "name": "receipt_from_row",
+      "path": "src/spine/ledger/receipts.py",
+      "body_sha256": "35cfc0f6545d50957c8a082c31edd88a8afd6295d28e4454ad03abd0498b1c4a"
+    },
+    {
+      "name": "_mapping",
+      "path": "src/spine/commands/receipts.py",
+      "body_sha256": "799f450c5d29855322a611b0982c60a85c2db18e622d6a1ecbc86f01fb9135e0"
+    },
+    {
+      "name": "Preview",
+      "path": "src/spine/commands/recurring_tasks.py",
+      "body_sha256": "08ff0c42a49f1598bf088c65462a9b0a8adb1c22b1e8181a89d1e5c9dc0b2ba0"
+    },
+    {
+      "name": "catalog",
+      "path": "src/spine/ledger/recurring_task_catalog.py",
+      "body_sha256": "cb5049e5d7940043832294de2c94c3939afce7946acf53d84cb3294096675a39"
+    },
+    {
+      "name": "advance_catalog",
+      "path": "src/spine/ledger/recurring_task_catalog.py",
+      "body_sha256": "6b1406a4bfdec4eea94b1ff6095e47c3321bc08d0553d3995d52ca79d4c1a588"
+    },
+    {
+      "name": "success_response",
+      "path": "src/spine/commands/recurring_tasks.py",
+      "body_sha256": "002f1922372dcb16e67d5442ad85cfb59c73530127a57c8b30aa9bbe76d342ac"
+    },
+    {
+      "name": "lookup",
+      "path": "src/spine/ledger/recurring_task_catalog.py",
+      "body_sha256": "91ff1db8c41deb0d27a0952d358d66abfc0ff8266ea2d1ae585de6174d392c27"
+    },
+    {
+      "name": "source_snapshot",
+      "path": "src/spine/ledger/recurring_task_catalog.py",
+      "body_sha256": "198fe4d770f648011dbf2c2bdeb4b2714c3528953ca3c8dedc00ad476277bd63"
+    },
+    {
+      "name": "intent_view",
+      "path": "src/spine/ledger/recurring_task_catalog.py",
+      "body_sha256": "893c9c06a31eaa9bd82726b78ccbbb81003c3a6d6b0a287596751b1f69e736ed"
+    },
+    {
+      "name": "pending_adoption",
+      "path": "src/spine/ledger/recurring_task_catalog.py",
+      "body_sha256": "24d9e9be152fb9b021c56b4bb1bc8ed9bbc093e32349c7dd5b46586bd531813f"
+    },
+    {
+      "name": "stored_projection",
+      "path": "src/spine/ledger/recurring_task_catalog.py",
+      "body_sha256": "9306e1d770a96037609fc819341c055ee27837cedc61df573fdc0b5ff30140f2"
+    },
+    {
+      "name": "rule_view",
+      "path": "src/spine/ledger/recurring_task_catalog.py",
+      "body_sha256": "720dcb1ec024be244430c898fabebb0239a2a36f3929a0e2fa19dc1dd7648f7d"
+    },
+    {
+      "name": "expected",
+      "path": "src/spine/commands/recurring_tasks.py",
+      "body_sha256": "efd9dda1c41ba46f1e669e5e8e773340f520949f15aa40e0472a0e2438c55da3"
+    },
+    {
+      "name": "configuration_record",
+      "path": "src/spine/commands/recurring_tasks.py",
+      "body_sha256": "d863d8d8da80e3c40486b79bbef9b2b845333a1615e7537cf7f231a9460d2947"
+    },
+    {
+      "name": "new_intent",
+      "path": "src/spine/commands/recurring_tasks.py",
+      "body_sha256": "bbcf8d6f635cf2d0ff7eb3ec140a5836f46411a685971c7030f8451bc9314330"
+    },
+    {
+      "name": "create",
+      "path": "src/spine/commands/recurring_tasks.py",
+      "body_sha256": "a51e242f4ff4bab3ee121514dea1adf0eda1478e413f44d5fdf353ebef2fa826"
+    },
+    {
+      "name": "update",
+      "path": "src/spine/commands/recurring_tasks.py",
+      "body_sha256": "827b705ec2aa760e4104d098f5bb3a2d9e082d25d07b77fedf0479ccf84dbe23"
+    },
+    {
+      "name": "retire",
+      "path": "src/spine/commands/recurring_tasks.py",
+      "body_sha256": "7ee995e19938fb08141f042313e5eea5e731fb5105fc3dbb1d6d4e6d770d0e98"
+    },
+    {
+      "name": "read",
+      "path": "src/spine/commands/recurring_tasks.py",
+      "body_sha256": "c58c93395b4c05d90c331471e7715eb1779ce984c62e0c61e4841fd8e52896f8"
+    },
+    {
+      "name": "execute",
+      "path": "src/spine/commands/recurring_tasks.py",
+      "body_sha256": "7903452f3b509249426ca2f396ebaca6dd08b87cf46a84a8b577c6902ff5fdee"
+    }
+  ]
+}

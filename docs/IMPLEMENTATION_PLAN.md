@@ -62,8 +62,20 @@ policy-specific work lineage. Focused checks pass; full regression passes 1,410 
 That increment was committed as `f9fd18a`. The next continuation extracts successor
 materialization, its target/range calculations and timed binding resolution. Focused
 and differential preservation checks pass; full regression passes 1,413 tests
-(one skipped), with typing/lint and documentation checks clean. Remaining
-R2 runtime/catalog/receipt/read command-helper dependencies are still open.
+(one skipped), with typing/lint and documentation checks clean; committed as `25ebada`.
+The next RF1 increment extracts recurring cursor/time/error primitives, receipt reads
+and catalog projections to lower owners, preserving pre-existing R2 admission/read
+bodies in the two overlapping command modules. The sole remaining recurring command
+dependency is exact response-size projection during reconciliation; RF1 stays open
+until that adapter seam is removed with parity checks. The 91-test focused suite,
+30-test final documentation/frozen-contract/operation selection, strict typing,
+lint and links pass. Full regression passes 1,418 tests (one skipped), 361.648 seconds.
+This continuation is selected for checkpointing, excluding the dirty R2 changes.
+The next slice is the required response-sizing capability described in the
+[RF1 next-slice brief](design-notes/internal-operations-rf0-rf1.md#next-slice-response-sizing-capability).
+It keeps wire response ownership in commands while removing the last recurring
+service import. RF1 closure requires parity/budget/rollback evidence; RF2/RF3 and
+R2 functional resumption remain separately gated.
 SPINE-099 remains the status/evidence owner.
 
 Preserve `e540a91`, the uncommitted R2 admission/read continuation, unrelated

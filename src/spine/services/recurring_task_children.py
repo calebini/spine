@@ -6,13 +6,13 @@ from collections.abc import Callable
 from datetime import timedelta
 from typing import Any, cast
 
-from spine.commands.recurring_task_runtime import PREFIX, fail, instant, wire
 from spine.core import occurrence_details
 from spine.core import temporal_bindings as binding_facts
 from spine.core.hashing import command_derived_id, hash_canonical_json
 from spine.core.notification_profiles import compose_notification_plan
 from spine.core.notifications import NormalizedNotificationPolicy
 from spine.core.provenance import derive_occurrence_provenance
+from spine.core.recurring_task_runtime import PREFIX, fail, instant, wire
 from spine.ledger import item_reads, schedule_work
 from spine.ledger.common import TemporalAnchorInput
 from spine.ledger.items import create_next_item_version, create_task_v1
@@ -595,7 +595,7 @@ def mappings(db: Any, assignment_id: str, generation: dict[str, Any], config: di
         key = token.rpartition(":")[2]
         belongs = token.startswith(generation["generation_id"] + ":")
         if not belongs:
-            from spine.commands.receipts import get_command_receipt
+            from spine.ledger.receipts import get_command_receipt
 
             receipt = get_command_receipt(db, token.rpartition(":")[0])
             belongs = (

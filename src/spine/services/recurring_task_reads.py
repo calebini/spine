@@ -9,7 +9,7 @@ from spine.ledger.recurring_tasks import read_record
 
 
 def assignment_view(db: Any, assignment: dict[str, Any], root: dict[str, Any]) -> dict[str, Any]:
-    from spine.commands.recurring_tasks import pending_adoption, source_snapshot, stored_projection
+    from spine.ledger.recurring_task_catalog import pending_adoption, source_snapshot, stored_projection
 
     state_row = read_record(db, "related_task_assignment_revisions", assignment["current_assignment_revision_id"])
     state = state_row["state_json"]
@@ -22,7 +22,7 @@ def assignment_view(db: Any, assignment: dict[str, Any], root: dict[str, Any]) -
     source = source_snapshot(db, root)
     owner = db.execute("SELECT * FROM item_access_owners WHERE item_id=?", (gen["task_item_id"],)).fetchone()
     if owner is None or observed is None:
-        from spine.commands.recurring_task_runtime import fail
+        from spine.core.recurring_task_runtime import fail
 
         fail("environment_failure", "assignment")
     successor = db.execute(

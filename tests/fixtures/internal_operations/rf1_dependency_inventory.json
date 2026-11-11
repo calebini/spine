@@ -185,112 +185,11 @@
         "page_roster|import|spine.commands.facet_runtime.parse_time": 1
       }
     },
-    "src/spine/services/recurring_task_children.py": {
-      "removal_gate": "RF1: remove remaining R2 command internals before claiming RF1 closure.",
-      "remaining": {
-        "<module>|import|spine.commands.recurring_task_runtime.PREFIX": 1,
-        "<module>|import|spine.commands.recurring_task_runtime.fail": 1,
-        "<module>|import|spine.commands.recurring_task_runtime.instant": 1,
-        "<module>|import|spine.commands.recurring_task_runtime.wire": 1,
-        "adopt_supporting|call|spine.commands.recurring_task_runtime.fail": 2,
-        "create.extension|call|spine.commands.recurring_task_runtime.fail": 1,
-        "mappings|call|spine.commands.receipts.get_command_receipt": 1,
-        "mappings|import|spine.commands.receipts.get_command_receipt": 1,
-        "materialization|call|spine.commands.recurring_task_runtime.instant": 2,
-        "materialization|call|spine.commands.recurring_task_runtime.wire": 2,
-        "reconcile_work|call|spine.commands.recurring_task_runtime.fail": 1
-      }
-    },
-    "src/spine/services/recurring_task_configuration.py": {
-      "removal_gate": "RF1: remove remaining R2 command internals before claiming RF1 closure.",
-      "remaining": {
-        "<module>|import|spine.commands.recurring_task_runtime.fail": 1,
-        "normalize_configuration|call|spine.commands.recurring_task_runtime.fail": 18
-      }
-    },
-    "src/spine/services/recurring_task_reads.py": {
-      "removal_gate": "RF1: remove remaining R2 command internals before claiming RF1 closure.",
-      "remaining": {
-        "assignment_view|call|spine.commands.recurring_task_runtime.fail": 1,
-        "assignment_view|call|spine.commands.recurring_tasks.pending_adoption": 1,
-        "assignment_view|call|spine.commands.recurring_tasks.source_snapshot": 1,
-        "assignment_view|call|spine.commands.recurring_tasks.stored_projection": 2,
-        "assignment_view|import|spine.commands.recurring_task_runtime.fail": 1,
-        "assignment_view|import|spine.commands.recurring_tasks.pending_adoption": 1,
-        "assignment_view|import|spine.commands.recurring_tasks.source_snapshot": 1,
-        "assignment_view|import|spine.commands.recurring_tasks.stored_projection": 1
-      }
-    },
     "src/spine/services/recurring_task_reconcile.py": {
       "removal_gate": "RF1: remove remaining R2 command internals before claiming RF1 closure.",
       "remaining": {
-        "<module>|import|spine.commands.recurring_task_runtime.PREFIX": 1,
-        "<module>|import|spine.commands.recurring_task_runtime.cursor_payload": 1,
-        "<module>|import|spine.commands.recurring_task_runtime.fail": 1,
-        "<module>|import|spine.commands.recurring_task_runtime.instant": 1,
-        "<module>|import|spine.commands.recurring_task_runtime.sign_cursor": 1,
-        "<module>|import|spine.commands.recurring_task_runtime.verify_cursor": 1,
-        "<module>|import|spine.commands.recurring_task_runtime.wire": 1,
-        "Page.__init__|call|spine.commands.recurring_task_runtime.fail": 2,
-        "Page.__init__|call|spine.commands.recurring_tasks.source_snapshot": 1,
-        "Page.__init__|import|spine.commands.recurring_tasks.source_snapshot": 1,
-        "Page.candidates.fact|call|spine.commands.recurring_task_runtime.instant": 1,
-        "Page.candidates|call|spine.commands.recurring_task_runtime.instant": 4,
-        "Page.candidates|call|spine.commands.recurring_task_runtime.wire": 2,
-        "Page.spend|call|spine.commands.recurring_task_runtime.fail": 1,
-        "Page.unit|call|spine.commands.recurring_task_runtime.fail": 2,
-        "_reconcile|call|spine.commands.recurring_task_runtime.fail": 1,
-        "_reconcile|call|spine.commands.recurring_task_runtime.instant": 2,
-        "_reconcile|call|spine.commands.recurring_task_runtime.wire": 2,
-        "_reconcile|call|spine.commands.recurring_tasks.intent_view": 2,
-        "_reconcile|call|spine.commands.recurring_tasks.pending_adoption": 1,
         "_reconcile|call|spine.commands.recurring_tasks.success_response": 1,
-        "_reconcile|import|spine.commands.recurring_tasks.intent_view": 1,
-        "_reconcile|import|spine.commands.recurring_tasks.pending_adoption": 1,
-        "_reconcile|import|spine.commands.recurring_tasks.success_response": 1,
-        "continuation|call|spine.commands.recurring_task_runtime.fail": 1,
-        "continuation|call|spine.commands.recurring_task_runtime.verify_cursor": 1,
-        "continuation|call|spine.commands.recurring_tasks.catalog": 1,
-        "continuation|call|spine.commands.recurring_tasks.source_snapshot": 1,
-        "continuation|import|spine.commands.recurring_tasks.catalog": 1,
-        "continuation|import|spine.commands.recurring_tasks.source_snapshot": 1,
-        "finish|call|spine.commands.recurring_task_runtime.cursor_payload": 1,
-        "finish|call|spine.commands.recurring_task_runtime.sign_cursor": 1,
-        "finish|call|spine.commands.recurring_tasks.advance_catalog": 1,
-        "finish|call|spine.commands.recurring_tasks.catalog": 1,
-        "finish|call|spine.commands.recurring_tasks.intent_view": 2,
-        "finish|call|spine.commands.recurring_tasks.pending_adoption": 3,
-        "finish|call|spine.commands.recurring_tasks.rule_view": 1,
-        "finish|import|spine.commands.recurring_tasks.advance_catalog": 1,
-        "finish|import|spine.commands.recurring_tasks.catalog": 1,
-        "finish|import|spine.commands.recurring_tasks.intent_view": 1,
-        "finish|import|spine.commands.recurring_tasks.pending_adoption": 1,
-        "finish|import|spine.commands.recurring_tasks.rule_view": 1,
-        "process_existing|call|spine.commands.recurring_task_runtime.fail": 1,
-        "process_existing|call|spine.commands.recurring_tasks.intent_view": 1,
-        "process_existing|call|spine.commands.recurring_tasks.pending_adoption": 1,
-        "process_existing|import|spine.commands.recurring_tasks.intent_view": 1,
-        "process_existing|import|spine.commands.recurring_tasks.pending_adoption": 1,
-        "references|call|spine.commands.recurring_task_runtime.fail": 1
-      }
-    },
-    "src/spine/services/recurring_task_restoration.py": {
-      "removal_gate": "RF1: remove remaining R2 command internals before claiming RF1 closure.",
-      "remaining": {
-        "<module>|import|spine.commands.recurring_task_runtime.fail": 1,
-        "insert_policies|call|spine.commands.recurring_task_runtime.fail": 2,
-        "prepare|call|spine.commands.recurring_task_runtime.fail": 3
-      }
-    },
-    "src/spine/services/recurring_task_states.py": {
-      "removal_gate": "RF1: remove remaining R2 command internals before claiming RF1 closure.",
-      "remaining": {
-        "<module>|import|spine.commands.recurring_task_runtime.fail": 1,
-        "suppress|call|spine.commands.recurring_task_runtime.fail": 5,
-        "suppress|call|spine.commands.recurring_tasks.advance_catalog": 1,
-        "suppress|call|spine.commands.recurring_tasks.lookup": 1,
-        "suppress|import|spine.commands.recurring_tasks.advance_catalog": 1,
-        "suppress|import|spine.commands.recurring_tasks.lookup": 1
+        "_reconcile|import|spine.commands.recurring_tasks.success_response": 1
       }
     },
     "src/spine/services/schedule_readback.py": {

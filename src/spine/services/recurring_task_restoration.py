@@ -7,10 +7,10 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from typing import Any, cast
 
-from spine.commands.recurring_task_runtime import fail
 from spine.core import facets as facet_codec
 from spine.core.errors import SpineValidationError
 from spine.core.notifications import NormalizedNotificationPolicy, normalize_notification_policy
+from spine.core.recurring_task_runtime import fail
 from spine.ledger import facets
 from spine.ledger.notification_profiles import current_application, current_assignment, insert_application
 from spine.ledger.notifications import insert_notification_schedule_policy

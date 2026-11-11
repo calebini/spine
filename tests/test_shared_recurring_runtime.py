@@ -1,0 +1,135 @@
+"""RF1 runtime/catalog extraction preserves bytes, history and caller ownership."""
+
+from __future__ import annotations
+
+import ast
+import hashlib
+import json
+import subprocess
+import sys
+import unittest
+from dataclasses import replace
+from datetime import datetime
+from pathlib import Path
+
+from spine.commands import receipts as receipt_commands
+from spine.commands import recurring_task_runtime as admission
+from spine.commands import recurring_tasks as commands
+from spine.core import recurring_task_runtime as runtime
+from spine.core.errors import SpineValidationError
+from spine.ledger import receipts
+from spine.ledger import recurring_task_catalog as catalog
+from tests import test_recurring_task_commands as helpers
+
+ROOT = Path(__file__).resolve().parents[1]
+
+
+class SharedRecurringRuntimeTests(unittest.TestCase):
+    def test_extracted_and_preexisting_admission_bodies_match_captured_baseline(self):
+        witness = json.loads((ROOT / "tests/fixtures/internal_operations/rf1_runtime_catalog_witness.json").read_text())
+        # Accept one complete captured state, never a per-function mix. The R2
+        # admission/read continuation is intentionally not part of this commit.
+        mismatches = []
+        for variant in (witness["bodies"], witness["committed_bodies"]):
+            failures = []
+            for entry in variant:
+                nodes = ast.parse((ROOT / entry["path"]).read_text()).body
+                node = next((n for n in nodes if isinstance(n, (ast.FunctionDef, ast.ClassDef)) and n.name == entry["name"]), None)
+                body = ast.dump(ast.Module(body=node.body, type_ignores=[]), include_attributes=False) if node else "missing"
+                if hashlib.sha256(body.encode()).hexdigest() != entry["body_sha256"]:
+                    failures.append((entry["path"], entry["name"]))
+            if not failures:
+                return
+            mismatches.append(failures)
+        self.fail(f"Neither complete captured baseline matches: {mismatches}")
+
+    def test_command_aliases_share_the_lower_implementation(self):
+        for name in ("fail", "instant", "wire", "cursor_config", "sign_cursor", "verify_cursor", "cursor_payload"):
+            self.assertIs(getattr(admission, name), getattr(runtime, name))
+        for name in (
+            "catalog",
+            "advance_catalog",
+            "lookup",
+            "source_snapshot",
+            "intent_view",
+            "pending_adoption",
+            "stored_projection",
+            "rule_view",
+        ):
+            self.assertIs(getattr(commands, name), getattr(catalog, name))
+        for name in ("get_command_receipt", "receipt_from_row"):
+            self.assertIs(getattr(receipt_commands, name), getattr(receipts, name))
+
+    def test_lower_owners_import_without_command_or_service_loading(self):
+        program = (
+            "import sys; from spine.core import recurring_task_runtime; "
+            "from spine.ledger import receipts, recurring_task_catalog; "
+            "assert not any(m.startswith(('spine.commands', 'spine.services')) for m in sys.modules)"
+        )
+        result = subprocess.run([sys.executable, "-c", program], capture_output=True, text=True, cwd=ROOT)
+        self.assertEqual(result.returncode, 0, result.stderr)
+
+    def test_cursor_bytes_and_failure_precedence_remain_exact(self):
+        contracts = helpers.contracts()
+        vectors = json.loads((ROOT / "tests/fixtures/recurring_related_tasks/cursors.json").read_text())["vectors"]
+        for vector in vectors:
+            payload = vector["payload"]
+            config = helpers.FacetCursorConfig(bytes.fromhex(vector["key_hex"]), payload["query"]["ledger_instance_id"], payload["key_id"])
+            arguments = (payload["query"], vector["purpose"], payload["issued_at_utc"], payload["catalog_generation"], contracts)
+            with self.subTest(purpose=vector["purpose"]):
+                self.assertEqual(runtime.sign_cursor(config, payload, contracts), vector["wire"])
+                self.assertEqual(runtime.verify_cursor(config, vector["wire"], *arguments), payload)
+                for bad in (
+                    None,
+                    replace(config, secret=b"short"),
+                    replace(config, ledger_id="other"),
+                ):
+                    with self.assertRaises(SpineValidationError) as caught:
+                        runtime.verify_cursor(bad, "invalid", *arguments)
+                    self.assertEqual(caught.exception.code, "environment_failure:cursor_configuration")
+                for token in ("invalid", vector["wire"] + "=", "!" + vector["wire"]):
+                    with self.assertRaises(SpineValidationError) as caught:
+                        runtime.verify_cursor(config, token, *arguments)
+                    self.assertEqual(
+                        (caught.exception.code, caught.exception.message), ("invalid_request:cursor", "invalid recurring-task cursor")
+                    )
+                with self.assertRaises(SpineValidationError) as caught:
+                    runtime.verify_cursor(
+                        config, vector["wire"], arguments[0], arguments[1], payload["expires_at_utc"], arguments[3], contracts
+                    )
+                self.assertEqual(caught.exception.code, "stale_cursor:cursor")
+                with self.assertRaises(SpineValidationError) as caught:
+                    runtime.verify_cursor(config, vector["wire"], arguments[0], arguments[1], arguments[2], "changed", contracts)
+                self.assertEqual(caught.exception.code, "stale_cursor:cursor")
+        self.assertEqual(runtime.wire(runtime.instant("2026-11-11T12:00:00+02:00")), "2026-11-11T10:00:00Z")
+        with self.assertRaises(SpineValidationError) as caught:
+            runtime.wire(datetime(2026, 11, 11))
+        self.assertEqual(caught.exception.code, "environment_failure:clock")
+
+    def test_catalog_and_historical_receipts_stay_read_only_and_rollback_owned(self):
+        h = helpers.RecurringTaskCommandTests()
+        h.contracts = helpers.contracts()
+        h.setUp()
+        self.addCleanup(h.doCleanups)
+        created = h.created()
+        rule = created["result"]["rule"]
+        before = helpers.dump(h.db)
+        changes = h.db.total_changes
+        receipt = receipts.get_command_receipt(h.db, h.request()["command_id"])
+        self.assertEqual(receipt["result_identity_facts"], created)
+        self.assertIsNone(receipts.get_command_receipt(h.db, "absent"))
+        self.assertEqual(
+            catalog.rule_view(h.db, catalog.lookup(h.db, "related_task_rules", rule["related_task_rule_id"], "related_task_rule_id")), rule
+        )
+        self.assertEqual(h.db.total_changes, changes)
+        with self.assertRaisesRegex(RuntimeError, "outer failure"), h.db.atomic_command(write=True):
+            generation = int(catalog.catalog(h.db))
+            catalog.advance_catalog(h.db)
+            self.assertEqual(catalog.catalog(h.db), str(generation + 1))
+            self.assertEqual(receipts.get_command_receipt(h.db, h.request()["command_id"]), receipt)
+            raise RuntimeError("outer failure")
+        self.assertEqual(helpers.dump(h.db), before)
+        with self.assertRaises(SpineValidationError) as caught:
+            catalog.lookup(h.db, "related_task_rules", "missing", "related_task_rule_id")
+        self.assertEqual(caught.exception.code, "referenced_row_not_found:related_task_rule_id")
+        self.assertEqual(h.db.execute("SELECT COUNT(*) FROM side_effect_attempts").fetchone()[0], 0)

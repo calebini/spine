@@ -182,6 +182,104 @@ passes **1,413 tests, OK (one skipped)** in 369.823 seconds using installed Tick
 The final 25-test documentation/declaration/frozen-web/operation selection, strict
 typing, focused Ruff, diff hygiene and 383 link targets pass. The known non-failing
 capacity trace and timezone-substitution diagnostics appeared. This continuation
-remains uncommitted, with existing R2/AGENTS edits
-preserved. Remaining RF1 work is the named recurring runtime/catalog/receipt/read
+was committed as `25ebada`, with existing R2/AGENTS edits
+preserved. Remaining RF1 work was the named recurring runtime/catalog/receipt/read
 dependencies; RF1 closure and RF2/RF3 are not claimed.
+
+## RF1 continuation: recurring primitives, receipts and catalog reads
+
+The operator requested continued RF1 after `25ebada`. The new owners are:
+
+- `core.recurring_task_runtime`: the existing recurring-family failure/time helpers,
+  cursor constants, canonical encoding, signing, configuration checks and verification.
+  A narrow `CursorValidator` protocol keeps the existing schema-validation call at
+  the same point without importing command admission. No new authentication or
+  generic codec framework is introduced.
+- `ledger.receipts`: exact keyed receipt lookup and historical row decoding. Receipt
+  construction/insertion and family replay decisions remain at their existing owners;
+  command imports forward to the same lower read implementation.
+- `ledger.recurring_task_catalog`: existing catalog-generation reads/advancement,
+  keyed lookup, source snapshots and stored rule/intent projections. These preserve
+  historical pins, null/omitted fields, counter strings and validation errors. The
+  catalog update still joins the caller transaction without making a receipt or commit.
+
+Recurring services use these owners directly. Their sole remaining command dependency
+is `_reconcile` calling `commands.recurring_tasks.success_response` to budget the exact
+complete response bytes. The command must retain response ownership; replacing this
+last call needs an explicit narrow projection/size capability with parity evidence,
+not moving a handler or duplicating its response formula. **RF1 remains open.**
+
+### Preservation of the dirty R2 baseline
+
+The earlier seven-file byte-preservation checkpoint is historical evidence, unchanged.
+This extraction necessarily overlaps two of those files: `commands.recurring_task_runtime.py`
+and `commands.recurring_tasks.py`. Their shared helpers become forwarding aliases;
+their pre-existing syntax, admission, normalization, read, execute and response bodies
+are unchanged. The [captured body witness](../../tests/fixtures/internal_operations/rf1_runtime_catalog_witness.json)
+identifies the exact pre-extraction dirty-source hashes and checks all original
+function/class bodies at either their original or extracted owners. It was captured
+from the baseline, not regenerated from the result. Five other pre-existing files,
+including AGENTS.md and the R2 reference module/test, remain byte-identical. Existing
+R2 tracking additions remain separate from this work; nothing resumes R2 behavior.
+
+### Verification
+
+The pre-extraction command/admission/boundary selection passed 36 tests. The new
+[runtime/catalog tests](../../tests/test_shared_recurring_runtime.py) cover fixed body
+preservation, forwarding identity, fresh-process import isolation, published cursor
+bytes, malformed/expired/stale cursors, invalid key configuration precedence, exact
+receipt history, read-only catalog projection and rollback of catalog advancement.
+The named dependency ratchet shrinks; no blanket exception is added. Strict typing
+passes for the three new shared modules. The corrected focused selection passes
+**91 tests**, 53.152 seconds; final documentation/declaration/frozen-web/operation
+checks pass **30 tests**, 4.703 seconds. Ruff/diff hygiene and all 385 local
+documentation targets pass. Full regression passes **1,418 tests, OK (one skipped)**
+in 361.648 seconds with the installed pinned Tickerd v1. The previously known
+non-failing capacity-limit trace and timezone-compatibility diagnostics appeared;
+no test assertions failed. The operator subsequently requested checkpointing.
+An initial expanded selection used a nonexistent test-module name; that
+invocation is not passing evidence and has been replaced with the correct selection.
+
+Commit preparation identified one pre-existing R2 edit inside a moved helper:
+`cursor_config` rejects surrogate characters in the key generation. That change is
+kept unstaged at its new core owner, not smuggled into the extraction commit. The
+body witness now also captures the exact `25ebada` bodies. Its test requires one
+complete captured baseline to match (committed or dirty), never an arbitrary mix.
+The original R2 test still covers the additional cursor validation; the refactor's
+cursor test covers the shared committed behavior. The two command files' original
+R2 edits remain unstaged as well. No prior full-suite result is represented as a
+clean-index run; commit-only verification is recorded separately.
+
+The exact staged tree was exported to a disposable directory without stashing or
+altering the working checkout. Its focused command/reconcile/restoration/lineage/
+preservation selection passed **78 tests**, 28.937 seconds. The three mixed staged
+files passed Ruff on their index contents; staged diff hygiene passed. The dirty
+working tree separately passed the 11-test preservation/boundary selection after
+the dual-baseline witness adjustment. No runtime behavior was changed during commit
+preparation; the committed extraction retains the original committed helper bodies.
+
+No public schema/registry/version changes, ledger migration, external send or deployment.
+RF2/RF3 and recurring-family activation remain separate gates. No push requested.
+
+## Next slice: response-sizing capability
+
+Prepared, not implemented. The remaining RF1 edge is `_reconcile` importing and
+calling `commands.recurring_tasks.success_response` during output-budget trials.
+
+1. Capture exact complete envelope bytes and page decisions before changing the
+   seam, including changed/no-op and ordinary/dry-run responses. Preserve both the
+   committed and pre-existing R2 dirty states rather than silently absorbing the latter.
+2. Keep `success_response`, audit/receipt identity projection and final response
+   assembly in the command adapter. Supply a required, typed, narrow sizing
+   capability to the reconciliation operation; no optional default authority,
+   full-handler callback, duplicated envelope formula or public contract change.
+3. Invoke it at the same trial point using current accepted result/audit facts.
+   Preserve exact canonical byte accounting, cursor contents, unit rollback,
+   non-refundable budgets, error precedence and caller transaction ownership.
+4. Test exact-at-limit/over-limit output, continuation without duplicates or missing
+   tasks, dry-run rollback, replay and final command-envelope agreement. Remove the
+   last counted recurring command import/call only after preservation passes.
+
+Run focused and full regression, frozen-contract/declaration checks, typing, lint
+and diff hygiene. Assess IO-01/02/06/08 before recording RF1 closure. This brief does
+not start RF2 state/mutation ownership, RF3 propagation or functional recurring R2/R3.

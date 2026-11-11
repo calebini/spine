@@ -28,7 +28,31 @@ from spine.core.hashing import audit_log_payload_hash, command_derived_id, hash_
 from spine.core.recurring_tasks import CONTRACT, derive, payload_hash
 from spine.ledger.identity import read_ledger_instance_id
 from spine.ledger.notification_profiles import require_owner_exists
-from spine.ledger.recurrence import load_current_recurrence_header, load_current_recurrence_set
+from spine.ledger.recurrence import load_current_recurrence_set
+from spine.ledger.recurring_task_catalog import (
+    advance_catalog as advance_catalog,
+)
+from spine.ledger.recurring_task_catalog import (
+    catalog as catalog,
+)
+from spine.ledger.recurring_task_catalog import (
+    intent_view as intent_view,
+)
+from spine.ledger.recurring_task_catalog import (
+    lookup as lookup,
+)
+from spine.ledger.recurring_task_catalog import (
+    pending_adoption as pending_adoption,
+)
+from spine.ledger.recurring_task_catalog import (
+    rule_view as rule_view,
+)
+from spine.ledger.recurring_task_catalog import (
+    source_snapshot as source_snapshot,
+)
+from spine.ledger.recurring_task_catalog import (
+    stored_projection as stored_projection,
+)
 from spine.ledger.recurring_task_migration import verify_candidate_schema
 from spine.ledger.recurring_tasks import compare_and_swap, insert_record, read_record
 from spine.ledger.transactions import LedgerConnection
@@ -41,14 +65,6 @@ INTERNAL_COMMANDS = frozenset(PREFIX + name for name in ("create", "update", "re
 class Preview(Exception):
     def __init__(self, result: dict[str, Any]) -> None:
         self.result = result
-
-
-def catalog(db: Any) -> str:
-    return str(db.execute("SELECT catalog_generation FROM related_task_catalog_state WHERE singleton_id=1").fetchone()[0])
-
-
-def advance_catalog(db: Any) -> None:
-    db.execute("UPDATE related_task_catalog_state SET catalog_generation=catalog_generation+1 WHERE singleton_id=1")
 
 
 def success_response(
@@ -74,93 +90,6 @@ def success_response(
     if dry_run:
         response.update(command_receipt_id=None, audit_ids=[], dry_run=True, commit_cutoff_recheck_required=True)
     return response
-
-
-def lookup(db: Any, table: str, key: str, field: str) -> dict[str, Any]:
-    from spine.ledger.recurring_tasks import row
-
-    value = row(db, table, key)
-    if value is None:
-        fail("referenced_row_not_found", field)
-    return read_record(db, table, key)
-
-
-def source_snapshot(db: Any, root: dict[str, Any]) -> dict[str, Any]:
-    item = db.execute("SELECT current_version FROM coordination_items WHERE item_id=?", (root["source_item_id"],)).fetchone()
-    header = load_current_recurrence_header(db, item_id=root["source_item_id"])
-    if item is None or header is None:
-        fail("environment_failure", "source")
-    return {
-        "source_item_id": root["source_item_id"],
-        "source_item_version": str(item[0]),
-        "recurrence_set_id": header["recurrence_set_id"],
-        "recurrence_revision_id": header["recurrence_revision_id"],
-        "normalized_recurrence_set_hash": header["normalized_recurrence_set_hash"],
-    }
-
-
-def intent_view(db: Any, identity: str | None) -> dict[str, Any] | None:
-    if identity is None:
-        return None
-    value = read_record(db, "related_task_intents", identity)
-    payload = value["intent_json"]
-    return {
-        "intent_id": identity,
-        "status": value["status"],
-        "kind": value["intent_kind"],
-        "assignment_high_water": payload["assignment_high_water"],
-        "scope": payload.get("scope"),
-        "disposition": payload.get("disposition"),
-        "configuration_revision_id": payload.get("configuration_revision_id"),
-    }
-
-
-def pending_adoption(db: Any, root_id: str) -> dict[str, Any] | None:
-    row = db.execute(
-        "SELECT intent_id FROM related_task_intents WHERE related_task_rule_id=? AND intent_kind='adopt' AND status='pending'", (root_id,)
-    ).fetchone()
-    return intent_view(db, row[0]) if row else None
-
-
-def stored_projection(db: Any, table: str, identity: str) -> dict[str, Any]:
-    value = read_record(db, table, identity)
-    return {k: str(v) if type(v) is int else v for k, v in value.items()}
-
-
-def rule_view(db: Any, root: dict[str, Any], *, summary: bool = False) -> dict[str, Any]:
-    config = read_record(db, "related_task_rule_revisions", root["current_revision_id"])
-    retired = intent_view(db, root["retirement_intent_id"])
-    progress = db.execute(
-        "SELECT 1 FROM related_task_rule_progress WHERE related_task_rule_id=?", (root["related_task_rule_id"],)
-    ).fetchone()
-    progress = stored_projection(db, "related_task_rule_progress", root["related_task_rule_id"]) if progress else None
-    if progress:
-        progress.pop("related_task_rule_id")
-    result = {
-        "related_task_rule_id": root["related_task_rule_id"],
-        "owner": root["owner_key"],
-        "rule_key": root["rule_key"],
-        "source_item_id": root["source_item_id"],
-        "recurrence_set_id": root["recurrence_set_id"],
-        "status": root["status"],
-        "rule_revision_id": root["current_revision_id"],
-        "change_version": str(root["change_version"]),
-        "adoption_intent": pending_adoption(db, root["related_task_rule_id"]),
-        "retirement_intent": retired,
-        "progress": progress,
-    }
-    if not summary:
-        result.update(
-            source_snapshot=source_snapshot(db, root),
-            revision_index=str(config["revision_index"]),
-            configuration=config["configuration_json"],
-            configuration_hash=config["configuration_hash"],
-            catalog_generation=catalog(db),
-            enrollment=root["enrollment_json"],
-            enrolled_at_utc=root["enrolled_at_utc"],
-            retirement_disposition=retired["disposition"] if retired else None,
-        )
-    return result
 
 
 def expected(db: Any, request: dict[str, Any], root: dict[str, Any]) -> None:

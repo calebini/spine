@@ -9,13 +9,13 @@ from datetime import timedelta
 from functools import partial
 from typing import Any
 
-from spine.commands.recurring_task_runtime import PREFIX, cursor_payload, fail, instant, sign_cursor, verify_cursor, wire
 from spine.core import occurrence_details
 from spine.core import temporal_bindings as binding_facts
 from spine.core.canonical_json import canonical_json_bytes
 from spine.core.errors import SpineValidationError
 from spine.core.hashing import hash_canonical_json
 from spine.core.occurrences import expand_recurrence_set
+from spine.core.recurring_task_runtime import PREFIX, cursor_payload, fail, instant, sign_cursor, verify_cursor, wire
 from spine.core.recurring_tasks import CONTRACT, derive, occurrence_key, payload_hash
 from spine.ledger import item_reads
 from spine.ledger.identity import read_ledger_instance_id
@@ -32,7 +32,7 @@ class _PageBoundary(Exception):
 
 
 def continuation(db: Any, request: dict[str, Any], root: dict[str, Any], context: Any, contracts: Any, now: str) -> dict[str, Any] | None:
-    from spine.commands.recurring_tasks import catalog, source_snapshot
+    from spine.ledger.recurring_task_catalog import catalog, source_snapshot
 
     if "cursor" not in request:
         return None
@@ -119,7 +119,7 @@ class Page:
         runtime: dict[str, Any],
         fault: Any,
     ) -> None:
-        from spine.commands.recurring_tasks import source_snapshot
+        from spine.ledger.recurring_task_catalog import source_snapshot
 
         self.db, self.context, self.root, self.request, self.contracts, self.now = db, context, root, request, contracts, now
         self.runtime, self.fault = runtime, fault
@@ -493,7 +493,8 @@ def reconcile(
 
 
 def _reconcile(page: Page) -> tuple[dict[str, Any], str, bool]:
-    from spine.commands.recurring_tasks import intent_view, pending_adoption, success_response
+    from spine.commands.recurring_tasks import success_response
+    from spine.ledger.recurring_task_catalog import intent_view, pending_adoption
 
     db, request, root = page.db, page.request, page.root
     context, contracts, now = page.context, page.contracts, page.now
@@ -607,7 +608,7 @@ def finish(
     evaluation: str, start: str, end: str, original: dict[str, Any],
     processed_assignments: int, existing_more: bool, source_more: bool,
 ) -> tuple[dict[str, Any], str, bool]:
-    from spine.commands.recurring_tasks import advance_catalog, catalog, intent_view, pending_adoption, rule_view
+    from spine.ledger.recurring_task_catalog import advance_catalog, catalog, intent_view, pending_adoption, rule_view
     from spine.services.recurring_task_adoption import complete
 
     db, request, root = page.db, page.request, page.root
@@ -751,7 +752,7 @@ def finish(
 
 def process_existing(page: Page, assignment: dict[str, Any]) -> dict[str, Any]:
     """Maintain an existing reservation independently of new-generation coverage."""
-    from spine.commands.recurring_tasks import intent_view, pending_adoption
+    from spine.ledger.recurring_task_catalog import intent_view, pending_adoption
     from spine.ledger.temporal_bindings import load_temporal_binding
     from spine.services import recurring_task_adoption as adoption
     from spine.services.recurring_task_states import append_state

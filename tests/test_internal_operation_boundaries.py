@@ -113,6 +113,7 @@ class InternalOperationBoundaryTests(unittest.TestCase):
             "ledger/item_reads.py", "ledger/provenance.py", "services/schedule_delivery.py",
             "services/schedule_policies.py", "ledger/schedule_work.py",
             "services/schedule_materialization.py", "core/notification_targets.py",
+            "core/recurring_task_runtime.py", "ledger/receipts.py", "ledger/recurring_task_catalog.py",
         )
         for relative in paths:
             with self.subTest(path=relative):
