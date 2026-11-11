@@ -1,6 +1,6 @@
 # Spine Backlog
 
-Last updated: 2026-11-10
+Last updated: 2026-11-11
 
 This is the single work queue for Spine development. The
 [implementation plan](IMPLEMENTATION_PLAN.md) explains roadmap direction and delivery
@@ -32,6 +32,55 @@ outcomes; leave later horizons coarse. Before promoting a horizon, define its sc
 dependencies, acceptance criteria, and required decisions. When finishing a task,
 record evidence and move it to Completed. Update affected orientation and contract
 status labels in the same change. Routine task updates do not change spec authority.
+
+## Selected internal architecture work
+
+### SPINE-096 — Assess internal architecture before continuing recurring tasks
+
+**Status:** Done — assessment and proposed refactoring sequence recorded (2026-11-11).
+**Operator direction:** Pause further R2/R3 implementation. Preserve the uncommitted
+R2 admission/read continuation and unrelated `AGENTS.md` edits; no runtime refactor,
+commit, push, migration, deployment or Whetstone run is authorized by this task.
+**Evidence:** [Internal architecture assessment](design-notes/internal-architecture-assessment-2026-11-11.md)
+traces CLI/HTTP/worker, mutation/copy-forward, reconciliation, permissions, replay,
+notification rendering/attempt and finalizer paths. Read-only AST inspection covered
+162 Python modules and confirmed the existing 27-entry item-writer inventory and
+single item-version SQL insertion owner. No runtime suite or ledger was invoked.
+**Recommendation:** Scoped internal application-layer restructuring through targeted
+extractions, retaining the ledger/domain/identity/transaction/attempt foundations.
+The operator selected the near-term direction and authorized its focused specification
+under SPINE-097; the report remains rationale, not an accepted runtime contract.
+Deferred resilience work remains deferred; historical completion evidence below is
+unchanged.
+**Next:** Review the SPINE-097 draft before implementation; no automatic R2/R3 resumption.
+
+### SPINE-097 — Specify shared internal operations and mutation boundaries
+
+**Status:** Done — focused draft and local specification checks complete (2026-11-11).
+Ratification, external review and runtime refactoring remain pending.
+**Operator direction:** Proceed with the near-term priorities through a focused internal
+specification first. Preserve public contracts and the paused R2 work; later cleanup
+remains demand-driven rather than an implementation prerequisite.
+**Scope:** [Internal application operations](../specs/internal-application-operations.md)
+defines shared scheduling/binding/notification operations, explicit authority/identity/
+budget inputs, complete item-change ownership, SQL/Python rollback participation and
+the synchronous propagation seam. Architecture/storage delegation and the normative
+index are amended minimally; feature owners retain behavior and persistence authority.
+**Acceptance:** Consistent draft with concrete preservation/verification gates, intact
+links and diff hygiene; no runtime, test, machine-contract or schema changes and no
+unrelated working-tree edits. This is drafting completion, not ratification or runtime
+proof. RF0–RF2 precede explicit R2 resumption; RF3 precedes R3 integration. Original
+recurring-task exit requirements and R4-only public activation remain intact.
+**Verification:** Seven documentation tests pass. Local validation checked 488 link
+targets and 37 heading fragments across the affected documents plus root README;
+tracked and new-file diff hygiene pass. A SHA-256 comparison with the starting
+worktree found only the five intended specification/index/tracking edits and the
+new leaf. Existing R2 runtime/test/docs changes, the assessment and unrelated
+`AGENTS.md` changes are byte-preserved. No runtime suite, ledger, external audit,
+commit or push was invoked.
+**Next:** Obtain a separately authorized bounded buildability/
+preservation review before ratification and implementation. No new product decision
+is proposed; concrete operation/type granularity remains an implementation design check.
 
 ## Selected feature design
 
@@ -818,8 +867,9 @@ No public command, automatic generation, delivery or deployment is authorized.
 
 ### SPINE-093 — R2: recurring-task commands and manual reconciliation
 
-**Status:** In progress (2026-11-10) — operator authorized R1 checkpoint and R2,
-including the narrow prospective producer fixes. R1 committed as `bc96a1d`.
+**Status:** Paused by operator (2026-11-11); SPINE-096 assessment is complete and the
+selected internal design is drafted under SPINE-097. Prior authorization/evidence remains: R1 checkpoint
+and R2, including the narrow prospective producer fixes; R1 committed as `bc96a1d`.
 **Scope:** All seven internal command handlers, configuration/enrollment,
 read/history/cursors, atomic ordinary task/owner/binding/policy/work creation,
 move/cancel/restore/suppress, both adoption scopes and all retirement dispositions.
@@ -1000,11 +1050,12 @@ non-fatal read-budget/timezone diagnostics appeared. Frozen web copies, 361 loca
 documentation targets and diff hygiene pass; unrelated `AGENTS.md` hash preserved.
 The operator requested committing this verified continuation before proceeding;
 public activation, R3 and R4 remain separate gates.
-**Next:** Operator authorized the remaining R2 implementation on 2026-11-10.
-Continue the remaining restoration/custom-policy, proof/hop/read/error-precedence,
-intent/coverage, replay and wider concurrency matrices against these tested
-foundations. Preserve immutable history and the R4-only public activation boundary;
-R2 is not complete from the selected passing cases.
+**Next:** Further implementation is paused by the 2026-11-11 operator direction;
+review/ratify SPINE-097 and verify the selected refactoring/resume gates first. On explicit
+resumption, retain the remaining restoration/custom-policy, proof/hop/read/error-
+precedence, intent/coverage, replay and wider concurrency matrices against these
+tested foundations. Preserve immutable history and the R4-only public activation
+boundary; R2 is not complete from the selected passing cases.
 
 ### SPINE-094 — R3: recurring-task all-writer safety and automatic scheduling
 
@@ -1018,7 +1069,9 @@ explicit writer/reconcile/attempt interleavings, suppression/restoration and
 pending-intent races, protected-work matrix, rollover/catch-up, dense-root fairness
 and repeated idle zero-write cycles. No real sends. See
 [R3](IMPLEMENTATION_PLAN.md#r3--all-writer-safety-and-automatic-scheduling-spine-094).
-**Next:** Finish R2 and obtain the selected checkpoint's implementation kickoff.
+**Next:** Respect the operator-directed implementation pause under SPINE-096/097;
+finish R2 and obtain the selected checkpoint's implementation kickoff. SPINE-097's
+change-propagation seam is drafted, not yet accepted or implemented.
 
 ### SPINE-095 — R4: recurring-task activation and release verification
 

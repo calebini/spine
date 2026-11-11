@@ -9,9 +9,38 @@ see [validation](TZDB_COMPATIBILITY_VALIDATION.md) and [operations](TZDB_COMPATI
 
 
 Role: Roadmap rationale and delivery history; current task status lives in [BACKLOG.md](BACKLOG.md)
-Last updated: 2026-11-10 (SPINE-092 committed; SPINE-093 internal foundation in progress)
+Last updated: 2026-11-11 (SPINE-097 internal-operation draft; R2/R3 implementation remains paused)
 
 This is a non-normative delivery plan. The specifications and machine-readable contracts remain authoritative.
+
+## Operator-directed architecture pause
+
+On 2026-11-11 the operator paused further recurring-task implementation to assess
+internal architecture before more R2/R3 integration. The
+[assessment and proposed RF0–RF4 sequence](design-notes/internal-architecture-assessment-2026-11-11.md)
+recommends scoped application-layer restructuring through targeted extractions,
+not a ledger redesign. The operator subsequently selected the near-term direction
+and authorized a focused specification first. The
+[internal application operations draft](../specs/internal-application-operations.md)
+now defines shared operation, mutation-state and propagation boundaries and IO-01–08
+preservation gates. Architecture/storage delegation and the normative index are aligned.
+Status and evidence are in SPINE-096/097; the draft is not ratified, externally reviewed
+or implemented, and its creation does not authorize runtime refactoring.
+
+The intended sequence remains RF0 baseline/design acceptance, RF1 shared operation
+extraction, RF2 complete item-change/state ownership, then RF3 propagation before R3.
+Use the assessment for rationale and the draft for proposed requirements; do not
+duplicate or replace feature contracts. The next step is a separately authorized
+bounded buildability/preservation review. RF4 cleanup remains unselected and is not a
+recurring-task resume gate. No new command contracts, migration or agent operations
+guide changes are planned by this internal-only scope.
+
+Preserve `e540a91`, the uncommitted R2 admission/read continuation, unrelated
+`AGENTS.md` edits and all prior completion evidence. The delivery plan below remains
+the functional roadmap, but earlier kickoff statements do not override this pause.
+R2 resumes only on explicit operator direction after the selected internal boundary
+work; R3 still requires the original R2 exit and a separate kickoff. Deferred
+resilience/retention/scalability work is not reactivated by this assessment.
 
 ## Planned Delivery: Recurring-Source Related Tasks
 

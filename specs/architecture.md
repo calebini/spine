@@ -316,6 +316,18 @@ Implementation directories should be added when behavior exists:
 
 Core code MUST NOT depend on adapters.
 
+### 10.1 Internal application-operation refinement
+
+The draft [internal application operations](internal-application-operations.md)
+leaf specifies incremental extraction into the existing `services` layer, with
+`ledger` retaining concrete persistence and transaction ownership. It separates
+family-specific command/replay adaptation from shared scheduling/binding/notification
+operations, complete item-change composition, transaction-local state and synchronous
+propagation. This is not a move of SQL into adapters or a new service process.
+Feature contracts and [storage atomicity](STORAGE_ATOMICITY_SPEC.md) retain their
+authority. The leaf's preservation gates do not change public contracts, activate
+recurring tasks or claim that the current implementation already meets the target.
+
 ## 11. Proposed Identity and Access Boundary
 
 `specs/accounts-and-chat-attribution.md` owns accounts, login identifiers, subject

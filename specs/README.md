@@ -28,6 +28,7 @@ Current spec surface:
 - `accounts-and-chat-attribution.md`: immediate trusted web identification and observed chat attribution for distinct accounts/subjects; verified web login/recovery preserved but deferred
 - `overview.md`: purpose, doctrine, ontology, and non-goals
 - `architecture.md`: component boundaries and relationships to tickerd, the governance authority, adapters, and projections
+- [internal-application-operations.md](internal-application-operations.md): draft internal scheduling/binding/notification operation ownership, complete mutations, transaction/page state and synchronous propagation; behavior-preserving RF0–RF3 design, not ratified or implemented
 - [cross-system-execution.md](cross-system-execution.md): proposed shared architecture `cortext.cross-system-execution` version `0.1.0-draft.1`; role ownership, capability adapters, evidence/budget/freshness boundaries and exact downstream references; no runtime or cross-repo adoption claim
 - `operational-resilience.md`: draft cross-cutting resource bounds, failure containment, recovery, runtime compatibility, and operational proof requirements
 - `compatibility.md`: implemented exact Spine-to-Tickerd package, capability, admission, diagnostic, v2 readback, and safety-gate contract
