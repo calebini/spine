@@ -93,8 +93,16 @@ See [RF2 evidence and remaining scope](design-notes/internal-operations-rf2.md).
 The first increment passes 95 before/after preservation tests, 106 tests in an
 isolated refactor-only snapshot, focused state/boundary/documentation checks and
 strict typing/lint. Full regression passes 1,435 tests (one skipped), 392.707 seconds.
-It remains uncommitted; RF2 is not yet complete. RF3 and functional R2 resumption
-remain gated.
+That increment is committed as `7423052`, excluding older R2 edits. The operator
+selected recurring-page state ownership next: rollbackable outputs and retained
+checkpoints get one owner; proof/hop/time consumption remains outside rollback.
+That continuation is now verified and uncommitted: 51 before/after preservation
+tests, 61 isolated refactor-only tests, 12 new page regressions, retained RF0/RF1
+witnesses, documentation/declaration checks and strict typing/lint pass. Full
+regression passes 1,447 tests (one skipped), 373.476 seconds. Complete prepared
+create/change/restore composition and narrower child-operation inputs/results
+remain the next RF2 increment.
+RF2 is not yet complete. RF3 and functional R2 resumption remain gated.
 
 Preserve `e540a91`, the uncommitted R2 admission/read continuation, unrelated
 `AGENTS.md` edits and all prior completion evidence. The delivery plan below remains

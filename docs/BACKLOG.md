@@ -219,7 +219,8 @@ migration, push or deployment; RF2 was selected separately below.
 ### SPINE-100 — RF2: complete item-change and transaction/page-state ownership
 
 **Status:** In progress — operator selected RF2 after RF1 checkpoint `9e50c1c`
-(2026-11-11); first transaction-state increment verified, uncommitted. Existing
+(2026-11-11); first transaction-state increment committed as `7423052`.
+Recurring-page ownership continuation is verified, uncommitted. Existing
 R2 admission/read and `AGENTS.md` edits remain preserved.
 **Scope:** Implement §§5–6 of the accepted internal-operations contract in bounded
 increments. First centralize the closed transaction mutation state and migrate its
@@ -243,9 +244,23 @@ tests, OK (one skipped)** in 392.707 seconds with installed pinned Tickerd v1.
 Known non-failing capacity-limit/timezone diagnostics appeared. All 456 local link
 targets and 36 cross-document heading fragments resolve; diff hygiene passes.
 **Evidence/next:** [RF2 state-owner evidence and remaining scope](design-notes/internal-operations-rf2.md).
-Checkpoint the verified increment when requested, then continue page-state ownership
-and complete prepared item-change composition with their separate preservation gates.
+The operator requested checkpointing and explicitly selected page-state ownership.
+Complete prepared item-change composition remains the following RF2 increment.
 RF2 remains open; no push or deployment.
+**Page-state continuation:** Implemented one typed owner for rollbackable page data
+and retained SQL/Python unit checkpoints. Final projections use the same paired
+trial boundary; LIFO closure and recovery-path exceptions cannot strand entered
+units. Proof/hop/time consumption remains outside rollback. The 51-test before/after
+page selection and unchanged complete RF1 response/ledger witnesses pass. Twelve
+new page regressions plus twelve boundary/body checks pass, as do strict typing,
+lint, and 24 documentation/declaration/preservation tests. The clean HEAD-plus-page
+snapshot excluding older R2 edits passes **61 tests**, 26.330 seconds. All 444
+checked local links and 40 heading fragments resolve. Full regression passes
+**1,447 tests, OK (one skipped)** in 373.476 seconds with installed pinned Tickerd v1;
+known non-failing capacity-limit and timezone diagnostics appeared. The continuation
+is uncommitted and does not close full RF2 composition. Next: closed prepared
+create/change/restore operations and narrow child inputs/results; preserve the
+allocator's order and all supporting-set/fault/budget/replay gates.
 
 ## Selected feature design
 

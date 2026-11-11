@@ -518,12 +518,12 @@ def change(
             insert_canonical_extension=extension,
             supporting_command_id=request["command_id"],
         )
-        page.runtime["audit_ids"].append(audit_id)
+        page.state.runtime["audit_ids"].append(audit_id)
         page.fault("task")
     else:
         extension(db, version)
-    page.changed = True
-    page.mutations += 1
+    page.state.changed = True
+    page.state.mutations += 1
     return {"task_item_version": str(next_version), "temporal_binding_revision_id": revision["temporal_binding_revision_id"]}
 
 
@@ -561,11 +561,11 @@ def reconcile_work(
     )
     for identity in cancelled:
         cancel_work_instance(db, work_instance_id=identity, cancelled_at_utc=page.now, reason_code=reasons[identity], require_fresh=False)
-    page.work["cancelled"].extend(cancelled)
-    page.work["retained"].extend(retained)
-    page.work["protected_stale"].extend(protected)
+    page.state.work["cancelled"].extend(cancelled)
+    page.state.work["retained"].extend(retained)
+    page.state.work["protected_stale"].extend(protected)
     if cancelled:
-        page.changed = True
+        page.state.changed = True
     if materialize and not terminal:
         created, _, _ = schedule_materialization.materialize_successor(
             db,
@@ -578,9 +578,9 @@ def reconcile_work(
             command_id=page.request["command_id"],
             created_at=page.now,
         )
-        page.work["created"].extend(created)
+        page.state.work["created"].extend(created)
         if created:
-            page.changed = True
+            page.state.changed = True
     page.fault("work")
 
 
@@ -751,7 +751,7 @@ def adopt_supporting(
             resolved = cast(Callable[..., dict[str, Any]], resolve)(db, selection, policy=policy.value, item_type="task", origin=origin)
             insert_notification_schedule_policy(db, normalized=policy)
             select_presentation(db, str(policy.value["notification_policy_id"]), resolved)
-            page.mappings.append(
+            page.state.mappings.append(
                 {
                     "assignment_id": assignment["assignment_id"],
                     "generation_id": generation["generation_id"],

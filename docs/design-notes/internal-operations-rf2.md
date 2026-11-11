@@ -75,23 +75,67 @@ Connection flags and producer guards are not reset or copied as page mutation da
   compatibility diagnostics appeared, as in the RF1 baseline. Thirty-six affected
   cross-document heading fragments and final diff hygiene also pass.
 
-The first increment is verified and uncommitted. It changes neither the preserved
+The first increment is verified and committed as `7423052`. It changes neither the preserved
 dirty R2 continuation nor the remaining RF2 exit requirements below.
+
+## Recurring-page continuation
+
+The operator selected page-state ownership after checkpoint `7423052`.
+`services.recurring_task_page_state.PageState` now owns results/work/mappings,
+working root/runtime facts, owner/change flags, mutation counts, continuation/lane
+position and the retained SQL/Python checkpoint stack. The previous loose state
+fields and independent snapshot loops are removed from reconciliation and its
+existing child/adoption consumers.
+
+`PageCheckpoint` deep-copies rollbackable working facts. Results are append-only:
+their checkpoint stores the prior length, avoiding repeated copies of accepted
+output prefixes. Restore preserves root/runtime/position and top-level accumulator
+references, so the command's cutoff/audit view observes the same rollback.
+`PageUnit` pairs that snapshot with the existing ledger-owned savepoint, without
+another writer, commit or receipt. Units register immediately after entry, before
+any child operation or decision-recovery reference lookup. Closure checks identity
+and LIFO order; successful invocation releases the stack, exceptional invocation
+unwinds it, and response-size rejection rolls back only the final suffix unit.
+
+Final response projection is also a paired SQL/Python trial. A rejected trial restores
+all page state, not just the change flag. Earlier accepted units stay intact; spent
+proof and hop work is not refunded. Existing per-source hop-reset policy is unchanged.
+The shared `ProofBudget`, execution clock/deadline, request/context/capabilities and
+per-trial oversized-work rejection signal remain outside rollbackable state.
+
+**Focused evidence:** the same 51 real command/page/restoration/admission/response
+tests pass before (49.818 seconds) and after (49.047 seconds). Four complete
+RF1 response/page/replay/ledger witnesses remain byte-identical; no fixture was
+regenerated. Twelve new page tests cover suffix restoration, stable references,
+deep copies, LIFO/foreign-unit rejection, failed entry, final projection trials,
+recoverable/unexpected failures, failure in a recovery-path lookup, work/mutation
+limits, individually oversized work, non-refundable proof/hops and SQLite write
+interruption. Together with twelve RF1 boundary/body tests they pass (24 total).
+Strict typing of the page state/reconciliation boundaries and focused Ruff pass.
+The isolated HEAD-plus-page snapshot without dirty R2 edits passes **61 tests**,
+26.330 seconds. Documentation/declaration/preservation checks pass **24 tests**,
+4.002 seconds. Five untouched pre-existing file hashes match, and all 444 selected
+local links and 40 heading fragments resolve. Full regression passes **1,447 tests,
+OK (one skipped)** in 373.476 seconds, using installed pinned Tickerd v1. The known
+non-failing capacity-limit and timezone diagnostics appeared. Final lint and diff
+hygiene pass. This page-state continuation is verified and uncommitted.
+
+Full item-change composition remains the next RF2 increment. Existing whole-Page
+child signatures have not yet been replaced by closed prepared operations and
+narrow results; they remain a named RF2 obligation, not a newly approved interface.
 
 ## Remaining RF2 work (not claimed complete)
 
-1. Encapsulate recurring `PageState` and retained unit checkpoints. Preserve LIFO
-   closing, accepted earlier units, continuation/cutoff behavior and non-refundable
-   proof/hop/time costs. Do not pass the whole mutable page to child operations.
-2. Introduce closed prepared create/change/restore operations with typed results.
+1. Introduce closed prepared create/change/restore operations with typed results;
+   stop passing the whole mutable page to child operations.
    Preserve the allocator's SQL order/prospective successor view, authority rechecks,
    explicit owner/binding changes, policies/applications/presentations, facets/roles,
    selected work behavior and evidence returned to the command owner.
-3. Close IO-03–06/08 across that composition: faults after every owned stage,
+2. Close IO-03–06/08 across that composition: faults after every owned stage,
    zero/eight facets, opposite roles and clears, shared-intent independent policies,
    customized restoration and terminal/suppression vetoes, exact budget accounting,
    protected replay/admission and full regression. This first increment only
-   establishes the transaction-state portion of those gates.
+   establishes the transaction/page-state portion of those gates.
 
 RF3 propagation and functional recurring R2/R3 resumption need their existing
 separate authorization/exit gates. No new policy decision is required for the

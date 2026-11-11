@@ -113,7 +113,7 @@ def outcome(page: Any, intent: dict[str, Any], assignment: dict[str, Any], state
                 "created_at_utc": page.now,
             },
         )
-        page.changed = True
+        page.state.changed = True
 
 
 def complete(page: Any, intent: dict[str, Any]) -> bool:
@@ -122,7 +122,7 @@ def complete(page: Any, intent: dict[str, Any]) -> bool:
         "SELECT 1 FROM related_task_assignments a LEFT JOIN related_task_intent_outcomes o "
         "ON o.assignment_id=a.assignment_id AND o.intent_id=? WHERE a.related_task_rule_id=? AND a.assignment_seq<=? "
         "AND o.assignment_id IS NULL LIMIT 1",
-        (intent["intent_id"], page.root["related_task_rule_id"], int(intent["assignment_high_water"])),
+        (intent["intent_id"], page.state.root["related_task_rule_id"], int(intent["assignment_high_water"])),
     ).fetchone()
     if unresolved:
         return False
@@ -143,5 +143,5 @@ def complete(page: Any, intent: dict[str, Any]) -> bool:
         ):
             return False
     page.db.execute("UPDATE related_task_intents SET status='complete' WHERE intent_id=? AND status='pending'", (intent["intent_id"],))
-    page.changed = True
+    page.state.changed = True
     return True

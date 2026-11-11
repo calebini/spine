@@ -25,6 +25,8 @@ from spine.ledger.recurring_tasks import compare_and_swap, ensure_selector, inse
 from spine.ledger.temporal_bindings import target_from_source
 from spine.services import recurring_task_children as children
 from spine.services import recurring_task_proofs as proofs
+from spine.services.recurring_task_page_state import PageBoundary as _PageBoundary
+from spine.services.recurring_task_page_state import PageState
 
 
 class ResponseSizer(Protocol):
@@ -33,10 +35,6 @@ class ResponseSizer(Protocol):
     def __call__(
         self, *, result: dict[str, Any], effect: str, changed: bool, audit_ids: Sequence[str]
     ) -> int: ...
-
-
-class _PageBoundary(Exception):
-    """Rollback a tentative whole unit or final response projection."""
 
 
 def continuation(db: Any, request: dict[str, Any], root: dict[str, Any], context: Any, contracts: Any, now: str) -> dict[str, Any] | None:
@@ -129,8 +127,9 @@ class Page:
     ) -> None:
         from spine.ledger.recurring_task_catalog import source_snapshot
 
-        self.db, self.context, self.root, self.request, self.contracts, self.now = db, context, root, request, contracts, now
-        self.runtime, self.fault = runtime, fault
+        self.db, self.context, self.request, self.contracts, self.now = db, context, request, contracts, now
+        self.state = PageState(root=root, runtime=runtime)
+        self.fault = fault
         self.snapshot = source_snapshot(db, root)
         self.config = read_record(db, "related_task_rule_revisions", root["current_revision_id"])["configuration_json"]
         self.limits = {k: int(v) for k, v in request["limits"].items()}
@@ -139,15 +138,6 @@ class Page:
             self.limits["lineage_hops"],
             lambda hop: fail("capacity_exceeded", "limits.lineage_hops" if hop else "limits.proof_steps"),
         )
-        self.results: list[dict[str, Any]] = []
-        self.work: dict[str, list[str]] = {k: [] for k in ("created", "retained", "cancelled", "protected_stale")}
-        self.mappings: list[dict[str, Any]] = []
-        self.changed = False
-        self.owners = False
-        self.mutations = 0
-        self.units: list[tuple[Any, dict[str, Any], int, dict[str, Any], str]] = []
-        self.position: dict[str, Any] = {}
-        self.lane = "assignments"
         # Bound loading before the existing recurrence projection constructs lists.
         for table in ("recurrence_rules", "recurrence_segments", "recurrence_rdates", "recurrence_exdates", "recurrence_overrides"):
             rows = db.execute(
@@ -164,42 +154,31 @@ class Page:
     def unit(self, operation: Callable[[], dict[str, Any]], selector: dict[str, Any], *,
              assignment: dict[str, Any] | None = None) -> dict[str, Any] | None:
         """Try a complete unit; a page boundary rolls back that unit and its trackers."""
-        snapshot = copy.deepcopy(
-            {key: getattr(self, key) for key in ("root", "work", "mappings", "changed", "owners", "mutations", "runtime")}
-        )
-        prior_work = sum(len(values) for values in self.work.values())
+        prior_work = sum(len(values) for values in self.state.work.values())
         unit_work = 0
         self.unit_oversized = False
-        scope = self.db.command_unit(nested=True)
-        scope.__enter__()
+        unit = self.state.begin_unit(self.db)
         try:
             before = self.db.total_changes
             value = operation()
-            self.mutations = snapshot["mutations"] + int(self.db.total_changes != before)
-            unit_work = sum(len(values) for values in self.work.values()) - prior_work
-            if self.mutations > self.limits["mutations"]:
+            self.state.mutations = unit.checkpoint.mutations + int(self.db.total_changes != before)
+            unit_work = sum(len(values) for values in self.state.work.values()) - prior_work
+            if self.state.mutations > self.limits["mutations"]:
                 fail("capacity_exceeded", "limits.mutations")
             if prior_work + unit_work > self.limits["work_rows"]:
                 fail("capacity_exceeded", "limits.work_rows")
         except SpineValidationError as error:
-            scope.__exit__(*sys.exc_info())
+            self.state.rollback(unit, sys.exc_info())
             # The caller still owns one outer transaction. Never restore SQL by
             # deleting history or clear trackers for already-accepted units.
-            for key, value in snapshot.items():
-                current = getattr(self, key)
-                if isinstance(current, dict):
-                    current.clear()
-                    current.update(value)
-                else:
-                    setattr(self, key, value)
             if (
                 error.code == "capacity_exceeded:limits.work_rows"
-                and self.results
+                and self.state.results
                 and not self.unit_oversized
                 and unit_work <= self.limits["work_rows"]
             ):
                 return None
-            if error.code == "capacity_exceeded:limits.mutations" and self.results:
+            if error.code == "capacity_exceeded:limits.mutations" and self.state.results:
                 return None
             code, _, field = error.code.partition(":")
             reason = None
@@ -212,8 +191,7 @@ class Page:
             elif code == "source_continuity_unresolved":
                 reason = "source_continuity_unresolved"
             if reason:
-                scope = self.db.command_unit(nested=True)
-                scope.__enter__()
+                self.state.begin_unit(self.db)
                 refs = references(self.db, assignment) if assignment else None
                 value = entry(selector, "decision_required", reason,
                               assignment=assignment["assignment_id"] if assignment else None,
@@ -222,25 +200,9 @@ class Page:
             else:
                 raise
         except BaseException:
-            scope.__exit__(*sys.exc_info())
+            self.state.rollback(unit, sys.exc_info())
             raise
-        self.units.append((scope, snapshot, len(self.results), copy.deepcopy(self.position), self.lane))
         return value
-
-    def rollback_unit(self) -> str:
-        scope, snapshot, count, position, lane = self.units.pop()
-        scope.__exit__(_PageBoundary, _PageBoundary(), None)
-        for key, value in snapshot.items():
-            current = getattr(self, key)
-            if isinstance(current, dict):
-                current.clear()
-                current.update(value)
-            else:
-                setattr(self, key, value)
-        del self.results[count:]
-        self.position.clear()
-        self.position.update(position)
-        return lane
 
     def spend(self) -> None:
         try:
@@ -282,12 +244,12 @@ class Page:
         result = []
         for occurrence in values:
             source = children.source_facts(
-                self.db, self.root, self.recurrence, occurrence, self.now, persist=False, command_id=self.request["command_id"]
+                self.db, self.state.root, self.recurrence, occurrence, self.now, persist=False, command_id=self.request["command_id"]
             )
             if not start <= source["resolved_source_utc"] < end:
                 continue
             selector = occurrence["target_occurrence_selector"]
-            boundary = self.root["enrollment_json"].get("selector")
+            boundary = self.state.root["enrollment_json"].get("selector")
             if boundary is not None and (selector["scheduled_fact"], canonical_json_bytes(selector)) < (
                 boundary["scheduled_fact"],
                 canonical_json_bytes(boundary),
@@ -295,7 +257,7 @@ class Page:
                 continue
             if boundary is None and instant(source["resolved_source_utc"]) + timedelta(
                 seconds=int(self.config["offset_seconds"])
-            ) <= instant(self.root["enrolled_at_utc"]):
+            ) <= instant(self.state.root["enrolled_at_utc"]):
                 continue
             result.append(occurrence)
         return sorted(result, key=lambda v: (v["original_scheduled_fact"], canonical_json_bytes(v["target_occurrence_selector"])))
@@ -311,10 +273,10 @@ class Page:
         managed_baseline: dict[str, Any] | None = None,
         restoration: Any = None,
     ) -> dict[str, Any]:
-        config, config_id = config or self.config, config_id or self.root["current_revision_id"]
+        config, config_id = config or self.config, config_id or self.state.root["current_revision_id"]
         selector = occurrence["target_occurrence_selector"]
         source = children.source_facts(
-            self.db, self.root, self.recurrence, occurrence, self.now, persist=False, command_id=self.request["command_id"]
+            self.db, self.state.root, self.recurrence, occurrence, self.now, persist=False, command_id=self.request["command_id"]
         )
         due = target_from_source(source, int(config["offset_seconds"]))["utc_instant"]
         if due <= self.now:
@@ -332,13 +294,13 @@ class Page:
         ):
             return entry(selector, "decision_required", "source_evidence_unavailable")
         if proof_id is None:
-            kind, proof = proofs.initial(self.db, self.root, self.snapshot, selector, self.budget)
+            kind, proof = proofs.initial(self.db, self.state.root, self.snapshot, selector, self.budget)
             if kind == "component_candidate":
                 basis_selector = proof["hops"][0]["prior_selector"] if proof["hops"] else selector
                 reserved = self.db.execute(
                     "SELECT assignment_id,occurrence_key FROM related_task_selector_reservations "
                     "WHERE related_task_rule_id=? AND occurrence_key=?",
-                    (self.root["related_task_rule_id"], occurrence_key(basis_selector)),
+                    (self.state.root["related_task_rule_id"], occurrence_key(basis_selector)),
                 ).fetchone()
                 if reserved is not None:
                     return entry(
@@ -350,28 +312,28 @@ class Page:
                             "conflicting_occurrence_keys": [reserved["occurrence_key"]],
                         },
                     )
-            proof_id = proofs.persist(self.db, self.root, kind, proof, self.request, self.now, self.budget)
+            proof_id = proofs.persist(self.db, self.state.root, kind, proof, self.request, self.now, self.budget)
         reference = ensure_selector(self.db, revision_id=self.snapshot["recurrence_revision_id"], selector=selector, budget=self.budget)
         first = assignment is None
         assignment_id = (
             assignment["assignment_id"]
             if assignment
-            else derive("assignment", {"related_task_rule_id": self.root["related_task_rule_id"], "initial_selector": selector})[0]
+            else derive("assignment", {"related_task_rule_id": self.state.root["related_task_rule_id"], "initial_selector": selector})[0]
         )
         prior = read_record(self.db, "related_task_generations", assignment["current_generation_id"]) if assignment is not None else None
         index = prior["generation_index"] + 1 if prior is not None else 1
         generation_id = derive("generation", {"assignment_id": assignment_id, "generation_index": str(index)})[0]
         source = children.source_facts(
-            self.db, self.root, self.recurrence, occurrence, self.now, persist=True, command_id=self.request["command_id"]
+            self.db, self.state.root, self.recurrence, occurrence, self.now, persist=True, command_id=self.request["command_id"]
         )
         child = children.create(
-            self.db, self.context, self.root, config, assignment_id, generation_id, source, self.request, self.now, self.fault,
+            self.db, self.context, self.state.root, config, assignment_id, generation_id, source, self.request, self.now, self.fault,
             restoration=restoration,
         )
-        self.runtime["cutoffs"].append(due)
-        self.runtime["audit_ids"].append(child["audit_id"])
-        self.work["created"].extend(child["work"])
-        self.mappings.extend(child["policy_mappings"])
+        self.state.runtime["cutoffs"].append(due)
+        self.state.runtime["audit_ids"].append(child["audit_id"])
+        self.state.work["created"].extend(child["work"])
+        self.state.mappings.extend(child["policy_mappings"])
         state = {
             "generation_id": generation_id,
             "selector": selector,
@@ -416,8 +378,8 @@ class Page:
                 "related_task_assignments",
                 {
                     "assignment_id": assignment_id,
-                    "related_task_rule_id": self.root["related_task_rule_id"],
-                    "assignment_seq": self.root["next_assignment_seq"],
+                    "related_task_rule_id": self.state.root["related_task_rule_id"],
+                    "assignment_seq": self.state.root["next_assignment_seq"],
                     "initial_selector_ref": reference,
                     "initial_selector_json": selector,
                     "initial_occurrence_key": occurrence["occurrence_key"],
@@ -457,7 +419,7 @@ class Page:
                     "created_at_utc": self.now,
                 },
             )
-            self.root["next_assignment_seq"] += 1
+            self.state.root["next_assignment_seq"] += 1
         else:
             from spine.services.recurring_task_states import append_state
 
@@ -465,15 +427,15 @@ class Page:
             append_state(self.db, assignment, state, self.request, self.now)
         reserve_selector(
             self.db,
-            rule_id=self.root["related_task_rule_id"],
+            rule_id=self.state.root["related_task_rule_id"],
             assignment_id=assignment_id,
             proof_id=proof_id,
             selector=selector,
             revision_id=self.snapshot["recurrence_revision_id"],
             budget=self.budget,
         )
-        self.changed = self.owners = True
-        self.mutations += 1
+        self.state.changed = self.state.owners = True
+        self.state.mutations += 1
         after = references(self.db, read_record(self.db, "related_task_assignments", assignment_id))
         return entry(
             selector,
@@ -496,15 +458,13 @@ def reconcile(
     try:
         return _reconcile(page, response_size=response_size)
     finally:
-        error = sys.exc_info()
-        while page.units:
-            page.units.pop()[0].__exit__(*error)
+        page.state.close(sys.exc_info())
 
 
 def _reconcile(page: Page, *, response_size: ResponseSizer) -> tuple[dict[str, Any], str, bool]:
     from spine.ledger.recurring_task_catalog import intent_view, pending_adoption
 
-    db, request, root = page.db, page.request, page.root
+    db, request, root = page.db, page.request, page.state.root
     context, contracts, now = page.context, page.contracts, page.now
     token = continuation(db, request, root, context, contracts, now)
     selected_intent = (
@@ -516,7 +476,7 @@ def _reconcile(page: Page, *, response_size: ResponseSizer) -> tuple[dict[str, A
     start = token["range_start_utc"] if token else wire(instant(evaluation) - timedelta(seconds=max(0, int(page.config["offset_seconds"]))))
     end = token["range_end_utc"] if token else wire(instant(evaluation) + timedelta(seconds=int(page.config["generation_horizon_seconds"])))
     position: dict[str, Any] = copy.deepcopy(token["after"] if token else {"assignment_after_seq": "0", "source_after": None})
-    page.position = position
+    page.state.position = position
     original = copy.deepcopy(position)
     assignments = db.execute(
         "SELECT assignment_id,assignment_seq FROM related_task_assignments WHERE related_task_rule_id=? "
@@ -527,7 +487,7 @@ def _reconcile(page: Page, *, response_size: ResponseSizer) -> tuple[dict[str, A
     # Each selected assignment is a whole unit, never a horizon-based omission.
     processed_assignments = 0
     for selected in assignments[: page.limits["assignments"]]:
-        if page.mutations >= page.limits["mutations"]:
+        if page.state.mutations >= page.limits["mutations"]:
             break
         page.budget.hops = page.limits["lineage_hops"]
         assignment = read_record(db, "related_task_assignments", selected["assignment_id"])
@@ -535,12 +495,12 @@ def _reconcile(page: Page, *, response_size: ResponseSizer) -> tuple[dict[str, A
         value = page.unit(partial(process_existing, page, assignment), stored["selector"], assignment=assignment)
         if value is None:
             break
-        page.results.append(value)
+        page.state.results.append(value)
         position["assignment_after_seq"] = str(selected["assignment_seq"])
         processed_assignments += 1
     existing_more = len(assignments) > processed_assignments
     source_more = False
-    page.lane = "source"
+    page.state.lane = "source"
     if root["status"] == "active":
         candidates = page.candidates(start, end)
         candidates = [
@@ -561,7 +521,7 @@ def _reconcile(page: Page, *, response_size: ResponseSizer) -> tuple[dict[str, A
                 > (key["scheduled_fact"], canonical_json_bytes(key["selector"]))
             ]
         for index, occurrence in enumerate(candidates):
-            if index >= page.limits["source_candidates"] or page.mutations >= page.limits["mutations"]:
+            if index >= page.limits["source_candidates"] or page.state.mutations >= page.limits["mutations"]:
                 source_more = True
                 break
             selector = occurrence["target_occurrence_selector"]
@@ -576,32 +536,30 @@ def _reconcile(page: Page, *, response_size: ResponseSizer) -> tuple[dict[str, A
                     if value is None:
                         source_more = True
                         break
-                    page.results.append(value)
+                    page.state.results.append(value)
                 except SpineValidationError as error:
                     if error.code != "source_continuity_unresolved":
                         raise
-                    page.results.append(entry(selector, "decision_required", "source_continuity_unresolved"))
+                    page.state.results.append(entry(selector, "decision_required", "source_continuity_unresolved"))
             position["source_after"] = {"scheduled_fact": selector["scheduled_fact"], "selector": selector}
     # Hold whole-unit savepoints until the *complete receipt* fits. Rolling back
     # a suffix never reruns accepted work, mints another ID or refunds proof work.
     while True:
-        changed = page.changed
         try:
-            with db.command_unit(nested=True):
+            with page.state.trial(db):
                 result, effect, _ = finish(
                     page, token, selected_intent, evaluation, start, end, original,
                     processed_assignments, existing_more, source_more,
                 )
                 if response_size(
-                    result=result, effect=effect, changed=page.changed, audit_ids=tuple(page.runtime["audit_ids"]),
+                    result=result, effect=effect, changed=page.state.changed, audit_ids=tuple(page.state.runtime["audit_ids"]),
                 ) > page.limits["response_bytes"]:
                     raise _PageBoundary()
-            return result, effect, page.changed
+            return result, effect, page.state.changed
         except _PageBoundary:
-            page.changed = changed
-            if len(page.results) <= 1 or not page.units:
+            if len(page.state.results) <= 1 or not page.state.has_units:
                 fail("capacity_exceeded", "limits.response_bytes")
-            lane = page.rollback_unit()
+            lane = page.state.rollback_last()
             if lane == "assignments":
                 processed_assignments -= 1
                 existing_more = True
@@ -617,17 +575,17 @@ def finish(
     from spine.ledger.recurring_task_catalog import advance_catalog, catalog, intent_view, pending_adoption, rule_view
     from spine.services.recurring_task_adoption import complete
 
-    db, request, root = page.db, page.request, page.root
-    context, contracts, now, position = page.context, page.contracts, page.now, page.position
+    db, request, root = page.db, page.request, page.state.root
+    context, contracts, now, position = page.context, page.contracts, page.now, page.state.position
     for intent in (pending_adoption(db, root["related_task_rule_id"]), intent_view(db, root["retirement_intent_id"])):
         if intent and intent["status"] == "pending":
             complete(page, intent)
-    if page.changed:
+    if page.state.changed:
         coverage_json = {
             "range_start_utc": start,
             "range_end_utc": end,
             "source_after": position["source_after"],
-            "complete": not existing_more and not source_more and not any(v["outcome"] == "decision_required" for v in page.results),
+            "complete": not existing_more and not source_more and not any(v["outcome"] == "decision_required" for v in page.state.results),
         }
         progress = row(db, "related_task_rule_progress", root["related_task_rule_id"])
         pending = pending_adoption(db, root["related_task_rule_id"])
@@ -644,7 +602,7 @@ def finish(
             )
         else:
             compare_and_swap(db, "related_task_rule_progress", root["related_task_rule_id"], progress["progress_version"], values)
-    if page.changed:
+    if page.state.changed:
         compare_and_swap(
             db,
             "related_task_rules",
@@ -654,7 +612,7 @@ def finish(
         )
         root = read_record(db, "related_task_rules", root["related_task_rule_id"])
         advance_catalog(db)
-    more, blocked = existing_more or source_more, any(v["outcome"] == "decision_required" for v in page.results)
+    more, blocked = existing_more or source_more, any(v["outcome"] == "decision_required" for v in page.state.results)
     adoption = pending_adoption(db, root["related_task_rule_id"])
     intent = intent_view(db, selected_intent["intent_id"]) if selected_intent else None
     query = {
@@ -694,7 +652,7 @@ def finish(
             "remaining_known_count": "0" if status in {"complete", "not_applicable"} else None,
         }
 
-    unique_mappings = {(p["task_item_id"], p["policy_key"]): p for p in page.mappings}
+    unique_mappings = {(p["task_item_id"], p["policy_key"]): p for p in page.state.mappings}
     result = {
         "rule": rule_view(db, root),
         "source_snapshot": page.snapshot,
@@ -707,9 +665,9 @@ def finish(
             "intent_id": intent["intent_id"] if intent else None,
             "assignment_high_water": intent["assignment_high_water"] if intent else None,
         },
-        "results": page.results,
+        "results": page.state.results,
         "policy_mappings": [unique_mappings[key] for key in sorted(unique_mappings)],
-        "work": {k: sorted(set(v)) for k, v in page.work.items()},
+        "work": {k: sorted(set(v)) for k, v in page.state.work.items()},
         "coverage": {
             "generation": coverage(
                 "not_applicable"
@@ -719,7 +677,7 @@ def finish(
                 else "decision_required"
                 if blocked
                 else "complete",
-                len(page.results) - processed_assignments,
+                len(page.state.results) - processed_assignments,
             ),
             "assignments": coverage(
                 "partial" if existing_more else "decision_required" if blocked else "complete",
@@ -753,7 +711,8 @@ def finish(
         "next_cursor": cursor,
         "delivery": "not_attempted_by_command",
     }
-    return result, "rule_page_applied" if page.changed else "rule_page_decision_required" if blocked else "rule_page_noop", page.changed
+    effect = "rule_page_applied" if page.state.changed else "rule_page_decision_required" if blocked else "rule_page_noop"
+    return result, effect, page.state.changed
 
 
 def process_existing(page: Page, assignment: dict[str, Any]) -> dict[str, Any]:
@@ -775,8 +734,8 @@ def process_existing(page: Page, assignment: dict[str, Any]) -> dict[str, Any]:
     original = copy.deepcopy(state)
     cause = row(db, "related_task_source_cancellations", gen["generation_id"])
     owned = refs["item_access_owner_id"] == gen["item_access_owner_id"] and refs["item_access_owner_revision"] == "1"
-    retirement = intent_view(db, page.root["retirement_intent_id"])
-    intent = pending_adoption(db, page.root["related_task_rule_id"])
+    retirement = intent_view(db, page.state.root["retirement_intent_id"])
+    intent = pending_adoption(db, page.state.root["related_task_rule_id"])
     if intent and assignment["assignment_seq"] > int(intent["assignment_high_water"]):
         intent = None
     intent_result, intent_reason, adopting, managed = None, None, False, None
@@ -841,11 +800,11 @@ def process_existing(page: Page, assignment: dict[str, Any]) -> dict[str, Any]:
                     "source_cancelled",
                     proofs.payload(page.snapshot, cancelled_event_version=page.snapshot["source_item_version"], event_status="cancelled"),
                 )
-                proof_id = proofs.persist(db, page.root, kind, proof, request, page.now, page.budget)
+                proof_id = proofs.persist(db, page.state.root, kind, proof, request, page.now, page.budget)
                 cancel_reason = "source_cancelled"
                 source["source_target_version"] = page.snapshot["source_item_version"]
             else:
-                kind, proof = proofs.existing(db, page.root, page.snapshot, state, page.budget)
+                kind, proof = proofs.existing(db, page.state.root, page.snapshot, state, page.budget)
                 selector = proof["selector"]
                 exclusion = next(
                     (
@@ -872,13 +831,13 @@ def process_existing(page: Page, assignment: dict[str, Any]) -> dict[str, Any]:
                     or state["selector"] != selector
                 )
                 proof_id = (
-                    proofs.persist(db, page.root, kind, proof, request, page.now, page.budget)
+                    proofs.persist(db, page.state.root, kind, proof, request, page.now, page.budget)
                     if changed_source or exclusion or cancelled or source_only
                     else state["proof_id"]
                 )
                 reserve_selector(
                     db,
-                    rule_id=page.root["related_task_rule_id"],
+                    rule_id=page.state.root["related_task_rule_id"],
                     assignment_id=assignment["assignment_id"],
                     proof_id=proof_id,
                     selector=selector,
@@ -905,12 +864,12 @@ def process_existing(page: Page, assignment: dict[str, Any]) -> dict[str, Any]:
                         ),
                         actionable=False,
                     )
-                    proof_id = proofs.persist(db, page.root, kind, value, request, page.now, page.budget)
+                    proof_id = proofs.persist(db, page.state.root, kind, value, request, page.now, page.budget)
                 elif occurrence is None:
                     raise SpineValidationError("source_continuity_unresolved", "missing current expressed occurrence")
                 else:
                     source = children.source_facts(
-                        db, page.root, page.recurrence, occurrence, page.now, persist=True, command_id=request["command_id"]
+                        db, page.state.root, page.recurrence, occurrence, page.now, persist=True, command_id=request["command_id"]
                     )
             if cancel_reason:
                 if current["detail"]["task_status"] == "open":
@@ -932,7 +891,7 @@ def process_existing(page: Page, assignment: dict[str, Any]) -> dict[str, Any]:
                 else:
                     outcome, reason = "retained", state["reason"]
             elif source_only:
-                if page.root["status"] == "retired":
+                if page.state.root["status"] == "retired":
                     outcome, reason = "retained", "rule_retired_keep_following"
                 else:
                     assert occurrence is not None
@@ -974,7 +933,7 @@ def process_existing(page: Page, assignment: dict[str, Any]) -> dict[str, Any]:
                                 moved = False
                             else:
                                 adopting = True
-                                page.runtime["cutoffs"].append(target["utc_instant"])
+                                page.state.runtime["cutoffs"].append(target["utc_instant"])
                                 moved = target["utc_instant"] != binding_facts.scheduled_for_target(current)["utc_instant"]
                                 state.update(
                                     adopted_rule_revision_id=intent["configuration_revision_id"], managed_baseline=baseline(desired)
@@ -1021,7 +980,7 @@ def process_existing(page: Page, assignment: dict[str, Any]) -> dict[str, Any]:
     state_id = None
     if state != original:
         state_id = append_state(db, assignment, state, request, page.now)
-        page.changed = True
+        page.state.changed = True
     if intent:
         if intent_result is None and (state["restoration_veto"] or source_only):
             intent_result = "skipped_terminal" if current["detail"]["task_status"] != "open" else "skipped_independent"
@@ -1030,7 +989,7 @@ def process_existing(page: Page, assignment: dict[str, Any]) -> dict[str, Any]:
                 current_assignment = read_record(db, "related_task_assignments", assignment["assignment_id"])
                 state["pending_intent_id"] = intent["intent_id"]
                 state_id = append_state(db, current_assignment, state, request, page.now)
-                page.changed = True
+                page.state.changed = True
         if intent_result:
             adoption.outcome(
                 page, intent, assignment, state_id or assignment["current_assignment_revision_id"], intent_result, intent_reason or reason
@@ -1062,7 +1021,7 @@ def process_existing(page: Page, assignment: dict[str, Any]) -> dict[str, Any]:
             },
         )
     after = references(db, read_record(db, "related_task_assignments", assignment["assignment_id"]))
-    page.mappings.extend(children.mappings(db, assignment["assignment_id"], gen, config))
+    page.state.mappings.extend(children.mappings(db, assignment["assignment_id"], gen, config))
     return entry(
         state["selector"],
         outcome,
