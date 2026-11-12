@@ -9,7 +9,7 @@ see [validation](TZDB_COMPATIBILITY_VALIDATION.md) and [operations](TZDB_COMPATI
 
 
 Role: Roadmap rationale and delivery history; current task status lives in [BACKLOG.md](BACKLOG.md)
-Last updated: 2026-11-12 (RF2 and R2 admission/read slice complete; remaining R2 exit work open; RF3/R3 unselected)
+Last updated: 2026-11-12 (R2 admission/read committed; manual intent/lifecycle continuation; RF3/R3 unselected)
 
 This is a non-normative delivery plan. The specifications and machine-readable contracts remain authoritative.
 
@@ -117,12 +117,13 @@ verified and committed as `07e097d`. The operator subsequently selected function
 R2 admission/read resumption, not automatic activation. RF3 and the original
 functional gates still precede R3.
 
-Preserve `e540a91`, the uncommitted R2 admission/read continuation, unrelated
-`AGENTS.md` edits and all prior completion evidence. The delivery plan below remains
-the functional roadmap. The 2026-11-12 instruction authorizes completing the
-preserved R2 admission/read work and its tests/tracking without committing,
-pushing, live calls, public activation or RF3/R3 implementation. R3 still requires
-the original R2 exit and a separate kickoff. Deferred
+The admission/read continuation is now committed as `002d24a`, following explicit
+operator authorization. Preserve unrelated `AGENTS.md` and older restoration-note
+edits and all prior completion evidence. The operator selected continued R2 manual
+reconciliation/lifecycle work; see the [current increment and remaining
+exit scope](design-notes/recurring-related-task-r2-intent-lifecycle.md).
+No push, live calls, public activation or RF3/R3 implementation is included.
+R3 still requires the original R2 exit and a separate kickoff. Deferred
 resilience/retention/scalability work is not reactivated by this assessment.
 
 ## Planned Delivery: Recurring-Source Related Tasks
@@ -262,10 +263,14 @@ history pagination and membership, observed versus immutable task/source truth,
 and exact single-read envelope limits. Final full regression passes **1,470 tests
 (one skipped)**, 377.265 seconds; 78 focused R2 cases and 41 boundary/contract/
 declaration tests also pass. The selected admission/read slice is complete and
-uncommitted; the evidence note records its precise scope, not whole-R2 conformance.
+committed as `002d24a`; the evidence note records its precise scope, not whole-R2 conformance.
 No public package/schema or runtime registry activation is included. Remaining R2
 combined-budget, restoration/custom-policy, intent/coverage, replay and wider
 concurrency matrices remain separate work; this does not close R2 or authorize R3.
+The selected [intent/lifecycle continuation](design-notes/recurring-related-task-r2-intent-lifecycle.md)
+adds final-skip selection, same-page cancellation/restoration intent outcomes and
+independent bounded lane/intent coverage. Its verification and precise outstanding
+R2 obligations are tracked under SPINE-093; the continuation is not yet committed.
 
 Implement all seven command handlers internally using the shared command context
 and one outer transaction, not recursive public-command submissions or child

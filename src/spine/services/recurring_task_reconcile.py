@@ -621,7 +621,7 @@ def finish(
     processed_assignments: int, existing_more: bool, source_more: bool,
 ) -> tuple[dict[str, Any], str, bool]:
     from spine.ledger.recurring_task_catalog import advance_catalog, catalog, intent_view, pending_adoption, rule_view
-    from spine.services.recurring_task_adoption import complete
+    from spine.services.recurring_task_adoption import complete, coverage_status
 
     db, request, root = page.db, page.request, page.state.root
     context, contracts, now, position = page.context, page.contracts, page.now, page.state.position
@@ -666,6 +666,10 @@ def finish(
     more, blocked = existing_more or source_more, any(v["outcome"] == "decision_required" for v in page.state.results)
     adoption = pending_adoption(db, root["related_task_rule_id"])
     intent = intent_view(db, selected_intent["intent_id"]) if selected_intent else None
+    adoption_coverage = intent if intent and intent["kind"] == "adopt" else adoption
+    retirement_coverage = intent_view(db, root["retirement_intent_id"])
+    assignment_blocked = any(v["outcome"] == "decision_required" for v in page.state.results[:processed_assignments])
+    generation_blocked = any(v["outcome"] == "decision_required" for v in page.state.results[processed_assignments:])
     query = {
         "contract_version": CONTRACT,
         "ledger_instance_id": read_ledger_instance_id(db),
@@ -703,6 +707,14 @@ def finish(
             "remaining_known_count": "0" if status in {"complete", "not_applicable"} else None,
         }
 
+    def intent_coverage(selected: dict[str, Any] | None) -> dict[str, Any]:
+        # Assignment sequences are gapless immutable reservations. Intersect the
+        # retained page's existing lane with this intent's finite high water; new
+        # source allocations and assignments above it are not adoption work.
+        high_water = int(selected["assignment_high_water"]) if selected else 0
+        count = min(int(position["assignment_after_seq"]), high_water) - min(int(original["assignment_after_seq"]), high_water)
+        return coverage(coverage_status(db, root["related_task_rule_id"], selected), count)
+
     unique_mappings = {(p["task_item_id"], p["policy_key"]): p for p in page.state.mappings}
     result = {
         "rule": rule_view(db, root),
@@ -726,30 +738,16 @@ def finish(
                 else "partial"
                 if source_more
                 else "decision_required"
-                if blocked
+                if generation_blocked
                 else "complete",
                 len(page.state.results) - processed_assignments,
             ),
             "assignments": coverage(
-                "partial" if existing_more else "decision_required" if blocked else "complete",
+                "partial" if existing_more else "decision_required" if assignment_blocked else "complete",
                 processed_assignments,
             ),
-            "adoption": coverage(
-                "complete"
-                if intent and intent["kind"] == "adopt" and intent["status"] == "complete"
-                else "partial"
-                if adoption
-                else "not_applicable",
-                processed_assignments if selected_intent and selected_intent["kind"] == "adopt" else 0,
-            ),
-            "retirement": coverage(
-                "complete"
-                if intent and intent["kind"] == "retire" and intent["status"] == "complete"
-                else "partial"
-                if intent and intent["kind"] == "retire"
-                else "not_applicable",
-                processed_assignments if selected_intent and selected_intent["kind"] == "retire" else 0,
-            ),
+            "adoption": intent_coverage(adoption_coverage),
+            "retirement": intent_coverage(retirement_coverage),
         },
         "future_generation": "rule_retired"
         if root["status"] != "active"
@@ -768,7 +766,7 @@ def finish(
 
 def process_existing(page: Page, assignment: dict[str, Any]) -> dict[str, Any]:
     """Maintain an existing reservation independently of new-generation coverage."""
-    from spine.ledger.recurring_task_catalog import intent_view, pending_adoption
+    from spine.ledger.recurring_task_catalog import intent_view
     from spine.ledger.temporal_bindings import load_temporal_binding
     from spine.services import recurring_task_adoption as adoption
     from spine.services.recurring_task_states import append_state
@@ -786,9 +784,7 @@ def process_existing(page: Page, assignment: dict[str, Any]) -> dict[str, Any]:
     cause = row(db, "related_task_source_cancellations", gen["generation_id"])
     owned = refs["item_access_owner_id"] == gen["item_access_owner_id"] and refs["item_access_owner_revision"] == "1"
     retirement = intent_view(db, page.state.root["retirement_intent_id"])
-    intent = pending_adoption(db, page.state.root["related_task_rule_id"])
-    if intent and assignment["assignment_seq"] > int(intent["assignment_high_water"]):
-        intent = None
+    intent = adoption.selected(db, page.state.root["related_task_rule_id"], assignment)
     intent_result, intent_reason, adopting, managed = None, None, False, None
     reason, outcome, actions = "already_current", "retained", []
     source = binding_facts.source_from_prior(prior)
@@ -950,11 +946,27 @@ def process_existing(page: Page, assignment: dict[str, Any]) -> dict[str, Any]:
                         db, command_id=page.request["command_id"], budget=page.budget, assignment_id=assignment["assignment_id"],
                         generation=gen, current=current, binding=binding, config=config,
                     )
-                    return page.create(
+                    restored = page.create(
                         occurrence, assignment=assignment, config=restoration.configuration,
                         config_id=state["adopted_rule_revision_id"], proof_id=proof_id,
                         managed_baseline=state["managed_baseline"], restoration=restoration,
                     )
+                    if intent:
+                        # This page selected a cancelled predecessor, outside
+                        # upcoming-open adoption. Restoration copies its choices;
+                        # it is not implicit consent to the pending new template.
+                        latest = read_record(db, "related_task_assignments", assignment["assignment_id"])
+                        retained = read_record(
+                            db, "related_task_assignment_revisions", latest["current_assignment_revision_id"]
+                        )["state_json"]
+                        retained["pending_intent_id"] = intent["intent_id"]
+                        retained_id = append_state(db, latest, retained, request, page.now)
+                        adoption.outcome(db, page.invocation, intent, assignment["assignment_id"], retained_id,
+                                         "skipped_terminal", original["reason"])
+                        page.state.changed = True
+                        restored["after"] = references(db, read_record(db, "related_task_assignments", assignment["assignment_id"]))
+                        restored["actions"] = sorted(set(restored["actions"]) | {"intent_skipped"})
+                    return restored
             else:
                 target = target_from_source(source, int(prior["offset_seconds"]))
                 moved = target["utc_instant"] != binding_facts.scheduled_for_target(current)["utc_instant"]
@@ -1028,6 +1040,14 @@ def process_existing(page: Page, assignment: dict[str, Any]) -> dict[str, Any]:
             state["pending_intent_id"] = intent["intent_id"]
     elif state != original:
         state["reason"] = reason
+    if intent:
+        if intent_result is None and outcome == "decision_required":
+            intent_result, intent_reason = "conflict", reason
+        elif intent_result is None and (state["restoration_veto"] or state["disposition"] == "source_cancelled" or source_only):
+            terminal = current["detail"]["task_status"] != "open" or state["disposition"] == "source_cancelled"
+            intent_result, intent_reason = ("skipped_terminal" if terminal else "skipped_independent"), reason
+        if intent_result:
+            state["pending_intent_id"] = intent["intent_id"]
     # A manually advanced task needs an exact binding witness even for a terminal veto.
     if outcome != "decision_required" and int(state["task_item_version"]) < int(current["current_version"]):
         state.update(page.change( assignment, gen, binding, current, source, config))
@@ -1035,21 +1055,12 @@ def process_existing(page: Page, assignment: dict[str, Any]) -> dict[str, Any]:
     if state != original:
         state_id = append_state(db, assignment, state, request, page.now)
         page.state.changed = True
-    if intent:
-        if intent_result is None and (state["restoration_veto"] or source_only):
-            intent_result = "skipped_terminal" if current["detail"]["task_status"] != "open" else "skipped_independent"
-            intent_reason = reason
-            if state.get("pending_intent_id") != intent["intent_id"]:
-                current_assignment = read_record(db, "related_task_assignments", assignment["assignment_id"])
-                state["pending_intent_id"] = intent["intent_id"]
-                state_id = append_state(db, current_assignment, state, request, page.now)
-                page.state.changed = True
-        if intent_result:
-            recorded = adoption.outcome(
-                db, page.invocation, intent, assignment["assignment_id"],
-                state_id or assignment["current_assignment_revision_id"], intent_result, intent_reason or reason
-            )
-            page.state.changed = page.state.changed or recorded
+    if intent and intent_result:
+        recorded = adoption.outcome(
+            db, page.invocation, intent, assignment["assignment_id"],
+            state_id or assignment["current_assignment_revision_id"], intent_result, intent_reason or reason
+        )
+        page.state.changed = page.state.changed or recorded
     if retirement and assignment["assignment_seq"] <= int(retirement["assignment_high_water"]):
         recorded = adoption.outcome(
             db, page.invocation,

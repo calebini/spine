@@ -121,17 +121,41 @@ def outcome(db: LedgerConnection, invocation: ChildInvocation, intent: dict[str,
     return False
 
 
-def complete(db: LedgerConnection, invocation: ChildInvocation, *, rule_id: str,
-             budget: ProofBudget, intent: dict[str, Any]) -> bool:
-    """Indexed missing-outcome seek, then bounded conflict-resolution evidence."""
-    invocation.require_transaction(db)
-    unresolved = db.execute(
+def selected(db: LedgerConnection, rule_id: str, assignment: dict[str, Any]) -> dict[str, Any] | None:
+    """A final skip/application is not reopened by a later source move or restore."""
+    from spine.ledger.recurring_task_catalog import pending_adoption
+
+    intent = pending_adoption(db, rule_id)
+    if intent is None or assignment["assignment_seq"] > int(intent["assignment_high_water"]):
+        return None
+    prior = row(db, "related_task_intent_outcomes", intent["intent_id"], assignment["assignment_id"])
+    return intent if prior is None or prior["outcome"] == "conflict" else None
+
+
+def missing_outcomes(db: LedgerConnection, rule_id: str, intent: dict[str, Any]) -> bool:
+    """Indexed existence seek; do not count the root or infer completion from totals."""
+    return db.execute(
         "SELECT 1 FROM related_task_assignments a LEFT JOIN related_task_intent_outcomes o "
         "ON o.assignment_id=a.assignment_id AND o.intent_id=? WHERE a.related_task_rule_id=? AND a.assignment_seq<=? "
         "AND o.assignment_id IS NULL LIMIT 1",
         (intent["intent_id"], rule_id, int(intent["assignment_high_water"])),
-    ).fetchone()
-    if unresolved:
+    ).fetchone() is not None
+
+
+def coverage_status(db: LedgerConnection, rule_id: str, intent: dict[str, Any] | None) -> str:
+    """Called after bounded completion proof; pending conflicts are not more rows."""
+    if intent is None:
+        return "not_applicable"
+    if intent["status"] == "complete":
+        return "complete"
+    return "partial" if missing_outcomes(db, rule_id, intent) else "decision_required"
+
+
+def complete(db: LedgerConnection, invocation: ChildInvocation, *, rule_id: str,
+             budget: ProofBudget, intent: dict[str, Any]) -> bool:
+    """Indexed missing-outcome seek, then bounded conflict-resolution evidence."""
+    invocation.require_transaction(db)
+    if missing_outcomes(db, rule_id, intent):
         return False
     conflicts = db.execute(
         "SELECT assignment_id FROM related_task_intent_outcomes WHERE intent_id=? AND outcome='conflict' LIMIT ?",

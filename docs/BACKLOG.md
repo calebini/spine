@@ -1285,6 +1285,21 @@ remain. Unrelated `AGENTS.md` and restoration-note hashes are unchanged.
 **Next:** Remaining manual lifecycle/intent/coverage and wider concurrency obligations
 are separate R2 exit work. This slice does not close all R2 or authorize RF3/R3.
 No commit, push, deployment, live calls or public activation occurred.
+**Checkpoint/continuation (2026-11-12):** Admission/read completion committed as
+`002d24a` after 27 focused tests passed again, excluding the preserved `AGENTS.md`
+and older restoration-note edits; no push. The operator selected continued R2
+manual reconciliation/lifecycle work. Current focus is finite adoption/retirement
+intent outcomes, independent lane coverage, cancellation/restoration eligibility
+and races, under the existing command contract. The first continuation closes
+same-page cancellation/adoption skips, restoration without implicit adoption,
+final skip selection and independent finite intent/lane coverage. Seven new
+regressions plus existing reconciliation/refactoring witnesses pass **38 tests**;
+full regression passes **1,477 tests, OK (one skipped)**, 393.779 seconds. Focused
+Ruff, two-module typing, frozen web copies, 244 local targets and diff hygiene pass;
+unrelated edit hashes are unchanged. See [intent/lifecycle evidence and remaining
+exit work](design-notes/recurring-related-task-r2-intent-lifecycle.md). This
+continuation is uncommitted; no RF3/R3, public activation or live operations are
+selected, and R2 remains in progress.
 
 ### SPINE-094 — R3: recurring-task all-writer safety and automatic scheduling
 
