@@ -671,6 +671,7 @@ def finish(
 ) -> tuple[dict[str, Any], str, bool]:
     from spine.ledger.recurring_task_catalog import advance_catalog, catalog, intent_view, pending_adoption, rule_view
     from spine.services.recurring_task_adoption import complete, coverage_status
+    from spine.services.recurring_task_horizon import source_exhausted
 
     db, request, root = page.db, page.request, page.state.root
     context, contracts, now, position = page.context, page.contracts, page.now, page.state.position
@@ -804,6 +805,8 @@ def finish(
         if blocked
         else "eligible"
         if source_more
+        else "source_exhausted"
+        if not more and source_exhausted(page.recurrence, evaluation, page.budget)
         else "waiting",
         "has_more": more,
         "next_cursor": cursor,

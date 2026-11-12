@@ -321,6 +321,36 @@ def expand_rule(
     return ExpandedRule(candidates=tuple(candidates), omitted_local_candidates=tuple(omitted))
 
 
+def rule_exhausted_before(
+    rule: CanonicalRule,
+    *,
+    boundary: str,
+    time_basis: str,
+    timezone: str | None = None,
+    timezone_database_version: str | None = None,
+    segment_start: str | None = None,
+    segment_end: str | None = None,
+) -> bool:
+    """Prove a rule has no candidates at/after one original-schedule boundary.
+
+    Use the same pre-exclusion, DST-aware COUNT arithmetic as expansion. This
+    does not expand history or treat a currently empty window as exhaustion.
+    Callers with work budgets must charge calendar/zone preparation before use.
+    """
+    parse_scheduled_fact(boundary, time_basis=time_basis, field="boundary")
+    lower = max(value for value in (rule.seed, rule.start_bound, segment_start) if value is not None)
+    if segment_end is not None and segment_end <= max(lower, boundary):
+        return True
+    if rule.until is not None and rule.until < max(lower, boundary):
+        return True
+    if rule.count is None:
+        return False
+    return _valid_candidate_count_between(
+        rule, start=lower, end=boundary, time_basis=time_basis,
+        timezone=timezone, timezone_database_version=timezone_database_version,
+    ) >= rule.count
+
+
 def _valid_candidate_count_between(
     rule: CanonicalRule,
     *,

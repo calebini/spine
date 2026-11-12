@@ -135,3 +135,49 @@ Broader reminder-lead/calendar-day support and finite-source exhaustion, remaini
 customization/source-continuity and combined-budget matrices, and additional
 cross-connection interleavings remain tracked R2 work. RF3/R3, public activation,
 live ledgers, migration, sending and deployment remain outside this continuation.
+
+## Finite-source exhaustion continuation — 2026-11-12
+
+The blocked-intent increment was committed as `0f2aeec`, preserving both unrelated
+edits. No push occurred. The following continuation is internal R2 work and remains
+uncommitted.
+
+### Scope
+
+- Completed manual pages can now distinguish `source_exhausted` from `waiting`.
+  The proof uses the evaluation instant, not the horizon's end: an empty current
+  window is not evidence that a sparse or future source has ended.
+- The core helper reuses pre-exclusion candidate arithmetic, including COUNT,
+  inclusive UNTIL, exclusive segment bounds, segment-start clipping, omitted
+  invalid calendar dates and nonexistent local times. It does not enumerate all
+  historical occurrences. Local evaluations use the pinned source timezone.
+- Active future rdates or moved occurrences prevent an exhaustion claim, including
+  moves beyond the generation horizon. Unknown/unbounded futures remain waiting;
+  exclusions do not prematurely consume COUNT. This is a conservative proof, not
+  an exhaustive search for the next surviving occurrence.
+- Calendar preparation and child inspections consume the existing proof budget.
+  Incomplete lanes, blocked pages and retired rules preserve their prior precedence.
+  Repeated exhausted observations do not write progress or audit rows. Explicit
+  commands retain their ordinary command receipts; no automatic loop is added.
+
+### Verification
+
+Ten new tests cover count/until boundary equality, segment clipping, invalid month
+days, leap-day yearly gaps, DST omissions, pinned local-time conversion, bounded
+arithmetic for old rules, future additions/moves, actual manual source-following,
+read-only proof budget failure and repeated exhausted no-op reconciliation.
+The initial eight tests plus existing reconciliation/lifecycle and frozen witnesses
+passed **56 tests**, 28.620 seconds. The final ten-test file passes, as do focused
+Ruff and three-module typing. Full regression passes **1,496 tests, OK (one skipped)**,
+420.159 seconds. The known non-fatal web read-budget callback and expected timezone
+substitution diagnostics appeared. All 244 unique local documentation targets and
+diff hygiene pass.
+Frozen web copies and public activation files are unchanged; preserved unrelated
+edit hashes match the preceding checkpoint. No frozen witness was regenerated.
+
+### Remaining boundary
+
+This does not close R2. Provable calendar-day reminder lead support, remaining
+customization/source-continuity and combined-budget matrices, and additional
+cross-connection interleavings remain tracked work. No RF3/R3, public activation,
+schema migration, live ledger access, notification send or deployment is included.

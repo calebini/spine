@@ -1313,6 +1313,20 @@ and four-module typing/Ruff pass. Full regression passes **1,486 tests, OK
 hygiene pass, with preserved edit hashes unchanged. See the same
 intent/lifecycle evidence note's continuation. No new public or automatic surface
 is authorized; this continuation is uncommitted and R2 is not fully closed.
+**Checkpoint/finite-source continuation (2026-11-12):** Committed the verified
+blocked-intent continuation as `0f2aeec`, excluding the preserved unrelated edits;
+no push. Continued R2 work is selected for bounded finite-source exhaustion
+reporting. Calendar-day reminder leads remain a separate timezone-aware proof
+obligation, not an elapsed-day approximation. The new read-only, budgeted proof
+reuses COUNT/UNTIL/segment arithmetic and pinned timezone semantics; future rdates
+and moved occurrences prevent premature exhaustion. Ten new tests cover sparse
+calendars, local boundaries, future moves, proof budgets and repeated no-op progress.
+Verification: **56** focused tests followed by the final **10-test** horizon file;
+full regression **1,496 tests, OK (one skipped)**, 420.159 seconds. Three-module
+typing, focused Ruff, frozen web copies, 244 local links and diff hygiene pass.
+Known non-fatal read-budget/timezone diagnostics remain. Public activation files
+and preserved unrelated hashes are unchanged. The finite-source increment is
+uncommitted; R2 remains open, with no RF3/R3, push, live operations or deployment.
 
 ### SPINE-094 — R3: recurring-task all-writer safety and automatic scheduling
 

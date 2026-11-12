@@ -270,10 +270,15 @@ concurrency matrices remain separate work; this does not close R2 or authorize R
 The selected [intent/lifecycle continuation](design-notes/recurring-related-task-r2-intent-lifecycle.md)
 adds final-skip selection, same-page cancellation/restoration intent outcomes and
 independent bounded lane/intent coverage, committed as `d61571e`. The subsequent
-uncommitted continuation closes selected durable blocked-outcome, conflict-skip
+continuation, committed as `0f2aeec`, closes selected durable blocked-outcome, conflict-skip
 finality and retirement race cases, plus a multi-child profile-link identity
 collision exposed by real recovery. Verification and precise outstanding R2
 obligations are tracked under SPINE-093; this does not close R2 or authorize RF3/R3.
+The next internal increment adds budgeted finite-source exhaustion reporting using
+the recurrence engine's COUNT/UNTIL/segment semantics, preserving future additions
+and moves and avoiding durable progress writes for idle observations. Calendar-day
+reminder-lead proof remains separate; it is not approximated by fixed elapsed days.
+See the same evidence note for verification and remaining R2 exit work.
 
 Implement all seven command handlers internally using the shared command context
 and one outer transaction, not recursive public-command submissions or child
