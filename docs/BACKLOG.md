@@ -1,6 +1,6 @@
 # Spine Backlog
 
-Last updated: 2026-11-11
+Last updated: 2026-11-12
 
 This is the single work queue for Spine development. The
 [implementation plan](IMPLEMENTATION_PLAN.md) explains roadmap direction and delivery
@@ -245,8 +245,9 @@ tests, OK (one skipped)** in 392.707 seconds with installed pinned Tickerd v1.
 Known non-failing capacity-limit/timezone diagnostics appeared. All 456 local link
 targets and 36 cross-document heading fragments resolve; diff hygiene passes.
 **Evidence/next:** [RF2 state/composition evidence and gate map](design-notes/internal-operations-rf2.md).
-The operator selected the final composition checkpoint. Functional R2 still requires explicit
-resumption; RF3 propagation and the original functional gates remain before R3.
+The final composition checkpoint is committed as `07e097d`. The operator then
+explicitly resumed admission/read work under SPINE-093 on 2026-11-12; RF3
+propagation and the original functional gates remain before R3.
 No push or deployment.
 **Page-state continuation:** Implemented one typed owner for rollbackable page data
 and retained SQL/Python unit checkpoints. Final projections use the same paired
@@ -1064,8 +1065,10 @@ No public command, automatic generation, delivery or deployment is authorized.
 
 ### SPINE-093 — R2: recurring-task commands and manual reconciliation
 
-**Status:** Paused by operator (2026-11-11); SPINE-096 assessment is complete and the
-selected internal design is drafted under SPINE-097. Prior authorization/evidence remains: R1 checkpoint
+**Status:** In progress — admission/read slice complete (2026-11-12), following
+explicit resumption after SPINE-100/RF2 completion. Remaining manual-engine exit
+evidence is not closed. No RF3/R3 or public activation selected.
+Prior authorization/evidence remains: R1 checkpoint
 and R2, including the narrow prospective producer fixes; R1 committed as `bc96a1d`.
 **Scope:** All seven internal command handlers, configuration/enrollment,
 read/history/cursors, atomic ordinary task/owner/binding/policy/work creation,
@@ -1247,12 +1250,41 @@ non-fatal read-budget/timezone diagnostics appeared. Frozen web copies, 361 loca
 documentation targets and diff hygiene pass; unrelated `AGENTS.md` hash preserved.
 The operator requested committing this verified continuation before proceeding;
 public activation, R3 and R4 remain separate gates.
-**Next:** Further implementation is paused by the 2026-11-11 operator direction;
-review/ratify SPINE-097 and verify the selected refactoring/resume gates first. On explicit
-resumption, retain the remaining restoration/custom-policy, proof/hop/read/error-
-precedence, intent/coverage, replay and wider concurrency matrices against these
-tested foundations. Preserve immutable history and the R4-only public activation
-boundary; R2 is not complete from the selected passing cases.
+**Restoration checkpoint:** Committed as `e540a91` on 2026-11-11, excluding
+unrelated `AGENTS.md` changes. The operator authorized continued R2 implementation.
+**Admission/read continuation (2026-11-11):** Explicit reference lookups now precede
+stale expected facts, while semantic/disclosure owners and compatible replay retain
+their phases. Syntax paths are ordered as specified; invalid Unicode and unsupported
+source items have closed, non-environment classifications. Paged reads count the
+exact success envelope rather than using a fixed byte reservation. Actual large
+adoption histories, historical replay after retirement/source/cursor changes, and
+mid-page proof/hop budget failures have new no-write/continuation tests.
+See [admission/read evidence and remaining work](design-notes/recurring-related-task-r2-admission-reads.md).
+**Verification:** Final focused command/page/restoration/bootstrap selection:
+**80 tests, OK**, 51.973 seconds. Three touched admission modules pass focused
+typing; Ruff/diff hygiene pass. Full regression: **1,402 tests, OK (one skipped)**,
+367.386 seconds. Known non-fatal timezone-substitution diagnostics appeared.
+Frozen web copies and 364 local documentation targets pass; unrelated `AGENTS.md`
+hash is unchanged, and public activation files have no diff.
+This continuation is uncommitted; no public capability, migration, R3 or R4 activation.
+**Admission/read completion (2026-11-12):** Following RF2 checkpoint `07e097d`,
+the explicitly resumed slice is complete and uncommitted. It preserves the prior
+continuation, fixes multiple-missing-field/unknown-view precedence and closes
+authenticated cursor overflow as `invalid_request:cursor`. Nine additional tests
+cover internal admission, all expected facts/limit domains, every cursor purpose,
+actual history pagination/membership, observed versus immutable truth, list filters
+and exact single-read envelopes. See the linked admission/read evidence above.
+**Verification:** Expanded focused selection **76 passed**, plus both subsequent
+admission/expected-order tests; **41** boundary/contract/declaration tests passed.
+Final full regression **1,470 tests, OK (one skipped)**, 377.265 seconds. The first
+full run exposed a stale RF1 exact-body guard; a separate hash-pinned two-body R2
+amendment preserves both original baselines and every unrelated function hash.
+Ruff, four-module typing (unavailable third-party stubs excluded), frozen web copies,
+local links and diff hygiene pass. Known non-fatal read-budget/timezone diagnostics
+remain. Unrelated `AGENTS.md` and restoration-note hashes are unchanged.
+**Next:** Remaining manual lifecycle/intent/coverage and wider concurrency obligations
+are separate R2 exit work. This slice does not close all R2 or authorize RF3/R3.
+No commit, push, deployment, live calls or public activation occurred.
 
 ### SPINE-094 — R3: recurring-task all-writer safety and automatic scheduling
 

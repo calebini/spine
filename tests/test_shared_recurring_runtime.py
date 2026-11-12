@@ -27,10 +27,23 @@ ROOT = Path(__file__).resolve().parents[1]
 class SharedRecurringRuntimeTests(unittest.TestCase):
     def test_extracted_and_preexisting_admission_bodies_match_captured_baseline(self):
         witness = json.loads((ROOT / "tests/fixtures/internal_operations/rf1_runtime_catalog_witness.json").read_text())
-        # Accept one complete captured state, never a per-function mix. The R2
-        # admission/read continuation is intentionally not part of this commit.
+        amendment = json.loads((ROOT / "tests/fixtures/internal_operations/r2_admission_read_body_amendment.json").read_text())
+        self.assertEqual(amendment["baseline_fixture"], "tests/fixtures/internal_operations/rf1_runtime_catalog_witness.json")
+        self.assertEqual(hashlib.sha256((ROOT / amendment["baseline_fixture"]).read_bytes()).hexdigest(),
+                         amendment["baseline_fixture_sha256"])
+        self.assertEqual(amendment["baseline_variant"], "bodies")
+        replacements = {(entry["path"], entry["name"]): entry for entry in amendment["replacements"]}
+        self.assertEqual(len(amendment["replacements"]), 2)
+        self.assertEqual(set(replacements), {
+            ("src/spine/commands/recurring_task_runtime.py", "RecurringTaskContracts"),
+            ("src/spine/core/recurring_task_runtime.py", "verify_cursor"),
+        })
+        amended = [replacements.get((entry["path"], entry["name"]), entry) for entry in witness["bodies"]]
+        # Accept one complete captured state, never a per-function mix. Retain
+        # both original RF1 baselines and narrowly record the two functional R2
+        # corrections authorized after RF2; all other body hashes stay frozen.
         mismatches = []
-        for variant in (witness["bodies"], witness["committed_bodies"]):
+        for variant in (witness["bodies"], witness["committed_bodies"], amended):
             failures = []
             for entry in variant:
                 nodes = ast.parse((ROOT / entry["path"]).read_text()).body
@@ -52,7 +65,7 @@ class SharedRecurringRuntimeTests(unittest.TestCase):
             if not failures:
                 return
             mismatches.append(failures)
-        self.fail(f"Neither complete captured baseline matches: {mismatches}")
+        self.fail(f"No complete captured baseline or authorized R2 amendment matches: {mismatches}")
 
     def test_command_aliases_share_the_lower_implementation(self):
         for name in ("fail", "instant", "wire", "cursor_config", "sign_cursor", "verify_cursor", "cursor_payload"):

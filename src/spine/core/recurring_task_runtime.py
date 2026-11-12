@@ -61,6 +61,7 @@ def cursor_config(config: Any, ledger_id: str) -> None:
         or getattr(config, "ledger_id", None) != ledger_id
         or not isinstance(getattr(config, "generation", None), str)
         or not config.generation
+        or any(0xD800 <= ord(char) <= 0xDFFF for char in config.generation)
     ):
         fail("environment_failure", "cursor_configuration")
 
@@ -88,7 +89,7 @@ def verify_cursor(
             raise ValueError("binding")
         if instant(payload["expires_at_utc"]) != instant(payload["issued_at_utc"]) + timedelta(seconds=3600):
             raise ValueError("lifetime")
-    except (ValueError, UnicodeError, SpineValidationError, KeyError, TypeError) as exc:
+    except (ValueError, UnicodeError, SpineValidationError, KeyError, TypeError, OverflowError) as exc:
         raise SpineValidationError("invalid_request:cursor", "invalid recurring-task cursor") from exc
     if payload["catalog_generation"] != catalog or instant(now) >= instant(payload["expires_at_utc"]):
         fail("stale_cursor", "cursor")

@@ -9,7 +9,7 @@ see [validation](TZDB_COMPATIBILITY_VALIDATION.md) and [operations](TZDB_COMPATI
 
 
 Role: Roadmap rationale and delivery history; current task status lives in [BACKLOG.md](BACKLOG.md)
-Last updated: 2026-11-11 (RF1 checkpointed; RF2 transaction-state ownership selected; R2/R3 remains paused)
+Last updated: 2026-11-12 (RF2 and R2 admission/read slice complete; remaining R2 exit work open; RF3/R3 unselected)
 
 This is a non-normative delivery plan. The specifications and machine-readable contracts remain authoritative.
 
@@ -26,8 +26,9 @@ now defines shared operation, mutation-state and propagation boundaries and IO-0
 preservation gates. Architecture/storage delegation and the normative index are aligned.
 Status and evidence are in SPINE-096–100. The operator ratified v1.0 and explicitly
 selected RF0/RF1 after the bounded review below. The selected RF0/RF1 extraction is
-now verified and checkpointed. The operator subsequently selected RF2; RF3 and
-functional recurring R2/R3 remain separately gated.
+now verified and checkpointed. The operator subsequently selected and completed
+RF2, then explicitly resumed R2 admission/read work on 2026-11-12. RF3/R3 remain
+separately gated.
 
 The draft, assessment and related tracking were committed as `60e025e`, excluding
 the preserved R2 continuation and unrelated `AGENTS.md` changes. SPINE-098 stages
@@ -112,14 +113,16 @@ matrices, declaration/permission/policy-lineage checks and strict typing/lint pa
 Full regression passes **1,461 tests, one skipped**, 366.240 seconds, after correcting
 the single stale inventory key detected in the first run. Public contracts and
 schema are unchanged. SPINE-100/RF2 is complete; the composition increment is
-verified and included in this checkpoint. Next is explicit functional R2 resumption,
-not automatic activation. RF3 and the original functional gates still precede R3.
+verified and committed as `07e097d`. The operator subsequently selected functional
+R2 admission/read resumption, not automatic activation. RF3 and the original
+functional gates still precede R3.
 
 Preserve `e540a91`, the uncommitted R2 admission/read continuation, unrelated
 `AGENTS.md` edits and all prior completion evidence. The delivery plan below remains
-the functional roadmap, but earlier kickoff statements do not override this pause.
-R2 resumes only on explicit operator direction after the selected internal boundary
-work; R3 still requires the original R2 exit and a separate kickoff. Deferred
+the functional roadmap. The 2026-11-12 instruction authorizes completing the
+preserved R2 admission/read work and its tests/tracking without committing,
+pushing, live calls, public activation or RF3/R3 implementation. R3 still requires
+the original R2 exit and a separate kickoff. Deferred
 resilience/retention/scalability work is not reactivated by this assessment.
 
 ## Planned Delivery: Recurring-Source Related Tasks
@@ -248,6 +251,18 @@ That increment was committed as `fa16c98`. The following
 [restoration increment](design-notes/recurring-related-task-r2-restoration.md)
 preserves actual child/reminder/facet choices on fresh generations and closes the
 narrow ordinary profile-policy successor-link prerequisite exposed by its tests.
+Restoration was committed as `e540a91`. The following
+[admission/read increment](design-notes/recurring-related-task-r2-admission-reads.md)
+closes selected validation/reference ordering, exact read-envelope pagination,
+historical replay and real budget rollback cases without activating public behavior.
+The 2026-11-12 continuation closes the admission/read edge matrix: required-field
+and unknown-view precedence, all page-limit syntax boundaries, internal admission,
+all expected facts, authenticated cursor canonicalization/overflow/expiry, actual
+history pagination and membership, observed versus immutable task/source truth,
+and exact single-read envelope limits. Final full regression passes **1,470 tests
+(one skipped)**, 377.265 seconds; 78 focused R2 cases and 41 boundary/contract/
+declaration tests also pass. The selected admission/read slice is complete and
+uncommitted; the evidence note records its precise scope, not whole-R2 conformance.
 No public package/schema or runtime registry activation is included. Remaining R2
 combined-budget, restoration/custom-policy, intent/coverage, replay and wider
 concurrency matrices remain separate work; this does not close R2 or authorize R3.

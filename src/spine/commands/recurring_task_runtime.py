@@ -9,7 +9,7 @@ from __future__ import annotations
 import copy
 from typing import Any
 
-from jsonschema import Draft202012Validator, FormatChecker
+from jsonschema import Draft202012Validator, FormatChecker, ValidationError
 from referencing import Registry, Resource
 
 from spine.core.canonical_json import canonical_json_bytes
@@ -86,12 +86,33 @@ FIELDS = [
 ]
 
 
+def unicode_errors(value: Any, path: tuple[str, ...] = ()) -> list[Any]:
+    """Include the canonical string domain in ordinary ordered syntax failures."""
+    errors = []
+    if isinstance(value, str):
+        if any(0xD800 <= ord(char) <= 0xDFFF for char in value):
+            errors.append(ValidationError("invalid Unicode string", validator="utf8", path=path))
+    elif isinstance(value, dict):
+        for key, child in value.items():
+            # Do not place a surrogate key in the failure envelope itself.
+            if any(0xD800 <= ord(char) <= 0xDFFF for char in key):
+                errors.append(ValidationError("invalid Unicode object key", validator="utf8", path=path))
+            else:
+                errors.extend(unicode_errors(child, (*path, key)))
+    elif isinstance(value, list):
+        for index, child in enumerate(value):
+            errors.extend(unicode_errors(child, (*path, str(index))))
+    return errors
+
+
 FORMATS = FormatChecker()
 
 
-@FORMATS.checks("date-time", raises=(ValueError, TypeError))
 def _datetime(value: Any) -> bool:
     return not isinstance(value, str) or instant(value).tzinfo is not None
+
+
+FORMATS.checks("date-time", raises=(ValueError, TypeError))(_datetime)
 
 
 class RecurringTaskContracts:
@@ -113,22 +134,32 @@ class RecurringTaskContracts:
         if resource == "show-request" and isinstance(value, dict):
             view = value.get("view", "rule")
             candidates = [branch for branch in schema["oneOf"] if branch["properties"]["view"]["const"] == view]
-            if not candidates:
-                fail("invalid_request", "view")
-            schema = candidates[0]
+            if candidates:
+                schema = candidates[0]
+            else:
+                # An unknown view has no selected branch. Validate common
+                # requirements and supplied known fields before ordering errors;
+                # do not let the discriminator bypass an earlier root-ID error
+                # or invent required fields from an unrelated view.
+                branches = schema["oneOf"]
+                properties = {key: prop for branch in branches for key, prop in branch["properties"].items()}
+                properties["view"] = {"enum": [branch["properties"]["view"]["const"] for branch in branches]}
+                required = set.intersection(*(set(branch["required"]) for branch in branches))
+                schema = {"type": "object", "properties": properties, "required": sorted(required), "additionalProperties": False}
         if definition is not None:
             schema = {"$schema": "https://json-schema.org/draft/2020-12/schema", "$ref": uri + "#/$defs/" + definition}
         errors = list(Draft202012Validator(schema, registry=self.registry, format_checker=FORMATS).iter_errors(value))
+        errors.extend(unicode_errors(value))
         if not errors:
             return
         if output:
             fail("environment_failure", "response_contract")
 
-        def leaves(error):
+        def leaves(error: Any) -> list[Any]:
             if error.context:
                 children = error.context
                 if error.validator in {"oneOf", "anyOf"} and isinstance(error.instance, dict):
-                    for discriminator in ("mode", "kind", "owner_kind", "view", "purpose", "resolution"):
+                    for discriminator in ("mode", "kind", "owner_kind", "view", "purpose", "resolution", "revision_resolution"):
                         matching = [
                             index
                             for index, branch in enumerate(error.schema[error.validator])
@@ -143,15 +174,28 @@ class RecurringTaskContracts:
 
         # Select the intended discriminated branch, not unrelated union branches.
         errors = [leaf for error in errors for leaf in leaves(error)]
-        errors = [e for e in errors if e.validator != "const"] or errors
-
-        def ordering(error):
+        def error_path(error: Any) -> list[Any]:
             path = list(error.absolute_path)
+            if error.validator == "additionalProperties" and isinstance(error.instance, dict):
+                extra = sorted(set(error.instance) - set(error.schema.get("properties", {})))
+                if extra:
+                    path.append(extra[0])
+            if error.validator == "required":
+                missing = sorted(
+                    set(error.validator_value) - set(error.instance),
+                    key=lambda key: (FIELDS.index(key) if not path and key in FIELDS else len(FIELDS), key),
+                )
+                if missing:
+                    path.append(missing[0])
+            return path
+
+        def ordering(error: Any) -> tuple[int, tuple[str, ...], bool]:
+            path = error_path(error)
             top = FIELDS.index(path[0]) if path and path[0] in FIELDS else len(FIELDS)
-            return (top, -len(path), tuple(str(p) for p in path), error.validator != "additionalProperties")
+            return (top, tuple(str(p) for p in path), error.validator != "additionalProperties")
 
         error = min(errors, key=ordering)
-        path = list(error.absolute_path)
+        path = error_path(error)
         if (
             path[:2] == ["configuration", "task_owner"]
             and isinstance(value["configuration"]["task_owner"], dict)
@@ -159,14 +203,7 @@ class RecurringTaskContracts:
         ):
             fail("invalid_request", "configuration.task_owner.owner_kind")
         if error.validator == "additionalProperties" and isinstance(error.instance, dict):
-            extra = sorted(set(error.instance) - set(error.schema.get("properties", {})))
-            if extra:
-                path.append(extra[0])
-                fail("unsupported_field", ".".join(map(str, path)))
-        if error.validator == "required":
-            missing = sorted(set(error.validator_value) - set(error.instance))
-            if missing:
-                path.append(missing[0])
+            fail("unsupported_field", ".".join(map(str, path)))
         fail("invalid_request", ".".join(map(str, path)) or "request")
 
     def request(self, command: str, request: Any) -> dict[str, Any]:
@@ -176,7 +213,7 @@ class RecurringTaskContracts:
         if isinstance(request, dict) and request.get("contract_version") != CONTRACT:
             fail("unsupported_contract_version", "contract_version")
         self.validate(entry["request_schema"].rsplit("/", 1)[1].removesuffix(".schema.json"), request)
-        result = copy.deepcopy(request)
+        result: dict[str, Any] = copy.deepcopy(request)
         canonical_json_bytes(result)
         if command.endswith("create"):
             result["configuration"].setdefault("generation_horizon_seconds", "4838400")

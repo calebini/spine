@@ -28,7 +28,7 @@ from spine.core.hashing import audit_log_payload_hash, command_derived_id, hash_
 from spine.core.recurring_tasks import CONTRACT, derive, payload_hash
 from spine.ledger.identity import read_ledger_instance_id
 from spine.ledger.notification_profiles import require_owner_exists
-from spine.ledger.recurrence import load_current_recurrence_set
+from spine.ledger.recurrence import load_current_recurrence_header, load_current_recurrence_set
 from spine.ledger.recurring_task_catalog import (
     advance_catalog as advance_catalog,
 )
@@ -62,12 +62,20 @@ if TYPE_CHECKING:
     from spine.services.recurring_task_reconcile import ResponseSizer
 
 DELIVERY = "not_attempted_by_command"
+READ_RESPONSE_BYTES = 1048576
 INTERNAL_COMMANDS = frozenset(PREFIX + name for name in ("create", "update", "retire", "show", "list", "reconcile", "assignment.suppress"))
 
 
 class Preview(Exception):
     def __init__(self, result: dict[str, Any]) -> None:
         self.result = result
+
+
+def response_envelope(command: str, result: dict[str, Any], effect: str, changed: bool, now: str) -> dict[str, Any]:
+    return {
+        "ok": True, "response_contract": RESPONSE, "command": command,
+        "changed": changed, "effect": effect, "evaluated_at_utc": now, "result": result,
+    }
 
 
 def success_response(
@@ -80,9 +88,7 @@ def success_response(
         audits.append(command_derived_id(
             prefix="audit", command=command, command_id=request["command_id"], row_role="audit", request_path="/audit"
         ))
-    response = {
-        "ok": True, "response_contract": RESPONSE, "command": command,
-        "changed": changed, "effect": effect, "evaluated_at_utc": now, "result": result,
+    response = response_envelope(command, result, effect, changed, now) | {
         "command_id": request["command_id"],
         "command_receipt_id": command_derived_id(
             prefix="command_receipt", command=command, command_id=request["command_id"],
@@ -191,6 +197,8 @@ def create(db: Any, request: dict[str, Any], context: Any, contracts: Any, now: 
     for field, value in [("item_version", str(item["current_version"]))]:
         if source[field] != value:
             fail("stale_version", "source." + field)
+    if load_current_recurrence_header(db, item_id=source["item_id"]) is None:
+        fail("semantic_conflict", "source.item_id", "source must have a recurrence set")
     current = source_snapshot(db, {"source_item_id": source["item_id"]})
     for field in ("recurrence_set_id", "recurrence_revision_id"):
         if source[field] != current[field]:
@@ -430,27 +438,30 @@ def read(db: Any, command: str, request: dict[str, Any], context: Any, contracts
             value = assignment_view(db, read_record(db, table, record["assignment_id"]), root)
         else:
             value = stored_projection(db, table, record["generation_id" if purpose == "generations" else "assignment_revision_id"])
-        if len(canonical_json_bytes(rows + [value])) > 1040384:
+        if len(canonical_json_bytes(rows + [value])) > READ_RESPONSE_BYTES:
             if not rows:
                 fail("capacity_exceeded", "response_bytes")
             break
         rows.append(value)
-        last = str(record[key])
-    more = len(records) > len(rows)
-    token = None
-    if more:
-        token = sign_cursor(
-            config, cursor_payload(config, purpose=purpose, query=query, catalog=catalog(db), now=now, after=last), contracts
-        )
-    return {
-        "rows": rows,
-        "query": query,
-        "catalog_generation": catalog(db),
-        "has_more": more,
-        "next_cursor": token,
-        "read_at_utc": now,
-        "delivery": DELIVERY,
-    }
+    while True:
+        more = len(records) > len(rows)
+        last = str(records[len(rows) - 1][key]) if rows else after
+        token = None
+        if more:
+            token = sign_cursor(
+                config, cursor_payload(config, purpose=purpose, query=query, catalog=catalog(db), now=now, after=last), contracts
+            )
+        result = {
+            "rows": rows, "query": query, "catalog_generation": catalog(db),
+            "has_more": more, "next_cursor": token, "read_at_utc": now, "delivery": DELIVERY,
+        }
+        envelope = response_envelope(command, result, "rules_listed" if command.endswith("list") else "rule_shown", False, now)
+        envelope["commit_cutoff_recheck_required"] = True
+        if len(canonical_json_bytes(envelope)) <= READ_RESPONSE_BYTES:
+            return result
+        if len(rows) <= 1:
+            fail("capacity_exceeded", "response_bytes")
+        rows.pop()
 
 
 def execute(
@@ -531,8 +542,10 @@ def execute(
                     fail("environment_failure", "clock")
             except (TypeError, ValueError) as exc:
                 raise SpineValidationError("environment_failure:clock", "invalid execution clock") from exc
-            if writes and db.execute("SELECT 1 FROM subjects WHERE subject_id=?", (value["actor_subject_id"],)).fetchone() is None:
-                fail("referenced_row_not_found", "actor_subject_id")
+            if writes:
+                from spine.commands.recurring_task_references import validate as validate_references
+
+                validate_references(db, value, context)
             if not writes:
                 result = read(db, command, value, context, contracts, now)
                 effect, changed = ("rules_listed" if command.endswith("list") else "rule_shown"), False
@@ -566,15 +579,7 @@ def execute(
                         "command",
                         "manual reconciliation and suppression are not yet wired in this internal checkpoint",
                     )
-            response = {
-                "ok": True,
-                "response_contract": RESPONSE,
-                "command": command,
-                "changed": changed,
-                "effect": effect,
-                "evaluated_at_utc": now,
-                "result": result,
-            }
+            response = response_envelope(command, result, effect, changed, now)
             if writes:
                 receipt_id = command_derived_id(
                     prefix="command_receipt",
@@ -624,7 +629,7 @@ def execute(
             else:
                 response["commit_cutoff_recheck_required"] = True
             contracts.response(command, response)
-            response_limit = int(value["limits"]["response_bytes"]) if command == PREFIX + "reconcile" else 1048576
+            response_limit = int(value["limits"]["response_bytes"]) if command == PREFIX + "reconcile" else READ_RESPONSE_BYTES
             if len(canonical_json_bytes(response)) > response_limit:
                 fail("capacity_exceeded", "limits.response_bytes" if command == PREFIX + "reconcile" else "response_bytes")
             if context.dry_run and writes:

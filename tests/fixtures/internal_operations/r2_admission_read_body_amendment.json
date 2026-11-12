@@ -1,0 +1,21 @@
+{
+  "baseline_fixture": "tests/fixtures/internal_operations/rf1_runtime_catalog_witness.json",
+  "baseline_fixture_sha256": "655afd7ef53e8238a827cf15d5db278a45a28a0b0321335006214e118304534b",
+  "baseline_variant": "bodies",
+  "authorization": "2026-11-12 operator-selected R2 admission/read completion after RF2 commit 07e097d; no RF3/R3 or public activation.",
+  "regression_tests": "tests/test_recurring_task_admission_reads.py",
+  "replacements": [
+    {
+      "path": "src/spine/commands/recurring_task_runtime.py",
+      "name": "RecurringTaskContracts",
+      "body_sha256": "644570820b27f483c96c30997d3c8d47bab8b38118be3a40edd8fc6db963c90a",
+      "reason": "Preserve command-field order for multiple missing fields and unknown show views without inventing another view's requirements."
+    },
+    {
+      "path": "src/spine/core/recurring_task_runtime.py",
+      "name": "verify_cursor",
+      "body_sha256": "256ba4f65d3868e29a4f9e4d1b4a3f8bb46a112afac7a2e0724c30bbc3cff1a9",
+      "reason": "Translate authenticated cursor datetime overflow to the existing invalid_request:cursor failure."
+    }
+  ]
+}
