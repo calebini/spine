@@ -197,7 +197,8 @@ def create(db: Any, request: dict[str, Any], context: Any, contracts: Any, now: 
     for field, value in [("item_version", str(item["current_version"]))]:
         if source[field] != value:
             fail("stale_version", "source." + field)
-    if load_current_recurrence_header(db, item_id=source["item_id"]) is None:
+    header = load_current_recurrence_header(db, item_id=source["item_id"])
+    if header is None:
         fail("semantic_conflict", "source.item_id", "source must have a recurrence set")
     current = source_snapshot(db, {"source_item_id": source["item_id"]})
     for field in ("recurrence_set_id", "recurrence_revision_id"):
@@ -205,8 +206,7 @@ def create(db: Any, request: dict[str, Any], context: Any, contracts: Any, now: 
             fail("stale_version", "source." + field)
     if item["item_type"] != "event" or item["status"] != "active" or item["event_status"] != "scheduled":
         fail("semantic_conflict", "source.item_id")
-    header = db.execute("SELECT time_basis FROM recurrence_sets WHERE recurrence_set_id=?", (source["recurrence_set_id"],)).fetchone()
-    if header[0] not in {"local_instant", "instant_utc"}:
+    if header["time_basis"] not in {"local_instant", "instant_utc"}:
         fail("semantic_conflict", "source.item_id")
     identity = derive("rule", {"owner": request["owner"], "rule_key": request["rule_key"]})[0]
     if db.execute(
@@ -214,7 +214,7 @@ def create(db: Any, request: dict[str, Any], context: Any, contracts: Any, now: 
         (canonical_json_bytes(request["owner"]).decode(), request["rule_key"]),
     ).fetchone():
         fail("semantic_conflict", "rule_key")
-    config = normalize_configuration(request["configuration"], context, contracts)
+    config = normalize_configuration(request["configuration"], context, contracts, source_time=header)
     enrollment = copy.deepcopy(request["enrollment"])
     if enrollment["kind"] == "selected_occurrence":
         from spine.commands import core
@@ -269,7 +269,10 @@ def update(
     prior = read_record(db, "related_task_rule_revisions", root["current_revision_id"])
     if request["configuration"]["task_owner"] != prior["configuration_json"]["task_owner"]:
         fail("semantic_conflict", "configuration.task_owner")
-    config = normalize_configuration(request["configuration"], context, contracts)
+    header = load_current_recurrence_header(db, item_id=root["source_item_id"])
+    if header is None:
+        fail("environment_failure", "source")
+    config = normalize_configuration(request["configuration"], context, contracts, source_time=header)
     equal = config == prior["configuration_json"]
     pending = pending_adoption(db, root["related_task_rule_id"])
     if pending and pending["configuration_revision_id"] != root["current_revision_id"]:

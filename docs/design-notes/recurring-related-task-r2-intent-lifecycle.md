@@ -181,3 +181,91 @@ This does not close R2. Provable calendar-day reminder lead support, remaining
 customization/source-continuity and combined-budget matrices, and additional
 cross-connection interleavings remain tracked work. No RF3/R3, public activation,
 schema migration, live ledger access, notification send or deployment is included.
+
+## Calendar-day reminder leads — 2026-11-12
+
+The finite-source increment was committed as `e87c9d6`, excluding the unrelated
+edits. The operator then selected calendar-day reminder leads and remaining R2
+work. This continuation is internal, uncommitted and does not activate R3/R4.
+
+### Proof and persistence boundary
+
+Calendar-day once/offsets/bounded-repeat templates now admit when their earliest
+source-relative reminder has a bounded proof. Create/update supply the current
+recurrence time facts; elapsed-only validation retains its previous arithmetic
+and does not read timezone data. No wire, configuration hash, stored shape,
+schema version or ordinary notification-resolution semantics change.
+
+For a task instant `T`, its source instant `S`, and a calendar reminder `R`:
+
+```
+T = S + task_offset
+R - T = days*86400 + reminder_clock - task_clock
+        + task_utc_offset - reminder_utc_offset
+```
+
+The proof ranges `task_clock` over `0..86399`, including possible moved-source
+times and midnight-crossing task offsets. Offset extrema come from the exact
+version-verified TZif bytes, including every historical type and both POSIX-footer
+offsets. No recurrence history or future year range is enumerated, no contemporary
+sampling substitutes for future rules, and only byte-derived parsing is cached.
+Provider version/evidence checks still run. Existing capture size/type limits bound
+the work; unavailable evidence fails closed.
+
+The result is a **conservative upper bound**, not a promise of the smallest horizon
+for a particular series. Short horizons without this proof are rejected, not
+silently widened. A calendar label in another zone still uses the task's local
+date, exactly as the existing notification resolver does. Gap omission and
+earliest-fold resolution remain owned by that resolver.
+
+Same-zone calendar repeat boundaries can be ordered by their shared-date local
+labels; elapsed boundaries retain their exact ordering. Mixed-zone/mixed-basis
+windows require disjoint proven UTC-offset intervals. An unprovable window or
+absolute reminder is rejected under the existing configuration-conflict contract.
+The existing R2 strict start-before-stop admission is preserved.
+
+Before a new assignment is created, reconciliation rechecks the lead under its
+current source time facts. An insufficient proof yields `configuration_invalid`
+without a partial child. Existing-task following, cancellation and restoration do
+not depend on a rolling generation horizon and are not blocked by that check.
+This is a manual R2 boundary, not an implementation of the deferred all-writer
+invalidation/automatic-worker path.
+
+### Verification and preservation
+
+Fourteen new tests cover bound equality and one-second rejection; positive and
+negative task offsets; same-zone and mixed repeat windows; earliest mixed offset
+selection; absolute/unavailable-evidence rejection; actual resolver comparisons
+across DST, date-line jumps and future footer dates; omitted gaps/earliest folds;
+synthetic footer-only offsets; and unchanged elapsed-only behavior.
+An unsupported/missing exact source-time context produces a structured
+configuration conflict rather than a timezone lookup/runtime exception.
+
+Disposable command tests exercise create/update no-write rejection, stored replay
+without reproof, real calendar work/no-duplicate reconciliation, a local recurring
+source across DST, upcoming-open adoption, source cancellation and fresh-generation
+restoration with prior task history preserved. A projection-seam injection checks
+changed-source timezone rejection before child writes; this is not represented as
+full source-writer integration evidence.
+
+The initial eleven tests plus existing admission/read, frozen-child and shared
+runtime tests pass **56 tests**, 36.146 seconds. The final fourteen-test calendar
+file passes separately, 2.644 seconds. Existing timezone compatibility pytest checks
+pass **39 tests**, 2.13 seconds;
+five-module typing, focused Ruff and frozen web copies pass. Final full regression:
+**1,510 tests, OK (one skipped)**, 406.749 seconds. Known non-fatal web read-budget
+callback and expected timezone-substitution diagnostics appeared. All 245 unique
+local documentation targets and diff hygiene pass. The earlier full run was
+stopped deliberately before adding the final source-basis guard; this reported
+result is the fresh complete run against the final code.
+
+The original RF1 baselines and prior admission amendment are unchanged. A separate
+[two-body calendar amendment](../../tests/fixtures/internal_operations/r2_calendar_lead_body_amendment.json)
+hash-pins only create/update's intentional source-context plumbing on top of the
+prior amendment. The guard still requires one complete accepted body set and
+preserves all unrelated hashes. No public registry, packaged contract, package
+version or migration is changed; both unrelated working-tree hashes are preserved.
+
+R2 remains open for remaining customization/source-continuity, combined-budget
+and cross-connection proof matrices. No push, external audit, live ledger access,
+send, deployment, RF3/R3 or public activation occurred.

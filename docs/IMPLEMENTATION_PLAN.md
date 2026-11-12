@@ -274,10 +274,13 @@ continuation, committed as `0f2aeec`, closes selected durable blocked-outcome, c
 finality and retirement race cases, plus a multi-child profile-link identity
 collision exposed by real recovery. Verification and precise outstanding R2
 obligations are tracked under SPINE-093; this does not close R2 or authorize RF3/R3.
-The next internal increment adds budgeted finite-source exhaustion reporting using
+The next internal increment, committed as `e87c9d6`, adds budgeted finite-source exhaustion reporting using
 the recurrence engine's COUNT/UNTIL/segment semantics, preserving future additions
-and moves and avoiding durable progress writes for idle observations. Calendar-day
-reminder-lead proof remains separate; it is not approximated by fixed elapsed days.
+and moves and avoiding durable progress writes for idle observations. The following
+calendar-lead increment uses bounded pinned-TZif offset ranges and all-clock date
+arithmetic instead of treating calendar days as fixed elapsed offsets. It also
+extends actual materialization, adoption and restoration evidence for calendar
+policies. Public activation and automatic all-writer integration remain unselected.
 See the same evidence note for verification and remaining R2 exit work.
 
 Implement all seven command handlers internally using the shared command context

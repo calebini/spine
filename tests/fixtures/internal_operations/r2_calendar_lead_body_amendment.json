@@ -1,0 +1,20 @@
+{
+  "prior_amendment": "tests/fixtures/internal_operations/r2_admission_read_body_amendment.json",
+  "prior_amendment_sha256": "5d06e7722fbdc1655b947054515e63d53d131347648d9fcc7deec7cd4f6b6a0e",
+  "authorization": "2026-11-12 operator-selected calendar-day reminder lead implementation after finite-source checkpoint e87c9d6; internal R2 only.",
+  "regression_tests": "tests/test_recurring_task_calendar_leads.py",
+  "replacements": [
+    {
+      "path": "src/spine/commands/recurring_tasks.py",
+      "name": "create",
+      "body_sha256": "8f0114dce81358e797733f388891588b3a8470b9b5403106a2c5274bfc961352",
+      "reason": "Pass the already validated current recurrence header to calendar-lead normalization; avoid using creation-only time facts."
+    },
+    {
+      "path": "src/spine/commands/recurring_tasks.py",
+      "name": "update",
+      "body_sha256": "17d8b27782e052e543434fb7aa3015f1d215ecdca49320f57179a5a2c9b7edc5",
+      "reason": "Supply current source time facts when proving the proposed configuration's reminder lead."
+    }
+  ]
+}

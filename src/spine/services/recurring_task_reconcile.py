@@ -25,6 +25,7 @@ from spine.ledger.recurring_tasks import compare_and_swap, ensure_selector, inse
 from spine.ledger.temporal_bindings import target_from_source
 from spine.services import recurring_task_children as children
 from spine.services import recurring_task_proofs as proofs
+from spine.services.recurring_task_leads import validate_reminder_lead
 from spine.services.recurring_task_operations import (
     ChangeChild,
     ChildDisposition,
@@ -378,6 +379,17 @@ class Page:
             or self.source_item["detail"]["event_status"] != "scheduled"
         ):
             return entry(selector, "decision_required", "source_evidence_unavailable")
+        if assignment is None:
+            # A source revision may change timezone after rule admission. Never
+            # create a newly selected task using a now-insufficient lead proof.
+            # Existing-task maintenance/restoration does not depend on a rolling
+            # generation horizon, and must not be blocked by this admission check.
+            try:
+                validate_reminder_lead(config, self.recurrence)
+            except SpineValidationError as exc:
+                if exc.code.startswith("semantic_conflict:configuration."):
+                    return entry(selector, "decision_required", "configuration_invalid")
+                raise
         if proof_id is None:
             kind, proof = proofs.initial(self.db, self.state.root, self.snapshot, selector, self.budget)
             if kind == "component_candidate":

@@ -264,3 +264,50 @@ def resolve_timezone(timezone: str, requested_version: str) -> CapturedZone:
 
 def timezone_for_version(timezone: str, requested_version: str) -> ZoneInfo:
     return resolve_timezone(timezone, requested_version).zone
+
+
+def timezone_offset_bounds(timezone: str, requested_version: str) -> tuple[int, int]:
+    """Conservative all-date UTC-offset bounds from the exact validated TZif.
+
+    Include every historical type and both POSIX-footer offsets, not sampled
+    contemporary dates. Work is bounded by capture's byte/type limits. Resolve
+    version evidence on each call; only byte-derived parsing is cached.
+    """
+    return _offset_bounds(resolve_timezone(timezone, requested_version).data)
+
+
+@lru_cache(maxsize=256)
+def _offset_bounds(data: bytes) -> tuple[int, int]:
+    # Input has already passed _decode_zone, including complete block lengths.
+    position = 0
+    for block in range(2):
+        version = data[position + 4]
+        isut, isstd, leap, count, types, chars = struct.unpack(">6I", data[position + 20:position + 44])
+        width = 4 if block == 0 else 8
+        type_start = position + 44 + count * (width + 1)
+        offsets = [struct.unpack_from(">i", data, type_start + index * 6)[0] for index in range(types)]
+        position = type_start + types * 6 + chars + leap * (width + 4) + isstd + isut
+        if version == 0 or block:
+            break
+    tail = data[position:].strip(b"\n")
+    if tail:
+        # POSIX signs are reversed relative to UTC offsets. Transition-rule
+        # syntax is already validated by ZoneInfo; only the two offsets matter.
+        name = rb"(?:<[A-Za-z0-9+\-]+>|[A-Za-z]+)"
+        offset = rb"[+-]?\d{1,3}(?::\d{1,2}(?::\d{1,2})?)?"
+        match = re.fullmatch(name + rb"(" + offset + rb")(?:(" + name + rb")(" + offset + rb")?(?:,.*)?)?", tail)
+        if match is None:
+            _fail("timezone footer offset bounds cannot be proved")
+
+        def seconds(value: bytes) -> int:
+            sign = -1 if value.startswith(b"-") else 1
+            parts = [int(part) for part in value.lstrip(b"+-").split(b":")]
+            return -sign * sum(part * scale for part, scale in zip(parts, (3600, 60, 1), strict=False))
+
+        standard = seconds(match[1])
+        offsets.append(standard)
+        if match[2] is not None:
+            offsets.append(seconds(match[3]) if match[3] is not None else standard + 3600)
+    if not offsets or any(not -86400 < value < 86400 for value in offsets):
+        _fail("timezone UTC offset is outside the supported datetime domain")
+    return min(offsets), max(offsets)

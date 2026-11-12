@@ -1327,6 +1327,24 @@ typing, focused Ruff, frozen web copies, 244 local links and diff hygiene pass.
 Known non-fatal read-budget/timezone diagnostics remain. Public activation files
 and preserved unrelated hashes are unchanged. The finite-source increment is
 uncommitted; R2 remains open, with no RF3/R3, push, live operations or deployment.
+**Calendar-lead continuation (2026-11-12):** Finite-source reporting committed as
+`e87c9d6`, excluding the two preserved unrelated edits. The operator selected
+calendar-day reminder admission and remaining R2 work. The internal continuation
+adds bounded pinned-TZif/all-clock lead proofs, strict provable repeat-window
+ordering, current-source revalidation before new generation, and actual calendar
+materialization/adoption/cancellation/restoration tests. Ordinary reminder
+resolution, wire/configuration shapes and elapsed-only behavior are unchanged.
+Short/unprovable horizons fail explicitly; no silent widening or historical scan.
+Verification: **56** focused tests followed by the final **14-test** calendar file;
+**39** timezone compatibility tests; full regression **1,510 tests, OK (one skipped)**,
+406.749 seconds. Five-module typing, focused Ruff, frozen web copies, 245 local
+links and diff hygiene pass. The known non-fatal read-budget/timezone diagnostics
+remain. A separate hash-pinned two-body create/update amendment preserves the
+original RF1 baselines and previous amendment; no other frozen witness changed.
+Both unrelated working-tree hashes are unchanged. See the intent/lifecycle
+evidence note's calendar section. This increment remains uncommitted. R2 stays
+open for individual customization, source-continuity, combined-budget and
+cross-connection exit evidence; no R3, public activation, push or deployment.
 
 ### SPINE-094 — R3: recurring-task all-writer safety and automatic scheduling
 

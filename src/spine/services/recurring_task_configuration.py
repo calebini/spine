@@ -13,10 +13,11 @@ from spine.core.recurring_task_runtime import fail
 from spine.ledger.notification_profiles import load_archetype, load_profile, require_owner_exists, resolve_default_profile
 from spine.services import schedule_delivery
 from spine.services.primary_locations import load_referenced_location, normalize_primary_location
+from spine.services.recurring_task_leads import validate_reminder_lead
 from spine.services.rendering_authoring import resolve
 
 
-def normalize_configuration(value: dict[str, Any], context: Any, contracts: Any) -> dict[str, Any]:
+def normalize_configuration(value: dict[str, Any], context: Any, contracts: Any, *, source_time: dict[str, Any]) -> dict[str, Any]:
     """Resolve once; no task, application, approval, audit or receipt is created."""
     result = copy.deepcopy(value)
     db, owner = context.ledger, result["task_owner"]
@@ -85,7 +86,9 @@ def normalize_configuration(value: dict[str, Any], context: Any, contracts: Any)
             if address in by_address:
                 fail("semantic_conflict", "configuration.notification_plan.rendering_applications")
             by_address[address] = entry["selection"]
-        effective, used, hashes = [], set(), set()
+        effective: list[dict[str, Any]] = []
+        used: set[tuple[str, str]] = set()
+        hashes: set[object] = set()
         for reminder, origin in zip(composed.reminders, composed.origins, strict=True):
             kind, source = origin["policy_origin"], origin["source_key"]
             key = reminder["policy_key"]
@@ -116,6 +119,7 @@ def normalize_configuration(value: dict[str, Any], context: Any, contracts: Any)
             hashes.add(normalized["normalized_notification_schedule_hash"])
             pinned = {"kind": "ordinary"}
             if kind != "custom_addition":
+                assert profile is not None
                 pinned = next(t for t in profile["revision"]["templates"] if t["template_key"] == source).get("rendering", pinned)
             address = ("custom_addition" if kind == "custom_addition" else "profile_template", source)
             selection = by_address.get(address, {"kind": "ordinary"})
@@ -127,13 +131,14 @@ def normalize_configuration(value: dict[str, Any], context: Any, contracts: Any)
                 fail("rendering_disclosure_unavailable", "configuration.notification_plan")
             policy_origin = {"kind": kind}
             if kind != "custom_addition":
+                assert profile is not None
                 policy_origin.update(
                     notification_profile_id=profile["notification_profile_id"],
                     notification_profile_revision_id=profile["revision"]["notification_profile_revision_id"],
                     template_key=source,
                 )
             try:
-                presentation = resolve(
+                presentation = resolve(  # type: ignore[no-untyped-call]  # Existing rendering-authoring boundary.
                     db, selection, policy={"item_id": None, **route}, item_type="task", origin=policy_origin, prospective_owner=owner
                 )
             except SpineValidationError:
@@ -176,24 +181,7 @@ def normalize_configuration(value: dict[str, Any], context: Any, contracts: Any)
                 "effective_templates": sorted(effective, key=lambda v: v["policy_key"]),
             },
         }
-        lead = 0
-        for entry in effective:
-            schedule = entry["template"]["schedule"]
-            boundaries = (
-                schedule["at"]
-                if schedule["kind"] == "offsets"
-                else [schedule["at"]]
-                if schedule["kind"] == "once"
-                else [schedule["start"], schedule["stop"]]
-            )
-            if any(v["kind"] != "target_offset" or v["offset_basis"] != "elapsed" for v in boundaries):
-                fail("semantic_conflict", "configuration.notification_plan", "earliest source-relative reminder lead cannot be proved")
-            offsets = [int(v["offset_seconds"]) for v in boundaries]
-            if schedule["kind"] == "repeat_window" and offsets[0] >= offsets[1]:
-                fail("semantic_conflict", "configuration.notification_plan")
-            lead = max(lead, -int(result["offset_seconds"]) - min(offsets))
-        if int(result["generation_horizon_seconds"]) < lead:
-            fail("semantic_conflict", "configuration.generation_horizon_seconds")
+        validate_reminder_lead(result, source_time)
     if len(canonical_json_bytes(result)) > 65536:
         fail("capacity_exceeded", "configuration")
     contracts.validate("types", result, definition="normalizedConfiguration", output=True)

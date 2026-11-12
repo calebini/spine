@@ -39,11 +39,19 @@ class SharedRecurringRuntimeTests(unittest.TestCase):
             ("src/spine/core/recurring_task_runtime.py", "verify_cursor"),
         })
         amended = [replacements.get((entry["path"], entry["name"]), entry) for entry in witness["bodies"]]
+        calendar = json.loads((ROOT / "tests/fixtures/internal_operations/r2_calendar_lead_body_amendment.json").read_text())
+        self.assertEqual(calendar["prior_amendment"], "tests/fixtures/internal_operations/r2_admission_read_body_amendment.json")
+        self.assertEqual(hashlib.sha256((ROOT / calendar["prior_amendment"]).read_bytes()).hexdigest(),
+                         calendar["prior_amendment_sha256"])
+        calendar_replacements = {(entry["path"], entry["name"]): entry for entry in calendar["replacements"]}
+        self.assertEqual(len(calendar["replacements"]), 2)
+        self.assertEqual(set(calendar_replacements), {("src/spine/commands/recurring_tasks.py", name) for name in ("create", "update")})
+        calendar_amended = [calendar_replacements.get((entry["path"], entry["name"]), entry) for entry in amended]
         # Accept one complete captured state, never a per-function mix. Retain
         # both original RF1 baselines and narrowly record the two functional R2
         # corrections authorized after RF2; all other body hashes stay frozen.
         mismatches = []
-        for variant in (witness["bodies"], witness["committed_bodies"], amended):
+        for variant in (witness["bodies"], witness["committed_bodies"], amended, calendar_amended):
             failures = []
             for entry in variant:
                 nodes = ast.parse((ROOT / entry["path"]).read_text()).body
