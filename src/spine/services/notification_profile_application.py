@@ -493,8 +493,14 @@ def persist_schedule_update_profile(
     actor_subject_id: str,
     updated_at_utc: str,
     policies: Sequence[tuple[str, Mapping[str, Any]]],
+    application_identity_seed: str | None = None,
 ) -> dict[str, Any]:
-    """Replace copied-forward profile facts inside a successor transaction."""
+    """Replace copied-forward profile facts inside a successor transaction.
+
+    Multi-item compositions may supply a distinct application identity seed for
+    link IDs. Command attribution always remains the real outer command.
+    Ordinary single-item callers retain their existing identity derivation.
+    """
 
     replace_application = bool(prepared["replace_application"])
     replace_assignment = bool(prepared["replace_assignment"])
@@ -599,6 +605,7 @@ def persist_schedule_update_profile(
             actor_subject_id=actor_subject_id,
             command_id=command_id,
             created_at_utc=updated_at_utc,
+            identity_seed=application_identity_seed,
         )
     return {
         "archetype": assignment_facts,

@@ -269,8 +269,11 @@ combined-budget, restoration/custom-policy, intent/coverage, replay and wider
 concurrency matrices remain separate work; this does not close R2 or authorize R3.
 The selected [intent/lifecycle continuation](design-notes/recurring-related-task-r2-intent-lifecycle.md)
 adds final-skip selection, same-page cancellation/restoration intent outcomes and
-independent bounded lane/intent coverage. Its verification and precise outstanding
-R2 obligations are tracked under SPINE-093; the continuation is not yet committed.
+independent bounded lane/intent coverage, committed as `d61571e`. The subsequent
+uncommitted continuation closes selected durable blocked-outcome, conflict-skip
+finality and retirement race cases, plus a multi-child profile-link identity
+collision exposed by real recovery. Verification and precise outstanding R2
+obligations are tracked under SPINE-093; this does not close R2 or authorize RF3/R3.
 
 Implement all seven command handlers internally using the shared command context
 and one outer transaction, not recursive public-command submissions or child

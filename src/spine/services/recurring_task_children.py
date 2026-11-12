@@ -816,6 +816,7 @@ def _adopt_supporting(
         item_id=task_id,
         item_version=version,
         command_id=command_id,
+        application_identity_seed=(desired_application["notification_profile_application_id"] if desired_application else None),
         actor_subject_id=invocation.actor_subject_id,
         updated_at_utc=now,
         policies=[(k, p.value) for k, p in desired_policies],

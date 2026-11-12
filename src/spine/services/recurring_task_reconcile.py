@@ -209,18 +209,61 @@ class Page:
             elif code == "source_continuity_unresolved":
                 reason = "source_continuity_unresolved"
             if reason:
-                self.state.begin_unit(self.db)
-                refs = references(self.db, assignment) if assignment else None
-                value = entry(selector, "decision_required", reason,
-                              assignment=assignment["assignment_id"] if assignment else None,
-                              generation=assignment["current_generation_id"] if assignment else None,
-                              before=refs, after=refs)
+                # Persist only the blocked-state evidence after rolling back the
+                # failed child operation. It remains a whole, budgeted unit and
+                # is rolled back together with page state on a byte boundary.
+                fallback = self.state.begin_unit(self.db)
+                before = self.db.total_changes
+                value = self.blocked(selector, assignment, reason)
+                self.state.mutations = fallback.checkpoint.mutations + int(self.db.total_changes != before)
             else:
                 raise
         except BaseException:
             self.state.rollback(unit, sys.exc_info())
             raise
         return value
+
+    def blocked(self, selector: dict[str, Any], assignment: dict[str, Any] | None, reason: str) -> dict[str, Any]:
+        from spine.ledger.recurring_task_catalog import intent_view
+        from spine.services import recurring_task_adoption as adoption
+        from spine.services.recurring_task_states import append_state
+
+        if assignment is None:
+            return entry(selector, "decision_required", reason)
+        before = references(self.db, assignment)
+        original = read_record(
+            self.db, "related_task_assignment_revisions", assignment["current_assignment_revision_id"]
+        )["state_json"]
+        state = copy.deepcopy(original)
+        state.update(disposition="decision_required", reason=reason)
+        intent = adoption.selected(self.db, self.state.root["related_task_rule_id"], assignment, budget=self.budget)
+        retirement = intent_view(self.db, self.state.root["retirement_intent_id"])
+        if retirement and (retirement["status"] != "pending" or assignment["assignment_seq"] > int(retirement["assignment_high_water"])):
+            retirement = None
+        # Cancel/detach supersedes adoption; keep-following does not require a
+        # child mutation and must not borrow the adoption's blocked outcome.
+        cleanup = retirement if retirement and retirement["disposition"] != "keep_following" else None
+        selected = intent or cleanup
+        if selected:
+            state["pending_intent_id"] = selected["intent_id"]
+        state_id = assignment["current_assignment_revision_id"]
+        if state != original:
+            state_id = append_state(self.db, assignment, state, self.request, self.now)
+            self.state.changed = True
+        for pending in (intent, retirement):
+            if pending:
+                recorded = adoption.outcome(
+                    self.db, self.invocation, pending, assignment["assignment_id"], state_id,
+                    "retained_equal" if pending is retirement and cleanup is None else "conflict", reason,
+                )
+                self.state.changed = self.state.changed or recorded
+        generation = read_record(self.db, "related_task_generations", assignment["current_generation_id"])
+        config = read_record(self.db, "related_task_rule_revisions", original["adopted_rule_revision_id"])["configuration_json"]
+        self.state.mappings.extend(children.mappings(self.db, assignment["assignment_id"], generation, config))
+        return entry(
+            selector, "decision_required", reason, assignment=assignment["assignment_id"], generation=generation["generation_id"],
+            before=before, after=references(self.db, read_record(self.db, "related_task_assignments", assignment["assignment_id"])),
+        )
 
     def apply_work(self, work: WorkEvidence) -> None:
         for kind in ("created", "cancelled", "retained", "protected_stale"):
@@ -398,6 +441,12 @@ class Page:
             "restoration_veto": False,
             "reason": "new_source_slot" if first else "source_restored",
         }
+        if assignment is not None:
+            predecessor_state = read_record(
+                self.db, "related_task_assignment_revisions", assignment["current_assignment_revision_id"]
+            )["state_json"]
+            if "pending_intent_id" in predecessor_state:
+                state["pending_intent_id"] = predecessor_state["pending_intent_id"]
         before = references(self.db, assignment) if assignment else None
         insert_record(
             self.db,
@@ -784,7 +833,7 @@ def process_existing(page: Page, assignment: dict[str, Any]) -> dict[str, Any]:
     cause = row(db, "related_task_source_cancellations", gen["generation_id"])
     owned = refs["item_access_owner_id"] == gen["item_access_owner_id"] and refs["item_access_owner_revision"] == "1"
     retirement = intent_view(db, page.state.root["retirement_intent_id"])
-    intent = adoption.selected(db, page.state.root["related_task_rule_id"], assignment)
+    intent = adoption.selected(db, page.state.root["related_task_rule_id"], assignment, budget=page.budget)
     intent_result, intent_reason, adopting, managed = None, None, False, None
     reason, outcome, actions = "already_current", "retained", []
     source = binding_facts.source_from_prior(prior)
@@ -1038,6 +1087,8 @@ def process_existing(page: Page, assignment: dict[str, Any]) -> dict[str, Any]:
         state.update(disposition="decision_required", reason=reason)
         if intent:
             state["pending_intent_id"] = intent["intent_id"]
+    elif intent_result == "skipped_overdue":
+        state.update(disposition="governed", reason=reason)
     elif state != original:
         state["reason"] = reason
     if intent:
@@ -1048,6 +1099,9 @@ def process_existing(page: Page, assignment: dict[str, Any]) -> dict[str, Any]:
             intent_result, intent_reason = ("skipped_terminal" if terminal else "skipped_independent"), reason
         if intent_result:
             state["pending_intent_id"] = intent["intent_id"]
+    retirement_selected = retirement is not None and assignment["assignment_seq"] <= int(retirement["assignment_high_water"])
+    if retirement is not None and retirement_selected and retirement["disposition"] != "keep_following":
+        state["pending_intent_id"] = retirement["intent_id"]
     # A manually advanced task needs an exact binding witness even for a terminal veto.
     if outcome != "decision_required" and int(state["task_item_version"]) < int(current["current_version"]):
         state.update(page.change( assignment, gen, binding, current, source, config))
@@ -1061,13 +1115,15 @@ def process_existing(page: Page, assignment: dict[str, Any]) -> dict[str, Any]:
             state_id or assignment["current_assignment_revision_id"], intent_result, intent_reason or reason
         )
         page.state.changed = page.state.changed or recorded
-    if retirement and assignment["assignment_seq"] <= int(retirement["assignment_high_water"]):
+    if retirement is not None and retirement_selected:
         recorded = adoption.outcome(
             db, page.invocation,
             retirement,
             assignment["assignment_id"],
             state_id or assignment["current_assignment_revision_id"],
-            "skipped_terminal"
+            "conflict"
+            if outcome == "decision_required" and retirement["disposition"] != "keep_following"
+            else "skipped_terminal"
             if current["detail"]["task_status"] != "open"
             else "applied"
             if outcome in {"cancelled", "detached"}

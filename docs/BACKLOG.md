@@ -1300,6 +1300,19 @@ unrelated edit hashes are unchanged. See [intent/lifecycle evidence and remainin
 exit work](design-notes/recurring-related-task-r2-intent-lifecycle.md). This
 continuation is uncommitted; no RF3/R3, public activation or live operations are
 selected, and R2 remains in progress.
+**Next checkpoint/continuation (2026-11-12):** Committed the verified intent/lifecycle
+increment as `d61571e`, excluding the two unrelated preserved edits; no push.
+Continued R2 work adds durable budgeted blocked-unit evidence, retirement conflict
+classification/resolution, bounded immutable skip-resolution proofs across
+restoration/following, and a real adoption-versus-retirement race. Profile-adoption
+recovery also closes a multi-child application-policy-link identity collision,
+preserving ordinary callers' derivation and real outer-command attribution.
+Nine new regressions extend the lifecycle file to sixteen; **48** focused tests
+and four-module typing/Ruff pass. Full regression passes **1,486 tests, OK
+(one skipped)**, 394.880 seconds; frozen web copies, 244 local links and diff
+hygiene pass, with preserved edit hashes unchanged. See the same
+intent/lifecycle evidence note's continuation. No new public or automatic surface
+is authorized; this continuation is uncommitted and R2 is not fully closed.
 
 ### SPINE-094 — R3: recurring-task all-writer safety and automatic scheduling
 

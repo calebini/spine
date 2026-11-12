@@ -121,7 +121,7 @@ def outcome(db: LedgerConnection, invocation: ChildInvocation, intent: dict[str,
     return False
 
 
-def selected(db: LedgerConnection, rule_id: str, assignment: dict[str, Any]) -> dict[str, Any] | None:
+def selected(db: LedgerConnection, rule_id: str, assignment: dict[str, Any], *, budget: ProofBudget) -> dict[str, Any] | None:
     """A final skip/application is not reopened by a later source move or restore."""
     from spine.ledger.recurring_task_catalog import pending_adoption
 
@@ -129,7 +129,36 @@ def selected(db: LedgerConnection, rule_id: str, assignment: dict[str, Any]) -> 
     if intent is None or assignment["assignment_seq"] > int(intent["assignment_high_water"]):
         return None
     prior = row(db, "related_task_intent_outcomes", intent["intent_id"], assignment["assignment_id"])
-    return intent if prior is None or prior["outcome"] == "conflict" else None
+    if prior is None:
+        return intent
+    if prior["outcome"] == "conflict" and not resolved(db, assignment, intent, budget=budget):
+        return intent
+    return None
+
+
+def resolved(db: LedgerConnection, assignment: dict[str, Any], intent: dict[str, Any], *, budget: ProofBudget) -> bool:
+    """Prove resolution on the current state's immutable, same-intent lineage.
+
+    A subsequent follow/restore may change the latest reason, not undo a final
+    skip. Follow exact predecessor keys and charge every read; never search an
+    unbounded history or accept evidence from another intent.
+    """
+    identity = assignment["current_assignment_revision_id"]
+    while identity is not None:
+        budget.spend()
+        revision = read_record(db, "related_task_assignment_revisions", identity)
+        state = revision["state_json"]
+        if state.get("pending_intent_id") != intent["intent_id"]:
+            return False
+        if (
+            state["adopted_rule_revision_id"] == intent["configuration_revision_id"]
+            or state["restoration_veto"]
+            or state["disposition"] == "source_cancelled"
+            or state["reason"] == "due_not_future"
+        ):
+            return True
+        identity = revision["prior_assignment_revision_id"]
+    return False
 
 
 def missing_outcomes(db: LedgerConnection, rule_id: str, intent: dict[str, Any]) -> bool:
@@ -164,14 +193,7 @@ def complete(db: LedgerConnection, invocation: ChildInvocation, *, rule_id: str,
     budget.spend(len(conflicts))
     for conflict in conflicts:
         assignment = read_record(db, "related_task_assignments", conflict["assignment_id"])
-        state = read_record(db, "related_task_assignment_revisions", assignment["current_assignment_revision_id"])["state_json"]
-        if state.get("pending_intent_id") != intent["intent_id"]:
-            return False
-        if (
-            state["adopted_rule_revision_id"] != intent["configuration_revision_id"]
-            and not state["restoration_veto"]
-            and state["reason"] != "due_not_future"
-        ):
+        if not resolved(db, assignment, intent, budget=budget):
             return False
     db.execute("UPDATE related_task_intents SET status='complete' WHERE intent_id=? AND status='pending'", (intent["intent_id"],))
     return True

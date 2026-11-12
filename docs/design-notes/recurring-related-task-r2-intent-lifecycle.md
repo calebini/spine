@@ -73,3 +73,65 @@ The existing [admission/read evidence](recurring-related-task-r2-admission-reads
 and [page-boundary evidence](recurring-related-task-r2-page-closure.md) retain their
 earlier proofs and outstanding obligations. No RRT family is marked fully closed
 by this increment. RF3/R3 and public activation require their own gates.
+
+## Blocked intent resolution continuation — 2026-11-12
+
+The preceding increment was committed as `d61571e` after operator authorization,
+excluding the unrelated `AGENTS.md` and restoration-note edits. No push occurred.
+The following work remains uncommitted and continues R2 only.
+
+### Closed paths
+
+- A failed route/disclosure child operation first rolls back its entire unit,
+  then records only the blocked assignment state and immutable intent conflict.
+  No partial task/policy/work mutation survives. This fallback itself consumes
+  a mutation unit, participates in response-byte rollback, and retains the actual
+  family policy mapping. Repeating unchanged blocked evidence does not append
+  duplicate states/outcomes.
+- Cancel/detach retirement records an ownership-blocked cleanup as a conflict,
+  never successful retention. It remains pending until actual terminal or
+  independent-state evidence resolves it. Keep-following retirement remains
+  distinct from a preserved adoption intent's success or failure.
+- Exact source-cancelled state resolves a prior adoption conflict without
+  overwriting the original conflict row. Restoration carries forward the intent
+  reference. Resolution uses primary-key predecessor reads through the current
+  state's immutable same-intent lineage; every read consumes proof budget.
+  Later restoration/following cannot reopen an already-final skip simply because
+  the latest operational reason changed. Evidence from another intent is not
+  accepted. No new state shape, table, migration or history rewrite is introduced.
+- Overdue resolution of a prior conflict now appends the actual governed skip
+  witness, rather than leaving the earlier decision-required reason unchanged.
+- An actual six-child profile-adoption recovery exposed colliding profile-policy
+  link IDs. The recurring composition supplies its per-application identity seed
+  through the existing profile persistence owner. The optional parameter defaults
+  to the existing derivation for ordinary callers; real outer-command attribution
+  is unchanged. No public request or response shape changes.
+
+### Added verification
+
+Nine additional tests extend the lifecycle file to sixteen cases. They exercise
+real route drift/recovery, unchanged blocked no-ops, controlled disclosure-owner
+rejection/recovery, preview and audit/receipt-fault rollback, mutation and byte
+boundaries, ownership-conflicted retirement followed by explicit task completion,
+source cancellation resolving a prior conflict, multi-conflict restoration and
+overdue/move sequences, and a two-connection adoption-versus-retirement race.
+The race admits one winner, gives the loser a stale-version result, preserves
+the winning command's replay without writes, and checks foreign keys and finite
+intent/generation counts. The history proof also has a low-budget failure check.
+
+Focused lifecycle/reconcile/shared-runtime/frozen-child verification passes
+**48 tests**, 26.746 seconds, followed by the passing low-budget proof regression.
+Full regression: **1,486 tests, OK (one skipped)**, 394.880 seconds. Four touched
+service modules pass typing; focused Ruff, frozen web copies, 244 local link
+targets and diff hygiene pass. The known non-fatal read-budget callback and
+expected timezone-substitution diagnostics appeared. The earlier frozen baselines
+were not regenerated to accommodate these changes. Public activation files have
+no diff; the unrelated `AGENTS.md` and restoration-note hashes remain unchanged.
+
+### Still open
+
+This closes the selected blocked-outcome/finality cases, not every R2 exit gate.
+Broader reminder-lead/calendar-day support and finite-source exhaustion, remaining
+customization/source-continuity and combined-budget matrices, and additional
+cross-connection interleavings remain tracked R2 work. RF3/R3, public activation,
+live ledgers, migration, sending and deployment remain outside this continuation.
