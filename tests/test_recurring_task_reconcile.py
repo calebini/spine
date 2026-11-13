@@ -15,9 +15,9 @@ from spine.commands.recurring_tasks import execute
 from spine.core.canonical_json import canonical_json_bytes
 from spine.core.recurrence_mutations import build_successor_recurrence_revision, derive_recurrence_lineage
 from spine.ledger import connect
-from spine.ledger.items import create_next_item_version
 from spine.ledger.recurrence import insert_initial_recurrence_set, insert_recurrence_lineage, load_current_recurrence_set
 from spine.ledger.recurring_task_migration import attach_candidate
+from spine.services.item_mutations import create_next_item_version
 from tests import test_recurring_task_commands as base
 
 

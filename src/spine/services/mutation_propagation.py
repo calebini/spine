@@ -1,11 +1,13 @@
 """Synchronous application-owned propagation of existing consequences only.
 
 No dispatch, repair queue, new history, child commit or implicit work policy.
-The selected families are bindings, relations, recurrence and item ownership; others remain tracked.
+Selected families are items/policies, bindings, relations, recurrence and item ownership.
 """
 
 import sqlite3
+from dataclasses import replace
 
+from spine.core.canonical_json import canonical_json_bytes
 from spine.core.errors import SpineValidationError
 from spine.core.mutation_effects import (
     ConfiguredOwnerPropagation,
@@ -30,13 +32,36 @@ def reserve_local_owner_epoch(db: sqlite3.Connection) -> int:
 def propagate(
     db: sqlite3.Connection, *, binding_id: str | None = None, relation_id: str | None = None,
     recurrence_revision_id: str | None = None,
+    item_id: str | None = None,
     ownership: LocalOwnerPropagation | ConfiguredOwnerPropagation | ProvisionedOwnerPropagation | None = None,
 ) -> MutationEffects:
     connection = require_transaction(db)
-    if sum(value is not None for value in (binding_id, relation_id, ownership, recurrence_revision_id)) != 1:
+    if sum(value is not None for value in (binding_id, relation_id, ownership, recurrence_revision_id, item_id)) != 1:
         raise SpineValidationError("environment_failure:propagation", "one exact mutation family is required")
     if ownership is not None:
         return _owners(connection, ownership)
+    if item_id is not None:
+        state = connection.mutation_state.propagation
+        item = state.items.get(item_id)
+        if item is None:
+            raise SpineValidationError("environment_failure:propagation", "missing or already propagated item mutation")
+        if getattr(connection, "_renderings_enabled", False) and any(
+            p.policy_id not in connection.mutation_state.renderings.pending
+            for p in state.policies.values() if p.item_id == item_id
+        ):
+            raise SpineValidationError("environment_failure:rendering", "unregistered policy writer or missing presentation")
+        policies = tuple(replace(p, after_presentation=canonical_json_bytes(connection.mutation_state.renderings.pending[p.policy_id]))
+                         if getattr(connection, "_renderings_enabled", False) else p
+                         for p in state.policies.values() if p.item_id == item_id)
+        if any(p.item_version != item.after.version for p in policies):
+            raise SpineValidationError("environment_failure:propagation", "policy mutation belongs to another item version")
+        # The native allocator has completed CAS, audit and cross-row invariants.
+        # Rendering/facet finalizers retain supporting-set/continuity proof and
+        # audit triggers retain catalog ownership. Do not apply them twice.
+        del state.items[item_id]
+        for policy in policies:
+            del state.policies[policy.policy_id]
+        return MutationEffects(items=(item,), policies=policies)
     if recurrence_revision_id is not None:
         pending_recurrences = connection.mutation_state.propagation.recurrences
         recurrence = pending_recurrences.get(recurrence_revision_id)

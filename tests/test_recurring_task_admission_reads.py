@@ -13,8 +13,8 @@ from spine.commands.recurring_task_runtime import CURSOR, DEFAULTS, PREFIX, _b64
 from spine.commands.recurring_tasks import execute, stored_projection
 from spine.core.canonical_json import canonical_json_bytes
 from spine.core.errors import SpineValidationError
-from spine.ledger.items import create_next_item_version
 from spine.ledger.recurring_task_sources import ProofBudget
+from spine.services.item_mutations import create_next_item_version
 from tests import test_recurring_task_commands as base
 from tests import test_recurring_task_reconcile as pages
 

@@ -69,7 +69,8 @@ class OwnershipPropagationTests(unittest.TestCase):
 
                 def observe(*args, original=original, captured=captured, **kwargs):
                     result = original(*args, **kwargs)
-                    captured.append(result)
+                    if result.owners:
+                        captured.append(result)
                     return result
 
                 with patch.object(mutation_propagation, "propagate", side_effect=observe):
@@ -124,6 +125,8 @@ class OwnershipPropagationTests(unittest.TestCase):
                 original = mutation_propagation.propagate
 
                 def wrong(db, original=original, **kwargs):
+                    if "ownership" not in kwargs:
+                        return original(db, **kwargs)
                     identity = kwargs["ownership"].owner_id
                     pending = db.mutation_state.propagation.owners
                     effect = pending[identity]
@@ -162,6 +165,8 @@ class OwnershipPropagationTests(unittest.TestCase):
         original = mutation_propagation.propagate
 
         def twice(*args, **kwargs):
+            if "ownership" not in kwargs:
+                return original(*args, **kwargs)
             original(*args, **kwargs)
             return original(*args, **kwargs)
 

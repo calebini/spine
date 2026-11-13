@@ -282,8 +282,9 @@ RF2 scope. No public contracts, persistent schema, agent workflow or activation 
 
 ### SPINE-101 — RF3: synchronous mutation-effect propagation
 
-**Status:** In progress — explicitly selected on 2026-11-13 after committing
-manual R2 as `7f35d68`. R3 scheduling/attempt integration remains unselected.
+**Status:** Done (2026-11-13) — all five RF3 increments implemented and verified;
+the final item/policy increment awaits checkpoint. R3 scheduling/attempt integration
+remains unselected. Manual R2 was committed as `7f35d68` before RF3 selection.
 **Scope:** Implement Section 7 of the accepted internal-application-operations
 contract: closed writer/effect inventory, exact transaction-local effects and one
 application propagation owner for existing consequences. Preserve trigger/finalizer
@@ -314,7 +315,7 @@ Eleven owner regressions plus one exact baseline witness pass; six response/ledg
 digests match `0135a68`. Full regression passes **1,560 tests, OK (one skipped)**,
 424.062 seconds. Focused checks, seven-module typing, changed-file lint, links and
 diff hygiene pass. Both unrelated files remain unchanged.
-**Third increment (implemented and verified, uncommitted):** Relation-create effects for the direct command, ordinary related
+**Third increment (committed as `5a212a6`):** Relation-create effects for the direct command, ordinary related
 tasks and recurring children. Preserve the standalone ledger helper's existing
 local transaction and the existing audit-trigger-owned conditional catalog bump.
 No relation update/retirement API, new catalog consequence or R3 work is added.
@@ -323,10 +324,10 @@ Ten new regressions and one six-case exact baseline witness pass. Full regressio
 lint, 21 dependency/documentation/declaration/web-sync tests, 388 links and diff
 hygiene pass. The existing bounded recurring cases and frozen witnesses remain
 unchanged; unrelated edits are preserved.
-**Fourth increment (implemented and verified, uncommitted):** Recurrence aggregate/lineage propagation across all six native
+**Fourth increment (committed as `5a212a6`):** Recurrence aggregate/lineage propagation across all six native
 command composers. Preserve exact immutable revisions, prospective item ordering,
-existing audit-trigger ownership and bounded recurring reconciliation. Relation
-edits remain uncommitted and preserved. No R3 or public behavior changes.
+existing audit-trigger ownership and bounded recurring reconciliation. No R3 or
+public behavior changes.
 Seven new recurrence regressions, a 17-observation baseline witness and the owner
 history mismatch regression pass. Full regression: **1,580 tests, OK (one skipped)**,
 446.138 seconds. Seven-module typing, changed-file lint, 388 local links and diff
@@ -334,10 +335,21 @@ hygiene pass. Existing instruction-budget limits and unrelated edits are preserv
 **Observed pre-existing issue:** Direct `recurrence.instance.add` replay after a
 successful add returns `semantic_conflict` at `command_id` on both `a4b3790` and
 this working tree. Recorded in RF3 evidence; not repaired under preservation scope.
-**Next:** Complete the remaining item/policy writer/effect
-inventory and integrate existing consequences. IO-07/08 are verified
-for the binding, initial ownership, selected relation-create and recurrence increments, not
-closed for all RF3. R3 remains unselected.
+**Checkpoint:** Relation and recurrence increments committed as `5a212a6`.
+**Fifth increment (implemented and verified, uncommitted):** Complete the selected
+item/policy writer inventory and route ordinary, direct-command, facet, people and
+recurring item composers through the application propagation owner. Capture exact
+item/policy/supporting facts, preserve copied-policy replacement and standalone
+helper behavior, and retain existing audit/continuity/finalizer consequences.
+Fourteen new regressions plus a 15-observation pre-extraction envelope/SQL witness
+pass, along with affected writer matrices, typing, lint and synchronization checks.
+Final full regression passes **1,595 tests, OK (one skipped)**, 426.649 seconds.
+Verification caught and corrected a missing-presentation error-mapping regression;
+both inherited rendering tests and a new propagation-loss rollback test pass without
+changing expected responses. Nine-module typing, changed-file Ruff, 32 synchronization/
+boundary tests, 388 local links and diff hygiene pass. IO-07/08 and RF3 are closed.
+The two unrelated edits are preserved; R3 remains unselected. No push, migration,
+public activation or deployment occurred.
 
 ## Selected feature design
 
@@ -1453,8 +1465,9 @@ checkpoint, then selection of the existing RF3 propagation prerequisite before R
 
 ### SPINE-094 — R3: recurring-task all-writer safety and automatic scheduling
 
-**Status:** Planned, not started or separately authorized. SPINE-093's manual R2
-checkpoint is complete; RF3 propagation remains the prerequisite before R3.
+**Status:** Ready for explicit kickoff, not started or separately authorized.
+SPINE-093's manual R2 checkpoint and SPINE-101's RF3 propagation are complete;
+the final RF3 item/policy increment awaits checkpoint.
 **Scope:** All existing source/target/relation/binding/owner/policy writers,
 atomic invalidation/catalog/dirty-CAS integration, per-attempt current-truth
 admission and fair bounded read-only scheduler planning. Preserve ordinary v1
@@ -1464,9 +1477,9 @@ explicit writer/reconcile/attempt interleavings, suppression/restoration and
 pending-intent races, protected-work matrix, rollover/catch-up, dense-root fairness
 and repeated idle zero-write cycles. No real sends. See
 [R3](IMPLEMENTATION_PLAN.md#r3--all-writer-safety-and-automatic-scheduling-spine-094).
-**Next:** Finish the accepted RF3 propagation seam under SPINE-101, then obtain
-an explicit R3 kickoff. The manual R2 checkpoint is complete; this does not
-authorize automatic recurring scheduling or attempt-gate integration.
+**Next:** Checkpoint the final RF3 increment, then obtain an explicit R3 kickoff.
+Completed prerequisites do not authorize automatic recurring scheduling or
+attempt-gate integration.
 
 ### SPINE-095 — R4: recurring-task activation and release verification
 

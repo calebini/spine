@@ -7,8 +7,8 @@ from spine.commands import core, handle
 from spine.commands.facets import CONTRACTS
 from spine.core.hashing import command_derived_id
 from spine.ledger import facets
-from spine.ledger.items import create_next_item_version
 from spine.ledger.supporting import ItemSubjectRoleInput
+from spine.services.item_mutations import create_next_item_version
 from tests import test_recurring_task_commands as base
 from tests import test_recurring_task_reconcile as pages
 

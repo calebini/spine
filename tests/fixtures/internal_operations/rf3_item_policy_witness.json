@@ -1,0 +1,103 @@
+{
+  "source_commit": "5a212a6",
+  "cases": {
+    "update_replaces_reminder_and_reconciles_then_materializes_atomically": [
+      {
+        "command": "schedule.create",
+        "response_sha256": "cf5d9804fa6ee92685db01e1663bb5e1039fd276562e0e115d9c139e0128a16f",
+        "response_bytes": 6184,
+        "ledger_sha256": "426269b2a90c2276a1f0f195064462d585d9be6b643b35f03451b24e2f51a284"
+      },
+      {
+        "command": "schedule.update",
+        "response_sha256": "e9e4961e5e38592ef5e9653bc866139fd2a06576f023bab16c5dedcfca798439",
+        "response_bytes": 5916,
+        "ledger_sha256": "d4e639ced89eb2ba87c14c1d367abdbf65d1fa7c0d6c9a183a977c0d87b66767"
+      },
+      {
+        "command": "schedule.update",
+        "response_sha256": "0e73c2c46cb98e059ee5aca81f09cabfe512b61dd633b39b5224aa9fa329473a",
+        "response_bytes": 5907,
+        "ledger_sha256": "d4e639ced89eb2ba87c14c1d367abdbf65d1fa7c0d6c9a183a977c0d87b66767"
+      }
+    ],
+    "cancel_terminalizes_item_and_cancels_only_never_started_work": [
+      {
+        "command": "schedule.create",
+        "response_sha256": "d077cc09b5530c71549636b7b70eef0552dadab7a790db1a77eec06782ab2d8c",
+        "response_bytes": 6184,
+        "ledger_sha256": "74e548867c8b0be74f9ffdde73362d56565ca5693ed606d4ef613e5a117c1369"
+      },
+      {
+        "command": "schedule.cancel",
+        "response_sha256": "0c628660df2378d76fd45d9e2ae0a72e45b4ecbd110987241c4d6e13fedc8b4d",
+        "response_bytes": 1735,
+        "ledger_sha256": "ddcb6f9dc4648bd011247361b6e83af9440cfd0799c3b8585353e8748ca2c53c"
+      },
+      {
+        "command": "schedule.cancel",
+        "response_sha256": "a5bbd69c91ff7ab7dbde13ac8aba19f8f2083481b873d628b05460056201e2d9",
+        "response_bytes": 1739,
+        "ledger_sha256": "ddcb6f9dc4648bd011247361b6e83af9440cfd0799c3b8585353e8748ca2c53c"
+      }
+    ],
+    "update_dry_run_matches_identities_and_persists_nothing": [
+      {
+        "command": "schedule.create",
+        "response_sha256": "2af12c99a2af8553da43176dc6f90ef7be2e43ac48a9dd3476304c26578d09f2",
+        "response_bytes": 2485,
+        "ledger_sha256": "726f4ce14a16ebcee8d177bfdd8ac1d2af151b3334a51c2fb5e2ba370a05095d"
+      },
+      {
+        "command": "schedule.update",
+        "response_sha256": "e0e667f01ec1abd5ebd82233dbb64df919f93726308e7872fe28944db29035ee",
+        "response_bytes": 2352,
+        "ledger_sha256": "726f4ce14a16ebcee8d177bfdd8ac1d2af151b3334a51c2fb5e2ba370a05095d"
+      },
+      {
+        "command": "schedule.update",
+        "response_sha256": "c617ac0acfe9434e71411ad7854b6d74d467348b53f9f5320e8950d2246eda65",
+        "response_bytes": 2337,
+        "ledger_sha256": "f27282a14beef16761abf1ec2a1ea289ecdaad1b1973958fa2485199e7bb23dc"
+      }
+    ],
+    "agenda_combines_singleton_and_recurrence_and_invalidates_cursor": [
+      {
+        "command": "schedule.create",
+        "response_sha256": "977e48705d542d22ceba6b967e0986c8fbfe750df2f824cf0a9b4ec459c9c4bb",
+        "response_bytes": 2475,
+        "ledger_sha256": "daa6b0914b73c21ccaab5e183eeff96d9a8ecd595c808cdf5885659ad06ca056"
+      },
+      {
+        "command": "schedule.create",
+        "response_sha256": "c62d481e6cb52f29a7b05ef029479bcc68a257364aab320dea23736f1677ad6e",
+        "response_bytes": 2869,
+        "ledger_sha256": "4230967c1b6e364dd9b8d1074a8e4ee6fd46b92a841ddbd02b4930499b5020b3"
+      },
+      {
+        "command": "agenda.show",
+        "response_sha256": "5379546b528c21b8bb43c11a155342c17b60502744af4a957962d1572d45d9d6",
+        "response_bytes": 5303,
+        "ledger_sha256": "4230967c1b6e364dd9b8d1074a8e4ee6fd46b92a841ddbd02b4930499b5020b3"
+      },
+      {
+        "command": "agenda.show",
+        "response_sha256": "d5778eecc968f99e1ca115ebddbcd2be0900cfc03b9e7ca4c1fe420c0a7f92d4",
+        "response_bytes": 1487,
+        "ledger_sha256": "4230967c1b6e364dd9b8d1074a8e4ee6fd46b92a841ddbd02b4930499b5020b3"
+      },
+      {
+        "command": "schedule.update",
+        "response_sha256": "af209c6ae2c978a1c7600d4ad5bbc07ef616443f969b0e0fe2d56a9a6f86eba0",
+        "response_bytes": 2333,
+        "ledger_sha256": "c809fbfcb7610791d6507846972d039963ea2986a98a05f0d373e1ec70a3bcf9"
+      },
+      {
+        "command": "agenda.show",
+        "response_sha256": "ae908a54dfea8513f983c09e31564ec7daa8c7c90099574077cb9abcc583ed6a",
+        "response_bytes": 128,
+        "ledger_sha256": "c809fbfcb7610791d6507846972d039963ea2986a98a05f0d373e1ec70a3bcf9"
+      }
+    ]
+  }
+}

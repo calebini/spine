@@ -776,7 +776,8 @@ class RenderingDeliveryTests(successor.RenderingSuccessorTests):
         root = self.create()["record"]
         grant = self.disclosure(root)
         siblings = []
-        with self.db.atomic_command():
+        # Standalone historical fixture authoring, not a composed item command.
+        with self.db:
             for offset in ("-3600", "-1800"):
                 policy = normalize_notification_policy(
                     {

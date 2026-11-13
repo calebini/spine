@@ -9,6 +9,7 @@ from dataclasses import dataclass
 from typing import Any, cast
 
 from spine.core import SpineValidationError
+from spine.core.canonical_json import canonical_json_bytes
 from spine.core.hashing import (
     audit_log_payload_hash,
     coordination_item_version_intent_hash,
@@ -25,6 +26,7 @@ from spine.ledger.common import (
 )
 from spine.ledger.facets import insert_snapshot, load_snapshot
 from spine.ledger.item_drafts import _UNSET, EventDraft, ItemVersionDraft, TaskDraft
+from spine.ledger.item_effects import record_item, snapshot
 from spine.ledger.sqlite import assert_ledger_invariants
 from spine.ledger.supporting import (
     ItemLocationInput,
@@ -98,7 +100,7 @@ def create_event_from_draft(
                 default_created_at_utc=draft.created_at_utc,
             )
 
-    def insert_detail(connection: sqlite3.Connection) -> None:
+    def insert_detail(connection: sqlite3.Connection) -> dict[str, object]:
         connection.execute(
             """
             INSERT INTO event_details (
@@ -117,6 +119,10 @@ def create_event_from_draft(
                 draft.attendance_policy_ref,
             ),
         )
+
+        return dict(event_status=enum_value(draft.event_status), all_day=int(draft.all_day),
+                    start_anchor_id=start_anchor_id, end_anchor_id=end_anchor_id,
+                    visibility=draft.visibility, attendance_policy_ref=draft.attendance_policy_ref)
 
     return _create_item_v1(
         connection,
@@ -237,7 +243,7 @@ def create_task_from_draft(
                 default_created_at_utc=draft.created_at_utc,
             )
 
-    def insert_detail(connection: sqlite3.Connection) -> None:
+    def insert_detail(connection: sqlite3.Connection) -> dict[str, object]:
         connection.execute(
             """
             INSERT INTO task_details (
@@ -257,6 +263,10 @@ def create_task_from_draft(
                 draft.completed_by_subject_id,
             ),
         )
+
+        return dict(task_status=enum_value(draft.task_status), completion_state=draft.completion_state,
+                    priority=draft.priority, due_anchor_id=due_anchor_id, defer_until_anchor_id=defer_until_anchor_id,
+                    completed_at_utc=draft.completed_at_utc, completed_by_subject_id=draft.completed_by_subject_id)
 
     return _create_item_v1(
         connection,
@@ -396,10 +406,10 @@ def create_item_version_from_draft(
                 created_at_utc=draft.created_at_utc,
                 created_by_subject_id=draft.created_by_subject_id,
             )
-            entries = (load_snapshot(connection, draft.item_id, draft.target_version)
-                       if draft.facet_entries is None else draft.facet_entries)
+            prior_entries = load_snapshot(connection, draft.item_id, draft.target_version)
+            entries = prior_entries if draft.facet_entries is None else draft.facet_entries
             insert_snapshot(connection, draft.item_id, next_version, entries)
-            _insert_next_detail(
+            before_detail, after_detail = _insert_next_detail(
                 connection,
                 item_id=draft.item_id,
                 item_type=current["item_type"],
@@ -408,7 +418,7 @@ def create_item_version_from_draft(
                 event_detail=draft.event_detail,
                 task_detail=draft.task_detail,
             )
-            copy_forward_supporting_sets(
+            prior_people = copy_forward_supporting_sets(
                 connection,
                 item_id=draft.item_id,
                 previous_version=draft.target_version,
@@ -426,6 +436,13 @@ def create_item_version_from_draft(
                     subject_roles=cast(tuple[ItemSubjectRoleInput, ...], draft.subject_roles),
                     default_created_at_utc=draft.created_at_utc,
                 )
+            people = prior_people
+            if draft.subject_roles is not _UNSET:
+                selected_roles = {enum_value(role) for role in draft.subject_role_replacement_roles}
+                people = tuple(sorted(
+                    [r for r in prior_people if r[1] not in selected_roles]
+                    + [(r.subject_id, enum_value(r.role), enum_value(r.status))
+                       for r in cast(tuple[ItemSubjectRoleInput, ...], draft.subject_roles)]))
             if insert_canonical_extension is not None:
                 insert_canonical_extension(connection, next_version)
             cursor = connection.execute(
@@ -452,6 +469,11 @@ def create_item_version_from_draft(
                 payload=draft.audit_payload,
             )
             assert_ledger_invariants(connection, item_id=draft.item_id)
+            record_item(connection, snapshot(dict(current), before_detail), snapshot({**dict(current),
+                "current_version": next_version, "title": next_title, "summary": next_summary,
+                "source_ref": next_source_ref}, after_detail), audit_id, before_people=prior_people, after_people=people,
+                before_facets=canonical_json_bytes(sorted(prior_entries, key=lambda e: e["facet_key"])),
+                after_facets=canonical_json_bytes(sorted(entries, key=lambda e: e["facet_key"])))
     except sqlite3.IntegrityError as exc:
         raise SpineValidationError("item_mutation_rejected", str(exc)) from exc
 
@@ -665,6 +687,10 @@ def archive_item(
                 created_at_utc=archived_at_utc,
             )
             assert_ledger_invariants(connection, item_id=item_id)
+            if getattr(connection, "_command_transaction", False):
+                detail = _current_detail(connection, item_id=item_id, item_type=current["item_type"], version=target_version)
+                record_item(connection, snapshot(dict(current), detail),
+                            snapshot({**dict(current), "status": "archived"}, detail), audit_id)
     except sqlite3.IntegrityError as exc:
         raise SpineValidationError("item_archive_rejected", str(exc)) from exc
     return audit_id
@@ -766,7 +792,7 @@ def _create_item_v1(
     subject_roles: tuple[ItemSubjectRoleInput, ...],
     validate_prerequisites: Callable[[sqlite3.Connection], None] | None,
     insert_anchors: Callable[[sqlite3.Connection], None],
-    insert_detail: Callable[[sqlite3.Connection], None],
+    insert_detail: Callable[[sqlite3.Connection], dict[str, object]],
     insert_canonical_extension: Callable[[sqlite3.Connection], None] | None = None,
     audit_action: str = "created",
     audit_reason_code: str = "created",
@@ -796,7 +822,7 @@ def _create_item_v1(
                 created_by_subject_id=created_by_subject_id,
             )
             insert_snapshot(connection, item_id, 1, facet_entries)
-            insert_detail(connection)
+            detail = insert_detail(connection)
             if insert_canonical_extension is not None:
                 insert_canonical_extension(connection)
             insert_supporting_sets(
@@ -838,6 +864,11 @@ def _create_item_v1(
                     ),
                 )
             assert_ledger_invariants(connection, item_id=item_id)
+            record_item(connection, None, snapshot(dict(item_id=item_id, item_type=item_type.value,
+                current_version=1, status="active", title=title, summary=summary, source_ref=source_ref), detail), audit_id,
+                before_people=(), before_facets=b"[]",
+                after_people=tuple(sorted((r.subject_id, enum_value(r.role), enum_value(r.status)) for r in subject_roles)),
+                after_facets=canonical_json_bytes(sorted(facet_entries, key=lambda e: e["facet_key"])))
     except sqlite3.IntegrityError as exc:
         raise SpineValidationError("item_create_rejected", str(exc)) from exc
     return CreatedItem(item_id=item_id, version=1, audit_id=audit_id)
@@ -852,6 +883,10 @@ def _item_transaction(connection: sqlite3.Connection) -> Iterator[None]:
     else:
         with connection.atomic_command():
             yield
+            # Retained standalone helper owns its complete local transaction.
+            # Composed calls above never take this exception.
+            connection.mutation_state.propagation.items.clear()
+            connection.mutation_state.propagation.policies.clear()
 
 
 def _insert_item_shell(
@@ -922,11 +957,12 @@ def _insert_next_detail(
     next_version: int,
     event_detail: dict[str, object] | None,
     task_detail: dict[str, object] | None,
-) -> None:
+) -> tuple[dict[str, object], dict[str, object]]:
     if item_type == ItemType.EVENT.value:
         if task_detail is not None:
             raise SpineValidationError("item_detail_mismatch", "task detail cannot be applied to an event")
         detail = _load_event_detail(connection, item_id=item_id, version=previous_version)
+        before = dict(detail)
         previous_status = detail["event_status"]
         detail.update(event_detail or {})
         _validate_event_status_transition(previous_status, detail["event_status"])
@@ -949,12 +985,13 @@ def _insert_next_detail(
                 detail["attendance_policy_ref"],
             ),
         )
-        return
+        return before, detail
 
     if item_type == ItemType.TASK.value:
         if event_detail is not None:
             raise SpineValidationError("item_detail_mismatch", "event detail cannot be applied to a task")
         detail = _load_task_detail(connection, item_id=item_id, version=previous_version)
+        before = dict(detail)
         previous_status = detail["task_status"]
         detail.update(task_detail or {})
         _validate_task_status_transition(previous_status, detail["task_status"])
@@ -981,10 +1018,11 @@ def _insert_next_detail(
                 detail["completed_by_subject_id"],
             ),
         )
-        return
+        return before, detail
 
     if event_detail is not None or task_detail is not None:
         raise SpineValidationError("item_detail_mismatch", "detail override is not valid for this item type")
+    return {}, {}
 
 
 def _insert_creation_audit(

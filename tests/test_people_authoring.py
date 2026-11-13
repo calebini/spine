@@ -10,7 +10,8 @@ import test_people_ledger as foundation
 from spine.core.errors import SpineValidationError
 from spine.ledger import ItemSubjectRoleInput
 from spine.ledger.people import read_people_snapshot
-from spine.ledger.people_authoring import capture_role_edge, replace_people, verify_role_edge
+from spine.ledger.people_authoring import capture_role_edge, verify_role_edge
+from spine.services.people_authoring import replace_people
 
 NOW = foundation.NOW
 

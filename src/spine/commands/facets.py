@@ -17,9 +17,9 @@ from spine.core.hashing import hash_canonical_json
 from spine.core.notification_profiles import normalize_owner
 from spine.ledger import facet_continuity, facets
 from spine.ledger.item_drafts import ItemVersionDraft
-from spine.ledger.items import create_item_version_from_draft
 from spine.ledger.notification_profiles import load_archetype, require_owner_exists
 from spine.ledger.transactions import LedgerConnection
+from spine.services.item_mutations import create_item_version_from_draft
 
 CONTRACTS = {
     "facet_schema.revision.show": "spine.facet-schema-revision-readback.v1",

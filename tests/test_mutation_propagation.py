@@ -280,6 +280,8 @@ class MutationPropagationTests(unittest.TestCase):
             ("services/recurring_task_children.py", "insert_temporal_binding_revision"): 2,
             ("services/recurring_task_children.py", "retire_temporal_binding"): 1,
             ("services/recurring_task_children.py", "propagate"): 4,
+            ("services/item_mutations.py", "propagate"): 1,
+            ("services/people_authoring.py", "propagate"): 1,
             ("web/service.py", "propagate"): 1,
             ("web/people_schedule_service.py", "propagate"): 1,
             ("web/provisioning.py", "propagate"): 1,

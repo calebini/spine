@@ -239,6 +239,9 @@ def insert_notification_schedule_policy(connection: sqlite3.Connection, *, norma
     from spine.ledger.rendering_definitions import stage_policy
 
     stage_policy(connection, value)
+    from spine.ledger.item_effects import record_policy
+
+    record_policy(connection, value)
 
 
 def load_notification_policies_at_version(
@@ -300,6 +303,9 @@ def remove_copied_notification_policy(
     connection.execute("DELETE FROM notification_policies WHERE policy_id = ?", (row["policy_id"],))
     if getattr(connection, "_renderings_enabled", False):
         connection.mutation_state.renderings.pending.pop(row["policy_id"], None)
+    from spine.ledger.item_effects import discard_copied_policy
+
+    discard_copied_policy(connection, row["policy_id"])
 
 
 def copy_forward_notification_policies(

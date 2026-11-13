@@ -42,13 +42,21 @@ class FacetStorageTests(unittest.TestCase):
 
     def create(self, item="task", *, seeded=True):
         with patch("spine.ledger.items.insert_snapshot", seeded_snapshot if seeded else facets.insert_snapshot):
-            return create_task_v1(self.db, item_id=item, title="Flight", created_at_utc=NOW, created_by_subject_id="owner")
+            result = create_task_v1(self.db, item_id=item, title="Flight", created_at_utc=NOW, created_by_subject_id="owner")
+            if self.db._command_transaction:
+                from spine.services.mutation_propagation import propagate
+                propagate(self.db, item_id=result.item_id)
+            return result
 
     def next(self, item="task", **kwargs):
         version = self.db.execute("SELECT current_version FROM coordination_items WHERE item_id=?", (item,)).fetchone()[0]
-        return create_item_version_from_draft(
+        result = create_item_version_from_draft(
             self.db, ItemVersionDraft(item_id=item, target_version=version, created_at_utc=NOW, created_by_subject_id="owner", **kwargs)
         )
+        if self.db._command_transaction:
+            from spine.services.mutation_propagation import propagate
+            propagate(self.db, item_id=result.item_id)
+        return result
 
     def test_empty_and_eight_entry_copy_forward_and_last_removal(self):
         self.create()

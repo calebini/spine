@@ -16,7 +16,6 @@ from spine.core.provenance import derive_occurrence_provenance
 from spine.core.recurring_task_runtime import PREFIX, fail, instant, wire
 from spine.ledger import item_reads, schedule_work
 from spine.ledger.common import TemporalAnchorInput
-from spine.ledger.items import create_next_item_version, create_task_v1
 from spine.ledger.notification_profiles import insert_application, insert_assignment, load_archetype, load_profile, require_owner_exists
 from spine.ledger.notifications import insert_notification_schedule_policy, load_notification_policies_at_version
 from spine.ledger.owner_mutations import insert_item_owner, record_item_owner_history
@@ -32,6 +31,7 @@ from spine.ledger.temporal_bindings import (
 from spine.ledger.transactions import LedgerConnection
 from spine.ledger.work import cancel_work_instance
 from spine.services import schedule_delivery, schedule_materialization, schedule_policies
+from spine.services.item_mutations import create_next_item_version, create_task_v1
 from spine.services.mutation_propagation import reserve_local_owner_epoch
 from spine.services.primary_locations import inline_location_inputs, reference_location_input
 from spine.services.recurring_task_operations import (

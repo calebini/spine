@@ -1,9 +1,10 @@
 """Private, immutable mutation facts; neither wire dimensions nor durable events.
 
-RF3 covers binding, relation, recurrence and initial item-owner producers. Other kinds must be
-introduced with their writer inventory, not guessed from an item-version bump.
+RF3 covers the inventoried item, policy, binding, relation, recurrence and initial
+item-owner producers. Categories describe proven facts, not every version bump.
 """
 
+import json
 from dataclasses import dataclass
 from enum import Enum
 
@@ -14,6 +15,12 @@ class ChangeCategory(Enum):
     OWNERSHIP = "ownership"
     RELATION = "relation"
     RECURRENCE = "recurrence"
+    ITEM = "item"
+    LIFECYCLE = "lifecycle"
+    POLICIES = "policies"
+    PEOPLE = "people"
+    FACETS = "facets"
+    PRESENTATIONS = "presentations"
 
 
 @dataclass(frozen=True)
@@ -179,9 +186,73 @@ class RecurrenceMutation:
 
 
 @dataclass(frozen=True)
+class ItemSnapshot:
+    item_id: str
+    item_type: str
+    version: int
+    status: str
+    title: str
+    summary: str | None
+    source_ref: str | None
+    detail_bytes: bytes
+
+
+@dataclass(frozen=True)
+class ItemMutation:
+    before: ItemSnapshot | None
+    after: ItemSnapshot
+    audit_id: str
+    # None on both sides explicitly means unaffected/not inspected (shell archive).
+    before_people: tuple[tuple[str, str, str], ...] | None = None
+    after_people: tuple[tuple[str, str, str], ...] | None = None
+    before_facets: bytes | None = None
+    after_facets: bytes | None = None
+
+    @property
+    def categories(self) -> frozenset[ChangeCategory]:
+        result = {ChangeCategory.ITEM}
+        before = {} if self.before is None else json.loads(self.before.detail_bytes)
+        after = json.loads(self.after.detail_bytes)
+        lifecycle = ("event_status", "task_status", "completion_state", "completed_at_utc", "completed_by_subject_id")
+        if (self.before is None or self.before.status != self.after.status
+                or any(before.get(k) != after.get(k) for k in lifecycle)):
+            result.add(ChangeCategory.LIFECYCLE)
+        # Exact temporal-reference changes, not an inference from allocation.
+        temporal = ("all_day", "start_anchor_id", "end_anchor_id", "due_anchor_id", "defer_until_anchor_id")
+        if any(before.get(k) != after.get(k) for k in temporal):
+            result.add(ChangeCategory.TIME)
+        if self.before_people != self.after_people:
+            result.add(ChangeCategory.PEOPLE)
+        if self.before_facets != self.after_facets:
+            result.add(ChangeCategory.FACETS)
+        return frozenset(result)
+
+
+@dataclass(frozen=True)
+class PolicyMutation:
+    item_id: str
+    item_version: int
+    policy_id: str
+    source_policy_id: str | None
+    definition_bytes: bytes
+    before_presentation: bytes | None = None
+    after_presentation: bytes | None = None
+
+    @property
+    def categories(self) -> frozenset[ChangeCategory]:
+        # This is an exact policy-row write, not proof of semantic schedule change.
+        result = {ChangeCategory.POLICIES}
+        if self.before_presentation != self.after_presentation:
+            result.add(ChangeCategory.PRESENTATIONS)
+        return frozenset(result)
+
+
+@dataclass(frozen=True)
 class MutationEffects:
     bindings: tuple[BindingMutation, ...] = ()
     owners: tuple[OwnerMutation, ...] = ()
     ownership_epoch: OwnershipPropagationResult | None = None
     relations: tuple[RelationMutation, ...] = ()
     recurrences: tuple[RecurrenceMutation, ...] = ()
+    items: tuple[ItemMutation, ...] = ()
+    policies: tuple[PolicyMutation, ...] = ()

@@ -121,6 +121,7 @@ class InternalOperationBoundaryTests(unittest.TestCase):
             "core/recurring_task_runtime.py", "ledger/receipts.py", "ledger/recurring_task_catalog.py",
             "core/mutation_effects.py", "ledger/mutation_effects.py", "services/mutation_propagation.py",
             "ledger/owner_mutations.py", "ledger/relations.py", "ledger/recurrence_effects.py",
+            "ledger/item_effects.py", "services/item_mutations.py",
         )
         for relative in paths:
             with self.subTest(path=relative):

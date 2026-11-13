@@ -9,7 +9,7 @@ see [validation](TZDB_COMPATIBILITY_VALIDATION.md) and [operations](TZDB_COMPATI
 
 
 Role: Roadmap rationale and delivery history; current task status lives in [BACKLOG.md](BACKLOG.md)
-Last updated: 2026-11-13 (RF3 relation and recurrence propagation verified, uncommitted)
+Last updated: 2026-11-13 (RF3 complete; final item/policy increment awaits checkpoint)
 
 This is a non-normative delivery plan. The specifications and machine-readable contracts remain authoritative.
 
@@ -170,9 +170,10 @@ needed for any checkpoint. Use disposable ledgers and fake adapters/clocks only.
 4. **R4 / SPINE-095:** public activation, packaged verification and operator handoff.
 
 R1 is committed as `bc96a1d`; the operator authorized R2 and its prospective
-producer follow-up. R2 is in progress, not complete. Later slices depend on the
-earlier checkpoint and must retain its regression evidence. A plan entry alone
-is not implementation authorization.
+producer follow-up. Manual R2 is complete at `7f35d68`; RF3 propagation is complete,
+with its final item/policy increment awaiting checkpoint before R3. Later slices depend on the earlier checkpoint
+and must retain its regression evidence. A plan entry alone is not implementation
+authorization.
 
 ### R1 — Persistence and source-identity foundation (SPINE-092)
 
@@ -336,7 +337,7 @@ full **1,560-test suite (one skipped)**. Seven-module typing, changed-file lint,
 documentation links and diff hygiene pass. This increment is committed as `a4b3790`.
 The next increment covers relation-create effects across direct and composite
 writers, retaining standalone helper behavior and audit-trigger catalog ownership.
-It is implemented and verified but uncommitted: **1,571 tests, OK (one skipped)**,
+It is implemented and verified: **1,571 tests, OK (one skipped)**,
 six-module typing, lint, links and exact baseline witnesses pass. No public
 contracts, persistence schema, runtime activation or agent workflow changed.
 The next selected increment captures exact recurrence revisions and lineage across
@@ -344,10 +345,20 @@ all six composers, verifies prospective revisions before the item pointer advanc
 and preserves existing audit/catalog consequences. It is implemented and verified:
 **1,580 tests, OK (one skipped)**; seven-module typing, changed-file lint, 388 links,
 diff hygiene and exact baseline witnesses pass. Relation and recurrence increments
-remain uncommitted. See the RF3 evidence for a baseline-confirmed legacy direct-add replay
+are committed together as `5a212a6`. See the RF3 evidence for a baseline-confirmed legacy direct-add replay
 defect discovered during testing; fixing that public behavior is separate work.
-Full RF3 closure remains open under SPINE-101 for the
-remaining item/policy families; R3 remains unselected.
+The final selected increment implements item/policy propagation through a closed
+application adapter set, including the distinct ledger people composer. Exact
+before/after item/supporting facts and policy/presentation ancestry preserve existing
+allocation, audit, work-mode and finalizer ordering; no consequence is duplicated.
+Native standalone helpers retain their existing local transaction exception, while
+missed composed propagation fails closed. Fourteen new regressions and a fixed
+15-observation baseline witness pass, with typing/lint and focused synchronization
+checks. Final full regression passes **1,595 tests, OK (one skipped)** in
+426.649 seconds. A missing staged-presentation error-mapping regression found in
+verification is corrected with whole-transaction rollback coverage; prior expected
+responses and golden bytes remain unchanged. IO-07/08 and RF3 are closed. This
+increment is uncommitted. R3 remains unselected and public activation remains R4.
 
 Implement all seven command handlers internally using the shared command context
 and one outer transaction, not recursive public-command submissions or child

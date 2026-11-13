@@ -25,9 +25,8 @@ from spine.core.people import normalize_people, people_id, replacement_is_noop, 
 from spine.ledger.common import require_utc_z
 from spine.ledger.items import mutation_audit_payload
 from spine.ledger.people import PeopleSnapshot, read_people_snapshot
-from spine.ledger.people_authoring import replace_people
 from spine.ledger.transactions import LedgerConnection
-from spine.services.people_authoring import PeopleAuthoring
+from spine.services.people_authoring import PeopleAuthoring, replace_people
 from spine.services.people_directory import PeopleDirectory
 from spine.services.rendering_authoring import RenderingAuthoring
 

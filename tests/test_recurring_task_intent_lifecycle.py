@@ -161,7 +161,7 @@ class RecurringTaskIntentLifecycleTests(unittest.TestCase):
         self.assertIsNone(recovered["result"]["rule"]["adoption_intent"])
 
     def test_cancel_retirement_cannot_complete_over_an_ownership_conflict(self):
-        from spine.ledger.items import create_next_item_version
+        from spine.services.item_mutations import create_next_item_version
 
         initial = self.reconcile(self.created()["result"]["rule"])
         first = initial["result"]["results"][0]

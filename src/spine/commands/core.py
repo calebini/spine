@@ -58,15 +58,6 @@ from spine.core.schedule import (
 from spine.ledger import catalog_reads, item_reads, schedule_work
 from spine.ledger.common import TemporalAnchorInput, copy_id, insert_temporal_anchor, require_utc_z
 from spine.ledger.item_drafts import _UNSET
-from spine.ledger.items import (
-    archive_item,
-    cancel_event,
-    cancel_task,
-    complete_task,
-    create_event_v1,
-    create_next_item_version,
-    create_task_v1,
-)
 from spine.ledger.migrate import current_schema_version
 from spine.ledger.notifications import (
     NotificationPolicyResolver,
@@ -99,6 +90,15 @@ from spine.ledger.supporting import (
 from spine.ledger.transactions import LedgerConnection
 from spine.ledger.work import assert_work_instance_not_stale, cancel_work_instance, create_work_instance
 from spine.services import schedule_delivery, schedule_materialization, schedule_policies
+from spine.services.item_mutations import (
+    archive_item,
+    cancel_event,
+    cancel_task,
+    complete_task,
+    create_event_v1,
+    create_next_item_version,
+    create_task_v1,
+)
 from spine.timezones import timezone_for_version
 
 # Preserve command helper imports while core and ledger own the shared implementation.

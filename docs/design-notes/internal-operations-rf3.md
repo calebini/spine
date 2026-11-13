@@ -1,8 +1,9 @@
 # RF3 — synchronous mutation-effect propagation
 
-Status: bindings committed as `0135a68`, ownership as `a4b3790`; relations and recurrence verified, both uncommitted
+Status: RF3 complete; bindings committed as `0135a68`, ownership as `a4b3790`, relations/recurrence as `5a212a6`; final item/policy increment verified, uncommitted
 (2026-11-13).
-This is implementation evidence, not a new normative contract or full RF3 closure.
+This is implementation evidence, not a new normative contract. Earlier sections
+record incremental checkpoints; the fifth increment below closes IO-07/08 and RF3.
 The authoritative boundary is
 [internal application operations §7](../../specs/internal-application-operations.md).
 Current scope/status lives in [SPINE-101](../BACKLOG.md#spine-101--rf3-synchronous-mutation-effect-propagation).
@@ -59,7 +60,7 @@ propagation fails closed; failure later in the same transaction rolls back both
 the binding and its consequence. Neither propagation nor its persistence helpers
 commit, dispatch commands, materialize work, schedule repair or send notifications.
 
-## Consequence ownership retained; remaining RF3 work
+## Consequence ownership retained; remaining work at the first checkpoint
 
 The new owner does **not** repeat consequences already applied elsewhere:
 
@@ -358,3 +359,127 @@ transaction and has no standalone local-commit exception.
   with installed pinned Tickerd. No public contract/schema, migration, activation,
   live ledger, deployment, commit or push is involved. This is not RF3 closure;
   item/policy work remains.
+
+## Fifth increment: item and policy application boundary
+
+The operator committed the relation/recurrence checkpoint as `5a212a6` and selected
+the remaining item/policy work to close RF3. R3 remains unselected. The same two
+unrelated files retain their recorded hashes and were excluded from the commit.
+
+### Closed writer and consequence inventory
+
+The existing machine inventory, `src/spine/ledger/facet_writer_inventory.v1.json`,
+continues to name every item-version allocation caller; its AST and real SQLite
+writer matrices remain unchanged. The following inventory adds the application
+acknowledgement and retained consequence owners, not new public producers:
+
+| Native writer | Application owner / callers | Existing consequences retained |
+| --- | --- | --- |
+| `ledger/items._create_item_v1` | Closed `services/item_mutations` event/task adapters; ordinary command and single/recurring related-task creation | Version/detail/supporting-set writes, allocator audit, facet snapshot/index, item-audit catalog triggers |
+| `ledger/items.create_item_version_from_draft` | Same service adapters for ordinary update, reschedule, lifecycle, recurrence edits, direct policy commands, facets and recurring change/restore; `services/people_authoring.replace_people` acknowledges the existing ledger people composer | Existing copy/replace/clear choices, CAS, audit, people/facet continuity checks, policy/application/presentation history and explicit work mode |
+| `ledger/items.archive_item` | Closed archive adapter | Shell-only lifecycle write and unchanged audit/trigger behavior; no version or policy allocation |
+| `ledger/notifications.insert_notification_schedule_policy` | The owning item application, including copy-forward, direct policy authoring, ordinary related creation, recurring creation/restoration/adoption | Schedule/selector rows, staged exact presentation and existing rendering finalizer |
+| `ledger/notifications.remove_copied_notification_policy` | The same item application before replacement | Deletes only its still-pending copied successor and discards that transient effect; the final replacement remains required |
+
+All item SQL remains in `ledger/items.py`: three shell writes, one version INSERT,
+two event-detail INSERTs and two task-detail INSERTs. Both policy INSERT/DELETE
+statements remain in `ledger/notifications.py`. The eight application allocator
+adapters form a closed, typed set; they preserve each existing callable signature,
+result and failure mapping. They do not normalize requests or accept a new universal
+mutation payload. The separate people adapter calls the existing ledger composer
+and acknowledges only changed results, preserving no-op admission and receipts.
+
+`ItemSnapshot` captures exact item/type/version/shell/detail and metadata facts.
+The allocator records `ItemMutation` only after its existing CAS, audit and
+cross-row invariant checks succeed. Native writes and those existing checks remain
+the persistence proof owner; propagation does not duplicate their history scans.
+Predecessor detail and role facts reuse existing reads. Explicit facet replacement
+also decodes the predecessor snapshot; unchanged copies reuse the ordinary read.
+People effects retain the opposite role and distinguish explicit empty clears.
+Facet facts preserve exact schema/binding/history/value pins. Shell archive records
+supporting facts as unaffected (`None`), not as fabricated empty snapshots.
+
+Categories distinguish item allocation from actual lifecycle, temporal-reference,
+people and facet changes. A new version alone proves none of the latter. This is
+not a replacement for public `changed_dimensions` or recurrence time resolution.
+Policy effects retain exact new/source policy IDs, item version, normalized
+definition bytes and source/selected presentation bytes. `POLICIES` describes the
+immutable row write (including copy-forward), not a claim that reminder semantics
+changed. `PRESENTATIONS` is proven only by differing selections. Ordinary title
+copy therefore does not masquerade as a presentation edit, and existing exclusive
+presentation-only public responses are untouched.
+
+The one `services/mutation_propagation.propagate` entrypoint consumes a complete
+item plus its final policy set at the application return boundary. A copied policy
+removed and replaced within the allocator extension is never reported as a final
+successor. Policies for another item version, duplicate acknowledgement, missing
+item acknowledgement or orphaned composed policy obligations fail closed.
+The transaction's existing checkpoint/reset/finalization registration includes
+both new dictionaries; rollback restores them alongside SQL.
+
+### Explicit retained exceptions and preservation
+
+- Standalone ledger item helpers still own their local transaction under §6. They
+  finish their native item/policy obligations only on that local path, after the
+  same allocator checks; composed calls cannot take this exception. The application
+  adapters require an already-owned transaction and never commit. Standalone
+  historical policy fixture authoring retains its checked local context and
+  rendering finalizer; composed policy insertion requires item acknowledgement.
+- `ledger/people_authoring.replace_people` retains its lower-level continuity proof
+  and allocator composition; its service adapter is the propagation owner. No
+  ledger-to-service dependency was added. Test-only composed native writers were
+  updated to call that boundary; their domain expectations and golden artifacts
+  were not relaxed.
+- `ledger/rendering_definitions.finalize`, `ledger/facets.finalize`, existing
+  allocator invariants, people/facet continuity decoders and persistent audit/access
+  triggers retain their current proof/index/epoch/catalog ownership. The propagation
+  seam acknowledges their ownership, not duplicates it. Catalog authoring for
+  profiles, archetypes, definitions, disclosure and access provisioning remains
+  under these named existing owners; it is not new scheduling mutation machinery.
+- Work creation, stale-only reconciliation, current attempt admission, prior attempt
+  replay, dry-run and all resource limits are unchanged. No R3 dirty queue, automatic
+  generation, scheduler integration, public activation or deployment is included.
+
+### Verification
+
+- Initial recurrence/notification/schedule selection: 28 tests exposed two test-only
+  native-composition omissions after correcting private native integer encoding.
+  Updating those composers, not relaxing finalization, produced a passing 44-test
+  lifecycle/budget/witness/dependency selection.
+- A first full run against the initial extraction reported 1,580 tests, three
+  failures, 39 errors and one skip. Failures were composed test-helper omissions,
+  standalone historical-policy fixture ownership and ownership-only observers
+  assuming all propagation results were ownership effects. Each was narrowed to
+  its actual family/application boundary; expected SQL, response and work facts
+  remain unchanged. One separate focused invocation needed the existing `tests`
+  import path; no runtime workaround was added for that harness requirement.
+- The final supporting-fact selection passes 47 tests, including the real facet and
+  people writer matrices and the unchanged delayed-rdate instruction budget. A
+  32-test new-regression/witness/transaction/dependency selection passes, plus the
+  additional composed-policy omission/standalone test. Nine affected modules pass
+  focused typing; changed-file Ruff and diff hygiene pass.
+- Fourteen new propagation tests cover precise classification, opposite-role
+  preservation/clears, facet-only and presentation-only edits, copy/replacement,
+  no-op/replay, omission, duplicate consumption, policy-version mismatch, nested
+  rollback/retry, late finalizer failure, standalone exceptions and closed writer
+  inventory. The separate new witness compares 15 public envelopes and whole-ledger
+  digests against a disposable `git archive 5a212a6` checkout, covering materializing
+  replacement/replay, protected cancellation/replay, preview/commit and cursor
+  invalidation. The fixture SHA-256 is
+  `70293bfd6b47e1d052e518fd1fc3281b6b5173dcef212708f43dc794a8f96702`.
+- The subsequent full run found two failures (1,594 tests, one skip): the same
+  missing-staged-presentation test inherited by two rendering test classes.
+  Evidence capture had raised `KeyError` before the existing rendering invariant,
+  incorrectly mapping the failure to `invalid_request`. Explicit invariant guards
+  now preserve `environment_failure:rendering` at both capture and propagation.
+  A new fault-injection test removes staged presentation evidence between those
+  boundaries and proves whole-ledger and transaction-state rollback. All 17 focused
+  item/policy/witness and both inherited regression cases pass; a fresh complete
+  run follows this correction. No expected response or golden was changed.
+- Final full regression: **1,595 tests in 426.649 seconds, OK (one skipped)**.
+  Nine-module typing, changed-file Ruff, 32 documentation/declaration/web-copy/
+  transaction/dependency tests, 388 local links and diff hygiene pass. Both unrelated
+  files and the frozen witness retain their recorded SHA-256 values. IO-07/08 and
+  RF3 are closed; the final item/policy increment is not committed or pushed.
+  R3 all-writer dirty/CAS, scheduler planning and attempt admission remain unselected;
+  no migration, public activation, deployment or external sending occurred.

@@ -127,8 +127,9 @@ def copy_forward_supporting_sets(
     created_at_utc: str,
     created_by_command_id: str,
     subject_role_copy_command: str | None = None,
-) -> None:
+) -> tuple[tuple[str, str, str], ...]:
     require_utc_z("created_at_utc", created_at_utc)
+    people: list[tuple[str, str, str]] = []
     for row in connection.execute(
         """
         SELECT item_location_id, location_id, role
@@ -164,6 +165,7 @@ def copy_forward_supporting_sets(
         """,
         (item_id, previous_version),
     ):
+        people.append((row["subject_id"], row["role"], row["status"]))
         connection.execute(
             """
             INSERT INTO item_subject_roles (
@@ -206,6 +208,7 @@ def copy_forward_supporting_sets(
         created_at_utc=created_at_utc,
         created_by_command_id=created_by_command_id,
     )
+    return tuple(sorted(people))
 
 
 def current_locations(connection: sqlite3.Connection, *, item_id: str, version: int) -> list[dict[str, object]]:

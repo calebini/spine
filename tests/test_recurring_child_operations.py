@@ -12,11 +12,11 @@ from unittest.mock import patch
 
 from spine.core.errors import SpineValidationError
 from spine.ledger import facets, item_reads
-from spine.ledger.items import create_next_item_version
 from spine.ledger.recurrence import load_current_recurrence_set
 from spine.ledger.supporting import ItemSubjectRoleInput
 from spine.ledger.work import start_work_instance
 from spine.services import recurring_task_adoption, recurring_task_children, recurring_task_restoration
+from spine.services.item_mutations import create_next_item_version
 from spine.services.recurring_task_operations import (
     ChangeChild,
     ChangedChild,

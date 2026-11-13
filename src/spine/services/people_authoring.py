@@ -20,9 +20,24 @@ from spine.core.people import (
     subjects_needing_admission,
 )
 from spine.ledger.people import read_people_snapshot
-from spine.ledger.people_authoring import capture_role_edge, verify_role_edge
+from spine.ledger.people_authoring import PeopleMutation, capture_role_edge, verify_role_edge
+from spine.ledger.people_authoring import replace_people as _replace_people
 from spine.ledger.supporting import ItemSubjectRoleInput
 from spine.ledger.transactions import LedgerConnection
+from spine.services import mutation_propagation
+
+
+def replace_people(
+    db: LedgerConnection, *, item_id: str, target_version: int, people: object,
+    command_id: str, actor_subject_id: str, updated_at_utc: str, audit_id: str,
+    admit_additions: Callable[[tuple[str, ...]], None],
+) -> PeopleMutation:
+    result = _replace_people(db, item_id=item_id, target_version=target_version, people=people,
+        command_id=command_id, actor_subject_id=actor_subject_id, updated_at_utc=updated_at_utc,
+        audit_id=audit_id, admit_additions=admit_additions)
+    if result.changed:
+        mutation_propagation.propagate(db, item_id=item_id)
+    return result
 
 
 def role_inputs(rows: tuple[RoleAssociation, ...]) -> tuple[ItemSubjectRoleInput, ...]:

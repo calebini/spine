@@ -15,7 +15,6 @@ from spine.core.errors import SpineValidationError
 from spine.core.hashing import hash_canonical_json
 from spine.core.provenance import DerivedOccurrenceProvenance, derive_occurrence_provenance
 from spine.ledger.common import TemporalAnchorInput, insert_temporal_anchor
-from spine.ledger.items import create_next_item_version, create_task_v1
 from spine.ledger.notifications import (
     insert_notification_schedule_policy,
     load_current_notification_policies,
@@ -36,6 +35,7 @@ from spine.ledger.temporal_bindings import (
     target_from_source,
 )
 from spine.ledger.work import cancel_work_instance
+from spine.services.item_mutations import create_next_item_version, create_task_v1
 
 _source_from_item = binding_facts.source_from_item
 _scheduled_for_target = binding_facts.scheduled_for_target

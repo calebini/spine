@@ -250,7 +250,8 @@ class PeopleWorkStateTests(unittest.TestCase):
     def test_shared_intent_siblings_disabled_and_presentation_policies_have_exact_bijection(self):
         version = str(self.db.execute('SELECT current_version FROM coordination_items WHERE item_id=?', (self.item,)).fetchone()[0])
         seeded = []
-        with self.db.atomic_command():
+        # Standalone historical fixture authoring, not a composed item command.
+        with self.db:
             for offset in ('-3600', '-1800', '-900'):
                 normalized = normalize_notification_policy({
                     'authoring_contract': 'spine.notification-schedule-authoring.v1',
