@@ -139,6 +139,24 @@ class OwnershipPropagationTests(unittest.TestCase):
                     h.run_command("schedule.create", body)
                 self.assertEqual(dump(h.db), before)
 
+    def test_header_history_equality_is_preserved_by_python_comparison(self):
+        from spine.ledger.owner_mutations import record_item_owner_history
+
+        h = self.web()
+
+        def drift(db, identity, actor, at, receipt):
+            pending = db.mutation_state.propagation.owners
+            effect = pending[identity]
+            pending[identity] = replace(effect, after=replace(effect.after, command_id="different"))
+            record_item_owner_history(db, identity, actor, at, receipt)
+            pending[identity] = replace(pending[identity], after=effect.after)
+
+        before = dump(h.db)
+        with (patch("spine.ledger.owner_mutations.record_item_owner_history", side_effect=drift),
+              self.assertRaises((WebError, SpineValidationError))):
+            h.run_command("schedule.create", h.event())
+        self.assertEqual(dump(h.db), before)
+
     def test_duplicate_propagation_rolls_back_first_advance(self):
         h = self.web()
         original = mutation_propagation.propagate

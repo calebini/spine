@@ -39,7 +39,8 @@ class MutationPropagationTests(unittest.TestCase):
 
         def observed(*args, **kwargs):
             effect = original(*args, **kwargs)
-            calls.append(effect)
+            if effect.bindings:
+                calls.append(effect)
             return effect
 
         return patch.object(mutation_propagation, "propagate", side_effect=observed)
@@ -273,11 +274,12 @@ class MutationPropagationTests(unittest.TestCase):
             ("commands/temporal_bindings.py", "insert_temporal_binding"): 1,
             ("commands/temporal_bindings.py", "insert_temporal_binding_revision"): 3,
             ("commands/temporal_bindings.py", "retire_temporal_binding"): 2,
-            ("commands/temporal_bindings.py", "propagate"): 3,
+            ("commands/core.py", "propagate"): 7,
+            ("commands/temporal_bindings.py", "propagate"): 4,
             ("services/recurring_task_children.py", "insert_temporal_binding"): 1,
             ("services/recurring_task_children.py", "insert_temporal_binding_revision"): 2,
             ("services/recurring_task_children.py", "retire_temporal_binding"): 1,
-            ("services/recurring_task_children.py", "propagate"): 3,
+            ("services/recurring_task_children.py", "propagate"): 4,
             ("web/service.py", "propagate"): 1,
             ("web/people_schedule_service.py", "propagate"): 1,
             ("web/provisioning.py", "propagate"): 1,

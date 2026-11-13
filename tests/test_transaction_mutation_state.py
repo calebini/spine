@@ -51,7 +51,7 @@ class TransactionMutationStateTests(unittest.TestCase):
         state = self.db.mutation_state
         expected = {
             "ownership": {"epoch_consumed", "epoch_before", "epoch_after"},
-            "propagation": {"bindings", "owners"},
+            "propagation": {"bindings", "owners", "relations", "recurrences"},
             "recurring": {"rows"},
             "renderings": {"pending", "versions", "catalog", "profiles", "attempts"},
             "facets": {"versions", "allocations", "roots", "items", "bindings", "definitions"},

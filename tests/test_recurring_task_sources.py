@@ -94,6 +94,9 @@ class RecurringTaskSourceTests(unittest.TestCase):
         with self.db.atomic_command(write=True):
             insert_initial_recurrence_set(self.db, normalized=successor, command_id="r1-successor", created_at_utc="2026-08-07T18:00:00Z")
             insert_recurrence_lineage(self.db, lineage=lines)
+            from spine.services.mutation_propagation import propagate
+
+            propagate(self.db, recurrence_revision_id=str(successor.value["recurrence_revision_id"]))
         return successor.value, lines
 
     def hop(self, before, after, lines):

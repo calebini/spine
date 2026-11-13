@@ -29,17 +29,16 @@ def record_item_owner_history(db: sqlite3.Connection, identity: str, actor: str,
 def verify_item_owner(db: sqlite3.Connection, effect: OwnerMutation) -> None:
     # Bounded exact header/history equality; neither catalog scans nor discovery.
     row = db.execute(
-        "SELECT o.*,h.changed_at_utc,h.changed_by_subject_id,h.command_receipt_id "
+        "SELECT o.*,h.* "
         "FROM item_access_owners o JOIN item_access_owner_revisions h "
         "ON h.item_access_owner_id=o.item_access_owner_id AND h.revision=o.current_revision "
-        "AND h.item_id=o.item_id AND h.owner_kind=o.owner_kind "
-        "AND h.owner_subject_id IS o.owner_subject_id AND h.owner_group_id IS o.owner_group_id "
-        "AND h.creator_entitlement_subject_id IS o.creator_entitlement_subject_id "
-        "AND h.created_by_command_id=o.created_by_command_id WHERE o.item_access_owner_id=?",
+        "WHERE o.item_access_owner_id=?",
         (effect.after.owner_id,),
     ).fetchone()
     history = effect.history
-    if history is None or row is None or tuple(row) != (*astuple(effect.after), history.at, history.actor, history.receipt_id):
+    if history is None or row is None or tuple(row) != (
+        *astuple(effect.after), *astuple(effect.after), history.at, history.actor, history.receipt_id,
+    ):
         raise SpineValidationError("environment_failure:propagation", "owner header/history consequence incomplete")
 
 

@@ -6,7 +6,9 @@ import sqlite3
 from contextlib import nullcontext
 
 from spine.core import SpineValidationError
+from spine.core.mutation_effects import RelationMutation, RelationSnapshot
 from spine.ledger.common import enum_value, new_id, require_non_empty, require_utc_z
+from spine.ledger.mutation_effects import require_transaction
 from spine.models.enums import RelationStatus, RelationType
 
 
@@ -55,9 +57,27 @@ def create_item_relation(
                     metadata_json,
                 ),
             )
+            # Preserve the exported helper's existing standalone local transaction.
+            # In composition, even manage_transaction=True is absorbed by the outer
+            # owner and MUST leave a propagation obligation for its application.
+            if not manage_transaction or getattr(connection, "_command_transaction", False):
+                pending = require_transaction(connection).mutation_state.propagation.relations
+                pending[relation_id] = RelationMutation(RelationSnapshot(
+                    relation_id, source_item_id, target_item_id, relation_type_value,
+                    enum_value(relation_status), created_at_utc, created_by_subject_id, metadata_json,
+                ))
     except sqlite3.IntegrityError as exc:
         raise SpineValidationError("item_relation_rejected", str(exc)) from exc
     return relation_id
+
+
+def relation_snapshot(connection: sqlite3.Connection, relation_id: str) -> RelationSnapshot | None:
+    row = connection.execute(
+        "SELECT relation_id,source_item_id,target_item_id,relation_type,relation_status,"
+        "created_at_utc,created_by_subject_id,metadata_json FROM coordination_item_relations WHERE relation_id=?",
+        (relation_id,),
+    ).fetchone()
+    return None if row is None else RelationSnapshot(*row)
 
 
 def get_active_relations(

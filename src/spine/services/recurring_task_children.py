@@ -215,6 +215,7 @@ def _create(
             created_by_subject_id=actor,
             manage_transaction=False,
         )
+        propagate(connection, relation_id=relation_id)
         insert_temporal_binding(connection, value=header)
         insert_temporal_binding_revision(connection, value=revision)
         propagate(connection, binding_id=binding_id)

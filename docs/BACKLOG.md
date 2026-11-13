@@ -306,7 +306,7 @@ Full regression passes **1,548 tests, OK (one skipped)**, 415.285 seconds. Focus
 selections, seven-module typing, lint, frozen witnesses/web copies and links pass.
 The legacy command-module typing check retains the same 37 diagnostics as HEAD;
 it is not claimed clean. Both unrelated files remain unchanged.
-**Current slice (implemented and verified, uncommitted):** Ownership propagation across recurring child creation, both
+**Second increment (committed as `a4b3790`):** Ownership propagation across recurring child creation, both
 protected schedule-create paths and explicit item adoption. Preserve local
 pre-reservation, configured post-history advancement and provisioning's existing
 whole-batch epoch owner; no inferred access grants or new bootstrap behavior.
@@ -314,9 +314,30 @@ Eleven owner regressions plus one exact baseline witness pass; six response/ledg
 digests match `0135a68`. Full regression passes **1,560 tests, OK (one skipped)**,
 424.062 seconds. Focused checks, seven-module typing, changed-file lint, links and
 diff hygiene pass. Both unrelated files remain unchanged.
-**Next:** Complete the remaining item/recurrence/relation/policy writer/effect
+**Third increment (implemented and verified, uncommitted):** Relation-create effects for the direct command, ordinary related
+tasks and recurring children. Preserve the standalone ledger helper's existing
+local transaction and the existing audit-trigger-owned conditional catalog bump.
+No relation update/retirement API, new catalog consequence or R3 work is added.
+Ten new regressions and one six-case exact baseline witness pass. Full regression:
+**1,571 tests, OK (one skipped)**, 410.083 seconds. Six-module typing, changed-file
+lint, 21 dependency/documentation/declaration/web-sync tests, 388 links and diff
+hygiene pass. The existing bounded recurring cases and frozen witnesses remain
+unchanged; unrelated edits are preserved.
+**Fourth increment (implemented and verified, uncommitted):** Recurrence aggregate/lineage propagation across all six native
+command composers. Preserve exact immutable revisions, prospective item ordering,
+existing audit-trigger ownership and bounded recurring reconciliation. Relation
+edits remain uncommitted and preserved. No R3 or public behavior changes.
+Seven new recurrence regressions, a 17-observation baseline witness and the owner
+history mismatch regression pass. Full regression: **1,580 tests, OK (one skipped)**,
+446.138 seconds. Seven-module typing, changed-file lint, 388 local links and diff
+hygiene pass. Existing instruction-budget limits and unrelated edits are preserved.
+**Observed pre-existing issue:** Direct `recurrence.instance.add` replay after a
+successful add returns `semantic_conflict` at `command_id` on both `a4b3790` and
+this working tree. Recorded in RF3 evidence; not repaired under preservation scope.
+**Next:** Complete the remaining item/policy writer/effect
 inventory and integrate existing consequences. IO-07/08 are verified
-for the binding and initial ownership increments, not closed for all RF3. R3 remains unselected.
+for the binding, initial ownership, selected relation-create and recurrence increments, not
+closed for all RF3. R3 remains unselected.
 
 ## Selected feature design
 

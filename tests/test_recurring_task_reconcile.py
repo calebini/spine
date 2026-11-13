@@ -90,6 +90,9 @@ class RecurringTaskReconcileTests(unittest.TestCase):
         def extension(db, _version):
             insert_initial_recurrence_set(db, normalized=normalized, command_id=command, created_at_utc=self.now)
             insert_recurrence_lineage(db, lineage=lines)
+            from spine.services.mutation_propagation import propagate
+
+            propagate(db, recurrence_revision_id=str(normalized.value["recurrence_revision_id"]))
 
         with self.db.atomic_command(write=True):
             create_next_item_version(

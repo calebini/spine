@@ -283,11 +283,12 @@ def handle_related_task_create(request: Mapping[str, Any], context: CommandConte
             created_by_subject_id=actor,
             manage_transaction=False,
         )
+        from spine.services.mutation_propagation import propagate
+
+        propagate(connection, relation_id=relation_id)
         _injected_failure(context, "relation")
         insert_temporal_binding(connection, value=header)
         insert_temporal_binding_revision(connection, value=revision)
-        from spine.services.mutation_propagation import propagate
-
         propagate(connection, binding_id=binding_id)
         _injected_failure(context, "binding")
         for _, policy in policies:

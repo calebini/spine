@@ -9,7 +9,9 @@ from typing import Any
 from spine.core.canonical_json import canonical_json_bytes
 from spine.core.errors import SpineValidationError
 from spine.core.hashing import hash_canonical_json
+from spine.core.mutation_effects import RecurrenceSnapshot
 from spine.core.recurrence_set import NormalizedRecurrenceSet
+from spine.ledger.recurrence_effects import header_snapshot, record_lineage, record_recurrence
 
 
 def insert_initial_recurrence_set(
@@ -210,6 +212,7 @@ def insert_initial_recurrence_set(
                 override["status"],
             ),
         )
+    record_recurrence(connection, value, command_id, created_at_utc)
 
 
 def insert_recurrence_lineage(connection: sqlite3.Connection, *, lineage: list[dict[str, object]]) -> None:
@@ -241,6 +244,7 @@ def insert_recurrence_lineage(connection: sqlite3.Connection, *, lineage: list[d
                 value["payload_hash"],
             ),
         )
+        record_lineage(connection, value)
 
 
 def current_recurrence_header_sql(item_type: str) -> str:
@@ -277,6 +281,23 @@ def load_current_recurrence_set(connection: sqlite3.Connection, *, item_id: str)
     header = load_current_recurrence_header(connection, item_id=item_id)
     if header is None:
         return None
+    return _decode_recurrence_set(connection, header)
+
+
+def load_recurrence_revision(
+    connection: sqlite3.Connection, *, revision_id: str,
+) -> tuple[RecurrenceSnapshot, dict[str, object]] | None:
+    """Decode an exact inserted revision, including before the item's pointer CAS."""
+    row = connection.execute(
+        "SELECT rs.*,rr.recurrence_revision_id,rr.revision_number,rr.source_item_version,rr.normalized_recurrence_set_hash,"
+        "rr.prior_recurrence_revision_id,rr.command_id,rr.created_at_utc "
+        "FROM recurrence_revisions rr JOIN recurrence_sets rs ON rs.recurrence_set_id=rr.recurrence_set_id "
+        "WHERE rr.recurrence_revision_id=?", (revision_id,),
+    ).fetchone()
+    return None if row is None else (header_snapshot(dict(row)), _decode_recurrence_set(connection, dict(row)))
+
+
+def _decode_recurrence_set(connection: sqlite3.Connection, header: dict[str, Any]) -> dict[str, object]:
     revision_id = header["recurrence_revision_id"]
     segments = [
         dict(row)

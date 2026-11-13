@@ -9,7 +9,7 @@ see [validation](TZDB_COMPATIBILITY_VALIDATION.md) and [operations](TZDB_COMPATI
 
 
 Role: Roadmap rationale and delivery history; current task status lives in [BACKLOG.md](BACKLOG.md)
-Last updated: 2026-11-13 (RF3 bindings committed; ownership propagation increment verified)
+Last updated: 2026-11-13 (RF3 relation and recurrence propagation verified, uncommitted)
 
 This is a non-normative delivery plan. The specifications and machine-readable contracts remain authoritative.
 
@@ -333,9 +333,21 @@ transaction checkpoint; no per-item double increment or inferred web setup occur
 Six fixed-input response/SQL witnesses captured from `0135a68` match exactly.
 Focused omission, replay, missing history/epoch and rollback tests pass, as does the
 full **1,560-test suite (one skipped)**. Seven-module typing, changed-file lint,
-documentation links and diff hygiene pass. This increment remains uncommitted.
+documentation links and diff hygiene pass. This increment is committed as `a4b3790`.
+The next increment covers relation-create effects across direct and composite
+writers, retaining standalone helper behavior and audit-trigger catalog ownership.
+It is implemented and verified but uncommitted: **1,571 tests, OK (one skipped)**,
+six-module typing, lint, links and exact baseline witnesses pass. No public
+contracts, persistence schema, runtime activation or agent workflow changed.
+The next selected increment captures exact recurrence revisions and lineage across
+all six composers, verifies prospective revisions before the item pointer advances,
+and preserves existing audit/catalog consequences. It is implemented and verified:
+**1,580 tests, OK (one skipped)**; seven-module typing, changed-file lint, 388 links,
+diff hygiene and exact baseline witnesses pass. Relation and recurrence increments
+remain uncommitted. See the RF3 evidence for a baseline-confirmed legacy direct-add replay
+defect discovered during testing; fixing that public behavior is separate work.
 Full RF3 closure remains open under SPINE-101 for the
-remaining item/recurrence/relation/policy families; R3 remains unselected.
+remaining item/policy families; R3 remains unselected.
 
 Implement all seven command handlers internally using the shared command context
 and one outer transaction, not recursive public-command submissions or child

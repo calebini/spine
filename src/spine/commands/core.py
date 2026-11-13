@@ -1738,6 +1738,9 @@ def _handle_schedule_create(request: Mapping[str, Any], context: CommandContext)
             )
         if recurrence is not None:
             insert_initial_recurrence_set(connection, normalized=recurrence, command_id=command_id, created_at_utc=created_at)
+            from spine.services.mutation_propagation import propagate
+
+            propagate(connection, recurrence_revision_id=str(recurrence.value["recurrence_revision_id"]))
         _schedule_fail_if_requested(context, "item")
         for _, policy in normalized_policies:
             insert_notification_schedule_policy(connection, normalized=policy)
@@ -2699,6 +2702,9 @@ def _handle_schedule_update(request: Mapping[str, Any], context: CommandContext)
                         effect="schedule_recurrence_replaced",
                     )
                     insert_recurrence_lineage(connection, lineage=lineage)
+                from spine.services.mutation_propagation import propagate
+
+                propagate(connection, recurrence_revision_id=str(successor_recurrence.value["recurrence_revision_id"]))
             if profile_replaces_policies or delivery is not None:
                 for prior in active_current:
                     remove_copied_notification_policy(
@@ -3228,6 +3234,10 @@ def _handle_event_reschedule(request: Mapping[str, Any], context: CommandContext
                 created_at_utc=at,
             )
 
+            from spine.services.mutation_propagation import propagate
+
+            propagate(connection, recurrence_revision_id=str(recurrence.value["recurrence_revision_id"]))
+
     mutation = create_next_item_version(
         context.ledger,
         item_id=item_id,
@@ -3370,6 +3380,9 @@ def _handle_relation_create(request: Mapping[str, Any], context: CommandContext)
     _insert_audit(
         context.ledger, audit_id, source_id, "relation_created", actor, at, {"action": "relation_created", "relation_id": relation_id}
     )
+    from spine.services.mutation_propagation import propagate
+
+    propagate(context.ledger, relation_id=relation_id)
     receipt = _store_write_receipt(
         context,
         command="relation.create",
@@ -4787,6 +4800,9 @@ def _handle_recurrence_instance_mutation(command: str, request: Mapping[str, Any
             created_at_utc=changed_at,
         )
         insert_recurrence_lineage(connection, lineage=lineage)
+        from spine.services.mutation_propagation import propagate
+
+        propagate(connection, recurrence_revision_id=str(successor.value["recurrence_revision_id"]))
         insert_command_receipt(connection, receipt)
 
     create_next_item_version(
@@ -5530,6 +5546,9 @@ def _persist_series_edit_success(
     def insert_revision(connection: sqlite3.Connection, _version: int) -> None:
         insert_initial_recurrence_set(connection, normalized=successor, command_id=command_id, created_at_utc=changed_at)
         insert_recurrence_lineage(connection, lineage=lineage)
+        from spine.services.mutation_propagation import propagate
+
+        propagate(connection, recurrence_revision_id=str(successor.value["recurrence_revision_id"]))
         insert_command_receipt(connection, receipt)
 
     create_next_item_version(
@@ -7491,6 +7510,10 @@ def _recurrence_insert_callback(
             command_id=command_id,
             created_at_utc=created_at_utc,
         )
+
+        from spine.services.mutation_propagation import propagate
+
+        propagate(connection, recurrence_revision_id=str(recurrence.value["recurrence_revision_id"]))
 
     return insert
 

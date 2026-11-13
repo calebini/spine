@@ -1,6 +1,6 @@
 """Private, immutable mutation facts; neither wire dimensions nor durable events.
 
-RF3 currently covers binding and initial item-owner producers. Other kinds must be
+RF3 covers binding, relation, recurrence and initial item-owner producers. Other kinds must be
 introduced with their writer inventory, not guessed from an item-version bump.
 """
 
@@ -12,6 +12,8 @@ class ChangeCategory(Enum):
     BINDING = "binding"
     TIME = "time"
     OWNERSHIP = "ownership"
+    RELATION = "relation"
+    RECURRENCE = "recurrence"
 
 
 @dataclass(frozen=True)
@@ -112,7 +114,74 @@ class OwnershipPropagationResult:
 
 
 @dataclass(frozen=True)
+class RelationSnapshot:
+    relation_id: str
+    source_item_id: str
+    target_item_id: str
+    relation_type: str
+    relation_status: str
+    created_at_utc: str
+    created_by_subject_id: str
+    metadata_json: str | None
+
+
+@dataclass(frozen=True)
+class RelationMutation:
+    after: RelationSnapshot
+    before: RelationSnapshot | None = None
+
+    @property
+    def categories(self) -> frozenset[ChangeCategory]:
+        return frozenset({ChangeCategory.RELATION})
+
+
+@dataclass(frozen=True)
+class RecurrenceSnapshot:
+    recurrence_set_id: str
+    recurrence_revision_id: str
+    revision_number: int
+    source_item_id: str
+    source_item_version: int
+    normalized_recurrence_set_hash: str
+    prior_recurrence_revision_id: str | None
+    command_id: str
+    created_at_utc: str
+
+
+@dataclass(frozen=True)
+class RecurrenceLineage:
+    lineage_id: str
+    command_id: str
+    recurrence_set_id: str
+    prior_recurrence_revision_id: str
+    new_recurrence_revision_id: str
+    lineage_role: str
+    prior_segment_id: str | None
+    new_segment_id: str | None
+    prior_child_id: str | None
+    new_child_id: str | None
+    effect: str
+    lineage_index: int
+    payload_hash: str
+
+
+@dataclass(frozen=True)
+class RecurrenceMutation:
+    before: RecurrenceSnapshot | None
+    after: RecurrenceSnapshot
+    definition_bytes: bytes
+    lineage: tuple[RecurrenceLineage, ...] = ()
+
+    @property
+    def categories(self) -> frozenset[ChangeCategory]:
+        # A new revision/hash is not proof that time, lifecycle or people changed.
+        return frozenset({ChangeCategory.RECURRENCE})
+
+
+@dataclass(frozen=True)
 class MutationEffects:
     bindings: tuple[BindingMutation, ...] = ()
     owners: tuple[OwnerMutation, ...] = ()
     ownership_epoch: OwnershipPropagationResult | None = None
+    relations: tuple[RelationMutation, ...] = ()
+    recurrences: tuple[RecurrenceMutation, ...] = ()

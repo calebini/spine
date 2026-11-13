@@ -11,7 +11,7 @@ from dataclasses import dataclass, field, fields
 from typing import TYPE_CHECKING, Any
 
 from spine.core.errors import SpineValidationError
-from spine.core.mutation_effects import BindingMutation, OwnerMutation
+from spine.core.mutation_effects import BindingMutation, OwnerMutation, RecurrenceMutation, RelationMutation
 
 if TYPE_CHECKING:
     from spine.ledger.transactions import LedgerConnection
@@ -47,12 +47,18 @@ class OwnershipMutationState(_Component):
 class PropagationMutationState(_Component):
     bindings: dict[str, BindingMutation] = field(default_factory=dict)
     owners: dict[str, OwnerMutation] = field(default_factory=dict)
+    relations: dict[str, RelationMutation] = field(default_factory=dict)
+    recurrences: dict[str, RecurrenceMutation] = field(default_factory=dict)
 
     def finalize(self, db: LedgerConnection) -> None:
         if self.bindings:
             raise SpineValidationError("environment_failure:propagation", "unpropagated binding mutation")
         if self.owners:
             raise SpineValidationError("environment_failure:propagation", "unpropagated ownership mutation")
+        if self.relations:
+            raise SpineValidationError("environment_failure:propagation", "unpropagated relation mutation")
+        if self.recurrences:
+            raise SpineValidationError("environment_failure:propagation", "unpropagated recurrence mutation")
 
 
 @dataclass(slots=True)
