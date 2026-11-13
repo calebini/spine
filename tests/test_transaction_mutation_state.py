@@ -20,6 +20,9 @@ def mark(state: TransactionMutationState, label: str) -> None:
     state.ownership.epoch_before = 4
     state.ownership.epoch_after = 5
     state.recurring.rows.add(("root", label, None))
+    state.recurring.catalog_advanced = True
+    state.recurring.invalidations[label] = 1
+    state.recurring.new_items.add(label)
     state.renderings.pending[label] = {"kind": "ordinary", "nested": {"values": [label]}}
     state.renderings.versions.add((label, 1))
     state.renderings.catalog.add(("root", label))
@@ -52,7 +55,7 @@ class TransactionMutationStateTests(unittest.TestCase):
         expected = {
             "ownership": {"epoch_consumed", "epoch_before", "epoch_after"},
             "propagation": {"bindings", "owners", "relations", "recurrences", "items", "policies"},
-            "recurring": {"rows"},
+            "recurring": {"rows", "catalog_advanced", "invalidations", "new_items"},
             "renderings": {"pending", "versions", "catalog", "profiles", "attempts"},
             "facets": {"versions", "allocations", "roots", "items", "bindings", "definitions"},
         }

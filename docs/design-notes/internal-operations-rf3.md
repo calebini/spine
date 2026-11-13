@@ -1,6 +1,6 @@
 # RF3 — synchronous mutation-effect propagation
 
-Status: RF3 complete; bindings committed as `0135a68`, ownership as `a4b3790`, relations/recurrence as `5a212a6`; final item/policy increment verified, uncommitted
+Status: RF3 complete; bindings committed as `0135a68`, ownership as `a4b3790`, relations/recurrence as `5a212a6`; final item/policy increment committed as `7e3983d`
 (2026-11-13).
 This is implementation evidence, not a new normative contract. Earlier sections
 record incremental checkpoints; the fifth increment below closes IO-07/08 and RF3.
@@ -480,6 +480,7 @@ both new dictionaries; rollback restores them alongside SQL.
   Nine-module typing, changed-file Ruff, 32 documentation/declaration/web-copy/
   transaction/dependency tests, 388 local links and diff hygiene pass. Both unrelated
   files and the frozen witness retain their recorded SHA-256 values. IO-07/08 and
-  RF3 are closed; the final item/policy increment is not committed or pushed.
-  R3 all-writer dirty/CAS, scheduler planning and attempt admission remain unselected;
-  no migration, public activation, deployment or external sending occurred.
+  RF3 are closed; the final item/policy increment was subsequently committed as
+  `7e3983d`. R3 was unselected at this checkpoint and is now separately tracked
+  under SPINE-094. No push, migration, public activation, deployment or external
+  sending occurred.

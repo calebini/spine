@@ -283,8 +283,8 @@ RF2 scope. No public contracts, persistent schema, agent workflow or activation 
 ### SPINE-101 — RF3: synchronous mutation-effect propagation
 
 **Status:** Done (2026-11-13) — all five RF3 increments implemented and verified;
-the final item/policy increment awaits checkpoint. R3 scheduling/attempt integration
-remains unselected. Manual R2 was committed as `7f35d68` before RF3 selection.
+the final item/policy increment is committed as `7e3983d`. R3 is now selected
+separately under SPINE-094. Manual R2 was committed as `7f35d68` before RF3 selection.
 **Scope:** Implement Section 7 of the accepted internal-application-operations
 contract: closed writer/effect inventory, exact transaction-local effects and one
 application propagation owner for existing consequences. Preserve trigger/finalizer
@@ -336,7 +336,7 @@ hygiene pass. Existing instruction-budget limits and unrelated edits are preserv
 successful add returns `semantic_conflict` at `command_id` on both `a4b3790` and
 this working tree. Recorded in RF3 evidence; not repaired under preservation scope.
 **Checkpoint:** Relation and recurrence increments committed as `5a212a6`.
-**Fifth increment (implemented and verified, uncommitted):** Complete the selected
+**Fifth increment (committed as `7e3983d`):** Complete the selected
 item/policy writer inventory and route ordinary, direct-command, facet, people and
 recurring item composers through the application propagation owner. Capture exact
 item/policy/supporting facts, preserve copied-policy replacement and standalone
@@ -348,8 +348,9 @@ Verification caught and corrected a missing-presentation error-mapping regressio
 both inherited rendering tests and a new propagation-loss rollback test pass without
 changing expected responses. Nine-module typing, changed-file Ruff, 32 synchronization/
 boundary tests, 388 local links and diff hygiene pass. IO-07/08 and RF3 are closed.
-The two unrelated edits are preserved; R3 remains unselected. No push, migration,
-public activation or deployment occurred.
+The two unrelated edits are preserved. R3 was unselected at RF3 closure and is
+now separately selected under SPINE-094. No push, migration, public activation or
+deployment occurred.
 
 ## Selected feature design
 
@@ -1465,9 +1466,10 @@ checkpoint, then selection of the existing RF3 propagation prerequisite before R
 
 ### SPINE-094 — R3: recurring-task all-writer safety and automatic scheduling
 
-**Status:** Ready for explicit kickoff, not started or separately authorized.
-SPINE-093's manual R2 checkpoint and SPINE-101's RF3 propagation are complete;
-the final RF3 item/policy increment awaits checkpoint.
+**Status:** In progress — explicitly selected after committing RF3 as `7e3983d`.
+SPINE-093's manual R2 checkpoint and SPINE-101's RF3 propagation are complete.
+The first R3 increment adds coalesced transaction-owned invalidation and
+generation-checked queue acknowledgement through the established propagation seam.
 **Scope:** All existing source/target/relation/binding/owner/policy writers,
 atomic invalidation/catalog/dirty-CAS integration, per-attempt current-truth
 admission and fair bounded read-only scheduler planning. Preserve ordinary v1
@@ -1477,9 +1479,22 @@ explicit writer/reconcile/attempt interleavings, suppression/restoration and
 pending-intent races, protected-work matrix, rollover/catch-up, dense-root fairness
 and repeated idle zero-write cycles. No real sends. See
 [R3](IMPLEMENTATION_PLAN.md#r3--all-writer-safety-and-automatic-scheduling-spine-094).
-**Next:** Checkpoint the final RF3 increment, then obtain an explicit R3 kickoff.
-Completed prerequisites do not authorize automatic recurring scheduling or
-attempt-gate integration.
+**Next:** Prove source/target invalidation, rollback and stale-page CAS before
+integrating assignment-aware direct-binding maintenance, automatic planning and
+per-attempt admission. R4/public activation, pushes and deployment remain outside
+this kickoff.
+**Initial increment:** Indexed source/root and current-generation lookup now feeds
+the existing RF3 propagation boundary into the coalescing dirty queue, with
+transaction-local once-consumption and monotonic catalog-derived CAS tokens.
+Standalone item/policy helpers retain equivalent invalidation. Thirteen new
+regressions pass; the lifecycle differential preserves all domain rows and verifies
+catalog-bound receipt/audit hashes. Final full regression passes **1,609 tests,
+OK (one skipped)** in 474.773 seconds; 68 lifecycle/edge tests, 32 synchronization/
+boundary tests, six-module typing, changed-file Ruff, 393 local links and diff
+hygiene pass. This initial R3 increment is uncommitted; unrelated edits are preserved.
+This is not R3 closure: intent/enrollment scheduling, acknowledgement integration,
+direct-binding assignment guards, per-attempt admission and fairness/idle-loop
+proof remain. See [initial R3 evidence](design-notes/recurring-related-task-r3-invalidation.md).
 
 ### SPINE-095 — R4: recurring-task activation and release verification
 

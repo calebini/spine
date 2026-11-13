@@ -70,6 +70,9 @@ class PropagationMutationState(_Component):
 @dataclass(slots=True)
 class RecurringMutationState(_Component):
     rows: set[tuple[str, str, str | None]] = field(default_factory=set)
+    catalog_advanced: bool = False
+    invalidations: dict[str, int] = field(default_factory=dict)
+    new_items: set[str] = field(default_factory=set)
 
     def finalize(self, db: LedgerConnection) -> None:
         if getattr(db, "_recurring_tasks_enabled", False):

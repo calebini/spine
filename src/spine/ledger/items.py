@@ -15,6 +15,7 @@ from spine.core.hashing import (
     coordination_item_version_intent_hash,
     coordination_item_version_normalized_fields_hash,
 )
+from spine.core.mutation_effects import MutationEffects
 from spine.ledger.common import (
     TemporalAnchorInput,
     enum_value,
@@ -823,6 +824,10 @@ def _create_item_v1(
             )
             insert_snapshot(connection, item_id, 1, facet_entries)
             detail = insert_detail(connection)
+            if isinstance(connection, LedgerConnection) and getattr(connection, "_recurring_tasks_enabled", False):
+                # Owner/policy extensions run before the completed item effect.
+                # This successful new allocation cannot already have dependents.
+                connection.mutation_state.recurring.new_items.add(item_id)
             if insert_canonical_extension is not None:
                 insert_canonical_extension(connection)
             insert_supporting_sets(
@@ -883,6 +888,10 @@ def _item_transaction(connection: sqlite3.Connection) -> Iterator[None]:
     else:
         with connection.atomic_command():
             yield
+            from spine.ledger.recurring_task_invalidation import invalidate_effects
+
+            invalidate_effects(connection, MutationEffects(items=tuple(connection.mutation_state.propagation.items.values()),
+                policies=tuple(connection.mutation_state.propagation.policies.values())))
             # Retained standalone helper owns its complete local transaction.
             # Composed calls above never take this exception.
             connection.mutation_state.propagation.items.clear()

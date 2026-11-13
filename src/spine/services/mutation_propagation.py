@@ -20,6 +20,7 @@ from spine.ledger.mutation_effects import binding_snapshot, require_transaction
 from spine.ledger.owner_mutations import access_epoch, advance_configured_epoch, verify_item_owner
 from spine.ledger.ownership import advance_ownership_epoch
 from spine.ledger.recurrence_effects import verify_recurrence
+from spine.ledger.recurring_task_invalidation import invalidate_effects
 from spine.ledger.relations import relation_snapshot
 from spine.ledger.temporal_bindings import binding_catalog_generation, increment_binding_catalog_generation
 
@@ -39,7 +40,7 @@ def propagate(
     if sum(value is not None for value in (binding_id, relation_id, ownership, recurrence_revision_id, item_id)) != 1:
         raise SpineValidationError("environment_failure:propagation", "one exact mutation family is required")
     if ownership is not None:
-        return _owners(connection, ownership)
+        return _finish(connection, _owners(connection, ownership))
     if item_id is not None:
         state = connection.mutation_state.propagation
         item = state.items.get(item_id)
@@ -61,7 +62,7 @@ def propagate(
         del state.items[item_id]
         for policy in policies:
             del state.policies[policy.policy_id]
-        return MutationEffects(items=(item,), policies=policies)
+        return _finish(connection, MutationEffects(items=(item,), policies=policies))
     if recurrence_revision_id is not None:
         pending_recurrences = connection.mutation_state.propagation.recurrences
         recurrence = pending_recurrences.get(recurrence_revision_id)
@@ -70,7 +71,7 @@ def propagate(
         verify_recurrence(db, recurrence)
         # Existing item audits/finalizers retain catalog and freshness ownership.
         del pending_recurrences[recurrence_revision_id]
-        return MutationEffects(recurrences=(recurrence,))
+        return _finish(connection, MutationEffects(recurrences=(recurrence,)))
     if relation_id is not None:
         pending_relations = connection.mutation_state.propagation.relations
         relation = pending_relations.get(relation_id)
@@ -81,7 +82,7 @@ def propagate(
         # SQL owns relation indexes/constraints. The existing family audit owns
         # conditional binding-catalog invalidation; do not increment it here.
         del pending_relations[relation_id]
-        return MutationEffects(relations=(relation,))
+        return _finish(connection, MutationEffects(relations=(relation,)))
     assert binding_id is not None
     pending = connection.mutation_state.propagation.bindings
     effect = pending.get(binding_id)
@@ -96,7 +97,12 @@ def propagate(
     if binding_catalog_generation(connection) != before + 1:
         raise SpineValidationError("environment_failure:propagation", "binding catalog consequence missing or duplicated")
     del pending[binding_id]
-    return MutationEffects(bindings=(effect,))
+    return _finish(connection, MutationEffects(bindings=(effect,)))
+
+
+def _finish(db: sqlite3.Connection, effects: MutationEffects) -> MutationEffects:
+    invalidate_effects(require_transaction(db), effects)
+    return effects
 
 
 def _owners(

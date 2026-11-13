@@ -18,7 +18,10 @@ def catalog(db: Any) -> str:
 
 
 def advance_catalog(db: Any) -> None:
+    if db.mutation_state.recurring.catalog_advanced:
+        return
     db.execute("UPDATE related_task_catalog_state SET catalog_generation=catalog_generation+1 WHERE singleton_id=1")
+    db.mutation_state.recurring.catalog_advanced = True
 
 
 def lookup(db: Any, table: str, key: str, field: str) -> dict[str, Any]:

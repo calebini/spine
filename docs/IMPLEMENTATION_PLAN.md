@@ -9,7 +9,7 @@ see [validation](TZDB_COMPATIBILITY_VALIDATION.md) and [operations](TZDB_COMPATI
 
 
 Role: Roadmap rationale and delivery history; current task status lives in [BACKLOG.md](BACKLOG.md)
-Last updated: 2026-11-13 (RF3 complete; final item/policy increment awaits checkpoint)
+Last updated: 2026-11-13 (RF3 committed as `7e3983d`; R3 invalidation started)
 
 This is a non-normative delivery plan. The specifications and machine-readable contracts remain authoritative.
 
@@ -171,7 +171,8 @@ needed for any checkpoint. Use disposable ledgers and fake adapters/clocks only.
 
 R1 is committed as `bc96a1d`; the operator authorized R2 and its prospective
 producer follow-up. Manual R2 is complete at `7f35d68`; RF3 propagation is complete,
-with its final item/policy increment awaiting checkpoint before R3. Later slices depend on the earlier checkpoint
+with its final item/policy increment committed as `7e3983d`. R3 is now explicitly
+selected. Later slices depend on the earlier checkpoint
 and must retain its regression evidence. A plan entry alone is not implementation
 authorization.
 
@@ -358,7 +359,8 @@ checks. Final full regression passes **1,595 tests, OK (one skipped)** in
 426.649 seconds. A missing staged-presentation error-mapping regression found in
 verification is corrected with whole-transaction rollback coverage; prior expected
 responses and golden bytes remain unchanged. IO-07/08 and RF3 are closed. This
-increment is uncommitted. R3 remains unselected and public activation remains R4.
+increment is committed as `7e3983d`. The operator then explicitly selected R3;
+public activation remains R4.
 
 Implement all seven command handlers internally using the shared command context
 and one outer transaction, not recursive public-command submissions or child
@@ -399,6 +401,17 @@ or automatically invoked. Primary proof: RRT-03/06/07/08/09/10/11/12/15/16/17,
 building on R1; automatic-writer and attempt gates are not yet claimed complete.
 
 ### R3 — All-writer safety and automatic scheduling (SPINE-094)
+
+**Kickoff (2026-11-13):** RF3 is committed as `7e3983d`; R3 is explicitly
+authorized. The first increment supplies indexed/coalesced source and current-task
+invalidation through the propagation seam, monotonic dirty-generation tokens,
+rollback-safe transaction state and stale-page CAS acknowledgement primitives.
+It does not yet wire scheduler planning, intent/enrollment dispatch, direct-binding
+assignment guards or attempt admission. See [R3 invalidation evidence](design-notes/recurring-related-task-r3-invalidation.md).
+This initial increment is verified and uncommitted: **1,609 tests, OK (one skipped)**,
+474.773 seconds; focused lifecycle/budget and synchronization checks, typing, lint,
+links and diff hygiene pass. The existing instruction bound and frozen fixtures
+remain intact, with an explicit one-function R3 catalog-body amendment.
 
 Inventory and integrate every existing source/item/recurrence, relation, binding,
 target-task/owner and relevant policy writer. Invalidate affected roots/witnesses

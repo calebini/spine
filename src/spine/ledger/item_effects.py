@@ -34,6 +34,10 @@ def record_item(
 def record_policy(db: sqlite3.Connection, value: dict[str, Any]) -> None:
     # Legacy standalone helpers retain their original local behavior.
     if not getattr(db, "_command_transaction", False):
+        if getattr(db, "_recurring_tasks_enabled", False):
+            from spine.ledger.recurring_task_invalidation import invalidate_item
+
+            invalidate_item(require_transaction(db), str(value["item_id"]))
         return
     connection = require_transaction(db)
     pending = connection.mutation_state.propagation.policies

@@ -388,6 +388,7 @@ class R2LocalOwnershipTests(unittest.TestCase):
     created = r2.RecurringTaskCommandTests.created
     run_command = r2.RecurringTaskCommandTests.run_command
     reconcile = pages.RecurringTaskReconcileTests.reconcile
+    rule = pages.RecurringTaskReconcileTests.rule
     def test_local_budget_rollback_preserves_one_epoch(self):
         pages.RecurringTaskReconcileTests.test_work_budget_stops_between_units_and_rolls_back_finalizer_trackers(self)
         self.assertEqual(read_access_state(self.db)["access_epoch"], 1)

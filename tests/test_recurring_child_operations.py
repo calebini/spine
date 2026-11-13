@@ -239,7 +239,7 @@ class RecurringChildOperationTests(unittest.TestCase):
                 subject_roles=(ItemSubjectRoleInput(subject_id="owner", role="participant"),),
                 supporting_command_id="independent-participant",
             )
-        rule = initial["result"]["rule"]
+        rule = self.h.rule(initial["result"]["rule"]["related_task_rule_id"])
         config = self.h.request()["configuration"]
         config["generation_horizon_seconds"] = "4838400"
         config["task_template"]["people"]["assignees"] = []

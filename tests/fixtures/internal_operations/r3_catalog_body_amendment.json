@@ -1,0 +1,14 @@
+{
+  "prior_amendment": "tests/fixtures/internal_operations/r2_calendar_lead_body_amendment.json",
+  "prior_amendment_sha256": "82d3e56a445ac63a1f67848725c57e5a0c315632b462f4f98a9742a66bcb93cc",
+  "authorization": "2026-11-13 operator-selected R3 after RF3 checkpoint 7e3983d; internal candidate only.",
+  "regression_tests": "tests/test_recurring_task_invalidation.py",
+  "replacements": [
+    {
+      "path": "src/spine/ledger/recurring_task_catalog.py",
+      "name": "advance_catalog",
+      "body_sha256": "116746830ac1002d4f68069ee6e013041da141eef1025ead83e6e0773f479de3",
+      "reason": "Coalesce related-task catalog advancement once per semantic transaction, retaining rollback-safe state and monotonic dirty-generation tokens."
+    }
+  ]
+}

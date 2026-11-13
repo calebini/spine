@@ -11,6 +11,7 @@ from unittest.mock import patch
 
 from spine.core import recurrence_mutations
 from spine.core.canonical_json import canonical_json_bytes
+from spine.core.hashing import audit_log_payload_hash, command_derived_id, hash_canonical_json
 from spine.ledger.recurrence import load_current_recurrence_set
 from tests import test_recurring_task_commands as base
 from tests import test_recurring_task_restoration as helpers
@@ -18,7 +19,7 @@ from tests import test_recurring_task_restoration as helpers
 FIXTURE = Path(__file__).parent / "fixtures/internal_operations/rf2_child_composition_witness.json"
 
 
-def collect_lifecycle():
+def collect_lifecycle(observe=None):
     h = helpers.RecurringTaskRestorationTests()
     h.contracts = base.contracts()
     ids = itertools.count()
@@ -31,6 +32,8 @@ def collect_lifecycle():
 
             def capture(name, result):
                 h.assertTrue(result["ok"], result)
+                if observe is not None:
+                    observe(name, result, h.db)
                 encoded = canonical_json_bytes(result)
                 evidence[name] = {
                     "response_sha256": hashlib.sha256(encoded).hexdigest(), "response_bytes": len(encoded),
@@ -87,10 +90,11 @@ class RecurringChildWitnessTests(unittest.TestCase):
                 kwargs["explicit"] = True
             return normalize(rows, **kwargs)
 
-        with patch.object(recurrence_mutations, "_normalize_segments", side_effect=historical_segments):
+        with (patch.object(recurrence_mutations, "_normalize_segments", side_effect=historical_segments),
+              patch("spine.services.mutation_propagation.invalidate_effects")):
             self.assertEqual(collect_lifecycle(), fixture["cases"])
 
-    def test_current_producer_matches_only_the_explicit_parent_correction_amendment(self):
+    def test_pre_r3_producer_matches_only_the_explicit_parent_correction_amendment(self):
         fixture = json.loads(FIXTURE.read_text())
         amendment = json.loads(FIXTURE.with_name("r2_immediate_parent_witness_amendment.json").read_text())
         self.assertEqual(hashlib.sha256(FIXTURE.read_bytes()).hexdigest(), amendment["baseline_sha256"])
@@ -98,4 +102,47 @@ class RecurringChildWitnessTests(unittest.TestCase):
         for name, case in amendment["cases"].items():
             for key in ("response_bytes", "changed", "effect"):
                 self.assertEqual(case[key], fixture["cases"][name][key])
-        self.assertEqual(collect_lifecycle(), fixture["cases"] | amendment["cases"])
+        with patch("spine.services.mutation_propagation.invalidate_effects"):
+            self.assertEqual(collect_lifecycle(), fixture["cases"] | amendment["cases"])
+
+    def test_r3_invalidation_changes_only_catalog_queue_and_bound_receipt_evidence(self):
+        def without_catalog(value):
+            if isinstance(value, dict):
+                return {k: without_catalog(v) for k, v in value.items() if k != "catalog_generation"}
+            if isinstance(value, list):
+                return [without_catalog(v) for v in value]
+            return value
+
+        def capture(target):
+            def observe(name, result, db):
+                # R3 deliberately changes the catalog, derived queue and receipts
+                # bound to exact expected facts. All ordinary/domain history stays.
+                tables = {r[0]: [dict(v) for v in db.execute('SELECT * FROM ' + r[0])]
+                          for r in db.execute("SELECT name FROM sqlite_schema WHERE type='table'").fetchall()
+                          if r[0] not in {"related_task_catalog_state", "related_task_dirty_rules"}}
+                audit_hashes = {}
+                for receipt in tables["command_receipts"]:
+                    semantic = json.loads(receipt["semantic_facts_json"])
+                    self.assertEqual(hash_canonical_json(semantic), receipt["semantic_facts_hash"])
+                    if receipt["command"].startswith("schedule.related_task_rule."):
+                        response = semantic["normalized_result"]
+                        if response["changed"]:
+                            identity = command_derived_id(prefix="audit", command=receipt["command"],
+                                command_id=semantic["request"]["command_id"], row_role="audit", request_path="/audit")
+                            audit_hashes[identity] = audit_log_payload_hash({
+                                "command": receipt["command"], "request": semantic["request"], "result": response["result"]})
+                    del receipt["semantic_facts_hash"]
+                    for key in ("semantic_facts_json", "result_identity_facts_json"):
+                        receipt[key] = without_catalog(json.loads(receipt[key]))
+                for audit in tables["audit_log"]:
+                    if audit["audit_id"] in audit_hashes:
+                        self.assertEqual(audit["payload_hash"], audit_hashes[audit["audit_id"]])
+                        del audit["payload_hash"]
+                target[name] = (without_catalog(result), tables)
+            return observe
+
+        before, after = {}, {}
+        with patch("spine.services.mutation_propagation.invalidate_effects"):
+            collect_lifecycle(capture(before))
+        collect_lifecycle(capture(after))
+        self.assertEqual(before, after)

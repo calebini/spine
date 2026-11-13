@@ -127,7 +127,7 @@ class RecurringTaskPreservationTests(unittest.TestCase):
         desired = self.request()["configuration"]
         desired["generation_horizon_seconds"] = "4838400"
         desired["task_template"]["item"]["title"] = "Pickup with kit"
-        updated = self.run_command("update", self.write("update", initial["result"]["rule"],
+        updated = self.run_command("update", self.write("update", self.rule(initial["result"]["rule"]["related_task_rule_id"]),
             configuration=desired, adoption_scope="upcoming_open"))
         self.assertTrue(updated["ok"], updated)
         adopted = self.reconcile(updated["result"]["rule"], "preserve-offset")

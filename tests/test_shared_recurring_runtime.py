@@ -47,11 +47,19 @@ class SharedRecurringRuntimeTests(unittest.TestCase):
         self.assertEqual(len(calendar["replacements"]), 2)
         self.assertEqual(set(calendar_replacements), {("src/spine/commands/recurring_tasks.py", name) for name in ("create", "update")})
         calendar_amended = [calendar_replacements.get((entry["path"], entry["name"]), entry) for entry in amended]
+        r3 = json.loads((ROOT / "tests/fixtures/internal_operations/r3_catalog_body_amendment.json").read_text())
+        self.assertEqual(r3["prior_amendment"], "tests/fixtures/internal_operations/r2_calendar_lead_body_amendment.json")
+        self.assertEqual(hashlib.sha256((ROOT / r3["prior_amendment"]).read_bytes()).hexdigest(), r3["prior_amendment_sha256"])
+        self.assertEqual(len(r3["replacements"]), 1)
+        r3_replacements = {(entry["path"], entry["name"]): entry for entry in r3["replacements"]}
+        self.assertEqual(set(r3_replacements), {("src/spine/ledger/recurring_task_catalog.py", "advance_catalog")})
+        r3_amended = [r3_replacements.get((entry["path"], entry["name"]), entry) for entry in calendar_amended]
         # Accept one complete captured state, never a per-function mix. Retain
         # both original RF1 baselines and narrowly record the two functional R2
-        # corrections authorized after RF2; all other body hashes stay frozen.
+        # corrections authorized after RF2 and the one R3 catalog-coalescing
+        # change; all other body hashes stay frozen.
         mismatches = []
-        for variant in (witness["bodies"], witness["committed_bodies"], amended, calendar_amended):
+        for variant in (witness["bodies"], witness["committed_bodies"], amended, calendar_amended, r3_amended):
             failures = []
             for entry in variant:
                 nodes = ast.parse((ROOT / entry["path"]).read_text()).body
@@ -73,7 +81,7 @@ class SharedRecurringRuntimeTests(unittest.TestCase):
             if not failures:
                 return
             mismatches.append(failures)
-        self.fail(f"No complete captured baseline or authorized R2 amendment matches: {mismatches}")
+        self.fail(f"No complete captured baseline or authorized R2/R3 amendment matches: {mismatches}")
 
     def test_command_aliases_share_the_lower_implementation(self):
         for name in ("fail", "instant", "wire", "cursor_config", "sign_cursor", "verify_cursor", "cursor_payload"):

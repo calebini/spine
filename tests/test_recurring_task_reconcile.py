@@ -52,6 +52,9 @@ class RecurringTaskReconcileTests(unittest.TestCase):
         )["result"]["rule"]
 
     def reconcile(self, rule, key="page", **limits):
+        # Happy-path helper rereads after ordinary child edits now invalidate the
+        # catalog. Stale/race tests submit explicit write() requests instead.
+        rule = self.rule(rule["related_task_rule_id"])
         request = self.write("reconcile", rule, limits=limits)
         request["command_id"] = key
         result = self.run_command("reconcile", request)
@@ -311,6 +314,7 @@ class RecurringTaskReconcileTests(unittest.TestCase):
         self.assertFalse(second["changed"])
 
     def update_rule(self, rule, *, title=None, priority=None, scope="upcoming_open"):
+        rule = self.rule(rule["related_task_rule_id"])
         config = copy.deepcopy(self.request()["configuration"])
         config["generation_horizon_seconds"] = "4838400"
         if title is not None:
@@ -721,7 +725,8 @@ class RecurringTaskReconcileTests(unittest.TestCase):
         desired["generation_horizon_seconds"] = "4838400"
         desired["task_template"]["people"]["assignees"] = []
         updated = self.run_command(
-            "update", self.write("update", initial["result"]["rule"], configuration=desired, adoption_scope="upcoming_open")
+            "update", self.write("update", self.rule(initial["result"]["rule"]["related_task_rule_id"]),
+                                 configuration=desired, adoption_scope="upcoming_open")
         )
         self.assertTrue(updated["ok"], updated)
         adopted = self.reconcile(updated["result"]["rule"], "clear-all-managed")
