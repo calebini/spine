@@ -1479,10 +1479,10 @@ explicit writer/reconcile/attempt interleavings, suppression/restoration and
 pending-intent races, protected-work matrix, rollover/catch-up, dense-root fairness
 and repeated idle zero-write cycles. No real sends. See
 [R3](IMPLEMENTATION_PLAN.md#r3--all-writer-safety-and-automatic-scheduling-spine-094).
-**Next:** Prove source/target invalidation, rollback and stale-page CAS before
-integrating assignment-aware direct-binding maintenance, automatic planning and
-per-attempt admission. R4/public activation, pushes and deployment remain outside
-this kickoff.
+**Next:** Integrate intent/enrollment queue production, automatic recurring-page
+planning/routing and per-attempt current-truth admission. Preserve the verified
+invalidation, acknowledgement and direct-binding guard boundaries. R4/public
+activation, pushes and deployment remain outside this increment.
 **Initial increment:** Indexed source/root and current-generation lookup now feeds
 the existing RF3 propagation boundary into the coalescing dirty queue, with
 transaction-local once-consumption and monotonic catalog-derived CAS tokens.
@@ -1491,10 +1491,22 @@ regressions pass; the lifecycle differential preserves all domain rows and verif
 catalog-bound receipt/audit hashes. Final full regression passes **1,609 tests,
 OK (one skipped)** in 474.773 seconds; 68 lifecycle/edge tests, 32 synchronization/
 boundary tests, six-module typing, changed-file Ruff, 393 local links and diff
-hygiene pass. This initial R3 increment is uncommitted; unrelated edits are preserved.
-This is not R3 closure: intent/enrollment scheduling, acknowledgement integration,
-direct-binding assignment guards, per-attempt admission and fairness/idle-loop
-proof remain. See [initial R3 evidence](design-notes/recurring-related-task-r3-invalidation.md).
+hygiene pass. This initial R3 increment is committed as `ffb9690`; unrelated edits are preserved.
+At that checkpoint, acknowledgement integration and direct-binding guards remained
+open; the continuation below closes those portions. See
+[R3 evidence](design-notes/recurring-related-task-r3-invalidation.md).
+
+**Verified continuation (2026-11-14, uncommitted):** Proven page acknowledgement
+and assignment-aware ordinary binding admission are implemented. Contiguous
+assignment coverage and source-prefix checks preserve earlier blocked work; final
+receipt sizing, preview and failure rollback cannot lose the dirty marker.
+Compatible replay and legal explicit manual detach/cancel remain available;
+unrelated v1 bindings retain their behavior. Twenty-one new tests pass. Full
+regression: **1,630 tests in 476.271 seconds, OK (one skipped)**; 32 documentation/
+declaration/boundary checks, three-module typing, changed-file Ruff, 391 local links
+and diff hygiene pass. Existing legacy-command typing diagnostics are unchanged;
+unrelated edits and original frozen fixtures are preserved. No scheduler/attempt
+closure, public activation, push or deployment is claimed.
 
 ### SPINE-095 — R4: recurring-task activation and release verification
 

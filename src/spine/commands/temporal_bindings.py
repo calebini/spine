@@ -577,6 +577,10 @@ def handle_binding_reconcile(request: Mapping[str, Any], context: CommandContext
         raise SpineValidationError("invalid_request:operator_resolution", "cancel_target is not legal for this state")
     if state == "target_diverged" and operator != "detach_at_current_target":
         raise SpineValidationError("semantic_conflict:operator_resolution", "target divergence requires explicit detach")
+    from spine.services.recurring_task_binding_guard import guard_binding_reconcile
+
+    guard_binding_reconcile(context.ledger, binding, state=state, operator=operator,
+                            source=source_current, target=target_current)
     current_target = _scheduled_for_target(target_current)
     target = current_target
     # Normal following uses successor truth for both relative offsets and local

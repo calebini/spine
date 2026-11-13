@@ -133,6 +133,9 @@ class RecurringTaskRestorationTests(unittest.TestCase):
             ).fetchall()
             self.assertEqual([r[0] for r in late_work], ["2026-08-08T19:10:00Z"])
             repeat = self.reconcile(result["result"]["rule"], f"restored-noop-{index}")
+            self.assertTrue(repeat["changed"])  # Discharge the retained repair invalidation once.
+            self.assertEqual(repeat["result"]["work"]["created"], [])
+            repeat = self.reconcile(repeat["result"]["rule"], f"restored-idle-{index}")
             self.assertFalse(repeat["changed"], repeat)
             self.assertEqual(self.db.execute("PRAGMA foreign_key_check").fetchall(), [])
             if index == 0:

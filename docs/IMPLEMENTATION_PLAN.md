@@ -408,10 +408,18 @@ invalidation through the propagation seam, monotonic dirty-generation tokens,
 rollback-safe transaction state and stale-page CAS acknowledgement primitives.
 It does not yet wire scheduler planning, intent/enrollment dispatch, direct-binding
 assignment guards or attempt admission. See [R3 invalidation evidence](design-notes/recurring-related-task-r3-invalidation.md).
-This initial increment is verified and uncommitted: **1,609 tests, OK (one skipped)**,
+This initial increment is verified and committed as `ffb9690`: **1,609 tests, OK (one skipped)**,
 474.773 seconds; focused lifecycle/budget and synchronization checks, typing, lint,
 links and diff hygiene pass. The existing instruction bound and frozen fixtures
 remain intact, with an explicit one-function R3 catalog-body amendment.
+
+**Verified continuation (2026-11-14, uncommitted):** proven reconciliation
+acknowledgement and assignment-aware direct-binding guards preserve unresolved
+prefixes, newer dirty tokens, transaction rollback, explicit manual independence
+and unrelated v1 paths. Full regression: **1,630 tests in 476.271 seconds, OK
+(one skipped)**; 21 new focused tests and 32 documentation/declaration/boundary
+checks pass, with selected service typing, lint, 391 local links and diff hygiene.
+Scheduler enrollment/intent dispatch and per-attempt admission remain later R3 work.
 
 Inventory and integrate every existing source/item/recurrence, relation, binding,
 target-task/owner and relevant policy writer. Invalidate affected roots/witnesses

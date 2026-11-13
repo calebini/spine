@@ -144,5 +144,10 @@ class RecurringChildWitnessTests(unittest.TestCase):
         before, after = {}, {}
         with patch("spine.services.mutation_propagation.invalidate_effects"):
             collect_lifecycle(capture(before))
-        collect_lifecycle(capture(after))
+        # Freeze the initial R3 invalidation increment independently of the
+        # subsequent coverage-only acknowledgement. The latter deliberately
+        # replaces one queued no-op with a progress/audit-bearing applied page;
+        # test_recurring_task_acknowledgement verifies its exact write boundary.
+        with patch("spine.services.recurring_task_acknowledgement.acknowledge_page", return_value=False):
+            collect_lifecycle(capture(after))
         self.assertEqual(before, after)

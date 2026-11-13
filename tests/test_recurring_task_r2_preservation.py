@@ -428,6 +428,9 @@ class RecurringTaskPreservationTests(unittest.TestCase):
             # Whole-event cancellation is terminal in the ordinary event model;
             # R2 must not invent a reopen operation to obtain restoration.
             repeated = self.reconcile(cancelled["result"]["rule"], "source-still-cancelled")
+            self.assertTrue(repeated["changed"])  # One-time dirty coverage, not another cancellation.
+            self.assertEqual(repeated["result"]["work"]["created"], [])
+            repeated = self.reconcile(repeated["result"]["rule"], "source-cancelled-idle")
             self.assertFalse(repeated["changed"])
             self.assertEqual(self.db.execute("SELECT COUNT(*) FROM related_task_generations").fetchone()[0], 6)
         else:

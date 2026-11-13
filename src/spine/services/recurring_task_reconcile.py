@@ -149,6 +149,12 @@ class Page:
             delivery_target_defaults=context.delivery_target_defaults, fault=fault,
         )
         self.snapshot = source_snapshot(db, root)
+        dirty = db.execute("SELECT * FROM related_task_dirty_rules WHERE related_task_rule_id=?",
+                           (root["related_task_rule_id"],)).fetchone()
+        self.dirty = dict(dirty) if dirty is not None else None
+        # Read-only evidence about the cursor's skipped source prefix. It is not
+        # changed by retained-unit rollback or final receipt-sizing trials.
+        self.source_prefix_unproved = False
         self.config = read_record(db, "related_task_rule_revisions", root["current_revision_id"])["configuration_json"]
         self.limits = {k: int(v) for k, v in request["limits"].items()}
         self.budget = ProofBudget(
@@ -643,6 +649,17 @@ def _reconcile(page: Page, *, response_size: ResponseSizer) -> tuple[dict[str, A
         ]
         if position["source_after"]:
             key = position["source_after"]
+            cursor_key = (key["scheduled_fact"], canonical_json_bytes(key["selector"]))
+            # A prior page may have returned decision_required without reserving
+            # the slot. A cursor is not proof that such a slot was discharged.
+            for value in candidates:
+                if (value["original_scheduled_fact"], canonical_json_bytes(value["target_occurrence_selector"])) > cursor_key:
+                    break
+                source = children.source_facts(db, root, page.recurrence, value, now,
+                                               persist=False, command_id=request["command_id"])
+                if target_from_source(source, int(page.config["offset_seconds"]))["utc_instant"] > now:
+                    page.source_prefix_unproved = True
+                    break
             candidates = [
                 v
                 for v in candidates
@@ -702,6 +719,7 @@ def finish(
     processed_assignments: int, existing_more: bool, source_more: bool,
 ) -> tuple[dict[str, Any], str, bool]:
     from spine.ledger.recurring_task_catalog import advance_catalog, catalog, intent_view, pending_adoption, rule_view
+    from spine.services.recurring_task_acknowledgement import acknowledge_page
     from spine.services.recurring_task_adoption import complete, coverage_status
     from spine.services.recurring_task_horizon import source_exhausted
 
@@ -713,6 +731,13 @@ def finish(
                 db, page.invocation, rule_id=page.state.root["related_task_rule_id"], budget=page.budget, intent=intent,
             )
             page.state.changed = page.state.changed or completed
+    acknowledged = acknowledge_page(
+        db, root["related_task_rule_id"], page.dirty, original=original, position=position,
+        results=page.state.results, processed_assignments=processed_assignments,
+        existing_more=existing_more, source_more=source_more,
+        source_prefix_unproved=page.source_prefix_unproved,
+    )
+    page.state.changed = page.state.changed or acknowledged
     if page.state.changed:
         coverage_json = {
             "range_start_utc": start,

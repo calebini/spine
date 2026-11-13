@@ -1,7 +1,8 @@
 # R3 initial increment — coalesced invalidation and queue CAS
 
-Status: initial R3 increment implemented and verified, uncommitted; R3 not closed
-(2026-11-13). Current status belongs to [SPINE-094](../BACKLOG.md#spine-094--r3-recurring-task-all-writer-safety-and-automatic-scheduling).
+Status: initial R3 increment committed as `ffb9690`; acknowledgement/guard
+continuation implemented and verified, uncommitted
+(2026-11-14). R3 not closed. Current status belongs to [SPINE-094](../BACKLOG.md#spine-094--r3-recurring-task-all-writer-safety-and-automatic-scheduling).
 
 ## Authority and checkpoint
 
@@ -99,13 +100,92 @@ new tests prove the old snapshot is rejected rather than implicitly repaired.
   declaration, web-sync, dependency and transaction-state tests. Six selected
   modules pass typing; changed-file Ruff, 393 local links and diff hygiene pass.
   Both unrelated file hashes and original frozen fixtures are unchanged. This
-  increment is uncommitted; no push, deployment, public activation or send occurred.
+  increment is committed as `ffb9690`; no push, deployment, public activation or send occurred.
 
 ## Still required for R3 closure
 
-Intent/enrollment queue production; proven page acknowledgement; complete writer
-and direct-binding assignment-aware admission coverage; fresh source/owner/intent
+Intent/enrollment queue production; complete writer and automatic-sweep routing;
+fresh source/owner/intent
 proof inside every actual send-attempt transaction; protected work-state/race
 tests; fair bounded automatic planning, horizon rollover and catch-up; repeated
 idle/blocked zero-write cycles. The dirty queue alone does not make stale sends
 safe and is not evidence of automatic generation. Public activation stays in R4.
+
+## Continuation — page acknowledgement and direct-binding guards
+
+Selected explicitly after checkpointing `ffb9690`; no runtime/schema declaration,
+public activation, migration path or deployment changes.
+
+### Proven queue coverage
+
+The page captures the dirty generation and its certified assignment prefix in
+the same command transaction as source truth. The application acknowledgement
+helper advances only a contiguous non-blocked assignment prefix. A continuation
+that skipped an earlier blocked assignment cannot clear it. Unreserved, still-
+future source candidates preceding the source cursor also prevent clearance:
+the cursor alone is not proof of their disposition. Already-due candidates are
+not future generation work. Pending adoption/retirement intents prevent a final
+clear. A new invalidation in the page's own transaction is deliberately retained;
+a subsequent clean proof page can discharge it. Generation CAS remains the final
+write boundary, preserving concurrent invalidation and delete/reinsert safety.
+
+Acknowledgement runs inside the final response-sizing trial. Trimming a whole
+unit restores both its SQL and page state, including any tentative acknowledgement.
+Dry run, receipt failure and outer rollback also restore queue/progress/catalog
+state. A successful coverage-only acknowledgement is `rule_page_applied` with the
+normal progress/root/catalog update and command audit/receipt. It does not change
+tasks, assignments, binding revisions, policies, work, attempts or access facts.
+The existing related-item audit trigger still advances the binding catalog once;
+it is neither suppressed nor bypassed. Once discharged, retained/idle observations
+do not update progress. Explicit commands still retain their required receipts;
+automatic no-op suppression is separate scheduler work.
+
+### Assignment-aware ordinary binding admission
+
+The shared application guard is called by `schedule.binding.reconcile`, which is
+also the ordinary automatic binding sweep's command path. The candidate gate
+keeps existing schema-19 behavior unchanged. An indexed generation lookup leaves
+unrelated v1 bindings untouched, including on the private candidate schema.
+
+For generated bindings it requires the latest generation. Existing legal explicit
+cancel/detach resolutions remain available and rely on canonical terminal or
+retired-binding truth plus atomic invalidation; manual cancellation does not
+fabricate source-cancellation evidence or permit restoration. Automatic legacy
+maintenance is allowed only for an exactly current governed assignment: current
+task/binding/source witness, active scheduled source/open task, unchanged owner
+identity/revision, permitted root retirement disposition, no applicable pending
+adoption, and bounded positive source membership proof. `keep_following` retirement
+retains maintenance. Stale, decision-required, source-cancel/exclusion, archived,
+cleanup-pending or otherwise incompatible branches fail before mutation with the
+existing `semantic_conflict` / `temporal_binding_id`, directing the caller to rule
+reconciliation. Recurring reconciliation remains the owner of moves, positive
+cancellation causes, assignment state, intent outcomes and restoration lineage;
+the old command cannot reproduce those incompletely. Compatible replay still
+precedes fresh guard checks.
+
+### Verification and preservation
+
+- **21 new focused tests pass**: full/partial acknowledgement, blocked assignment
+  and source prefixes, stale continuation, self-invalidation, exact write/audit
+  boundary, preview/receipt rollback and response-byte trimming; generated current,
+  stale, archived, source-cancelled, excluded, pending-adoption/cleanup and retained-
+  following cases; explicit manual detach/cancel; replay; exact target witness;
+  ordinary v1 move/materialization on the private candidate ledger.
+- The candidate direct-binding harness pins only its imported schema-version
+  constant to candidate 20. It does not bypass contracts or mutation logic and
+  does not change the installed schema-19 declaration.
+- Historical no-op tests now distinguish one coverage-only acknowledgement from
+  the subsequent unchanged idle page; duplicate/task/reminder/history assertions
+  remain. The initial R3 invalidation differential explicitly isolates the later
+  acknowledgement feature. A separate live all-table comparison proves exactly
+  the allowed acknowledgement write set and independently recomputes receipt and
+  audit hashes. Original frozen fixture bytes remain unchanged.
+- Changed-file Ruff and the three selected application modules pass Mypy. The
+  legacy binding command has existing typing debt: baseline and current each
+  report 34 diagnostics under identical isolated Mypy options; no new diagnostic
+  is introduced. No broad typing cleanup is included.
+- Full regression: **1,630 tests in 476.271 seconds, OK (one skipped)**. The
+  32-test documentation/declaration/web-sync/transaction/boundary selection passes
+  separately, as do 391 local file links and diff hygiene. Unrelated operator
+  edits and the original frozen fixtures retain their pre-work hashes. This
+  continuation is uncommitted; no push, deployment, public activation or send.

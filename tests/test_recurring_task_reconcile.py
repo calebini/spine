@@ -209,7 +209,9 @@ class RecurringTaskReconcileTests(unittest.TestCase):
         self.assertNotEqual(selected["after"]["task_item_id"], first["after"]["task_item_id"])
         self.assertEqual(selected["after"]["predecessor_generation_id"], first["generation_id"])
         final = self.reconcile(restored["result"]["rule"], "restore-again")
-        self.assertFalse(final["changed"])
+        self.assertTrue(final["changed"])  # One-time discharge of the repair's dirty token.
+        self.assertEqual({r["outcome"] for r in final["result"]["results"]}, {"retained"})
+        self.assertFalse(self.reconcile(final["result"]["rule"], "restore-idle")["changed"])
 
     def test_restoration_retains_original_managed_baseline_for_later_three_way_adoption(self):
         from spine.ledger.recurring_tasks import read_record
@@ -440,8 +442,10 @@ class RecurringTaskReconcileTests(unittest.TestCase):
                 self.assertEqual(mapping["creation_token"], "adopt-reminders:one_hour")
         self.assertIsNone(adopted["result"]["rule"]["adoption_intent"])
         repeated = self.reconcile(adopted["result"]["rule"], "adopt-again")
-        self.assertFalse(repeated["changed"])
+        self.assertTrue(repeated["changed"])  # Coverage acknowledgement, not repeated adoption.
         self.assertEqual(adopted["result"]["policy_mappings"], repeated["result"]["policy_mappings"])
+        self.assertEqual(repeated["result"]["work"]["created"], [])
+        self.assertFalse(self.reconcile(repeated["result"]["rule"], "adopt-idle")["changed"])
 
     def test_completed_task_is_consumed_not_reopened_by_source_changes(self):
         initial = self.reconcile(self.created()["result"]["rule"])
