@@ -298,17 +298,25 @@ do not claim this first increment closes RF3 or add R3 dirty queues.
 guards; no-op/replay add nothing, nested rollback restores SQL/Python state,
 duplicate/missing propagation fails closed, existing freshness tests and full suite
 pass. Preserve both unrelated edits. No push, public activation or deployment.
-**Progress/evidence:** The first binding increment is implemented and verified,
-uncommitted; see [writer inventory and verification](design-notes/internal-operations-rf3.md).
+**Progress/evidence:** The first binding increment is implemented, verified and
+committed as `0135a68`; see [writer inventory and verification](design-notes/internal-operations-rf3.md).
 Thirteen new propagation regressions cover exact evidence, bypass/duplicate
 rejection, budget-preserving capture, no-op/replay and transactional rollback.
 Full regression passes **1,548 tests, OK (one skipped)**, 415.285 seconds. Focused
 selections, seven-module typing, lint, frozen witnesses/web copies and links pass.
 The legacy command-module typing check retains the same 37 diagnostics as HEAD;
 it is not claimed clean. Both unrelated files remain unchanged.
-**Next:** Complete the item/recurrence/relation/ownership/policy writer/effect
-inventory and integrate remaining existing consequences. IO-07/08 are verified
-for this binding increment, not closed for all RF3. R3 remains unselected.
+**Current slice (implemented and verified, uncommitted):** Ownership propagation across recurring child creation, both
+protected schedule-create paths and explicit item adoption. Preserve local
+pre-reservation, configured post-history advancement and provisioning's existing
+whole-batch epoch owner; no inferred access grants or new bootstrap behavior.
+Eleven owner regressions plus one exact baseline witness pass; six response/ledger
+digests match `0135a68`. Full regression passes **1,560 tests, OK (one skipped)**,
+424.062 seconds. Focused checks, seven-module typing, changed-file lint, links and
+diff hygiene pass. Both unrelated files remain unchanged.
+**Next:** Complete the remaining item/recurrence/relation/policy writer/effect
+inventory and integrate existing consequences. IO-07/08 are verified
+for the binding and initial ownership increments, not closed for all RF3. R3 remains unselected.
 
 ## Selected feature design
 

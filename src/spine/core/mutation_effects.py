@@ -1,6 +1,6 @@
 """Private, immutable mutation facts; neither wire dimensions nor durable events.
 
-RF3's first increment covers binding producers only. Other effect kinds must be
+RF3 currently covers binding and initial item-owner producers. Other kinds must be
 introduced with their writer inventory, not guessed from an item-version bump.
 """
 
@@ -11,6 +11,7 @@ from enum import Enum
 class ChangeCategory(Enum):
     BINDING = "binding"
     TIME = "time"
+    OWNERSHIP = "ownership"
 
 
 @dataclass(frozen=True)
@@ -57,5 +58,61 @@ class BindingMutation:
 
 
 @dataclass(frozen=True)
+class OwnerSnapshot:
+    item_id: str
+    owner_id: str
+    revision: int
+    owner_kind: str
+    owner_subject_id: str | None
+    owner_group_id: str | None
+    creator_subject_id: str | None
+    command_id: str
+
+
+@dataclass(frozen=True)
+class OwnerHistory:
+    actor: str
+    at: str
+    receipt_id: str
+
+
+@dataclass(frozen=True)
+class OwnerMutation:
+    after: OwnerSnapshot
+    history: OwnerHistory | None = None
+    before: OwnerSnapshot | None = None
+
+    @property
+    def categories(self) -> frozenset[ChangeCategory]:
+        return frozenset({ChangeCategory.OWNERSHIP})
+
+
+@dataclass(frozen=True)
+class LocalOwnerPropagation:
+    owner_id: str
+
+
+@dataclass(frozen=True)
+class ConfiguredOwnerPropagation:
+    owner_id: str
+    expected_epoch: int
+
+
+@dataclass(frozen=True)
+class ProvisionedOwnerPropagation:
+    owner_ids: tuple[str, ...]
+    before_epoch: int
+    after_epoch: int
+
+
+@dataclass(frozen=True)
+class OwnershipPropagationResult:
+    before_epoch: int
+    after_epoch: int
+
+
+@dataclass(frozen=True)
 class MutationEffects:
-    bindings: tuple[BindingMutation, ...]
+    bindings: tuple[BindingMutation, ...] = ()
+    owners: tuple[OwnerMutation, ...] = ()
+    ownership_epoch: OwnershipPropagationResult | None = None

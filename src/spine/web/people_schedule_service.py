@@ -13,6 +13,8 @@ from spine.commands.rendering_runtime import RenderingPermissions
 from spine.core.canonical_json import canonical_json_bytes
 from spine.core.errors import SpineValidationError
 from spine.core.hashing import command_derived_id, hash_canonical_json
+from spine.core.mutation_effects import ConfiguredOwnerPropagation, OwnerSnapshot
+from spine.ledger.owner_mutations import insert_item_owner
 from spine.services.people_authoring import PeopleAuthoring
 from spine.services.people_directory import PeopleDirectory
 from spine.services.rendering_authoring import RenderingAuthoring
@@ -71,12 +73,14 @@ class ProtectedScheduleRendering(RenderingAuthoring):
             scope, p, request = self.create_scope, self.permissions, self.request
             identity = command_derived_id(prefix='item_access_owner', command='schedule.create', command_id=request['command_id'],
                                           row_role='item_access_owner', request_path='/create_owner_scope')
-            self.db.execute('INSERT INTO item_access_owners VALUES(?,?,1,?,?,?,?,?)', (
-                item_id, identity, scope['owner_kind'], scope.get('owner_subject_id'), scope.get('owner_group_id'),
+            insert_item_owner(self.db, OwnerSnapshot(
+                item_id, identity, 1, scope['owner_kind'], scope.get('owner_subject_id'), scope.get('owner_group_id'),
                 p.subject if scope['owner_kind'] == 'subject_group' else None, request['command_id']))
             record(self.db, 'owner', identity, p.subject, request['created_at_utc'],
                    core._receipt_id('schedule.create', request['command_id']))
-            self.db.execute('UPDATE ledger_access_state SET access_epoch=access_epoch+1')
+            from spine.services.mutation_propagation import propagate
+
+            propagate(self.db, ownership=ConfiguredOwnerPropagation(identity, p.identity['access_epoch']))
             p.identity['access_epoch'] += 1
             self.owner_created = True
         super().persist(item_id, version)

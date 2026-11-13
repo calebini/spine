@@ -9,7 +9,7 @@ from types import TracebackType
 from typing import Any, Literal
 
 from spine.core.errors import SpineValidationError
-from spine.ledger.mutation_state import TransactionMutationState
+from spine.ledger.mutation_state import OwnershipMutationState, TransactionMutationState
 
 REGISTERED_VERSION_PRODUCERS = frozenset({"item_create", "item_version_from_draft"})
 
@@ -195,7 +195,8 @@ class LedgerConnection(sqlite3.Connection):
     ) -> Literal[False]:
         if self._command_transaction:
             return False
-        if getattr(self, "_facets_enabled", False) or self.mutation_state.propagation.bindings:
+        if (getattr(self, "_facets_enabled", False) or self.mutation_state.propagation.bindings
+                or self.mutation_state.propagation.owners):
             if exc_type is not None:
                 self.rollback()
             else:
@@ -264,7 +265,7 @@ class LedgerConnection(sqlite3.Connection):
         self.execute("BEGIN IMMEDIATE" if write else "BEGIN")
         self._command_transaction = True
         self._command_write = write
-        self.mutation_state.ownership.epoch_consumed = False
+        self.mutation_state.ownership.restore(OwnershipMutationState())
         try:
             yield
             # A deferred foreign key failure here also rolls the whole command back.
@@ -276,4 +277,4 @@ class LedgerConnection(sqlite3.Connection):
         finally:
             self._command_transaction = False
             self._command_write = False
-            self.mutation_state.ownership.epoch_consumed = False
+            self.mutation_state.ownership.restore(OwnershipMutationState())

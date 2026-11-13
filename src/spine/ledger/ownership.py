@@ -70,4 +70,6 @@ def advance_ownership_epoch(db: LedgerConnection) -> int:
                       (epoch, state["access_epoch"])).rowcount != 1:
             invalid()
     db.mutation_state.ownership.epoch_consumed = True
+    db.mutation_state.ownership.epoch_before = 0 if state is None else int(state["access_epoch"])
+    db.mutation_state.ownership.epoch_after = epoch
     return epoch

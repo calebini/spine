@@ -16,6 +16,11 @@ SOURCES = {
 
 
 def record(db: Any, kind: str, identity: str, actor: str, at: str, receipt: str) -> None:
+    if kind == "owner":
+        from spine.ledger.owner_mutations import record_item_owner_history
+
+        record_item_owner_history(db, identity, actor, at, receipt)
+        return
     source, key, revision_column, destination = SOURCES[kind]
     row = dict(db.execute(f"SELECT * FROM {source} WHERE {key}=?", (identity,)).fetchone())
     row["revision"] = row.pop(revision_column)

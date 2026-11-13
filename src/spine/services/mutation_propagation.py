@@ -1,19 +1,40 @@
 """Synchronous application-owned propagation of existing consequences only.
 
 No dispatch, repair queue, new history, child commit or implicit work policy.
-The initial closed effect family is bindings; RF3's other writers remain tracked.
+The selected closed families are bindings and item ownership; others remain tracked.
 """
 
 import sqlite3
 
 from spine.core.errors import SpineValidationError
-from spine.core.mutation_effects import MutationEffects
+from spine.core.mutation_effects import (
+    ConfiguredOwnerPropagation,
+    LocalOwnerPropagation,
+    MutationEffects,
+    OwnershipPropagationResult,
+    ProvisionedOwnerPropagation,
+)
 from spine.ledger.mutation_effects import binding_snapshot, require_transaction
+from spine.ledger.owner_mutations import access_epoch, advance_configured_epoch, verify_item_owner
+from spine.ledger.ownership import advance_ownership_epoch
 from spine.ledger.temporal_bindings import binding_catalog_generation, increment_binding_catalog_generation
 
 
-def propagate(db: sqlite3.Connection, *, binding_id: str) -> MutationEffects:
+def reserve_local_owner_epoch(db: sqlite3.Connection) -> int:
+    """Retain local bootstrap's before-owner-write reservation and failure order."""
+    return advance_ownership_epoch(require_transaction(db))
+
+
+def propagate(
+    db: sqlite3.Connection, *, binding_id: str | None = None,
+    ownership: LocalOwnerPropagation | ConfiguredOwnerPropagation | ProvisionedOwnerPropagation | None = None,
+) -> MutationEffects:
     connection = require_transaction(db)
+    if (binding_id is None) == (ownership is None):
+        raise SpineValidationError("environment_failure:propagation", "one exact mutation family is required")
+    if ownership is not None:
+        return _owners(connection, ownership)
+    assert binding_id is not None
     pending = connection.mutation_state.propagation.bindings
     effect = pending.get(binding_id)
     if effect is None:
@@ -28,3 +49,32 @@ def propagate(db: sqlite3.Connection, *, binding_id: str) -> MutationEffects:
         raise SpineValidationError("environment_failure:propagation", "binding catalog consequence missing or duplicated")
     del pending[binding_id]
     return MutationEffects(bindings=(effect,))
+
+
+def _owners(
+    db: sqlite3.Connection, plan: LocalOwnerPropagation | ConfiguredOwnerPropagation | ProvisionedOwnerPropagation,
+) -> MutationEffects:
+    connection = require_transaction(db)
+    pending = connection.mutation_state.propagation.owners
+    identities = plan.owner_ids if isinstance(plan, ProvisionedOwnerPropagation) else (plan.owner_id,)
+    if not identities or len(identities) != len(set(identities)) or any(identity not in pending for identity in identities):
+        raise SpineValidationError("environment_failure:propagation", "missing or already propagated ownership mutation")
+    effects = tuple(pending[identity] for identity in identities)
+    for effect in effects:
+        verify_item_owner(db, effect)
+    if isinstance(plan, LocalOwnerPropagation):
+        reservation = connection.mutation_state.ownership
+        if not reservation.epoch_consumed or reservation.epoch_before is None or reservation.epoch_after is None:
+            raise SpineValidationError("environment_failure:propagation", "local ownership epoch not reserved")
+        before, after = reservation.epoch_before, reservation.epoch_after
+    elif isinstance(plan, ConfiguredOwnerPropagation):
+        before, after = plan.expected_epoch, plan.expected_epoch + 1
+        advance_configured_epoch(db, before)
+    else:
+        # Explicit provisioning owns its whole-batch promotion/epoch transition.
+        before, after = plan.before_epoch, plan.after_epoch
+    if after != before + 1 or access_epoch(db) != after:
+        raise SpineValidationError("environment_failure:propagation", "ownership epoch consequence differs")
+    for identity in identities:
+        del pending[identity]
+    return MutationEffects(owners=effects, ownership_epoch=OwnershipPropagationResult(before, after))

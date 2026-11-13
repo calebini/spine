@@ -9,7 +9,7 @@ see [validation](TZDB_COMPATIBILITY_VALIDATION.md) and [operations](TZDB_COMPATI
 
 
 Role: Roadmap rationale and delivery history; current task status lives in [BACKLOG.md](BACKLOG.md)
-Last updated: 2026-11-13 (manual R2 committed; first RF3 binding propagation increment verified, uncommitted)
+Last updated: 2026-11-13 (RF3 bindings committed; ownership propagation increment verified)
 
 This is a non-normative delivery plan. The specifications and machine-readable contracts remain authoritative.
 
@@ -322,7 +322,20 @@ propagation/preservation checks, seven-module typing, lint and frozen contract
 checks. A redundant-read budget regression found during verification was corrected
 without increasing runtime limits; captured native values are checked against SQL
 once per logical propagation. The legacy command module retains its pre-existing
-37 typing diagnostics. Full RF3 closure remains open under SPINE-101.
+37 typing diagnostics. That increment is committed as `0135a68`.
+
+The next selected RF3 increment centralizes initial item-owner/header history
+writes across recurring children, both protected schedule-create paths and explicit
+item adoption. Typed propagation preserves each path's existing epoch stage:
+local pre-reservation, configured post-history advancement, or provisioning-owned
+batch reservation/advancement. Existing before/after epoch evidence joins the
+transaction checkpoint; no per-item double increment or inferred web setup occurs.
+Six fixed-input response/SQL witnesses captured from `0135a68` match exactly.
+Focused omission, replay, missing history/epoch and rollback tests pass, as does the
+full **1,560-test suite (one skipped)**. Seven-module typing, changed-file lint,
+documentation links and diff hygiene pass. This increment remains uncommitted.
+Full RF3 closure remains open under SPINE-101 for the
+remaining item/recurrence/relation/policy families; R3 remains unselected.
 
 Implement all seven command handlers internally using the shared command context
 and one outer transaction, not recursive public-command submissions or child

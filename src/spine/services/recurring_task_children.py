@@ -9,6 +9,7 @@ from typing import Any, cast
 from spine.core import occurrence_details
 from spine.core import temporal_bindings as binding_facts
 from spine.core.hashing import command_derived_id, hash_canonical_json
+from spine.core.mutation_effects import LocalOwnerPropagation, OwnerSnapshot
 from spine.core.notification_profiles import compose_notification_plan
 from spine.core.notifications import NormalizedNotificationPolicy
 from spine.core.provenance import derive_occurrence_provenance
@@ -18,7 +19,7 @@ from spine.ledger.common import TemporalAnchorInput
 from spine.ledger.items import create_next_item_version, create_task_v1
 from spine.ledger.notification_profiles import insert_application, insert_assignment, load_archetype, load_profile, require_owner_exists
 from spine.ledger.notifications import insert_notification_schedule_policy, load_notification_policies_at_version
-from spine.ledger.ownership import advance_ownership_epoch
+from spine.ledger.owner_mutations import insert_item_owner, record_item_owner_history
 from spine.ledger.provenance import persist_binding_provenance
 from spine.ledger.relations import create_item_relation
 from spine.ledger.rendering_definitions import select_presentation
@@ -31,6 +32,7 @@ from spine.ledger.temporal_bindings import (
 from spine.ledger.transactions import LedgerConnection
 from spine.ledger.work import cancel_work_instance
 from spine.services import schedule_delivery, schedule_materialization, schedule_policies
+from spine.services.mutation_propagation import reserve_local_owner_epoch
 from spine.services.primary_locations import inline_location_inputs, reference_location_input
 from spine.services.recurring_task_operations import (
     ChangeChild,
@@ -193,26 +195,15 @@ def _create(
 
     def extension(connection: Any) -> None:
         fault("task")
-        advance_ownership_epoch(connection)
+        reserve_local_owner_epoch(connection)
         fault("ownership_state")
-        connection.execute(
-            "INSERT INTO item_access_owners VALUES(?,?,1,?,?,?,NULL,?)",
-            (task_id, owner_id, owner["owner_kind"], owner.get("owner_subject_id"), owner.get("owner_group_id"), outer),
-        )
-        connection.execute(
-            "INSERT INTO item_access_owner_revisions VALUES(?,?,1,?,?,?,NULL,?,?,?,?)",
-            (
-                task_id,
-                owner_id,
-                owner["owner_kind"],
-                owner.get("owner_subject_id"),
-                owner.get("owner_group_id"),
-                outer,
-                now,
-                actor,
-                receipt_id,
-            ),
-        )
+        insert_item_owner(connection, OwnerSnapshot(
+            task_id, owner_id, 1, owner["owner_kind"], owner.get("owner_subject_id"), owner.get("owner_group_id"), None, outer,
+        ))
+        record_item_owner_history(connection, owner_id, actor, now, receipt_id)
+        from spine.services.mutation_propagation import propagate
+
+        propagate(connection, ownership=LocalOwnerPropagation(owner_id))
         fault("owner")
         create_item_relation(
             connection,
@@ -226,8 +217,6 @@ def _create(
         )
         insert_temporal_binding(connection, value=header)
         insert_temporal_binding_revision(connection, value=revision)
-        from spine.services.mutation_propagation import propagate
-
         propagate(connection, binding_id=binding_id)
         fault("binding")
         archetype_id = None

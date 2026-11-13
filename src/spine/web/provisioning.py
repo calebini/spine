@@ -9,6 +9,8 @@ from typing import Any, cast
 from spine.commands.receipts import command_derived_id, command_receipt, get_command_receipt, insert_command_receipt
 from spine.core.canonical_json import canonical_json_bytes
 from spine.core.hashing import hash_canonical_json
+from spine.core.mutation_effects import OwnerSnapshot, ProvisionedOwnerPropagation
+from spine.ledger.owner_mutations import insert_item_owner
 from spine.ledger.transactions import LedgerConnection
 from spine.web.contracts import validate
 from spine.web.errors import WebError
@@ -335,6 +337,11 @@ def apply(db: sqlite3.Connection, request: dict[str, Any], *, realm: str = "loca
         if len(db.execute("SELECT account_id FROM web_operators WHERE eligible=1 LIMIT 33").fetchall()) > 32:
             raise WebError("capacity_exceeded")
         after = epoch(db)
+        owner_ids = tuple(result["row_ids"][0] for result in results if result["operation_path"].startswith("/item_adoptions/"))
+        if owner_ids:
+            from spine.services.mutation_propagation import propagate
+
+            propagate(db, ownership=ProvisionedOwnerPropagation(owner_ids, before, after))
         audit_id = derived(command_id, "access_audit", "/audit")
         receipt_id = derived(command_id, "command_receipt", "/")
         response = {
@@ -444,10 +451,9 @@ def _apply_operation(
     elif key == "item_adoptions":
         identity = derived(command, "item_access_owner", path)
         scope = o["owner_scope"]
-        db.execute(
-            "INSERT INTO item_access_owners VALUES(?,?,1,?,?,?,NULL,?)",
-            (o["item_id"], identity, scope["owner_kind"], scope.get("owner_subject_id"), scope.get("owner_group_id"), command),
-        )
+        insert_item_owner(db, OwnerSnapshot(
+            o["item_id"], identity, 1, scope["owner_kind"], scope.get("owner_subject_id"), scope.get("owner_group_id"), None, command,
+        ))
         ids = [identity]
     elif key == "grants":
         if action == "create":

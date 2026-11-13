@@ -17,6 +17,8 @@ from spine.ledger.transactions import LedgerConnection
 
 def mark(state: TransactionMutationState, label: str) -> None:
     state.ownership.epoch_consumed = True
+    state.ownership.epoch_before = 4
+    state.ownership.epoch_after = 5
     state.recurring.rows.add(("root", label, None))
     state.renderings.pending[label] = {"kind": "ordinary", "nested": {"values": [label]}}
     state.renderings.versions.add((label, 1))
@@ -48,8 +50,8 @@ class TransactionMutationStateTests(unittest.TestCase):
     def test_closed_registration_covers_every_declared_obligation(self) -> None:
         state = self.db.mutation_state
         expected = {
-            "ownership": {"epoch_consumed"},
-            "propagation": {"bindings"},
+            "ownership": {"epoch_consumed", "epoch_before", "epoch_after"},
+            "propagation": {"bindings", "owners"},
             "recurring": {"rows"},
             "renderings": {"pending", "versions", "catalog", "profiles", "attempts"},
             "facets": {"versions", "allocations", "roots", "items", "bindings", "definitions"},

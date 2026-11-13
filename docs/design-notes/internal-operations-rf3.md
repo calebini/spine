@@ -1,6 +1,7 @@
 # RF3 — synchronous mutation-effect propagation
 
-Status: first binding increment implemented and verified, uncommitted (2026-11-13).
+Status: binding increment committed as `0135a68`; ownership increment implemented and verified, uncommitted
+(2026-11-13).
 This is implementation evidence, not a new normative contract or full RF3 closure.
 The authoritative boundary is
 [internal application operations §7](../../specs/internal-application-operations.md).
@@ -68,7 +69,9 @@ The new owner does **not** repeat consequences already applied elsewhere:
   already paired with explicit increments. Ordinary source edits therefore still
   have their own catalog increment, separate from later binding reconciliation.
 - `ledger/ownership.advance_ownership_epoch` retains its existing epoch ownership
-  and transaction-local once-consumption rule.
+  and transaction-local once-consumption rule. The ownership increment below
+  routes recurring creation through the application owner while retaining explicit
+  provisioning's whole-batch reservation.
 - `ledger/facets` retains typed-index/continuity checks and finalization, including
   the existing temporary tracking machinery.
 - `ledger/rendering_definitions.finalize` retains rendering, presentation and
@@ -77,7 +80,7 @@ The new owner does **not** repeat consequences already applied elsewhere:
 
 These are retained owners, **not a claim that every remaining writer has been
 inventoried or migrated**. Next RF3 work must close the ordinary item, recurrence,
-relation, ownership and policy writer/effect inventory, then integrate their
+relation and policy writer/effect inventory, then integrate their
 existing consequences through the accepted typed boundary without duplicating
 trigger/finalizer behavior. Include lower-level and recurring paths, exact
 before/after witnesses and missed-propagation guards. No R3 dirty queue, new
@@ -115,5 +118,84 @@ attempt semantics or global eager reconciliation belongs in RF3.
 - Final full suite: **1,548 tests, OK (one skipped)**, 415.285 seconds, using
   `PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src .venv/bin/python -m unittest discover -s tests`
   and installed pinned Tickerd (no sibling source import). Final focused Ruff,
-  typing and diff checks pass. This binding increment is verified and uncommitted;
+  typing and diff checks pass. This binding increment is committed as `0135a68`;
   the remaining RF3 inventory/integration above is still open.
+
+## Second increment: item ownership creation
+
+The operator requested committing the first increment and continuing RF3. The
+unchanged baseline for this extraction is `0135a68`; the same two unrelated edits
+remain excluded. This increment covers **initial item ownership**, not new owner
+transfer, access-policy changes, provisioning capabilities or public activation.
+
+| Existing producer | Preserved epoch ownership/order | Preserved entitlement/history |
+| --- | --- | --- |
+| `services/recurring_task_children._create.extension` | Reserve before header; local bootstrap or configured state; once per outer transaction | No creator entitlement; generation-derived IDs and outer receipt |
+| `web/service.WebService.command`, fresh `schedule.create` | Configured-only increment after owner history | Group creator entitlement only; ordinary command receipt |
+| `web/people_schedule_service.ProtectedScheduleRendering.persist` | Same configured-only increment before continuing presentation persistence | Same entitlement; successor scheduling receipt |
+| `web/provisioning._apply_operation`, `item_adoptions` | Existing whole-batch `apply` advancement, or v3 `prepare_change` pre-reservation | No creator entitlement; provisioning receipt and unchanged operation-path IDs |
+
+All four headers now use `ledger/owner_mutations.insert_item_owner`; all initial
+history rows use `record_item_owner_history`. `web/history.record` delegates its
+owner case and retains all non-owner cases. These primitives register exact frozen
+owner/history facts but never grant authority, choose bootstrap behavior, advance an
+epoch or commit. The initial owner revision remains `1`; no transfer operation or
+historical rewrite is added. AST checks pin the four callers and the two native
+SQL writes, including the explicitly retained provisioning epoch primitive.
+
+The existing `services/mutation_propagation.propagate` entrypoint takes a closed
+typed ownership choice: local reserved, configured advancement, or provisioning
+batch verification. It verifies exact header/history equality through indexed
+identity reads, advances only the configured path, validates the existing epoch
+transition and acknowledges the selected obligations. It returns immutable owner
+identities/revisions, `OWNERSHIP` classification and before/after epoch evidence.
+This is private evidence, never a new wire field or durable event.
+
+Local reservation still calls `ledger/ownership.advance_ownership_epoch` before
+the owner insert; the existing `ownership_state` fault boundary is retained.
+The once marker now also retains its before/after epoch in the same checkpointed
+component. Explicit v3 provisioning initializes that evidence when creating state,
+so a composed local writer sees the same consumed epoch. Nested rollback restores
+it, and commit/rollback/connection reuse clears it. Configured creation does not
+call the local bootstrap primitive: absent or wrong-mode state cannot be repaired.
+
+Legacy provisioning still creates or advances access state at its existing stage;
+v3 promotion still keeps the existing ledger/recovery identity and explicit realm
+choice. The shared propagation entrypoint verifies adoption consequences only
+after the existing batch has established its epoch. It does not increment again
+per adopted item. Batches without adoptions, no-op calls and replays add no owner
+propagation call.
+
+Retained access writers outside this extraction are explicit: operator, membership,
+grant and route-approval changes stay in provisioning; subject/group status and
+route-security epoch triggers remain in migration `0013_trusted_web_access.sql`.
+Their existing consequence ownership is neither duplicated nor silently bypassed.
+Ordinary trusted-local schedule creation remains ownerless unless its current
+workflow explicitly creates/adopts ownership. No new account, membership, grant,
+route, creator entitlement or notification work is inferred by this extraction.
+
+### Ownership verification
+
+- Initial affected bootstrap/protected scheduling/adoption/recurring edge/witness
+  selection: 61 tests passed.
+- Focused propagation/state/inventory/bootstrap selection: 58 tests passed.
+- Final ownership/binding/edge/frozen-child selection: 36 tests passed, including
+  unchanged bounded seven-task reconciliation.
+- Eleven new owner regressions plus one exact witness check cover all four
+  producers, replay, missing/duplicate propagation, missing history/epoch, incorrect
+  captured values, two-owner batches, local promotion, absent-state refusal by the
+  configured path, native-writer and context-manager bypass, and nested rollback.
+- `rf3_owner_witness.json` was captured from an isolated `git archive 0135a68`
+  checkout, not from the modified runtime. Fixed inputs/clocks/ledger identity
+  produce six response/whole-ledger digests for configured creation/replay,
+  adoption/replay and group people-create/replay. Current bytes match exactly.
+  The existing recurring lifecycle witness supplies the local/restoration parity
+  evidence without replacing or editing its goldens.
+- Final transaction/boundary/operator-documentation/declaration/web-copy selection:
+  32 tests passed. Seven affected core/ledger/service modules pass static typing.
+  Changed-file Ruff, 388 local documentation link targets and diff hygiene pass;
+  both unrelated-file hashes remain unchanged.
+- Full regression: **1,560 tests, OK (one skipped)**, 424.062 seconds, using
+  `PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src .venv/bin/python -m unittest discover -s tests`
+  and installed pinned Tickerd. This ownership increment is verified but uncommitted;
+  no RF3-wide closure or R3 kickoff is claimed.

@@ -22,7 +22,9 @@ from spine.commands.core import _handle_agenda_show, handle
 from spine.commands.receipts import command_derived_id, get_command_receipt
 from spine.core import SpineValidationError
 from spine.core.hashing import hash_canonical_json
+from spine.core.mutation_effects import ConfiguredOwnerPropagation, OwnerSnapshot
 from spine.core.schedule import system_timezone_database_version
+from spine.ledger.owner_mutations import insert_item_owner
 from spine.ledger.preflight import verify_runtime_schema
 from spine.ledger.sqlite import connect
 from spine.web.contracts import API, REGISTRY, registry, validate
@@ -263,21 +265,15 @@ class WebService:
                 row_role="item_access_owner",
                 request_path="/create_owner_scope",
             )
-            db.execute(
-                "INSERT INTO item_access_owners VALUES(?,?,1,?,?,?,?,?)",
-                (
-                    item_id,
-                    identity,
-                    scope["owner_kind"],
-                    scope.get("owner_subject_id"),
-                    scope.get("owner_group_id"),
-                    permissions.subject if scope["owner_kind"] == "subject_group" else None,
-                    request["command_id"],
-                ),
-            )
+            insert_item_owner(db, OwnerSnapshot(
+                item_id, identity, 1, scope["owner_kind"], scope.get("owner_subject_id"), scope.get("owner_group_id"),
+                permissions.subject if scope["owner_kind"] == "subject_group" else None, request["command_id"],
+            ))
             new_receipt = get_command_receipt(db, request["command_id"])
             record(db, "owner", identity, permissions.subject, request["created_at_utc"], new_receipt["command_receipt_id"])
-            db.execute("UPDATE ledger_access_state SET access_epoch=access_epoch+1")
+            from spine.services.mutation_propagation import propagate
+
+            propagate(db, ownership=ConfiguredOwnerPropagation(identity, permissions.identity["access_epoch"]))
             permissions.identity["access_epoch"] += 1
         release = scope if not receipt and command in {"schedule.create", "schedule.update"} else None
         permissions.references(result, release_owner=release)
