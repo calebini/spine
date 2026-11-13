@@ -18,6 +18,7 @@ from spine.ledger.temporal_bindings import (
     retire_temporal_binding,
     target_from_source,
 )
+from spine.services.mutation_propagation import propagate
 from tests import test_recurring_task_commands as base
 from tests import test_recurring_task_reconcile as pages
 from tests import test_recurring_task_restoration as restoration
@@ -65,11 +66,15 @@ class RecurringTaskPreservationTests(unittest.TestCase):
                 anchor_kind="local_instant", local_date=target["local_date"], local_time=target["local_time"],
                 timezone=target["timezone"], timezone_database_version=target["timezone_database_version"],
             ), anchor_id=anchor_id, default_created_at_utc=self.now)
+            def extension(db, _):
+                insert_temporal_binding_revision(db, value=revision)
+                propagate(db, binding_id=str(binding["temporal_binding_id"]))
+
             create_next_item_version(
                 self.db, item_id=task, target_version=version, created_at_utc=self.now,
                 created_by_subject_id="owner", task_detail={"due_anchor_id": anchor_id},
                 supporting_command_id=anchor_id,
-                insert_canonical_extension=lambda db, _: insert_temporal_binding_revision(db, value=revision),
+                insert_canonical_extension=extension,
             )
 
     def test_source_refresh_and_restoration_preserve_individual_offset(self):
@@ -393,6 +398,7 @@ class RecurringTaskPreservationTests(unittest.TestCase):
                     else:
                         retire_temporal_binding(self.db, temporal_binding_id=first["after"]["temporal_binding_id"],
                             command_id="manual-detach", retired_at_utc=self.now)
+                        propagate(self.db, binding_id=first["after"]["temporal_binding_id"])
                 before = copy.deepcopy(core._hydrated_item(self.db, task))
                 consumed = self.reconcile(initial["result"]["rule"], "consume-" + mode)
                 selected = next(v for v in consumed["result"]["results"] if v["assignment_id"] == first["assignment_id"])

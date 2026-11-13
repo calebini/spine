@@ -4,13 +4,16 @@ from __future__ import annotations
 
 import sqlite3
 from collections.abc import Mapping
+from dataclasses import replace
 from datetime import UTC, datetime
 
 from spine.core.errors import SpineValidationError
+from spine.core.mutation_effects import BindingSnapshot
 from spine.core.occurrence_details import decorate_occurrence, next_scheduled_fact
 from spine.core.occurrences import expand_recurrence_set
 from spine.core.schedule import resolve_local_instant, system_timezone_database_version
 from spine.ledger.item_reads import hydrated_item_at_version
+from spine.ledger.mutation_effects import binding_before, binding_revision, record_binding, require_transaction
 from spine.ledger.recurrence import load_current_recurrence_set, load_target_occurrence_selector
 from spine.timezones import timezone_for_version
 
@@ -29,6 +32,8 @@ BINDING_STATES = (
 
 
 def insert_temporal_binding(connection: sqlite3.Connection, *, value: Mapping[str, object]) -> None:
+    require_transaction(connection)
+    binding_id = str(value["temporal_binding_id"])
     connection.execute(
         """
         INSERT INTO relative_temporal_bindings (
@@ -56,9 +61,19 @@ def insert_temporal_binding(connection: sqlite3.Connection, *, value: Mapping[st
             value.get("retired_by_command_id"),
         ),
     )
+    record_binding(connection, binding_id, None, BindingSnapshot(
+        binding_id=binding_id, source_item_id=str(value["source_item_id"]),
+        target_item_id=str(value["target_item_id"]), relationship_id=str(value["relationship_id"]),
+        status=str(value.get("binding_status", "active")),
+    ))
 
 
 def insert_temporal_binding_revision(connection: sqlite3.Connection, *, value: Mapping[str, object]) -> None:
+    require_transaction(connection)
+    binding_id = str(value["temporal_binding_id"])
+    before = binding_before(connection, binding_id)
+    if before is None:
+        raise SpineValidationError("environment_failure:propagation", "binding revision has no header")
     connection.execute(
         """
         INSERT INTO relative_temporal_binding_revisions (
@@ -102,9 +117,12 @@ def insert_temporal_binding_revision(connection: sqlite3.Connection, *, value: M
             value["created_at_utc"],
         ),
     )
+    record_binding(connection, binding_id, before, binding_revision(before, value))
 
 
 def retire_temporal_binding(connection: sqlite3.Connection, *, temporal_binding_id: str, command_id: str, retired_at_utc: str) -> None:
+    require_transaction(connection)
+    before = binding_before(connection, temporal_binding_id)
     cursor = connection.execute(
         """
         UPDATE relative_temporal_bindings
@@ -115,6 +133,9 @@ def retire_temporal_binding(connection: sqlite3.Connection, *, temporal_binding_
     )
     if cursor.rowcount != 1:
         raise SpineValidationError("stale_version:temporal_binding_id", "temporal binding is no longer active")
+    if before is None:
+        raise SpineValidationError("environment_failure:propagation", "binding retirement has no header")
+    record_binding(connection, temporal_binding_id, before, replace(before, status="retired"))
 
 
 def load_temporal_binding(connection: sqlite3.Connection, temporal_binding_id: str) -> dict[str, object]:

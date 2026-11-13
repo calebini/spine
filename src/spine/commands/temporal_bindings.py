@@ -29,7 +29,6 @@ from spine.ledger.temporal_bindings import (
     binding_catalog_generation,
     binding_state,
     binding_view,
-    increment_binding_catalog_generation,
     insert_temporal_binding,
     insert_temporal_binding_revision,
     load_temporal_binding,
@@ -287,7 +286,9 @@ def handle_related_task_create(request: Mapping[str, Any], context: CommandConte
         _injected_failure(context, "relation")
         insert_temporal_binding(connection, value=header)
         insert_temporal_binding_revision(connection, value=revision)
-        increment_binding_catalog_generation(connection)
+        from spine.services.mutation_propagation import propagate
+
+        propagate(connection, binding_id=binding_id)
         _injected_failure(context, "binding")
         for _, policy in policies:
             insert_notification_schedule_policy(connection, normalized=policy)
@@ -829,7 +830,9 @@ def _manual_reconcile(
                 context.ledger, temporal_binding_id=str(binding["temporal_binding_id"]), command_id=command_id, retired_at_utc=at
             )
         if truth_changed:
-            increment_binding_catalog_generation(context.ledger)
+            from spine.services.mutation_propagation import propagate
+
+            propagate(context.ledger, binding_id=str(binding["temporal_binding_id"]))
         policies = [p for p in load_current_notification_policies(context.ledger, item_id=item_id) if p["status"] == "active"]
         cancelled, retained, protected, reasons = c._schedule_reconcile_work_plan(
             context.ledger,
@@ -958,7 +961,9 @@ def _versioned_reconcile(
             retire_temporal_binding(
                 connection, temporal_binding_id=str(binding["temporal_binding_id"]), command_id=command_id, retired_at_utc=at
             )
-        increment_binding_catalog_generation(connection)
+        from spine.services.mutation_propagation import propagate
+
+        propagate(connection, binding_id=str(binding["temporal_binding_id"]))
         # The allocator advances the current pointer after this extension. Its
         # already-copied successor policies, not the still-current predecessor,
         # must own any replacement work inserted for this version.

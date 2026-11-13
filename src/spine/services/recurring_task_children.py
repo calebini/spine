@@ -24,7 +24,6 @@ from spine.ledger.relations import create_item_relation
 from spine.ledger.rendering_definitions import select_presentation
 from spine.ledger.supporting import ItemLocationInput, ItemSubjectRoleInput
 from spine.ledger.temporal_bindings import (
-    increment_binding_catalog_generation,
     insert_temporal_binding,
     insert_temporal_binding_revision,
     target_from_source,
@@ -227,7 +226,9 @@ def _create(
         )
         insert_temporal_binding(connection, value=header)
         insert_temporal_binding_revision(connection, value=revision)
-        increment_binding_catalog_generation(connection)
+        from spine.services.mutation_propagation import propagate
+
+        propagate(connection, binding_id=binding_id)
         fault("binding")
         archetype_id = None
         if item["archetype"] is not None:
@@ -485,7 +486,9 @@ def change(db: LedgerConnection, invocation: ChildInvocation, plan: ChangeChild)
             retire_temporal_binding(
                 connection, temporal_binding_id=binding["temporal_binding_id"], command_id=invocation.command_id, retired_at_utc=now
             )
-        increment_binding_catalog_generation(connection)
+        from spine.services.mutation_propagation import propagate
+
+        propagate(connection, binding_id=str(binding["temporal_binding_id"]))
         invocation.fault("binding")
         work = reconcile_work(
             connection, invocation,

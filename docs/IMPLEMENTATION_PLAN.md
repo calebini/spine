@@ -9,7 +9,7 @@ see [validation](TZDB_COMPATIBILITY_VALIDATION.md) and [operations](TZDB_COMPATI
 
 
 Role: Roadmap rationale and delivery history; current task status lives in [BACKLOG.md](BACKLOG.md)
-Last updated: 2026-11-13 (manual R2 checkpoint verified, uncommitted; RF3/R3 unselected)
+Last updated: 2026-11-13 (manual R2 committed; first RF3 binding propagation increment verified, uncommitted)
 
 This is a non-normative delivery plan. The specifications and machine-readable contracts remain authoritative.
 
@@ -27,8 +27,8 @@ preservation gates. Architecture/storage delegation and the normative index are 
 Status and evidence are in SPINE-096–100. The operator ratified v1.0 and explicitly
 selected RF0/RF1 after the bounded review below. The selected RF0/RF1 extraction is
 now verified and checkpointed. The operator subsequently selected and completed
-RF2, then explicitly resumed R2 admission/read work on 2026-11-12. RF3/R3 remain
-separately gated.
+RF2, then explicitly resumed R2 admission/read work on 2026-11-12. After the manual
+R2 checkpoint, the operator selected RF3 on 2026-11-13. R3 remains separately gated.
 
 The draft, assessment and related tracking were committed as `60e025e`, excluding
 the preserved R2 continuation and unrelated `AGENTS.md` changes. SPINE-098 stages
@@ -303,9 +303,26 @@ selection, final 15-test preservation file, seven-module typing, lint and frozen
 web copies pass. Full regression passes **1,533 tests, OK (one skipped)**,
 401.367 seconds; the final focused file additionally covers two tests added after
 full-suite discovery. Manual R2 exit is complete, with the exact cross-slice limits
-recorded in the map. This continuation is uncommitted. The next implementation
-gate is RF3 propagation before R3, requiring separate operator selection; public
-activation and installed-package proof remain R4 work.
+recorded in the map. This continuation is committed as `7f35d68`. The operator
+selected RF3 propagation next; public activation and installed-package proof remain
+R4 work.
+
+The first RF3 increment establishes immutable binding effects, a transaction-local
+propagation obligation and one application owner for the existing binding catalog
+consequence. All five existing ordinary/recurring binding composers use it. Missing,
+duplicate or incomplete propagation aborts the owning transaction; nested rollback
+restores the pending effects alongside SQL. Existing audit-trigger and finalizer
+consequences remain owned by their current paths, not duplicated. This is **not RF3
+closure**: the remaining item/recurrence/relation/ownership/policy writer families
+still need their complete effect inventory and integration. See
+[RF3 inventory and evidence](design-notes/internal-operations-rf3.md) and SPINE-101.
+No public command/schema, migration, scheduler activation or R3 work is included.
+The first increment passes the full **1,548-test suite (one skipped)**, focused
+propagation/preservation checks, seven-module typing, lint and frozen contract
+checks. A redundant-read budget regression found during verification was corrected
+without increasing runtime limits; captured native values are checked against SQL
+once per logical propagation. The legacy command module retains its pre-existing
+37 typing diagnostics. Full RF3 closure remains open under SPINE-101.
 
 Implement all seven command handlers internally using the shared command context
 and one outer transaction, not recursive public-command submissions or child

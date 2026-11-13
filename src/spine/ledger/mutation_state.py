@@ -11,6 +11,7 @@ from dataclasses import dataclass, field, fields
 from typing import TYPE_CHECKING, Any
 
 from spine.core.errors import SpineValidationError
+from spine.core.mutation_effects import BindingMutation
 
 if TYPE_CHECKING:
     from spine.ledger.transactions import LedgerConnection
@@ -38,6 +39,15 @@ class _Component:
 @dataclass(slots=True)
 class OwnershipMutationState(_Component):
     epoch_consumed: bool = False
+
+
+@dataclass(slots=True)
+class PropagationMutationState(_Component):
+    bindings: dict[str, BindingMutation] = field(default_factory=dict)
+
+    def finalize(self, db: LedgerConnection) -> None:
+        if self.bindings:
+            raise SpineValidationError("environment_failure:propagation", "unpropagated binding mutation")
 
 
 @dataclass(slots=True)
@@ -92,14 +102,17 @@ class FacetMutationState(_Component):
 @dataclass(slots=True)
 class TransactionMutationState:
     ownership: OwnershipMutationState = field(default_factory=OwnershipMutationState)
+    propagation: PropagationMutationState = field(default_factory=PropagationMutationState)
     recurring: RecurringMutationState = field(default_factory=RecurringMutationState)
     renderings: RenderingMutationState = field(default_factory=RenderingMutationState)
     facets: FacetMutationState = field(default_factory=FacetMutationState)
 
-    def _components(self) -> tuple[OwnershipMutationState, RecurringMutationState, RenderingMutationState, FacetMutationState]:
+    def _components(self) -> tuple[
+        OwnershipMutationState, PropagationMutationState, RecurringMutationState, RenderingMutationState, FacetMutationState
+    ]:
         # Single closed registration point: checkpoint/restore/reset/finalize use
         # this same order. Rendering may add facts needed by facet finalization.
-        return self.ownership, self.recurring, self.renderings, self.facets
+        return self.ownership, self.propagation, self.recurring, self.renderings, self.facets
 
     def checkpoint(self) -> TransactionMutationState:
         checkpoint = TransactionMutationState()

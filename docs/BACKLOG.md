@@ -280,6 +280,36 @@ inventory mismatch, full regression passes **1,461 tests, OK (one skipped)**,
 capacity-limit/timezone diagnostics. IO-03–06 and IO-08 are closed for the selected
 RF2 scope. No public contracts, persistent schema, agent workflow or activation changed.
 
+### SPINE-101 — RF3: synchronous mutation-effect propagation
+
+**Status:** In progress — explicitly selected on 2026-11-13 after committing
+manual R2 as `7f35d68`. R3 scheduling/attempt integration remains unselected.
+**Scope:** Implement Section 7 of the accepted internal-application-operations
+contract: closed writer/effect inventory, exact transaction-local effects and one
+application propagation owner for existing consequences. Preserve trigger/finalizer
+ownership, identities, receipts, work modes and public activation boundaries.
+**First increment:** Establish the typed seam and required propagation for all
+existing binding create/revision/retirement composers, including direct binding
+commands and recurring child operations. Catalog increments stay once per existing
+logical operation. Missing propagation must abort rather than defer repair.
+Inventory the remaining item/recurrence/relation/owner/policy consequences explicitly;
+do not claim this first increment closes RF3 or add R3 dirty queues.
+**Acceptance:** IO-07/08: exact pre/post evidence, caller inventory and bypass
+guards; no-op/replay add nothing, nested rollback restores SQL/Python state,
+duplicate/missing propagation fails closed, existing freshness tests and full suite
+pass. Preserve both unrelated edits. No push, public activation or deployment.
+**Progress/evidence:** The first binding increment is implemented and verified,
+uncommitted; see [writer inventory and verification](design-notes/internal-operations-rf3.md).
+Thirteen new propagation regressions cover exact evidence, bypass/duplicate
+rejection, budget-preserving capture, no-op/replay and transactional rollback.
+Full regression passes **1,548 tests, OK (one skipped)**, 415.285 seconds. Focused
+selections, seven-module typing, lint, frozen witnesses/web copies and links pass.
+The legacy command-module typing check retains the same 37 diagnostics as HEAD;
+it is not claimed clean. Both unrelated files remain unchanged.
+**Next:** Complete the item/recurrence/relation/ownership/policy writer/effect
+inventory and integrate remaining existing consequences. IO-07/08 are verified
+for this binding increment, not closed for all RF3. R3 remains unselected.
+
 ## Selected feature design
 
 ### SPINE-075 — Specify recurring-source per-occurrence related tasks
@@ -1067,8 +1097,9 @@ No public command, automatic generation, delivery or deployment is authorized.
 
 **Status:** Done — internal manual-engine checkpoint verified (2026-11-13),
 following explicit resumption after SPINE-100/RF2 completion. The consolidated
-manual acceptance map and final verification appear below. Changes remain
-uncommitted; RF3/R3 and public activation are not selected or claimed complete.
+manual acceptance map and final verification appear below. Changes are
+committed as `7f35d68`; RF3 is now selected under SPINE-101. R3 and public
+activation are not selected or claimed complete.
 Prior authorization/evidence remains: R1 checkpoint
 and R2, including the narrow prospective producer fixes; R1 committed as `bc96a1d`.
 **Scope:** All seven internal command handlers, configuration/enrollment,
@@ -1404,9 +1435,9 @@ explicit writer/reconcile/attempt interleavings, suppression/restoration and
 pending-intent races, protected-work matrix, rollover/catch-up, dense-root fairness
 and repeated idle zero-write cycles. No real sends. See
 [R3](IMPLEMENTATION_PLAN.md#r3--all-writer-safety-and-automatic-scheduling-spine-094).
-**Next:** Respect the operator-directed implementation pause under SPINE-096/097;
-finish R2 and obtain the selected checkpoint's implementation kickoff. SPINE-097's
-change-propagation seam is drafted, not yet accepted or implemented.
+**Next:** Finish the accepted RF3 propagation seam under SPINE-101, then obtain
+an explicit R3 kickoff. The manual R2 checkpoint is complete; this does not
+authorize automatic recurring scheduling or attempt-gate integration.
 
 ### SPINE-095 — R4: recurring-task activation and release verification
 

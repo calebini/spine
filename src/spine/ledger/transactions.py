@@ -195,7 +195,7 @@ class LedgerConnection(sqlite3.Connection):
     ) -> Literal[False]:
         if self._command_transaction:
             return False
-        if getattr(self, "_facets_enabled", False):
+        if getattr(self, "_facets_enabled", False) or self.mutation_state.propagation.bindings:
             if exc_type is not None:
                 self.rollback()
             else:
