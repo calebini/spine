@@ -25,14 +25,24 @@ class ProofBudget:
     hops: int = 64
     on_exhausted: Callable[[bool], None] | None = None
 
-    def spend(self, amount: int = 1, *, hop: bool = False) -> None:
-        if amount < 0 or amount > self.steps or (hop and self.hops < 1):
+    def traverse(self, depth: int) -> None:
+        """Cap each lineage path; charge every traversal to shared proof work.
+
+        Revalidating a path or proving another candidate does not deepen that
+        path. Neither operation refunds steps, including on unit rollback.
+        """
+        if depth < 1 or depth > self.hops:
             if self.on_exhausted is not None:
-                self.on_exhausted(hop and self.hops < 1)
+                self.on_exhausted(True)
+            raise SpineValidationError("source_continuity_unresolved", "bounded source lineage exhausted")
+        self.spend()
+
+    def spend(self, amount: int = 1) -> None:
+        if amount < 0 or amount > self.steps:
+            if self.on_exhausted is not None:
+                self.on_exhausted(False)
             raise SpineValidationError("source_continuity_unresolved", "bounded source proof exhausted")
         self.steps -= amount
-        if hop:
-            self.hops -= 1
 
 
 def _rows(db: sqlite3.Connection, sql: str, args: tuple[object, ...], budget: ProofBudget) -> list[dict[str, Any]]:
@@ -228,8 +238,8 @@ def continuity(
 ) -> dict[str, Any]:
     """Verify every stored hop and every contributing component, not just one."""
     old = require_candidate(db, prior_revision, prior_selector, budget)
-    for hop in hops:
-        budget.spend(hop=True)
+    for depth, hop in enumerate(hops, 1):
+        budget.traverse(depth)
         if hop["prior_revision_id"] != prior_revision or hop["prior_selector"] != prior_selector:
             raise SpineValidationError("source_continuity_unresolved", "disconnected source proof")
         new = require_candidate(db, hop["new_revision_id"], hop["selector"], budget)
@@ -311,8 +321,10 @@ def _addition_history(db: sqlite3.Connection, root: dict[str, Any], head: dict[s
     This is bounded by the same hop/row budget, never a scan of unrelated history.
     Changed stream/topology requires stronger continuity evidence, not novelty.
     """
+    depth = 0
     while head["recurrence_revision_id"] != root["enrolled_recurrence_revision_id"]:
-        budget.spend(hop=True)
+        depth += 1
+        budget.traverse(depth)
         prior_id = head["prior_recurrence_revision_id"]
         if prior_id is None:
             raise SpineValidationError("source_continuity_unresolved", "addition history does not reach enrollment")

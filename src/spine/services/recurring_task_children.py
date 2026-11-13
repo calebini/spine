@@ -44,7 +44,7 @@ from spine.services.recurring_task_operations import (
     RestoreChild,
     WorkEvidence,
 )
-from spine.services.recurring_task_restoration import Restoration
+from spine.services.recurring_task_restoration import Restoration, defer_anchor
 from spine.services.rendering_authoring import resolve
 
 COMMAND = PREFIX + "reconcile"
@@ -375,6 +375,8 @@ def _create(
         summary=item["summary"],
         source_ref=item["source_ref"],
         priority=item["task_detail"]["priority"],
+        completion_state=restoration.current["detail"]["completion_state"] if restoration is not None else None,
+        defer_until_anchor=defer_anchor(restoration, seed) if restoration is not None else None,
         due_anchor=TemporalAnchorInput(
             anchor_kind="local_instant",
             anchor_id=anchor_id,
@@ -435,7 +437,9 @@ def change(db: LedgerConnection, invocation: ChildInvocation, plan: ChangeChild)
         revision_index=int(prior["revision_index"]) + 1,
         source=source,
         source_scope="selected_occurrence",
-        offset=int(config["offset_seconds"]),
+        # A source refresh/cancellation must retain an individual binding's
+        # offset. Only explicit three-way adoption may replace that choice.
+        offset=int(config["offset_seconds"] if managed and "offset_seconds" in managed else prior["offset_seconds"]),
         target=target_facts,
         target_item_version=next_version,
         target_anchor_id=anchor_id,

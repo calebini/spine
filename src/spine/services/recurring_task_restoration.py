@@ -12,6 +12,7 @@ from spine.core.errors import SpineValidationError
 from spine.core.notifications import NormalizedNotificationPolicy, normalize_notification_policy
 from spine.core.recurring_task_runtime import fail
 from spine.ledger import facets
+from spine.ledger.common import TemporalAnchorInput
 from spine.ledger.notification_profiles import current_application, current_assignment, insert_application
 from spine.ledger.notifications import insert_notification_schedule_policy
 from spine.ledger.recurring_task_sources import ProofBudget
@@ -29,6 +30,20 @@ class Restoration:
     family_keys: dict[str, str]
     facet_entries: tuple[dict[str, Any], ...]
     application: dict[str, Any] | None
+
+
+def defer_anchor(snapshot: Restoration, seed: str) -> TemporalAnchorInput | None:
+    """Copy the actual optional defer fact into the new item, not its old ID."""
+    from spine.services.recurring_task_children import child_id
+
+    anchor = snapshot.current["detail"].get("defer_until_anchor")
+    if anchor is None:
+        return None
+    fields = {key: anchor[key] for key in (
+        "anchor_kind", "local_date", "local_time", "timezone", "timezone_database_version",
+        "utc_instant", "window_start_utc", "window_end_utc", "source",
+    ) if key in anchor}
+    return TemporalAnchorInput(**fields, anchor_id=child_id(seed, "defer_anchor", "/restored/defer", "anchor"))
 
 
 def prepare(db: LedgerConnection, *, command_id: str, budget: ProofBudget, assignment_id: str,

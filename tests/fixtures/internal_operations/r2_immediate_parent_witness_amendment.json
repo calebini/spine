@@ -1,0 +1,42 @@
+{
+  "baseline": "rf2_child_composition_witness.json",
+  "baseline_sha256": "eedb18dfd719afbf443b218f964f73e046e5b925fd9a012eb27edc3bf2a85fc3",
+  "reason": "Implicit recurrence segment copies reference the immediate predecessor, not the predecessor's older parent. Only the second source revision and downstream identities change; historical rows are not rewritten.",
+  "cases": {
+    "adopt_clear": {
+      "changed": true,
+      "effect": "rule_page_applied",
+      "ledger_sha256": "7336d085ecdefd33e152241b4b3a6dee7341bcf2e83e564592a1084bf40338c5",
+      "response_bytes": 29873,
+      "response_sha256": "e96e2e906498c4231439e5aeb4e8250ff8e9186c09488a752eadfa6dccc19371"
+    },
+    "cancel": {
+      "changed": true,
+      "effect": "rule_page_applied",
+      "ledger_sha256": "97c720434afc25597d99e3ad4ba96126e2ee0c22e5048f22d5faa856b5993412",
+      "response_bytes": 35254,
+      "response_sha256": "9175618dfa4dee7d8e96e906c98a43832ab6cd0803d57b441717160426d53878"
+    },
+    "noop": {
+      "changed": false,
+      "effect": "rule_page_noop",
+      "ledger_sha256": "fe2ca3bd4d8e467e2690c9caa701458743c97180ab36561c355f1a2221f497d5",
+      "response_bytes": 28997,
+      "response_sha256": "16cbb7e36c1428ac7cfddb7182a0f4a1b4712366bc76fc78d413856cbaf7ddf0"
+    },
+    "replay": {
+      "changed": false,
+      "effect": "rule_page_noop",
+      "ledger_sha256": "fe2ca3bd4d8e467e2690c9caa701458743c97180ab36561c355f1a2221f497d5",
+      "response_bytes": 28996,
+      "response_sha256": "9bc2919830ba1cf35c8a1f694198d0cc3fa2b4ad7ab8b30d7b6ca3269b113858"
+    },
+    "restore": {
+      "changed": true,
+      "effect": "rule_page_applied",
+      "ledger_sha256": "10240c12b178cca4c19b63c452f943a7e3282eefcd90ca1c8f41125ca8780ea2",
+      "response_bytes": 35241,
+      "response_sha256": "1d408dc7649006452b9e3c6c05891bf7700e3167cfd188b5add9c9e3446207e8"
+    }
+  }
+}

@@ -496,10 +496,27 @@ class RecurringTaskAdmissionReadTests(unittest.TestCase):
         self.assertTrue(split["ok"], split)
         self.assertEqual(split["effect"], "series_edit_following_applied")
         rule = self.rule(initial["result"]["rule"]["related_task_rule_id"])
+        # One hop is sufficient for each of these independent one-hop proofs;
+        # repeated validation and other assignments do not consume its depth.
+        before = base.dump(self.db)
+        request = self.write("reconcile", rule, limits={"lineage_hops": "1", "proof_steps": "50000"})
+        preview = self.run_command("reconcile", request, context=replace(self.context, dry_run=True))
+        self.assertTrue(preview["ok"], preview)
+        self.assertEqual({v["outcome"] for v in preview["result"]["results"]}, {"refreshed"})
+        self.assertEqual(base.dump(self.db), before)
+        # A second authentic source edit really deepens the unaccepted path.
+        added = handle("recurrence.instance.add", {
+            "command_id": "budget-second-hop", "actor_subject_id": "owner", "item_id": self.event["item_id"],
+            "target_version": rule["source_snapshot"]["source_item_version"], "recurrence_set_id": self.set_id,
+            "recurrence_revision_id": rule["source_snapshot"]["recurrence_revision_id"],
+            "added_at_utc": self.now, "scheduled_fact": "2027-01-01T18:00:00Z", "reason_code": "future_class",
+        }, self.context)
+        self.assertTrue(added["ok"], added)
+        rule = self.rule(initial["result"]["rule"]["related_task_rule_id"])
         request = self.write("reconcile", rule, limits={"lineage_hops": "1", "proof_steps": "50000"})
         self.assert_error("reconcile", request, "capacity_exceeded", "limits.lineage_hops")
         self.assertEqual(self.db.execute("SELECT COUNT(*) FROM task_details WHERE task_status='cancelled'").fetchone()[0], 0)
-        refreshed = self.reconcile(rule, "sufficient-proof", lineage_hops="256", proof_steps="50000")
+        refreshed = self.reconcile(rule, "sufficient-proof", lineage_hops="2", proof_steps="50000")
         self.assertTrue(refreshed["changed"], refreshed)
         self.assertEqual({v["outcome"] for v in refreshed["result"]["results"]}, {"refreshed"})
         self.assertEqual(self.db.execute("SELECT COUNT(*) FROM related_task_generations").fetchone()[0], 6)
@@ -512,9 +529,9 @@ class RecurringTaskAdmissionReadTests(unittest.TestCase):
         active, first_unit_cost = [], []
         real_spend = ProofBudget.spend
 
-        def observed_spend(budget, amount=1, *, hop=False):
+        def observed_spend(budget, amount=1):
             active[:] = [budget]
-            return real_spend(budget, amount, hop=hop)
+            return real_spend(budget, amount)
 
         def measured_fault(stage):
             if stage == "binding" and not first_unit_cost:

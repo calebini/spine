@@ -303,12 +303,28 @@ def _generation(db: sqlite3.Connection, value: dict[str, Any]) -> None:
     assignment = required(db, "related_task_assignments", value["assignment_id"])
     root = required(db, "related_task_rules", assignment["related_task_rule_id"])
     _id("generation", value, "generation_id", {"assignment_id": value["assignment_id"], "generation_index": str(value["generation_index"])})
+    restored_offset = None
     if value["predecessor_generation_id"] is not None:
         prior = required(db, "related_task_generations", value["predecessor_generation_id"])
         invariant(prior["assignment_id"] == value["assignment_id"] and prior["generation_index"] + 1 == value["generation_index"])
+        cancellation = row(db, "related_task_source_cancellations", prior["generation_id"])
+        invariant(cancellation is not None, "restoration lacks source-only cancellation")
+        assert cancellation is not None
+        cancelled_state = required(db, "related_task_assignment_revisions", cancellation["assignment_revision_id"])
+        cancelled_binding = db.execute(
+            "SELECT * FROM relative_temporal_binding_revisions WHERE temporal_binding_revision_id=?",
+            (cancelled_state["temporal_binding_revision_id"],),
+        ).fetchone()
         invariant(
-            row(db, "related_task_source_cancellations", prior["generation_id"]) is not None, "restoration lacks source-only cancellation"
+            cancelled_binding is not None
+            and cancelled_binding["temporal_binding_id"] == prior["temporal_binding_id"]
+            and cancelled_state["generation_id"] == prior["generation_id"]
+            and cancelled_binding["target_item_version"] == cancellation["cancelled_task_version"],
+            "restoration cancellation binding mismatch",
         )
+        # Restoration preserves the actual individual choice at cancellation,
+        # not the rule default or a mutable latest binding pointer.
+        restored_offset = str(cancelled_binding["offset_seconds"])
     proof = required(db, "related_task_source_proofs", value["creation_proof_id"])
     config = required(db, "related_task_rule_revisions", value["created_rule_revision_id"])
     invariant(proof["related_task_rule_id"] == root["related_task_rule_id"] == config["related_task_rule_id"])
@@ -354,7 +370,7 @@ def _generation(db: sqlite3.Connection, value: dict[str, Any]) -> None:
         and str(initial["source_target_version"]) == creation["source_item_version"]
         and initial["target_item_version"] == value["created_task_version"]
         and initial["offset_basis"] == configuration["offset_basis"]
-        and str(initial["offset_seconds"]) == configuration["offset_seconds"],
+        and str(initial["offset_seconds"]) == (restored_offset if restored_offset is not None else configuration["offset_seconds"]),
         "generation creation binding mismatch",
     )
     owner = db.execute(

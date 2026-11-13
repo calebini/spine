@@ -9,7 +9,7 @@ see [validation](TZDB_COMPATIBILITY_VALIDATION.md) and [operations](TZDB_COMPATI
 
 
 Role: Roadmap rationale and delivery history; current task status lives in [BACKLOG.md](BACKLOG.md)
-Last updated: 2026-11-12 (R2 admission/read committed; manual intent/lifecycle continuation; RF3/R3 unselected)
+Last updated: 2026-11-13 (manual R2 checkpoint verified, uncommitted; RF3/R3 unselected)
 
 This is a non-normative delivery plan. The specifications and machine-readable contracts remain authoritative.
 
@@ -282,6 +282,30 @@ arithmetic instead of treating calendar days as fixed elapsed offsets. It also
 extends actual materialization, adoption and restoration evidence for calendar
 policies. Public activation and automatic all-writer integration remain unselected.
 See the same evidence note for verification and remaining R2 exit work.
+
+Calendar leads were committed as `09a2c8e`. The following operator-selected
+customization/continuity continuation corrects actual completion/defer copy-forward,
+prospective immediate-parent segment lineage, delayed rdate birth/carry-forward
+proof construction, and per-proof lineage depth accounting. Exact shared proof
+work and separate-connection creation/replay races are tested without public
+activation. The original frozen lifecycle fixture remains intact with a separate
+explicit source-parent amendment. Verification and remaining exit status are
+recorded in the same evidence note and SPINE-093; RF3/R3 are not started.
+
+The 2026-11-13 continuation closes individual-offset and reference/disclosure
+preservation cases and consolidates the
+[manual R2 acceptance map](design-notes/recurring-related-task-r2-intent-lifecycle.md#consolidated-manual-r2-acceptance-map).
+Source refresh/move/cancellation retain the actual individual offset; restored
+generation validation uses immutable predecessor cancellation evidence, not the
+rule default. Exact disclosure reuse and unavailable-reference rejection do not
+grant authority or manufacture replacement catalog facts. The affected 102-test
+selection, final 15-test preservation file, seven-module typing, lint and frozen
+web copies pass. Full regression passes **1,533 tests, OK (one skipped)**,
+401.367 seconds; the final focused file additionally covers two tests added after
+full-suite discovery. Manual R2 exit is complete, with the exact cross-slice limits
+recorded in the map. This continuation is uncommitted. The next implementation
+gate is RF3 propagation before R3, requiring separate operator selection; public
+activation and installed-package proof remain R4 work.
 
 Implement all seven command handlers internally using the shared command context
 and one outer transaction, not recursive public-command submissions or child

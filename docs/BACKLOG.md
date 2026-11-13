@@ -1,6 +1,6 @@
 # Spine Backlog
 
-Last updated: 2026-11-12
+Last updated: 2026-11-13
 
 This is the single work queue for Spine development. The
 [implementation plan](IMPLEMENTATION_PLAN.md) explains roadmap direction and delivery
@@ -1065,9 +1065,10 @@ No public command, automatic generation, delivery or deployment is authorized.
 
 ### SPINE-093 — R2: recurring-task commands and manual reconciliation
 
-**Status:** In progress — admission/read slice complete (2026-11-12), following
-explicit resumption after SPINE-100/RF2 completion. Remaining manual-engine exit
-evidence is not closed. No RF3/R3 or public activation selected.
+**Status:** Done — internal manual-engine checkpoint verified (2026-11-13),
+following explicit resumption after SPINE-100/RF2 completion. The consolidated
+manual acceptance map and final verification appear below. Changes remain
+uncommitted; RF3/R3 and public activation are not selected or claimed complete.
 Prior authorization/evidence remains: R1 checkpoint
 and R2, including the narrow prospective producer fixes; R1 committed as `bc96a1d`.
 **Scope:** All seven internal command handlers, configuration/enrollment,
@@ -1345,10 +1346,55 @@ Both unrelated working-tree hashes are unchanged. See the intent/lifecycle
 evidence note's calendar section. This increment remains uncommitted. R2 stays
 open for individual customization, source-continuity, combined-budget and
 cross-connection exit evidence; no R3, public activation, push or deployment.
+**Customization/continuity continuation (2026-11-12):** Calendar-lead work committed
+as `09a2c8e`, excluding the two preserved unrelated edits. The operator selected
+remaining R2 customization, continuity, budget and concurrency cases. Regressions
+now prove actual task detail preservation/clears, delayed positive additions,
+exact path and page-work budgets and competing first-generation pages. Confirmed
+gaps are corrected: completion/defer restoration, immediate-parent implicit source
+copies, historical positive-addition plus current-copy proofs, and per-proof rather
+than page-cumulative lineage depth. Existing proof shapes and strict source checks
+remain; incomplete lineage fails closed without partial child/proof writes.
+The original RF2 witness remains frozen, with a separate exact amendment for the
+prospective parent-identity correction. Focused edge/page/witness verification:
+**24 tests, OK**, then **72** final focused tests and **10** repeated physical race
+tests; Ruff, six-module typing, frozen web copies, 247 local links and diff hygiene
+pass. Initial full regression identified two older budget-test expectations; these
+now prove genuine one-/two-hop boundaries and retain mid-page rollback. The full
+admission/read file passes **22 tests**; fresh full regression passes **1,520 tests,
+OK (one skipped)**, 403.331 seconds, with only the known non-fatal read-budget and
+timezone diagnostics. See the intent/lifecycle evidence note's new continuation
+for the precise remaining individual-offset/disclosure/reference assessment and
+consolidated R2 exit map. No public/R3
+activation; this continuation is uncommitted and whole-R2 exit remains unclaimed.
+**Final manual preservation/acceptance continuation (2026-11-13):** The operator
+selected the remaining offset/disclosure/reference cases and consolidated exit
+mapping. Canonical individual-offset tests reproduced and corrected two defects:
+source changes overwrote the binding's offset with its rule default, and restored
+generation validation incorrectly compared actual copied offset to that default.
+Source changes now preserve the actual offset except explicit managed adoption;
+restoration validates against immutable predecessor cancellation/binding evidence.
+Fifteen new tests cover offsets, malformed-successor rollback, valid/revoked
+disclosure, referenced-route immutability/inactivation, inactive participant and
+non-queryable facet references, catch-up/enrollment, independent group ownership,
+manual terminal/detach vetoes, whole-event cancellation and occurrence restoration.
+The affected **102-test** selection and final **15-test** file pass. Full regression
+passes **1,533 tests, OK (one skipped)**, 401.367 seconds. The final preservation
+file includes two cancellation cases added after full-suite discovery; both pass
+in that final 15-test run. Seven-module typing, focused Ruff, frozen web copies,
+269 local documentation targets and diff hygiene pass. Only the known non-fatal
+read-budget callback and expected timezone-substitution diagnostics appeared. The
+[consolidated manual R2 map](design-notes/recurring-related-task-r2-intent-lifecycle.md#consolidated-manual-r2-acceptance-map)
+records exact evidence and separates RF3/R3/R4 obligations. This closes the
+selected manual R2 exit, not whole-family runtime conformance or release readiness.
+Both unrelated file hashes and original frozen witnesses are unchanged. No commit,
+push, public activation or RF3/R3 work occurred. Next is an operator-authorized
+checkpoint, then selection of the existing RF3 propagation prerequisite before R3.
 
 ### SPINE-094 — R3: recurring-task all-writer safety and automatic scheduling
 
-**Status:** Blocked by SPINE-093; planned, not started or separately authorized.
+**Status:** Planned, not started or separately authorized. SPINE-093's manual R2
+checkpoint is complete; RF3 propagation remains the prerequisite before R3.
 **Scope:** All existing source/target/relation/binding/owner/policy writers,
 atomic invalidation/catalog/dirty-CAS integration, per-attempt current-truth
 admission and fair bounded read-only scheduler planning. Preserve ordinary v1

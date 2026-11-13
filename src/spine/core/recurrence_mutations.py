@@ -144,7 +144,9 @@ def _normalize_segments(
         if row.get("active_end") is not None:
             preimage["active_end"] = row["active_end"]
         parent = row.get("lineage_parent_segment_id")
-        if parent is None and not explicit and row.get("segment_id") is not None:
+        if not explicit and row.get("segment_id") is not None:
+            # An implicit copy is produced by this immediate predecessor, not
+            # by the ancestor that produced the predecessor's own segment.
             parent = row["segment_id"]
         if parent is not None:
             preimage["lineage_parent_segment_id"] = parent

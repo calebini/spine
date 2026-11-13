@@ -360,6 +360,7 @@ class Page:
         restoration: Any = None,
     ) -> dict[str, Any]:
         config, config_id = config or self.config, config_id or self.state.root["current_revision_id"]
+        birth: tuple[str, dict[str, Any]] | None = None
         selector = occurrence["target_occurrence_selector"]
         source = children.source_facts(
             self.db, self.state.root, self.recurrence, occurrence, self.now, persist=False, command_id=self.request["command_id"]
@@ -410,6 +411,18 @@ class Page:
                         },
                     )
             proof_id = proofs.persist(self.db, self.state.root, kind, proof, self.request, self.now, self.budget)
+            if proof["recurrence_revision_id"] != self.snapshot["recurrence_revision_id"]:
+                birth = (proof_id, proof)
+                # A delayed addition first proves its historical birth. Its
+                # current membership must then have an independently verified
+                # copy chain, inside this same whole-unit savepoint.
+                path = proofs.hops(self.db, proof["recurrence_revision_id"], self.snapshot["recurrence_revision_id"],
+                                   proof["selector"], self.budget)
+                if not path or path[-1]["selector"] != selector:
+                    fail("source_continuity_unresolved", "source")
+                carried = proofs.payload(self.snapshot, selector, prior_proof_id=proof_id, prior_selector=proof["selector"],
+                                         hops=path, lineage_ids=sorted({line for hop in path for line in hop["lineage_ids"]}))
+                proof_id = proofs.persist(self.db, self.state.root, "carry_forward", carried, self.request, self.now, self.budget)
         reference = ensure_selector(self.db, revision_id=self.snapshot["recurrence_revision_id"], selector=selector, budget=self.budget)
         first = assignment is None
         assignment_id = (
@@ -534,6 +547,13 @@ class Page:
 
             assert assignment is not None
             append_state(self.db, assignment, state, self.request, self.now)
+        if birth is not None:
+            # Reserve the positively proved original alias for this assignment
+            # too. When unchanged, the first reservation keeps the birth proof;
+            # state/generation still pin the fully verified current proof.
+            reserve_selector(self.db, rule_id=self.state.root["related_task_rule_id"], assignment_id=assignment_id,
+                             proof_id=birth[0], selector=birth[1]["selector"],
+                             revision_id=birth[1]["recurrence_revision_id"], budget=self.budget)
         reserve_selector(
             self.db,
             rule_id=self.state.root["related_task_rule_id"],

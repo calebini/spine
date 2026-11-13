@@ -11,9 +11,10 @@ from spine.ledger.recurring_tasks import insert_record, row
 
 
 def hops(db: Any, before: str, after: str, selector: dict[str, Any], budget: ProofBudget) -> list[dict[str, Any]]:
-    path, current = [], after
+    path: list[dict[str, Any]] = []
+    current = after
     while current != before:
-        budget.spend(hop=True)
+        budget.traverse(len(path) + 1)
         header = revision(db, current, budget)
         path.append(header)
         current = header["prior_recurrence_revision_id"]
@@ -100,15 +101,32 @@ def initial(
         )
     current = candidate(db, snapshot["recurrence_revision_id"], selector["scheduled_fact"], budget)
     if current is not None and current["rdates"] and not current["rules"]:
+        # The first page may run several revisions after the actual addition.
+        # Find its birth, then prove the copies separately; a current copied row
+        # is not itself positive novelty evidence. Missing/changed history still
+        # fails closed in new_rdate verification and subsequent carry-forward.
+        depth = 0
+        while current["header"]["recurrence_revision_id"] != root["enrolled_recurrence_revision_id"]:
+            depth += 1
+            budget.traverse(depth)
+            prior_id = current["header"]["prior_recurrence_revision_id"]
+            if prior_id is None:
+                raise SpineValidationError("source_continuity_unresolved", "addition has no enrollment ancestry")
+            previous = candidate(db, prior_id, selector["scheduled_fact"], budget)
+            if previous is None:
+                break
+            current = previous
         header = current["header"]
+        if not current["rdates"] or current["rules"]:
+            raise SpineValidationError("source_continuity_unresolved", "addition has an unproved prior contributor")
         ids = db.execute(
             "SELECT lineage_id FROM recurrence_lineage WHERE new_recurrence_revision_id=? AND new_child_id=? ORDER BY lineage_id LIMIT ?",
             (header["recurrence_revision_id"], current["rdates"][0][0]["rdate_id"], budget.steps + 1),
         ).fetchall()
         budget.spend(len(ids))
         return "new_rdate", payload(
-            snapshot,
-            selector,
+            {key: str(header[key]) for key in snapshot},
+            current["selector"],
             rdate_id=current["rdates"][0][0]["rdate_id"],
             prior_recurrence_revision_id=header["prior_recurrence_revision_id"],
             lineage_ids=[r[0] for r in ids],

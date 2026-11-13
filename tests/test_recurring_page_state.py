@@ -49,7 +49,8 @@ class RecurringPageStateTests(unittest.TestCase):
         self.state.mappings.append({"policy": label})
         self.state.changed = self.state.owners = True
         self.state.mutations += 1
-        self.budget.spend(3, hop=True)
+        self.budget.traverse(1)
+        self.budget.spend(2)
         return {"outcome": label}
 
     def accept(self, label):
@@ -81,7 +82,7 @@ class RecurringPageStateTests(unittest.TestCase):
             self.state.lane = "source"
             self.accept("second")
             self.accept("third")
-            self.assertEqual((self.budget.steps, self.budget.hops), (91, 17))
+            self.assertEqual((self.budget.steps, self.budget.hops), (91, 20))
             self.assertEqual(self.state.rollback_last(), "source")
             self.assertEqual(self.values(), ["first", "second"])
             self.assertEqual(self.state.position, {"after": "second"})
@@ -99,7 +100,7 @@ class RecurringPageStateTests(unittest.TestCase):
             self.assertIs(self.state.position, position)
             self.assertIs(self.state.root, self.root)
             self.assertIs(self.state.runtime, self.runtime)
-            self.assertEqual((self.budget.steps, self.budget.hops), (91, 17))
+            self.assertEqual((self.budget.steps, self.budget.hops), (91, 20))
             self.assertEqual(self.state.rollback_last(), "assignments")
             self.assertEqual(self.state.checkpoint(), initial)
             self.assertEqual(self.values(), [])
@@ -120,7 +121,7 @@ class RecurringPageStateTests(unittest.TestCase):
             self.assertEqual(self.state.checkpoint(), checkpoint)
             self.assertEqual(self.db.mutation_state, sql_state)
             self.assertEqual(self.values(), ["accepted"])
-            self.assertEqual((self.budget.steps, self.budget.hops), (94, 18))
+            self.assertEqual((self.budget.steps, self.budget.hops), (94, 20))
             self.assertTrue(self.state.has_units)
             self.assertEqual(self.db._command_unit_depth, 1)
             # Successful projection releases its own scope, not the retained unit.

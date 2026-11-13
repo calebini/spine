@@ -9,6 +9,7 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
+from spine.core import recurrence_mutations
 from spine.core.canonical_json import canonical_json_bytes
 from spine.ledger.recurrence import load_current_recurrence_set
 from tests import test_recurring_task_commands as base
@@ -75,4 +76,26 @@ class RecurringChildWitnessTests(unittest.TestCase):
     def test_complete_lifecycle_envelopes_and_sql_match_prechange_checkpoint(self):
         fixture = json.loads(FIXTURE.read_text())
         self.assertEqual(fixture["source_commit"], "07fc937")
-        self.assertEqual(collect_lifecycle(), fixture["cases"])
+        normalize = recurrence_mutations._normalize_segments
+
+        def historical_segments(rows, **kwargs):
+            # Reproduce the immutable pre-correction producer, not a fallback
+            # in the runtime. The old parent was retained on repeated copies.
+            if not kwargs["explicit"]:
+                rows = [{**row, "lineage_parent_segment_id": row.get("lineage_parent_segment_id") or row["segment_id"]}
+                        for row in rows]
+                kwargs["explicit"] = True
+            return normalize(rows, **kwargs)
+
+        with patch.object(recurrence_mutations, "_normalize_segments", side_effect=historical_segments):
+            self.assertEqual(collect_lifecycle(), fixture["cases"])
+
+    def test_current_producer_matches_only_the_explicit_parent_correction_amendment(self):
+        fixture = json.loads(FIXTURE.read_text())
+        amendment = json.loads(FIXTURE.with_name("r2_immediate_parent_witness_amendment.json").read_text())
+        self.assertEqual(hashlib.sha256(FIXTURE.read_bytes()).hexdigest(), amendment["baseline_sha256"])
+        self.assertEqual(set(amendment["cases"]), {"cancel", "restore", "adopt_clear", "noop", "replay"})
+        for name, case in amendment["cases"].items():
+            for key in ("response_bytes", "changed", "effect"):
+                self.assertEqual(case[key], fixture["cases"][name][key])
+        self.assertEqual(collect_lifecycle(), fixture["cases"] | amendment["cases"])
