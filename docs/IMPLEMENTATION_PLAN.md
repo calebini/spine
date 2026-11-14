@@ -493,6 +493,16 @@ RRT-04/05/07/10/11/12/16/17/18 across all writers and worker entrypoints.
 
 ### R4 — Public activation and release verification (SPINE-095)
 
+**Completed locally (2026-11-14):** activation committed as `d69a4ae`;
+all 18 obligations passed together through 93 named installed-wheel tests.
+The complete public CLI/worker lifecycle, fake attempt, all retirement and
+reminder modes, migration/rollback and full regression suite pass. Full discovery:
+**1,727 tests in 620.482 seconds, OK (one skipped)**; that missing-build-tool wheel
+test separately passed with the prepared interpreter. See the
+[final release record](design-notes/recurring-related-task-r4-release.md#final-verification-results)
+and [exact runtime test IDs](design-notes/recurring-related-task-r4-runtime-evidence.json).
+No deployment or live send is implied. The paragraphs below retain delivery history.
+
 **Selected (2026-11-14):** R3 committed as `c90f27d`. First R4 increment
 packages the exact 33-resource offline closure and adds a compiled-pin loader,
 per-resource corruption/missing checks, and a non-editable wheel resource proof.
@@ -554,8 +564,9 @@ this checkpoint; those remain separately requested operator actions.
 
 ### Required proof allocation
 
-This matrix allocates work; every row is **pending**, not an executed proof.
-R4 reruns all rows and records test names/results before activation.
+This matrix retains the original proof allocation. R4 has now rerun every row;
+the [executed result](design-notes/recurring-related-task-r4-runtime-evidence.json)
+records exact test names and passing outcomes, separate from source-only fixtures.
 
 | Obligation | Introduce/finalize | Required real evidence |
 | --- | --- | --- |

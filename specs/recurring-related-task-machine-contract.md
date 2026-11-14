@@ -16,7 +16,7 @@ suppression and existing notification/attempt rules remain unchanged.
 The ratified source capability manifest is
 [recurring-related-tasks.v1.json](../contracts/recurring-related-tasks.v1.json).
 It declares exact versions, seven local commands, request/response paths,
-prerequisites, bounds, identity conventions and pending runtime obligations.
+prerequisites, bounds, identity conventions and runtime verification obligations.
 It is **not** the compiled runtime registry. Runtime 0.12.0 registers this exact
 trusted-local family and ships its complete offline closure on schema 20.
 `proposed_contract_versions` retains its original source-manifest field name;
@@ -27,8 +27,9 @@ The [fixture manifest](../contracts/recurring-related-task-fixture-manifest.json
 separates valid/invalid wire fixtures, computed hash/cursor vectors and pure
 decision witnesses. Evidence examples include mutually exclusive branches,
 explicitly labelled as alternatives rather than one consistent ledger snapshot.
-Runtime acceptance and remaining release obligations are tracked by
-`docs/BACKLOG.md` SPINE-095. The fixture manifest's source-only labels distinguish
+Runtime acceptance and release verification are tracked by
+`docs/BACKLOG.md` SPINE-095; the [executed R4 matrix](../docs/design-notes/recurring-related-task-r4-runtime-evidence.json)
+records all 18 obligations separately. The fixture manifest's source-only labels distinguish
 pure corpus validation from actual runtime proof. A passing offline
 test cannot prove actual SQL transactions, locking, attempt races, migration or
 worker behavior; those remain implementation acceptance requirements.

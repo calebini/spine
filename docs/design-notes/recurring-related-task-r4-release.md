@@ -1,7 +1,7 @@
 # R4 recurring-task release integration
 
-Status: in progress; package increment committed as `46da61f`, migration-core
-increment as `62fe2ef`; CLI/worker activation uncommitted (2026-11-14).
+Status: complete locally; package increment committed as `46da61f`,
+migration-core as `62fe2ef`, CLI/worker activation as `d69a4ae` (2026-11-14).
 Authority: [SPINE-095](../BACKLOG.md#spine-095--r4-recurring-task-activation-and-release-verification)
 and the [R4 plan](../IMPLEMENTATION_PLAN.md#r4--public-activation-and-release-verification-spine-095).
 R3 is committed as `c90f27d`. The unrelated agent-instructions and R2 restoration
@@ -136,13 +136,102 @@ both contract bundles and the schema manifest, documentation links and diff
 hygiene pass. Full-suite evidence and final focused evidence are distinct; R4's
 complete named lifecycle acceptance reconciliation remains the next increment.
 
-## Remaining R4 qualification
+## Complete lifecycle and release qualification
 
-Execute all named
-RRT acceptance obligations, synthetic migration/race coverage and the installed
-public science-class lifecycle matrix (including move/exclude/restore, suppression,
-completion, scoped updates, each retirement disposition and fake attempts),
-followed by final acceptance reconciliation. The initial activation canary above
-does not claim that entire matrix is closed.
-No new HTTP allowlist, live migration, deployment, real-send test or release
-publication is authorized by this checkpoint.
+The activation checkpoint is committed as `d69a4ae`. The qualification increment
+does not change the seven public command shapes or lifecycle semantics. It adds
+an executable [obligation inventory](../../tests/recurring_task_release_obligations.py),
+a [runner](../../scripts/verify_recurring_task_release.py), and a retained
+[runtime result](recurring-related-task-r4-runtime-evidence.json). Every RRT-01–18
+row names actual test methods. Resolution refuses missing/ambiguous witnesses;
+failed or skipped evidence cannot close the runner. The inventory regression test
+also checks that the retained result matches the current named selection.
+
+**All 18 obligations passed together: 93 distinct tests, 63.756 seconds, zero
+skips**, running against the non-editable wheel outside the checkout. Only test
+code and fixture inputs came from the repository; `spine` and its child modules
+came from the isolated installed package, with no source-runtime path fallback.
+This includes fresh/populated migration, all injected rollback stages, immutable
+history/FKs, old-writer refusal, replay, proof/lineage rejection, commit-clock
+cutoffs, native ownership without grants, policy continuity, cancellation,
+restoration/suppression and separate-connection races, adoption, retirement,
+attempt freshness/protection, idle zero-write/fairness, cursor expiry and
+invalidation, query indexes, disclosure/people/route checks and whole-unit budgets.
+The JSON contains exact per-obligation test IDs, rather than treating wire
+fixtures or file names as runtime proof.
+
+The [installed public CLI canary](../../scripts/verify_recurring_task_activation.py)
+now exercises the complete science-class lifecycle. Four Saturday classes at
+11:30 produce four unique 13:00 pickups with four reminders at 12:50; a second
+rule independently produces four tasks through the actual worker. The canary
+then proves same-task following after a class moves, replacement work at the
+successor time, cancellation on exclusion, exactly one linked restoration,
+suppression, completion without reopening, overlapping-customization decisions
+and explicit resolution. Separate rules exercise all three retirement
+dispositions, checking task and binding outcomes, with profile-backed and zero
+reminder cases alongside custom reminders.
+
+One synthetic Tickerd cycle invokes the normal adapter, rendering and durable
+attempt-backed processor with a **file-only fake sender**. It proves one send
+record, no duplicate on repeated processing, public attempt readback and history
+preservation after source cancellation. No real destination or live service is
+contacted. Final explicit deep verification succeeds. Synthetic cycle time is a
+test input to the normal Tickerd protocol, not a runtime clock override.
+
+The descriptor's 18 runtime statuses now say `runtime_verified` and the packaged
+descriptor/pin are synchronized, with compiled pin
+`6daa92da0ef83f9e6ef934d02ff894c088a01c7fe0aec4b6244a0bc7e83993bc`.
+The **wire fixture manifest and schema closure remain source-only** intentionally:
+their finite computed examples are representation evidence, not the executable
+release matrix. No HTTP registration or authorization widening accompanies this.
+
+Reproduce the named runtime selection from the checkout:
+
+```bash
+PYTHONPATH=src .venv/bin/python -m scripts.verify_recurring_task_release \
+  --report /absolute/disposable/rrt-runtime-evidence.json
+```
+
+For the installed-wheel selection, preload the installed `spine` with isolated
+Python and add only the repository root for the test/fixture modules (never
+`src`). For the public lifecycle, use the installed wheel's Python with `-I`,
+the absolute canary-script path, and a working directory outside the checkout.
+Both require the exact supported Tickerd runtime. The script creates and removes
+its own disposable ledger and private cursor file; no existing ledger is used.
+
+## Final verification results
+
+- Full serial discovery: **1,727 tests in 620.482 seconds, OK (one skipped)**.
+  The skipped revision-readback wheel test lacked local build tooling in the
+  test interpreter; it was rerun with `SPINE_WHEEL_BUILD_PYTHON` pointing at the
+  prepared disposable build interpreter: **one test in 8.990 seconds, OK**.
+- Final source contract/inventory/operator-documentation/package selection:
+  **39 tests, OK** (after the evidence and fixture-builder message reconciliation).
+  The full discovery above preceded those final evidence/message-only adjustments;
+  no runtime semantics changed after discovery.
+- All 18 named runtime groups: **93 tests in 63.756 seconds, OK, no skips**,
+  against the isolated installed wheel. The retained JSON has exact test IDs.
+- Installed public CLI and actual worker science-class lifecycle: pass, including
+  the file-only fake attempt and final explicit deep verification.
+- Repository Ruff, compilation, changed-loader Mypy (`--follow-imports=silent
+  --disable-error-code=import-untyped`), 487 local documentation paths and diff
+  hygiene pass. The import-only exception is for unavailable jsonschema stubs;
+  it does not disable checks of the loader's typed implementation. A broader
+  ad-hoc strict check also found existing untyped enrichment-adapter methods;
+  they were not changed or suppressed as part of this release.
+- All 80 computed source-only artifacts regenerate exactly; recurring/ownership
+  resource synchronization and the complete schema-20 manifest checks pass.
+- Non-editable wheel closure/migration-core check and `pip check` pass. All **197
+  installed Python modules** are byte-identical to their source counterparts.
+
+Final verification wheel SHA-256:
+`f9ecd66b38eba63d0e2369b7167517d1021b3217d0c987a0fe11de3d9c4f483a`.
+The exact Tickerd source is `ffe613c65ea3d6fc70a1dc3603c32068f06350df`, version
+0.2.0, capability `tickerd.runtime-capabilities.v1`, descriptor SHA-256
+`215f9aa6b54e6c0e6186796a55d78e1c5a270adc9b3ccefb433df5a3bb87b58b`.
+No floating/sibling-source substitution was used for installed-wheel verification.
+
+R1–R4 implementation/release-verification work is complete locally. This does
+not assert live qualification or deployment. No push, live migration, real-send
+test or release publication was performed. The preexisting `AGENTS.md` and R2
+restoration-note edits remain untouched and outside the qualification increment.

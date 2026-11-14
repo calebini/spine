@@ -1553,10 +1553,12 @@ checks, Ruff, focused typing, compilation, local link checks and diff hygiene pa
 
 ### SPINE-095 — R4: recurring-task activation and release verification
 
-**Status:** In progress — selected by the operator after committing R3 as `c90f27d`.
-First increment: exact offline package closure, bounded fail-closed loader and
-installed-wheel resource tests. Public registration, schema activation and full
-release verification remain later R4 work; no deployment is authorized.
+**Status:** Done locally (2026-11-14) — full R4 lifecycle and release verification
+completed; not pushed or deployed. All RRT-01–18 obligations have named executed
+runtime evidence. The preexisting unrelated working-tree edits are preserved.
+**History:** selected after committing R3 as `c90f27d`. The first increment added
+exact offline package closure, bounded fail-closed loading and installed-wheel
+resource tests; public activation and full qualification followed separately.
 See [R4 package evidence](design-notes/recurring-related-task-r4-release.md).
 Verification: 63 focused tests pass; all 33 assets match their source pins,
 non-editable installed-wheel loading outside the checkout passes, as do lint,
@@ -1568,7 +1570,7 @@ or automatic migration is advertised by this intermediate checkpoint.
 Migration-core verification: **1,717 tests in 510.142 seconds, OK (one skipped)**;
 87 focused migration/preflight/ownership/preservation tests, isolated installed-
 wheel migration, lint, typing, sync, compilation and diff/link checks pass.
-**Current activation increment:** runtime 0.12.0/schema 20, seven trusted-local
+**Activation checkpoint (`d69a4ae`):** runtime 0.12.0/schema 20, seven trusted-local
 rule commands, native connection tracking, deep-verification snapshots and
 protected worker actor/cursor/default-route wiring are implemented locally.
 The ratified provisioning-v3 bridge is packaged separately from the frozen web
@@ -1589,9 +1591,18 @@ dependencies, fresh/populated synthetic migrations, fake worker/attempts, full
 documented suite and applicable lint/typing/compilation/sync/regeneration checks.
 Change source-only assertions to implemented-behavior tests, not removed gates.
 See [R4](IMPLEMENTATION_PLAN.md#r4--public-activation-and-release-verification-spine-095).
-**Next:** Finish the complete RRT matrix and installed-wheel lifecycle/rollback/
-fake-attempt qualification, then reconcile final acceptance evidence before
-calling R4 complete or releasing. No push/deployment is included here.
+**Release qualification:** full serial discovery **1,727 tests in 620.482 seconds,
+OK (one skipped)**; the skipped wheel test separately passed with the prepared
+build interpreter. The installed-wheel RRT matrix passed **93 tests, zero skips**
+across all 18 obligations. Complete public science-class move/exclude/restore,
+completion, suppression, scoped-adoption conflict/resolution, all retirement
+dispositions, zero/profile/custom reminders, fake attempt history and explicit
+deep verification pass. Final focused checks, lint, applicable typing, compilation,
+80-artifact regeneration, package/schema synchronization and link/diff checks pass.
+See the [exact executed obligation report](design-notes/recurring-related-task-r4-runtime-evidence.json)
+and [release record](design-notes/recurring-related-task-r4-release.md#final-verification-results).
+**Next:** Operator review/checkpoint of this qualification increment, then any
+separately requested release/push/deployment action. No R1–R4 runtime slice remains.
 Any live deployment or real-send test requires a separate operator request.
 
 ## Post-release corrective work

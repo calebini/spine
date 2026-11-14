@@ -1663,7 +1663,7 @@ def main():
         drift = [path for path, value in bundle.items() if not (ROOT / path).is_file() or read(path) != value]
         if drift:
             raise SystemExit("Fixture drift: " + ", ".join(drift))
-        print(f"Verified {len(bundle)} deterministic source-only artifacts; runtime pending")
+        print(f"Verified {len(bundle)} deterministic source-only artifacts; runtime evidence is separate")
     else:
         print(json.dumps(bundle, ensure_ascii=False, indent=2))
 

@@ -222,92 +222,92 @@
     {
       "id": "RRT-01",
       "description": "Migration, immutable history, FKs, reservations and rollback on actual SQLite",
-      "status": "pending_runtime_verification"
+      "status": "runtime_verified"
     },
     {
       "id": "RRT-02",
       "description": "Compiled exact-version admission and packaged offline closure; local-only registration",
-      "status": "pending_runtime_verification"
+      "status": "runtime_verified"
     },
     {
       "id": "RRT-03",
       "description": "Atomic outer page transaction, existing receipt replay and no child commits",
-      "status": "pending_runtime_verification"
+      "status": "runtime_verified"
     },
     {
       "id": "RRT-04",
       "description": "Source proof, normalized selector-child validation before any reuse/insert helper",
-      "status": "pending_runtime_verification"
+      "status": "runtime_verified"
     },
     {
       "id": "RRT-05",
       "description": "One-to-one multi-revision lineage; missing/ambiguous evidence fails closed",
-      "status": "pending_runtime_verification"
+      "status": "runtime_verified"
     },
     {
       "id": "RRT-06",
       "description": "Enrollment, merged moved/rdate candidates, COUNT and all proof-step bounds",
-      "status": "pending_runtime_verification"
+      "status": "runtime_verified"
     },
     {
       "id": "RRT-07",
       "description": "Commit clock and strict-future initial/restoration/adoption cutoffs",
-      "status": "pending_runtime_verification"
+      "status": "runtime_verified"
     },
     {
       "id": "RRT-08",
       "description": "Deterministic child identities and immutable owner history before policies/work",
-      "status": "pending_runtime_verification"
+      "status": "runtime_verified"
     },
     {
       "id": "RRT-09",
       "description": "Registered multi-policy creation tokens, intent-preserving copies and adoption",
-      "status": "pending_runtime_verification"
+      "status": "runtime_verified"
     },
     {
       "id": "RRT-10",
       "description": "Source cancellation, latest-only successor generation and suppression races",
-      "status": "pending_runtime_verification"
+      "status": "runtime_verified"
     },
     {
       "id": "RRT-11",
       "description": "Managed-field three-way adoption and finite high-water cleanup",
-      "status": "pending_runtime_verification"
+      "status": "runtime_verified"
     },
     {
       "id": "RRT-12",
       "description": "All retirement dispositions including overdue/out-of-horizon assignments",
-      "status": "pending_runtime_verification"
+      "status": "runtime_verified"
     },
     {
       "id": "RRT-13",
       "description": "Attempt-start freshness and protection of leased/in-progress/attempted work",
-      "status": "pending_runtime_verification"
+      "status": "runtime_verified"
     },
     {
       "id": "RRT-14",
       "description": "No idle receipts/progress churn and fair bounded scheduler selection",
-      "status": "pending_runtime_verification"
+      "status": "runtime_verified"
     },
     {
       "id": "RRT-15",
       "description": "Authentic read/cursor snapshot, seek indexes, invalidation and expiry",
-      "status": "pending_runtime_verification"
+      "status": "runtime_verified"
     },
     {
       "id": "RRT-16",
       "description": "Disclosure/route/people validation without grants or creator entitlement",
-      "status": "pending_runtime_verification"
+      "status": "runtime_verified"
     },
     {
       "id": "RRT-17",
       "description": "Byte/work/proof budgets, whole-unit atomicity and no unchanged continuations",
-      "status": "pending_runtime_verification"
+      "status": "runtime_verified"
     },
     {
       "id": "RRT-18",
       "description": "Concurrent writer CAS, unique generation/selector reservation and replay conflicts",
-      "status": "pending_runtime_verification"
+      "status": "runtime_verified"
     }
   ],
   "validation_stage_order": [

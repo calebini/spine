@@ -87,11 +87,11 @@ policy version in the same transaction. The people and timezone capabilities fro
 
 Runtime 0.12.0/schema 20 adds [recurring-source related-task rules](docs/RECURRING_RELATED_TASKS.md):
 one pickup, preparation task or follow-up per occurrence, with independent task
-history, follow-source timing and reminders. Public activation is implemented;
-the remaining release qualification is tracked under SPINE-095.
+history, follow-source timing and reminders. Public activation and release
+verification are tracked under [SPINE-095](docs/BACKLOG.md#spine-095--r4-recurring-task-activation-and-release-verification).
 
 Spine `0.12.0` is an implemented alpha; its scheduling core is exercised in a staging
-agent environment. The current SQLite ledger schema is version `19`. The trusted multi-operator backend is also running in staging on `cortext1`, with
+agent environment. The current SQLite ledger schema is version `20`. The trusted multi-operator backend is also running in staging on `cortext1`, with
 operator testing through the connected [Kinflow frontend](../kinflow-web-ui/README.md).
 Concrete operator-reported work is tracked in the [backlog](docs/BACKLOG.md);
 this checkout version is not a deployment claim.
@@ -410,7 +410,7 @@ design and compatibility promises live in `specs/`.
 
 Spine is substantial, but it is not finished.
 
-Implemented today: the schema-15 coordination ledger, command contracts, recurrence,
+Implemented today: the schema-20 coordination ledger, command contracts, recurrence,
 notifications, atomic scheduling, operational lifecycle, readback, locations, temporal
 bindings, deterministic notification rendering, dynamic item archetypes, reusable
 notification profiles, durable attempt processing, Tickerd integration, and the first
@@ -419,21 +419,15 @@ instance identity. Kinflow supplies the existing connected read-only frontend un
 operator testing. The backlog tracks concrete requested work; general staging and
 frontend reviews SPINE-001–003 were withdrawn.
 
+The trusted-local [recurring-source related-task family](docs/RECURRING_RELATED_TASKS.md)
+adds one governed task per occurrence, with explicit following, restoration,
+retirement and per-task reminders. Native [ownership bootstrap](specs/local-ownership-bootstrap.md)
+does not provision web accounts or grants. The
+[release evidence](docs/design-notes/recurring-related-task-r4-release.md) separates
+runtime tests from the retained source-only wire examples and from deployment.
+
 Still deliberately separate or in design:
 
-- [trusted-local ownership bootstrap](specs/local-ownership-bootstrap.md): accepted
-  realm-independent ownership-epoch design and ratified contracts, with an internal
-  R2 candidate implementation; no automatic web account provisioning or public
-  runtime/migration activation is implied;
-- [recurring-source related tasks](specs/recurring-related-tasks.md): ratified rules
-  generating one ordinary task per event occurrence, with explicit temporal
-  following, cancellation reconciliation and per-task reminders; detailed
-  [storage/lineage](specs/recurring-related-task-storage.md) and
-  [command](specs/recurring-related-task-commands.md) companions passed scoped
-  technical review; the [machine companion](specs/recurring-related-task-machine-contract.md)
-  supplies reviewed, ratified source-only schemas and computed fixtures. The
-  [four-slice implementation plan](docs/IMPLEMENTATION_PLAN.md#planned-delivery-recurring-source-related-tasks)
-  is prepared; runtime behavior is not implemented or advertised;
 - governed contextual LLM advisories and agent-generated enrichment;
 - opt-in [facet-aware notification rendering definitions](specs/notification-rendering-definitions.md)
   supplied as configuration by operators or packs; ratified design and initial machine

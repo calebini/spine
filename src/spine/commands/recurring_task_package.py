@@ -14,7 +14,7 @@ from jsonschema.exceptions import SchemaError
 from spine.commands.recurring_task_runtime import RecurringTaskContracts
 from spine.core.errors import SpineValidationError
 
-PIN_SHA256 = "867c7835bf110d4335a6ff0b0f481ade47638d918f538ad48380ebd821321a45"
+PIN_SHA256 = "6daa92da0ef83f9e6ef934d02ff894c088a01c7fe0aec4b6244a0bc7e83993bc"
 DESCRIPTOR = "recurring-related-tasks.v1.json"
 CLOSURE = "recurring-related-task-schema-closure.v1.json"
 

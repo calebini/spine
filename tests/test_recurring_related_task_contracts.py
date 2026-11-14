@@ -1,8 +1,8 @@
 """Source-only RRT wire, identity and finite model witnesses; no runtime claims.
 
 Nothing here opens a ledger, dispatches a command or starts a worker. Actual SQL,
-migration, locking, freshness/attempt races and scheduler behavior remain the
-manifest's pending runtime obligations.
+migration, locking, freshness/attempt races and scheduler behavior are verified
+separately by the named R4 runtime inventory, never by these pure wire examples.
 """
 
 import base64
@@ -218,7 +218,7 @@ class RecurringRelatedTaskContractTests(unittest.TestCase):
                 self.assertFalse(set(self.descriptor["commands"]) & {r["command"] for r in read(path)["commands"]})
         self.assertFalse((ROOT / "src/spine/contracts/web/schemas/recurring-related-tasks").exists())
         self.assertEqual(set(self.manifest["runtime_obligations"]), {r["id"] for r in self.descriptor["runtime_obligations"]})
-        self.assertTrue(all(r["status"] == "pending_runtime_verification" for r in self.descriptor["runtime_obligations"]))
+        self.assertTrue(all(r["status"] == "runtime_verified" for r in self.descriptor["runtime_obligations"]))
         self.assertEqual(self.manifest["builder_helpers"], ["scripts/recurring_related_task_fixture_sources.py"])
         self.assertEqual(self.manifest["test_oracle_helpers"], ["tests/recurring_related_task_oracles.py"])
 
@@ -233,7 +233,7 @@ class RecurringRelatedTaskContractTests(unittest.TestCase):
             check=False,
         )
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
-        self.assertIn("deterministic source-only artifacts; runtime pending", result.stdout)
+        self.assertIn("deterministic source-only artifacts; runtime evidence is separate", result.stdout)
 
     def test_deterministic_builder_matches_retained_artifacts(self):
         for path, expected in build().items():
