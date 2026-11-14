@@ -1479,12 +1479,10 @@ explicit writer/reconcile/attempt interleavings, suppression/restoration and
 pending-intent races, protected-work matrix, rollover/catch-up, dense-root fairness
 and repeated idle zero-write cycles. No real sends. See
 [R3](IMPLEMENTATION_PLAN.md#r3--all-writer-safety-and-automatic-scheduling-spine-094).
-**Next:** Complete intent/enrollment queue production and automatic recurring-page
-semantic planning, revalidation and dispatch/routing. The current continuation
-adds bounded read-only discovery and per-attempt admission; discovery is not
-itself authorization to dispatch a mutation. Preserve the verified
-invalidation, acknowledgement and direct-binding guard boundaries. R4/public
-activation, pushes and deployment remain outside this increment.
+**Next:** Connect discovery, fair page continuation and transaction-fenced dispatch
+to the worker. Verify catch-up, restart and repeated idle/blocked cycles end to end.
+Neither discovery nor a queue marker authorizes a mutation. R4/public activation
+and deployment remain separate.
 **Initial increment:** Indexed source/root and current-generation lookup now feeds
 the existing RF3 propagation boundary into the coalescing dirty queue, with
 transaction-local once-consumption and monotonic catalog-derived CAS tokens.
@@ -1510,7 +1508,7 @@ and diff hygiene pass. Existing legacy-command typing diagnostics are unchanged;
 unrelated edits and original frozen fixtures are preserved. No scheduler/attempt
 closure, public activation, push or deployment is claimed.
 
-**Verified continuation (2026-11-14, uncommitted):**
+**Verified continuation (2026-11-14, committed `833ff94`):**
 Generated work now rechecks assignment/generation, current task/source/binding/
 relation/owner, veto, pending adoption/retirement and bounded source membership
 at the shared durable attempt insertion boundary. The same transaction protects
@@ -1526,6 +1524,21 @@ Verification: **1,662 tests in 492.392 seconds, OK (one skipped)**; 32 new tests
 72 selected admission/discovery/page/binding/witness tests and 26 boundary/
 documentation checks pass. Seven-module Mypy, changed-file Ruff, 391 local links,
 diff hygiene and preservation hashes pass. No push, deployment or real send.
+
+**Rule-writer continuation (2026-11-14):** Enrollment, changed
+configuration, adoption, retirement and restoration suppression queue the affected
+root inside their existing command transaction. A new-only configuration does
+not retarget existing children. An empty retirement can discharge its outstanding
+marker once, then drops from discovery. Preview, rollback, compatible replay and
+fresh no-ops do not advance the queue. See [verification and boundaries](design-notes/recurring-related-task-r3-invalidation.md#rule-writers-as-queue-producers).
+
+**Semantic page continuation (2026-11-14):** A discovered rule can
+now be evaluated without writing and its exact reconcile request rechecked under
+the writer lock. An unchanged conflict is observable without issuing a command;
+an eligible missing reminder can be repaired without regenerating the task.
+See [dispatch fence and limits](design-notes/recurring-related-task-r3-invalidation.md#semantic-page-planning-and-dispatch).
+Next: fair continuation routing and end-to-end scheduling through the worker,
+including idle/blocked, catch-up and restart cases. R3 remains open.
 
 ### SPINE-095 — R4: recurring-task activation and release verification
 

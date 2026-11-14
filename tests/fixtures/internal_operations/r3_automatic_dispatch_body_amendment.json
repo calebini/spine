@@ -1,0 +1,11 @@
+{
+  "prior_amendment": "tests/fixtures/internal_operations/r3_rule_queue_body_amendment.json",
+  "prior_amendment_sha256": "4796d531c354de3d5ec65f8459226266859d9d27667a20152d9ec37ad924e820",
+  "replacement": {
+    "path": "src/spine/commands/recurring_tasks.py",
+    "name": "execute",
+    "body_sha256": "52159e46f19b848dfac051b2f4ba00335789ae01ec67f7f0b1da12b412d6b92a",
+    "reason": "Fence an internal automatic reconcile before dispatch and roll back a sized no-change page; preserve explicit command replay."
+  },
+  "regression_tests": "tests/test_recurring_task_automatic.py"
+}

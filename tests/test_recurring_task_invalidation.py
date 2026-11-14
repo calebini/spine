@@ -40,6 +40,110 @@ class RecurringInvalidationTests(unittest.TestCase):
     def generate(self):
         return self.h.reconcile(self.rule)["result"]["results"][0]["after"]
 
+    def assert_marker(self, flags, generation):
+        row = self.dirty()
+        self.assertEqual(tuple(row[k] for k in ("source_dirty", "target_dirty", "intent_dirty")), flags)
+        self.assertEqual((row["dirty_generation"], row["assignment_after_seq"]), (generation, 0))
+        self.assertEqual(int(catalog(self.db)), generation)
+
+    def test_enrollment_wakes_only_its_root_and_replay_does_not_requeue(self):
+        token = int(self.rule["catalog_generation"])
+        self.assert_marker((1, 0, 0), token)
+        second = self.h.created("second-pickup")["result"]["rule"]
+        self.assertEqual(int(second["catalog_generation"]), token + 1)
+        self.assertEqual(self.dirty()["dirty_generation"], token)
+        self.assertEqual(self.db.execute("SELECT count(*) FROM related_task_assignments").fetchone()[0], 0)
+        before = dump(self.db)
+        self.assertTrue(self.h.created()["replayed"])
+        self.assertEqual(dump(self.db), before)
+
+    def test_configuration_and_new_adoption_restart_only_the_required_lanes(self):
+        self.generate()
+        token = int(catalog(self.db))
+        config = self.h.request()["configuration"]
+        config["generation_horizon_seconds"] = "4838400"
+        config["task_template"]["item"]["title"] = "New pickup"
+
+        def request(key, scope):
+            return self.h.write(key, self.h.rule(self.identity), configuration=config, adoption_scope=scope)
+
+        def versions():
+            return self.db.execute("SELECT item_id,current_version FROM coordination_items ORDER BY item_id").fetchall()
+
+        children = versions()
+        new_only = self.h.run_command("update", request("new-only", "new_assignments_only"))
+        self.assertTrue(new_only["changed"], new_only)
+        self.assert_marker((1, 0, 0), token + 1)
+        with self.db.atomic_command():
+            self.assertTrue(acknowledge(self.db, self.identity, token + 1, assignment_after_seq=2))
+        adoption = request("adopt", "upcoming_open")
+        self.assertEqual(self.h.run_command("update", adoption)["effect"], "rule_adoption_requested")
+        self.assert_marker((1, 0, 1), token + 2)
+        with self.db.atomic_command():
+            self.assertFalse(acknowledge(self.db, self.identity, token + 1))
+        self.assertEqual(versions(), children)
+        self.assertTrue(self.h.run_command("update", adoption)["replayed"])
+        self.assertFalse(self.h.run_command("update", request("already-pending", "upcoming_open"))["changed"])
+        self.assert_marker((1, 0, 1), token + 2)
+
+    def test_empty_adoption_changes_configuration_without_pending_intent_work(self):
+        before = int(catalog(self.db))
+        updated = self.h.update_rule(self.rule, title="Changed before generation")
+        self.assertIsNone(updated["adoption_intent"])
+        self.assert_marker((1, 0, 0), before + 1)
+        self.assertEqual(self.db.execute("SELECT COUNT(*) FROM related_task_assignments").fetchone()[0], 0)
+
+    def test_pending_retirement_is_atomic_and_does_not_cancel_tasks_inline(self):
+        self.generate()
+        token = int(catalog(self.db))
+        request = self.h.write("retire", self.h.rule(self.identity), disposition="cancel_open")
+        before = dump(self.db)
+        preview = self.h.run_command("retire", request, context=replace(self.h.context, dry_run=True))
+        self.assertTrue(preview["changed"], preview)
+        self.assertEqual(dump(self.db), before)
+
+        def fault(stage):
+            if stage == "receipt":
+                raise RuntimeError("final rollback")
+
+        with self.assertRaisesRegex(RuntimeError, "final rollback"):
+            self.h.run_command("retire", request, fault=fault)
+        self.assertEqual(dump(self.db), before)
+        retired = self.h.run_command("retire", request)
+        self.assertTrue(retired["changed"], retired)
+        self.assert_marker((0, 0, 1), token + 1)
+        self.assertEqual(self.db.execute("SELECT COUNT(*) FROM task_details WHERE task_status='cancelled'").fetchone()[0], 0)
+        self.assertTrue(self.h.run_command("retire", request)["replayed"])
+        fresh = self.h.write("retire-again", self.h.rule(self.identity), disposition="cancel_open")
+        self.assertFalse(self.h.run_command("retire", fresh)["changed"])
+        self.assert_marker((0, 0, 1), token + 1)
+
+    def test_restoration_veto_replaces_prior_dirty_token_once(self):
+        first = self.h.reconcile(self.rule)["result"]["results"][0]
+        self.h.source_change(exdates=[self.h.excluded(first)])
+        self.h.reconcile(self.rule, "cancel")
+        self.h.source_change(exdates=[])
+        prior = self.dirty()
+
+        def request(key):
+            view = self.h.run_command("show", {
+                "contract_version": self.h.request()["contract_version"], "related_task_rule_id": self.identity,
+                "view": "assignment", "assignment_id": first["assignment_id"],
+            })["result"]["assignment"]
+            value = self.h.write(key, self.h.rule(self.identity), assignment_id=first["assignment_id"],
+                                 target_generation_id=view["generation_id"], target_task_item_id=view["task_item_id"])
+            value["expected"]["assignment_change_version"] = view["change_version"]
+            return value
+
+        suppress = request("veto")
+        self.assertTrue(self.h.run_command("assignment.suppress", suppress)["changed"])
+        self.assert_marker((1, prior["target_dirty"], 1), prior["dirty_generation"] + 1)
+        self.assertTrue(self.h.run_command("assignment.suppress", suppress)["replayed"])
+        self.assertFalse(self.h.run_command("assignment.suppress", request("again"))["changed"])
+        with self.db.atomic_command():
+            self.assertFalse(acknowledge(self.db, self.identity, prior["dirty_generation"]))
+        self.assert_marker((1, prior["target_dirty"], 1), prior["dirty_generation"] + 1)
+
     def test_source_item_and_recurrence_coalesce_without_child_fanout(self):
         self.generate()
         children = self.db.execute("SELECT item_id,current_version FROM coordination_items WHERE item_type='task'").fetchall()
@@ -147,6 +251,7 @@ class RecurringInvalidationTests(unittest.TestCase):
         self.assertEqual(dump(self.db), before)
 
     def test_nested_and_outer_rollback_restore_catalog_queue_and_coalescing(self):
+        self.generate()  # Begin with the enrollment marker discharged.
         before = dump(self.db)
         with self.assertRaisesRegex(RuntimeError, "outer"), self.db.atomic_command():
             mark(self.db, self.identity, DirtyReason.SOURCE)
@@ -171,12 +276,13 @@ class RecurringInvalidationTests(unittest.TestCase):
         self.assertEqual(dump(self.db), before)
 
     def test_unrelated_writer_and_repeated_read_do_not_touch_queue_or_catalog(self):
+        original = self.dirty()
         before = int(catalog(self.db))
         result = handle("task.create", dict(command_id="unrelated-r3", actor_subject_id="owner",
             title="Independent task", created_at_utc=self.h.now), self.h.context)
         self.assertTrue(result["ok"], result)
         self.assertEqual(int(catalog(self.db)), before)
-        self.assertIsNone(self.dirty())
+        self.assertEqual(self.dirty(), original)
         frozen = dump(self.db)
         for _ in range(3):
             self.h.rule(self.identity)

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import copy
-from collections.abc import Callable
+from collections.abc import Callable, Mapping
 from dataclasses import dataclass
 from typing import Any, cast
 
@@ -112,6 +112,47 @@ def extra_supporting(snapshot: Restoration, seed: str, now: str) -> tuple[tuple[
     return roles, locations
 
 
+def pinned_selection(presentation: dict[str, Any]) -> dict[str, Any]:
+    if presentation["kind"] == "ordinary":
+        return {"kind": "ordinary"}
+    return {"kind": "definition", "definition": presentation["definition"],
+            "effective_selection_keys": presentation["effective_selection_keys"],
+            "authorization": {"resolution": "exact", "disclosure_authorization_id": presentation["disclosure_authorization_id"]}}
+
+
+def restored_policy_inputs(db: LedgerConnection, prior: dict[str, Any], defaults: Mapping[str, Any]
+                           ) -> tuple[schedule_delivery.ResolvedDelivery, dict[str, Any], dict[str, Any]]:
+    if prior["target"]["anchor_role"] != "task_due" or prior["target"]["application_scope"] != "item":
+        fail("semantic_conflict", "configuration.task_template", "restored task has an independent recurrence target")
+    recipient = "recipient_subject_id" if prior["recipient_kind"] == "subject" else "recipient_group_id"
+    try:
+        route = schedule_delivery.resolve_delivery({
+            "recipient_kind": prior["recipient_kind"], recipient: prior[recipient], "channel": prior["channel"],
+            "target": {"resolution": "explicit", "delivery_target_id": prior["delivery_target_id"]},
+        }, ledger=db, defaults=defaults)
+    except SpineValidationError:
+        fail("semantic_conflict", "configuration.delivery", "restored destination is unavailable")
+    selection = pinned_selection(load_presentation(db, prior["notification_policy_id"]))
+    origin = cast(Callable[..., dict[str, Any]], rendering_authoring.policy_origin)(db, prior)
+    return route, selection, origin
+
+
+def restored_policy(prior: dict[str, Any], route: schedule_delivery.ResolvedDelivery, *, generation_id: str, key: str | None,
+                    task_id: str, now: str) -> NormalizedNotificationPolicy:
+    from spine.services.recurring_task_children import child_id
+
+    token = generation_id + ":" + key if key is not None else child_id(
+        generation_id, "notification", "/restored/independent/" + prior["notification_intent_id"]
+    )
+    return normalize_notification_policy({
+        "authoring_contract": "spine.notification-schedule-authoring.v1",
+        "target": {k: prior["target"][k] for k in ("anchor_role", "application_scope")},
+        "schedule": prior["schedule"], "late_handling": prior["late_handling"],
+    }, item_id=task_id, item_version="1", command_id=token, created_at_utc=now,
+        recipient_kind=route["recipient_kind"], recipient_id=route["recipient_id"], channel=route["channel"],
+        delivery_target_id=route["delivery_target_id"])
+
+
 def insert_policies(db: LedgerConnection, invocation: ChildInvocation, snapshot: Restoration, *, task_id: str, generation_id: str,
                     assignment_id: str, archetype_assignment_id: str | None
                     ) -> tuple[tuple[tuple[str, NormalizedNotificationPolicy], ...], list[dict[str, Any]]]:
@@ -122,38 +163,13 @@ def insert_policies(db: LedgerConnection, invocation: ChildInvocation, snapshot:
     for prior in snapshot.current["notification_policies"]:
         if prior["status"] != "active":
             continue
-        if prior["target"]["anchor_role"] != "task_due" or prior["target"]["application_scope"] != "item":
-            fail("semantic_conflict", "configuration.task_template", "restored task has an independent recurrence target")
+        route, selection, origin = restored_policy_inputs(db, prior, invocation.delivery_target_defaults)
         old_id = prior["notification_intent_id"]
         key = snapshot.family_keys.get(old_id)
         # Family keys retain the ratified generation/key convention. Independent
         # reminders have no family key: use the existing command-ID derivation
         # over this new generation and the predecessor's immutable intent ID.
-        token = generation_id + ":" + key if key is not None else child_id(
-            generation_id, "notification", "/restored/independent/" + old_id
-        )
-        recipient_field = "recipient_subject_id" if prior["recipient_kind"] == "subject" else "recipient_group_id"
-        try:
-            route = schedule_delivery.resolve_delivery({
-                "recipient_kind": prior["recipient_kind"], recipient_field: prior[recipient_field], "channel": prior["channel"],
-                "target": {"resolution": "explicit", "delivery_target_id": prior["delivery_target_id"]},
-            }, ledger=db, defaults=invocation.delivery_target_defaults)
-        except SpineValidationError:
-            fail("semantic_conflict", "configuration.delivery", "restored destination is unavailable")
-        normalized = normalize_notification_policy({
-            "authoring_contract": "spine.notification-schedule-authoring.v1",
-            "target": {key: prior["target"][key] for key in ("anchor_role", "application_scope")},
-            "schedule": prior["schedule"], "late_handling": prior["late_handling"],
-        }, item_id=task_id, item_version="1", command_id=token, created_at_utc=now,
-            recipient_kind=route["recipient_kind"], recipient_id=route["recipient_id"], channel=route["channel"],
-            delivery_target_id=route["delivery_target_id"])
-        prior_presentation = load_presentation(db, prior["notification_policy_id"])
-        selection = {"kind": "ordinary"} if prior_presentation["kind"] == "ordinary" else {
-            "kind": "definition", "definition": prior_presentation["definition"],
-            "effective_selection_keys": prior_presentation["effective_selection_keys"],
-            "authorization": {"resolution": "exact", "disclosure_authorization_id": prior_presentation["disclosure_authorization_id"]},
-        }
-        origin = cast(Callable[..., dict[str, Any]], rendering_authoring.policy_origin)(db, prior)
+        normalized = restored_policy(prior, route, generation_id=generation_id, key=key, task_id=task_id, now=now)
         presentation = cast(Callable[..., dict[str, Any]], rendering_authoring.resolve)(
             db, selection, policy=normalized.value, item_type="task", origin=origin
         )
@@ -164,7 +180,7 @@ def insert_policies(db: LedgerConnection, invocation: ChildInvocation, snapshot:
         if key is not None:
             mappings.append({
                 "assignment_id": assignment_id, "generation_id": generation_id, "task_item_id": task_id,
-                "policy_key": key, "creation_token": token,
+                "policy_key": key, "creation_token": generation_id + ":" + key,
                 "notification_intent_id": normalized.value["notification_intent_id"],
                 "notification_policy_id": normalized.value["notification_policy_id"],
             })

@@ -141,7 +141,7 @@ def discover_root(db: LedgerConnection, rule_id: str, *, evaluated_at_utc: str, 
                     continue
                 from spine.services.recurring_task_children import source_facts
 
-                source_value = source_facts(db, root, window.recurrence, occurrence, evaluated_at_utc,
+                source_value = source_facts(db, window.source_item, window.recurrence, occurrence, evaluated_at_utc,
                                            persist=False, command_id="read-only-discovery")
                 if instant(source_value["resolved_source_utc"]) + timedelta(seconds=int(config["offset_seconds"])) <= evaluated:
                     continue

@@ -97,7 +97,26 @@ def collect_baseline():
 
 class RecurringResponseSizingTests(unittest.TestCase):
     def test_complete_envelope_trials_replay_and_ledger_match_prechange_witness(self):
-        self.assertEqual(collect_baseline(), json.loads(FIXTURE.read_text())["cases"])
+        # Freeze RF1's catalog-only enrollment. The live producer queues a
+        # marker which a byte-limited page can now discharge as progress.
+        with patch.object(commands, "mark", side_effect=lambda db, rule_id, reason: commands.advance_catalog(db)):
+            self.assertEqual(collect_baseline(), json.loads(FIXTURE.read_text())["cases"])
+
+    def test_live_enrollment_retains_byte_page_units_and_counts_coverage_progress(self):
+        current = collect_baseline()
+        historical = json.loads(FIXTURE.read_text())["cases"]
+        for kind in ("changed", "noop"):
+            self.assertEqual(current[kind], historical[kind])
+        # Preview starts with an extra queue row; it leaves that entire ledger
+        # unchanged, including the marker, while returning the original bytes.
+        self.assertTrue(current["dry_run"]["ledger_unchanged"])
+        self.assertEqual({k: v for k, v in current["dry_run"].items() if k != "ledger_sha256"},
+                         {k: v for k, v in historical["dry_run"].items() if k != "ledger_sha256"})
+        pages = current["byte_pages"]["pages"]
+        self.assertEqual([(p["assignments"], p["has_more"]) for p in pages],
+                         [(p["assignments"], p["has_more"]) for p in historical["byte_pages"]["pages"]])
+        self.assertEqual([p["effect"] for p in pages], ["rule_page_applied"] * 4)
+        self.assertEqual(current["byte_pages"]["generation_count"], 6)
 
     def test_sizer_uses_the_command_envelope_and_current_audit_snapshot(self):
         result = {"title": "Après l’école 🧪", "results": [], "delivery": "not_attempted_by_command"}

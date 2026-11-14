@@ -146,6 +146,13 @@ def complete(db: LedgerConnection, invocation: ChildInvocation, *, rule_id: str,
              budget: ProofBudget, intent: dict[str, Any]) -> bool:
     """Indexed missing-outcome seek, then bounded conflict-resolution evidence."""
     invocation.require_transaction(db)
+    if not can_complete(db, rule_id, intent, budget):
+        return False
+    db.execute("UPDATE related_task_intents SET status='complete' WHERE intent_id=? AND status='pending'", (intent["intent_id"],))
+    return True
+
+
+def can_complete(db: LedgerConnection, rule_id: str, intent: dict[str, Any], budget: ProofBudget) -> bool:
     if missing_outcomes(db, rule_id, intent):
         return False
     conflicts = db.execute(
@@ -157,5 +164,4 @@ def complete(db: LedgerConnection, invocation: ChildInvocation, *, rule_id: str,
         assignment = read_record(db, "related_task_assignments", conflict["assignment_id"])
         if not resolved(db, assignment, intent, budget=budget):
             return False
-    db.execute("UPDATE related_task_intents SET status='complete' WHERE intent_id=? AND status='pending'", (intent["intent_id"],))
     return True

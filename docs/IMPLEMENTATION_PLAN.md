@@ -422,7 +422,7 @@ checks pass, with selected service typing, lint, 391 local links and diff hygien
 At that checkpoint, scheduler enrollment/intent dispatch and per-attempt admission
 remained later R3 work.
 
-**Verified continuation (2026-11-14, uncommitted):**
+**Verified continuation (2026-11-14, committed `833ff94`):**
 The shared durable attempt INSERT now admits generated work against current
 assignment/source/owner/intent truth under the writer transaction. It applies to
 rendered/non-rendered work and does not gate outcome recording for a previously
@@ -435,6 +435,22 @@ recheck, enrollment/intent invalidation, cursor routing and scheduler integratio
 Full regression: **1,662 tests in 492.392 seconds, OK (one skipped)**. The 32 new
 tests, 72-test focused selection and 26 boundary/documentation checks pass, as do
 seven-module typing, changed-file lint, 391 links and preservation/diff checks.
+
+**Rule-writer continuation:** Enrollment and configuration changes invalidate the
+generation lane; adoption of existing assignments, retirement and restoration
+vetoes invalidate the intent lane. R3 uses the existing transactional queue and
+catalog instead of a second scheduler/inbox. Retained children can acknowledge a
+queued prefix without adopting new-only configuration. Next: distinguish proven
+page effects from retained/blocked observations, then revalidate before command
+dispatch and route continuations fairly. No public command or worker activation.
+
+**Semantic page continuation:** The candidate runtime shares the manual page's
+selection and lifecycle decisions with a read-only observer. Automatic dispatch
+compares the observation again under the command's writer lock; unchanged
+blocked/idle observations do not issue commands. Explicit commands retain their
+own replay and no-op receipt behavior. The remaining R3 delivery is connecting
+discovery, continuation selection and fenced dispatch to the scheduler, not a
+new command contract. See the [implementation evidence](design-notes/recurring-related-task-r3-invalidation.md#semantic-page-planning-and-dispatch).
 
 Inventory and integrate every existing source/item/recurrence, relation, binding,
 target-task/owner and relevant policy writer. Invalidate affected roots/witnesses

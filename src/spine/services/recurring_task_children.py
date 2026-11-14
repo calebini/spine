@@ -14,7 +14,7 @@ from spine.core.notification_profiles import compose_notification_plan
 from spine.core.notifications import NormalizedNotificationPolicy
 from spine.core.provenance import derive_occurrence_provenance
 from spine.core.recurring_task_runtime import PREFIX, fail, instant, wire
-from spine.ledger import item_reads, schedule_work
+from spine.ledger import schedule_work
 from spine.ledger.common import TemporalAnchorInput
 from spine.ledger.notification_profiles import insert_application, insert_assignment, load_archetype, load_profile, require_owner_exists
 from spine.ledger.notifications import insert_notification_schedule_policy, load_notification_policies_at_version
@@ -33,7 +33,7 @@ from spine.ledger.work import cancel_work_instance
 from spine.services import schedule_delivery, schedule_materialization, schedule_policies
 from spine.services.item_mutations import create_next_item_version, create_task_v1
 from spine.services.mutation_propagation import reserve_local_owner_epoch
-from spine.services.primary_locations import inline_location_inputs, reference_location_input
+from spine.services.primary_locations import inline_location_inputs, load_referenced_location, reference_location_input
 from spine.services.recurring_task_operations import (
     ChangeChild,
     ChangedChild,
@@ -73,9 +73,8 @@ def materialization(config: dict[str, Any], now: str, *, policies: list[dict[str
 
 
 def source_facts(
-    db: Any, root: dict[str, Any], recurrence: dict[str, Any], occurrence: dict[str, Any], now: str, *, persist: bool, command_id: str
+    db: Any, item: dict[str, Any], recurrence: dict[str, Any], occurrence: dict[str, Any], now: str, *, persist: bool, command_id: str
 ) -> dict[str, Any]:
-    item = item_reads.hydrated_item(db, root["source_item_id"])
     occurrence = occurrence_details.decorate_occurrence(item, recurrence, dict(occurrence), include_internal=True)
     original = occurrence["original_scheduled_fact"]
     derived = derive_occurrence_provenance(
@@ -115,6 +114,30 @@ def restore(db: LedgerConnection, invocation: ChildInvocation, plan: RestoreChil
     return _create(db, invocation, plan.creation, restoration=plan.predecessor)
 
 
+def configured_policies(config: dict[str, Any], route: schedule_delivery.ResolvedDelivery, task_id: str, seed: str,
+                        now: str) -> tuple[tuple[str, NormalizedNotificationPolicy], ...]:
+    entries = config["notification_plan"]["resolved"]["effective_templates"]
+    reminders = [{"policy_key": e["policy_key"], "schedule": e["template"]["schedule"], "late_handling": e["template"]["late_handling"]}
+                 for e in entries]
+    return (schedule_policies.normalize_policies(reminders, item_id=task_id, item_type="task", recurring=False,
+                                                command_id=seed, created_at_utc=now, delivery=route) if entries else ())
+
+
+def check_creation_references(db: LedgerConnection, config: dict[str, Any]) -> None:
+    """Recheck mutable availability without re-resolving a pinned selection."""
+    require_owner_exists(db, config["task_owner"])
+    template = config["task_template"]
+    location, archetype = template["item"]["primary_location"], template["item"]["archetype"]
+    if location and location["mode"] == "reference":
+        load_referenced_location(db, location_id=location["location_id"], field="configuration.task_template")
+    if archetype:
+        load_archetype(db, archetype["item_archetype_id"], revision_id=archetype["item_archetype_revision_id"])
+    for subject in template["people"]["assignees"]:
+        status = db.execute("SELECT status FROM subjects WHERE subject_id=?", (subject,)).fetchone()
+        if not status or status[0] != "active":
+            fail("semantic_conflict", "configuration.task_template")
+
+
 def _create(
     db: LedgerConnection, invocation: ChildInvocation, creation: CreateChild, *, restoration: Restoration | None = None,
 ) -> CreatedChild:
@@ -124,7 +147,7 @@ def _create(
     seed, actor, outer = creation.generation_id, invocation.actor_subject_id, invocation.command_id
     item, template = config["task_template"]["item"], config["task_template"]
     owner = config["task_owner"]
-    require_owner_exists(db, owner)
+    check_creation_references(db, config)
     target = target_from_source(source, int(config["offset_seconds"]))
     task_id = child_id(seed, "item", "/task")
     anchor_id = child_id(seed, "due_anchor", "/temporal_binding/resolved_target", "anchor")
@@ -254,17 +277,7 @@ def _create(
             if {k: v for k, v in route["snapshot"].items() if k != "delivery_state"} != config["delivery"]["resolved"]:
                 fail("semantic_conflict", "configuration.delivery", "resolved destination changed")
             entries = plan["effective_templates"]
-            reminders = [
-                {"policy_key": e["policy_key"], "schedule": e["template"]["schedule"], "late_handling": e["template"]["late_handling"]}
-                for e in entries
-            ]
-            policies = (
-                schedule_policies.normalize_policies(
-                    reminders, item_id=task_id, item_type="task", recurring=False, command_id=seed, created_at_utc=now, delivery=route
-                )
-                if entries
-                else ()
-            )
+            policies = configured_policies(config, route, task_id, seed, now)
             for entry, (key, normalized) in zip(entries, policies, strict=True):
                 presentation = entry["presentation"]
                 selection = (
@@ -634,6 +647,34 @@ def mappings(db: Any, assignment_id: str, generation: dict[str, Any], config: di
     return result
 
 
+def adoption_policies(
+    db: LedgerConnection, invocation: ChildInvocation, assignment_id: str, generation: dict[str, Any],
+    current: dict[str, Any], version: int, config: dict[str, Any],
+) -> tuple[list[dict[str, Any]], tuple[tuple[str, NormalizedNotificationPolicy], ...]]:
+    """Compute the exact successor family; independent reminders are not replaced."""
+    entries = (config["notification_plan"] or {}).get("resolved", {}).get("effective_templates", [])
+    route = (schedule_delivery.resolve_delivery(config["delivery"]["requested"], ledger=db, defaults=invocation.delivery_target_defaults)
+             if entries else None)
+    if route and {k: v for k, v in route["snapshot"].items() if k != "delivery_state"} != config["delivery"]["resolved"]:
+        fail("semantic_conflict", "configuration.delivery")
+    family = mappings(db, assignment_id, generation, config)
+    keys = {p["notification_intent_id"]: p["policy_key"] for p in family}
+    current_family = [p for p in current["notification_policies"] if p["notification_intent_id"] in keys]
+    by_key = {p["policy_key"]: p for p in family}
+    desired = []
+    for selected in entries:
+        key = selected["policy_key"]
+        identity = by_key.get(key)
+        desired.append({"policy_key": key, "schedule": selected["template"]["schedule"],
+                        "late_handling": selected["template"]["late_handling"],
+                        **({k: identity[k] for k in ("notification_intent_id", "notification_policy_id")} if identity else {})})
+    policies, _, _ = schedule_policies.update_policies(
+        current_family, desired=desired, delivery=route, item=current, next_version=version, command_id=invocation.command_id,
+        updated_at=invocation.now, policy_keys=keys, established_policy_intents=set(keys), recurring=False,
+    )
+    return current_family, policies
+
+
 def _adopt_supporting(
     db: LedgerConnection,
     invocation: ChildInvocation,
@@ -697,48 +738,7 @@ def _adopt_supporting(
     if "reminders" in patch:
         plan = (config["notification_plan"] or {}).get("resolved", {})
         entries = plan.get("effective_templates", [])
-        route = (
-            schedule_delivery.resolve_delivery(
-                config["delivery"]["requested"], ledger=db, defaults=invocation.delivery_target_defaults
-            ) if entries else None
-        )
-        if route and {k: v for k, v in route["snapshot"].items() if k != "delivery_state"} != config["delivery"]["resolved"]:
-            fail("semantic_conflict", "configuration.delivery")
-        family = mappings(db, assignment_id, generation, config)
-        family_ids = {p["notification_intent_id"] for p in family}
-        current_family = [p for p in current["notification_policies"] if p["notification_intent_id"] in family_ids]
-        by_key = {p["policy_key"]: p for p in family}
-        desired = []
-        for selected in entries:
-            key = selected["policy_key"]
-            identity = by_key.get(key)
-            desired.append(
-                {
-                    "policy_key": key,
-                    "schedule": selected["template"]["schedule"],
-                    "late_handling": selected["template"]["late_handling"],
-                    **(
-                        {
-                            "notification_intent_id": identity["notification_intent_id"],
-                            "notification_policy_id": identity["notification_policy_id"],
-                        }
-                        if identity
-                        else {}
-                    ),
-                }
-            )
-        desired_policies, _, _ = schedule_policies.update_policies(
-            current_family,
-            desired=desired,
-            delivery=route,
-            item=current,
-            next_version=version,
-            command_id=command_id,
-            updated_at=now,
-            policy_keys={p["notification_intent_id"]: p["policy_key"] for p in family},
-            established_policy_intents=family_ids,
-            recurring=False,
-        )
+        current_family, desired_policies = adoption_policies(db, invocation, assignment_id, generation, current, version, config)
         for prior in current_family:
             remove_copied_notification_policy(
                 db, item_id=task_id, item_version=version, notification_intent_id=prior["notification_intent_id"]

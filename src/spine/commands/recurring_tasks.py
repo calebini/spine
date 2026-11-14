@@ -53,12 +53,14 @@ from spine.ledger.recurring_task_catalog import (
 from spine.ledger.recurring_task_catalog import (
     stored_projection as stored_projection,
 )
+from spine.ledger.recurring_task_invalidation import DirtyReason, mark
 from spine.ledger.recurring_task_migration import verify_candidate_schema
 from spine.ledger.recurring_tasks import compare_and_swap, insert_record, read_record
 from spine.ledger.transactions import LedgerConnection
 from spine.services.recurring_task_configuration import normalize_configuration
 
 if TYPE_CHECKING:
+    from spine.services.recurring_task_page_plan import PagePlan
     from spine.services.recurring_task_reconcile import ResponseSizer
 
 DELIVERY = "not_attempted_by_command"
@@ -252,7 +254,7 @@ def create(db: Any, request: dict[str, Any], context: Any, contracts: Any, now: 
             "created_at_utc": now,
         },
     )
-    advance_catalog(db)
+    mark(db, identity, DirtyReason.SOURCE)
     root = lookup(db, "related_task_rules", identity, "related_task_rule_id")
     return (
         {"rule": rule_view(db, root), "generation_started": False, "materialized_work_count": "0", "delivery": DELIVERY},
@@ -307,7 +309,12 @@ def update(
     changed = not equal or wants and pending is None
     if changed:
         compare_and_swap(db, "related_task_rules", root["related_task_rule_id"], root["change_version"], {"current_revision_id": revision})
-        advance_catalog(db)
+        # Changed generation configuration affects future candidates. Only an
+        # actual adoption with an existing prefix adds an intent work lane.
+        reason = DirtyReason.SOURCE if not equal else DirtyReason.INTENT
+        if wants and high_water != "0":
+            reason |= DirtyReason.INTENT
+        mark(db, root["related_task_rule_id"], reason)
     root = lookup(db, "related_task_rules", root["related_task_rule_id"], "related_task_rule_id")
     effect = "rule_configuration_updated" if not equal else "rule_adoption_requested" if changed else "rule_update_noop"
     return (
@@ -349,7 +356,7 @@ def retire(db: Any, request: dict[str, Any], root: dict[str, Any], now: str) -> 
             root["change_version"],
             {"status": "retired", "retirement_intent_id": identity},
         )
-        advance_catalog(db)
+        mark(db, root["related_task_rule_id"], DirtyReason.INTENT)
         changed = True
     root = lookup(db, "related_task_rules", root["related_task_rule_id"], "related_task_rule_id")
     return (
@@ -475,6 +482,7 @@ def execute(
     contracts: RecurringTaskContracts,
     clock: Callable[[], str] | None = None,
     fault: Callable[[str], None] | None = None,
+    automatic_plan: PagePlan | None = None,
 ) -> dict[str, Any]:
     """Internal development entry; shared command context, one owning transaction."""
     db, timeout = context.ledger, None
@@ -495,10 +503,17 @@ def execute(
         if command not in INTERNAL_COMMANDS:
             fail("unsupported_command", "command")
         value = contracts.request(command, request)
+        if automatic_plan is not None and (command != PREFIX + "reconcile" or context.dry_run):
+            fail("environment_failure", "admission")
         writes = contracts.descriptor["commands"][command]["mutates"]
         budget = FacetBudget()
         timeout = install_budget(db, budget)
         with db.atomic_command(write=writes):
+            if automatic_plan is not None:
+                from spine.commands.recurring_task_automatic import recheck
+
+                now = clock()
+                recheck(db, value, context, contracts, now, automatic_plan)
             semantic = {
                 "contract_version": CONTRACT,
                 "normalization_version": "spine.recurring-related-tasks.normalization.v1",
@@ -539,7 +554,8 @@ def execute(
                 response["replayed"] = True
                 contracts.response(command, response)
                 return dict(response)
-            now = clock()
+            if automatic_plan is None:
+                now = clock()
             try:
                 if not isinstance(now, str) or wire(instant(now)) != now:
                     fail("environment_failure", "clock")
@@ -576,6 +592,12 @@ def execute(
                         db, value, root, context, contracts, now, runtime, fault,
                         response_size=response_sizer(command, value, now, dry_run=context.dry_run),
                     )
+                    if automatic_plan is not None and not changed:
+                        # A bounded/byte-sized page may have retained less work
+                        # than planned. No audit, receipt or provisional writes.
+                        from spine.commands.recurring_task_automatic import PlanObsolete
+
+                        raise PlanObsolete("no_semantic_change")
                 else:
                     fail(
                         "unsupported_command",

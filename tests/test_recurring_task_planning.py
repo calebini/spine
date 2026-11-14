@@ -36,6 +36,7 @@ class RecurringDiscoveryTests(unittest.TestCase):
         first = self.plan().roots[0]
         self.assertEqual(len(first.occurrence_keys), 6)
         self.assertEqual(first.assignment_ids, ())
+        self.assertEqual(first.dirty_generation, int(self.rule["catalog_generation"]))
         self.assertIsNone(first.diagnostic)
         self.assertEqual(self.db.execute("SELECT COUNT(*) FROM related_task_generations").fetchone()[0], 0)
 
@@ -70,8 +71,26 @@ class RecurringDiscoveryTests(unittest.TestCase):
 
     def test_pending_adoption_selects_maintenance_without_waiting_for_queue(self):
         self.h.reconcile(self.rule)
-        self.h.update_rule(self.rule, title="Pickup changed")
+        updated = self.h.update_rule(self.rule, title="Pickup changed")
+        row = self.db.execute("SELECT source_dirty,target_dirty,intent_dirty,dirty_generation FROM related_task_dirty_rules").fetchone()
+        self.assertEqual(tuple(row), (1, 0, 1, int(updated["catalog_generation"])))
+        # An intent is independently discoverable even without a queue hint.
+        with self.db.atomic_command():
+            self.db.execute("DELETE FROM related_task_dirty_rules WHERE related_task_rule_id=?", (updated["related_task_rule_id"],))
         self.assertEqual(len(self.plan().roots[0].assignment_ids), 6)
+
+    def test_empty_retirement_remains_discoverable_until_acknowledged_once(self):
+        request = self.h.write("retire-empty", self.rule, disposition="cancel_open")
+        retired = self.h.run_command("retire", request)
+        self.assertTrue(retired["changed"], retired)
+        root = self.plan().roots[0]
+        self.assertEqual((root.assignment_ids, root.occurrence_keys), ((), ()))
+        self.assertEqual(root.dirty_generation, int(retired["result"]["rule"]["catalog_generation"]))
+        page = self.h.reconcile(self.rule, "discharge-retired")
+        self.assertTrue(page["changed"], page)
+        self.assertEqual(page["result"]["results"], [])
+        self.assertEqual(self.plan().roots, ())
+        self.assertFalse(self.h.reconcile(self.rule, "idle")["changed"])
 
     def test_retirement_selects_cleanup_and_never_new_generations(self):
         self.h.reconcile(self.rule, source_candidates="1")

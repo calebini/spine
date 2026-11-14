@@ -1,7 +1,7 @@
 # R3 initial increment — coalesced invalidation and queue CAS
 
-Status: initial R3 increment committed as `ffb9690`; acknowledgement/guard
-continuation implemented and verified, uncommitted
+Status: initial R3 increment committed as `ffb9690`; acknowledgement/guards as
+`8349a63`; discovery/attempt admission as `833ff94`; rule-writer continuation uncommitted
 (2026-11-14). R3 not closed. Current status belongs to [SPINE-094](../BACKLOG.md#spine-094--r3-recurring-task-all-writer-safety-and-automatic-scheduling).
 
 ## Authority and checkpoint
@@ -256,4 +256,70 @@ Full regression: **1,662 tests in 492.392 seconds, OK (one skipped)**. All 32 ne
 tests are included. The 26-test documentation/declaration/web-sync/internal-boundary
 selection also passes, as do 391 local links. Original frozen fixtures and both
 unrelated operator edits retain their pre-work SHA-256 values. This continuation
-is uncommitted; no push, deployment, public activation or real send occurred.
+is committed as `833ff94`; no push, deployment, public activation or real send occurred.
+
+## Rule writers as queue producers
+
+Rule creation marks the source lane. A changed configuration marks the source
+lane, with an intent flag only if adoption covers existing assignments; adoption
+alone marks the intent lane. Retirement and a new restoration veto mark intent,
+including when a retired root has no children left to visit. An explicit page can
+then clear that root once. Marking uses the same catalog advancement as before,
+restarts coverage at sequence zero, and replaces the prior token without dropping
+pending reasons. No new queue/event/receipt type or synchronous child mutation.
+
+The runtime tests exercise the command, not just the queue primitive: creation,
+mixed source/adoption flags, stale-token rejection, preview and receipt-stage
+rollback, no-op/replay, terminal cleanup and suppression. The original RF1
+sizing fixture remains unchanged: reproducing catalog-only enrollment still
+matches it exactly. With the live queue, a byte-limited retained page can now
+report applied coverage; the assignment identities, page boundaries and final
+generation count remain unchanged. No automatic dispatch, migration or real send.
+
+Verification on disposable ledgers: full discovery ran **1,668 tests in
+482.274 seconds, OK (one skipped)**. One additional empty-adoption case added
+after suite discovery passed separately. The 46-test focused selection, Mypy on
+the command/state/queue modules, changed-file Ruff, 392 local document link
+paths and diff hygiene also passed.
+
+## Semantic page planning and dispatch
+
+The candidate-only planner accepts a concrete reconcile request, not just a
+dirty root. It observes a single read transaction with SQLite writes disabled;
+it does not obtain evidence by executing a mutation and rolling it back.
+The observer and writer share the signed continuation, evaluation range,
+assignment/source ordering, proof validation, cancellation/restoration and
+adoption precedence. Within an observation, an unpersisted predecessor or
+selector reservation can support its verified successor; neither becomes a
+durable source fact. Intent completion or a provable dirty-prefix advance can
+itself justify a dispatch. An unchanged conflict cannot.
+
+The private dispatch path re-observes under the same `BEGIN IMMEDIATE` that owns
+the command, before any receipt or child writes. The comparison binds the ledger,
+normalized request, catalog generation, ordered units and observed effects.
+Clock rollback rejects the plan; forward time is allowed only if the semantic
+observation still matches. The writer retains the final due-time fence, whole-unit
+rollback, complete-envelope byte sizing, and normal receipt validation. If sizing
+drops the only changed unit and there is no actual coverage advance, the
+automatic transaction rolls back without an audit or receipt. Explicit manual
+no-ops and compatible replay remain distinct.
+
+Each observation uses one snapshot of the source event for all candidate proofs;
+the writer re-reads it in its own transaction. The automatic write budget covers
+both the recheck and the actual command: a large request that fits the manual
+writer can exceed the automatic instruction budget and fail without writes.
+Neither path raises the ceiling. The delayed-added-date case after three source
+revisions succeeds manually at its existing limits, and across four signed
+automatic pages with a two-source-candidate limit, creating seven unique tasks.
+
+The worker does not yet call this interface. Fair selection across roots,
+resuming a bounded read-only prefix without generating an idle command, and
+restarting after an invalidated continuation remain scheduler integration work.
+Tests use only disposable ledgers and never invoke a delivery adapter.
+
+Verification: full discovery ran **1,684 tests in 484.448 seconds, OK (one
+skipped)**. The final 308-test recurring suite also includes the delayed-added-date
+automatic pagination test added after full discovery started. All 16 automatic
+planner/fence cases passed. The separate 21-test boundary/documentation/
+declaration/witness selection passed, as did twelve-module Mypy, changed-file
+Ruff, 394 local documentation link paths and diff hygiene.

@@ -92,6 +92,21 @@ def references(db: Any, assignment: dict[str, Any], desired: str | None = None) 
     }
 
 
+def blocked_reason(error: SpineValidationError) -> str | None:
+    code, _, field = error.code.partition(":")
+    if code.startswith("rendering_"):
+        return "disclosure_unavailable"
+    if (field == "configuration.delivery" or code in {"delivery_target_not_found", "delivery_target_inactive"}
+            or (code in {"semantic_conflict", "referenced_row_not_found"} and field.startswith("delivery."))):
+        return "route_unavailable"
+    if code in {"semantic_conflict", "referenced_row_not_found"} and (
+        field == "configuration.task_template" or field in {"owner.owner_subject_id", "owner.owner_group_id",
+                                                           "item_archetype_id", "item_archetype_revision_id"}
+    ):
+        return "configuration_invalid"
+    return "source_continuity_unresolved" if code == "source_continuity_unresolved" else None
+
+
 def entry(
     selector: dict[str, Any],
     outcome: str,
@@ -162,7 +177,7 @@ class Page:
         )
         self.source_window = SourceWindow.load(db, root, self.config, self.snapshot, now, self.budget)
         self.recurrence = self.source_window.recurrence
-        self.source_item = item_reads.hydrated_item(db, root["source_item_id"])
+        self.source_item = self.source_window.source_item
 
     def unit(self, operation: Callable[[], dict[str, Any]], selector: dict[str, Any], *,
              assignment: dict[str, Any] | None = None) -> dict[str, Any] | None:
@@ -194,16 +209,7 @@ class Page:
                 return None
             if error.code == "capacity_exceeded:limits.mutations" and self.state.results:
                 return None
-            code, _, field = error.code.partition(":")
-            reason = None
-            if code.startswith("rendering_"):
-                reason = "disclosure_unavailable"
-            elif field == "configuration.delivery" or code in {"delivery_target_not_found", "delivery_target_inactive"}:
-                reason = "route_unavailable"
-            elif code == "semantic_conflict" and field == "configuration.task_template":
-                reason = "configuration_invalid"
-            elif code == "source_continuity_unresolved":
-                reason = "source_continuity_unresolved"
+            reason = blocked_reason(error)
             if reason:
                 # Persist only the blocked-state evidence after rolling back the
                 # failed child operation. It remains a whole, budgeted unit and
@@ -243,13 +249,14 @@ class Page:
         if selected:
             state["pending_intent_id"] = selected["intent_id"]
         state_id = assignment["current_assignment_revision_id"]
+        self.before_state(state, original, "decision_required", reason)
         if state != original:
             state_id = append_state(self.db, assignment, state, self.request, self.now)
             self.state.changed = True
         for pending in (intent, retirement):
             if pending:
-                recorded = adoption.outcome(
-                    self.db, self.invocation, pending, assignment["assignment_id"], state_id,
+                recorded = self.record_outcome(
+                    pending, assignment["assignment_id"], state_id,
                     "retained_equal" if pending is retirement and cleanup is None else "conflict", reason,
                 )
                 self.state.changed = self.state.changed or recorded
@@ -294,6 +301,38 @@ class Page:
     def candidates(self, start: str, end: str) -> list[dict[str, Any]]:
         return self.source_window.candidates(start, end)
 
+    # The bounded observer shares lifecycle precedence, but substitutes read-only
+    # proof checks and stops at an identified semantic effect before any write.
+    def proof(self, kind: str, value: dict[str, Any]) -> str:
+        return proofs.persist(self.db, self.state.root, kind, value, self.request, self.now, self.budget)
+
+    def reserve(self, assignment: dict[str, Any], proof_id: str, selector: dict[str, Any]) -> None:
+        reserve_selector(self.db, rule_id=self.state.root["related_task_rule_id"], assignment_id=assignment["assignment_id"],
+                         proof_id=proof_id, selector=selector, revision_id=self.snapshot["recurrence_revision_id"], budget=self.budget)
+
+    def reserved(self, key: str) -> bool:
+        return self.db.execute("SELECT 1 FROM related_task_selector_reservations WHERE related_task_rule_id=? AND occurrence_key=?",
+                               (self.state.root["related_task_rule_id"], key)).fetchone() is not None
+
+    def current_source(self, occurrence: dict[str, Any]) -> dict[str, Any]:
+        return children.source_facts(self.db, self.source_item, self.recurrence, occurrence, self.now,
+                                     persist=True, command_id=self.request["command_id"])
+
+    def retained_work(self, gen: dict[str, Any], current: dict[str, Any], config: dict[str, Any]) -> None:
+        self.apply_work(children.reconcile_work(self.db, self.invocation, gen["task_item_id"], int(current["current_version"]),
+                                                config, work_limit=self.limits["work_rows"]))
+
+    def before_creation(self, config: dict[str, Any], source: dict[str, Any], generation_id: str, restoration: Any) -> None:
+        """Live path continues into the complete, transaction-owned child writer."""
+
+    def before_state(self, state: dict[str, Any], original: dict[str, Any], outcome: str, reason: str) -> None:
+        """Live path continues into its exact-state revision/outcome writers."""
+
+    def record_outcome(self, intent: dict[str, Any], assignment_id: str, state_id: str, outcome: str, reason: str) -> bool:
+        from spine.services.recurring_task_adoption import outcome as record
+
+        return record(self.db, self.invocation, intent, assignment_id, state_id, outcome, reason)
+
     def create(
         self,
         occurrence: dict[str, Any],
@@ -309,7 +348,7 @@ class Page:
         birth: tuple[str, dict[str, Any]] | None = None
         selector = occurrence["target_occurrence_selector"]
         source = children.source_facts(
-            self.db, self.state.root, self.recurrence, occurrence, self.now, persist=False, command_id=self.request["command_id"]
+            self.db, self.source_item, self.recurrence, occurrence, self.now, persist=False, command_id=self.request["command_id"]
         )
         due = target_from_source(source, int(config["offset_seconds"]))["utc_instant"]
         if due <= self.now:
@@ -356,7 +395,7 @@ class Page:
                             "conflicting_occurrence_keys": [reserved["occurrence_key"]],
                         },
                     )
-            proof_id = proofs.persist(self.db, self.state.root, kind, proof, self.request, self.now, self.budget)
+            proof_id = self.proof(kind, proof)
             if proof["recurrence_revision_id"] != self.snapshot["recurrence_revision_id"]:
                 birth = (proof_id, proof)
                 # A delayed addition first proves its historical birth. Its
@@ -368,8 +407,7 @@ class Page:
                     fail("source_continuity_unresolved", "source")
                 carried = proofs.payload(self.snapshot, selector, prior_proof_id=proof_id, prior_selector=proof["selector"],
                                          hops=path, lineage_ids=sorted({line for hop in path for line in hop["lineage_ids"]}))
-                proof_id = proofs.persist(self.db, self.state.root, "carry_forward", carried, self.request, self.now, self.budget)
-        reference = ensure_selector(self.db, revision_id=self.snapshot["recurrence_revision_id"], selector=selector, budget=self.budget)
+                proof_id = self.proof("carry_forward", carried)
         first = assignment is None
         assignment_id = (
             assignment["assignment_id"]
@@ -379,8 +417,10 @@ class Page:
         prior = read_record(self.db, "related_task_generations", assignment["current_generation_id"]) if assignment is not None else None
         index = prior["generation_index"] + 1 if prior is not None else 1
         generation_id = derive("generation", {"assignment_id": assignment_id, "generation_index": str(index)})[0]
+        self.before_creation(config, source, generation_id, restoration)
+        reference = ensure_selector(self.db, revision_id=self.snapshot["recurrence_revision_id"], selector=selector, budget=self.budget)
         source = children.source_facts(
-            self.db, self.state.root, self.recurrence, occurrence, self.now, persist=True, command_id=self.request["command_id"]
+            self.db, self.source_item, self.recurrence, occurrence, self.now, persist=True, command_id=self.request["command_id"]
         )
         creation = CreateChild(
             source_item_id=self.state.root["source_item_id"], configuration=config,
@@ -547,12 +587,47 @@ def _reconcile(page: Page, *, response_size: ResponseSizer) -> tuple[dict[str, A
         if token and "intent_id" in token
         else (pending_adoption(db, root["related_task_rule_id"]) or intent_view(db, root["retirement_intent_id"]))
     )
-    evaluation = token["evaluation_at_utc"] if token else now
-    start = token["range_start_utc"] if token else wire(instant(evaluation) - timedelta(seconds=max(0, int(page.config["offset_seconds"]))))
-    end = token["range_end_utc"] if token else wire(instant(evaluation) + timedelta(seconds=int(page.config["generation_horizon_seconds"])))
+    evaluation, start, end = page_bounds(page, token)
     position: dict[str, Any] = copy.deepcopy(token["after"] if token else {"assignment_after_seq": "0", "source_after": None})
     page.state.position = position
     original = copy.deepcopy(position)
+    processed_assignments, existing_more, source_more = select_units(page, position, start, end)
+    # Hold whole-unit savepoints until the *complete receipt* fits. Rolling back
+    # a suffix never reruns accepted work, mints another ID or refunds proof work.
+    while True:
+        try:
+            with page.state.trial(db):
+                result, effect, _ = finish(
+                    page, token, selected_intent, evaluation, start, end, original,
+                    processed_assignments, existing_more, source_more,
+                )
+                if response_size(
+                    result=result, effect=effect, changed=page.state.changed, audit_ids=tuple(page.state.runtime["audit_ids"]),
+                ) > page.limits["response_bytes"]:
+                    raise _PageBoundary()
+            return result, effect, page.state.changed
+        except _PageBoundary:
+            if len(page.state.results) <= 1 or not page.state.has_units:
+                fail("capacity_exceeded", "limits.response_bytes")
+            lane = page.state.rollback_last()
+            if lane == "assignments":
+                processed_assignments -= 1
+                existing_more = True
+            else:
+                source_more = True
+
+
+def page_bounds(page: Page, token: dict[str, Any] | None) -> tuple[str, str, str]:
+    if token:
+        return token["evaluation_at_utc"], token["range_start_utc"], token["range_end_utc"]
+    now = instant(page.now)
+    return (page.now, wire(now - timedelta(seconds=max(0, int(page.config["offset_seconds"])))),
+            wire(now + timedelta(seconds=int(page.config["generation_horizon_seconds"]))))
+
+
+def select_units(page: Page, position: dict[str, Any], start: str, end: str) -> tuple[int, bool, bool]:
+    """The explicit writer and bounded observer must walk exactly the same prefixes."""
+    db, root, now, request = page.db, page.state.root, page.now, page.request
     assignments = db.execute(
         "SELECT assignment_id,assignment_seq FROM related_task_assignments WHERE related_task_rule_id=? "
         "AND assignment_seq>? ORDER BY assignment_seq LIMIT ?",
@@ -578,15 +653,7 @@ def _reconcile(page: Page, *, response_size: ResponseSizer) -> tuple[dict[str, A
     page.state.lane = "source"
     if root["status"] == "active":
         candidates = page.candidates(start, end)
-        candidates = [
-            value
-            for value in candidates
-            if db.execute(
-                "SELECT 1 FROM related_task_selector_reservations WHERE related_task_rule_id=? AND occurrence_key=?",
-                (root["related_task_rule_id"], value["occurrence_key"]),
-            ).fetchone()
-            is None
-        ]
+        candidates = [v for v in candidates if not page.reserved(v["occurrence_key"])]
         if position["source_after"]:
             key = position["source_after"]
             cursor_key = (key["scheduled_fact"], canonical_json_bytes(key["selector"]))
@@ -595,7 +662,7 @@ def _reconcile(page: Page, *, response_size: ResponseSizer) -> tuple[dict[str, A
             for value in candidates:
                 if (value["original_scheduled_fact"], canonical_json_bytes(value["target_occurrence_selector"])) > cursor_key:
                     break
-                source = children.source_facts(db, root, page.recurrence, value, now,
+                source = children.source_facts(db, page.source_item, page.recurrence, value, now,
                                                persist=False, command_id=request["command_id"])
                 if target_from_source(source, int(page.config["offset_seconds"]))["utc_instant"] > now:
                     page.source_prefix_unproved = True
@@ -611,11 +678,7 @@ def _reconcile(page: Page, *, response_size: ResponseSizer) -> tuple[dict[str, A
                 source_more = True
                 break
             selector = occurrence["target_occurrence_selector"]
-            reserved = db.execute(
-                "SELECT assignment_id FROM related_task_selector_reservations WHERE related_task_rule_id=? AND occurrence_key=?",
-                (root["related_task_rule_id"], occurrence["occurrence_key"]),
-            ).fetchone()
-            if reserved is None:
+            if not page.reserved(occurrence["occurrence_key"]):
                 try:
                     page.budget.hops = page.limits["lineage_hops"]
                     value = page.unit(partial(page.create, occurrence), selector)
@@ -628,29 +691,7 @@ def _reconcile(page: Page, *, response_size: ResponseSizer) -> tuple[dict[str, A
                         raise
                     page.state.results.append(entry(selector, "decision_required", "source_continuity_unresolved"))
             position["source_after"] = {"scheduled_fact": selector["scheduled_fact"], "selector": selector}
-    # Hold whole-unit savepoints until the *complete receipt* fits. Rolling back
-    # a suffix never reruns accepted work, mints another ID or refunds proof work.
-    while True:
-        try:
-            with page.state.trial(db):
-                result, effect, _ = finish(
-                    page, token, selected_intent, evaluation, start, end, original,
-                    processed_assignments, existing_more, source_more,
-                )
-                if response_size(
-                    result=result, effect=effect, changed=page.state.changed, audit_ids=tuple(page.state.runtime["audit_ids"]),
-                ) > page.limits["response_bytes"]:
-                    raise _PageBoundary()
-            return result, effect, page.state.changed
-        except _PageBoundary:
-            if len(page.state.results) <= 1 or not page.state.has_units:
-                fail("capacity_exceeded", "limits.response_bytes")
-            lane = page.state.rollback_last()
-            if lane == "assignments":
-                processed_assignments -= 1
-                existing_more = True
-            else:
-                source_more = True
+    return processed_assignments, existing_more, source_more
 
 
 def finish(
@@ -894,7 +935,7 @@ def process_existing(page: Page, assignment: dict[str, Any]) -> dict[str, Any]:
                     "source_cancelled",
                     proofs.payload(page.snapshot, cancelled_event_version=page.snapshot["source_item_version"], event_status="cancelled"),
                 )
-                proof_id = proofs.persist(db, page.state.root, kind, proof, request, page.now, page.budget)
+                proof_id = page.proof(kind, proof)
                 cancel_reason = "source_cancelled"
                 source["source_target_version"] = page.snapshot["source_item_version"]
             else:
@@ -925,19 +966,11 @@ def process_existing(page: Page, assignment: dict[str, Any]) -> dict[str, Any]:
                     or state["selector"] != selector
                 )
                 proof_id = (
-                    proofs.persist(db, page.state.root, kind, proof, request, page.now, page.budget)
+                    page.proof(kind, proof)
                     if changed_source or exclusion or cancelled or source_only
                     else state["proof_id"]
                 )
-                reserve_selector(
-                    db,
-                    rule_id=page.state.root["related_task_rule_id"],
-                    assignment_id=assignment["assignment_id"],
-                    proof_id=proof_id,
-                    selector=selector,
-                    revision_id=page.snapshot["recurrence_revision_id"],
-                    budget=page.budget,
-                )
+                page.reserve(assignment, proof_id, selector)
                 state.update(selector=selector, occurrence_key=proof["occurrence_key"])
                 cancel_reason = None
                 if exclusion or cancelled:
@@ -958,13 +991,11 @@ def process_existing(page: Page, assignment: dict[str, Any]) -> dict[str, Any]:
                         ),
                         actionable=False,
                     )
-                    proof_id = proofs.persist(db, page.state.root, kind, value, request, page.now, page.budget)
+                    proof_id = page.proof(kind, value)
                 elif occurrence is None:
                     raise SpineValidationError("source_continuity_unresolved", "missing current expressed occurrence")
                 else:
-                    source = children.source_facts(
-                        db, page.state.root, page.recurrence, occurrence, page.now, persist=True, command_id=request["command_id"]
-                    )
+                    source = page.current_source(occurrence)
             if cancel_reason:
                 if current["detail"]["task_status"] == "open":
                     source.update(
@@ -1008,11 +1039,15 @@ def process_existing(page: Page, assignment: dict[str, Any]) -> dict[str, Any]:
                         retained = read_record(
                             db, "related_task_assignment_revisions", latest["current_assignment_revision_id"]
                         )["state_json"]
-                        retained["pending_intent_id"] = intent["intent_id"]
-                        retained_id = append_state(db, latest, retained, request, page.now)
-                        adoption.outcome(db, page.invocation, intent, assignment["assignment_id"], retained_id,
-                                         "skipped_terminal", original["reason"])
-                        page.state.changed = True
+                        retained_id = latest["current_assignment_revision_id"]
+                        if retained.get("pending_intent_id") != intent["intent_id"]:
+                            updated = {**retained, "pending_intent_id": intent["intent_id"]}
+                            page.before_state(updated, retained, "skipped_terminal", original["reason"])
+                            retained_id = append_state(db, latest, updated, request, page.now)
+                            page.state.changed = True
+                        recorded = page.record_outcome(intent, assignment["assignment_id"], retained_id,
+                                                       "skipped_terminal", original["reason"])
+                        page.state.changed = page.state.changed or recorded
                         restored["after"] = references(db, read_record(db, "related_task_assignments", assignment["assignment_id"]))
                         restored["actions"] = sorted(set(restored["actions"]) | {"intent_skipped"})
                     return restored
@@ -1074,10 +1109,7 @@ def process_existing(page: Page, assignment: dict[str, Any]) -> dict[str, Any]:
                     )
                     actions = (["configuration_adopted"] if adopting else []) + (["task_rescheduled"] if moved else ["witness_refreshed"])
                 else:
-                    page.apply_work(children.reconcile_work(
-                        db, page.invocation, gen["task_item_id"], int(current["current_version"]), config,
-                        work_limit=page.limits["work_rows"],
-                    ))
+                    page.retained_work(gen, current, config)
         except SpineValidationError as error:
             if error.code != "source_continuity_unresolved":
                 raise
@@ -1105,19 +1137,19 @@ def process_existing(page: Page, assignment: dict[str, Any]) -> dict[str, Any]:
     # A manually advanced task needs an exact binding witness even for a terminal veto.
     if outcome != "decision_required" and int(state["task_item_version"]) < int(current["current_version"]):
         state.update(page.change( assignment, gen, binding, current, source, config))
+    page.before_state(state, original, outcome, reason)
     state_id = None
     if state != original:
         state_id = append_state(db, assignment, state, request, page.now)
         page.state.changed = True
     if intent and intent_result:
-        recorded = adoption.outcome(
-            db, page.invocation, intent, assignment["assignment_id"],
+        recorded = page.record_outcome(
+            intent, assignment["assignment_id"],
             state_id or assignment["current_assignment_revision_id"], intent_result, intent_reason or reason
         )
         page.state.changed = page.state.changed or recorded
     if retirement is not None and retirement_selected:
-        recorded = adoption.outcome(
-            db, page.invocation,
+        recorded = page.record_outcome(
             retirement,
             assignment["assignment_id"],
             state_id or assignment["current_assignment_revision_id"],

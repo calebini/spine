@@ -9,6 +9,7 @@ from spine.core.canonical_json import canonical_json_bytes
 from spine.core.errors import SpineValidationError
 from spine.core.occurrences import expand_recurrence_set
 from spine.core.recurring_task_runtime import fail, instant, wire
+from spine.ledger import item_reads
 from spine.ledger.recurrence import load_current_recurrence_set
 from spine.ledger.recurring_task_sources import ProofBudget, _calendar_cost
 from spine.services import recurring_task_children as children
@@ -22,6 +23,7 @@ class SourceWindow:
     recurrence: dict[str, Any]
     now: str
     budget: ProofBudget
+    source_item: dict[str, Any]
 
     @classmethod
     def load(cls, db: Any, root: dict[str, Any], config: dict[str, Any],
@@ -35,7 +37,9 @@ class SourceWindow:
         recurrence = load_current_recurrence_set(db, item_id=root["source_item_id"])
         if recurrence is None:
             fail("environment_failure", "source")
-        return cls(db, root, config, recurrence, now, budget)
+        # Generation writes target tasks, never the source event. Bind its facts
+        # once to this transaction, not once per proof/candidate/child.
+        return cls(db, root, config, recurrence, now, budget, item_reads.hydrated_item(db, root["source_item_id"]))
 
     def spend(self) -> None:
         try:
@@ -77,7 +81,7 @@ class SourceWindow:
         result = []
         for occurrence in values:
             source = children.source_facts(
-                self.db, self.root, self.recurrence, occurrence, self.now, persist=False, command_id="read-only-source-window"
+                self.db, self.source_item, self.recurrence, occurrence, self.now, persist=False, command_id="read-only-source-window"
             )
             if not start <= source["resolved_source_utc"] < end:
                 continue

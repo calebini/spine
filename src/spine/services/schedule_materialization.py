@@ -99,35 +99,11 @@ def materialize_successor(
         for policy in policies:
             targets_by_intent[str(policy["notification_intent_id"])] = [target]
 
-    opportunities: list[dict[str, object]] = []
-    for policy in policies:
-        expanded_policy = expand_notification_policy(
-            policy,
-            targets=targets_by_intent[str(policy["notification_intent_id"])],
-            evaluated_at_utc=str(materialization["evaluated_at_utc"]),
-            range_start_utc=range_start,
-            range_end_utc=range_end,
-            candidate_limit=int(str(materialization["limit"])) + 1,
-        )
-        opportunities.extend(dict(value) for value in expanded_policy.opportunities if bool(value["actionable"]))
-    opportunities.sort(key=lambda value: (str(value["eligible_at_utc"]), str(value["notification_opportunity_id"])))
-    limit = int(str(materialization["limit"]))
-    if len(opportunities) > limit:
-        raise SpineValidationError(
-            "invalid_request:materialization.limit",
-            "materialization.limit is smaller than the complete actionable opportunity set",
-        )
+    opportunities = actionable_opportunities(policies, targets_by_intent, materialization)
     created: list[str] = []
     evidence: list[dict[str, object]] = []
     for opportunity in opportunities:
-        work_id, _ = notification_id(
-            "work_instance",
-            "spine.notification-work-instance-id.v1",
-            {
-                "notification_opportunity_id": opportunity["notification_opportunity_id"],
-                "delivery_target_id": opportunity["delivery_target_id"],
-            },
-        )
+        work_id = opportunity_work_id(opportunity)
         if work_exists(connection, work_id):
             continue
         recipient_id = opportunity.get("recipient_subject_id") or opportunity.get("recipient_group_id")
@@ -176,3 +152,29 @@ def materialize_successor(
                 evidence_value["expressed_scheduled_fact"] = provenance_row["expressed_scheduled_fact"]
         evidence.append(evidence_value)
     return created, evidence, len(opportunities)
+
+
+def actionable_opportunities(
+    policies: Sequence[Mapping[str, object]], targets_by_intent: Mapping[str, list[dict[str, object]]],
+    materialization: Mapping[str, object],
+) -> list[dict[str, object]]:
+    opportunities: list[dict[str, object]] = []
+    for policy in policies:
+        expanded = expand_notification_policy(
+            policy, targets=targets_by_intent[str(policy["notification_intent_id"])],
+            evaluated_at_utc=str(materialization["evaluated_at_utc"]),
+            range_start_utc=str(materialization["range_start_utc"]), range_end_utc=str(materialization["range_end_utc"]),
+            candidate_limit=int(str(materialization["limit"])) + 1,
+        )
+        opportunities.extend(dict(value) for value in expanded.opportunities if value["actionable"])
+    opportunities.sort(key=lambda value: (str(value["eligible_at_utc"]), str(value["notification_opportunity_id"])))
+    if len(opportunities) > int(str(materialization["limit"])):
+        raise SpineValidationError("invalid_request:materialization.limit",
+                                   "materialization.limit is smaller than the complete actionable opportunity set")
+    return opportunities
+
+
+def opportunity_work_id(opportunity: Mapping[str, object]) -> str:
+    return notification_id("work_instance", "spine.notification-work-instance-id.v1", {
+        "notification_opportunity_id": opportunity["notification_opportunity_id"], "delivery_target_id": opportunity["delivery_target_id"],
+    })[0]

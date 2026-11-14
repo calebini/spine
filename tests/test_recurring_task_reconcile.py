@@ -374,7 +374,11 @@ class RecurringTaskReconcileTests(unittest.TestCase):
         initial = self.reconcile(self.created()["result"]["rule"])
         rule = self.update_rule(initial["result"]["rule"], title="Future tasks only", scope="new_assignments_only")
         result = self.reconcile(rule, "new-only-page")
-        self.assertFalse(result["changed"])
+        # Coverage of the queued configuration change is progress exactly once;
+        # no existing assignment adopts the new template.
+        self.assertTrue(result["changed"])
+        self.assertEqual({r["outcome"] for r in result["result"]["results"]}, {"retained"})
+        self.assertFalse(self.reconcile(rule, "after-new-only-coverage")["changed"])
         self.assertEqual(
             {
                 r[0]

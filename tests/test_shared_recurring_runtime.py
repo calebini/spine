@@ -54,12 +54,25 @@ class SharedRecurringRuntimeTests(unittest.TestCase):
         r3_replacements = {(entry["path"], entry["name"]): entry for entry in r3["replacements"]}
         self.assertEqual(set(r3_replacements), {("src/spine/ledger/recurring_task_catalog.py", "advance_catalog")})
         r3_amended = [r3_replacements.get((entry["path"], entry["name"]), entry) for entry in calendar_amended]
+        queue = json.loads((ROOT / "tests/fixtures/internal_operations/r3_rule_queue_body_amendment.json").read_text())
+        self.assertEqual(queue["prior_amendment"], "tests/fixtures/internal_operations/r3_catalog_body_amendment.json")
+        self.assertEqual(hashlib.sha256((ROOT / queue["prior_amendment"]).read_bytes()).hexdigest(), queue["prior_amendment_sha256"])
+        writers = {(e["path"], e["name"]): e for e in queue["replacements"]}
+        self.assertEqual(len(queue["replacements"]), 3)
+        self.assertEqual(set(writers), {("src/spine/commands/recurring_tasks.py", name) for name in ("create", "update", "retire")})
+        queued = [writers.get((e["path"], e["name"]), e) for e in r3_amended]
+        fence = json.loads((ROOT / "tests/fixtures/internal_operations/r3_automatic_dispatch_body_amendment.json").read_text())
+        self.assertEqual(fence["prior_amendment"], "tests/fixtures/internal_operations/r3_rule_queue_body_amendment.json")
+        self.assertEqual(hashlib.sha256((ROOT / fence["prior_amendment"]).read_bytes()).hexdigest(), fence["prior_amendment_sha256"])
+        adapter = fence["replacement"]
+        self.assertEqual((adapter["path"], adapter["name"]), ("src/spine/commands/recurring_tasks.py", "execute"))
+        fenced = [adapter if (e["path"], e["name"]) == (adapter["path"], adapter["name"]) else e for e in queued]
         # Accept one complete captured state, never a per-function mix. Retain
         # both original RF1 baselines and narrowly record the two functional R2
         # corrections authorized after RF2 and the one R3 catalog-coalescing
         # change; all other body hashes stay frozen.
         mismatches = []
-        for variant in (witness["bodies"], witness["committed_bodies"], amended, calendar_amended, r3_amended):
+        for variant in (witness["bodies"], witness["committed_bodies"], amended, calendar_amended, r3_amended, queued, fenced):
             failures = []
             for entry in variant:
                 nodes = ast.parse((ROOT / entry["path"]).read_text()).body

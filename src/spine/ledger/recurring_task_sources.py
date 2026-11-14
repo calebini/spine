@@ -384,6 +384,16 @@ def _addition_history(db: sqlite3.Connection, root: dict[str, Any], head: dict[s
 
 def verify_proof(db: sqlite3.Connection, root: dict[str, Any], kind: str, payload: dict[str, Any], budget: ProofBudget) -> None:
     """Validate a pinned proof against actual immutable source rows, read-only."""
+    verify_planned_proof(db, root, kind, payload, budget, predecessors={})
+
+
+def verify_planned_proof(db: sqlite3.Connection, root: dict[str, Any], kind: str, payload: dict[str, Any],
+                         budget: ProofBudget, *, predecessors: dict[str, dict[str, Any]],
+                         verified_reservations: frozenset[str] = frozenset()) -> None:
+    """An observer may supply its own already-verified, not-yet-stored predecessors.
+
+    Persistence and actual admission always require the ledger-backed form.
+    """
     from spine.core.recurring_tasks import decode, validate_proof
 
     validate_proof(kind, payload)
@@ -418,24 +428,23 @@ def verify_proof(db: sqlite3.Connection, root: dict[str, Any], kind: str, payloa
             (root["related_task_rule_id"], payload["occurrence_key"]),
             budget,
         )
-        invariant(len(reservations) == 1, "identity requires an existing selector reservation")
+        invariant(len(reservations) == 1 or payload["occurrence_key"] in verified_reservations,
+                  "identity requires an existing selector reservation")
     for lid in payload["lineage_ids"]:
         row = _lineage(db, lid, budget)
         invariant(row["recurrence_set_id"] == root["recurrence_set_id"], "foreign proof lineage")
     if "prior_proof_id" in payload:
-        prior_rows = _rows(
-            db,
-            "SELECT * FROM related_task_source_proofs WHERE proof_id=? AND related_task_rule_id=?",
-            (payload["prior_proof_id"], root["related_task_rule_id"]),
-            budget,
-        )
-        invariant(len(prior_rows) == 1, "missing preceding proof")
-        prior = prior_rows[0]
-        previous = decode(prior["proof_json"])
+        previous = predecessors.get(payload["prior_proof_id"])
+        if previous is None:
+            prior_rows = _rows(db, "SELECT * FROM related_task_source_proofs WHERE proof_id=? AND related_task_rule_id=?",
+                               (payload["prior_proof_id"], root["related_task_rule_id"]), budget)
+            invariant(len(prior_rows) == 1, "missing preceding proof")
+            previous = decode(prior_rows[0]["proof_json"])
+        assert previous is not None
         invariant(previous.get("selector") == payload["prior_selector"], "prior proof selector mismatch")
         if kind == "carry_forward":
             invariant(bool(payload["hops"]), "carry-forward requires source hops")
-            resolved = continuity(db, prior["recurrence_revision_id"], payload["prior_selector"], payload["hops"], budget)
+            resolved = continuity(db, previous["recurrence_revision_id"], payload["prior_selector"], payload["hops"], budget)
             invariant(
                 resolved["header"]["recurrence_revision_id"] == payload["recurrence_revision_id"]
                 and resolved["selector"] == payload["selector"]
@@ -443,7 +452,8 @@ def verify_proof(db: sqlite3.Connection, root: dict[str, Any], kind: str, payloa
             invariant(sorted({lid for hop in payload["hops"] for lid in hop["lineage_ids"]}) == payload["lineage_ids"])
         elif kind in {"excluded", "occurrence_cancelled"}:
             invariant(
-                prior["recurrence_revision_id"] == payload["recurrence_revision_id"] and payload["prior_selector"] == payload["selector"],
+                previous["recurrence_revision_id"] == payload["recurrence_revision_id"]
+                and payload["prior_selector"] == payload["selector"],
                 "inactive proof must reference accepted current identity",
             )
         elif kind == "identity":

@@ -67,7 +67,8 @@ def append_state(db: Any, assignment: dict[str, Any], state: dict[str, Any], req
 
 
 def suppress(db: Any, request: dict[str, Any], root: dict[str, Any], now: str) -> tuple[dict[str, Any], str, bool]:
-    from spine.ledger.recurring_task_catalog import advance_catalog, lookup
+    from spine.ledger.recurring_task_catalog import lookup
+    from spine.ledger.recurring_task_invalidation import DirtyReason, mark
     from spine.services.recurring_task_reads import assignment_view
 
     assignment = lookup(db, "related_task_assignments", request["assignment_id"], "assignment_id")
@@ -129,7 +130,7 @@ def suppress(db: Any, request: dict[str, Any], root: dict[str, Any], now: str) -
             root["change_version"],
             {"current_revision_id": root["current_revision_id"]},
         )
-        advance_catalog(db)
+        mark(db, root["related_task_rule_id"], DirtyReason.INTENT)
     projection = assignment_view(db, read_record(db, "related_task_assignments", assignment["assignment_id"]), root)
     return (
         {

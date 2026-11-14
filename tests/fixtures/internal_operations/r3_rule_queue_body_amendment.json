@@ -1,0 +1,25 @@
+{
+  "prior_amendment": "tests/fixtures/internal_operations/r3_catalog_body_amendment.json",
+  "prior_amendment_sha256": "2011f0e2d34dc64bd5157483bfd9eaf8f581d5d9f4dede6c93313486e0d13e6b",
+  "regression_tests": "tests/test_recurring_task_invalidation.py",
+  "replacements": [
+    {
+      "path": "src/spine/commands/recurring_tasks.py",
+      "name": "create",
+      "body_sha256": "30da92a47055a78576e59cd5bd0b6bdc38300da9eb87a6e3938f4ce785e39572",
+      "reason": "Queue enrollment instead of only advancing the catalog."
+    },
+    {
+      "path": "src/spine/commands/recurring_tasks.py",
+      "name": "update",
+      "body_sha256": "61e25cd8a4f77831959eba6ae23e3349112b8ecffafa57d26095c413bd48e92e",
+      "reason": "Queue changed source configuration or adoption, retaining the existing changed/no-op boundary."
+    },
+    {
+      "path": "src/spine/commands/recurring_tasks.py",
+      "name": "retire",
+      "body_sha256": "077d8450f35570491f63f6454f91f60db3374c92aea62883141a3f74800313f5",
+      "reason": "Queue the retirement intent without visiting the root's assignments."
+    }
+  ]
+}
