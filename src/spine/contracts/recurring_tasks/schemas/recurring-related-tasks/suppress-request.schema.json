@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/suppress-request.schema.json",
+  "title": "Draft recurring-task suppress request",
+  "$comment": "Source only. Command identifier is external dispatch, not a request field. Dry run is an execution option. Exact semantic validation/precedence and byte caps remain required.",
+  "type": "object",
+  "properties": {
+    "contract_version": {
+      "const": "spine.recurring-related-tasks.v1"
+    },
+    "command_id": {
+      "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/id"
+    },
+    "actor_subject_id": {
+      "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/id"
+    },
+    "requested_at_utc": {
+      "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/utc"
+    },
+    "related_task_rule_id": {
+      "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/ruleId"
+    },
+    "expected": {
+      "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/suppressionExpected"
+    },
+    "assignment_id": {
+      "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/assignmentId"
+    },
+    "target_generation_id": {
+      "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/generationId"
+    },
+    "target_task_item_id": {
+      "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/id"
+    }
+  },
+  "required": [
+    "contract_version",
+    "command_id",
+    "actor_subject_id",
+    "requested_at_utc",
+    "related_task_rule_id",
+    "expected",
+    "assignment_id",
+    "target_generation_id",
+    "target_task_item_id"
+  ],
+  "additionalProperties": false
+}

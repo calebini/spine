@@ -1,0 +1,852 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/preimages.schema.json",
+  "title": "Closed recurring-task and delegated identity preimages (ratified/source only)",
+  "$comment": "New-family preimages and delegated old preimages remain distinct. No new fields are added to frozen command/notification/recurrence algorithms.",
+  "$defs": {
+    "related_task_rule": {
+      "type": "object",
+      "properties": {
+        "canonical_json_version": {
+          "const": "spine.canonical-json.v1"
+        },
+        "contract_version": {
+          "const": "spine.recurring-related-tasks.v1"
+        },
+        "derivation_version": {
+          "const": "spine.related-task-rule-id.v1"
+        },
+        "owner": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/owner"
+        },
+        "rule_key": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/key"
+        }
+      },
+      "required": [
+        "canonical_json_version",
+        "contract_version",
+        "derivation_version",
+        "owner",
+        "rule_key"
+      ],
+      "additionalProperties": false
+    },
+    "configuration_hash": {
+      "type": "object",
+      "properties": {
+        "canonical_json_version": {
+          "const": "spine.canonical-json.v1"
+        },
+        "contract_version": {
+          "const": "spine.recurring-related-tasks.v1"
+        },
+        "derivation_version": {
+          "const": "spine.related-task-rule-configuration.v1"
+        },
+        "configuration": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/normalizedConfiguration"
+        }
+      },
+      "required": [
+        "canonical_json_version",
+        "contract_version",
+        "derivation_version",
+        "configuration"
+      ],
+      "additionalProperties": false
+    },
+    "related_task_rule_revision": {
+      "type": "object",
+      "properties": {
+        "canonical_json_version": {
+          "const": "spine.canonical-json.v1"
+        },
+        "contract_version": {
+          "const": "spine.recurring-related-tasks.v1"
+        },
+        "derivation_version": {
+          "const": "spine.related-task-rule-revision-id.v1"
+        },
+        "related_task_rule_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/ruleId"
+        },
+        "revision_index": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/positive"
+        },
+        "prior_revision_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/revisionId"
+        },
+        "configuration_hash": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/sha256"
+        }
+      },
+      "required": [
+        "canonical_json_version",
+        "contract_version",
+        "derivation_version",
+        "related_task_rule_id",
+        "revision_index",
+        "configuration_hash"
+      ],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "revision_index": {
+                "const": "1"
+              }
+            }
+          },
+          "then": {
+            "not": {
+              "required": [
+                "prior_revision_id"
+              ]
+            }
+          },
+          "else": {
+            "required": [
+              "prior_revision_id"
+            ]
+          }
+        }
+      ]
+    },
+    "related_task_assignment": {
+      "type": "object",
+      "properties": {
+        "canonical_json_version": {
+          "const": "spine.canonical-json.v1"
+        },
+        "contract_version": {
+          "const": "spine.recurring-related-tasks.v1"
+        },
+        "derivation_version": {
+          "const": "spine.related-task-assignment-id.v1"
+        },
+        "related_task_rule_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/ruleId"
+        },
+        "initial_selector": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/sourceSelector"
+        }
+      },
+      "required": [
+        "canonical_json_version",
+        "contract_version",
+        "derivation_version",
+        "related_task_rule_id",
+        "initial_selector"
+      ],
+      "additionalProperties": false
+    },
+    "related_task_generation": {
+      "type": "object",
+      "properties": {
+        "canonical_json_version": {
+          "const": "spine.canonical-json.v1"
+        },
+        "contract_version": {
+          "const": "spine.recurring-related-tasks.v1"
+        },
+        "derivation_version": {
+          "const": "spine.related-task-generation-id.v1"
+        },
+        "assignment_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/assignmentId"
+        },
+        "generation_index": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/positive"
+        }
+      },
+      "required": [
+        "canonical_json_version",
+        "contract_version",
+        "derivation_version",
+        "assignment_id",
+        "generation_index"
+      ],
+      "additionalProperties": false
+    },
+    "related_task_proof": {
+      "type": "object",
+      "properties": {
+        "canonical_json_version": {
+          "const": "spine.canonical-json.v1"
+        },
+        "contract_version": {
+          "const": "spine.recurring-related-tasks.v1"
+        },
+        "derivation_version": {
+          "const": "spine.related-task-proof-id.v1"
+        },
+        "related_task_rule_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/ruleId"
+        },
+        "proof_kind": {
+          "enum": [
+            "enrollment",
+            "identity",
+            "carry_forward",
+            "component_candidate",
+            "new_rdate",
+            "excluded",
+            "occurrence_cancelled",
+            "source_cancelled"
+          ]
+        },
+        "proof_payload": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/evidence.schema.json#/$defs/proofPayload"
+        }
+      },
+      "required": [
+        "canonical_json_version",
+        "contract_version",
+        "derivation_version",
+        "related_task_rule_id",
+        "proof_kind",
+        "proof_payload"
+      ],
+      "additionalProperties": false
+    },
+    "state_hash": {
+      "type": "object",
+      "properties": {
+        "canonical_json_version": {
+          "const": "spine.canonical-json.v1"
+        },
+        "contract_version": {
+          "const": "spine.recurring-related-tasks.v1"
+        },
+        "derivation_version": {
+          "const": "spine.related-task-assignment-state.v1"
+        },
+        "state": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/evidence.schema.json#/$defs/state"
+        }
+      },
+      "required": [
+        "canonical_json_version",
+        "contract_version",
+        "derivation_version",
+        "state"
+      ],
+      "additionalProperties": false
+    },
+    "related_task_assignment_revision": {
+      "type": "object",
+      "properties": {
+        "canonical_json_version": {
+          "const": "spine.canonical-json.v1"
+        },
+        "contract_version": {
+          "const": "spine.recurring-related-tasks.v1"
+        },
+        "derivation_version": {
+          "const": "spine.related-task-assignment-revision-id.v1"
+        },
+        "assignment_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/assignmentId"
+        },
+        "change_version": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/positive"
+        },
+        "prior_assignment_revision_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/assignmentRevisionId"
+        },
+        "state_hash": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/sha256"
+        }
+      },
+      "required": [
+        "canonical_json_version",
+        "contract_version",
+        "derivation_version",
+        "assignment_id",
+        "change_version",
+        "state_hash"
+      ],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "change_version": {
+                "const": "1"
+              }
+            }
+          },
+          "then": {
+            "not": {
+              "required": [
+                "prior_assignment_revision_id"
+              ]
+            }
+          },
+          "else": {
+            "required": [
+              "prior_assignment_revision_id"
+            ]
+          }
+        }
+      ]
+    },
+    "related_task_intent": {
+      "type": "object",
+      "properties": {
+        "canonical_json_version": {
+          "const": "spine.canonical-json.v1"
+        },
+        "contract_version": {
+          "const": "spine.recurring-related-tasks.v1"
+        },
+        "derivation_version": {
+          "const": "spine.related-task-intent-id.v1"
+        },
+        "related_task_rule_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/ruleId"
+        },
+        "rule_change_version": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/positive"
+        },
+        "intent_kind": {
+          "enum": [
+            "adopt",
+            "retire"
+          ]
+        },
+        "intent_payload": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/evidence.schema.json#/$defs/intentPayload"
+        }
+      },
+      "required": [
+        "canonical_json_version",
+        "contract_version",
+        "derivation_version",
+        "related_task_rule_id",
+        "rule_change_version",
+        "intent_kind",
+        "intent_payload"
+      ],
+      "additionalProperties": false
+    },
+    "related_task_suppression": {
+      "type": "object",
+      "properties": {
+        "canonical_json_version": {
+          "const": "spine.canonical-json.v1"
+        },
+        "contract_version": {
+          "const": "spine.recurring-related-tasks.v1"
+        },
+        "derivation_version": {
+          "const": "spine.related-task-suppression-id.v1"
+        },
+        "assignment_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/assignmentId"
+        },
+        "target_generation_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/generationId"
+        }
+      },
+      "required": [
+        "canonical_json_version",
+        "contract_version",
+        "derivation_version",
+        "assignment_id",
+        "target_generation_id"
+      ],
+      "additionalProperties": false
+    },
+    "command_derived": {
+      "type": "object",
+      "properties": {
+        "derivation_version": {
+          "const": "spine.command-id.v1"
+        },
+        "command": {
+          "enum": [
+            "schedule.related_task_rule.create",
+            "schedule.related_task_rule.update",
+            "schedule.related_task_rule.reconcile",
+            "schedule.related_task_rule.retire",
+            "schedule.related_task_rule.assignment.suppress"
+          ]
+        },
+        "command_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/id"
+        },
+        "row_role": {
+          "enum": [
+            "item",
+            "due_anchor",
+            "relation",
+            "temporal_binding",
+            "temporal_binding_revision",
+            "item_access_owner",
+            "audit",
+            "command_receipt"
+          ]
+        },
+        "request_path": {
+          "type": "string",
+          "pattern": "^/"
+        }
+      },
+      "required": [
+        "derivation_version",
+        "command",
+        "command_id",
+        "row_role",
+        "request_path"
+      ],
+      "additionalProperties": false
+    },
+    "occurrence_key": {
+      "type": "object",
+      "properties": {
+        "derivation_version": {
+          "const": "spine.recurrence-occurrence-key.v2"
+        },
+        "contract_version": {
+          "const": "spine.recurrence.contract.v1"
+        },
+        "normalization_version": {
+          "const": "spine.recurrence.normalization.v1"
+        },
+        "canonical_json_version": {
+          "const": "spine.canonical-json.v1"
+        },
+        "target_occurrence_selector": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/sourceSelector"
+        }
+      },
+      "required": [
+        "derivation_version",
+        "contract_version",
+        "normalization_version",
+        "canonical_json_version",
+        "target_occurrence_selector"
+      ],
+      "additionalProperties": false
+    },
+    "selector_ref": {
+      "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/sourceSelector"
+    },
+    "notification_intent": {
+      "type": "object",
+      "properties": {
+        "contract_version": {
+          "const": "spine.notification-schedule.contract.v1"
+        },
+        "normalization_version": {
+          "const": "spine.notification-schedule.normalization.v1"
+        },
+        "canonical_json_version": {
+          "const": "spine.canonical-json.v1"
+        },
+        "derivation_version": {
+          "const": "spine.notification-intent-id.v1"
+        },
+        "item_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/id"
+        },
+        "intent_created_item_version": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/positive"
+        },
+        "intent_created_by_command_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/id"
+        }
+      },
+      "required": [
+        "contract_version",
+        "normalization_version",
+        "canonical_json_version",
+        "derivation_version",
+        "item_id",
+        "intent_created_item_version",
+        "intent_created_by_command_id"
+      ],
+      "additionalProperties": false
+    },
+    "normalized_notification_schedule_hash": {
+      "type": "object",
+      "properties": {
+        "contract_version": {
+          "const": "spine.notification-schedule.contract.v1"
+        },
+        "normalization_version": {
+          "const": "spine.notification-schedule.normalization.v1"
+        },
+        "canonical_json_version": {
+          "const": "spine.canonical-json.v1"
+        },
+        "derivation_version": {
+          "const": "spine.normalized-notification-schedule-hash.v1"
+        },
+        "target": {
+          "type": "object",
+          "properties": {
+            "anchor_role": {
+              "const": "task_due"
+            },
+            "application_scope": {
+              "const": "item"
+            }
+          },
+          "required": [
+            "anchor_role",
+            "application_scope"
+          ],
+          "additionalProperties": false
+        },
+        "schedule": {
+          "$ref": "../notification-types.schema.json#/$defs/schedule"
+        },
+        "late_handling": {
+          "$ref": "../notification-types.schema.json#/$defs/lateHandling"
+        }
+      },
+      "required": [
+        "contract_version",
+        "normalization_version",
+        "canonical_json_version",
+        "derivation_version",
+        "target",
+        "schedule",
+        "late_handling"
+      ],
+      "additionalProperties": false
+    },
+    "notification_schedule": {
+      "type": "object",
+      "properties": {
+        "contract_version": {
+          "const": "spine.notification-schedule.contract.v1"
+        },
+        "normalization_version": {
+          "const": "spine.notification-schedule.normalization.v1"
+        },
+        "canonical_json_version": {
+          "const": "spine.canonical-json.v1"
+        },
+        "derivation_version": {
+          "const": "spine.notification-schedule-id.v1"
+        },
+        "notification_intent_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/id"
+        },
+        "item_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/id"
+        },
+        "item_version": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/positive"
+        },
+        "normalized_notification_schedule_hash": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/sha256"
+        }
+      },
+      "required": [
+        "contract_version",
+        "normalization_version",
+        "canonical_json_version",
+        "derivation_version",
+        "notification_intent_id",
+        "item_id",
+        "item_version",
+        "normalized_notification_schedule_hash"
+      ],
+      "additionalProperties": false
+    },
+    "notification_policy": {
+      "type": "object",
+      "properties": {
+        "contract_version": {
+          "const": "spine.notification-schedule.contract.v1"
+        },
+        "normalization_version": {
+          "const": "spine.notification-schedule.normalization.v1"
+        },
+        "canonical_json_version": {
+          "const": "spine.canonical-json.v1"
+        },
+        "derivation_version": {
+          "const": "spine.notification-policy-id.v1"
+        },
+        "notification_intent_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/id"
+        },
+        "intent_created_item_version": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/positive"
+        },
+        "intent_created_by_command_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/id"
+        },
+        "item_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/id"
+        },
+        "item_version": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/positive"
+        },
+        "notification_schedule_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/id"
+        },
+        "recipient_kind": {
+          "enum": [
+            "subject",
+            "subject_group"
+          ]
+        },
+        "recipient_subject_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/id"
+        },
+        "recipient_group_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/id"
+        },
+        "channel": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/id"
+        },
+        "delivery_target_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/id"
+        },
+        "target": {
+          "type": "object",
+          "properties": {
+            "anchor_role": {
+              "const": "task_due"
+            },
+            "application_scope": {
+              "const": "item"
+            }
+          },
+          "required": [
+            "anchor_role",
+            "application_scope"
+          ],
+          "additionalProperties": false
+        },
+        "normalized_notification_schedule_hash": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/sha256"
+        },
+        "status": {
+          "enum": [
+            "active",
+            "disabled"
+          ]
+        },
+        "created_at_utc": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/utc"
+        },
+        "created_by_command_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/id"
+        },
+        "source_notification_policy_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/id"
+        },
+        "disabled_at_utc": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/utc"
+        }
+      },
+      "required": [
+        "contract_version",
+        "normalization_version",
+        "canonical_json_version",
+        "derivation_version",
+        "notification_intent_id",
+        "intent_created_item_version",
+        "intent_created_by_command_id",
+        "item_id",
+        "item_version",
+        "notification_schedule_id",
+        "recipient_kind",
+        "channel",
+        "delivery_target_id",
+        "target",
+        "normalized_notification_schedule_hash",
+        "status",
+        "created_at_utc",
+        "created_by_command_id"
+      ],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "recipient_kind": {
+                "const": "subject"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "recipient_subject_id"
+            ],
+            "not": {
+              "required": [
+                "recipient_group_id"
+              ]
+            }
+          },
+          "else": {
+            "required": [
+              "recipient_group_id"
+            ],
+            "not": {
+              "required": [
+                "recipient_subject_id"
+              ]
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "disabled"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "disabled_at_utc"
+            ]
+          },
+          "else": {
+            "not": {
+              "required": [
+                "disabled_at_utc"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "notification_schedule_slot": {
+      "type": "object",
+      "properties": {
+        "contract_version": {
+          "const": "spine.notification-schedule.contract.v1"
+        },
+        "normalization_version": {
+          "const": "spine.notification-schedule.normalization.v1"
+        },
+        "canonical_json_version": {
+          "const": "spine.canonical-json.v1"
+        },
+        "derivation_version": {
+          "const": "spine.notification-schedule-slot-key.v1"
+        },
+        "schedule_kind": {
+          "const": "once"
+        },
+        "slot_descriptor": {
+          "$ref": "../notification-types.schema.json#/$defs/boundary"
+        }
+      },
+      "required": [
+        "contract_version",
+        "normalization_version",
+        "canonical_json_version",
+        "derivation_version",
+        "schedule_kind",
+        "slot_descriptor"
+      ],
+      "additionalProperties": false
+    },
+    "notification_opportunity": {
+      "type": "object",
+      "properties": {
+        "contract_version": {
+          "const": "spine.notification-schedule.contract.v1"
+        },
+        "normalization_version": {
+          "const": "spine.notification-schedule.normalization.v1"
+        },
+        "canonical_json_version": {
+          "const": "spine.canonical-json.v1"
+        },
+        "derivation_version": {
+          "const": "spine.notification-opportunity-id.v1"
+        },
+        "notification_intent_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/id"
+        },
+        "normalized_notification_schedule_hash": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/sha256"
+        },
+        "target_binding": {
+          "type": "object",
+          "properties": {
+            "anchor_role": {
+              "const": "task_due"
+            },
+            "application_scope": {
+              "const": "item"
+            },
+            "item_target_scheduled_fact": {
+              "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/fact"
+            }
+          },
+          "required": [
+            "anchor_role",
+            "application_scope",
+            "item_target_scheduled_fact"
+          ],
+          "additionalProperties": false
+        },
+        "notification_schedule_slot_key": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/id"
+        },
+        "eligible_at_utc": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/utc"
+        }
+      },
+      "required": [
+        "contract_version",
+        "normalization_version",
+        "canonical_json_version",
+        "derivation_version",
+        "notification_intent_id",
+        "normalized_notification_schedule_hash",
+        "target_binding",
+        "notification_schedule_slot_key",
+        "eligible_at_utc"
+      ],
+      "additionalProperties": false
+    },
+    "work_instance": {
+      "type": "object",
+      "properties": {
+        "contract_version": {
+          "const": "spine.notification-schedule.contract.v1"
+        },
+        "normalization_version": {
+          "const": "spine.notification-schedule.normalization.v1"
+        },
+        "canonical_json_version": {
+          "const": "spine.canonical-json.v1"
+        },
+        "derivation_version": {
+          "const": "spine.notification-work-instance-id.v1"
+        },
+        "notification_opportunity_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/id"
+        },
+        "delivery_target_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/id"
+        }
+      },
+      "required": [
+        "contract_version",
+        "normalization_version",
+        "canonical_json_version",
+        "derivation_version",
+        "notification_opportunity_id",
+        "delivery_target_id"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

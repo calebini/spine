@@ -1467,7 +1467,7 @@ checkpoint, then selection of the existing RF3 propagation prerequisite before R
 ### SPINE-094 — R3: recurring-task all-writer safety and automatic scheduling
 
 **Status:** Done — internal R3 verified on disposable ledgers (2026-11-14);
-worker integration is uncommitted. Originally selected after RF3 `7e3983d`.
+worker integration committed as `c90f27d`. Originally selected after RF3 `7e3983d`.
 SPINE-093's manual R2 checkpoint and SPINE-101's RF3 propagation are complete.
 The first R3 increment adds coalesced transaction-owned invalidation and
 generation-checked queue acknowledgement through the established propagation seam.
@@ -1553,7 +1553,14 @@ checks, Ruff, focused typing, compilation, local link checks and diff hygiene pa
 
 ### SPINE-095 — R4: recurring-task activation and release verification
 
-**Status:** Ready following SPINE-094; not started or separately authorized.
+**Status:** In progress — selected by the operator after committing R3 as `c90f27d`.
+First increment: exact offline package closure, bounded fail-closed loader and
+installed-wheel resource tests. Public registration, schema activation and full
+release verification remain later R4 work; no deployment is authorized.
+See [R4 package evidence](design-notes/recurring-related-task-r4-release.md).
+Verification: 63 focused tests pass; all 33 assets match their source pins,
+non-editable installed-wheel loading outside the checkout passes, as do lint,
+loader typing, compilation, documentation links, sync and diff hygiene.
 **Scope:** Exact packaged closure, trusted-local public commands and dependencies,
 implemented declarations, coherent migration/package metadata and generic operator
 documentation. No web allowlist, authentication redesign or deployment procedure.

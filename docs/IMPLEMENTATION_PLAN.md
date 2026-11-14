@@ -493,6 +493,14 @@ RRT-04/05/07/10/11/12/16/17/18 across all writers and worker entrypoints.
 
 ### R4 — Public activation and release verification (SPINE-095)
 
+**Selected (2026-11-14):** R3 committed as `c90f27d`. First R4 increment
+packages the exact 33-resource offline closure and adds a compiled-pin loader,
+per-resource corruption/missing checks, and a non-editable wheel resource proof.
+See [R4 package evidence](design-notes/recurring-related-task-r4-release.md).
+This is not the public activation or complete R4 acceptance result. Next:
+command registration, schema-20 migration/preflight integration, worker startup
+configuration and the installed public science-class scenario below.
+
 Package the exact offline source schema closure and register the seven trusted-
 local CLI commands and their exact dependencies only after R1–R3 tests pass.
 Change the source-only tests to implemented-behavior assertions in the same

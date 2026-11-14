@@ -1,0 +1,1560 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/evidence.schema.json",
+  "title": "Recurring task immutable evidence v1 (ratified/source only)",
+  "$comment": "Hash/equality, relational FKs, contiguous history, monotone veto and transaction proofs require offline semantic oracles and later runtime tests, not schema acceptance alone.",
+  "$defs": {
+    "lineageHop": {
+      "type": "object",
+      "properties": {
+        "prior_revision_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/id"
+        },
+        "new_revision_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/id"
+        },
+        "prior_selector": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/sourceSelector"
+        },
+        "selector": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/sourceSelector"
+        },
+        "lineage_ids": {
+          "type": "array",
+          "items": {
+            "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/id"
+          },
+          "minItems": 1,
+          "maxItems": 50000,
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "prior_revision_id",
+        "new_revision_id",
+        "prior_selector",
+        "selector",
+        "lineage_ids"
+      ],
+      "additionalProperties": false
+    },
+    "enrollmentProof": {
+      "type": "object",
+      "properties": {
+        "source_item_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/id"
+        },
+        "source_item_version": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/positive"
+        },
+        "recurrence_set_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/id"
+        },
+        "recurrence_revision_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/id"
+        },
+        "normalized_recurrence_set_hash": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/sha256"
+        },
+        "selector": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/sourceSelector"
+        },
+        "occurrence_key": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/occurrenceKey"
+        },
+        "lineage_ids": {
+          "type": "array",
+          "items": {
+            "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/id"
+          },
+          "maxItems": 50000,
+          "uniqueItems": true
+        },
+        "enrolled_recurrence_revision_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/id"
+        }
+      },
+      "required": [
+        "source_item_id",
+        "source_item_version",
+        "recurrence_set_id",
+        "recurrence_revision_id",
+        "normalized_recurrence_set_hash",
+        "selector",
+        "occurrence_key",
+        "lineage_ids",
+        "enrolled_recurrence_revision_id"
+      ],
+      "additionalProperties": false
+    },
+    "identityProof": {
+      "type": "object",
+      "properties": {
+        "source_item_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/id"
+        },
+        "source_item_version": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/positive"
+        },
+        "recurrence_set_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/id"
+        },
+        "recurrence_revision_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/id"
+        },
+        "normalized_recurrence_set_hash": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/sha256"
+        },
+        "selector": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/sourceSelector"
+        },
+        "occurrence_key": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/occurrenceKey"
+        },
+        "lineage_ids": {
+          "type": "array",
+          "items": {
+            "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/id"
+          },
+          "maxItems": 50000,
+          "uniqueItems": true
+        },
+        "prior_proof_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/proofId"
+        },
+        "prior_selector": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/sourceSelector"
+        }
+      },
+      "required": [
+        "source_item_id",
+        "source_item_version",
+        "recurrence_set_id",
+        "recurrence_revision_id",
+        "normalized_recurrence_set_hash",
+        "selector",
+        "occurrence_key",
+        "lineage_ids"
+      ],
+      "additionalProperties": false,
+      "dependentRequired": {
+        "prior_proof_id": [
+          "prior_selector"
+        ],
+        "prior_selector": [
+          "prior_proof_id"
+        ]
+      }
+    },
+    "carryProof": {
+      "type": "object",
+      "properties": {
+        "source_item_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/id"
+        },
+        "source_item_version": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/positive"
+        },
+        "recurrence_set_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/id"
+        },
+        "recurrence_revision_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/id"
+        },
+        "normalized_recurrence_set_hash": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/sha256"
+        },
+        "selector": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/sourceSelector"
+        },
+        "occurrence_key": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/occurrenceKey"
+        },
+        "lineage_ids": {
+          "type": "array",
+          "items": {
+            "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/id"
+          },
+          "maxItems": 50000,
+          "uniqueItems": true
+        },
+        "prior_proof_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/proofId"
+        },
+        "prior_selector": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/sourceSelector"
+        },
+        "hops": {
+          "type": "array",
+          "items": {
+            "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/evidence.schema.json#/$defs/lineageHop"
+          },
+          "minItems": 1,
+          "maxItems": 256
+        }
+      },
+      "required": [
+        "source_item_id",
+        "source_item_version",
+        "recurrence_set_id",
+        "recurrence_revision_id",
+        "normalized_recurrence_set_hash",
+        "selector",
+        "occurrence_key",
+        "lineage_ids",
+        "prior_proof_id",
+        "prior_selector",
+        "hops"
+      ],
+      "additionalProperties": false
+    },
+    "componentSelector": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "source_kind": {
+              "const": "rule"
+            },
+            "selector": {
+              "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/sourceRule"
+            }
+          },
+          "required": [
+            "source_kind",
+            "selector"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "source_kind": {
+              "const": "rdate"
+            },
+            "selector": {
+              "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/sourceRdate"
+            }
+          },
+          "required": [
+            "source_kind",
+            "selector"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "componentProof": {
+      "type": "object",
+      "properties": {
+        "source_item_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/id"
+        },
+        "source_item_version": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/positive"
+        },
+        "recurrence_set_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/id"
+        },
+        "recurrence_revision_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/id"
+        },
+        "normalized_recurrence_set_hash": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/sha256"
+        },
+        "selector": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/sourceSelector"
+        },
+        "occurrence_key": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/occurrenceKey"
+        },
+        "lineage_ids": {
+          "type": "array",
+          "items": {
+            "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/id"
+          },
+          "maxItems": 50000,
+          "uniqueItems": true
+        },
+        "basis_revision_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/id"
+        },
+        "component_selector": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/evidence.schema.json#/$defs/componentSelector"
+        },
+        "hops": {
+          "type": "array",
+          "items": {
+            "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/evidence.schema.json#/$defs/lineageHop"
+          },
+          "maxItems": 256
+        }
+      },
+      "required": [
+        "source_item_id",
+        "source_item_version",
+        "recurrence_set_id",
+        "recurrence_revision_id",
+        "normalized_recurrence_set_hash",
+        "selector",
+        "occurrence_key",
+        "lineage_ids",
+        "basis_revision_id",
+        "component_selector",
+        "hops"
+      ],
+      "additionalProperties": false
+    },
+    "rdateProof": {
+      "type": "object",
+      "properties": {
+        "source_item_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/id"
+        },
+        "source_item_version": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/positive"
+        },
+        "recurrence_set_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/id"
+        },
+        "recurrence_revision_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/id"
+        },
+        "normalized_recurrence_set_hash": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/sha256"
+        },
+        "selector": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/sourceSelector"
+        },
+        "occurrence_key": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/occurrenceKey"
+        },
+        "lineage_ids": {
+          "type": "array",
+          "items": {
+            "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/id"
+          },
+          "maxItems": 50000,
+          "uniqueItems": true
+        },
+        "rdate_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/id"
+        },
+        "prior_recurrence_revision_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/id"
+        }
+      },
+      "required": [
+        "source_item_id",
+        "source_item_version",
+        "recurrence_set_id",
+        "recurrence_revision_id",
+        "normalized_recurrence_set_hash",
+        "selector",
+        "occurrence_key",
+        "lineage_ids",
+        "rdate_id",
+        "prior_recurrence_revision_id"
+      ],
+      "additionalProperties": false
+    },
+    "excludedProof": {
+      "type": "object",
+      "properties": {
+        "source_item_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/id"
+        },
+        "source_item_version": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/positive"
+        },
+        "recurrence_set_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/id"
+        },
+        "recurrence_revision_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/id"
+        },
+        "normalized_recurrence_set_hash": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/sha256"
+        },
+        "selector": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/sourceSelector"
+        },
+        "occurrence_key": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/occurrenceKey"
+        },
+        "lineage_ids": {
+          "type": "array",
+          "items": {
+            "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/id"
+          },
+          "maxItems": 50000,
+          "uniqueItems": true
+        },
+        "prior_proof_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/proofId"
+        },
+        "prior_selector": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/sourceSelector"
+        },
+        "exdate_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/id"
+        },
+        "exclusion_active": {
+          "const": true
+        },
+        "actionable": {
+          "const": false
+        }
+      },
+      "required": [
+        "source_item_id",
+        "source_item_version",
+        "recurrence_set_id",
+        "recurrence_revision_id",
+        "normalized_recurrence_set_hash",
+        "selector",
+        "occurrence_key",
+        "lineage_ids",
+        "prior_proof_id",
+        "prior_selector",
+        "exdate_id",
+        "exclusion_active",
+        "actionable"
+      ],
+      "additionalProperties": false
+    },
+    "cancelledOccurrenceProof": {
+      "type": "object",
+      "properties": {
+        "source_item_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/id"
+        },
+        "source_item_version": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/positive"
+        },
+        "recurrence_set_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/id"
+        },
+        "recurrence_revision_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/id"
+        },
+        "normalized_recurrence_set_hash": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/sha256"
+        },
+        "selector": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/sourceSelector"
+        },
+        "occurrence_key": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/occurrenceKey"
+        },
+        "lineage_ids": {
+          "type": "array",
+          "items": {
+            "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/id"
+          },
+          "maxItems": 50000,
+          "uniqueItems": true
+        },
+        "prior_proof_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/proofId"
+        },
+        "prior_selector": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/sourceSelector"
+        },
+        "override_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/id"
+        },
+        "lifecycle": {
+          "const": "cancelled"
+        },
+        "actionable": {
+          "const": false
+        }
+      },
+      "required": [
+        "source_item_id",
+        "source_item_version",
+        "recurrence_set_id",
+        "recurrence_revision_id",
+        "normalized_recurrence_set_hash",
+        "selector",
+        "occurrence_key",
+        "lineage_ids",
+        "prior_proof_id",
+        "prior_selector",
+        "override_id",
+        "lifecycle",
+        "actionable"
+      ],
+      "additionalProperties": false
+    },
+    "cancelledSourceProof": {
+      "type": "object",
+      "properties": {
+        "source_item_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/id"
+        },
+        "source_item_version": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/positive"
+        },
+        "recurrence_set_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/id"
+        },
+        "recurrence_revision_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/id"
+        },
+        "normalized_recurrence_set_hash": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/sha256"
+        },
+        "lineage_ids": {
+          "type": "array",
+          "items": {
+            "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/id"
+          },
+          "maxItems": 0,
+          "uniqueItems": true
+        },
+        "cancelled_event_version": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/positive"
+        },
+        "event_status": {
+          "const": "cancelled"
+        }
+      },
+      "required": [
+        "source_item_id",
+        "source_item_version",
+        "recurrence_set_id",
+        "recurrence_revision_id",
+        "normalized_recurrence_set_hash",
+        "lineage_ids",
+        "cancelled_event_version",
+        "event_status"
+      ],
+      "additionalProperties": false
+    },
+    "proofPayload": {
+      "anyOf": [
+        {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/evidence.schema.json#/$defs/enrollmentProof"
+        },
+        {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/evidence.schema.json#/$defs/identityProof"
+        },
+        {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/evidence.schema.json#/$defs/carryProof"
+        },
+        {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/evidence.schema.json#/$defs/componentProof"
+        },
+        {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/evidence.schema.json#/$defs/rdateProof"
+        },
+        {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/evidence.schema.json#/$defs/excludedProof"
+        },
+        {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/evidence.schema.json#/$defs/cancelledOccurrenceProof"
+        },
+        {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/evidence.schema.json#/$defs/cancelledSourceProof"
+        }
+      ]
+    },
+    "proofRecord": {
+      "type": "object",
+      "properties": {
+        "proof_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/proofId"
+        },
+        "related_task_rule_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/ruleId"
+        },
+        "proof_kind": {
+          "enum": [
+            "enrollment",
+            "identity",
+            "carry_forward",
+            "component_candidate",
+            "new_rdate",
+            "excluded",
+            "occurrence_cancelled",
+            "source_cancelled"
+          ]
+        },
+        "source_item_version": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/positive"
+        },
+        "recurrence_revision_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/id"
+        },
+        "prior_recurrence_revision_id": {
+          "anyOf": [
+            {
+              "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/id"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "proof_json": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/evidence.schema.json#/$defs/proofPayload"
+        },
+        "proof_hash": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/sha256"
+        },
+        "created_by_command_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/id"
+        },
+        "created_at_utc": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/utc"
+        }
+      },
+      "required": [
+        "proof_id",
+        "related_task_rule_id",
+        "proof_kind",
+        "source_item_version",
+        "recurrence_revision_id",
+        "prior_recurrence_revision_id",
+        "proof_json",
+        "proof_hash",
+        "created_by_command_id",
+        "created_at_utc"
+      ],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "proof_kind": {
+                "const": "enrollment"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "proof_json": {
+                "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/evidence.schema.json#/$defs/enrollmentProof"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "proof_kind": {
+                "const": "identity"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "proof_json": {
+                "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/evidence.schema.json#/$defs/identityProof"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "proof_kind": {
+                "const": "carry_forward"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "proof_json": {
+                "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/evidence.schema.json#/$defs/carryProof"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "proof_kind": {
+                "const": "component_candidate"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "proof_json": {
+                "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/evidence.schema.json#/$defs/componentProof"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "proof_kind": {
+                "const": "new_rdate"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "proof_json": {
+                "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/evidence.schema.json#/$defs/rdateProof"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "proof_kind": {
+                "const": "excluded"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "proof_json": {
+                "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/evidence.schema.json#/$defs/excludedProof"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "proof_kind": {
+                "const": "occurrence_cancelled"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "proof_json": {
+                "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/evidence.schema.json#/$defs/cancelledOccurrenceProof"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "proof_kind": {
+                "const": "source_cancelled"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "proof_json": {
+                "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/evidence.schema.json#/$defs/cancelledSourceProof"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "state": {
+      "type": "object",
+      "properties": {
+        "generation_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/generationId"
+        },
+        "selector": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/sourceSelector"
+        },
+        "occurrence_key": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/occurrenceKey"
+        },
+        "source_item_version": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/positive"
+        },
+        "recurrence_revision_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/id"
+        },
+        "proof_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/proofId"
+        },
+        "task_item_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/id"
+        },
+        "task_item_version": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/positive"
+        },
+        "temporal_binding_revision_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/id"
+        },
+        "adopted_rule_revision_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/revisionId"
+        },
+        "managed_baseline": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/managedBaseline"
+        },
+        "disposition": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/assignmentDisposition"
+        },
+        "restoration_veto": {
+          "type": "boolean"
+        },
+        "reason": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/reason"
+        },
+        "pending_intent_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/intentId"
+        }
+      },
+      "required": [
+        "generation_id",
+        "selector",
+        "occurrence_key",
+        "source_item_version",
+        "recurrence_revision_id",
+        "proof_id",
+        "task_item_id",
+        "task_item_version",
+        "temporal_binding_revision_id",
+        "adopted_rule_revision_id",
+        "managed_baseline",
+        "disposition",
+        "restoration_veto",
+        "reason"
+      ],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "disposition": {
+                "enum": [
+                  "done",
+                  "manual_cancelled",
+                  "detached",
+                  "suppressed"
+                ]
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "restoration_veto": {
+                "const": true
+              }
+            }
+          }
+        }
+      ]
+    },
+    "stateRecord": {
+      "type": "object",
+      "properties": {
+        "assignment_revision_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/assignmentRevisionId"
+        },
+        "assignment_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/assignmentId"
+        },
+        "change_version": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/positive"
+        },
+        "prior_assignment_revision_id": {
+          "anyOf": [
+            {
+              "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/assignmentRevisionId"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "state_json": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/evidence.schema.json#/$defs/state"
+        },
+        "state_hash": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/sha256"
+        },
+        "source_item_version": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/positive"
+        },
+        "recurrence_revision_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/id"
+        },
+        "task_item_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/id"
+        },
+        "task_item_version": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/positive"
+        },
+        "adopted_rule_revision_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/revisionId"
+        },
+        "generation_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/generationId"
+        },
+        "selector_ref": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/id"
+        },
+        "temporal_binding_revision_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/id"
+        },
+        "proof_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/proofId"
+        },
+        "command_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/id"
+        },
+        "created_at_utc": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/utc"
+        }
+      },
+      "required": [
+        "assignment_revision_id",
+        "assignment_id",
+        "change_version",
+        "prior_assignment_revision_id",
+        "state_json",
+        "state_hash",
+        "source_item_version",
+        "recurrence_revision_id",
+        "task_item_id",
+        "task_item_version",
+        "adopted_rule_revision_id",
+        "generation_id",
+        "selector_ref",
+        "temporal_binding_revision_id",
+        "proof_id",
+        "command_id",
+        "created_at_utc"
+      ],
+      "additionalProperties": false
+    },
+    "generationRecord": {
+      "type": "object",
+      "properties": {
+        "generation_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/generationId"
+        },
+        "assignment_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/assignmentId"
+        },
+        "generation_index": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/positive"
+        },
+        "predecessor_generation_id": {
+          "anyOf": [
+            {
+              "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/generationId"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "task_item_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/id"
+        },
+        "created_task_version": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/positive"
+        },
+        "relationship_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/id"
+        },
+        "temporal_binding_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/id"
+        },
+        "item_access_owner_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/id"
+        },
+        "created_rule_revision_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/revisionId"
+        },
+        "creation_proof_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/proofId"
+        },
+        "created_by_command_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/id"
+        },
+        "created_at_utc": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/utc"
+        }
+      },
+      "required": [
+        "generation_id",
+        "assignment_id",
+        "generation_index",
+        "predecessor_generation_id",
+        "task_item_id",
+        "created_task_version",
+        "relationship_id",
+        "temporal_binding_id",
+        "item_access_owner_id",
+        "created_rule_revision_id",
+        "creation_proof_id",
+        "created_by_command_id",
+        "created_at_utc"
+      ],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "generation_index": {
+                "const": "1"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "predecessor_generation_id": {
+                "type": "null"
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "predecessor_generation_id": {
+                "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/generationId"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "cancellation": {
+      "type": "object",
+      "properties": {
+        "generation_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/generationId"
+        },
+        "cancelled_task_version": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/positive"
+        },
+        "proof_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/proofId"
+        },
+        "assignment_revision_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/assignmentRevisionId"
+        },
+        "command_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/id"
+        },
+        "cancelled_at_utc": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/utc"
+        }
+      },
+      "required": [
+        "generation_id",
+        "cancelled_task_version",
+        "proof_id",
+        "assignment_revision_id",
+        "command_id",
+        "cancelled_at_utc"
+      ],
+      "additionalProperties": false
+    },
+    "suppression": {
+      "type": "object",
+      "properties": {
+        "suppression_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/suppressionId"
+        },
+        "assignment_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/assignmentId"
+        },
+        "target_generation_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/generationId"
+        },
+        "actor_subject_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/id"
+        },
+        "command_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/id"
+        },
+        "command_receipt_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/id"
+        },
+        "suppressed_at_utc": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/utc"
+        }
+      },
+      "required": [
+        "suppression_id",
+        "assignment_id",
+        "target_generation_id",
+        "actor_subject_id",
+        "command_id",
+        "command_receipt_id",
+        "suppressed_at_utc"
+      ],
+      "additionalProperties": false
+    },
+    "adoptionPayload": {
+      "type": "object",
+      "properties": {
+        "configuration_revision_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/revisionId"
+        },
+        "assignment_high_water": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/decimal"
+        },
+        "scope": {
+          "const": "upcoming_open"
+        }
+      },
+      "required": [
+        "configuration_revision_id",
+        "assignment_high_water",
+        "scope"
+      ],
+      "additionalProperties": false
+    },
+    "retirementPayload": {
+      "type": "object",
+      "properties": {
+        "disposition": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/disposition"
+        },
+        "assignment_high_water": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/decimal"
+        },
+        "superseded_adoption_intent_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/intentId"
+        }
+      },
+      "required": [
+        "disposition",
+        "assignment_high_water"
+      ],
+      "additionalProperties": false
+    },
+    "intentPayload": {
+      "oneOf": [
+        {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/evidence.schema.json#/$defs/adoptionPayload"
+        },
+        {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/evidence.schema.json#/$defs/retirementPayload"
+        }
+      ]
+    },
+    "intentRecord": {
+      "type": "object",
+      "properties": {
+        "intent_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/intentId"
+        },
+        "related_task_rule_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/ruleId"
+        },
+        "rule_change_version": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/positive"
+        },
+        "intent_kind": {
+          "enum": [
+            "adopt",
+            "retire"
+          ]
+        },
+        "intent_json": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/evidence.schema.json#/$defs/intentPayload"
+        },
+        "status": {
+          "enum": [
+            "pending",
+            "complete",
+            "superseded"
+          ]
+        },
+        "created_by_command_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/id"
+        },
+        "created_at_utc": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/utc"
+        }
+      },
+      "required": [
+        "intent_id",
+        "related_task_rule_id",
+        "rule_change_version",
+        "intent_kind",
+        "intent_json",
+        "status",
+        "created_by_command_id",
+        "created_at_utc"
+      ],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "intent_kind": {
+                "const": "adopt"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "intent_json": {
+                "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/evidence.schema.json#/$defs/adoptionPayload"
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "intent_json": {
+                "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/evidence.schema.json#/$defs/retirementPayload"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "intentOutcome": {
+      "type": "object",
+      "properties": {
+        "intent_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/intentId"
+        },
+        "assignment_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/assignmentId"
+        },
+        "assignment_revision_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/assignmentRevisionId"
+        },
+        "outcome": {
+          "enum": [
+            "applied",
+            "skipped_terminal",
+            "skipped_overdue",
+            "skipped_independent",
+            "retained_equal",
+            "conflict"
+          ]
+        },
+        "reason": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/reason"
+        },
+        "command_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/id"
+        },
+        "created_at_utc": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/utc"
+        }
+      },
+      "required": [
+        "intent_id",
+        "assignment_id",
+        "assignment_revision_id",
+        "outcome",
+        "reason",
+        "command_id",
+        "created_at_utc"
+      ],
+      "additionalProperties": false
+    },
+    "ownerHeader": {
+      "type": "object",
+      "properties": {
+        "item_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/id"
+        },
+        "item_access_owner_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/id"
+        },
+        "current_revision": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/positive"
+        },
+        "owner_kind": {
+          "enum": [
+            "subject",
+            "subject_group"
+          ]
+        },
+        "owner_subject_id": {
+          "anyOf": [
+            {
+              "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/id"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "owner_group_id": {
+          "anyOf": [
+            {
+              "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/id"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "creator_entitlement_subject_id": {
+          "type": "null"
+        },
+        "created_by_command_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/id"
+        }
+      },
+      "required": [
+        "item_id",
+        "item_access_owner_id",
+        "current_revision",
+        "owner_kind",
+        "owner_subject_id",
+        "owner_group_id",
+        "creator_entitlement_subject_id",
+        "created_by_command_id"
+      ],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "owner_kind": {
+                "const": "subject"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "owner_subject_id": {
+                "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/id"
+              },
+              "owner_group_id": {
+                "type": "null"
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "owner_group_id": {
+                "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/id"
+              },
+              "owner_subject_id": {
+                "type": "null"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "ownerRevision": {
+      "type": "object",
+      "properties": {
+        "item_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/id"
+        },
+        "item_access_owner_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/id"
+        },
+        "owner_kind": {
+          "enum": [
+            "subject",
+            "subject_group"
+          ]
+        },
+        "owner_subject_id": {
+          "anyOf": [
+            {
+              "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/id"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "owner_group_id": {
+          "anyOf": [
+            {
+              "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/id"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "creator_entitlement_subject_id": {
+          "type": "null"
+        },
+        "created_by_command_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/id"
+        },
+        "revision": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/positive"
+        },
+        "changed_at_utc": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/utc"
+        },
+        "changed_by_subject_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/id"
+        },
+        "command_receipt_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/id"
+        }
+      },
+      "required": [
+        "item_id",
+        "item_access_owner_id",
+        "owner_kind",
+        "owner_subject_id",
+        "owner_group_id",
+        "creator_entitlement_subject_id",
+        "created_by_command_id",
+        "revision",
+        "changed_at_utc",
+        "changed_by_subject_id",
+        "command_receipt_id"
+      ],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "owner_kind": {
+                "const": "subject"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "owner_subject_id": {
+                "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/id"
+              },
+              "owner_group_id": {
+                "type": "null"
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "owner_group_id": {
+                "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/id"
+              },
+              "owner_subject_id": {
+                "type": "null"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "sourceTuple": {
+      "type": "object",
+      "properties": {
+        "scheduled_fact": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/fact"
+        },
+        "selector": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/sourceSelector"
+        }
+      },
+      "required": [
+        "scheduled_fact",
+        "selector"
+      ],
+      "additionalProperties": false
+    },
+    "lanePosition": {
+      "type": "object",
+      "properties": {
+        "assignment_after_seq": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/decimal"
+        },
+        "source_after": {
+          "anyOf": [
+            {
+              "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/evidence.schema.json#/$defs/sourceTuple"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "assignment_after_seq",
+        "source_after"
+      ],
+      "additionalProperties": false
+    },
+    "progressCoverage": {
+      "type": "object",
+      "properties": {
+        "range_start_utc": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/utc"
+        },
+        "range_end_utc": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/utc"
+        },
+        "source_after": {
+          "anyOf": [
+            {
+              "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/evidence.schema.json#/$defs/sourceTuple"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "complete": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "range_start_utc",
+        "range_end_utc",
+        "source_after",
+        "complete"
+      ],
+      "additionalProperties": false
+    },
+    "progress": {
+      "type": "object",
+      "properties": {
+        "progress_version": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/decimal"
+        },
+        "source_scan_version": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/positive"
+        },
+        "recurrence_revision_id": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/id"
+        },
+        "coverage_json": {
+          "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/evidence.schema.json#/$defs/progressCoverage"
+        },
+        "assignment_after_seq": {
+          "anyOf": [
+            {
+              "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/decimal"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "pending_intent_id": {
+          "anyOf": [
+            {
+              "$ref": "https://cortext.local/spine/contracts/schemas/recurring-related-tasks/types.schema.json#/$defs/intentId"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "progress_version",
+        "source_scan_version",
+        "recurrence_revision_id",
+        "coverage_json",
+        "assignment_after_seq",
+        "pending_intent_id"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

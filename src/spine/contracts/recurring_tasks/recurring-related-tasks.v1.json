@@ -1,0 +1,325 @@
+{
+  "contract_version": "spine.recurring-related-tasks.v1",
+  "normalization_version": "spine.recurring-related-tasks.normalization.v1",
+  "response_contract": "spine.recurring-related-tasks-response.v1",
+  "cursor_version": "spine.recurring-related-tasks.cursor.v1",
+  "canonical_json_version": "spine.canonical-json.v1",
+  "status": "ratified_machine_contract",
+  "exposure": "trusted_local_only",
+  "runtime_implemented": false,
+  "ledger_schema_version": null,
+  "logical_spec": "specs/recurring-related-tasks.md",
+  "storage_spec": "specs/recurring-related-task-storage.md",
+  "command_spec": "specs/recurring-related-task-commands.md",
+  "machine_spec": "specs/recurring-related-task-machine-contract.md",
+  "commands": {
+    "schedule.related_task_rule.create": {
+      "contract_version": "spine.recurring-related-tasks.v1",
+      "response_contract": "spine.recurring-related-tasks-response.v1",
+      "mutates": true,
+      "request_schema": "contracts/schemas/recurring-related-tasks/create-request.schema.json",
+      "response_schema": "contracts/schemas/recurring-related-tasks/create-response.schema.json",
+      "failure_schema": "contracts/schemas/recurring-related-tasks/failure.schema.json"
+    },
+    "schedule.related_task_rule.update": {
+      "contract_version": "spine.recurring-related-tasks.v1",
+      "response_contract": "spine.recurring-related-tasks-response.v1",
+      "mutates": true,
+      "request_schema": "contracts/schemas/recurring-related-tasks/update-request.schema.json",
+      "response_schema": "contracts/schemas/recurring-related-tasks/update-response.schema.json",
+      "failure_schema": "contracts/schemas/recurring-related-tasks/failure.schema.json"
+    },
+    "schedule.related_task_rule.retire": {
+      "contract_version": "spine.recurring-related-tasks.v1",
+      "response_contract": "spine.recurring-related-tasks-response.v1",
+      "mutates": true,
+      "request_schema": "contracts/schemas/recurring-related-tasks/retire-request.schema.json",
+      "response_schema": "contracts/schemas/recurring-related-tasks/retire-response.schema.json",
+      "failure_schema": "contracts/schemas/recurring-related-tasks/failure.schema.json"
+    },
+    "schedule.related_task_rule.assignment.suppress": {
+      "contract_version": "spine.recurring-related-tasks.v1",
+      "response_contract": "spine.recurring-related-tasks-response.v1",
+      "mutates": true,
+      "request_schema": "contracts/schemas/recurring-related-tasks/suppress-request.schema.json",
+      "response_schema": "contracts/schemas/recurring-related-tasks/suppress-response.schema.json",
+      "failure_schema": "contracts/schemas/recurring-related-tasks/failure.schema.json"
+    },
+    "schedule.related_task_rule.reconcile": {
+      "contract_version": "spine.recurring-related-tasks.v1",
+      "response_contract": "spine.recurring-related-tasks-response.v1",
+      "mutates": true,
+      "request_schema": "contracts/schemas/recurring-related-tasks/reconcile-request.schema.json",
+      "response_schema": "contracts/schemas/recurring-related-tasks/reconcile-response.schema.json",
+      "failure_schema": "contracts/schemas/recurring-related-tasks/failure.schema.json"
+    },
+    "schedule.related_task_rule.list": {
+      "contract_version": "spine.recurring-related-tasks.v1",
+      "response_contract": "spine.recurring-related-tasks-response.v1",
+      "mutates": false,
+      "request_schema": "contracts/schemas/recurring-related-tasks/list-request.schema.json",
+      "response_schema": "contracts/schemas/recurring-related-tasks/list-response.schema.json",
+      "failure_schema": "contracts/schemas/recurring-related-tasks/failure.schema.json"
+    },
+    "schedule.related_task_rule.show": {
+      "contract_version": "spine.recurring-related-tasks.v1",
+      "response_contract": "spine.recurring-related-tasks-response.v1",
+      "mutates": false,
+      "request_schema": "contracts/schemas/recurring-related-tasks/show-request.schema.json",
+      "response_schema": "contracts/schemas/recurring-related-tasks/show-response.schema.json",
+      "failure_schema": "contracts/schemas/recurring-related-tasks/failure.schema.json"
+    }
+  },
+  "required_existing_contract_versions": [
+    "spine.canonical-json.v1",
+    "spine.item-archetypes.v1",
+    "spine.ledger-instance.v1",
+    "spine.normalized-temporal-binding-revision-hash.v1",
+    "spine.notification-opportunities.v1",
+    "spine.notification-profile-application.v2",
+    "spine.notification-profile-bindings.v1",
+    "spine.notification-profiles.v2",
+    "spine.notification-rendering-integration.v1",
+    "spine.notification-schedule-authoring.v1",
+    "spine.notification-schedule.contract.v1",
+    "spine.notification-schedule.normalization.v1",
+    "spine.people-and-responsibility.v1",
+    "spine.people-notification-continuity.v1",
+    "spine.recurrence-authoring.v1",
+    "spine.recurrence.contract.v1",
+    "spine.recurrence.normalization.v1",
+    "spine.relative-temporal-binding-normalization.v1",
+    "spine.relative-temporal-binding.v1",
+    "spine.schedule-cancel.v1",
+    "spine.schedule-create-normalization.v1",
+    "spine.schedule-create.v4",
+    "spine.schedule-operations-normalization.v1",
+    "spine.schedule-primary-location-authoring.v1",
+    "spine.schedule-primary-location-normalization.v1",
+    "spine.schedule-primary-location-view.v1",
+    "spine.schedule-primary-location.v1",
+    "spine.schedule-update.v4",
+    "spine.temporal-binding-catalog.v1"
+  ],
+  "proposed_contract_versions": [
+    "spine.recurring-related-tasks-response.v1",
+    "spine.recurring-related-tasks.cursor.v1",
+    "spine.recurring-related-tasks.normalization.v1",
+    "spine.recurring-related-tasks.v1"
+  ],
+  "limits": {
+    "default_generation_horizon_seconds": "4838400",
+    "maximum_generation_horizon_seconds": "31622400",
+    "maximum_configuration_utf8_bytes": "65536",
+    "maximum_effective_templates": "32",
+    "maximum_assignees": "100",
+    "cursor_lifetime_seconds": "3600",
+    "read_default_limit": "50",
+    "read_maximum_limit": "200",
+    "page": {
+      "source_candidates": [
+        256,
+        2048
+      ],
+      "assignments": [
+        32,
+        128
+      ],
+      "mutations": [
+        32,
+        128
+      ],
+      "proof_steps": [
+        10000,
+        50000
+      ],
+      "lineage_hops": [
+        64,
+        256
+      ],
+      "work_rows": [
+        128,
+        4096
+      ],
+      "response_bytes": [
+        262144,
+        1048576
+      ]
+    }
+  },
+  "effects": {
+    "create": [
+      [
+        "rule_created"
+      ],
+      []
+    ],
+    "update": [
+      [
+        "rule_configuration_updated",
+        "rule_adoption_requested"
+      ],
+      [
+        "rule_update_noop"
+      ]
+    ],
+    "retire": [
+      [
+        "rule_retired"
+      ],
+      [
+        "rule_retire_noop"
+      ]
+    ],
+    "suppress": [
+      [
+        "assignment_restoration_suppressed"
+      ],
+      [
+        "assignment_suppress_noop"
+      ]
+    ],
+    "reconcile": [
+      [
+        "rule_page_applied",
+        "rule_progress_advanced"
+      ],
+      [
+        "rule_page_decision_required",
+        "rule_page_noop"
+      ]
+    ],
+    "show": [
+      [],
+      [
+        "rule_shown"
+      ]
+    ],
+    "list": [
+      [],
+      [
+        "rules_listed"
+      ]
+    ]
+  },
+  "error_codes": [
+    "environment_failure",
+    "unsupported_command",
+    "unsupported_contract_version",
+    "invalid_request",
+    "unsupported_field",
+    "command_id_conflict",
+    "referenced_row_not_found",
+    "stale_cursor",
+    "stale_version",
+    "semantic_conflict",
+    "rendering_disclosure_unavailable",
+    "capacity_exceeded",
+    "stale_evaluation"
+  ],
+  "identity_preimages_schema": "contracts/schemas/recurring-related-tasks/preimages.schema.json",
+  "runtime_obligations": [
+    {
+      "id": "RRT-01",
+      "description": "Migration, immutable history, FKs, reservations and rollback on actual SQLite",
+      "status": "pending_runtime_verification"
+    },
+    {
+      "id": "RRT-02",
+      "description": "Compiled exact-version admission and packaged offline closure; local-only registration",
+      "status": "pending_runtime_verification"
+    },
+    {
+      "id": "RRT-03",
+      "description": "Atomic outer page transaction, existing receipt replay and no child commits",
+      "status": "pending_runtime_verification"
+    },
+    {
+      "id": "RRT-04",
+      "description": "Source proof, normalized selector-child validation before any reuse/insert helper",
+      "status": "pending_runtime_verification"
+    },
+    {
+      "id": "RRT-05",
+      "description": "One-to-one multi-revision lineage; missing/ambiguous evidence fails closed",
+      "status": "pending_runtime_verification"
+    },
+    {
+      "id": "RRT-06",
+      "description": "Enrollment, merged moved/rdate candidates, COUNT and all proof-step bounds",
+      "status": "pending_runtime_verification"
+    },
+    {
+      "id": "RRT-07",
+      "description": "Commit clock and strict-future initial/restoration/adoption cutoffs",
+      "status": "pending_runtime_verification"
+    },
+    {
+      "id": "RRT-08",
+      "description": "Deterministic child identities and immutable owner history before policies/work",
+      "status": "pending_runtime_verification"
+    },
+    {
+      "id": "RRT-09",
+      "description": "Registered multi-policy creation tokens, intent-preserving copies and adoption",
+      "status": "pending_runtime_verification"
+    },
+    {
+      "id": "RRT-10",
+      "description": "Source cancellation, latest-only successor generation and suppression races",
+      "status": "pending_runtime_verification"
+    },
+    {
+      "id": "RRT-11",
+      "description": "Managed-field three-way adoption and finite high-water cleanup",
+      "status": "pending_runtime_verification"
+    },
+    {
+      "id": "RRT-12",
+      "description": "All retirement dispositions including overdue/out-of-horizon assignments",
+      "status": "pending_runtime_verification"
+    },
+    {
+      "id": "RRT-13",
+      "description": "Attempt-start freshness and protection of leased/in-progress/attempted work",
+      "status": "pending_runtime_verification"
+    },
+    {
+      "id": "RRT-14",
+      "description": "No idle receipts/progress churn and fair bounded scheduler selection",
+      "status": "pending_runtime_verification"
+    },
+    {
+      "id": "RRT-15",
+      "description": "Authentic read/cursor snapshot, seek indexes, invalidation and expiry",
+      "status": "pending_runtime_verification"
+    },
+    {
+      "id": "RRT-16",
+      "description": "Disclosure/route/people validation without grants or creator entitlement",
+      "status": "pending_runtime_verification"
+    },
+    {
+      "id": "RRT-17",
+      "description": "Byte/work/proof budgets, whole-unit atomicity and no unchanged continuations",
+      "status": "pending_runtime_verification"
+    },
+    {
+      "id": "RRT-18",
+      "description": "Concurrent writer CAS, unique generation/selector reservation and replay conflicts",
+      "status": "pending_runtime_verification"
+    }
+  ],
+  "validation_stage_order": [
+    "runtime_schema_family_admission",
+    "command_and_selector_support",
+    "syntax_domain_closed_fields",
+    "compatible_replay_or_command_conflict",
+    "actor_and_referenced_rows",
+    "cursor_integrity_query_expiry_generation",
+    "explicit_expected_facts",
+    "semantic_validation_and_disclosure",
+    "whole_unit_budgets_and_source_environment",
+    "commit_time_eligibility_and_versions"
+  ]
+}
