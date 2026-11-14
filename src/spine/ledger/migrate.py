@@ -170,6 +170,11 @@ def main(argv: Sequence[str] | None = None) -> int:
 
 
 def _apply_migration(connection: sqlite3.Connection, *, version: int, migration_name: str) -> None:
+    if version == 20:
+        from spine.ledger.recurring_task_migration import install_recurring_task_storage
+
+        install_recurring_task_storage(connection, applied_at_utc=_utc_now())
+        return
     if version == 19:
         from spine.ledger.rendering_migration import install_rendering_storage
         install_rendering_storage(connection, applied_at_utc=_utc_now())

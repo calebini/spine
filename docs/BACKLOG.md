@@ -1561,6 +1561,13 @@ See [R4 package evidence](design-notes/recurring-related-task-r4-release.md).
 Verification: 63 focused tests pass; all 33 assets match their source pins,
 non-editable installed-wheel loading outside the checkout passes, as do lint,
 loader typing, compilation, documentation links, sync and diff hygiene.
+Packaging committed as `46da61f`. Current increment: ordered schema-20 migration
+core and complete bounded expected-object manifest, preserving schema-19 default
+admission until CLI and worker activation can move together. No public capability
+or automatic migration is advertised by this intermediate checkpoint.
+Migration-core verification: **1,717 tests in 510.142 seconds, OK (one skipped)**;
+87 focused migration/preflight/ownership/preservation tests, isolated installed-
+wheel migration, lint, typing, sync, compilation and diff/link checks pass.
 **Scope:** Exact packaged closure, trusted-local public commands and dependencies,
 implemented declarations, coherent migration/package metadata and generic operator
 documentation. No web allowlist, authentication redesign or deployment procedure.

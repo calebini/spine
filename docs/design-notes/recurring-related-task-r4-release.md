@@ -1,6 +1,7 @@
 # R4 recurring-task release integration
 
-Status: in progress, first increment uncommitted (2026-11-14).
+Status: in progress; package increment committed as `46da61f`, migration-core
+increment uncommitted (2026-11-14).
 Authority: [SPINE-095](../BACKLOG.md#spine-095--r4-recurring-task-activation-and-release-verification)
 and the [R4 plan](../IMPLEMENTATION_PLAN.md#r4--public-activation-and-release-verification-spine-095).
 R3 is committed as `c90f27d`. The unrelated agent-instructions and R2 restoration
@@ -47,7 +48,45 @@ The final locally built test wheel SHA-256 is
 `bfa2886bc90875044296fdce7f0e5e7061dba883cebe6dd1e724e8ed6010f093`;
 this is a disposable verification artifact, not a published release.
 
-## Remaining R4
+## Migration and preflight core
+
+Packaging was committed as `46da61f`. The next increment supplies
+`install_recurring_task_storage` through the existing ordered migration
+dispatcher. The guarded disposable-candidate helper delegates to that same core,
+not a second DDL implementation. It owns one exclusive transaction, validates
+schema 19 before/inside it, rebuilds ownership-state constraints without changing
+row values, installs the pinned DDL, performs deep migration verification, records
+version 20, and checks the final expected-object manifest before commit. Every
+failure rolls back DDL, data and the schema version, restores FK enforcement,
+and does not arm recurring write tracking.
+
+The [schema manifest generator](../../scripts/sync_recurring_task_schema_manifest.py)
+overlays the pinned migration delta on the complete predecessor manifest, including
+the replaced ownership table. Normal `verify_runtime_schema(expected_version=20)`
+now checks that exact table/index/trigger inventory using the established bounded
+preflight implementation. It ignores noncolliding extra objects and reports the
+ordinary missing-object and definition-drift diagnostics. Deep integrity/domain
+checks occur only in the explicit migration, not routine preflight.
+
+[Release migration tests](../../tests/test_recurring_task_release_migration.py)
+cover ordered dispatch, empty/no-enrollment installation, exact populated-history
+and configured-ownership preservation, idempotency, all eight injected rollback
+stages, final manifest failure, unknown ownership dependents, ambient-transaction
+refusal, writer exclusion, and metadata-only verification. Public/default runtime
+and migration admission still require schema 19; this is release substrate,
+not a schema-20 production activation.
+
+The migration increment's focused selection ran **87 tests in 27.193 seconds,
+OK**, covering new migration/preflight cases, predecessor migrations, existing
+ownership and recurring storage, package validation and boundary/documentation
+checks. Repository Ruff, two-module Mypy, compilation, schema/resource sync,
+403 local document paths and diff hygiene pass. The isolated, non-editable wheel
+check also ran the explicit migration core and verified schema 20, without
+creating any enrolled rule. The disposable verification wheel SHA-256 is
+`f0651e06c1d54a167373062de6a65c25c445054faa6c42e35ede1a47928910d1`.
+Full serial discovery: **1,717 tests in 510.142 seconds, OK (one skipped)**.
+
+## Remaining R4 activation
 
 Promote the normal migration/preflight path to schema 20, expose the seven
 trusted-local commands with exact prerequisites, supply protected cursor and

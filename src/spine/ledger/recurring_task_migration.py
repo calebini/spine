@@ -1,4 +1,4 @@
-"""Explicit internal schema-20 candidate; not wired into public migrations yet."""
+"""Atomic schema-20 migration; default runtime promotion is a separate R4 gate."""
 
 from __future__ import annotations
 
@@ -91,7 +91,21 @@ def install_candidate(
         disposable_test_ledger and isinstance(db, LedgerConnection) and not db.in_transaction,
         "recurring-task candidate requires an idle disposable test ledger",
     )
+    install_recurring_task_storage(db, applied_at_utc=applied_at_utc, fault=fault)
+
+
+def install_recurring_task_storage(
+    db: sqlite3.Connection, *, applied_at_utc: str, fault: Callable[[str], None] | None = None,
+) -> None:
+    """Offline ordered migration core. Caller must exclude other service writers.
+
+    No bootstrap, enrollment, inferred repairs or public capability declaration.
+    All old rows retain their values; only ownership-state DDL is rebuilt.
+    """
+    invariant(isinstance(db, LedgerConnection) and not db.in_transaction,
+              "recurring migration requires an idle transaction-aware ledger")
     if db.execute("SELECT MAX(schema_version) FROM ledger_schema").fetchone()[0] == CANDIDATE_SCHEMA_VERSION:
+        verify_runtime_schema(db, expected_version=CANDIDATE_SCHEMA_VERSION)
         attach_candidate(db)
         return
     verify_runtime_schema(db, expected_version=19)
@@ -99,7 +113,7 @@ def install_candidate(
     invariant(db.execute("PRAGMA foreign_keys").fetchone()[0] == 1, "foreign keys must be enabled")
     db.execute("PRAGMA foreign_keys=OFF")
     try:
-        db.execute("BEGIN IMMEDIATE")
+        db.execute("BEGIN EXCLUSIVE")
         verify_runtime_schema(db, expected_version=19)
         invariant(not db.execute("PRAGMA foreign_key_check").fetchall(), "predecessor foreign-key check failed")
         invariant(db.execute("PRAGMA integrity_check").fetchone()[0] == "ok", "predecessor integrity check failed")
@@ -120,6 +134,7 @@ def install_candidate(
         verify_deep(db)
         inject("verified")
         db.execute("INSERT INTO ledger_schema VALUES (?,?)", (CANDIDATE_SCHEMA_VERSION, applied_at_utc))
+        verify_runtime_schema(db, expected_version=CANDIDATE_SCHEMA_VERSION)
         inject("activation")
         db.commit()
     except BaseException:

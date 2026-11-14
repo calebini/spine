@@ -501,6 +501,13 @@ This is not the public activation or complete R4 acceptance result. Next:
 command registration, schema-20 migration/preflight integration, worker startup
 configuration and the installed public science-class scenario below.
 
+**Migration core increment:** packaging is committed as `46da61f`. The ordered
+migration dispatcher now has an atomic schema-20 implementation and the complete
+expected-object manifest, tested with explicit version-20 verification on
+disposable ledgers. Default migration/runtime admission is intentionally still
+19; the activation increment must change defaults, declarations, CLI admission
+and worker wiring coherently, not rely on an environment-dependent candidate gate.
+
 Package the exact offline source schema closure and register the seven trusted-
 local CLI commands and their exact dependencies only after R1–R3 tests pass.
 Change the source-only tests to implemented-behavior assertions in the same
