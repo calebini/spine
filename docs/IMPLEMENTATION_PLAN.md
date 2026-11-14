@@ -413,13 +413,28 @@ This initial increment is verified and committed as `ffb9690`: **1,609 tests, OK
 links and diff hygiene pass. The existing instruction bound and frozen fixtures
 remain intact, with an explicit one-function R3 catalog-body amendment.
 
-**Verified continuation (2026-11-14, uncommitted):** proven reconciliation
+**Verified continuation (2026-11-14, committed `8349a63`):** proven reconciliation
 acknowledgement and assignment-aware direct-binding guards preserve unresolved
 prefixes, newer dirty tokens, transaction rollback, explicit manual independence
 and unrelated v1 paths. Full regression: **1,630 tests in 476.271 seconds, OK
 (one skipped)**; 21 new focused tests and 32 documentation/declaration/boundary
 checks pass, with selected service typing, lint, 391 local links and diff hygiene.
-Scheduler enrollment/intent dispatch and per-attempt admission remain later R3 work.
+At that checkpoint, scheduler enrollment/intent dispatch and per-attempt admission
+remained later R3 work.
+
+**Verified continuation (2026-11-14, uncommitted):**
+The shared durable attempt INSERT now admits generated work against current
+assignment/source/owner/intent truth under the writer transaction. It applies to
+rendered/non-rendered work and does not gate outcome recording for a previously
+admitted send. Bounded read-only automatic discovery supplies root rotation,
+independent maintenance/generation lanes and clock-driven horizon rollover,
+sharing source expansion with manual pages. Discovery intentionally does not call
+commands or write/rollback previews and is not sufficient to dispatch a page.
+Next: complete semantic page planning with a transaction-local pre-dispatch
+recheck, enrollment/intent invalidation, cursor routing and scheduler integration.
+Full regression: **1,662 tests in 492.392 seconds, OK (one skipped)**. The 32 new
+tests, 72-test focused selection and 26 boundary/documentation checks pass, as do
+seven-module typing, changed-file lint, 391 links and preservation/diff checks.
 
 Inventory and integrate every existing source/item/recurrence, relation, binding,
 target-task/owner and relevant policy writer. Invalidate affected roots/witnesses

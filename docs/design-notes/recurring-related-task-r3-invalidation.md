@@ -104,12 +104,12 @@ new tests prove the old snapshot is rejected rather than implicitly repaired.
 
 ## Still required for R3 closure
 
-Intent/enrollment queue production; complete writer and automatic-sweep routing;
-fresh source/owner/intent
-proof inside every actual send-attempt transaction; protected work-state/race
-tests; fair bounded automatic planning, horizon rollover and catch-up; repeated
-idle/blocked zero-write cycles. The dirty queue alone does not make stale sends
-safe and is not evidence of automatic generation. Public activation stays in R4.
+Intent/enrollment queue production; complete semantic page planning, freshness
+revalidation and automatic-sweep/continuation routing; end-to-end automatic
+catch-up and repeated idle/blocked zero-write cycles. The continuations below add
+attempt admission and bounded read-only discovery, but the dirty queue and
+discovery alone are not evidence of automatic generation. Public activation
+stays in R4.
 
 ## Continuation — page acknowledgement and direct-binding guards
 
@@ -188,4 +188,72 @@ precedes fresh guard checks.
   32-test documentation/declaration/web-sync/transaction/boundary selection passes
   separately, as do 391 local file links and diff hygiene. Unrelated operator
   edits and the original frozen fixtures retain their pre-work hashes. This
-  continuation is uncommitted; no push, deployment, public activation or send.
+  continuation is committed as `8349a63`; no push, deployment, public activation or send.
+
+## Continuation — automatic discovery and final attempt admission
+
+Selected after `8349a63`. Internal candidate only; installed runtime/schema and
+public capability declarations are unchanged. No live ledgers or real sends.
+
+### Final attempt boundary
+
+`ledger.recurring_task_attempts.assert_attempt_current` runs from the shared
+`create_started_attempt` insertion path. Candidate work starts acquire a writer
+transaction before the final proof; an existing rendered/command transaction is
+joined rather than committed early. A caller disabling transaction management
+without an active transaction is refused. Work-to-generation resolution uses the
+unique task index; unrelated work retains existing behavior.
+
+Admission requires the latest generation, exactly witnessed task/binding, active
+source and task, correct active relation, unchanged owner identity/revision,
+governed non-veto state, permitted root disposition and no applicable pending
+adoption. Source item version/recurrence must match the current witness, and fresh
+bounded positive membership plus exclusion/cancellation checks run in that same
+snapshot. Proof exhaustion refuses, never cancels. Pending cancel/detach blocks;
+keep-following retirement and new-assignment-only configuration edits do not
+invalidate otherwise current children. Observed explicitly detached children
+return to ordinary work freshness instead of depending on the former source.
+
+This gate only admits a new attempt. It neither cancels protected work nor rewrites
+attempts, and does not prevent recording an already admitted attempt's outcome.
+Rendered replay remains non-sending. Shared adoption selection moved into a
+read-only ledger helper; service callers retain the same exact selection rules.
+
+### Read-only automatic discovery (not dispatch)
+
+`services.recurring_task_planning` owns no durable cursor or progress. The caller
+supplies an in-memory root keyset position, advanced even for unresolved or dense
+roots. The root budget bounds rows *visited*, not just rows surviving an eligibility
+filter. Maintenance selection is independent of source enumeration and survives
+a source-proof budget failure. Clean roots do not scan assignment history merely
+because completed tasks exist. Active roots still examine the moving generation
+horizon, including positive-offset source times before evaluation when the child
+is not yet due. Reserved slots, inactive occurrences and overdue children do not
+become fresh generation candidates. Retired roots never generate new children.
+
+Manual pages and discovery reuse `SourceWindow` for the same bounded source
+expansion and enrollment filtering. Discovery never invokes reconciliation,
+command receipts, progress writes, queue acknowledgements or rollback previews.
+Tests enable SQLite `query_only`, compare all-table dumps and `total_changes`.
+Fingerprints describe snapshot/discovery evidence, not dispatch authority.
+
+**Remaining R3:** complete semantic page planning for changed/retained/blocked
+units and transaction-local revalidation before dispatch; enrollment/intent queue
+production; continuation routing and integration into the scheduling/Tickerd
+path. In particular a persistent dirty marker must not repeatedly trigger a
+no-op or blocked command. No automatic mutation dispatch or R3 closure is claimed
+by this discovery increment. Public activation stays in R4.
+
+### Verification
+
+Focused discovery/attempt/page/binding/frozen-witness selection: **72 tests pass**
+in 40.380 seconds. Includes writer-lock exclusion between proof and INSERT,
+source-change-before-attempt, protected retry/outcome preservation, pending
+adoption/cleanup, detached independence, superseded generations, owner mismatch,
+rendered admission/replay, read-only idle ticks, bounded/fair lanes and rollover.
+Seven changed runtime modules pass Mypy; changed-file Ruff and diff hygiene pass.
+Full regression: **1,662 tests in 492.392 seconds, OK (one skipped)**. All 32 new
+tests are included. The 26-test documentation/declaration/web-sync/internal-boundary
+selection also passes, as do 391 local links. Original frozen fixtures and both
+unrelated operator edits retain their pre-work SHA-256 values. This continuation
+is uncommitted; no push, deployment, public activation or real send occurred.

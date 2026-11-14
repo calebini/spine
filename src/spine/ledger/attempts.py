@@ -54,12 +54,8 @@ def create_started_attempt(
     require_non_empty("idempotency_key", idempotency_key)
     require_utc_z("attempted_at_utc", attempted_at_utc)
     item_id, source_item_version = _resolve_attempt_binding(
-        connection,
-        item_id=item_id,
-        source_item_version=source_item_version,
-        work_instance_id=work_instance_id,
-        candidate_action_id=candidate_action_id,
-        projection_id=projection_id,
+        connection, item_id=item_id, source_item_version=source_item_version,
+        work_instance_id=work_instance_id, candidate_action_id=candidate_action_id, projection_id=projection_id,
     )
     request_payload_hash = side_effect_request_payload_hash(
         adapter_name=adapter_name,
@@ -75,6 +71,20 @@ def create_started_attempt(
     )
     try:
         with connection if manage_transaction else nullcontext():
+            if work_instance_id is not None and getattr(connection, "_recurring_tasks_enabled", False):
+                if not connection.in_transaction:
+                    if not manage_transaction:
+                        raise SpineValidationError("stale_work_instance", "attempt admission requires a transaction")
+                    connection.execute("BEGIN IMMEDIATE")
+                from spine.ledger.recurring_task_attempts import assert_attempt_current
+
+                assert_attempt_current(connection, work_instance_id)
+                # Revalidate origin binding inside the final writer snapshot;
+                # ordinary callers retain their established validation order.
+                item_id, source_item_version = _resolve_attempt_binding(
+                    connection, item_id=item_id, source_item_version=source_item_version,
+                    work_instance_id=work_instance_id, candidate_action_id=candidate_action_id, projection_id=projection_id,
+                )
             connection.execute(
                 """
                 INSERT INTO side_effect_attempts (

@@ -9,18 +9,15 @@ from datetime import timedelta
 from functools import partial
 from typing import Any, Protocol
 
-from spine.core import occurrence_details
 from spine.core import temporal_bindings as binding_facts
 from spine.core.canonical_json import canonical_json_bytes
 from spine.core.errors import SpineValidationError
 from spine.core.hashing import hash_canonical_json
-from spine.core.occurrences import expand_recurrence_set
 from spine.core.recurring_task_runtime import cursor_payload, fail, instant, sign_cursor, verify_cursor, wire
 from spine.core.recurring_tasks import CONTRACT, derive, occurrence_key, payload_hash
 from spine.ledger import item_reads
 from spine.ledger.identity import read_ledger_instance_id
-from spine.ledger.recurrence import load_current_recurrence_set
-from spine.ledger.recurring_task_sources import ProofBudget, _calendar_cost
+from spine.ledger.recurring_task_sources import ProofBudget
 from spine.ledger.recurring_tasks import compare_and_swap, ensure_selector, insert_record, read_record, reserve_selector, row
 from spine.ledger.temporal_bindings import target_from_source
 from spine.services import recurring_task_children as children
@@ -38,6 +35,7 @@ from spine.services.recurring_task_operations import (
 )
 from spine.services.recurring_task_page_state import PageBoundary as _PageBoundary
 from spine.services.recurring_task_page_state import PageState
+from spine.services.recurring_task_source_window import SourceWindow
 
 
 class ResponseSizer(Protocol):
@@ -162,17 +160,8 @@ class Page:
             self.limits["lineage_hops"],
             lambda hop: fail("capacity_exceeded", "limits.lineage_hops" if hop else "limits.proof_steps"),
         )
-        # Bound loading before the existing recurrence projection constructs lists.
-        for table in ("recurrence_rules", "recurrence_segments", "recurrence_rdates", "recurrence_exdates", "recurrence_overrides"):
-            rows = db.execute(
-                f"SELECT 1 FROM {table} WHERE recurrence_revision_id=? LIMIT ?",
-                (self.snapshot["recurrence_revision_id"], self.budget.steps + 1),
-            ).fetchall()
-            self.budget.spend(len(rows))
-        recurrence = load_current_recurrence_set(db, item_id=root["source_item_id"])
-        if recurrence is None:
-            fail("environment_failure", "source")
-        self.recurrence: dict[str, Any] = recurrence
+        self.source_window = SourceWindow.load(db, root, self.config, self.snapshot, now, self.budget)
+        self.recurrence = self.source_window.recurrence
         self.source_item = item_reads.hydrated_item(db, root["source_item_id"])
 
     def unit(self, operation: Callable[[], dict[str, Any]], selector: dict[str, Any], *,
@@ -296,63 +285,14 @@ class Page:
         return {"task_item_version": result.task_item_version,
                 "temporal_binding_revision_id": result.temporal_binding_revision_id}
 
-    def spend(self) -> None:
-        try:
-            self.budget.spend()
-        except SpineValidationError:
-            fail("capacity_exceeded", "limits.proof_steps")
-
     def expand(self, start: str, end: str, *, basis: str) -> list[dict[str, Any]]:
-        for rule in self.recurrence["rules"]:
-            if rule["status"] == "active":
-                self.budget.spend(_calendar_cost(self.recurrence, rule, end))
-        return list(
-            expand_recurrence_set(self.recurrence, range_start=start, range_end=end, range_basis=basis, spend_work=self.spend).occurrences
-        )
+        return self.source_window.expand(start, end, basis=basis)
 
     def occurrence(self, selector: dict[str, Any]) -> dict[str, Any] | None:
-        fact = selector["scheduled_fact"]
-        values = self.expand(
-            fact, occurrence_details.next_scheduled_fact(fact, time_basis=self.recurrence["time_basis"]), basis="original_schedule"
-        )
-        matched = [v for v in values if v["target_occurrence_selector"] == selector]
-        return matched[0] if len(matched) == 1 else None
+        return self.source_window.occurrence(selector)
 
     def candidates(self, start: str, end: str) -> list[dict[str, Any]]:
-        from spine.timezones import timezone_for_version
-
-        zone = None
-        if self.recurrence["time_basis"] == "local_instant":
-            zone = timezone_for_version(self.recurrence["timezone"], self.recurrence["timezone_database_version"])
-
-        def fact(value: str) -> str:
-            return instant(value).astimezone(zone).isoformat(timespec="seconds").split("+")[0] if zone else value
-
-        # UTC-to-local endpoints need a conservative envelope around offset changes.
-        lower, upper = fact(wire(instant(start) - timedelta(days=2))), fact(wire(instant(end) + timedelta(days=2)))
-        if zone:
-            lower, upper = lower[:19], upper[:19]
-        values = self.expand(lower, upper, basis="expressed_time")
-        result = []
-        for occurrence in values:
-            source = children.source_facts(
-                self.db, self.state.root, self.recurrence, occurrence, self.now, persist=False, command_id=self.request["command_id"]
-            )
-            if not start <= source["resolved_source_utc"] < end:
-                continue
-            selector = occurrence["target_occurrence_selector"]
-            boundary = self.state.root["enrollment_json"].get("selector")
-            if boundary is not None and (selector["scheduled_fact"], canonical_json_bytes(selector)) < (
-                boundary["scheduled_fact"],
-                canonical_json_bytes(boundary),
-            ):
-                continue
-            if boundary is None and instant(source["resolved_source_utc"]) + timedelta(
-                seconds=int(self.config["offset_seconds"])
-            ) <= instant(self.state.root["enrolled_at_utc"]):
-                continue
-            result.append(occurrence)
-        return sorted(result, key=lambda v: (v["original_scheduled_fact"], canonical_json_bytes(v["target_occurrence_selector"])))
+        return self.source_window.candidates(start, end)
 
     def create(
         self,

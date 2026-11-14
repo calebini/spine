@@ -1479,8 +1479,10 @@ explicit writer/reconcile/attempt interleavings, suppression/restoration and
 pending-intent races, protected-work matrix, rollover/catch-up, dense-root fairness
 and repeated idle zero-write cycles. No real sends. See
 [R3](IMPLEMENTATION_PLAN.md#r3--all-writer-safety-and-automatic-scheduling-spine-094).
-**Next:** Integrate intent/enrollment queue production, automatic recurring-page
-planning/routing and per-attempt current-truth admission. Preserve the verified
+**Next:** Complete intent/enrollment queue production and automatic recurring-page
+semantic planning, revalidation and dispatch/routing. The current continuation
+adds bounded read-only discovery and per-attempt admission; discovery is not
+itself authorization to dispatch a mutation. Preserve the verified
 invalidation, acknowledgement and direct-binding guard boundaries. R4/public
 activation, pushes and deployment remain outside this increment.
 **Initial increment:** Indexed source/root and current-generation lookup now feeds
@@ -1496,7 +1498,7 @@ At that checkpoint, acknowledgement integration and direct-binding guards remain
 open; the continuation below closes those portions. See
 [R3 evidence](design-notes/recurring-related-task-r3-invalidation.md).
 
-**Verified continuation (2026-11-14, uncommitted):** Proven page acknowledgement
+**Verified continuation (2026-11-14, committed `8349a63`):** Proven page acknowledgement
 and assignment-aware ordinary binding admission are implemented. Contiguous
 assignment coverage and source-prefix checks preserve earlier blocked work; final
 receipt sizing, preview and failure rollback cannot lose the dirty marker.
@@ -1507,6 +1509,23 @@ declaration/boundary checks, three-module typing, changed-file Ruff, 391 local l
 and diff hygiene pass. Existing legacy-command typing diagnostics are unchanged;
 unrelated edits and original frozen fixtures are preserved. No scheduler/attempt
 closure, public activation, push or deployment is claimed.
+
+**Verified continuation (2026-11-14, uncommitted):**
+Generated work now rechecks assignment/generation, current task/source/binding/
+relation/owner, veto, pending adoption/retirement and bounded source membership
+at the shared durable attempt insertion boundary. The same transaction protects
+both rendered and non-rendered attempts. Failed admission does not cancel work or
+rewrite attempted history; completion of an admitted attempt remains independent.
+Read-only automatic discovery uses bounded root keyset rotation, separate existing-
+assignment/source candidate limits, and horizon rollover without durable polling
+facts. The explicit page and discovery share the same source-window reader.
+This is not scheduler activation: semantic page planning and transaction-local
+revalidation before dispatch, continuation routing, and enrollment/intent queue
+production still remain. R3 is open; R4/public activation remains blocked.
+Verification: **1,662 tests in 492.392 seconds, OK (one skipped)**; 32 new tests,
+72 selected admission/discovery/page/binding/witness tests and 26 boundary/
+documentation checks pass. Seven-module Mypy, changed-file Ruff, 391 local links,
+diff hygiene and preservation hashes pass. No push, deployment or real send.
 
 ### SPINE-095 — R4: recurring-task activation and release verification
 
