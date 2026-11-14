@@ -25,6 +25,7 @@ def schema13(db):
         patch("spine.ledger.facet_access_migration.install_facet_access"),
         patch("spine.ledger.facet_location_migration.install_facet_location_freeze"),
         patch("spine.ledger.rendering_migration.install_rendering_storage"),
+        patch("spine.ledger.recurring_task_migration.install_recurring_task_storage"),
     ):
         initialize_schema(db)
     with db:
@@ -64,7 +65,7 @@ class LedgerIdentityTests(unittest.TestCase):
             expected = schema13_identity(db)
             with patch("spine.ledger.migrate._utc_now", return_value=f"2026-09-0{values[0]}T00:00:00Z"):
                 result = migrate_schema(db)
-                self.assertEqual(result.applied_versions, (14, 15, 16, 17, 18, 19))
+                self.assertEqual(result.applied_versions, (14, 15, 16, 17, 18, 19, 20))
             self.assertEqual(read_ledger_instance_id(db), expected)
             identities.append(expected)
             changes = db.total_changes

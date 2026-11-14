@@ -1,6 +1,6 @@
 # Recurring Related Tasks: Detailed Command Contract
 
-Status: Accepted v1.0.0 — ratified source-only wire contract; not registered or implemented
+Status: Accepted v1.0.0 — trusted-local commands implemented in runtime 0.12.0/schema 20; release verification tracked separately
 
 Ratified: 2026-11-09
 

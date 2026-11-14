@@ -1,7 +1,7 @@
 {
   "manifest_version": "spine.sqlite-schema-object-manifest.v1",
   "schemas": {
-    "19": {
+    "20": {
       "objects": [
         {
           "object_type": "index",
@@ -474,6 +474,61 @@
           "definition_sha256": "fca994ca095b1533e96d74b30fdd82bc533b27601eee1550d70ba00c9014821b"
         },
         {
+          "name": "related_task_assignment_revisions_history_idx",
+          "object_type": "index",
+          "definition_sha256": "5f2048744a9c277ed0b71ce72615197530a4f63abce1877ea76f1d96627a6ba2"
+        },
+        {
+          "name": "related_task_assignments_page_idx",
+          "object_type": "index",
+          "definition_sha256": "1db0900bd810cb177197199bba9ffaf3b26b6bb1891d1de1d4f4777fb927035d"
+        },
+        {
+          "name": "related_task_generations_assignment_idx",
+          "object_type": "index",
+          "definition_sha256": "02081c46ee398df864d64c5055cd6e0864f13b8adea79ada6aa959a3647b32ed"
+        },
+        {
+          "name": "related_task_intents_pending_idx",
+          "object_type": "index",
+          "definition_sha256": "36444ff55c7c287a7fc95b4f600c2ec8a4aa737bd21438c2cfbf4bcc94ee36ce"
+        },
+        {
+          "name": "related_task_outcomes_assignment_idx",
+          "object_type": "index",
+          "definition_sha256": "81f151f804b64ce40e9522db3c9c70b3cdba9874323949ab1a14dc1287823b99"
+        },
+        {
+          "name": "related_task_proofs_revision_idx",
+          "object_type": "index",
+          "definition_sha256": "fa03f4f54f67ec565bdb255170f50f94a106dd6c505b9c10c099de28fa543066"
+        },
+        {
+          "name": "related_task_reservations_assignment_idx",
+          "object_type": "index",
+          "definition_sha256": "7ac329eb6717d6bd20d6d7165d55296e9e04a01e04582b5d53b4b68e783a53e0"
+        },
+        {
+          "name": "related_task_rules_owner_idx",
+          "object_type": "index",
+          "definition_sha256": "d0f8abe0063acdf53f2681734cea2cafe724bfd263b7c05f039581725e7a7728"
+        },
+        {
+          "name": "related_task_rules_source_idx",
+          "object_type": "index",
+          "definition_sha256": "fd03eba35ccd0617f2c014560d83ddf912fcbff14d65a2d0c431606cefb172e2"
+        },
+        {
+          "name": "related_task_single_pending_adoption",
+          "object_type": "index",
+          "definition_sha256": "0898074bca4842d189f04f8b44eed25b07278465df3e124151c1b7be70f01f99"
+        },
+        {
+          "name": "related_task_source_lineage_copy_idx",
+          "object_type": "index",
+          "definition_sha256": "af100d596b80264462fc31e9325fd2ea5efa7725e6afe3eb3930d857d9c9630b"
+        },
+        {
           "object_type": "index",
           "name": "relative_temporal_binding_revisions_binding_idx",
           "definition_sha256": "0bd69e8c85c724a02d1b3615a643ef0d1d6d324950bc97d6c34b06abca735aca"
@@ -739,9 +794,9 @@
           "definition_sha256": "0db1b8220e4ce575c348edda0b71811537a5857619d2b03611fbe3424fefc3af"
         },
         {
-          "object_type": "table",
           "name": "ledger_access_state",
-          "definition_sha256": "4622844119dff05f15464bc63a1080f598bff03b726e5f4169a5b9485aacbb83"
+          "object_type": "table",
+          "definition_sha256": "e0c53b300b7a0347dd101fac753a762349d9ff83b16c08be752ebf95098648a8"
         },
         {
           "object_type": "table",
@@ -982,6 +1037,81 @@
           "object_type": "table",
           "name": "recurrence_target_rule_sources",
           "definition_sha256": "e77e3c20d70db92200610558ec6e27f71f29c0facb17f457ce05e5fcf1c6b6fe"
+        },
+        {
+          "name": "related_task_assignment_revisions",
+          "object_type": "table",
+          "definition_sha256": "69c4c70bf96bb4e9bc3922abee3fd773f69c0da60f7ff6a883e12a4966cb0ad5"
+        },
+        {
+          "name": "related_task_assignments",
+          "object_type": "table",
+          "definition_sha256": "813cd39d8b25d7cbab0662f3cd5b7d44a00b576af4c5ce7454d7973bb0958958"
+        },
+        {
+          "name": "related_task_catalog_state",
+          "object_type": "table",
+          "definition_sha256": "e7b3f0df74b454a09af02bccc6cba3c9b551bd5eba7583fae6a5de5474d56f51"
+        },
+        {
+          "name": "related_task_dirty_rules",
+          "object_type": "table",
+          "definition_sha256": "c46fa00d3b88f2720b051dc2fa46067753b935086296fae130864266846fd052"
+        },
+        {
+          "name": "related_task_generations",
+          "object_type": "table",
+          "definition_sha256": "6b37bb4ee07baad6a10b7c8be9e78a1eeb7d3b0bd4f4d54391afc116916e94e5"
+        },
+        {
+          "name": "related_task_intent_outcomes",
+          "object_type": "table",
+          "definition_sha256": "8ef7c6935159c46019731449e4110e121ce3beb03fecb725aa7f352d1e00690b"
+        },
+        {
+          "name": "related_task_intents",
+          "object_type": "table",
+          "definition_sha256": "5c9d1d3484f21405b4e8599cbb22da68933eab884d37a4772280374a2ce19b45"
+        },
+        {
+          "name": "related_task_proof_lineage",
+          "object_type": "table",
+          "definition_sha256": "f96503747267f1424fafc04597a47644ca5c63edf651029ab0836fb946291b8a"
+        },
+        {
+          "name": "related_task_restoration_suppressions",
+          "object_type": "table",
+          "definition_sha256": "67b56a8edf07e0a53e2670f1a5c23fd621eea3797aab898dc8f108a30ec45bf3"
+        },
+        {
+          "name": "related_task_rule_progress",
+          "object_type": "table",
+          "definition_sha256": "d15dd760f6ec0669b6c6ed97a2525be061fac2d465418372847e05f5ad315b16"
+        },
+        {
+          "name": "related_task_rule_revisions",
+          "object_type": "table",
+          "definition_sha256": "fa490759cba1d130acb33bca1baca7738dbe32309846a5d7d4fa0dac6459eb30"
+        },
+        {
+          "name": "related_task_rules",
+          "object_type": "table",
+          "definition_sha256": "ece8d67c56a950b6260da393a9535b0b280fe0657c1f3e3a396401d7fa62b1b4"
+        },
+        {
+          "name": "related_task_selector_reservations",
+          "object_type": "table",
+          "definition_sha256": "bbf12b60d3061137e07caf9f5111b819f1d5e04f98ad39a8af424dc19af2ee04"
+        },
+        {
+          "name": "related_task_source_cancellations",
+          "object_type": "table",
+          "definition_sha256": "7621fa9b8975327fb7f6eb7ac6e3923fbe46752d5dde113c8d30c2088cba0ac3"
+        },
+        {
+          "name": "related_task_source_proofs",
+          "object_type": "table",
+          "definition_sha256": "612452005e64a37839fadf850d15d7edd1c57e5df3439d525f4f92ceb9e7b78c"
         },
         {
           "object_type": "table",
@@ -1352,6 +1482,141 @@
           "object_type": "trigger",
           "name": "notification_renderings_immutable_update",
           "definition_sha256": "b763ceb38f642f99df5bf0070dc048fd08dff210971c0078f56f00d10d0db5df"
+        },
+        {
+          "name": "related_task_assignment_revisions_immutable_delete",
+          "object_type": "trigger",
+          "definition_sha256": "d23ba417b01ebf1bbfbbc405056e96176db409a82858efbdf38bb68b8ad399c2"
+        },
+        {
+          "name": "related_task_assignment_revisions_immutable_update",
+          "object_type": "trigger",
+          "definition_sha256": "6eb8ce38abd977763b897644452ca0e21a8a4f6bf9c02915ddf8267fbcde231d"
+        },
+        {
+          "name": "related_task_assignments_guard_delete",
+          "object_type": "trigger",
+          "definition_sha256": "94a1abb3991c7fef6f0753eb99648fb6181fc7a72e324283d51627a0f411cea1"
+        },
+        {
+          "name": "related_task_assignments_guard_update",
+          "object_type": "trigger",
+          "definition_sha256": "93ffae61fbc81f8443e695b8e0a39d85ea1e3f8575397ec7b41921863b3ec4dc"
+        },
+        {
+          "name": "related_task_catalog_state_guard_delete",
+          "object_type": "trigger",
+          "definition_sha256": "650f969dcc8c2db2f799fd237aed23fb859acfef61bb960d9554192336af71c0"
+        },
+        {
+          "name": "related_task_catalog_state_guard_update",
+          "object_type": "trigger",
+          "definition_sha256": "ac344b7d7915da9645ca64e8f0586c76c18cfd205811327c28417add4d81e3ac"
+        },
+        {
+          "name": "related_task_generations_immutable_delete",
+          "object_type": "trigger",
+          "definition_sha256": "9fb3c2b15ebfe4bf80f9bac5f7e250257521ef7b2229d7fa913525d09a385817"
+        },
+        {
+          "name": "related_task_generations_immutable_update",
+          "object_type": "trigger",
+          "definition_sha256": "1755c54366ad833dabdfcd7814df09bbff66efa429c301e6a7b11a2e052a760f"
+        },
+        {
+          "name": "related_task_intent_outcomes_immutable_delete",
+          "object_type": "trigger",
+          "definition_sha256": "0b62120521037725cd40a77d3f80884373f7f13147d2f55057a78ffb840556b7"
+        },
+        {
+          "name": "related_task_intent_outcomes_immutable_update",
+          "object_type": "trigger",
+          "definition_sha256": "0057c959bbc3c3dafed7dfe864fae47352575cc4b09474eda4f53269ebfc603e"
+        },
+        {
+          "name": "related_task_intents_guard_delete",
+          "object_type": "trigger",
+          "definition_sha256": "69d8130cd1f4160e1f7d0c0312de1c8f077b78b7a0c96fe01c4f8ca6eed68e7f"
+        },
+        {
+          "name": "related_task_intents_guard_update",
+          "object_type": "trigger",
+          "definition_sha256": "c4c5625d0f01ff07980c30d2c2eb29454d3dbe7b0ddc04721052e47d20c38b91"
+        },
+        {
+          "name": "related_task_proof_lineage_immutable_delete",
+          "object_type": "trigger",
+          "definition_sha256": "99b357adbd7c63d3b83a6feeee75b55553036303b38cae60e953df513cb90334"
+        },
+        {
+          "name": "related_task_proof_lineage_immutable_update",
+          "object_type": "trigger",
+          "definition_sha256": "f8732d09587e4da922ee9aab1357995a66b3f48f0f6f4ceb80e6c1b39fb1dc28"
+        },
+        {
+          "name": "related_task_restoration_suppressions_immutable_delete",
+          "object_type": "trigger",
+          "definition_sha256": "70f9fc005e8e210bb8dbe7477106272483c5058c6114c4e132fcefb33c0c4eca"
+        },
+        {
+          "name": "related_task_restoration_suppressions_immutable_update",
+          "object_type": "trigger",
+          "definition_sha256": "ff1e3fe4aba9168ba0b16c8366737e9c47a0b3782dda74013813444eeda6ff7c"
+        },
+        {
+          "name": "related_task_rule_progress_guard_update",
+          "object_type": "trigger",
+          "definition_sha256": "7bcab4701a9b837014c462d1c70eb32c37e9f92321399235de429181f1881f53"
+        },
+        {
+          "name": "related_task_rule_revisions_immutable_delete",
+          "object_type": "trigger",
+          "definition_sha256": "f805bbae1bcf592ec88e99b97b7623cf97060b9bbe2d8d84cbd9a910decd1d8c"
+        },
+        {
+          "name": "related_task_rule_revisions_immutable_update",
+          "object_type": "trigger",
+          "definition_sha256": "a5f5233180177312fc032cd6c4c4cd79d0d2a9b012829b67238af389203ca7e9"
+        },
+        {
+          "name": "related_task_rules_guard_delete",
+          "object_type": "trigger",
+          "definition_sha256": "d97283e61485c4d9a3b01e940cbd94ec2df5999fd164ab769579da11e1fbdd38"
+        },
+        {
+          "name": "related_task_rules_guard_update",
+          "object_type": "trigger",
+          "definition_sha256": "02007f755c6b18a3fe0eba2ca7be02790b0337e371d4ac0ce3bc1913a1089c42"
+        },
+        {
+          "name": "related_task_selector_reservations_immutable_delete",
+          "object_type": "trigger",
+          "definition_sha256": "2ebc81950a8a540e220b8bae9e61f06b1339de5438e833781480701b887feaea"
+        },
+        {
+          "name": "related_task_selector_reservations_immutable_update",
+          "object_type": "trigger",
+          "definition_sha256": "a1e6c7af7796edf75177e0c64431bd1fa3405691b1e4155f426c864fdbd2d1bc"
+        },
+        {
+          "name": "related_task_source_cancellations_immutable_delete",
+          "object_type": "trigger",
+          "definition_sha256": "e952691a3c64506c3e8f38305f789ee9eda3c0fa94c4a59a5345322a6dd99beb"
+        },
+        {
+          "name": "related_task_source_cancellations_immutable_update",
+          "object_type": "trigger",
+          "definition_sha256": "80ab5a3c6624502b382614b57c69620c1d77e371d227be5cfd202fa34b24a90e"
+        },
+        {
+          "name": "related_task_source_proofs_immutable_delete",
+          "object_type": "trigger",
+          "definition_sha256": "2c4a8e4ff978e0008423fb4e1ea07c01d949c75c9828e6fb1b71b93a45ce6171"
+        },
+        {
+          "name": "related_task_source_proofs_immutable_update",
+          "object_type": "trigger",
+          "definition_sha256": "a4a4d45f7dc28a779023b2f600380e003d4dbab33129684c083cc234e031af3e"
         },
         {
           "object_type": "trigger",

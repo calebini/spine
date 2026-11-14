@@ -513,9 +513,16 @@ def _apply_operation(
 def handle(command: str, request: dict[str, Any], context: Any) -> dict[str, Any]:
     realm = os.environ.get("SPINE_WEB_REALM_ID", "local")
     try:
+        bootstrap = None
+        if request.get("contract_version") == "spine.trusted-web-provisioning.v3":
+            if context.transport_metadata not in ({}, {"adapter": "cli"}):
+                raise WebError("admission_unavailable")
+            from spine.web.ownership_package import packaged
+
+            bootstrap = packaged()
         if command == "web_access.plan":
             with context.ledger.atomic_command(write=False):
-                return plan(context.ledger, request, realm=realm)
-        return apply(context.ledger, request, realm=realm)
+                return plan(context.ledger, request, realm=realm, bootstrap=bootstrap)
+        return apply(context.ledger, request, realm=realm, bootstrap=bootstrap)
     except WebError as exc:
         return {"ok": False, "command": command, "error": {"code": exc.code, "message": exc.code.replace("_", " ")}}

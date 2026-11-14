@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cortext.local/spine/contracts/schemas/local-ownership-bootstrap/state.schema.json",
+  "type": "object",
+  "properties": {
+    "contract_version": {
+      "const": "spine.ownership-access-state.v1"
+    },
+    "state": {
+      "$ref": "types.schema.json#/$defs/state"
+    }
+  },
+  "required": [
+    "contract_version",
+    "state"
+  ],
+  "additionalProperties": false
+}

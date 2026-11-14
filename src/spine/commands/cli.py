@@ -128,7 +128,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         request = (
             {}
             if args.input == "-" and (command == "system.info" or direct_schedule_show)
-            else _load_request(args.input, facet=command in FACET_COMMANDS, rendering=command in RENDERING_COMMANDS,
+            else _load_request(args.input, facet=command in FACET_COMMANDS or command.startswith("schedule.related_task_rule."),
+                               rendering=command in RENDERING_COMMANDS,
                                people=command in {"people.list", "item.people.show", "item.people.update",
                                                   "schedule.create", "schedule.update"})
         )
@@ -168,7 +169,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         from spine.commands.facets import WRITES as FACET_WRITES
 
         cursor_config = None
-        if command in PAGES and os.environ.get("SPINE_FACET_CURSOR_CONFIG"):
+        recurring = command.startswith("schedule.related_task_rule.")
+        if (command in PAGES or recurring) and os.environ.get("SPINE_FACET_CURSOR_CONFIG"):
             cursor_config = load_cursor_config(os.environ["SPINE_FACET_CURSOR_CONFIG"])
         rendering_cursor_config = None
         if command in {"notification_rendering_definition.list", "notification_rendering_disclosure.list"}:
@@ -186,7 +188,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         connection = _open_ledger(
             args.db,
             writable=command in WRITE_COMMANDS and (
-                not args.dry_run or command in FACET_WRITES or rendering_request(command, request) or people_request(command, request)),
+                not args.dry_run or recurring or command in FACET_WRITES or rendering_request(command, request)
+                or people_request(command, request)),
         )
     except SpineValidationError as exc:
         code, _, field = exc.code.partition(":")

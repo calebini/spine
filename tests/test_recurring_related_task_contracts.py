@@ -195,17 +195,17 @@ class RecurringRelatedTaskContractTests(unittest.TestCase):
             self.assertTrue(any(r["schema"] == SCHEMAS + name + "-request.schema.json" and r["valid"] for r in self.manifest["fixtures"]))
             self.assertTrue(any(r["schema"] == SCHEMAS + name + "-response.schema.json" and r["valid"] for r in self.manifest["fixtures"]))
 
-    def test_source_only_boundary_and_exact_existing_prerequisites(self):
-        self.assertFalse(self.descriptor["runtime_implemented"])
+    def test_trusted_local_runtime_boundary_and_exact_existing_prerequisites(self):
+        self.assertTrue(self.descriptor["runtime_implemented"])
         self.assertFalse(self.manifest["runtime_verified"])
         self.assertEqual(self.descriptor["status"], "ratified_machine_contract")
         self.assertEqual(self.manifest["status"], "ratified_source_only")
         self.assertEqual(read("contracts/recurring-related-task-schema-closure.v1.json")["status"], "ratified_source_only")
         self.assertEqual(self.descriptor["exposure"], "trusted_local_only")
-        self.assertIsNone(self.descriptor["ledger_schema_version"])
+        self.assertEqual(self.descriptor["ledger_schema_version"], "20")
         proposed = self.descriptor["proposed_contract_versions"]
-        self.assertFalse(set(proposed) & set(IMPLEMENTED_CONTRACT_VERSIONS))
-        self.assertFalse(set(self.descriptor["commands"]) & set(COMMAND_RUNTIME_CONTRACT_REGISTRY))
+        self.assertLessEqual(set(proposed), set(IMPLEMENTED_CONTRACT_VERSIONS))
+        self.assertLessEqual(set(self.descriptor["commands"]), set(COMMAND_RUNTIME_CONTRACT_REGISTRY))
         deps = self.descriptor["required_existing_contract_versions"]
         self.assertEqual(deps, sorted(set(deps)))
         self.assertLessEqual(set(deps), set(IMPLEMENTED_CONTRACT_VERSIONS))

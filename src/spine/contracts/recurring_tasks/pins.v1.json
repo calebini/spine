@@ -2,7 +2,7 @@
   "contract_version": "spine.recurring-task-package-pins.v1",
   "files": {
     "recurring-related-task-schema-closure.v1.json": "d00a0f7eab8140aede9c4de9e084f4f5f6c08f3c33aded7bb740af55a002ab5f",
-    "recurring-related-tasks.v1.json": "f069bbfa20ae1eadacab7c64e9d60fca059daa55bc07ab921a01ab844ca34803",
+    "recurring-related-tasks.v1.json": "a99a74ba9d50e9aefa1e1c04e980f415a84992ea49107ec49467c73d16103370",
     "schemas/notification-profile-types-v2.schema.json": "e1587494d473198b49f16be89e27de12e32df512821d5670f9c8bf48f654f875",
     "schemas/notification-profile-types.schema.json": "182353b53719d924cb062d898d7e3cae1f0de9e124bb2b793c26fa6a59ab6b8c",
     "schemas/notification-rendering-definition-types.schema.json": "3b6ea94ce86bbb06f45c63516700235edba43cd0800ed4be05261fc774848344",

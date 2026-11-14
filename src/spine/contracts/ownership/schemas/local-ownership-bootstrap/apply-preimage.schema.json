@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cortext.local/spine/contracts/schemas/local-ownership-bootstrap/apply-preimage.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "contract_version": {
+      "const": "spine.trusted-web-provisioning.v3"
+    },
+    "actor_subject_id": {
+      "$ref": "../trusted-web-provisioning-apply-request.v2.schema.json#/properties/actor_subject_id"
+    },
+    "action_timestamp_utc": {
+      "$ref": "../trusted-web-provisioning-apply-request.v2.schema.json#/properties/action_timestamp_utc"
+    },
+    "expected_access_epoch": {
+      "$ref": "types.schema.json#/$defs/decimal"
+    },
+    "normalized_plan": {
+      "$ref": "provisioning-plan-response.v3.schema.json#/$defs/normalizedPlan"
+    },
+    "plan_hash": {
+      "$ref": "../trusted-web-types.schema.json#/$defs/sha256"
+    },
+    "realm_id": {
+      "$ref": "types.schema.json#/$defs/id"
+    }
+  },
+  "required": [
+    "contract_version",
+    "actor_subject_id",
+    "action_timestamp_utc",
+    "expected_access_epoch",
+    "normalized_plan",
+    "plan_hash",
+    "realm_id"
+  ]
+}

@@ -55,6 +55,54 @@ _READ_COMMANDS = frozenset(
     }
 )
 
+_READ_COMMANDS |= frozenset({"schedule.related_task_rule.list", "schedule.related_task_rule.show"})
+
+RECURRING_TASK_COMMANDS = frozenset({
+    "schedule.related_task_rule.create",
+    "schedule.related_task_rule.update",
+    "schedule.related_task_rule.retire",
+    "schedule.related_task_rule.assignment.suppress",
+    "schedule.related_task_rule.reconcile",
+    "schedule.related_task_rule.list",
+    "schedule.related_task_rule.show",
+})
+RECURRING_TASK_REQUIRED_CONTRACTS = (
+    "spine.canonical-json.v1",
+    "spine.item-archetypes.v1",
+    "spine.ledger-instance.v1",
+    "spine.normalized-temporal-binding-revision-hash.v1",
+    "spine.notification-opportunities.v1",
+    "spine.notification-profile-application.v2",
+    "spine.notification-profile-bindings.v1",
+    "spine.notification-profiles.v2",
+    "spine.notification-rendering-integration.v1",
+    "spine.notification-schedule-authoring.v1",
+    "spine.notification-schedule.contract.v1",
+    "spine.notification-schedule.normalization.v1",
+    "spine.ownership-access-state.v1",
+    "spine.people-and-responsibility.v1",
+    "spine.people-notification-continuity.v1",
+    "spine.recurrence-authoring.v1",
+    "spine.recurrence.contract.v1",
+    "spine.recurrence.normalization.v1",
+    "spine.recurring-related-tasks-response.v1",
+    "spine.recurring-related-tasks.cursor.v1",
+    "spine.recurring-related-tasks.normalization.v1",
+    "spine.recurring-related-tasks.v1",
+    "spine.relative-temporal-binding-normalization.v1",
+    "spine.relative-temporal-binding.v1",
+    "spine.schedule-cancel.v1",
+    "spine.schedule-create-normalization.v1",
+    "spine.schedule-create.v4",
+    "spine.schedule-operations-normalization.v1",
+    "spine.schedule-primary-location-authoring.v1",
+    "spine.schedule-primary-location-normalization.v1",
+    "spine.schedule-primary-location-view.v1",
+    "spine.schedule-primary-location.v1",
+    "spine.schedule-update.v4",
+    "spine.temporal-binding-catalog.v1",
+)
+
 _BASE_COMMANDS = {
     "subject.upsert",
     "subject_group.upsert",
@@ -84,6 +132,8 @@ def _requirements(commands: set[str], *versions: str) -> None:
 
 _requirements({"web_access.plan", "web_access.apply"}, "spine.trusted-web-provisioning.v1")
 _requirements({"web_access.plan", "web_access.apply"}, "spine.trusted-web-provisioning.v2")
+_requirements({"web_access.plan", "web_access.apply"}, "spine.trusted-web-provisioning.v2",
+              "spine.trusted-web-provisioning.v3", "spine.ownership-access-state.v1")
 _requirements({"facet_schema.create", "facet_schema.publish", "facet_schema.retire", "facet_schema.show"}, "spine.facet-schemas.v1")
 _requirements({"facet_schema.list"}, "spine.facet-schemas.v1", "spine.facet-cursor.v1")
 _requirements({"facet_schema.revision.show"}, "spine.facet-schema-revision-readback.v1", "spine.facet-schemas.v1")
@@ -345,6 +395,9 @@ _requirements({"item.people.update"}, "spine.people-and-responsibility.v1", "spi
               "spine.notification-rendering-integration.v1")
 
 
+_requirements(set(RECURRING_TASK_COMMANDS), *RECURRING_TASK_REQUIRED_CONTRACTS)
+
+
 def _entry(command: str, additional: tuple[str, ...]) -> CommandContractEntry:
     return CommandContractEntry(
         command=command,
@@ -371,6 +424,7 @@ MVP_COMMANDS = frozenset(COMMAND_RUNTIME_CONTRACT_REGISTRY)
 WRITE_COMMANDS = frozenset(command for command, entry in COMMAND_RUNTIME_CONTRACT_REGISTRY.items() if entry.access_mode == "write")
 
 WORKER_COMMANDS = (
+    "schedule.related_task_rule.reconcile",
     "notification_work.materialize",
     "occurrence_provenance.regenerate",
     "schedule.binding.reconcile",

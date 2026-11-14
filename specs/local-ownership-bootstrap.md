@@ -1,6 +1,6 @@
 # Trusted-Local Ownership Bootstrap
 
-Status: Accepted v1.0.0 — ratified; internal R2 candidate implementation, public activation pending
+Status: Accepted v1.0.0 — native ownership state and trusted-local provisioning v3 implemented in runtime 0.12.0/schema 20; release verification tracked separately
 Created: 2026-11-10
 Ratified: 2026-11-10, following the bounded consistency review
 Machine contracts ratified: 2026-11-10, following the full review and clean focused recheck
@@ -384,8 +384,11 @@ implementation evidence; the wire corpus cannot close them.
 The [fixture manifest](../contracts/local-ownership-bootstrap-fixture-manifest.json)
 indexes the offline witnesses, not completion of those runtime obligations.
 
-Before activation publish packaged state/provisioning schemas and matching compiled
+Activation requires packaged state/provisioning schemas and matching compiled
 contract requirements, coherent DDL/object fingerprints, actual runtime tests and
 all remaining R2 gates. The source-only v3 and internal state identifiers must not
 appear in implemented versions merely because offline tests pass. No public
-bootstrap command, service requirement, sending authorization or R3/R4 activation.
+bootstrap command, service requirement or sending authorization is introduced.
+Runtime 0.12.0/schema 20 implements this local activation with a separately pinned
+ownership package; the frozen web registry and v1/v2 response shapes stay unchanged.
+SPINE-095 tracks release qualification independently of pure fixture status labels.

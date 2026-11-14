@@ -21,7 +21,7 @@ DIRECTORY = resources.files("spine.contracts").joinpath("recurring_tasks")
 
 
 class RecurringPackageTests(unittest.TestCase):
-    def test_exact_source_parity_complete_offline_and_not_public_yet(self):
+    def test_exact_source_parity_complete_offline_and_trusted_local_activation(self):
         loaded = package.packaged()
         closure = json.loads((ROOT / "contracts" / package.CLOSURE).read_bytes())
         self.assertEqual(set(loaded.documents), {e["path"] for e in closure["resources"]})
@@ -30,8 +30,8 @@ class RecurringPackageTests(unittest.TestCase):
             self.assertEqual(DIRECTORY.joinpath(name).read_bytes(), (ROOT / entry["path"]).read_bytes())
         self.assertEqual(loaded.descriptor, json.loads((ROOT / "contracts" / package.DESCRIPTOR).read_bytes()))
         self.assertTrue(set(loaded.descriptor["required_existing_contract_versions"]) <= IMPLEMENTED_CONTRACT_VERSIONS)
-        self.assertTrue(set(loaded.descriptor["commands"]).isdisjoint(COMMAND_RUNTIME_CONTRACT_REGISTRY))
-        self.assertEqual(IMPLEMENTED_LEDGER_SCHEMA_VERSION, 19)
+        self.assertTrue(set(loaded.descriptor["commands"]) <= set(COMMAND_RUNTIME_CONTRACT_REGISTRY))
+        self.assertEqual(IMPLEMENTED_LEDGER_SCHEMA_VERSION, 20)
 
     def test_missing_or_changed_each_required_asset_fails_closed(self):
         pins = json.loads(DIRECTORY.joinpath("pins.v1.json").read_bytes())

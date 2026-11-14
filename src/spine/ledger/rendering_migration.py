@@ -28,6 +28,9 @@ def statements(script: str) -> list[str]:
 
 def verify_candidate_schema(db: sqlite3.Connection) -> None:
     """Pinned metadata-only candidate validation; never scans domain rows."""
+    if db.execute("SELECT MAX(schema_version) FROM ledger_schema").fetchone()[0] == 20:
+        verify_runtime_schema(db, expected_version=20)
+        return
     manifest = json.loads(resources.files("spine.ledger").joinpath("schema_object_manifest.rendering-candidate.json").read_text())
     invariant(
         manifest["manifest_version"] == "spine.rendering-candidate-schema-manifest.v1"
@@ -100,6 +103,10 @@ def install_candidate(db: sqlite3.Connection, *, disposable_test_ledger: bool = 
     """Atomic schema-18 candidate, never a production initialize/migrate path."""
     if not disposable_test_ledger or db.in_transaction or not isinstance(db, LedgerConnection):
         raise SpineValidationError("ledger_migration_predecessor", "candidate rendering storage requires an idle disposable test ledger")
+    if db.execute("SELECT MAX(schema_version) FROM ledger_schema").fetchone()[0] == 20:
+        verify_runtime_schema(db, expected_version=20)
+        db.enable_renderings()
+        return
     if db.execute("SELECT MAX(schema_version) FROM ledger_schema").fetchone()[0] == 19:
         verify_candidate_schema(db)
         db.enable_renderings()

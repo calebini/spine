@@ -1,6 +1,6 @@
 {
   "contract_version": "spine.local-ownership-bootstrap.v1",
-  "status": "ratified_source_only",
+  "status": "ratified_machine_contract",
   "ratified": "2026-11-10",
   "design_status": "ratified",
   "runtime_verified": false,
@@ -12,8 +12,8 @@
   ],
   "public_bootstrap_command": null,
   "web_registry_change": false,
-  "package_version_change": false,
-  "ledger_schema_change_activated": false,
+  "package_version_change": true,
+  "ledger_schema_change_activated": true,
   "schemas": [
     "contracts/schemas/local-ownership-bootstrap/apply-preimage.schema.json",
     "contracts/schemas/local-ownership-bootstrap/types.schema.json",

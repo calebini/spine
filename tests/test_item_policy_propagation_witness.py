@@ -8,6 +8,7 @@ from unittest.mock import patch
 
 from spine.core.canonical_json import canonical_json_bytes
 from tests import test_schedule_operations_command as schedules
+from tests.schema19_witness_support import schema19
 
 FIXTURE = Path(__file__).parent / "fixtures/internal_operations/rf3_item_policy_witness.json"
 
@@ -47,4 +48,5 @@ class ItemPolicyWitnessTests(unittest.TestCase):
     def test_item_policy_envelopes_and_sql_match_checkpoint(self):
         baseline = json.loads(FIXTURE.read_text())
         self.assertEqual(baseline["source_commit"], "5a212a6")
-        self.assertEqual(collect(), baseline["cases"])
+        with schema19():
+            self.assertEqual(collect(), baseline["cases"])

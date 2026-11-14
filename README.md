@@ -85,7 +85,12 @@ policy version in the same transaction. The people and timezone capabilities fro
 [timezone baseline setup](docs/TZDB_COMPATIBILITY_OPERATIONS.md), and the
 [timezone contract](specs/timezone-compatibility.md).
 
-Spine `0.11.2` is an implemented alpha; its scheduling core is exercised in a staging
+Runtime 0.12.0/schema 20 adds [recurring-source related-task rules](docs/RECURRING_RELATED_TASKS.md):
+one pickup, preparation task or follow-up per occurrence, with independent task
+history, follow-source timing and reminders. Public activation is implemented;
+the remaining release qualification is tracked under SPINE-095.
+
+Spine `0.12.0` is an implemented alpha; its scheduling core is exercised in a staging
 agent environment. The current SQLite ledger schema is version `19`. The trusted multi-operator backend is also running in staging on `cortext1`, with
 operator testing through the connected [Kinflow frontend](../kinflow-web-ui/README.md).
 Concrete operator-reported work is tracked in the [backlog](docs/BACKLOG.md);

@@ -60,15 +60,18 @@ class CommandRuntimeContractRegistryTests(unittest.TestCase):
     def test_registry_is_complete_sorted_and_exact(self) -> None:
         self.assertEqual(COMMAND_RUNTIME_CONTRACT_REGISTRY_ID, "spine.command-runtime-contract-registry.v1")
         from spine.commands.facets import CONTRACTS as FACET_COMMANDS
+        from spine.commands.registry import RECURRING_TASK_COMMANDS
         from spine.commands.rendering_catalog import COMMANDS as RENDERING_COMMANDS
 
-        self.assertEqual(len(COMMAND_RUNTIME_CONTRACT_REGISTRY), 79)
+        self.assertEqual(len(COMMAND_RUNTIME_CONTRACT_REGISTRY), 86)
         self.assertEqual(
             set(COMMAND_RUNTIME_CONTRACT_REGISTRY),
             _dispatch_commands() | set(PROFILE_COMMANDS) | set(FACET_COMMANDS) | set(RENDERING_COMMANDS)
-            | {"people.list", "item.people.show", "item.people.update"},
+        | {"people.list", "item.people.show", "item.people.update"} | RECURRING_TASK_COMMANDS,
         )
         expected_read_commands = {
+            "schedule.related_task_rule.list",
+            "schedule.related_task_rule.show",
             "agenda.show",
             "item.list",
             "item.occurrences",

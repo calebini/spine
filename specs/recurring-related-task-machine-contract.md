@@ -1,6 +1,6 @@
 # Recurring Related Tasks: Machine Companion
 
-Status: Accepted v1.0.0 — ratified machine contracts; source-only, not implemented
+Status: Accepted v1.0.0 — implemented trusted-local family in runtime 0.12.0/schema 20; release verification tracked separately
 
 Ratified: 2026-11-09
 
@@ -17,16 +17,19 @@ The ratified source capability manifest is
 [recurring-related-tasks.v1.json](../contracts/recurring-related-tasks.v1.json).
 It declares exact versions, seven local commands, request/response paths,
 prerequisites, bounds, identity conventions and pending runtime obligations.
-It is **not** the compiled runtime registry. No handler, HTTP allowlist, installed
-schema closure, package version or ledger schema is activated by this corpus.
-`proposed_contract_versions` lists the source declarations pending runtime
-activation; ratification does not add them to compiled implemented declarations.
+It is **not** the compiled runtime registry. Runtime 0.12.0 registers this exact
+trusted-local family and ships its complete offline closure on schema 20.
+`proposed_contract_versions` retains its original source-manifest field name;
+those exact versions are now compiled implemented declarations. Ratification alone
+did not activate them. No HTTP allowlist or new authentication surface is added.
 
 The [fixture manifest](../contracts/recurring-related-task-fixture-manifest.json)
 separates valid/invalid wire fixtures, computed hash/cursor vectors and pure
 decision witnesses. Evidence examples include mutually exclusive branches,
 explicitly labelled as alternatives rather than one consistent ledger snapshot.
-Every runtime obligation remains pending. A passing offline
+Runtime acceptance and remaining release obligations are tracked by
+`docs/BACKLOG.md` SPINE-095. The fixture manifest's source-only labels distinguish
+pure corpus validation from actual runtime proof. A passing offline
 test cannot prove actual SQL transactions, locking, attempt races, migration or
 worker behavior; those remain implementation acceptance requirements.
 

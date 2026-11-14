@@ -56,4 +56,7 @@ class OwnershipPropagationWitnessTests(unittest.TestCase):
     def test_owner_header_history_epochs_and_wire_bytes_match_checkpoint(self):
         fixture = json.loads(FIXTURE.read_text())
         self.assertEqual(fixture["source_commit"], "0135a68")
-        self.assertEqual(collect(), fixture["cases"])
+        from tests.schema19_witness_support import schema19
+
+        with schema19():
+            self.assertEqual(collect(), fixture["cases"])

@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cortext.local/spine/contracts/schemas/local-ownership-bootstrap/provisioning-plan-request.v3.schema.json",
+  "type": "object",
+  "properties": {
+    "contract_version": {
+      "const": "spine.trusted-web-provisioning.v3"
+    },
+    "ledger_id": {
+      "$ref": "types.schema.json#/$defs/id"
+    },
+    "realm_id": {
+      "$ref": "types.schema.json#/$defs/id"
+    },
+    "expected_access_epoch": {
+      "$ref": "types.schema.json#/$defs/decimal"
+    },
+    "operators": {
+      "$ref": "../trusted-web-provisioning-plan-request.v2.schema.json#/properties/operators"
+    },
+    "memberships": {
+      "$ref": "../trusted-web-provisioning-plan-request.v2.schema.json#/properties/memberships"
+    },
+    "item_adoptions": {
+      "$ref": "../trusted-web-provisioning-plan-request.v2.schema.json#/properties/item_adoptions"
+    },
+    "grants": {
+      "$ref": "../trusted-web-provisioning-plan-request.v2.schema.json#/properties/grants"
+    },
+    "route_approvals": {
+      "$ref": "../trusted-web-provisioning-plan-request.v2.schema.json#/properties/route_approvals"
+    }
+  },
+  "required": [
+    "contract_version",
+    "ledger_id",
+    "realm_id",
+    "expected_access_epoch"
+  ],
+  "additionalProperties": false
+}

@@ -14,7 +14,7 @@ from jsonschema.exceptions import SchemaError
 from spine.commands.recurring_task_runtime import RecurringTaskContracts
 from spine.core.errors import SpineValidationError
 
-PIN_SHA256 = "ee9dd3d44fd4b3504e75da27cdfa255f7ac8dbbcaec7e076b88e8f7ba9504842"
+PIN_SHA256 = "867c7835bf110d4335a6ff0b0f481ade47638d918f538ad48380ebd821321a45"
 DESCRIPTOR = "recurring-related-tasks.v1.json"
 CLOSURE = "recurring-related-task-schema-closure.v1.json"
 
@@ -82,6 +82,8 @@ def load_from(directory: Traversable) -> RecurringTaskContracts:
         if expected != set(assets) or any(_references(doc, doc["$id"]) - identities for doc in documents.values()):
             raise ValueError("incomplete offline closure")
         result = RecurringTaskContracts(documents, assets[DESCRIPTOR])
+        if result.descriptor.get("runtime_implemented") is not True or result.descriptor.get("ledger_schema_version") != "20":
+            raise ValueError("recurring-task runtime descriptor is not activated")
         if not set(result.descriptor["required_existing_contract_versions"]) <= IMPLEMENTED_CONTRACT_VERSIONS:
             raise ValueError("required existing runtime contract unavailable")
         for spec in result.descriptor["commands"].values():

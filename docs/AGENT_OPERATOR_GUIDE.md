@@ -1,5 +1,11 @@
 # Agent Operator Guide
 
+Runtime 0.12.0/schema 20 adds
+[recurring related-task rules](RECURRING_RELATED_TASKS.md): one maintained task
+per source occurrence, without replacing ordinary tasks or one-off bindings.
+Read that focused guide for enrollment, expected facts, continuations,
+restoration vetoes, retirement and required worker configuration.
+
 Status: operational contract for current runtime surfaces
 Audience: local agents and agent operators integrating with Spine
 

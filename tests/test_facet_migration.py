@@ -21,6 +21,7 @@ def predecessor(db):
         patch("spine.ledger.facet_access_migration.install_facet_access"),
         patch("spine.ledger.facet_location_migration.install_facet_location_freeze"),
         patch("spine.ledger.rendering_migration.install_rendering_storage"),
+        patch("spine.ledger.recurring_task_migration.install_recurring_task_storage"),
     ):
         initialize_schema(db)
     # Raw predecessor fixture: the new allocator deliberately cannot write schema 15.
@@ -58,8 +59,8 @@ class FacetMigrationTests(unittest.TestCase):
                 before = predecessor(db)
                 db.backup(backup)
                 result = migrate_schema(db)
-                self.assertEqual(result.applied_versions, (16, 17, 18, 19))
-                self.assertEqual(result.after_version, 19)
+                self.assertEqual(result.applied_versions, (16, 17, 18, 19, 20))
+                self.assertEqual(result.after_version, 20)
                 after = all_rows(db)
                 for table, rows in before.items():
                     if table != "ledger_schema":

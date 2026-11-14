@@ -238,6 +238,10 @@ class OwnershipBootstrapTests(unittest.TestCase):
         self.assertEqual(read_access_state(self.db)["ledger_id"], "separate-logical-ledger")
 
     def test_every_rebuild_fault_restores_predecessor_and_fk_enforcement(self):
+        self.db = connect()
+        self.addCleanup(self.db.close)
+        with patch("spine.ledger.sqlite.IMPLEMENTED_LEDGER_SCHEMA_VERSION", 19):
+            initialize_schema(self.db)
         before = dump(self.db)
         for stage in ("preflight", "ownership_created", "ownership_copied", "ownership_dropped", "ownership_rebuilt",
                       "ddl", "verified", "activation"):
@@ -250,6 +254,10 @@ class OwnershipBootstrapTests(unittest.TestCase):
             self.assertEqual(self.db.execute("PRAGMA foreign_keys").fetchone()[0], 1)
 
     def test_invalid_stored_identifiers_and_extra_dependents_abort_migration(self):
+        self.db = connect()
+        self.addCleanup(self.db.close)
+        with patch("spine.ledger.sqlite.IMPLEMENTED_LEDGER_SCHEMA_VERSION", 19):
+            initialize_schema(self.db)
         with self.db.atomic_command():
             self.db.execute("INSERT INTO ledger_access_state VALUES(1,'invalid\nledger','realm','multi_user','trusted_identity',1,1)")
         before = dump(self.db)

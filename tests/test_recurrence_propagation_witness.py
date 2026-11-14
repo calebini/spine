@@ -8,6 +8,7 @@ from unittest.mock import patch
 
 from spine.core.canonical_json import canonical_json_bytes
 from tests import test_recurrence_commands as commands
+from tests.schema19_witness_support import schema19
 
 FIXTURE = Path(__file__).parent / "fixtures/internal_operations/rf3_recurrence_witness.json"
 
@@ -46,4 +47,5 @@ class RecurrencePropagationWitnessTests(unittest.TestCase):
     def test_recurrence_envelopes_and_sql_match_checkpoint(self):
         fixture = json.loads(FIXTURE.read_text())
         self.assertEqual(fixture["source_commit"], "a4b3790")
-        self.assertEqual(collect(), fixture["cases"])
+        with schema19():
+            self.assertEqual(collect(), fixture["cases"])

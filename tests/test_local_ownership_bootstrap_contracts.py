@@ -226,13 +226,14 @@ class LocalOwnershipBootstrapContractTests(unittest.TestCase):
                              command_id=request["command_id"], row_role=role, request_path=path))
 
     def test_successors_are_not_runtime_or_frozen_web_activation(self):
-        self.assertEqual(IMPLEMENTED_LEDGER_SCHEMA_VERSION, 19)
-        self.assertTrue(set(self.descriptor["proposed_contract_versions"]).isdisjoint(IMPLEMENTED_CONTRACT_VERSIONS))
+        self.assertEqual(IMPLEMENTED_LEDGER_SCHEMA_VERSION, 20)
+        self.assertIn("spine.ownership-access-state.v1", IMPLEMENTED_CONTRACT_VERSIONS)
+        self.assertIn("spine.trusted-web-provisioning.v3", IMPLEMENTED_CONTRACT_VERSIONS)
         self.assertNotIn("ownership.bootstrap", COMMAND_RUNTIME_CONTRACT_REGISTRY)
         packaged = ROOT / "src/spine/contracts/web/schemas/local-ownership-bootstrap"
         self.assertFalse(packaged.exists())
         for name in ("plan", "apply"):
-            self.assertNotIn("spine.trusted-web-provisioning.v3",
+            self.assertIn("spine.trusted-web-provisioning.v3",
                              COMMAND_RUNTIME_CONTRACT_REGISTRY["web_access." + name].required_contract_versions)
         v2 = self.validator("contracts/schemas/trusted-web-provisioning-plan-request.v2.schema.json")
         request = read(FIXTURES + "request_plan_local.json")

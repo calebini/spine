@@ -23,6 +23,7 @@ class FacetLocationFreezeTests(unittest.TestCase):
             with (
                 patch("spine.ledger.facet_location_migration.install_facet_location_freeze"),
                 patch("spine.ledger.rendering_migration.install_rendering_storage"),
+                patch("spine.ledger.recurring_task_migration.install_recurring_task_storage"),
             ):
                 h.setUp()
         else:
@@ -97,7 +98,7 @@ class FacetLocationFreezeTests(unittest.TestCase):
         with self.assertRaises(SpineValidationError):
             verify_runtime_schema(h.db)
         result = migrate_schema(h.db)
-        self.assertEqual(result.applied_versions, (18, 19))
+        self.assertEqual(result.applied_versions, (18, 19, 20))
         for table, rows in before.items():
             if table != "ledger_schema":
                 self.assertEqual(all_rows(h.db)[table], rows, table)

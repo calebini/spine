@@ -28,6 +28,9 @@ def connect(path: str | Path = ":memory:", *, busy_timeout_ms: int = DEFAULT_BUS
         connection.enable_facets()
     if connection.execute("SELECT 1 FROM sqlite_schema WHERE name='notification_policy_presentations' AND type='table'").fetchone():
         connection.enable_renderings()
+    if (connection.execute("SELECT 1 FROM sqlite_schema WHERE name='ledger_schema' AND type='table'").fetchone()
+            and connection.execute("SELECT MAX(schema_version) FROM ledger_schema").fetchone()[0] == 20):
+        connection.enable_recurring_tasks()
     return connection
 
 
@@ -53,6 +56,8 @@ def initialize_schema(connection: sqlite3.Connection) -> None:
             if isinstance(connection, LedgerConnection):
                 connection.enable_facets()
                 connection.enable_renderings()
+                if version >= 20:
+                    connection.enable_recurring_tasks()
             return
         raise SpineValidationError(
             "ledger_schema_requires_migration",
@@ -105,6 +110,10 @@ def initialize_schema(connection: sqlite3.Connection) -> None:
     install_facet_location_freeze(connection, applied_at_utc="1970-01-01T00:00:00Z", fresh=True)
     from spine.ledger.rendering_migration import install_rendering_storage
     install_rendering_storage(connection, applied_at_utc="1970-01-01T00:00:00Z", fresh=True)
+    if IMPLEMENTED_LEDGER_SCHEMA_VERSION >= 20:
+        from spine.ledger.recurring_task_migration import install_recurring_task_storage
+
+        install_recurring_task_storage(connection, applied_at_utc="1970-01-01T00:00:00Z")
 
 
 def _is_file_backed_database(database: str) -> bool:

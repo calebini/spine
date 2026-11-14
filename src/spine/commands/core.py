@@ -144,6 +144,10 @@ def handle(command: str, request: Mapping[str, Any], context: CommandContext) ->
     if context.ledger is None:
         return _error(command, "invalid_request", f"{command} requires CommandContext.ledger", "ledger")
     try:
+        if command.startswith("schedule.related_task_rule."):
+            from spine.commands.recurring_task_admission import execute_public
+
+            return execute_public(command, request, context)
         from spine.commands import people_candidate
         if people_candidate.accepts(command, request):
             return people_candidate.execute_public(command, request, context)
@@ -162,6 +166,8 @@ def handle(command: str, request: Mapping[str, Any], context: CommandContext) ->
             preview.enable_facets()
             if getattr(context.ledger, "_renderings_enabled", False):
                 preview.enable_renderings()
+            if getattr(context.ledger, "_recurring_tasks_enabled", False):
+                preview.enable_recurring_tasks()
             try:
                 preview_context = CommandContext(
                     ledger=preview,

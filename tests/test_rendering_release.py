@@ -200,12 +200,12 @@ class RenderingReleaseTests(unittest.TestCase):
             self.assertEqual(error["error"]["field"], "cursor_config")
 
     def test_registry_and_bounded_preflight_have_no_domain_scan(self):
-        self.assertEqual(__version__, "0.11.2")
+        self.assertEqual(__version__, "0.12.0")
         self.assertIn("spine.notification-rendering-integration.v1", IMPLEMENTED_CONTRACT_VERSIONS)
         traced = []
         self.h.db.set_trace_callback(traced.append)
         try:
-            self.assertEqual(verify_runtime_schema(self.h.db).schema_version, 19)
+            self.assertEqual(verify_runtime_schema(self.h.db).schema_version, 20)
         finally:
             self.h.db.set_trace_callback(None)
         sql = " ".join(traced).lower()
@@ -223,7 +223,8 @@ class RenderingReleaseTests(unittest.TestCase):
         for stage in ("preflight", "ddl", "backfill", "verified", "activation", None):
             with self.subTest(stage=stage):
                 h = operations.ScheduleOperationsCommandTests()
-                with patch("spine.ledger.rendering_migration.install_rendering_storage"):
+                with patch("spine.ledger.rendering_migration.install_rendering_storage"), \
+                     patch("spine.ledger.recurring_task_migration.install_recurring_task_storage"):
                     h.setUp()
                 try:
                     with patch("spine.commands.core.IMPLEMENTED_LEDGER_SCHEMA_VERSION", 18):
@@ -250,8 +251,8 @@ class RenderingReleaseTests(unittest.TestCase):
                             )
                             self.assertEqual(h.connection.execute("PRAGMA foreign_keys").fetchone()[0], 1)
                         else:
-                            self.assertEqual(migrate_schema(h.connection).applied_versions, (19,))
-                            self.assertEqual(verify_schema(h.connection).schema_version, 19)
+                            self.assertEqual(migrate_schema(h.connection).applied_versions, (19, 20))
+                            self.assertEqual(verify_schema(h.connection).schema_version, 20)
                             for table, rows in before.items():
                                 if table != "ledger_schema":
                                     self.assertEqual(rows, all_rows(h.connection)[table], table)

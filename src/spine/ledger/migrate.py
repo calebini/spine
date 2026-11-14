@@ -122,6 +122,17 @@ def verify_schema(connection: sqlite3.Connection) -> SchemaVerificationResult:
     verify_all(connection)
     from spine.ledger.rendering_definitions import verify_deep
     verify_deep(connection)
+    if runtime_result.schema_version >= 20:
+        from spine.ledger.recurring_tasks import verify_deep as verify_recurring_deep
+
+        owns_snapshot = not connection.in_transaction
+        if owns_snapshot:
+            connection.execute("BEGIN")
+        try:
+            verify_recurring_deep(connection)
+        finally:
+            if owns_snapshot:
+                connection.rollback()
     return SchemaVerificationResult(
         schema_version=runtime_result.schema_version,
         table_count=runtime_result.table_count,

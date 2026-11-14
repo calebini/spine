@@ -132,7 +132,7 @@ class RecurringBindingGuardTests(unittest.TestCase):
 
         # Make the ordinary task before admitting the private schema; the guard
         # must not impose recurring-family lifecycle on an unrelated binding.
-        with patch("spine.commands.temporal_bindings.IMPLEMENTED_LEDGER_SCHEMA_VERSION", 19):
+        with patch("spine.commands.temporal_bindings.IMPLEMENTED_LEDGER_SCHEMA_VERSION", 20):
             h = ordinary.BindingSuccessorMaterializationTests()
             h.setUp()
             self.addCleanup(h.doCleanups)

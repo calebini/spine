@@ -1,0 +1,21 @@
+{
+  "contract_version": "spine.ownership-package-pins.v1",
+  "files": {
+    "local-ownership-bootstrap.v1.json": "b186b12ae2fc18c6b4f3814b6766586ab3396572a1738c48094d6a021b5c55e5",
+    "schemas/local-ownership-bootstrap/apply-preimage.schema.json": "b73b9815853f169d8cbf0fd40d3f5f46bdada64d525901df41baf4226ad672ae",
+    "schemas/local-ownership-bootstrap/plan-preimage.schema.json": "2369c6acdb07d0e54d12177c2fb6a4f511491fd4accd320035868a0471e2d835",
+    "schemas/local-ownership-bootstrap/provisioning-apply-request.v3.schema.json": "807708e2f0e89eaa385563b93a8da2f924a23b3052901dbeadf78d8ead39b83a",
+    "schemas/local-ownership-bootstrap/provisioning-apply-response.v3.schema.json": "3c2394b05f145c946a350bf6f56aeacbc1032c5e311f7bb1437b422129854a31",
+    "schemas/local-ownership-bootstrap/provisioning-plan-request.v3.schema.json": "aeddbed5d1c25a06ad008242d17a001cd10560d57e23f5e0d53af343163ffd8c",
+    "schemas/local-ownership-bootstrap/provisioning-plan-response.v3.schema.json": "e2f42a4fcd5959710ea30d2329e3e91d9e99bdf093dc515cf78e6d3598bad5a4",
+    "schemas/local-ownership-bootstrap/state.schema.json": "f83eeea0b03eb7a56e1d22e20e6faa93da1b7d87083c5cb14fc2072b0ac68aa6",
+    "schemas/local-ownership-bootstrap/transition-vectors.schema.json": "af014380f7bad93041bcbbc2c610c4e63fa06193e5c49e042cc854109bd00538",
+    "schemas/local-ownership-bootstrap/types.schema.json": "aace34997c0ee2860bef323632ba711f41f319c32b5e33886d1bbb33d2937d0f",
+    "schemas/trusted-web-error.schema.json": "15168205e986b7f8c1bc012300a413d7e70a3ac3d56b8153078777627354dec4",
+    "schemas/trusted-web-provisioning-apply-request.v2.schema.json": "d616d966c26439166d650a8b5ff1b1730fb6725c2c0193101db37bda9635dd65",
+    "schemas/trusted-web-provisioning-apply-response.v2.schema.json": "547876c9dd6190bd06f0386b7291c37d99a3f7651d4ec1bfd202a21cd3c1a61d",
+    "schemas/trusted-web-provisioning-plan-request.v2.schema.json": "41a6c7713f9483566b4f3be6f4a88ad2f6c0c53566effadbabc6854e1da4fb1c",
+    "schemas/trusted-web-provisioning-plan-response.v2.schema.json": "f28389eb7734b990e8a2e40e9f4d14853876fa9880b38587a629ed79bfd8ee58",
+    "schemas/trusted-web-types.schema.json": "2500d14cc1ed9b01b25bbc71d9c68ac84d2def49ab62fd41ce894d97e2b505f8"
+  }
+}

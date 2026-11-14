@@ -10,6 +10,7 @@ from spine.commands import CommandContext, handle
 from spine.core.canonical_json import canonical_json_bytes
 from tests import test_binding_successor_materialization as bindings
 from tests import test_ledger_supporting_sets as ledger
+from tests.schema19_witness_support import schema19
 
 FIXTURE = Path(__file__).parent / "fixtures/internal_operations/rf3_relation_witness.json"
 
@@ -58,4 +59,5 @@ class RelationPropagationWitnessTests(unittest.TestCase):
     def test_responses_audits_catalog_and_sql_match_checkpoint(self):
         fixture = json.loads(FIXTURE.read_text())
         self.assertEqual(fixture["source_commit"], "a4b3790")
-        self.assertEqual(collect(), fixture["cases"])
+        with schema19():
+            self.assertEqual(collect(), fixture["cases"])

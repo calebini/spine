@@ -508,6 +508,16 @@ disposable ledgers. Default migration/runtime admission is intentionally still
 19; the activation increment must change defaults, declarations, CLI admission
 and worker wiring coherently, not rely on an environment-dependent candidate gate.
 
+**CLI/worker activation increment:** migration core committed as `62fe2ef`.
+The local runtime now promotes to 0.12.0/schema 20 with the exact seven-command
+registry, packaged admission and native reconnect/finalizer integration.
+Canonical worker startup accepts protected actor/cursor/default-route configuration
+and fails DOWN before processing when rules lack valid configuration. The existing
+ratified provisioning-v3 path is also available locally with its own pinned
+schema closure; no web registry changes. Installed-wheel public/manual generation,
+replay and worker-only generation are verified against pinned Tickerd, with no sends.
+R4 remains open for the complete lifecycle/acceptance qualification below.
+
 Package the exact offline source schema closure and register the seven trusted-
 local CLI commands and their exact dependencies only after R1–R3 tests pass.
 Change the source-only tests to implemented-behavior assertions in the same

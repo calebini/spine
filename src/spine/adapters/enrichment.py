@@ -5,6 +5,7 @@ from contextlib import closing, nullcontext
 from datetime import datetime
 from pathlib import Path
 
+from spine import IMPLEMENTED_LEDGER_SCHEMA_VERSION
 from spine.adapters.contextual_experiment import Source, digest, dump, require
 from spine.adapters.contextual_live import LiveCaptureStore, decode
 from spine.ledger.transactions import LedgerConnection
@@ -17,7 +18,8 @@ def open_source(path):
     db = sqlite3.connect(Path(path).resolve().as_uri() + "?mode=ro", uri=True, factory=LedgerConnection, timeout=1)
     try:
         db.row_factory = sqlite3.Row
-        require(db.execute("SELECT max(schema_version) FROM ledger_schema").fetchone()[0] == 19, "enrichment_schema")
+        require(db.execute("SELECT max(schema_version) FROM ledger_schema").fetchone()[0] == IMPLEMENTED_LEDGER_SCHEMA_VERSION,
+                "enrichment_schema")
         db.enable_renderings()
         db.execute("PRAGMA query_only=ON")
         return EnrichmentSource(db)

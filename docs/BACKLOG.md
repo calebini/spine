@@ -1561,13 +1561,25 @@ See [R4 package evidence](design-notes/recurring-related-task-r4-release.md).
 Verification: 63 focused tests pass; all 33 assets match their source pins,
 non-editable installed-wheel loading outside the checkout passes, as do lint,
 loader typing, compilation, documentation links, sync and diff hygiene.
-Packaging committed as `46da61f`. Current increment: ordered schema-20 migration
+Packaging committed as `46da61f`. Migration increment (committed `62fe2ef`): ordered schema-20 migration
 core and complete bounded expected-object manifest, preserving schema-19 default
 admission until CLI and worker activation can move together. No public capability
 or automatic migration is advertised by this intermediate checkpoint.
 Migration-core verification: **1,717 tests in 510.142 seconds, OK (one skipped)**;
 87 focused migration/preflight/ownership/preservation tests, isolated installed-
 wheel migration, lint, typing, sync, compilation and diff/link checks pass.
+**Current activation increment:** runtime 0.12.0/schema 20, seven trusted-local
+rule commands, native connection tracking, deep-verification snapshots and
+protected worker actor/cursor/default-route wiring are implemented locally.
+The ratified provisioning-v3 bridge is packaged separately from the frozen web
+bundle, allowing explicit local-to-configured promotion. No HTTP allowlist or
+authentication changes. Public installed-wheel CLI and unattended-worker canaries
+pass with exact pinned Tickerd; no real sends. Full R4 release qualification and
+the complete named acceptance matrix remain open after this increment.
+Activation verification: **1,724 tests in 590.414 seconds, OK (one skipped)**;
+39 final focused tests also pass, including the no-rule/shared-facet-key regression
+added after full-suite discovery. Installed public CLI/worker canaries pass on the
+final wheel. Lint, focused typing, compilation, package sync and link/diff checks pass.
 **Scope:** Exact packaged closure, trusted-local public commands and dependencies,
 implemented declarations, coherent migration/package metadata and generic operator
 documentation. No web allowlist, authentication redesign or deployment procedure.
@@ -1577,9 +1589,9 @@ dependencies, fresh/populated synthetic migrations, fake worker/attempts, full
 documented suite and applicable lint/typing/compilation/sync/regeneration checks.
 Change source-only assertions to implemented-behavior tests, not removed gates.
 See [R4](IMPLEMENTATION_PLAN.md#r4--public-activation-and-release-verification-spine-095).
-**Next:** On selection, package and expose the trusted-local family, wire the
-candidate worker dependency at release startup, and verify the complete release
-before advertising it.
+**Next:** Finish the complete RRT matrix and installed-wheel lifecycle/rollback/
+fake-attempt qualification, then reconcile final acceptance evidence before
+calling R4 complete or releasing. No push/deployment is included here.
 Any live deployment or real-send test requires a separate operator request.
 
 ## Post-release corrective work

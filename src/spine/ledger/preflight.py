@@ -50,10 +50,10 @@ def expected_schema_objects(*, version: int | None = None) -> tuple[SchemaObject
     """Load the checked-in manifest shipped with this runtime."""
 
     version = CURRENT_SCHEMA_VERSION if version is None else version
+    name = ("schema_object_manifest.v1.json" if version == IMPLEMENTED_LEDGER_SCHEMA_VERSION
+            else f"schema_object_manifest.schema{version}.json")
     payload: Any = json.loads(
-        resources.files("spine.ledger").joinpath(
-            "schema_object_manifest.v1.json" if version == CURRENT_SCHEMA_VERSION else f"schema_object_manifest.schema{version}.json"
-        ).read_text(encoding="utf-8")
+        resources.files("spine.ledger").joinpath(name).read_text(encoding="utf-8")
     )
     if payload.get("manifest_version") != SCHEMA_OBJECT_MANIFEST_ID:
         raise RuntimeError("compiled schema-object manifest identity mismatch")

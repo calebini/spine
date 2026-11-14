@@ -114,7 +114,7 @@ additive selector on `schedule.create`/`schedule.update`, not a rename. The thre
 people read successors are separately protected HTTP operations, not extensions
 to frozen local schedule/agenda/occurrence read shapes.
 
-The stable command core lives behind the importable Python handler signature `spine.commands.handle(command: str, request: Mapping, context: CommandContext) -> Mapping`. The canonical command identifier is the dotted `resource.verb` value. Currently implemented contract command identifiers are `system.info`, `subject.upsert`, `subject_group.upsert`, `delivery_target.upsert`, `item.show`, `item.list`, `item.occurrences`, `item.archive`, `event.create`, `event.update`, `event.reschedule`, `event.cancel`, `task.create`, `schedule.build`, `schedule.create`, `schedule.show`, `agenda.show`, `schedule.update`, `schedule.cancel`, `schedule.related_task.create`, `schedule.binding.list`, `schedule.binding.reconcile`, `task.update`, `task.complete`, `task.cancel`, `relation.create`, `relation.list`, `reminder.create`, `reminder.edit`, `reminder.disable`, `notification.opportunities`, `notification_work.materialize`, `recurrence.instance.add`, `recurrence.instance.remove`, `recurrence.instance.override`, `recurrence.series.edit`, `occurrence_provenance.regenerate`, `owner_scope.list`, `web_access.plan`, and `web_access.apply`.
+The stable command core lives behind the importable Python handler signature `spine.commands.handle(command: str, request: Mapping, context: CommandContext) -> Mapping`. The canonical command identifier is the dotted `resource.verb` value. Currently implemented contract command identifiers are `system.info`, `subject.upsert`, `subject_group.upsert`, `delivery_target.upsert`, `item.show`, `item.list`, `item.occurrences`, `item.archive`, `event.create`, `event.update`, `event.reschedule`, `event.cancel`, `task.create`, `schedule.build`, `schedule.create`, `schedule.show`, `agenda.show`, `schedule.update`, `schedule.cancel`, `schedule.related_task.create`, `schedule.binding.list`, `schedule.binding.reconcile`, `task.update`, `task.complete`, `task.cancel`, `relation.create`, `relation.list`, `reminder.create`, `reminder.edit`, `reminder.disable`, `notification.opportunities`, `notification_work.materialize`, `recurrence.instance.add`, `recurrence.instance.remove`, `recurrence.instance.override`, `recurrence.series.edit`, `occurrence_provenance.regenerate`, `owner_scope.list`, `web_access.plan`, `web_access.apply`, `schedule.related_task_rule.create`, `schedule.related_task_rule.update`, `schedule.related_task_rule.retire`, `schedule.related_task_rule.assignment.suppress`, `schedule.related_task_rule.reconcile`, `schedule.related_task_rule.list`, and `schedule.related_task_rule.show`.
 
 CLI invocations such as `spine event create` are transport aliases. MCP tools and localhost HTTP routes may use local names, but each request and response maps to exactly one canonical command and returns that command in the `command` field.
 
@@ -158,11 +158,12 @@ Together with the identifiers above, this is the closed implemented command set.
 ## 4. Common Request, Output, and Error Rules
 
 The accepted [trusted-local ownership bootstrap](local-ownership-bootstrap.md)
-defines a source-only internal state projection and proposed
+defines the native ownership state projection and
 `spine.trusted-web-provisioning.v3` successor for the existing two local provisioning
-commands. Neither is implemented or added to the closed command/runtime registry
-by ratification; no public bootstrap command exists. Existing v1/v2 provisioning
-and protected admission retain their released shapes until explicit activation.
+commands. Runtime 0.12.0/schema 20 implements them with a separately pinned offline
+package. There is no new bootstrap command or HTTP entrypoint; existing v1/v2
+provisioning and protected-admission response shapes remain unchanged. An explicit
+v3 plan/apply is required to promote trusted-local ownership into a configured realm.
 
 Write commands require `command_id`, explicit `actor_subject_id`, and explicit UTC timestamps in `YYYY-MM-DDTHH:MM:SSZ` format. Except for the first-subject bootstrap rule, `actor_subject_id` must resolve before mutation. Unresolved actors fail with `referenced_row_not_found`, `field=actor_subject_id`, and CLI exit `4`.
 
@@ -263,6 +264,8 @@ Every registry entry requires `spine.canonical-json.v1`. The following table is 
 
 | Commands | Additional `required_contract_versions` |
 |---|---|
+| The seven `schedule.related_task_rule` commands enumerated in Section 3 | Exact union of `required_existing_contract_versions` and `proposed_contract_versions` in [the recurring-task descriptor](../contracts/recurring-related-tasks.v1.json), plus `spine.ownership-access-state.v1` |
+| `web_access.plan`, `web_access.apply` | `spine.trusted-web-provisioning.v2`, `spine.trusted-web-provisioning.v3`, `spine.ownership-access-state.v1` |
 | `subject.upsert`, `subject_group.upsert`, `delivery_target.upsert`, `item.show`, `item.list`, `item.archive`, `event.create`, `event.update`, `event.reschedule`, `event.cancel`, `task.create`, `task.update`, `task.complete`, `task.cancel`, `relation.create`, `relation.list` | none |
 | `system.info` | `spine.ledger-instance.v1`, `spine.system-info.v3`, `spine.tickerd-compatibility.v1` |
 | `owner_scope.list` | `spine.owner-scope-discovery.v2`, `spine.owner-scope-list-response.v2`, `spine.owner-scope-list-cursor.v2` |

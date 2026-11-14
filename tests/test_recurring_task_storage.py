@@ -11,6 +11,7 @@ import unittest
 from concurrent.futures import ThreadPoolExecutor
 from contextlib import closing
 from pathlib import Path
+from unittest.mock import patch
 
 from spine import IMPLEMENTED_LEDGER_SCHEMA_VERSION
 from spine.commands import CommandContext, handle
@@ -108,11 +109,14 @@ class RecurringTaskMigrationTests(unittest.TestCase):
     def setUp(self):
         self.db = connect()
         self.addCleanup(self.db.close)
-        initialize_schema(self.db)
+        with patch("spine.ledger.sqlite.IMPLEMENTED_LEDGER_SCHEMA_VERSION", 19):
+            initialize_schema(self.db)
 
     def test_explicit_candidate_fresh_install_idempotency_and_old_writer_refusal(self):
-        self.assertEqual(IMPLEMENTED_LEDGER_SCHEMA_VERSION, 19)
-        self.assertEqual(migrate_schema(self.db).after_version, 19)
+        self.assertEqual(IMPLEMENTED_LEDGER_SCHEMA_VERSION, 20)
+        with patch("spine.ledger.migrate.CURRENT_SCHEMA_VERSION", 19), \
+             patch("spine.ledger.migrate.verify_schema"):
+            self.assertEqual(migrate_schema(self.db).after_version, 19)
         self.assertEqual(self.db.execute("SELECT COUNT(*) FROM sqlite_schema WHERE name='related_task_rules'").fetchone()[0], 0)
         with self.assertRaises(SpineValidationError):
             install_candidate(self.db)
@@ -126,7 +130,7 @@ class RecurringTaskMigrationTests(unittest.TestCase):
         with self.assertRaises(SpineValidationError):
             verify_runtime_schema(self.db, expected_version=19)
         response = handle("system.info", {}, CommandContext(ledger=self.db))
-        self.assertFalse(response["ok"])
+        self.assertTrue(response["ok"], response)
 
     def test_every_migration_fault_rolls_back_schema_data_and_version(self):
         before = snapshot(self.db)

@@ -179,6 +179,9 @@ class SpineTickerdWorkAdapter:
             evaluated = _utc_z(envelope.actual_start_ts)
             visit = None
             actor = self.scheduler_actor_subject_id
+            if (self.recurring_tasks is None and getattr(self.connection, "_recurring_tasks_enabled", False)
+                    and self.connection.execute("SELECT 1 FROM related_task_rules LIMIT 1").fetchone()):
+                raise SpineValidationError("environment_failure:scheduler_configuration", "recurring scheduler is not configured")
             if self.recurring_tasks is not None and self.runtime_mode == "active" and envelope.runtime_mode == "active" and max_batches > 0:
                 if not isinstance(self.connection, LedgerConnection):
                     raise SpineValidationError("environment_failure", "recurring scheduler requires a ledger connection")

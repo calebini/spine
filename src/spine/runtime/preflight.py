@@ -144,6 +144,16 @@ def admit_worker(
         )
     resolver = resolve_tickerd_compatibility if dependency_resolver is None else dependency_resolver
     try:
+        from spine.commands.recurring_task_package import packaged
+
+        packaged()
+    except SpineValidationError:
+        return emit_worker_preflight_failure(
+            config=config, health_sink=health_sink, event_sink=event_sink,
+            reason="runtime_contract_mismatch",
+            required_contract_versions=("spine.recurring-related-tasks.v1",),
+        )
+    try:
         resolver()
     except TickerdCompatibilityError as exc:
         return emit_worker_preflight_failure(

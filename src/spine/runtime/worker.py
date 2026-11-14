@@ -4,9 +4,10 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import sqlite3
 import sys
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -22,7 +23,13 @@ from spine.adapters import (
     SpineTickerdWorkAdapter,
 )
 from spine.ledger import connect, initialize_schema
-from spine.runtime.preflight import BootstrapEventSink, BootstrapHealthSink, WorkerBootstrapConfig, admit_worker
+from spine.runtime.preflight import (
+    BootstrapEventSink,
+    BootstrapHealthSink,
+    WorkerBootstrapConfig,
+    admit_worker,
+    emit_worker_preflight_failure,
+)
 from spine.runtime.storage_safety import SpineStorageSafetyGate, StorageSafetyLatch, StorageSafetyPolicy
 from spine.runtime.tickerd_observe import RUNTIME_MODES
 from spine.runtime.tickerd_runner import SpineRunnerPaths, _ledger_path, _tickerd_runner_types, report_database_unavailable
@@ -110,6 +117,9 @@ def run_spine_worker(
     storage_reserve_bytes: int = 268_435_456,
     critical_storage_action: str = "exit_nonzero",
     enrichment: Any = None,
+    scheduler_actor_subject_id: str | None = None,
+    facet_cursor_config: Any = None,
+    delivery_target_defaults: Mapping[str, Any] | None = None,
 ) -> Any:
     """Run Spine work through Tickerd with the configured worker bindings."""
 
@@ -131,6 +141,16 @@ def run_spine_worker(
     )
     if preflight_failure is not None:
         return preflight_failure
+    try:
+        recurring = _recurring_scheduler(connection, scheduler_actor_subject_id, facet_cursor_config, delivery_target_defaults)
+    except Exception:
+        # Startup configuration cannot authorize partial operation or sends.
+        return emit_worker_preflight_failure(
+            config=bootstrap_config, health_sink=BootstrapHealthSink(paths.runner.health_path),
+            event_sink=BootstrapEventSink(paths.runner.events_path, max_bytes=bootstrap_config.event_log_max_bytes,
+                                         backup_count=bootstrap_config.event_log_backup_count),
+            reason="runtime_configuration_invalid",
+        )
     (
         TickerdConfig,
         RuntimeKernel,
@@ -178,6 +198,8 @@ def run_spine_worker(
         runtime_mode=runtime_mode,
         processor=processor,
         storage_safety_latch=latch,
+        scheduler_actor_subject_id=scheduler_actor_subject_id,
+        recurring_tasks=recurring,
     )
     kernel = RuntimeKernel(
         config,
@@ -263,6 +285,9 @@ def main(argv: Sequence[str] | None = None) -> int:
             storage_critical_free_bytes=args.storage_critical_free_bytes,
             storage_reserve_bytes=args.storage_reserve_bytes,
             critical_storage_action=args.critical_storage_action,
+            scheduler_actor_subject_id=args.scheduler_actor_subject_id,
+            facet_cursor_config=args.facet_cursor_config,
+            delivery_target_defaults=_delivery_defaults(args.delivery_target_default),
         )
     finally:
         connection.close()
@@ -284,6 +309,34 @@ def main(argv: Sequence[str] | None = None) -> int:
     json.dump(payload, sys.stdout, sort_keys=True)
     sys.stdout.write("\n")
     return int(result.exit_code)
+
+
+def _delivery_defaults(values: Sequence[str]) -> Mapping[str, Any]:
+    from spine.commands.cli import _delivery_target_defaults
+
+    return _delivery_target_defaults(values)
+
+
+def _recurring_scheduler(connection: sqlite3.Connection, actor: str | None, cursor: Any,
+                         defaults: Mapping[str, Any] | None = None) -> Any:
+    from spine.commands.context import CommandContext
+    from spine.commands.facet_runtime import FacetCursorConfig, load_cursor_config
+    from spine.commands.recurring_task_package import packaged
+    from spine.commands.recurring_task_scheduler import RecurringTaskSweep
+    from spine.core.recurring_task_runtime import cursor_config
+    from spine.ledger.identity import read_ledger_instance_id
+
+    # A pre-existing facet cursor environment is not an opt-in to scheduling.
+    if actor is None and not connection.execute("SELECT 1 FROM related_task_rules LIMIT 1").fetchone():
+        return None
+    if not actor or not cursor:
+        raise ValueError("recurring scheduler requires an explicit actor and protected cursor configuration")
+    configured = cursor if isinstance(cursor, FacetCursorConfig) else load_cursor_config(cursor)
+    cursor_config(configured, read_ledger_instance_id(connection))
+    if not connection.execute("SELECT 1 FROM subjects WHERE subject_id=? AND status='active'", (actor,)).fetchone():
+        raise ValueError("recurring scheduler actor is not active")
+    return RecurringTaskSweep(CommandContext(ledger=connection, facet_cursor_config=configured,
+                                            delivery_target_defaults=defaults or {}), packaged(), actor)
 
 
 def _worker_processor(
@@ -343,6 +396,10 @@ def _parse_args(argv: Sequence[str] | None) -> argparse.Namespace:
     parser.add_argument("--state-dir", required=True, help="Directory for lock, owner, health, Tickerd events, and fake sends.")
     parser.add_argument("--initialize-schema", action="store_true", help="Initialize the Spine schema before running.")
     parser.add_argument("--mode", choices=RUNTIME_MODES, default="active", help="Tickerd runtime mode.")
+    parser.add_argument("--scheduler-actor-subject-id", default=os.environ.get("SPINE_SCHEDULER_ACTOR_SUBJECT_ID"))
+    parser.add_argument("--facet-cursor-config", default=os.environ.get("SPINE_FACET_CURSOR_CONFIG"),
+                        help="Protected existing cursor-key file used with a separate recurring-task HMAC domain.")
+    parser.add_argument("--delivery-target-default", action="append", default=[], metavar="KEY=DELIVERY_TARGET_ID")
     parser.add_argument(
         "--bindings",
         default="openclaw",

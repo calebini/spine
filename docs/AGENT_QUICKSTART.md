@@ -1,7 +1,13 @@
 # Spine Agent Quickstart
 
-Status: executable cold-start path for the current schema-19 runtime
+Status: executable cold-start path for the schema-20 runtime
 Audience: an agent with repository access and no prior Spine context
+
+Runtime 0.12.0 adds [recurring-source related-task rules](RECURRING_RELATED_TASKS.md).
+Use a rule for one pickup/task per recurring source occurrence; keep
+`schedule.related_task.create` for a single selected occurrence. Rules require
+explicit worker actor/cursor configuration for unattended generation. Upgrade
+through the migration tool; ordinary commands never migrate a ledger.
 
 For event attendance and task responsibility, use [People commands](PEOPLE_COMMANDS.md)
 (runtime 0.11.0/schema 19). Discover exact IDs in an explicit scope; participants,

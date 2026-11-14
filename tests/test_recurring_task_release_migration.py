@@ -31,7 +31,8 @@ class ReleaseMigrationTests(unittest.TestCase):
     def setUp(self):
         self.db = connect()
         self.addCleanup(self.db.close)
-        initialize_schema(self.db)
+        with patch("spine.ledger.sqlite.IMPLEMENTED_LEDGER_SCHEMA_VERSION", 19):
+            initialize_schema(self.db)
 
     def install(self, **kwargs):
         install_recurring_task_storage(self.db, applied_at_utc=AT, **kwargs)
@@ -49,11 +50,11 @@ class ReleaseMigrationTests(unittest.TestCase):
         self.install()
         self.assertEqual((state(self.db), self.db.total_changes), before)
 
-    def test_default_remains_closed_until_coherent_runtime_activation(self):
-        self.assertEqual(IMPLEMENTED_LEDGER_SCHEMA_VERSION, 19)
-        self.assertEqual(migrate_schema(self.db).after_version, 19)
-        self.install()
-        with self.assertRaisesRegex(SpineValidationError, "ledger_schema_unsupported"):
+    def test_normal_migration_activates_twenty_and_old_runtime_refuses_it(self):
+        self.assertEqual(IMPLEMENTED_LEDGER_SCHEMA_VERSION, 20)
+        self.assertEqual(migrate_schema(self.db).after_version, 20)
+        with patch("spine.ledger.migrate.CURRENT_SCHEMA_VERSION", 19), \
+             self.assertRaisesRegex(SpineValidationError, "ledger_schema_unsupported"):
             migrate_schema(self.db)
 
     def test_all_faults_restore_old_schema_rows_fk_and_version(self):
@@ -74,9 +75,12 @@ class ReleaseMigrationTests(unittest.TestCase):
 
     def test_existing_ownership_and_scheduling_history_retains_exact_values(self):
         fixture = ordinary.BindingSuccessorMaterializationTests()
-        fixture.setUp()
+        with patch("spine.ledger.sqlite.IMPLEMENTED_LEDGER_SCHEMA_VERSION", 19), \
+             patch("spine.commands.core.IMPLEMENTED_LEDGER_SCHEMA_VERSION", 19), \
+             patch("spine.commands.temporal_bindings.IMPLEMENTED_LEDGER_SCHEMA_VERSION", 19):
+            fixture.setUp()
+            fixture.create()
         self.addCleanup(fixture.doCleanups)
-        fixture.create()
         db = fixture.db
         with db.atomic_command():
             db.execute("INSERT INTO ledger_access_state VALUES(1,'migration-fixture','realm','multi_user','trusted_identity',7,3)")
@@ -148,7 +152,8 @@ class ReleaseMigrationTests(unittest.TestCase):
             db = connect(path)
             other = connect(path, busy_timeout_ms=0)
             try:
-                initialize_schema(db)
+                with patch("spine.ledger.sqlite.IMPLEMENTED_LEDGER_SCHEMA_VERSION", 19):
+                    initialize_schema(db)
 
                 def compete(stage):
                     if stage in {"preflight", "ddl"}:

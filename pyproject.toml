@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "spine-ledger"
-version = "0.11.2"
+version = "0.12.0"
 description = "Canonical coordination ledger and planning fabric for Cortext1."
 readme = "README.md"
 requires-python = ">=3.12"
@@ -43,7 +43,7 @@ where = ["src"]
 
 [tool.setuptools.package-data]
 "spine.ledger" = ["schema.sql", "*.candidate.sql", "schema_object_manifest*.json", "facet_writer_inventory.v1.json", "rendering_writer_inventory.v1.json", "migrations/*.sql"]
-"spine.contracts" = ["contextual_notification/*.json", "*.json", "web/*.json", "web/schemas/*.json", "rendering/*.json", "rendering/schemas/*.json", "revision_readback/*.json", "revision_readback/schemas/*.json", "people/*.json", "people/schemas/*.json", "recurring_tasks/*.json", "recurring_tasks/schemas/*.json", "recurring_tasks/schemas/recurring-related-tasks/*.json"]
+"spine.contracts" = ["contextual_notification/*.json", "*.json", "web/*.json", "web/schemas/*.json", "rendering/*.json", "rendering/schemas/*.json", "revision_readback/*.json", "revision_readback/schemas/*.json", "people/*.json", "people/schemas/*.json", "recurring_tasks/*.json", "recurring_tasks/schemas/*.json", "recurring_tasks/schemas/recurring-related-tasks/*.json", "ownership/*.json", "ownership/schemas/*.json", "ownership/schemas/local-ownership-bootstrap/*.json"]
 "spine" = ["py.typed"]
 
 [tool.pytest.ini_options]
