@@ -576,17 +576,21 @@ def reconcile(
         page.state.close(sys.exc_info())
 
 
-def _reconcile(page: Page, *, response_size: ResponseSizer) -> tuple[dict[str, Any], str, bool]:
+def page_intent(page: Page, token: dict[str, Any] | None) -> dict[str, Any] | None:
     from spine.ledger.recurring_task_catalog import intent_view, pending_adoption
 
-    db, request, root = page.db, page.request, page.state.root
-    context, contracts, now = page.context, page.contracts, page.now
-    token = continuation(db, request, root, context, contracts, now)
-    selected_intent = (
+    db, root = page.db, page.state.root
+    return (
         intent_view(db, token["intent_id"])
         if token and "intent_id" in token
         else (pending_adoption(db, root["related_task_rule_id"]) or intent_view(db, root["retirement_intent_id"]))
     )
+
+
+def _reconcile(page: Page, *, response_size: ResponseSizer) -> tuple[dict[str, Any], str, bool]:
+    db, request, root = page.db, page.request, page.state.root
+    token = continuation(db, request, root, page.context, page.contracts, page.now)
+    selected_intent = page_intent(page, token)
     evaluation, start, end = page_bounds(page, token)
     position: dict[str, Any] = copy.deepcopy(token["after"] if token else {"assignment_after_seq": "0", "source_after": None})
     page.state.position = position
@@ -694,18 +698,36 @@ def select_units(page: Page, position: dict[str, Any], start: str, end: str) -> 
     return processed_assignments, existing_more, source_more
 
 
+def page_cursor(page: Page, root: dict[str, Any], intent: dict[str, Any] | None, position: dict[str, Any],
+                token: dict[str, Any] | None, evaluation: str, start: str, end: str) -> str:
+    """Sign only the prefix actually observed or committed, in its original snapshot/window."""
+    from spine.ledger.recurring_task_catalog import catalog
+
+    query = {"contract_version": CONTRACT, "ledger_instance_id": read_ledger_instance_id(page.db),
+             "related_task_rule_id": root["related_task_rule_id"], "limits": page.request["limits"]}
+    payload = cursor_payload(page.context.facet_cursor_config, purpose="reconcile", query=query,
+                            catalog=catalog(page.db), after=position, now=token["issued_at_utc"] if token else page.now)
+    payload.update(rule_change_version=str(root["change_version"]), rule_revision_id=root["current_revision_id"],
+                   **{k: page.snapshot[k] for k in ("source_item_id", "recurrence_set_id", "source_item_version",
+                                                     "recurrence_revision_id", "normalized_recurrence_set_hash")},
+                   evaluation_at_utc=evaluation, range_start_utc=start, range_end_utc=end)
+    if intent:
+        payload.update(intent_id=intent["intent_id"], assignment_high_water=intent["assignment_high_water"])
+    return sign_cursor(page.context.facet_cursor_config, payload, page.contracts)
+
+
 def finish(
     page: Page, token: dict[str, Any] | None, selected_intent: dict[str, Any] | None,
     evaluation: str, start: str, end: str, original: dict[str, Any],
     processed_assignments: int, existing_more: bool, source_more: bool,
 ) -> tuple[dict[str, Any], str, bool]:
-    from spine.ledger.recurring_task_catalog import advance_catalog, catalog, intent_view, pending_adoption, rule_view
+    from spine.ledger.recurring_task_catalog import advance_catalog, intent_view, pending_adoption, rule_view
     from spine.services.recurring_task_acknowledgement import acknowledge_page
     from spine.services.recurring_task_adoption import complete, coverage_status
     from spine.services.recurring_task_horizon import source_exhausted
 
     db, request, root = page.db, page.request, page.state.root
-    context, contracts, now, position = page.context, page.contracts, page.now, page.state.position
+    now, position = page.now, page.state.position
     for intent in (pending_adoption(db, root["related_task_rule_id"]), intent_view(db, root["retirement_intent_id"])):
         if intent and intent["status"] == "pending":
             completed = complete(
@@ -758,35 +780,7 @@ def finish(
     retirement_coverage = intent_view(db, root["retirement_intent_id"])
     assignment_blocked = any(v["outcome"] == "decision_required" for v in page.state.results[:processed_assignments])
     generation_blocked = any(v["outcome"] == "decision_required" for v in page.state.results[processed_assignments:])
-    query = {
-        "contract_version": CONTRACT,
-        "ledger_instance_id": read_ledger_instance_id(db),
-        "related_task_rule_id": root["related_task_rule_id"],
-        "limits": request["limits"],
-    }
-    cursor = None
-    if more:
-        payload = cursor_payload(
-            context.facet_cursor_config,
-            purpose="reconcile",
-            query=query,
-            catalog=catalog(db),
-            after=position,
-            now=token["issued_at_utc"] if token else now,
-        )
-        payload.update(
-            rule_change_version=str(root["change_version"]),
-            rule_revision_id=root["current_revision_id"],
-            source_item_id=page.snapshot["source_item_id"],
-            recurrence_set_id=page.snapshot["recurrence_set_id"],
-            **{k: page.snapshot[k] for k in ("source_item_version", "recurrence_revision_id", "normalized_recurrence_set_hash")},
-            evaluation_at_utc=evaluation,
-            range_start_utc=start,
-            range_end_utc=end,
-        )
-        if intent:
-            payload.update(intent_id=intent["intent_id"], assignment_high_water=intent["assignment_high_water"])
-        cursor = sign_cursor(context.facet_cursor_config, payload, contracts)
+    cursor = page_cursor(page, root, intent, position, token, evaluation, start, end) if more else None
 
     def coverage(status: str, count: int) -> dict[str, Any]:
         return {

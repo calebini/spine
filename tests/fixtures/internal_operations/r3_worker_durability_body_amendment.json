@@ -1,0 +1,11 @@
+{
+  "prior_amendment": "tests/fixtures/internal_operations/r3_automatic_dispatch_body_amendment.json",
+  "prior_amendment_sha256": "e3f3d76811e3506531611730c962695599cc5a0fa8af6e2eea9bf512edb3c454",
+  "replacement": {
+    "path": "src/spine/commands/recurring_tasks.py",
+    "name": "execute",
+    "body_sha256": "061db9e7f304a017a4803da01782073bb9029b0ea635b94d53efa5c909cbada0",
+    "reason": "Propagate original SQLite operational failures only for internal automatic dispatch so the worker can latch durability failures before further work."
+  },
+  "regression_tests": "tests/test_recurring_task_scheduler.py"
+}

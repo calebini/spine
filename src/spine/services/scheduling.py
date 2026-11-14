@@ -654,7 +654,7 @@ def _reconcile_temporal_bindings(
     actor_subject_id: str,
     max_bindings: int,
 ) -> tuple[tuple[dict[str, object], ...], int, int]:
-    context = CommandContext(ledger=connection)
+    context = CommandContext(ledger=connection, transport_metadata={"automatic_scheduler": True})
     listed = handle(
         "schedule.binding.list",
         {

@@ -674,6 +674,10 @@ def execute(
     except Preview as preview:
         return preview.result
     except (SpineValidationError, sqlite3.Error) as exc:
+        if automatic_plan is not None and isinstance(exc, sqlite3.Error) and not isinstance(exc, sqlite3.IntegrityError):
+            # Worker storage-safety classification needs the original SQLite error.
+            # Explicit commands still return their established wire failure envelope.
+            raise
         if isinstance(exc, SpineValidationError):
             code, _, field = exc.code.partition(":")
             if code == "source_continuity_unresolved":

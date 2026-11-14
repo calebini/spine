@@ -406,7 +406,8 @@ def handle_binding_list(request: Mapping[str, Any], context: CommandContext) -> 
     c._check_fields(command, request, allowed)
     if request.get("contract_version") != LIST_CONTRACT:
         raise SpineValidationError("invalid_request:contract_version", f"contract_version must be {LIST_CONTRACT}")
-    _runtime_check(context.ledger, _binding_family_versions())
+    scheduler = _candidate_scheduler(context)
+    _runtime_check(context.ledger, _binding_family_versions(), candidate_scheduler=scheduler)
     source_id = c._nested_optional_str(request, "source_item_id", "source_item_id")
     target_id = c._nested_optional_str(request, "target_item_id", "target_item_id")
     bounded = request.get("bounded", False)
@@ -450,6 +451,11 @@ def handle_binding_list(request: Mapping[str, Any], context: CommandContext) -> 
             raise SpineValidationError("invalid_request:cursor", "cursor ordering tuple is invalid")
         last = raw_last
     where = ["binding_status = ?"]
+    if scheduler:
+        # The rule lane owns these children. Exclude before ordering/limiting so
+        # a dense governed root cannot displace ordinary v1 repairs.
+        where.append("NOT EXISTS (SELECT 1 FROM related_task_generations g "
+                     "WHERE g.temporal_binding_id=relative_temporal_bindings.temporal_binding_id)")
     params: list[object] = [status]
     if source_id is not None:
         where.append("source_item_id = ?")
@@ -539,7 +545,7 @@ def handle_binding_reconcile(request: Mapping[str, Any], context: CommandContext
     replay = c._compatible_replay(command, command_id, semantic, context)
     if replay is not None:
         return _reconcile_response(replay, "schedule_binding_reconcile_replay")
-    _runtime_check(context.ledger, _reconcile_versions())
+    _runtime_check(context.ledger, _reconcile_versions(), candidate_scheduler=_candidate_scheduler(context))
     binding_id = c._required_str(request, "temporal_binding_id")
     binding = load_temporal_binding(context.ledger, binding_id)
     revision = binding["latest_revision"]
@@ -1208,12 +1214,22 @@ def _resolution_kind(outcome: str) -> str:
     }.get(outcome, "source_refreshed")
 
 
-def _runtime_check(connection: sqlite3.Connection, required: set[str]) -> None:
+def _candidate_scheduler(context: CommandContext) -> bool:
+    return bool(context.transport_metadata.get("automatic_scheduler") is True
+                and getattr(context.ledger, "_recurring_tasks_enabled", False))
+
+
+def _runtime_check(connection: sqlite3.Connection, required: set[str], *, candidate_scheduler: bool = False) -> None:
     from spine.ledger.migrate import current_schema_version
 
-    if current_schema_version(connection) != IMPLEMENTED_LEDGER_SCHEMA_VERSION:
+    version = IMPLEMENTED_LEDGER_SCHEMA_VERSION
+    if candidate_scheduler:
+        from spine.ledger.recurring_task_migration import CANDIDATE_SCHEMA_VERSION
+
+        version = CANDIDATE_SCHEMA_VERSION
+    if current_schema_version(connection) != version:
         raise SpineValidationError(
-            "environment_failure:ledger_schema_version", f"binding commands require schema {IMPLEMENTED_LEDGER_SCHEMA_VERSION}"
+            "environment_failure:ledger_schema_version", f"binding commands require schema {version}"
         )
     if not required.issubset(IMPLEMENTED_CONTRACT_VERSIONS):
         raise SpineValidationError(

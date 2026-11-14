@@ -6,10 +6,11 @@ import sqlite3
 from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass
 from datetime import datetime
-from typing import cast
+from typing import TYPE_CHECKING, cast
 
 from spine.core import SpineValidationError
 from spine.ledger.common import utc_z_from_datetime
+from spine.ledger.transactions import LedgerConnection
 from spine.protocols import (
     TickerdCycleEnvelope,
     TickerdProcessResult,
@@ -33,6 +34,9 @@ from spine.services import (
     start_work,
     succeed_work,
 )
+
+if TYPE_CHECKING:
+    from spine.commands.recurring_task_scheduler import RecurringTaskSweep
 
 SIDE_EFFECTS_BLOCKED = "SIDE_EFFECTS_BLOCKED"
 NO_PROCESSOR_CONFIGURED = "NO_PROCESSOR_CONFIGURED"
@@ -77,6 +81,7 @@ class SpineTickerdWorkAdapter:
     scheduler_actor_subject_id: str | None = None
     materialization_horizon_seconds: int = 86_400
     storage_safety_latch: StorageSafetyLatch | None = None
+    recurring_tasks: RecurringTaskSweep | None = None
 
     def read_mode(self) -> TickerdRuntimeMode:
         """Return Tickerd's runtime mode without making Tickerd a hard import."""
@@ -166,22 +171,35 @@ class SpineTickerdWorkAdapter:
         return tickerd_types.process_result.processed()
 
     def reconcile(self, envelope: TickerdCycleEnvelope, *, max_batches: int) -> TickerdReconcileResult:
-        """Materialize the next bounded notification horizon before work selection."""
+        """Run one bounded recurring visit, then the ordinary notification horizon."""
 
         self._require_storage_safe()
         try:
             tickerd_types = _tickerd_public_types()
+            evaluated = _utc_z(envelope.actual_start_ts)
+            visit = None
+            actor = self.scheduler_actor_subject_id
+            if self.recurring_tasks is not None and self.runtime_mode == "active" and envelope.runtime_mode == "active" and max_batches > 0:
+                if not isinstance(self.connection, LedgerConnection):
+                    raise SpineValidationError("environment_failure", "recurring scheduler requires a ledger connection")
+                if actor is not None and actor != self.recurring_tasks.actor:
+                    raise SpineValidationError("environment_failure:scheduler_actor", "conflicting scheduler identities")
+                actor = self.recurring_tasks.actor
+                visit = self.recurring_tasks.run(self.connection, evaluated, self._require_storage_safe)
+                self._require_storage_safe()
+                if "environment_failure:scheduler_actor" in visit.reasons:
+                    return tickerd_types.reconcile_result(ok=False, items_scanned=1, items_repaired=0)
             result = materialize_notification_horizon(
                 self.connection,
-                evaluated_at_utc=_utc_z(envelope.actual_start_ts),
+                evaluated_at_utc=evaluated,
                 horizon_seconds=self.materialization_horizon_seconds,
                 max_items=max(1, max_batches) * 100,
-                actor_subject_id=self.scheduler_actor_subject_id,
+                actor_subject_id=actor,
             )
             return tickerd_types.reconcile_result(
-                ok=not result.failures,
-                items_scanned=result.items_scanned,
-                items_repaired=result.items_repaired,
+                ok=not result.failures and not (visit and visit.failed),
+                items_scanned=result.items_scanned + int(visit is not None and visit.rule_id is not None),
+                items_repaired=result.items_repaired + int(visit is not None and visit.status == "applied"),
             )
         except sqlite3.Error as exc:
             self._observe_sqlite_error(exc)

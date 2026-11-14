@@ -45,6 +45,7 @@ class RootDiscovery:
     sources_more: bool
     dirty_generation: int | None
     diagnostic: str | None
+    check_existing: bool
 
 
 @dataclass(frozen=True)
@@ -95,7 +96,7 @@ def discover(
 
 
 def discover_root(db: LedgerConnection, rule_id: str, *, evaluated_at_utc: str, limits: DiscoveryLimits) -> RootDiscovery:
-    """A transaction-local bounded snapshot; reusable by a future dispatch fence."""
+    """A bounded transaction-local hint. The worker re-plans before dispatch."""
     if not db.in_transaction:
         raise SpineValidationError("environment_failure", "discovery root requires a read snapshot")
     limits.validate()
@@ -105,7 +106,8 @@ def discover_root(db: LedgerConnection, rule_id: str, *, evaluated_at_utc: str, 
     adoption, retirement = pending_adoption(db, rule_id), intent_view(db, root["retirement_intent_id"])
     assignment_ids: tuple[str, ...] = ()
     assignments_more = False
-    if dirty or adoption or retirement and retirement["status"] == "pending":
+    maintenance = bool(dirty or adoption or retirement and retirement["status"] == "pending")
+    if maintenance:
         rows = db.execute(
             "SELECT assignment_id FROM related_task_assignments WHERE related_task_rule_id=? AND assignment_seq>? "
             "ORDER BY assignment_seq LIMIT ?", (rule_id, dirty["assignment_after_seq"] if dirty else 0, limits.assignments + 1),
@@ -153,13 +155,24 @@ def discover_root(db: LedgerConnection, rule_id: str, *, evaluated_at_utc: str, 
         # Retain independent assignment maintenance selection even when source
         # enumeration cannot be proved. No absence/cancellation inference.
         keys, sources_more, diagnostic = [], False, error.code
+    # Clean roots with only mode=none revisions cannot have clock-driven
+    # rule-level work repairs. Do not walk consumed historical assignments
+    # merely because the root still exists. Check a bounded history prefix:
+    # unknown/long histories take the conservative semantic planner path.
+    check_existing = maintenance
+    if not check_existing and root["next_assignment_seq"] > 1:
+        revisions = db.execute(
+            "SELECT json_extract(configuration_json,'$.materialization.mode') FROM related_task_rule_revisions "
+            "WHERE related_task_rule_id=? ORDER BY revision_index DESC LIMIT 9", (rule_id,),
+        ).fetchall()
+        check_existing = len(revisions) > 8 or any(v[0] != "none" for v in revisions)
     facts: dict[str, Any] = {
         "rule_id": rule_id, "change_version": str(root["change_version"]), "revision_id": root["current_revision_id"],
         "catalog": catalog(db), "source": snapshot,
         "dirty": {k: str(v) if type(v) is int else v for k, v in dirty.items()} if dirty else None,
         "adoption": adoption, "retirement": retirement,
         "assignment_ids": list(assignment_ids), "occurrence_keys": keys, "assignments_more": assignments_more,
-        "sources_more": sources_more, "diagnostic": diagnostic,
+        "sources_more": sources_more, "diagnostic": diagnostic, "check_existing": check_existing,
     }
     return RootDiscovery(rule_id, hash_canonical_json(facts), assignment_ids, tuple(keys), assignments_more,
-                         sources_more, dirty["dirty_generation"] if dirty else None, diagnostic)
+                         sources_more, dirty["dirty_generation"] if dirty else None, diagnostic, check_existing)

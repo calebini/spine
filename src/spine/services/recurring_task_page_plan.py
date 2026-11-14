@@ -29,7 +29,7 @@ from spine.services import rendering_authoring, schedule_delivery, schedule_mate
 from spine.services.recurring_task_acknowledgement import coverage_action
 from spine.services.recurring_task_adoption import can_complete
 from spine.services.recurring_task_operations import ChildDisposition, ChildWorkOverflow
-from spine.services.recurring_task_reconcile import Page, blocked_reason, continuation, page_bounds, select_units
+from spine.services.recurring_task_reconcile import Page, blocked_reason, continuation, page_bounds, page_cursor, page_intent, select_units
 from spine.services.recurring_task_restoration import Restoration, pinned_selection, restored_policy, restored_policy_inputs
 
 
@@ -51,6 +51,7 @@ class PagePlan:
     units: tuple[Unit, ...]
     progress: tuple[str, ...]
     has_more: bool
+    observed_cursor: str | None = field(default=None, compare=False, repr=False)
 
     @property
     def dispatchable(self) -> bool:
@@ -263,7 +264,7 @@ def observe(db: LedgerConnection, request: dict[str, Any], context: Any, contrac
         token = continuation(db, request, root, context, contracts, now)
         position = dict(token["after"]) if token else {"assignment_after_seq": "0", "source_after": None}
         original = dict(position)
-        _, start, end = page_bounds(page, token)
+        evaluation, start, end = page_bounds(page, token)
         processed, existing_more, source_more = select_units(page, position, start, end)
         progress = []
         # A changed unit may invalidate coverage or resolve an intent. Do not
@@ -277,5 +278,9 @@ def observe(db: LedgerConnection, request: dict[str, Any], context: Any, contrac
                                       source_prefix_unproved=page.source_prefix_unproved)
             if ack and page.dirty:
                 progress.append(f"coverage:{page.dirty['dirty_generation']}:{seq}")
+        more = existing_more or source_more
+        cursor = None
+        if more and not progress and not any(unit.changed for unit in page.observations) and position != original:
+            cursor = page_cursor(page, root, page_intent(page, token), position, token, evaluation, start, end)
         return PagePlan(read_ledger_instance_id(db), now, hash_canonical_json(request), catalog(db), tuple(page.observations),
-                        tuple(progress), existing_more or source_more)
+                        tuple(progress), more, cursor)

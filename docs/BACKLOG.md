@@ -1466,7 +1466,8 @@ checkpoint, then selection of the existing RF3 propagation prerequisite before R
 
 ### SPINE-094 — R3: recurring-task all-writer safety and automatic scheduling
 
-**Status:** In progress — explicitly selected after committing RF3 as `7e3983d`.
+**Status:** Done — internal R3 verified on disposable ledgers (2026-11-14);
+worker integration is uncommitted. Originally selected after RF3 `7e3983d`.
 SPINE-093's manual R2 checkpoint and SPINE-101's RF3 propagation are complete.
 The first R3 increment adds coalesced transaction-owned invalidation and
 generation-checked queue acknowledgement through the established propagation seam.
@@ -1479,9 +1480,10 @@ explicit writer/reconcile/attempt interleavings, suppression/restoration and
 pending-intent races, protected-work matrix, rollover/catch-up, dense-root fairness
 and repeated idle zero-write cycles. No real sends. See
 [R3](IMPLEMENTATION_PLAN.md#r3--all-writer-safety-and-automatic-scheduling-spine-094).
-**Next:** Connect discovery, fair page continuation and transaction-fenced dispatch
-to the worker. Verify catch-up, restart and repeated idle/blocked cycles end to end.
-Neither discovery nor a queue marker authorizes a mutation. R4/public activation
+**Current increment:** The private worker adapter now connects discovery, fair
+continuation and transaction-fenced dispatch. Catch-up, restart, competing
+roots, blocked/idle zero-write and ordinary scheduling are tested together.
+Neither discovery nor a queue marker authorizes a mutation. Public activation
 and deployment remain separate.
 **Initial increment:** Indexed source/root and current-generation lookup now feeds
 the existing RF3 propagation boundary into the coalescing dirty queue, with
@@ -1540,9 +1542,18 @@ See [dispatch fence and limits](design-notes/recurring-related-task-r3-invalidat
 Next: fair continuation routing and end-to-end scheduling through the worker,
 including idle/blocked, catch-up and restart cases. R3 remains open.
 
+**Worker integration (2026-11-14):** This increment completes that routing in
+the existing Tickerd reconciler. The protected continuation and both root
+positions are memory-only. Read-only pages can advance past retained or blocked
+prefixes without minting receipts; stale plans cannot publish. See
+[worker evidence and boundaries](design-notes/recurring-related-task-r3-invalidation.md#candidate-worker-routing).
+Full serial discovery: **1,701 tests in 495.433 seconds, OK (one skipped)**.
+Sixteen new worker tests, the targeted 124-test selection, architecture-boundary
+checks, Ruff, focused typing, compilation, local link checks and diff hygiene pass.
+
 ### SPINE-095 — R4: recurring-task activation and release verification
 
-**Status:** Blocked by SPINE-094; planned, not started or separately authorized.
+**Status:** Ready following SPINE-094; not started or separately authorized.
 **Scope:** Exact packaged closure, trusted-local public commands and dependencies,
 implemented declarations, coherent migration/package metadata and generic operator
 documentation. No web allowlist, authentication redesign or deployment procedure.
@@ -1552,7 +1563,9 @@ dependencies, fresh/populated synthetic migrations, fake worker/attempts, full
 documented suite and applicable lint/typing/compilation/sync/regeneration checks.
 Change source-only assertions to implemented-behavior tests, not removed gates.
 See [R4](IMPLEMENTATION_PLAN.md#r4--public-activation-and-release-verification-spine-095).
-**Next:** Finish R3, verify the complete release and only then advertise the family.
+**Next:** On selection, package and expose the trusted-local family, wire the
+candidate worker dependency at release startup, and verify the complete release
+before advertising it.
 Any live deployment or real-send test requires a separate operator request.
 
 ## Post-release corrective work

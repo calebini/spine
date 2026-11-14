@@ -452,6 +452,13 @@ own replay and no-op receipt behavior. The remaining R3 delivery is connecting
 discovery, continuation selection and fenced dispatch to the scheduler, not a
 new command contract. See the [implementation evidence](design-notes/recurring-related-task-r3-invalidation.md#semantic-page-planning-and-dispatch).
 
+**Worker integration:** The candidate Tickerd adapter now visits recurring rules
+fairly, resumes signed pages in memory and dispatches only fenced changes.
+Tests exercise catch-up, restart, stale cursors, ordinary binding coexistence,
+late work repair and storage stops using disposable ledgers. See
+[candidate worker routing](design-notes/recurring-related-task-r3-invalidation.md#candidate-worker-routing).
+The packaged worker and public schema/command declarations remain R4 work.
+
 Inventory and integrate every existing source/item/recurrence, relation, binding,
 target-task/owner and relevant policy writer. Invalidate affected roots/witnesses
 and catalog generations in the same canonical transaction, including old direct

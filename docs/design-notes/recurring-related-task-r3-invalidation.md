@@ -1,8 +1,9 @@
 # R3 initial increment — coalesced invalidation and queue CAS
 
 Status: initial R3 increment committed as `ffb9690`; acknowledgement/guards as
-`8349a63`; discovery/attempt admission as `833ff94`; rule-writer continuation uncommitted
-(2026-11-14). R3 not closed. Current status belongs to [SPINE-094](../BACKLOG.md#spine-094--r3-recurring-task-all-writer-safety-and-automatic-scheduling).
+`8349a63`; discovery/attempt admission as `833ff94`; rule writers and dispatch
+fence as `f5520c5`. Worker routing closes internal R3 (uncommitted, 2026-11-14).
+Current status belongs to [SPINE-094](../BACKLOG.md#spine-094--r3-recurring-task-all-writer-safety-and-automatic-scheduling).
 
 ## Authority and checkpoint
 
@@ -323,3 +324,47 @@ automatic pagination test added after full discovery started. All 16 automatic
 planner/fence cases passed. The separate 21-test boundary/documentation/
 declaration/witness selection passed, as did twelve-module Mypy, changed-file
 Ruff, 394 local documentation link paths and diff hygiene.
+
+### Candidate worker routing
+
+The existing Tickerd reconciler now accepts a private, opt-in recurring scheduler.
+One reconcile call visits at most one root and plans at most two existing
+assignments and two new source candidates. A round-robin fresh visit alternates
+with a continuation visit. Both positions and the single signed cursor live in
+worker memory; none is a database heartbeat. A changed page uses the writer's
+post-commit cursor; an unchanged nonterminal page signs only its observed prefix
+under the same cursor contract. Expiry or a competing catalog change discards
+that cursor. A restart begins fresh and relies on durable reservations, not
+replayed commands or guessed positions. A busy or over-budget root yields its
+turn; liveness is not a promise that an interrupted or continuously changing
+snapshot can finish before its cursor expires.
+
+Clean discovery need not inspect assignment history solely because a rule has
+children. Retained assignments can still need time-driven work repair under a
+past **adopted** configuration; discovery checks a bounded prefix of revision
+modes and conservatively schedules a page when it cannot rule this out. A
+transient visit reports the root, status, bounded reason codes and outcome counts;
+receipt-bearing changes retain their ordinary ledger evidence.
+
+The active recurring lane executes before ordinary notification reconciliation.
+The direct temporal-binding lane excludes generated bindings before limiting
+its list, without changing explicit binding reads or unrelated repairs. Both
+lanes use the explicitly configured actor when the recurring lane participates.
+The worker checks storage safety at entry, under the writer lock and at page
+finalization. Operational SQLite errors propagate to the existing durability
+latch with their native error codes. Tickerd retains cadence and delivery
+authority; this hook neither sends nor introduces a second daemon.
+
+[Worker tests](../../tests/test_recurring_task_scheduler.py) exercise actual
+Tickerd cadence, restart, due cutoffs, horizon rollover, ordinary bindings,
+multi-root and blocked-prefix fairness, stale cursor on exclusion/restoration,
+work repair after a retained prefix, and unchanged idle/blocked ledger snapshots.
+The public worker still admits schema 19 and does not construct this dependency;
+packaged construction, schema-20 activation and installed-wheel proof belong to R4.
+
+Final full serial discovery: **1,701 tests in 495.433s, OK (one skipped)**.
+The 124-test targeted worker/safety/recurring selection and all seven architecture
+boundary tests pass. Repository Ruff, compilation, six-module Mypy (ignoring
+missing third-party stubs), 397 local documentation link paths and diff hygiene
+also pass. The original command-body witness is preserved; one linked
+amendment records native SQLite error propagation for automatic dispatch only.

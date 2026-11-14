@@ -67,12 +67,19 @@ class SharedRecurringRuntimeTests(unittest.TestCase):
         adapter = fence["replacement"]
         self.assertEqual((adapter["path"], adapter["name"]), ("src/spine/commands/recurring_tasks.py", "execute"))
         fenced = [adapter if (e["path"], e["name"]) == (adapter["path"], adapter["name"]) else e for e in queued]
+        durability = json.loads((ROOT / "tests/fixtures/internal_operations/r3_worker_durability_body_amendment.json").read_text())
+        self.assertEqual(durability["prior_amendment"], "tests/fixtures/internal_operations/r3_automatic_dispatch_body_amendment.json")
+        prior_digest = hashlib.sha256((ROOT / durability["prior_amendment"]).read_bytes()).hexdigest()
+        self.assertEqual(prior_digest, durability["prior_amendment_sha256"])
+        worker = durability["replacement"]
+        self.assertEqual((worker["path"], worker["name"]), (adapter["path"], adapter["name"]))
+        guarded = [worker if e == adapter else e for e in fenced]
         # Accept one complete captured state, never a per-function mix. Retain
         # both original RF1 baselines and narrowly record the two functional R2
         # corrections authorized after RF2 and the one R3 catalog-coalescing
         # change; all other body hashes stay frozen.
         mismatches = []
-        for variant in (witness["bodies"], witness["committed_bodies"], amended, calendar_amended, r3_amended, queued, fenced):
+        for variant in (witness["bodies"], witness["committed_bodies"], amended, calendar_amended, r3_amended, queued, fenced, guarded):
             failures = []
             for entry in variant:
                 nodes = ast.parse((ROOT / entry["path"]).read_text()).body

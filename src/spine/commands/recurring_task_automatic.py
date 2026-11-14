@@ -1,4 +1,4 @@
-"""Internal R3 automatic reconcile admission. No worker/public dispatch registration."""
+"""Internal R3 automatic reconcile admission. No public dispatch registration."""
 
 from collections.abc import Callable
 from dataclasses import dataclass
