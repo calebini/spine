@@ -21,6 +21,7 @@ from spine.commands import handle
 from spine.core.errors import SpineValidationError
 from spine.core.notification_details import decode_detailed
 from spine.core.notifications import normalize_notification_policy
+from spine.core.rendering_definitions import ATTACHED_FIELD_DISCLOSURES
 from spine.core.schedule import system_timezone_database_version
 from spine.ledger import connect, get_notification_rendering, get_work_instance
 from spine.ledger.notifications import insert_notification_schedule_policy
@@ -164,7 +165,7 @@ class RenderingDeliveryTests(successor.RenderingSuccessorTests):
             reason_code="withdrawn",
         )
 
-    def configure_fields(self, event, fields, *, permitted=()):
+    def configure_fields(self, event, fields, *, permitted=(), attached=False):
         revision = copy.deepcopy(self.revision)
         revision["selections"] = [
             revision["selections"][0]
@@ -194,10 +195,217 @@ class RenderingDeliveryTests(successor.RenderingSuccessorTests):
                 "target_ref": "owner@example",
             },
         }
-        grant = self.call("notification_rendering_disclosure.provision", scope=scope)["record"]
+        command = "notification_rendering_disclosure.provision"
+        if attached:
+            del scope["permitted_location_ids"]
+            scope["location_authority"] = "attached_field"
+            grant = self.command(command, self.request(command, scope=scope, contract_version=ATTACHED_FIELD_DISCLOSURES))["record"]
+        else:
+            grant = self.call(command, scope=scope)["record"]
         selection = self.selection(grant) | {"effective_selection_keys": sorted(fields)}
         self.candidate("schedule.update", self.edit(event, selection, "select-fields"))
         return grant
+
+    def test_attached_location_uses_only_exact_current_field_and_preserves_history(self):
+        from spine.ledger import LocationInput
+        from spine.ledger.supporting import insert_location
+
+        event, _ = self.event(selected=False)
+        grant = self.configure_fields(event, ["airport"], attached=True)
+        work = self.work(event, start=True)
+        missing = self.message(work)
+        self.assertEqual(missing.notification_rendering.details["selections"], [{"selection_key": "airport", "outcome": "field_missing"}])
+        for key, label in [("first-airport", "Pearson"), ("later-airport", "Heathrow"), ("private", "Private clinic")]:
+            with self.db.atomic_command():
+                insert_location(
+                    self.db, location=LocationInput(label=label, kind="place", address_text="Hidden address"),
+                    location_id=key, default_created_at_utc=NOW,
+                )
+            if key == "private":
+                continue
+            self.facet(event, {"flight": "AC872", "airport": key})
+            message = self.message(work)
+            self.assertTrue(message.body_text.endswith(" · Airport: " + label), message.body_text)
+            self.assertNotIn("Hidden address", json.dumps(message.notification_rendering.as_view()))
+            self.assertEqual(message.delivery_id, missing.delivery_id)
+            self.assertEqual(message.dedupe_key, missing.dedupe_key)
+        self.assertNotIn("Private clinic", message.body_text)
+        self.prepare(message)
+        stored = get_notification_rendering(self.db, attempt_id=message.attempt_id)
+        revoke = "notification_rendering_disclosure.revoke"
+        self.command(revoke, self.request(
+            revoke, contract_version=ATTACHED_FIELD_DISCLOSURES,
+            disclosure_authorization_id=grant["disclosure_authorization_id"],
+            expected_scope_hash=grant["scope_hash"], reason_code="withdrawn",
+        ))
+        replay = self.message(work)
+        self.assertEqual(replay.body_text, message.body_text)
+        self.assertFalse(self.prepare(replay).may_start_external_write)
+        later = self.db.execute("SELECT work_instance_id,eligible_at_utc FROM work_instances WHERE item_id=? AND work_instance_id!=? "
+                                "ORDER BY eligible_at_utc LIMIT 1", (event["item_id"], work["work_instance_id"])).fetchone()
+        start_work(self.db, work_instance_id=later[0], started_at_utc=later[1])
+        fresh = self.message(get_work_instance(self.db, later[0]))
+        self.assertNotIn("Heathrow", fresh.body_text)
+        self.assertEqual(fresh.notification_rendering.details["authorization_state"], "revoked")
+        self.assertEqual(get_notification_rendering(self.db, attempt_id=message.attempt_id), stored)
+        verify_deep(self.db)
+
+    def test_shared_default_profile_applies_to_separately_owned_item(self):
+        from spine.ledger import LocationInput
+        from spine.ledger.supporting import insert_location
+
+        catalog = self.scope
+        item_owner = {"owner_kind": "subject_group", "owner_group_id": "family"}
+        self.command("subject_group.upsert", {
+            "command_id": "family", "actor_subject_id": "owner", "group_id": "family",
+            "display_name": "Family", "status": "active", "updated_at_utc": NOW,
+        })
+        self.revision["selections"].append(self.revision["selections"][0] | {
+            "selection_key": "airport", "field_key": "airport", "label": "From", "projection": "location_label",
+        })
+        profile, _, root = self.profile()
+        profile_id = profile["notification_profile_id"]
+        self.command("notification_profile.binding.set", {
+            "contract_version": "spine.notification-profile-bindings.v1",
+            "command_id": "bind-shared-default", "actor_subject_id": "owner", "action_timestamp_utc": NOW,
+            "owner": catalog, "item_archetype_id": self.archetype["item_archetype_id"], "notification_profile_id": profile_id,
+        })
+        definition = {k: root[k] for k in (
+            "notification_rendering_definition_id", "notification_rendering_definition_revision_id",
+        )}
+        command = "notification_rendering_disclosure.provision"
+        scope = {
+            "item_owner": item_owner, "definition": definition, "approved_selection_keys": ["airport"],
+            "use_scope": {"kind": "profile", "notification_profile_id": profile_id},
+            "destination": {
+                "recipient": {"kind": "subject", "subject_id": "owner"}, "delivery_target_id": "whatsapp-owner",
+                "channel": "whatsapp", "adapter_name": "openclaw", "destination_source": "delivery_target", "target_ref": "owner@example",
+            },
+        }
+        rejected = handle(command, self.request(command, scope=scope | {"permitted_location_ids": []}), self.context)
+        self.assertEqual(rejected["error"]["code"], "rendering_disclosure_scope_mismatch")
+        grant = self.command(command, self.request(
+            command, contract_version=ATTACHED_FIELD_DISCLOSURES, scope=scope | {"location_authority": "attached_field"},
+        ))["record"]
+        request = self.fixture.event_request("shared-default", title="Flight", materialize=False)
+        request["contract_version"] = "spine.schedule-create.v3"
+        request["item"]["archetype"] = {
+            "item_archetype_id": self.archetype["item_archetype_id"],
+            "item_archetype_revision_id": self.archetype["item_archetype_revision_id"],
+            "selection_source": "operator_explicit", "revision_resolution": "exact",
+        }
+        request["notification_plan"] = {
+            "mode": "archetype_default", "scope_chain": [catalog], "on_no_match": "fail",
+            "rendering_applications": [{"source_kind": "profile_template", "source_key": "day_before", "selection": {"kind": "ordinary"}}],
+        }
+        event = self.command("schedule.create", request)
+        selection = self.selection(grant, unique=True) | {"effective_selection_keys": ["airport"]}
+        # Grant does not cover the catalog owner or unadopted item.
+        denied = handle("schedule.update", self.edit(event, selection, "unadopted"), self.context)
+        self.assertEqual(denied["error"]["code"], "rendering_disclosure_unavailable")
+        self.scope = item_owner
+        self.assertTrue(self.adopt(
+            event["item_id"],
+            operators=[{"operation": "create", "subject_id": "owner", "display_name": "Owner",
+                        "activation_basis": "trusted_local_approval"}],
+            memberships=[{"operation": "create", "subject_id": "owner", "group_id": "family", "role": "owner", "starts_at_utc": NOW}],
+        )["ok"])
+        with self.db.atomic_command():
+            insert_location(self.db, location=LocationInput(label="Pearson", kind="place"), location_id="new-airport",
+                            default_created_at_utc=NOW)
+        self.facet(event, {"flight": "AC872", "airport": "new-airport"})
+        mismatched_recipient = scope["destination"] | {"recipient": {"kind": "subject_group", "group_id": "family"}}
+        wrong_owner_or_route = [
+            scope | {"item_owner": catalog},
+            scope | {"destination": mismatched_recipient},
+        ]
+        for index, other_scope in enumerate(wrong_owner_or_route):
+            other_grant = self.command(command, self.request(
+                command, contract_version=ATTACHED_FIELD_DISCLOSURES,
+                scope=other_scope | {"location_authority": "attached_field"},
+            ))["record"]
+            wrong = self.selection(other_grant) | {"effective_selection_keys": ["airport"]}
+            denied = handle("schedule.update", self.edit(event, wrong, f"wrong-shared-{index}"), self.context)
+            self.assertEqual(denied["error"]["code"], "rendering_disclosure_scope_mismatch")
+        for invalid in (
+            scope | {"use_scope": {"kind": "direct_policy"}},
+            scope | {"destination": scope["destination"] | {"target_ref": "other-chat"}},
+        ):
+            denied = handle(command, self.request(
+                command, contract_version=ATTACHED_FIELD_DISCLOSURES,
+                scope=invalid | {"location_authority": "attached_field"},
+            ), self.context)
+            self.assertEqual(denied["error"]["code"], "rendering_disclosure_scope_mismatch")
+        exact = self.selection(grant) | {"effective_selection_keys": ["airport", "flight"]}
+        denied = handle("schedule.update", self.edit(event, exact, "overscoped"), self.context)
+        self.assertEqual(denied["error"]["code"], "rendering_disclosure_scope_mismatch")
+        result = self.command("schedule.update", self.edit(event, selection, "shared-presentation"))
+        self.assertEqual(result["policies"][0]["presentation"]["disclosure_authorization_id"], grant["disclosure_authorization_id"])
+        materialize_notification_horizon(self.db, actor_subject_id="owner", evaluated_at_utc="2026-08-13T13:55:00Z",
+                                         horizon_seconds=600, max_items=10)
+        message = self.message(self.work(event, start=True))
+        self.assertTrue(message.body_text.endswith(" · From: Pearson"), message.body_text)
+        self.assertNotIn("AC872", message.body_text)
+        self.prepare(message)
+        verify_deep(self.db)
+
+    def test_attached_field_contract_and_versioned_catalog(self):
+        from dataclasses import replace
+
+        v2 = ATTACHED_FIELD_DISCLOSURES
+        uri = "https://cortext.local/spine/contracts/schemas/notification-rendering-disclosures-v2.schema.json#/$defs/"
+
+        def validator(fragment):
+            return Draft202012Validator({"$ref": uri + fragment}, registry=self.registry)
+
+        shape = json.loads((ROOT / "tests/fixtures/notification_rendering_disclosures_v2/request_provision.json").read_text())
+        validator("provisionRequest").validate(shape)
+        root = self.create()["record"]
+        old = self.disclosure(root)
+        scope = old["scope"].copy()
+        del scope["permitted_location_ids"]
+        scope["location_authority"] = "attached_field"
+        context = replace(self.context, rendering_cursor_config=self.config)
+        provision = "notification_rendering_disclosure.provision"
+        request = self.request(provision, contract_version=v2, scope=scope)
+        for wrong_scope in (scope | {"permitted_location_ids": []}, scope | {"location_authority": "anywhere"}):
+            bad = request | {"scope": wrong_scope}
+            self.assertFalse(validator("provisionRequest").is_valid(bad))
+            self.assertFalse(handle(provision, bad, context)["ok"])
+        validator("provisionRequest").validate(request)
+        created = self.command(provision, request)
+        validator("provisionResponse").validate(created)
+        replay = self.command(provision, request)
+        self.assertEqual(replay["record"], created["record"])
+        self.assertTrue(replay["replayed"])
+        second = self.command(provision, self.request(provision, contract_version=v2, scope=scope))["record"]
+        show = "notification_rendering_disclosure.show"
+        identity = created["record"]["disclosure_authorization_id"]
+        query = self.request(show, contract_version=v2, disclosure_authorization_id=identity)
+        validator("showRequest").validate(query)
+        validator("showResponse").validate(self.command(show, query))
+        wrong = query | {"contract_version": "spine.notification-rendering-disclosures.v1"}
+        self.assertEqual(handle(show, wrong, context)["error"]["code"], "referenced_row_not_found")
+        list_command = "notification_rendering_disclosure.list"
+        query = self.request(list_command, owner=self.scope, status="active", limit="1")
+        legacy = handle(list_command, query, context)
+        self.assertEqual(legacy["records"], [old])
+        self.assertFalse(legacy["has_more"])
+        first = handle(list_command, query | {"contract_version": v2}, context)
+        validator("listResponse").validate(first)
+        self.assertTrue(first["has_more"])
+        continuation = query | {"contract_version": v2, "cursor": first["next_cursor"]}
+        validator("listRequest").validate(continuation)
+        page = handle(list_command, continuation, context)
+        validator("listResponse").validate(page)
+        self.assertEqual({r["disclosure_authorization_id"] for r in first["records"] + page["records"]},
+                         {identity, second["disclosure_authorization_id"]})
+        self.assertEqual(handle(list_command, query | {"cursor": first["next_cursor"]}, context)["error"]["code"], "stale_cursor")
+        revoke = "notification_rendering_disclosure.revoke"
+        request = self.request(revoke, contract_version=v2, disclosure_authorization_id=identity,
+                               expected_scope_hash=created["record"]["scope_hash"], reason_code="withdrawn")
+        validator("revokeRequest").validate(request)
+        validator("revokeResponse").validate(self.command(revoke, request))
 
     def test_typed_scalar_order_and_approved_location_label_only(self):
         from spine.ledger import LocationInput

@@ -1,0 +1,39 @@
+{
+  "schema_version": "spine.notification-rendering-disclosure-contract-registry.v2",
+  "status": "implemented_local",
+  "logical_owner": "specs/notification-rendering-integration.md",
+  "commands": {
+    "notification_rendering_disclosure.provision": {
+      "contract_version": "spine.notification-rendering-disclosures.v2",
+      "request_schema": "contracts/schemas/notification-rendering-disclosures-v2.schema.json#/$defs/provisionRequest",
+      "response_schema": "contracts/schemas/notification-rendering-disclosures-v2.schema.json#/$defs/provisionResponse",
+      "failure_schema": "contracts/schemas/notification-rendering-definition-responses.schema.json#/$defs/failure",
+      "mutates": true,
+      "exposure": "trusted_local"
+    },
+    "notification_rendering_disclosure.revoke": {
+      "contract_version": "spine.notification-rendering-disclosures.v2",
+      "request_schema": "contracts/schemas/notification-rendering-disclosures-v2.schema.json#/$defs/revokeRequest",
+      "response_schema": "contracts/schemas/notification-rendering-disclosures-v2.schema.json#/$defs/revokeResponse",
+      "failure_schema": "contracts/schemas/notification-rendering-definition-responses.schema.json#/$defs/failure",
+      "mutates": true,
+      "exposure": "trusted_local"
+    },
+    "notification_rendering_disclosure.show": {
+      "contract_version": "spine.notification-rendering-disclosures.v2",
+      "request_schema": "contracts/schemas/notification-rendering-disclosures-v2.schema.json#/$defs/showRequest",
+      "response_schema": "contracts/schemas/notification-rendering-disclosures-v2.schema.json#/$defs/showResponse",
+      "failure_schema": "contracts/schemas/notification-rendering-definition-responses.schema.json#/$defs/failure",
+      "mutates": false,
+      "exposure": "trusted_local"
+    },
+    "notification_rendering_disclosure.list": {
+      "contract_version": "spine.notification-rendering-disclosures.v2",
+      "request_schema": "contracts/schemas/notification-rendering-disclosures-v2.schema.json#/$defs/listRequest",
+      "response_schema": "contracts/schemas/notification-rendering-disclosures-v2.schema.json#/$defs/listResponse",
+      "failure_schema": "contracts/schemas/notification-rendering-definition-responses.schema.json#/$defs/failure",
+      "mutates": false,
+      "exposure": "trusted_local"
+    }
+  }
+}

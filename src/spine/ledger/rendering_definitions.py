@@ -54,12 +54,13 @@ def load_disclosure(db: sqlite3.Connection, authorization_id: str) -> dict[str, 
     row = db.execute("SELECT * FROM notification_rendering_disclosures WHERE disclosure_authorization_id=?", (authorization_id,)).fetchone()
     invariant(row is not None, "missing rendering disclosure")
     scope = codec.stored_object(row["scope_json"], 24576)
+    contract = row["scope_contract_version"]
     invariant(
-        codec.normalize_scope(scope) == scope
-        and row["scope_contract_version"] == codec.DISCLOSURES
+        contract in {codec.DISCLOSURES, codec.ATTACHED_FIELD_DISCLOSURES}
+        and codec.normalize_scope(scope, contract) == scope
         and row["canonical_json_version"] == codec.CANON
     )
-    invariant(row["scope_hash"] == codec.content_hash(codec.DISCLOSURES, "scope", scope) and row["match_hash"] == codec.match_hash(scope))
+    invariant(row["scope_hash"] == codec.content_hash(contract, "scope", scope) and row["match_hash"] == codec.match_hash(scope))
     ref = scope["definition"]
     invariant(
         (row["definition_root_id"], row["definition_revision_id"])
@@ -77,7 +78,7 @@ def load_disclosure(db: sqlite3.Connection, authorization_id: str) -> dict[str, 
             (authorization_id,),
         )
     ]
-    invariant(locations == scope["permitted_location_ids"])
+    invariant(locations == scope.get("permitted_location_ids", []))
     profiles = [
         r[0]
         for r in db.execute(
@@ -89,6 +90,21 @@ def load_disclosure(db: sqlite3.Connection, authorization_id: str) -> dict[str, 
     definition = load_revision(db, row["definition_revision_id"])
     invariant(definition["notification_rendering_definition_id"] == row["definition_root_id"])
     invariant(set(scope["approved_selection_keys"]) <= {s["selection_key"] for s in definition["revision"]["selections"]})
+    if contract == codec.ATTACHED_FIELD_DISCLOSURES:
+        catalog = db.execute(
+            "SELECT owner_kind,owner_subject_id,owner_group_id FROM notification_rendering_definitions "
+            "WHERE notification_rendering_definition_id=?",
+            (row["definition_root_id"],),
+        ).fetchone()
+        invariant(catalog is not None)
+        if profiles:
+            profile = db.execute(
+                "SELECT owner_kind,owner_subject_id,owner_group_id FROM notification_profiles WHERE notification_profile_id=?",
+                (profiles[0],),
+            ).fetchone()
+            invariant(profile is not None and root_owner(profile) == root_owner(catalog))
+        else:
+            invariant(root_owner(catalog) == scope["item_owner"])
     return {**dict(row), "scope": scope}
 
 

@@ -3,6 +3,7 @@
 from spine.core import facets as facet_codec
 from spine.core.notification_details import require
 from spine.core.notification_rendering import _normalized_text
+from spine.core.rendering_definitions import location_permitted
 from spine.ledger.facets import load_definition
 from spine.ledger.rendering_definitions import load_disclosure, load_presentation, load_revision
 
@@ -57,7 +58,7 @@ def validate_evidence_definition(db, rendering):
         raw = values[source["field_key"]]
         if "location_id" in source:
             require(field["type"] == "reference" and field["target_kind"] == "location")
-            require(source["location_id"] == raw and raw in grant["scope"]["permitted_location_ids"])
+            require(source["location_id"] == raw and location_permitted(grant, definition["selection_key"], raw))
             location = db.execute("SELECT label FROM locations WHERE location_id=?", (raw,)).fetchone()
             require(location is not None)
             raw = location[0]

@@ -93,7 +93,7 @@ class RenderingFoundationTests(unittest.TestCase):
         return self.call("notification_rendering_definition.create", owner=self.scope, definition_key=key, revision=self.revision)
 
     def test_rendering_is_publicly_activated_only_on_local_surface(self):
-        self.assertEqual(self.db.execute("SELECT MAX(schema_version) FROM ledger_schema").fetchone()[0], 20)
+        self.assertEqual(self.db.execute("SELECT MAX(schema_version) FROM ledger_schema").fetchone()[0], 21)
         result = handle(
             "notification_rendering_definition.create",
             self.request("notification_rendering_definition.create", owner=self.scope, definition_key="flight", revision=self.revision),
@@ -219,7 +219,7 @@ class RenderingFoundationTests(unittest.TestCase):
             with self.subTest(stage=stage):
                 db = connect()
                 with patch("spine.ledger.rendering_migration.install_rendering_storage"), \
-                     patch("spine.ledger.recurring_task_migration.install_recurring_task_storage"):
+                     patch("spine.ledger.sqlite.IMPLEMENTED_LEDGER_SCHEMA_VERSION", 19):
                     initialize_schema(db)
                 before = [tuple(r) for r in db.execute("SELECT type,name,sql FROM sqlite_schema ORDER BY name")]
 

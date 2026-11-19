@@ -1,6 +1,7 @@
 # Facet-aware notification rendering
 
-This is the trusted-local operator guide for the schema-19 rendering release.
+This is the trusted-local operator guide for facet-aware reminders, including
+attached-field location disclosure in runtime 0.13.0/schema 21.
 Start with ordinary scheduling in [the quickstart](AGENT_QUICKSTART.md); use this
 guide only when reminders should include explicitly selected facet facts.
 
@@ -28,7 +29,7 @@ definition pins the facet schema revision, field keys, labels and compatible ite
 types. It appends bounded deterministic details to the existing concise reminder;
 it cannot contain executable templates, network lookups or model instructions.
 
-Direct scalar values and explicitly permitted location **labels** are supported.
+Direct scalar values and approved fields' location **labels** are supported.
 Location references remain references; do not copy addresses into string fields to
 bypass that model. Location projection never releases an address, coordinates or
 provider metadata. Canonical facts of referenced locations remain immutable.
@@ -45,11 +46,20 @@ reminders retain their selected revision. Retirement is **not** disclosure revoc
 
 ## 2. Record reusable, scoped disclosure
 
-Use `notification_rendering_disclosure.provision` with
-`contract_version=spine.notification-rendering-disclosures.v1`. Record the explicit
-operator instruction and exact scope: item owner, definition root/revision, approved
+Use `notification_rendering_disclosure.provision`. Record the explicit operator
+instruction and exact scope: item owner, definition root/revision, approved
 selection keys, profile or direct-policy use, recipient, delivery target, channel,
-adapter, destination source, target reference, and permitted location IDs.
+adapter, destination source and target reference. Choose one scope contract:
+
+- `spine.notification-rendering-disclosures.v2`: set scope
+  `"location_authority": "attached_field"`; omit `permitted_location_ids`. This
+  covers the label of the location attached to the exact approved field, including
+  newly attached airports. For a shared Flight catalog, use the **item owner** in
+  the scope and the exact profile root and definition from that catalog. Repeat
+  approval for a different item owner, definition revision or delivery route.
+- `spine.notification-rendering-disclosures.v1`: set scope
+  `permitted_location_ids` to the exact location allowlist. Existing grants remain
+  v1 and do not widen automatically.
 
 For example: “Include flight number and terminal for this profile's reminders to
 this family chat.” This is a reusable configuration, not approval of all fields in
@@ -61,9 +71,11 @@ Exact authorization IDs avoid ambiguity. Unique-match resolution succeeds only
 when exactly one current authorization covers the request; ambiguous or missing
 matches fail authoring atomically. `.show`/`.list` inspect grants; `.revoke` withdraws
 one without changing historical attempt evidence. Use a new authorization for a
-new scope rather than editing an immutable grant.
+new scope rather than editing an immutable grant. Use the grant's own contract
+version for show, list and revoke.
 
-See [the scoped authorization example](../tests/fixtures/notification_rendering_definitions/contracts/request_disclosure_provision.json).
+See the [attached-field request example](../tests/fixtures/notification_rendering_disclosures_v2/request_provision.json)
+or the [v1 exact-ID example](../tests/fixtures/notification_rendering_definitions/contracts/request_disclosure_provision.json).
 
 ## 3. Apply without confusing presentation with scheduling
 

@@ -105,7 +105,7 @@ class RenderingSuccessorTests(foundation.RenderingFoundationTests):
             )
         return self.candidate("notification_profile.create", request), request, root
 
-    def adopt(self, item):
+    def adopt(self, item, **operations):
         state = self.db.execute("SELECT access_epoch FROM ledger_access_state WHERE singleton_id=1").fetchone()
         epoch = str(state[0]) if state else "0"
         proposed = plan(
@@ -114,6 +114,7 @@ class RenderingSuccessorTests(foundation.RenderingFoundationTests):
                 "contract_version": "spine.trusted-web-provisioning.v1",
                 "ledger_id": "test-ledger",
                 "expected_access_epoch": epoch,
+                **operations,
                 "item_adoptions": [
                     {
                         "operation": "create",

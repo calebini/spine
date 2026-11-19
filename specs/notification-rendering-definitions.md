@@ -252,8 +252,10 @@ the renderer neither follows a latest-location alias nor repoints old events. A 
 reusable location catalog is separate work, not a prerequisite or implied feature here.
 
 Resolve only after referenced-location read and label-disclosure authority succeeds.
-The authorization must cover that location identity, not merely an arbitrary reference
-typed as location. Missing, unavailable, unapproved or unauthorized rows omit the
+The v1 authorization must cover that location identity. The v2 attached-field
+authorization instead covers the location actually stored in the exact approved field
+of this item/version, for the same delivery scope. It does not expose another field
+or allow a caller to supply an independent lookup ID. Missing, unavailable, unapproved or unauthorized rows omit the
 selection without revealing which condition exposed a private resource. An unusable
 label follows the optional-text omission rules. Storage corruption and operational
 failure are not converted into absence. No raw location ID is printed as fallback.
@@ -342,7 +344,8 @@ and `active|revoked` lifecycle. The scope names:
   this branch separately for each policy;
 - the exact recipient kind/ID and delivery target, including its channel, adapter
   and destination reference snapshot; and
-- for location-label selections, the explicit permitted location IDs.
+- for location-label selections, either the explicit permitted location IDs (v1)
+  or the attached-field mode (v2).
 
 The same authorization may serve many matching events. Profile application records
 the authorization ID and immutable scope hash alongside each policy's selected
@@ -364,9 +367,11 @@ its key or displayed name matches. Existing policies never inherit the new revis
 
 Authorize field selection, not one scalar value snapshot: corrections to a flight
 number or terminal remain covered. This does not permit changing the selected field,
-schema/definition revision, profile root/use branch or destination. A changed location reference
-must name an already permitted location ID or require a new scoped authorization;
-approving a location-label field does not authorize disclosing arbitrary private places.
+schema/definition revision, profile root/use branch or destination. Under v1, a changed
+location reference still needs an already permitted ID or a new authorization. Under v2,
+attaching an authorized field's location has the same trust boundary as setting the
+item's primary location: a permitted author is responsible for attaching the right place.
+The renderer has no airport classifier and cannot discover or substitute another location.
 These exact-match rules favor explicit refresh over implicit compatibility inference.
 
 No authorization is embedded as an operative grant inside a portable pack. Pack
@@ -374,6 +379,12 @@ installation may create definitions but requires an independently authorized ope
 action to provision destination-specific disclosure. Chat instructions are represented
 by the trusted executor under today's attribution posture; the record is auditable
 configuration, not proof of independently authenticated human consent.
+
+The trusted-local v2 contract also permits the actual item owner to approve an exact
+shared-catalog definition for one exact profile root from that same catalog. This does
+not make the definition or profile the item's owner, confer permission on another item
+owner, or extend v2 to protected surfaces. Direct-policy scopes still require a
+same-owner definition. See [integration § Attached-field disclosures](notification-rendering-integration.md#attached-field-disclosures).
 
 ### 8.2 Per-policy exceptions and lifecycle
 

@@ -90,11 +90,16 @@ one pickup, preparation task or follow-up per occurrence, with independent task
 history, follow-source timing and reminders. Public activation and release
 verification are tracked under [SPINE-095](docs/BACKLOG.md#spine-095--r4-recurring-task-activation-and-release-verification).
 
-Spine `0.12.0` is an implemented alpha; its scheduling core is exercised in a staging
-agent environment. The current SQLite ledger schema is version `20`. The trusted multi-operator backend is also running in staging on `cortext1`, with
+Spine `0.13.0` is an implemented alpha; its scheduling core is exercised in a staging
+agent environment. The current SQLite ledger schema is version `21`. The trusted multi-operator backend is also running in staging on `cortext1`, with
 operator testing through the connected [Kinflow frontend](../kinflow-web-ui/README.md).
 Concrete operator-reported work is tracked in the [backlog](docs/BACKLOG.md);
 this checkout version is not a deployment claim.
+
+Version 0.13.0 adds [attached-field disclosure](docs/NOTIFICATION_RENDERING_GUIDE.md#2-record-reusable-scoped-disclosure):
+approve an airport field for a route once, without maintaining an airport allowlist.
+Existing exact-location grants and attempt history retain their original semantics.
+Offline schema 20 → 21 migration requires a verified backup and stopped writers.
 
 Version 0.11.0 adds explicit event participants and task assignees, scoped people
 discovery, historical role readback, atomic scheduling v4 and permissioned
@@ -429,11 +434,6 @@ runtime tests from the retained source-only wire examples and from deployment.
 Still deliberately separate or in design:
 
 - governed contextual LLM advisories and agent-generated enrichment;
-- opt-in [facet-aware notification rendering definitions](specs/notification-rendering-definitions.md)
-  supplied as configuration by operators or packs; ratified design and initial machine
-  contracts/fixtures, not implemented; the [integration amendment](specs/notification-rendering-integration.md)
-  is ratified with source-only successor schemas and computed fixtures for persistence,
-  authoring, delivery continuity and evidence; runtime activation remains pending;
 - canonical archival and retention policy for long-lived ledgers;
 - broader external projection adapters;
 - production qualification across sustained load and failure campaigns;

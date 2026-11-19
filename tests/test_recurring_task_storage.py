@@ -113,7 +113,7 @@ class RecurringTaskMigrationTests(unittest.TestCase):
             initialize_schema(self.db)
 
     def test_explicit_candidate_fresh_install_idempotency_and_old_writer_refusal(self):
-        self.assertEqual(IMPLEMENTED_LEDGER_SCHEMA_VERSION, 20)
+        self.assertEqual(IMPLEMENTED_LEDGER_SCHEMA_VERSION, 21)
         with patch("spine.ledger.migrate.CURRENT_SCHEMA_VERSION", 19), \
              patch("spine.ledger.migrate.verify_schema"):
             self.assertEqual(migrate_schema(self.db).after_version, 19)
@@ -129,6 +129,10 @@ class RecurringTaskMigrationTests(unittest.TestCase):
         self.assertEqual(tuple(self.db.execute("SELECT * FROM related_task_catalog_state").fetchone()), (1, 0))
         with self.assertRaises(SpineValidationError):
             verify_runtime_schema(self.db, expected_version=19)
+        response = handle("system.info", {}, CommandContext(ledger=self.db))
+        self.assertFalse(response["ok"], response)
+        self.assertEqual(response["error"]["field"], "ledger_schema_version")
+        self.assertEqual(migrate_schema(self.db).applied_versions, (21,))
         response = handle("system.info", {}, CommandContext(ledger=self.db))
         self.assertTrue(response["ok"], response)
 

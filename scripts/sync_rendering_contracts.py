@@ -10,6 +10,7 @@ ROOT = Path(__file__).resolve().parents[1]
 DEST = ROOT / "src/spine/contracts/rendering"
 REGISTRIES = (
     "notification-rendering-definition-contract-registry.v1.json",
+    "notification-rendering-disclosure-contract-registry.v2.json",
     "notification-rendering-integration-contract-registry.v1.json",
     "notification-rendering-integration.v1.json",
 )

@@ -19,7 +19,7 @@ class FacetAccessMigrationTests(unittest.TestCase):
             patch("spine.ledger.facet_access_migration.install_facet_access"),
             patch("spine.ledger.facet_location_migration.install_facet_location_freeze"),
             patch("spine.ledger.rendering_migration.install_rendering_storage"),
-            patch("spine.ledger.recurring_task_migration.install_recurring_task_storage"),
+            patch("spine.ledger.sqlite.IMPLEMENTED_LEDGER_SCHEMA_VERSION", 19),
         ):
             self.h.setUp()
         self.addCleanup(self.h.doCleanups)
@@ -80,12 +80,12 @@ class FacetAccessMigrationTests(unittest.TestCase):
         with self.assertRaises(SpineValidationError):
             verify_runtime_schema(self.db)
         result = migrate_schema(self.db)
-        self.assertEqual(result.applied_versions, (17, 18, 19, 20))
+        self.assertEqual(result.applied_versions, (17, 18, 19, 20, 21))
         after = all_rows(self.db)
         for table, rows in before.items():
             if table != "ledger_schema":
                 self.assertEqual(rows, after[table], table)
-        self.assertEqual(verify_schema(self.db).schema_version, 20)
+        self.assertEqual(verify_schema(self.db).schema_version, 21)
         self.assertEqual(self.db.execute("PRAGMA foreign_keys").fetchone()[0], 1)
         self.assertEqual(self.db.execute("SELECT count(*) FROM sqlite_schema WHERE name LIKE 'custom_grant_%'").fetchone()[0], 2)
 

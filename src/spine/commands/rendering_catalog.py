@@ -37,8 +37,7 @@ class _Preview(Exception):
 
 def normalize(command, value):
     family, operation = command.split(".")
-    contract = codec.DEFINITIONS if family == "notification_rendering_definition" else codec.DISCLOSURES
-    definition = contract == codec.DEFINITIONS
+    definition = family == "notification_rendering_definition"
     identity = DEFINITION_ID if definition else DISCLOSURE_ID
     required, optional = {"contract_version"}, set()
     if operation in WRITES:
@@ -62,7 +61,8 @@ def normalize(command, value):
         codec.fail("invalid_request", "command")
     request = codec.exact(value, required, optional)
     codec.bounded(request, 32768, "request")
-    if request["contract_version"] != contract:
+    contract = request["contract_version"]
+    if contract not in ((codec.DEFINITIONS,) if definition else (codec.DISCLOSURES, codec.ATTACHED_FIELD_DISCLOSURES)):
         codec.fail("invalid_request", "contract_version")
     for key in required - {"contract_version", "owner", "scope", "revision", "limit"}:
         codec.identity(request[key], key)
@@ -73,7 +73,7 @@ def normalize(command, value):
     if "revision" in request:
         request["revision"] = codec.normalize_revision(request["revision"])
     if "scope" in request:
-        request["scope"] = codec.normalize_scope(request["scope"])
+        request["scope"] = codec.normalize_scope(request["scope"], contract)
     for key in ("reason_code", "definition_key"):
         if key in request:
             request[key] = normalize_catalog_key(request[key], key)
@@ -191,7 +191,7 @@ def insert_revision(db, identity, revision_id, revision, number, receipt_id):
     )
 
 
-def validate_scope(db, scope, budget, permissions):
+def validate_scope(db, scope, budget, permissions, *, contract):
     own = scope["item_owner"]
     require_owner_exists(db, {**own, "owner_subject_id": own.get("owner_subject_id"), "owner_group_id": own.get("owner_group_id")})
     if permissions:
@@ -203,7 +203,11 @@ def validate_scope(db, scope, budget, permissions):
     if root["status"] != "active":
         codec.fail("rendering_definition_retired", "scope.definition")
     revision = load_revision(db, ref[REVISION_ID])
-    if revision[DEFINITION_ID] != ref[DEFINITION_ID] or root_owner(root) != own:
+    catalog_owner = root_owner(root)
+    shared = catalog_owner != own
+    if revision[DEFINITION_ID] != ref[DEFINITION_ID] or (
+        shared and (contract != codec.ATTACHED_FIELD_DISCLOSURES or scope["use_scope"]["kind"] != "profile")
+    ):
         codec.fail("rendering_disclosure_scope_mismatch", "scope")
     keys = {s["selection_key"] for s in revision["revision"]["selections"]}
     if not set(scope["approved_selection_keys"]) <= keys:
@@ -212,7 +216,7 @@ def validate_scope(db, scope, budget, permissions):
         profile = row(db, "notification_profiles", "notification_profile_id", scope["use_scope"]["notification_profile_id"], budget)
         if permissions:
             permissions.catalog("notification_profile", profile["notification_profile_id"], use=True)
-        if profile["status"] != "active" or root_owner(profile) != own:
+        if profile["status"] != "active" or root_owner(profile) != catalog_owner:
             codec.fail("rendering_disclosure_scope_mismatch", "scope.use_scope")
     destination = scope["destination"]
     route = row(db, "delivery_targets", "delivery_target_id", destination["delivery_target_id"], budget)
@@ -232,7 +236,7 @@ def validate_scope(db, scope, budget, permissions):
         recipient.get("subject_id", recipient.get("group_id")),
         budget,
     )
-    for location in scope["permitted_location_ids"]:
+    for location in scope.get("permitted_location_ids", []):
         if permissions:
             codec.fail("permission_denied", "scope.permitted_location_ids")
         row(db, "locations", "location_id", location, budget)
@@ -331,7 +335,8 @@ def write(command, request, db, budget, permissions):
     else:
         if operation == "provision":
             scope = request["scope"]
-            validate_scope(db, scope, budget, permissions)
+            contract = request["contract_version"]
+            validate_scope(db, scope, budget, permissions, contract=contract)
             identity = derived("notification_rendering_disclosure", "/scope")
             own, ref, recipient = scope["item_owner"], scope["definition"], scope["destination"]["recipient"]
             db.execute(
@@ -340,10 +345,10 @@ def write(command, request, db, budget, permissions):
                     identity,
                     ref[DEFINITION_ID],
                     ref[REVISION_ID],
-                    codec.DISCLOSURES,
+                    contract,
                     codec.CANON,
                     canonical_json_text(scope),
-                    codec.content_hash(codec.DISCLOSURES, "scope", scope),
+                    codec.content_hash(contract, "scope", scope),
                     codec.match_hash(scope),
                     "active",
                     receipt_id,
@@ -359,7 +364,7 @@ def write(command, request, db, budget, permissions):
             )
             db.executemany(
                 "INSERT INTO notification_rendering_disclosure_locations VALUES (?,?)",
-                [(identity, v) for v in scope["permitted_location_ids"]],
+                [(identity, v) for v in scope.get("permitted_location_ids", [])],
             )
             if scope["use_scope"]["kind"] == "profile":
                 db.execute(
@@ -370,6 +375,8 @@ def write(command, request, db, budget, permissions):
         else:
             identity = request[DISCLOSURE_ID]
             grant = load_disclosure(db, identity)
+            if grant["scope_contract_version"] != request["contract_version"]:
+                codec.fail("referenced_row_not_found", DISCLOSURE_ID)
             if permissions:
                 permissions.owner_admin(grant["scope"]["item_owner"])
             if request["expected_scope_hash"] != grant["scope_hash"]:
@@ -435,6 +442,11 @@ def read(command, request, db, budget, permissions, admission, config, now):
     base = {"ok": True, "command": command, "contract_version": request["contract_version"]}
     generation = db.execute("SELECT generation FROM notification_rendering_catalog_state WHERE singleton=1").fetchone()[0]
     if command.endswith(".show"):
+        if not definition and not db.execute(
+            "SELECT 1 FROM notification_rendering_disclosures WHERE disclosure_authorization_id=? AND scope_contract_version=?",
+            (request[identity], request["contract_version"]),
+        ).fetchone():
+            codec.fail("referenced_row_not_found", identity)
         if permissions:
             if definition:
                 permissions.rendering(request[identity])
@@ -448,6 +460,8 @@ def read(command, request, db, budget, permissions, admission, config, now):
             codec.fail("environment_failure", "cursor_config")
         config.validate(db)
         query = {k: request[k] for k in ("owner", "status", "limit")}
+        if request["contract_version"] == codec.ATTACHED_FIELD_DISCLOSURES:
+            query["contract_version"] = request["contract_version"]
         facts = cursor_facts(db, command, query, admission, permissions)
         prior = config.decode(request["cursor"]) if "cursor" in request else None
         if prior:
@@ -464,6 +478,9 @@ def read(command, request, db, budget, permissions, admission, config, now):
                 prior["last_id"] if prior else "",
             ],
         )
+        if not definition:
+            where.append("r.scope_contract_version=?")
+            parameters.append(request["contract_version"])
         if permissions and not permissions.scope(own):
             if not definition:
                 where.append("0")
@@ -512,10 +529,13 @@ def execute(command: str, request: Mapping, context: CommandContext, *, admissio
     db.set_progress_handler(budget.progress, 100)
     try:
         normalized = normalize(command, request)
+        budget.check()
         is_write = command.split(".")[1] in WRITES
         read_facts = None
         with db.atomic_command(write=command.split(".")[1] in WRITES):
             permissions = admission.permissions(db, timestamp, budget)
+            if permissions is not None and normalized["contract_version"] == codec.ATTACHED_FIELD_DISCLOSURES:
+                codec.fail("permission_denied", "contract_version")
             if command.split(".")[1] in WRITES:
                 result = write(command, normalized, db, budget, permissions)
                 if context.dry_run:

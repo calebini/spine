@@ -349,9 +349,11 @@ _requirements(
 _requirements(
     {"notification_rendering_disclosure.provision", "notification_rendering_disclosure.revoke", "notification_rendering_disclosure.show"},
     "spine.notification-rendering-disclosures.v1",
+    "spine.notification-rendering-disclosures.v2",
 )
 _requirements(
-    {"notification_rendering_disclosure.list"}, "spine.notification-rendering-disclosures.v1", "spine.notification-rendering-cursor.v1"
+    {"notification_rendering_disclosure.list"}, "spine.notification-rendering-disclosures.v1",
+    "spine.notification-rendering-disclosures.v2", "spine.notification-rendering-cursor.v1"
 )
 _SUCCESSOR_REQUIREMENTS = {
     "schedule.create": (
@@ -436,6 +438,7 @@ WORKER_REQUIRED_CONTRACT_VERSIONS = tuple(
             "spine.notification-rendering.v1",
             "spine.notification-rendering.concise-en-ca.v1",
             "spine.notification-rendering-input.v1",
+            "spine.notification-rendering-disclosures.v2",
             "spine.tickerd-compatibility.v1",
         }
     )

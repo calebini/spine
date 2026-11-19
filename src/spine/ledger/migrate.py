@@ -181,6 +181,11 @@ def main(argv: Sequence[str] | None = None) -> int:
 
 
 def _apply_migration(connection: sqlite3.Connection, *, version: int, migration_name: str) -> None:
+    if version == 21:
+        from spine.ledger.rendering_disclosure_migration import install_attached_field_disclosures
+
+        install_attached_field_disclosures(connection, applied_at_utc=_utc_now())
+        return
     if version == 20:
         from spine.ledger.recurring_task_migration import install_recurring_task_storage
 

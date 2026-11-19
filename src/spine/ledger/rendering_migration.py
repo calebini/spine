@@ -10,7 +10,7 @@ from collections.abc import Callable
 from importlib import resources
 
 from spine.core.errors import SpineValidationError
-from spine.ledger.preflight import expected_schema_objects, verify_runtime_schema
+from spine.ledger.preflight import CURRENT_SCHEMA_VERSION, current_schema_version, expected_schema_objects, verify_runtime_schema
 from spine.ledger.rendering_definitions import insert_presentation, invariant, verify_deep
 from spine.ledger.transactions import LedgerConnection
 
@@ -28,8 +28,9 @@ def statements(script: str) -> list[str]:
 
 def verify_candidate_schema(db: sqlite3.Connection) -> None:
     """Pinned metadata-only candidate validation; never scans domain rows."""
-    if db.execute("SELECT MAX(schema_version) FROM ledger_schema").fetchone()[0] == 20:
-        verify_runtime_schema(db, expected_version=20)
+    version = current_schema_version(db)
+    if 20 <= version <= CURRENT_SCHEMA_VERSION:
+        verify_runtime_schema(db, expected_version=version)
         return
     manifest = json.loads(resources.files("spine.ledger").joinpath("schema_object_manifest.rendering-candidate.json").read_text())
     invariant(
@@ -103,8 +104,9 @@ def install_candidate(db: sqlite3.Connection, *, disposable_test_ledger: bool = 
     """Atomic schema-18 candidate, never a production initialize/migrate path."""
     if not disposable_test_ledger or db.in_transaction or not isinstance(db, LedgerConnection):
         raise SpineValidationError("ledger_migration_predecessor", "candidate rendering storage requires an idle disposable test ledger")
-    if db.execute("SELECT MAX(schema_version) FROM ledger_schema").fetchone()[0] == 20:
-        verify_runtime_schema(db, expected_version=20)
+    version = current_schema_version(db)
+    if 20 <= version <= CURRENT_SCHEMA_VERSION:
+        verify_runtime_schema(db, expected_version=version)
         db.enable_renderings()
         return
     if db.execute("SELECT MAX(schema_version) FROM ledger_schema").fetchone()[0] == 19:

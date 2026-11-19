@@ -74,11 +74,18 @@ class LedgerConnection(sqlite3.Connection):
         for table, kind, column, operations in (
             ("notification_rendering_definitions", "root", "notification_rendering_definition_id", ("INSERT", "UPDATE")),
             ("notification_rendering_definition_revisions", "revision", "notification_rendering_definition_revision_id", ("INSERT",)),
-            ("notification_rendering_disclosures", "disclosure", "disclosure_authorization_id", ("INSERT", "UPDATE")),
         ):
             for operation in operations:
                 self.execute(f"""CREATE TEMP TRIGGER spine_rendering_{table}_{operation} AFTER {operation} ON main.{table}
                     BEGIN SELECT spine_touch_rendering('{kind}',NEW.{column}); END""")
+        self.arm_rendering_disclosure_tracking()
+
+    def arm_rendering_disclosure_tracking(self) -> None:
+        """Restore connection-local guards after an offline table rebuild."""
+        for operation in ("INSERT", "UPDATE"):
+            self.execute(f"""CREATE TEMP TRIGGER IF NOT EXISTS spine_rendering_notification_rendering_disclosures_{operation}
+                AFTER {operation} ON main.notification_rendering_disclosures
+                BEGIN SELECT spine_touch_rendering('disclosure',NEW.disclosure_authorization_id); END""")
 
     def _touch_policy(self, item_id: str, version: int) -> int:
         self.mutation_state.renderings.versions.add((item_id, version))

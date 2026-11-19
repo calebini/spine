@@ -21,6 +21,7 @@ from spine.core.notification_rendering import _normalized_text
 CANON = "spine.canonical-json.v1"
 DEFINITIONS = "spine.notification-rendering-definitions.v1"
 DISCLOSURES = "spine.notification-rendering-disclosures.v1"
+ATTACHED_FIELD_DISCLOSURES = "spine.notification-rendering-disclosures.v2"
 PRESENTATION = "spine.notification-rendering-presentation.v1"
 PROFILE_V2 = "spine.notification-profiles.v2"
 MAX_INTEGER = 9223372036854775807
@@ -129,9 +130,12 @@ def normalize_revision(value: object) -> dict[str, Any]:
     return revision
 
 
-def normalize_scope(value: object) -> dict[str, Any]:
+def normalize_scope(value: object, contract: str = DISCLOSURES) -> dict[str, Any]:
+    if contract not in {DISCLOSURES, ATTACHED_FIELD_DISCLOSURES}:
+        fail("unsupported_contract_version", "contract_version")
     scope = exact(
-        value, {"item_owner", "definition", "approved_selection_keys", "use_scope", "destination", "permitted_location_ids"}, field="scope"
+        value, {"item_owner", "definition", "approved_selection_keys", "use_scope", "destination"}
+        | ({"permitted_location_ids"} if contract == DISCLOSURES else {"location_authority"}), field="scope"
     )
     scope["item_owner"] = owner(scope["item_owner"])
     if scope["item_owner"]["owner_kind"] == "system":
@@ -140,7 +144,10 @@ def normalize_scope(value: object) -> dict[str, Any]:
     scope["approved_selection_keys"] = sorted_strings(
         scope["approved_selection_keys"], "scope.approved_selection_keys", 8, minimum=1, keys=True
     )
-    scope["permitted_location_ids"] = sorted_strings(scope["permitted_location_ids"], "scope.permitted_location_ids", 64)
+    if contract == DISCLOSURES:
+        scope["permitted_location_ids"] = sorted_strings(scope["permitted_location_ids"], "scope.permitted_location_ids", 64)
+    elif scope["location_authority"] != "attached_field":
+        fail("invalid_request", "scope.location_authority")
     use = scope["use_scope"]
     if not isinstance(use, Mapping) or use.get("kind") not in {"profile", "direct_policy"}:
         fail("invalid_request", "scope.use_scope")
@@ -150,6 +157,14 @@ def normalize_scope(value: object) -> dict[str, Any]:
     scope["destination"] = normalize_destination(scope["destination"])
     bounded(scope, 24576, "scope")
     return scope
+
+
+def location_permitted(grant: Mapping[str, Any], selection_key: str, location_id: str) -> bool:
+    """Only authorize the value obtained from the caller's exact selected field."""
+    scope = grant["scope"]
+    return selection_key in scope["approved_selection_keys"] and (
+        grant["scope_contract_version"] == ATTACHED_FIELD_DISCLOSURES or location_id in scope["permitted_location_ids"]
+    )
 
 
 def normalize_destination(value: object) -> dict[str, Any]:

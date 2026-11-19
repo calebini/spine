@@ -1,7 +1,7 @@
 {
   "manifest_version": "spine.sqlite-schema-object-manifest.v1",
   "schemas": {
-    "20": {
+    "21": {
       "objects": [
         {
           "object_type": "index",
@@ -382,6 +382,11 @@
           "object_type": "index",
           "name": "notification_rendering_disclosure_profiles_notification_profile_id_idx",
           "definition_sha256": "953542158276927c06455ec9a70f622ecee7918208fe768bc7d0bd1fd0d5647b"
+        },
+        {
+          "object_type": "index",
+          "name": "notification_rendering_disclosures_catalog_version_idx",
+          "definition_sha256": "bd080f3478739909c0b750cd9ac348c1eaf4c05ba9f1a94190c804354c8b4997"
         },
         {
           "object_type": "index",
@@ -906,7 +911,7 @@
         {
           "object_type": "table",
           "name": "notification_rendering_disclosures",
-          "definition_sha256": "407cb4f826dae11b79399d82fa750d5643f446edfe4a3fa1c4088fc20eb15cc8"
+          "definition_sha256": "70af74c9c2cdbb028ebf4f3d542b4b41f95cc098abaadf59dd733a54d9b3bb58"
         },
         {
           "object_type": "table",

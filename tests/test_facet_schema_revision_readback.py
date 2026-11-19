@@ -363,11 +363,17 @@ root = resources.files('spine.contracts').joinpath('revision_readback')
 pins = json.loads(root.joinpath('pins.v1.json').read_text())
 for name, expected in pins['files'].items():
     assert hashlib.sha256(root.joinpath(name).read_bytes()).hexdigest() == expected
+rendering = resources.files('spine.contracts').joinpath('rendering')
+rendering_pins = json.loads(rendering.joinpath('pins.v1.json').read_text())['files']
+for name in ('notification-rendering-disclosure-contract-registry.v2.json',
+             'schemas/notification-rendering-disclosures-v2.schema.json'):
+    assert hashlib.sha256(rendering.joinpath(name).read_bytes()).hexdigest() == rendering_pins[name]
+assert resources.files('spine.ledger.migrations').joinpath('0021_attached_field_disclosures.sql').is_file()
 entry = COMMAND_RUNTIME_CONTRACT_REGISTRY['facet_schema.revision.show']
 print(json.dumps({'version': __version__, 'schema': IMPLEMENTED_LEDGER_SCHEMA_VERSION,
                  'requirements': entry.required_contract_versions, 'files': sorted(pins['files'])}))
 """))
-            self.assertEqual((facts["version"], facts["schema"]), (__version__, 20))
+            self.assertEqual((facts["version"], facts["schema"]), (__version__, 21))
             self.assertEqual(facts["requirements"], list(COMMAND_RUNTIME_CONTRACT_REGISTRY[COMMAND].required_contract_versions))
             self.assertEqual(set(facts["files"]), {
                 "facet-schema-revision-readback.v1.json",

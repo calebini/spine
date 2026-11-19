@@ -768,3 +768,47 @@ payload bytes, not just bad MACs. Verify the MAC before trusting payload facts, 
 compare command, query, context, ledger/key/catalog generation and current access
 epoch/time fence. No token renewal on continuation. The reference vectors exercise
 these pure decisions, not database permission resolution or a running cursor service.
+### Attached-field disclosures
+
+`spine.notification-rendering-disclosures.v2` is a trusted-local successor for
+`notification_rendering_disclosure.provision|show|list|revoke`. Its closed scope
+replaces `permitted_location_ids` with `location_authority: "attached_field"`;
+all other scope identities retain their exact v1 meanings. V1 commands see only v1
+grants; v2 commands see only v2 grants. The v2 list binds the requested contract in
+its existing protected cursor. A wrong-version identity is unavailable, not projected
+lossily. Both versions participate in existing exact/unique policy resolution;
+matching both is ambiguous, never an implicit preference or upgrade.
+
+V2 permits a separately owned catalog only for profile-scoped use where the pinned
+definition and profile share a catalog owner. Provisioning does not change item access
+or route eligibility. Application validates the explicit current item owner, exact
+definition revision, approved selection subset, profile root or direct use, and exact
+recipient/route snapshot; shared-catalog grant use is trusted-local only. Existing
+profile-revision rules still apply: changes to schedule alone do not enlarge permission,
+and a different definition revision or profile root requires a matching grant. No pack,
+profile, item creation, route choice, or facet write automatically issues a grant.
+The absence of a matching grant does not authorize detailed authoring; callers can
+explicitly choose ordinary presentation.
+
+At attempt start, recheck the grant and current owner and destination in the existing
+admission fence. Resolve only the current item's selected facet slot, schema revision
+and field, then read the referenced row's canonical label. Under v2, a newly attached
+location needs no identity-specific approval. Under v1, its ID must still appear in
+the immutable allowlist. Omitted, unavailable or revoked detail follows existing
+evidenced omission, provided ordinary admission independently succeeds. Corruption,
+stale work and route/lifecycle denial remain failures. No unrelated location, address,
+coordinates or provider metadata is retrieved as a substitute. The existing evidence
+shape records the actual location ID and normalized label for an included field; the
+pinned scope hash identifies which authorization semantics applied. Replay reads the
+original persisted body. Neither work IDs nor provider idempotency keys change.
+
+Schema 21 extends the existing disclosure table's scope-contract constraint and adds
+an owner/status/version/keyset index. The offline atomic schema 20 → 21 migration
+copies disclosure rows unchanged, preserves their child rows, policy snapshots,
+receipts and attempt history, and verifies SQLite, foreign keys, rendering history and
+the target schema before committing. No disclosures are created or rewritten. Use a
+verified predecessor backup for rollback; runtime 0.12.0 rejects schema 21.
+The v2 scope hash uses the existing canonical scope hash algorithm with the v2
+contract version; the match hash remains unchanged, using the same four binding keys.
+Existing wire and evidence schemas remain intact; v2 schemas and command selectors
+are published in the [v2 registry](../contracts/notification-rendering-disclosure-contract-registry.v2.json).

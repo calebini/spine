@@ -2,11 +2,10 @@
 
 import unittest
 from dataclasses import replace
-from unittest.mock import patch
 
 from spine.commands import handle
 from spine.ledger.recurrence import load_current_recurrence_set
-from spine.ledger.recurring_task_migration import CANDIDATE_SCHEMA_VERSION, install_candidate
+from spine.ledger.recurring_task_migration import install_candidate
 from spine.ledger.temporal_bindings import binding_view
 from tests import test_recurring_task_commands as base
 from tests import test_recurring_task_reconcile as helpers
@@ -22,10 +21,6 @@ class RecurringBindingGuardTests(unittest.TestCase):
         self.rule = self.h.created()["result"]["rule"]
         self.initial = self.h.reconcile(self.rule)
         self.child = self.initial["result"]["results"][0]
-        # Admit the private candidate only inside this disposable harness. The
-        # installed v1 command still rejects schema 20 until R4 activation.
-        self.enterContext(patch("spine.commands.temporal_bindings.IMPLEMENTED_LEDGER_SCHEMA_VERSION",
-                                CANDIDATE_SCHEMA_VERSION))
 
     def request(self, operator=None):
         view = binding_view(self.db, self.child["after"]["temporal_binding_id"])
@@ -132,12 +127,11 @@ class RecurringBindingGuardTests(unittest.TestCase):
 
         # Make the ordinary task before admitting the private schema; the guard
         # must not impose recurring-family lifecycle on an unrelated binding.
-        with patch("spine.commands.temporal_bindings.IMPLEMENTED_LEDGER_SCHEMA_VERSION", 20):
-            h = ordinary.BindingSuccessorMaterializationTests()
-            h.setUp()
-            self.addCleanup(h.doCleanups)
-            child = h.create()
-            h.move("2026-08-23")
+        h = ordinary.BindingSuccessorMaterializationTests()
+        h.setUp()
+        self.addCleanup(h.doCleanups)
+        child = h.create()
+        h.move("2026-08-23")
         install_candidate(h.db, disposable_test_ledger=True)
         response = handle("schedule.binding.reconcile", h.request(child), h.context)
         self.assertTrue(response["ok"], response)

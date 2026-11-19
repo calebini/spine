@@ -1,0 +1,3 @@
+-- Consumed inside install_attached_field_disclosures after rebuilding the scope CHECK.
+CREATE INDEX notification_rendering_disclosures_catalog_version_idx
+ON notification_rendering_disclosures(owner_kind,owner_subject_id,owner_group_id,status,scope_contract_version,disclosure_authorization_id);

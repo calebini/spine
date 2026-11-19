@@ -36,7 +36,7 @@ def resolve_details(db, *, work_row, base):
         authorization = "unavailable"
     elif (
         root_owner(owner) != grant["scope"]["item_owner"]
-        or root_owner(root) != root_owner(owner)
+        or (grant["scope_contract_version"] == codec.DISCLOSURES and root_owner(root) != root_owner(owner))
         or current_destination != grant["scope"]["destination"]
         or codec.use_scope(presentation["origin"]) != grant["scope"]["use_scope"]
     ):
@@ -59,7 +59,7 @@ def resolve_details(db, *, work_row, base):
             if authorization != "active":
                 candidate["outcome"] = "disclosure_unavailable"
             else:
-                candidate.update(_source(db, base, selection, grant["scope"], sources, locations))
+                candidate.update(_source(db, base, selection, grant, sources, locations))
         candidates.append(candidate)
     return build_details(
         base,
@@ -78,7 +78,7 @@ def resolve_details(db, *, work_row, base):
     )
 
 
-def _source(db, base, selection, scope, sources, locations):
+def _source(db, base, selection, grant, sources, locations):
     facet_key = selection["facet_key"]
     if facet_key not in sources:
         marker = db.execute(
@@ -122,7 +122,7 @@ def _source(db, base, selection, scope, sources, locations):
     }
     if selection["projection"] == "location_label":
         require(field["type"] == "reference" and field["target_kind"] == "location")
-        if raw not in scope["permitted_location_ids"]:
+        if not codec.location_permitted(grant, selection["selection_key"], raw):
             return {"outcome": "reference_unavailable"}
         if raw not in locations:
             require(len(locations) < 8)

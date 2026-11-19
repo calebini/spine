@@ -15,6 +15,7 @@ from spine.core.hashing import audit_log_payload_hash, command_derived_id, hash_
 from spine.ledger.recurrence import load_current_recurrence_set
 from tests import test_recurring_task_commands as base
 from tests import test_recurring_task_restoration as helpers
+from tests.schema19_witness_support import historical_schema
 
 FIXTURE = Path(__file__).parent / "fixtures/internal_operations/rf2_child_composition_witness.json"
 
@@ -90,7 +91,7 @@ class RecurringChildWitnessTests(unittest.TestCase):
                 kwargs["explicit"] = True
             return normalize(rows, **kwargs)
 
-        with (patch.object(recurrence_mutations, "_normalize_segments", side_effect=historical_segments),
+        with (historical_schema(20), patch.object(recurrence_mutations, "_normalize_segments", side_effect=historical_segments),
               patch("spine.services.mutation_propagation.invalidate_effects")):
             self.assertEqual(collect_lifecycle(), fixture["cases"])
 
@@ -102,7 +103,7 @@ class RecurringChildWitnessTests(unittest.TestCase):
         for name, case in amendment["cases"].items():
             for key in ("response_bytes", "changed", "effect"):
                 self.assertEqual(case[key], fixture["cases"][name][key])
-        with patch("spine.services.mutation_propagation.invalidate_effects"):
+        with historical_schema(20), patch("spine.services.mutation_propagation.invalidate_effects"):
             self.assertEqual(collect_lifecycle(), fixture["cases"] | amendment["cases"])
 
     def test_r3_invalidation_changes_only_catalog_queue_and_bound_receipt_evidence(self):

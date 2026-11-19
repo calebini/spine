@@ -321,8 +321,8 @@ The schema-19 registry retains the prior family requirements and adds:
 | --- | --- |
 | Definition create/publish/retire/show | `spine.notification-rendering-definitions.v1` |
 | Definition list | `spine.notification-rendering-definitions.v1`, `spine.notification-rendering-cursor.v1` |
-| Disclosure provision/revoke/show | `spine.notification-rendering-disclosures.v1` |
-| Disclosure list | `spine.notification-rendering-disclosures.v1`, `spine.notification-rendering-cursor.v1` |
+| Disclosure provision/revoke/show | `spine.notification-rendering-disclosures.v1`, `spine.notification-rendering-disclosures.v2` |
+| Disclosure list | `spine.notification-rendering-disclosures.v1`, `spine.notification-rendering-disclosures.v2`, `spine.notification-rendering-cursor.v1` |
 | `notification_profile.create/revise/show/list` | `spine.notification-profiles.v2` |
 | `schedule.create` | `spine.schedule-create.v3`, `spine.schedule-create-response.v3`, `spine.schedule-create-receipt.v3`, `spine.notification-profile-application.v2` |
 | `schedule.update` | `spine.schedule-update.v3`, `spine.schedule-update-response.v3`, `spine.schedule-update-receipt.v3`, `spine.notification-profile-application.v2` |

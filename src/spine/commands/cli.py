@@ -254,7 +254,8 @@ def _parser() -> argparse.ArgumentParser:
         prog="spine-command",
         epilog=(
             "Facet-aware rendering: notification_rendering_definition create/publish/retire/show/list; "
-            "notification_rendering_disclosure provision/revoke/show/list. Select spine.schedule-show.v2, "
+            "notification_rendering_disclosure provision/revoke/show/list (v1 exact IDs or v2 attached fields). "
+            "Select spine.schedule-show.v2, "
             "spine.schedule-create.v3, spine.schedule-update.v3 or spine.notification-profiles.v2 in request contract_version. "
             "Catalog list commands require protected SPINE_RENDERING_CURSOR_CONFIG."
             " People: people list, item people show/update; scheduling people use spine.schedule-create.v4 or "

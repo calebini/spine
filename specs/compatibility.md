@@ -386,3 +386,14 @@ a new visible delivery. Spine always sends the exact persisted body for each
 attempt. This fix does not qualify an OpenClaw build, assert provider exactly-once
 delivery, or change the transport's receipt requirements. The regression double
 models the required gateway behavior; it is not runtime provider evidence.
+
+### Attached-field rendering disclosure
+
+Spine 0.13.0/schema 21 adds a trusted-local
+[`spine.notification-rendering-disclosures.v2` selector](notification-rendering-integration.md#attached-field-disclosures).
+Existing Flight pack content (including existing definition and profile revisions)
+does not need to be changed. Installation still never grants disclosure; reusable
+field/route approval is a separate operator action. Tooling with an exact release
+or schema pin must qualify the new runtime before using it; do not substitute a
+different Spine artifact or loosen the pin. The frozen web surfaces and Tickerd
+compatibility boundary are unchanged.

@@ -14,7 +14,7 @@ from spine.ledger.identity import read_ledger_instance_id
 from spine.ledger.ownership import read_access_state
 from spine.ledger.ownership_migration import RESOURCE as OWNERSHIP_RESOURCE
 from spine.ledger.ownership_migration import rebuild_access_state
-from spine.ledger.preflight import expected_schema_objects, verify_runtime_schema
+from spine.ledger.preflight import CURRENT_SCHEMA_VERSION, current_schema_version, expected_schema_objects, verify_runtime_schema
 from spine.ledger.recurring_tasks import verify_deep
 from spine.ledger.rendering_definitions import verify_deep as verify_rendering_deep
 from spine.ledger.sqlite import assert_ledger_invariants
@@ -39,6 +39,11 @@ def statements(script: str) -> list[str]:
 
 def verify_candidate_schema(db: sqlite3.Connection) -> None:
     """Bounded schema metadata checks, never domain/history scans."""
+    # Preserve the pinned schema-20 migration oracle, but use the current
+    # runtime manifest when the fixture is already on a supported successor.
+    if CURRENT_SCHEMA_VERSION > CANDIDATE_SCHEMA_VERSION and current_schema_version(db) == CURRENT_SCHEMA_VERSION:
+        verify_runtime_schema(db)
+        return
     manifest = json.loads(resources.files("spine.ledger").joinpath(MANIFEST).read_text())
     invariant(
         manifest["manifest_version"] == "spine.recurring-tasks-candidate-schema-manifest.v1"
@@ -67,11 +72,13 @@ def attach_candidate(db: sqlite3.Connection) -> None:
     """Opt into internal write validation on a reopened candidate connection."""
     invariant(isinstance(db, LedgerConnection) and not db.in_transaction, "candidate requires an idle ledger connection")
     assert isinstance(db, LedgerConnection)
-    invariant(
-        db.execute("SELECT MAX(schema_version) FROM ledger_schema").fetchone()[0] == CANDIDATE_SCHEMA_VERSION,
-        "candidate schema version mismatch",
-    )
-    verify_candidate_schema(db)
+    version = current_schema_version(db)
+    if version == CANDIDATE_SCHEMA_VERSION:
+        verify_candidate_schema(db)
+    elif version == CURRENT_SCHEMA_VERSION and version > CANDIDATE_SCHEMA_VERSION:
+        verify_runtime_schema(db)
+    else:
+        invariant(False, "candidate schema version mismatch")
     db.enable_recurring_tasks()
 
 
@@ -91,6 +98,9 @@ def install_candidate(
         disposable_test_ledger and isinstance(db, LedgerConnection) and not db.in_transaction,
         "recurring-task candidate requires an idle disposable test ledger",
     )
+    if current_schema_version(db) == CURRENT_SCHEMA_VERSION and CURRENT_SCHEMA_VERSION > CANDIDATE_SCHEMA_VERSION:
+        attach_candidate(db)
+        return
     install_recurring_task_storage(db, applied_at_utc=applied_at_utc, fault=fault)
 
 

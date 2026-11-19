@@ -28,9 +28,10 @@ def connect(path: str | Path = ":memory:", *, busy_timeout_ms: int = DEFAULT_BUS
         connection.enable_facets()
     if connection.execute("SELECT 1 FROM sqlite_schema WHERE name='notification_policy_presentations' AND type='table'").fetchone():
         connection.enable_renderings()
-    if (connection.execute("SELECT 1 FROM sqlite_schema WHERE name='ledger_schema' AND type='table'").fetchone()
-            and connection.execute("SELECT MAX(schema_version) FROM ledger_schema").fetchone()[0] == 20):
-        connection.enable_recurring_tasks()
+    if connection.execute("SELECT 1 FROM sqlite_schema WHERE name='ledger_schema' AND type='table'").fetchone():
+        version = connection.execute("SELECT MAX(schema_version) FROM ledger_schema").fetchone()[0]
+        if version in range(20, IMPLEMENTED_LEDGER_SCHEMA_VERSION + 1):
+            connection.enable_recurring_tasks()
     return connection
 
 
@@ -114,6 +115,10 @@ def initialize_schema(connection: sqlite3.Connection) -> None:
         from spine.ledger.recurring_task_migration import install_recurring_task_storage
 
         install_recurring_task_storage(connection, applied_at_utc="1970-01-01T00:00:00Z")
+    if IMPLEMENTED_LEDGER_SCHEMA_VERSION >= 21:
+        from spine.ledger.rendering_disclosure_migration import install_attached_field_disclosures
+
+        install_attached_field_disclosures(connection, applied_at_utc="1970-01-01T00:00:00Z")
 
 
 def _is_file_backed_database(database: str) -> bool:

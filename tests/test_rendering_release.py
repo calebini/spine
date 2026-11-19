@@ -165,7 +165,7 @@ class RenderingReleaseTests(unittest.TestCase):
         )
 
     def test_public_cli_readback_compact_and_catalog_dry_run(self):
-        event, _ = self.h.event()
+        event, grant = self.h.event()
         self.h.prepare(self.h.message(self.h.work(event, start=True)))
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "ledger.sqlite"
@@ -190,6 +190,25 @@ class RenderingReleaseTests(unittest.TestCase):
             self.assertIsNone(
                 check.execute("SELECT 1 FROM notification_rendering_definitions WHERE definition_key='cli-preview'").fetchone()
             )
+            scope = grant["scope"].copy()
+            del scope["permitted_location_ids"]
+            scope["location_authority"] = "attached_field"
+            command = "notification_rendering_disclosure.provision"
+            contract = "spine.notification-rendering-disclosures.v2"
+            request = self.h.request(command, contract_version=contract, scope=scope)
+            code, dry_run = self.cli(path, command, request, "--dry-run")
+            self.assertEqual(code, 0, dry_run)
+            self.assertTrue(dry_run["dry_run"])
+            code, provisioned = self.cli(path, command, request)
+            self.assertEqual(code, 0, provisioned)
+            self.assertEqual(provisioned["record"], dry_run["record"])
+            self.assertFalse(provisioned["replayed"])
+            code, shown = self.cli(path, "notification_rendering_disclosure.show", {
+                "contract_version": contract,
+                "disclosure_authorization_id": provisioned["record"]["disclosure_authorization_id"],
+            })
+            self.assertEqual(code, 0, shown)
+            self.assertEqual(shown["record"], provisioned["record"])
             with patch.dict("os.environ", {"SPINE_RENDERING_CURSOR_CONFIG": ""}):
                 code, error = self.cli(
                     path,
@@ -200,12 +219,12 @@ class RenderingReleaseTests(unittest.TestCase):
             self.assertEqual(error["error"]["field"], "cursor_config")
 
     def test_registry_and_bounded_preflight_have_no_domain_scan(self):
-        self.assertEqual(__version__, "0.12.0")
+        self.assertEqual(__version__, "0.13.0")
         self.assertIn("spine.notification-rendering-integration.v1", IMPLEMENTED_CONTRACT_VERSIONS)
         traced = []
         self.h.db.set_trace_callback(traced.append)
         try:
-            self.assertEqual(verify_runtime_schema(self.h.db).schema_version, 20)
+            self.assertEqual(verify_runtime_schema(self.h.db).schema_version, 21)
         finally:
             self.h.db.set_trace_callback(None)
         sql = " ".join(traced).lower()
@@ -219,12 +238,52 @@ class RenderingReleaseTests(unittest.TestCase):
         self.show(event)
         self.assertEqual(before, self.h.db.total_changes)
 
+    def test_attached_field_migration_preserves_populated_schema_twenty_and_guard(self):
+        from spine.ledger import LocationInput
+        from spine.ledger.rendering_disclosure_migration import install_attached_field_disclosures
+        from spine.ledger.supporting import insert_location
+
+        h = delivery.RenderingDeliveryTests()
+        with patch("spine.ledger.sqlite.IMPLEMENTED_LEDGER_SCHEMA_VERSION", 20), \
+             patch("spine.commands.core.IMPLEMENTED_LEDGER_SCHEMA_VERSION", 20):
+            h.setUp()
+            self.addCleanup(h.tearDown)
+            event, _ = h.event(selected=False)
+            with h.db.atomic_command():
+                insert_location(h.db, location=LocationInput(label="Pearson", kind="place"),
+                                location_id="airport", default_created_at_utc=NOW)
+            h.facet(event, {"flight": "AC872", "airport": "airport"})
+            grant = h.configure_fields(event, ["airport"], permitted=["airport"])
+            message = h.message(h.work(event, start=True))
+            self.assertTrue(message.body_text.endswith(" · Airport: Pearson"))
+            h.prepare(message)
+        before = all_rows(h.db)
+        for stage in ("ddl", "verified"):
+            def fault(current, *, stage=stage):
+                if current == stage:
+                    raise RuntimeError(stage)
+
+            with self.assertRaisesRegex(RuntimeError, stage):
+                install_attached_field_disclosures(h.db, applied_at_utc=NOW, fault=fault)
+            self.assertEqual(all_rows(h.db), before)
+            verify_runtime_schema(h.db, expected_version=20)
+            self.assertEqual(h.db.execute("PRAGMA foreign_keys").fetchone()[0], 1)
+        result = migrate_schema(h.db)
+        self.assertEqual(result.applied_versions, (21,))
+        self.assertEqual(verify_schema(h.db).schema_version, 21)
+        after = all_rows(h.db)
+        self.assertEqual({k: rows for k, rows in after.items() if k != "ledger_schema"},
+                         {k: rows for k, rows in before.items() if k != "ledger_schema"})
+        tracked = h.db.execute("SELECT name FROM sqlite_temp_schema WHERE tbl_name='notification_rendering_disclosures'").fetchall()
+        self.assertEqual(len(tracked), 2)
+        self.assertEqual(h.revoke(grant)["record"]["status"], "revoked")
+
     def test_populated_migration_faults_and_backup_restore(self):
         for stage in ("preflight", "ddl", "backfill", "verified", "activation", None):
             with self.subTest(stage=stage):
                 h = operations.ScheduleOperationsCommandTests()
                 with patch("spine.ledger.rendering_migration.install_rendering_storage"), \
-                     patch("spine.ledger.recurring_task_migration.install_recurring_task_storage"):
+                     patch("spine.ledger.sqlite.IMPLEMENTED_LEDGER_SCHEMA_VERSION", 19):
                     h.setUp()
                 try:
                     with patch("spine.commands.core.IMPLEMENTED_LEDGER_SCHEMA_VERSION", 18):
@@ -251,8 +310,8 @@ class RenderingReleaseTests(unittest.TestCase):
                             )
                             self.assertEqual(h.connection.execute("PRAGMA foreign_keys").fetchone()[0], 1)
                         else:
-                            self.assertEqual(migrate_schema(h.connection).applied_versions, (19, 20))
-                            self.assertEqual(verify_schema(h.connection).schema_version, 20)
+                            self.assertEqual(migrate_schema(h.connection).applied_versions, (19, 20, 21))
+                            self.assertEqual(verify_schema(h.connection).schema_version, 21)
                             for table, rows in before.items():
                                 if table != "ledger_schema":
                                     self.assertEqual(rows, all_rows(h.connection)[table], table)

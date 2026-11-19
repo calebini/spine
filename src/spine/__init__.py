@@ -2,9 +2,9 @@
 
 __all__ = ["IMPLEMENTED_CONTRACT_VERSIONS", "IMPLEMENTED_LEDGER_SCHEMA_VERSION", "__version__"]
 
-__version__ = "0.12.0"
+__version__ = "0.13.0"
 
-IMPLEMENTED_LEDGER_SCHEMA_VERSION = 20
+IMPLEMENTED_LEDGER_SCHEMA_VERSION = 21
 IMPLEMENTED_CONTRACT_VERSIONS = frozenset(
     {
         "spine.recurring-related-tasks.v1",
@@ -31,6 +31,7 @@ IMPLEMENTED_CONTRACT_VERSIONS = frozenset(
         "spine.timezone-compatibility.v1",
         "spine.notification-rendering-definitions.v1",
         "spine.notification-rendering-disclosures.v1",
+        "spine.notification-rendering-disclosures.v2",
         "spine.notification-rendering-details-evidence.v1",
         "spine.notification-rendering-presentation.v1",
         "spine.notification-rendering-cursor.v1",

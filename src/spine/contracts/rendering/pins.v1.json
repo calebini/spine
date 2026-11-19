@@ -2,6 +2,7 @@
   "contract_version": "spine.local-rendering-package-pins.v1",
   "files": {
     "notification-rendering-definition-contract-registry.v1.json": "7c02327d44389ef1ddec32194eafddede02629dec9fb4bb2255706e1e9a93103",
+    "notification-rendering-disclosure-contract-registry.v2.json": "d81a64d7b987c09a0fd1d9ffca3966e63b4f80f04a32c2826f40c6eac5c34148",
     "notification-rendering-integration-contract-registry.v1.json": "a6eecac5aeb16caa9e88a51f717812626ba9175dc586ae8d65ddec9ec99d624c",
     "notification-rendering-integration.v1.json": "a7bd15a05ccb71b94fdaed4e0d8689423ee73d8ea70a4d28a3a064747d545a82",
     "schemas/notification-authoring-v2.schema.json": "0fb444d688a27a825720bde7a68d2dc6fed1ca9d32da1b77c19c1f5439864782",
@@ -18,6 +19,7 @@
     "schemas/notification-rendering-definition-evidence.schema.json": "f444e19a5ee8b4fcf04b1ba87b2bcaa5f9e2e5ff71574c342af453c186c22a0f",
     "schemas/notification-rendering-definition-responses.schema.json": "df4352d013699072b0d37ea38299cae613e7ef2123690523a72d23f815d9f4af",
     "schemas/notification-rendering-definition-types.schema.json": "3b6ea94ce86bbb06f45c63516700235edba43cd0800ed4be05261fc774848344",
+    "schemas/notification-rendering-disclosures-v2.schema.json": "88129f88481f1461b30db680302eddcb01350a9bca819f1aed2d550c43a80e8e",
     "schemas/notification-rendering-integration-failure.schema.json": "25a887ebb1569d299ede8353fec2c0752cdccca92dc29e615290d6387e68cc8e",
     "schemas/notification-rendering-integration-types.schema.json": "5740b6f3e92cdac2f48daf4f85ea79b37803345dfb54a705f5fd8c37ff320aa6",
     "schemas/notification-rendering-v2.schema.json": "8e728a66d33714d93cddac1fa5cb9c07391ef786a6fcb47d2524866f50e853cc",

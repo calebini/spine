@@ -51,8 +51,8 @@ class ReleaseMigrationTests(unittest.TestCase):
         self.assertEqual((state(self.db), self.db.total_changes), before)
 
     def test_normal_migration_activates_twenty_and_old_runtime_refuses_it(self):
-        self.assertEqual(IMPLEMENTED_LEDGER_SCHEMA_VERSION, 20)
-        self.assertEqual(migrate_schema(self.db).after_version, 20)
+        self.assertEqual(IMPLEMENTED_LEDGER_SCHEMA_VERSION, 21)
+        self.assertEqual(migrate_schema(self.db).after_version, 21)
         with patch("spine.ledger.migrate.CURRENT_SCHEMA_VERSION", 19), \
              self.assertRaisesRegex(SpineValidationError, "ledger_schema_unsupported"):
             migrate_schema(self.db)

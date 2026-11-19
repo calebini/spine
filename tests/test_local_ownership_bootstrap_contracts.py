@@ -226,7 +226,7 @@ class LocalOwnershipBootstrapContractTests(unittest.TestCase):
                              command_id=request["command_id"], row_role=role, request_path=path))
 
     def test_successors_are_not_runtime_or_frozen_web_activation(self):
-        self.assertEqual(IMPLEMENTED_LEDGER_SCHEMA_VERSION, 20)
+        self.assertEqual(IMPLEMENTED_LEDGER_SCHEMA_VERSION, 21)
         self.assertIn("spine.ownership-access-state.v1", IMPLEMENTED_CONTRACT_VERSIONS)
         self.assertIn("spine.trusted-web-provisioning.v3", IMPLEMENTED_CONTRACT_VERSIONS)
         self.assertNotIn("ownership.bootstrap", COMMAND_RUNTIME_CONTRACT_REGISTRY)

@@ -1222,12 +1222,13 @@ def _candidate_scheduler(context: CommandContext) -> bool:
 def _runtime_check(connection: sqlite3.Connection, required: set[str], *, candidate_scheduler: bool = False) -> None:
     from spine.ledger.migrate import current_schema_version
 
+    actual = current_schema_version(connection)
     version = IMPLEMENTED_LEDGER_SCHEMA_VERSION
-    if candidate_scheduler:
+    if candidate_scheduler and actual != version:
         from spine.ledger.recurring_task_migration import CANDIDATE_SCHEMA_VERSION
 
         version = CANDIDATE_SCHEMA_VERSION
-    if current_schema_version(connection) != version:
+    if actual != version:
         raise SpineValidationError(
             "environment_failure:ledger_schema_version", f"binding commands require schema {version}"
         )

@@ -1,6 +1,6 @@
 # Spine Backlog
 
-Last updated: 2026-11-13
+Last updated: 2026-11-19
 
 This is the single work queue for Spine development. The
 [implementation plan](IMPLEMENTATION_PLAN.md) explains roadmap direction and delivery
@@ -4732,6 +4732,24 @@ never authorizes deletion of canonical evidence.
 **Source:** [Storage lifecycle horizon](IMPLEMENTATION_PLAN.md#future-horizon-bounded-ledger-storage-lifecycle).
 
 ## Completed
+
+### SPINE-103 — Approve attached location fields without an airport allowlist
+
+**Status:** Done locally (2026-11-19), runtime 0.13.0/schema 21; not deployed.
+**Scope:** Exact item-owner, field, definition, use and destination approval with
+the same trust in attached locations as the ordinary renderer. Preserve explicit
+v1 grants and stored attempt history; allow shared profile/definition catalogs
+without transferring item ownership. No implicit pack authorization.
+**Contract:** [Attached-field disclosures](../specs/notification-rendering-integration.md#attached-field-disclosures).
+**Evidence:** [Delivery regressions](../tests/test_rendering_delivery.py) exercise
+shared default application, new airports, label-only output, scope denials,
+missing detail, revocation, replay and versioned readback. [Release checks](../tests/test_rendering_release.py)
+cover CLI and atomic upgrade of a populated schema-20 ledger with exact-location
+grants and attempts, including fault rollback. Focused scheduler, package/wheel,
+contract and migration verification passed. The broad regression matrix has seven
+historical byte-witness fixture mismatches in this environment; an archive of
+unchanged `3e65ef0` reproduced the exact observed witness hashes. The historical
+fixtures were left unchanged. Verification used disposable ledgers only.
 
 ### SPINE-074 — Implement opt-in enriched reminder delivery offline
 

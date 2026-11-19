@@ -31,7 +31,7 @@ class RecurringPackageTests(unittest.TestCase):
         self.assertEqual(loaded.descriptor, json.loads((ROOT / "contracts" / package.DESCRIPTOR).read_bytes()))
         self.assertTrue(set(loaded.descriptor["required_existing_contract_versions"]) <= IMPLEMENTED_CONTRACT_VERSIONS)
         self.assertTrue(set(loaded.descriptor["commands"]) <= set(COMMAND_RUNTIME_CONTRACT_REGISTRY))
-        self.assertEqual(IMPLEMENTED_LEDGER_SCHEMA_VERSION, 20)
+        self.assertEqual(IMPLEMENTED_LEDGER_SCHEMA_VERSION, 21)
 
     def test_missing_or_changed_each_required_asset_fails_closed(self):
         pins = json.loads(DIRECTORY.joinpath("pins.v1.json").read_bytes())

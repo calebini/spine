@@ -95,7 +95,8 @@ def resolve(db, selection, *, policy, item_type, origin, permissions=None, budge
     if owner is None:
         codec.fail("rendering_disclosure_unavailable", "presentation", "explicit item owner adoption is required before detail selection")
     own = root_owner(owner)
-    if root_owner(root) != own:
+    same_owner = root_owner(root) == own
+    if permissions and not same_owner:
         codec.fail("rendering_disclosure_scope_mismatch", "presentation")
     if permissions and any(
         s["projection"] == "location_label" and s["selection_key"] in selected["effective_selection_keys"]
@@ -128,8 +129,10 @@ def resolve(db, selection, *, policy, item_type, origin, permissions=None, budge
         if budget:
             budget.resolve("notification_rendering_disclosures", identity)
         grant = load_disclosure(db, identity)
+        attached_field = grant["scope_contract_version"] == codec.ATTACHED_FIELD_DISCLOSURES
         if (
             grant["status"] == "active"
+            and (permissions is None if attached_field else same_owner)
             and all(grant["scope"][k] == v for k, v in expected.items())
             and set(selected["effective_selection_keys"]) <= set(grant["scope"]["approved_selection_keys"])
         ):

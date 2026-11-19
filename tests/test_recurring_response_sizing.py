@@ -14,6 +14,7 @@ from spine.commands import recurring_tasks as commands
 from spine.core.canonical_json import canonical_json_bytes
 from spine.services.recurring_task_reconcile import reconcile
 from tests import test_recurring_task_reconcile as helpers
+from tests.schema19_witness_support import historical_schema
 
 FIXTURE = Path(__file__).parent / "fixtures/internal_operations/rf1_response_sizing_witness.json"
 
@@ -99,11 +100,12 @@ class RecurringResponseSizingTests(unittest.TestCase):
     def test_complete_envelope_trials_replay_and_ledger_match_prechange_witness(self):
         # Freeze RF1's catalog-only enrollment. The live producer queues a
         # marker which a byte-limited page can now discharge as progress.
-        with patch.object(commands, "mark", side_effect=lambda db, rule_id, reason: commands.advance_catalog(db)):
+        with historical_schema(20), patch.object(commands, "mark", side_effect=lambda db, rule_id, reason: commands.advance_catalog(db)):
             self.assertEqual(collect_baseline(), json.loads(FIXTURE.read_text())["cases"])
 
     def test_live_enrollment_retains_byte_page_units_and_counts_coverage_progress(self):
-        current = collect_baseline()
+        with historical_schema(20):
+            current = collect_baseline()
         historical = json.loads(FIXTURE.read_text())["cases"]
         for kind in ("changed", "noop"):
             self.assertEqual(current[kind], historical[kind])

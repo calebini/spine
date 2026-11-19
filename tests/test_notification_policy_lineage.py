@@ -37,7 +37,7 @@ class NotificationPolicyLineageTests(unittest.TestCase):
             "spine.ledger.facet_access_migration.install_facet_access"
         ), patch("spine.ledger.facet_location_migration.install_facet_location_freeze"), patch(
             "spine.ledger.rendering_migration.install_rendering_storage"
-        ), patch("spine.ledger.recurring_task_migration.install_recurring_task_storage"):
+        ), patch("spine.ledger.sqlite.IMPLEMENTED_LEDGER_SCHEMA_VERSION", 19):
             initialize_schema(self.db)
         def local_anchor(db, anchor_id):
             db.execute(
@@ -89,8 +89,8 @@ class NotificationPolicyLineageTests(unittest.TestCase):
                 target_scheduled_fact=opportunity["target_scheduled_fact"], target_at_utc=opportunity["target_at_utc"],
                 delivery_target_id="test-route", eligible_at_utc=opportunity["eligible_at_utc"], created_at_utc=EVALUATED)
         before = all_rows(self.db)
-        self.assertEqual(migrate_schema(self.db).applied_versions, (16, 17, 18, 19, 20))
-        self.assertEqual(verify_schema(self.db).schema_version, 20)
+        self.assertEqual(migrate_schema(self.db).applied_versions, (16, 17, 18, 19, 20, 21))
+        self.assertEqual(verify_schema(self.db).schema_version, 21)
         for table, rows in before.items():
             if table != "ledger_schema":
                 self.assertEqual(all_rows(self.db)[table], rows, table)

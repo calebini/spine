@@ -17,6 +17,7 @@ SOURCE_ONLY_SCHEMAS = frozenset({
     "notification-rendering-definition-evidence.schema.json",
     "notification-rendering-definition-vectors.schema.json",
     "notification-rendering-definition-obligations.schema.json",
+    "notification-rendering-disclosures-v2.schema.json",
     "notification-rendering-integration-types.schema.json",
     "notification-profile-types-v2.schema.json",
     "notification-profile-commands-v2.schema.json",
