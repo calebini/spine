@@ -191,8 +191,10 @@ presence of a profile in the enclosing schedule request:
 | Suppressed profile template | No resulting policy or disclosure application |
 
 In both authorization branches, the actual selected definition, effective fields,
-owner, destination and permitted location identities must independently match
-Section 8.1. Being a profile replacement does not authorize a different definition
+owner and destination must independently match Section 8.1. Location-label
+selections apply the grant's version-specific rule in Sections 6.1 and 8.1:
+an exact ID allowlist for v1, the actual attached field value for v2.
+Being a profile replacement does not authorize a different definition
 or additional fields. A custom addition cannot claim profile origin by reusing a
 template key, copying its schedule or naming the same rendering definition. Record
 origin and exact source provenance at authoring and preserve them on copy-forward;
@@ -260,7 +262,7 @@ selection without revealing which condition exposed a private resource. An unusa
 label follows the optional-text omission rules. Storage corruption and operational
 failure are not converted into absence. No raw location ID is printed as fallback.
 
-Record the permitted location ID and normalized label actually used in protected
+Record the actual location ID and normalized label used in protected
 attempt evidence, alongside the facet's item/schema/binding identities. Because the
 canonical location row is immutable, do not invent a location revision identifier.
 The already implemented primary-location rendering path stays unchanged.
@@ -469,8 +471,10 @@ If terminal is absent, only flight number appears. If the facet was upgraded to 
 different schema revision, neither field is borrowed from history; ordinary prose
 remains until an explicit compatible selection is applied. Publishing a new catalog
 revision changes none of these existing reminders. Reference-valued origin/destination
-fields may select the referenced location's label under Section 6.1 and the approved
-location set, without replacing primary location.
+fields may select the referenced location's label under Sections 6.1 and 8.1, without
+replacing primary location. A v1 grant requires the referenced ID on the allowlist;
+a v2 grant covers the location attached to that exact approved field for the
+matching destination on the current item version.
 
 ## 11. Verification families required before implementation acceptance
 
@@ -549,7 +553,8 @@ tests and wheel checks linked from SPINE-053.
 ### 13.1 Versions, normalization and identities
 
 Implemented local versions are `spine.notification-rendering-definitions.v1` (catalog),
-`spine.notification-rendering-disclosures.v1` (authorization management),
+`spine.notification-rendering-disclosures.v1` (exact-ID grants),
+`spine.notification-rendering-disclosures.v2` (attached-field grants),
 `spine.notification-rendering-presentation.v1` (authoring/application fragments) and
 `spine.notification-rendering-details-evidence.v1` (attempt evidence extension).
 The last two are fragments within the integration's versioned successor envelopes,
@@ -561,9 +566,9 @@ Unicode normalization. Reject invalid scalar Unicode. IDs/keys are exact strings
 not whitespace-trimmed or case-folded. Normalize display names, non-null descriptions
 and selector labels using ordinary renderer text normalization before validation and
 hashing. Empty normalized strings and forbidden control characters are invalid.
-Sort compatible item types, approved/effective selection keys and permitted location
-IDs lexicographically; reject duplicates rather than silently collapsing them. Preserve
-selection array order. Projection/type equality, unique selection keys and unique
+Sort compatible item types, approved/effective selection keys and, for v1 grants,
+permitted location IDs lexicographically. Reject duplicates rather than silently
+collapsing them. Preserve selection array order. Projection/type equality, unique selection keys and unique
 `(facet_key, facet_schema_revision_id, field_key)` tuples are semantic checks beyond
 JSON Schema. Date validity and canonical integer encoding remain facet authority.
 
@@ -572,9 +577,11 @@ content preimage is exactly `{contract_version, canonical_json_version, revision
 using the catalog version and normalized complete revision. Scope preimage is exactly
 `{contract_version, canonical_json_version, scope}` using the disclosure version and
 normalized complete immutable scope. Profile revision is absent from scope; it remains
-in the application origin. Empty permitted-location arrays are explicit and retained.
-Each disclosed location must be in that list. Extra fields, wildcards and omitted
-use-scope branches are invalid.
+in the application origin. A v1 scope retains its explicit permitted-location array,
+even when empty, and each disclosed location must be in that list. A v2 scope instead
+records `location_authority: "attached_field"` and has no permitted-location array;
+Sections 6.1 and 8.1 govern the location actually attached to the selected field.
+Extra fields, wildcards and omitted use-scope branches are invalid.
 
 New row IDs use the existing `spine.command-id.v1` derivation, not content IDs. These
 are the exact row roles, prefixes (identical to role), and request paths:
@@ -625,6 +632,10 @@ requires exact immutable `expected_scope_hash`; repeating the same reason is
 original creation/publish/retirement/revocation provenance. Revocation does not publish
 a replacement scope. Provision requires an active, accessible definition and validates
 all fields, owner/use/destination and allowed references before storing the grant.
+Fresh show and revoke return `referenced_row_not_found` for an absent grant ID
+or an ID belonging to another disclosure contract version. A stored record in
+the requested version that fails invariant validation is an environment failure.
+Compatible revoke replay is resolved from its receipt before any fresh grant lookup.
 
 Fresh validation precedence is: bounded decoding and closed shape/version; admission;
 receipt replay comparison; target/dependency existence and permission; expected revision
@@ -632,9 +643,12 @@ or scope hash; lifecycle; selector/type/ownership/scope semantics; normalized no
 comparison; atomic persistence. Missing or inaccessible protected resources do not
 leak their existence. Invalid definition dependencies/types use
 `rendering_definition_invalid`; retired fresh use uses `rendering_definition_retired`.
-No matching authorization uses `rendering_disclosure_unavailable`, multiple matching
-records use `rendering_disclosure_ambiguous`, and an explicit nonmatching scope uses
-`rendering_disclosure_scope_mismatch`. At attempt start these expected disclosure
+No active matching authorization under unique resolution uses
+`rendering_disclosure_unavailable`; multiple matches use
+`rendering_disclosure_ambiguous`. Exact authoring uses
+`rendering_disclosure_unavailable` for an absent ID or an otherwise matching
+revoked grant, and `rendering_disclosure_scope_mismatch` for a nonmatching scope
+regardless of grant lifecycle. At attempt start these expected disclosure
 failures instead omit optional detail after ordinary admission, never author a grant.
 
 Show may address an exact historical definition revision belonging to the named root;
@@ -665,7 +679,9 @@ Origin is assembled by the composition service, not trusted from a client assert
 
 For disclosure matching compare item owner, definition reference, origin-derived use
 scope and full destination structurally. Effective fields must be a subset of approved
-fields; actual location values must be in the permitted set individually. All fields
+fields. At attempt start v1 requires each actual location ID on its allowlist; v2
+authorizes only the location attached to the exact selected field on the current
+item version, without a per-ID check (Sections 6.1 and 8.1). All fields
 on destination are exact: recipient kind/ID, target ID, channel, adapter, destination
 source and target reference. Transport membership and display labels are not identity.
 Retained policies may use retired definitions; new applications may not. Recheck grant
@@ -694,8 +710,9 @@ Limits in the registry are hard rejection bounds on normalized canonical UTF-8 b
 where named bytes, Unicode scalars where named scalars. Check raw request bytes before
 decoding too. At most eight selected sources and eight unique location primary-key
 lookups may be evaluated; no discovery scans. At most 64 permitted location IDs may
-appear per grant. Evidence-extension overflow is a persistence/budget failure, not an
-ordinary fallback. These bounds do not substitute for physical query/index proofs.
+appear in a v1 grant; v2 has no such list. Evidence-extension overflow is a
+persistence/budget failure, not an ordinary fallback. These bounds do not substitute
+for physical query/index proofs.
 
 ### 13.4 Verification boundary
 

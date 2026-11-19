@@ -521,14 +521,17 @@ names in Section 5. Add reverse-FK indexes for all reference tables and receipt 
 
 `match_hash` hashes exactly `{derivation_version: spine.rendering-disclosure-match.v1,
 canonical_json_version, item_owner, definition, use_scope, destination}`. These fields
-come from the normalized scope; fields and permitted locations are intentionally
-excluded. Index disclosures `(match_hash,status,disclosure_authorization_id)`. Unique
+come from the normalized scope; approved fields and version-specific location
+authority are intentionally excluded. Index disclosures
+`(match_hash,status,disclosure_authorization_id)`. Unique
 resolution inspects at most 101 active candidates; if more than 100 exist, fail capacity,
 even if an early candidate matched. Under the cap, compare full structural scope,
 effective-key subset and required authority; zero/multiple matching grants retain
-existing unavailable/ambiguous errors. Empty facet values do not constrain the allowed
-location set at authoring; each actual location is checked at attempt time. Exact-ID
-selection uses a PK lookup and the same semantic checks. Never globally scan grants.
+existing unavailable/ambiguous errors. Facet values do not constrain grant selection
+at authoring; apply the v1 ID allowlist or the v2 attached-field rule only when resolving
+location detail at attempt time. Exact-ID selection uses a PK lookup and the same
+scope checks. An absent ID or otherwise matching revoked grant is unavailable; an
+existing nonmatching scope is a scope mismatch. Never globally scan grants.
 
 List uses binary root/grant keyset order, not OFFSET. Filter owner/lifecycle and
 authority before page size; no totals. Fetch at most limit+1 authorized candidates.
@@ -775,8 +778,11 @@ these pure decisions, not database permission resolution or a running cursor ser
 replaces `permitted_location_ids` with `location_authority: "attached_field"`;
 all other scope identities retain their exact v1 meanings. V1 commands see only v1
 grants; v2 commands see only v2 grants. The v2 list binds the requested contract in
-its existing protected cursor. A wrong-version identity is unavailable, not projected
-lossily. Both versions participate in existing exact/unique policy resolution;
+its existing protected cursor. Fresh show and revoke treat missing or wrong-version
+identities as `referenced_row_not_found`, not lossily projected records or corrupt
+storage. A compatible revoke replay still returns its receipt before fresh lookup.
+V2 records use `revoked: null` when active and the existing provenance object when
+revoked. Both versions participate in existing exact/unique policy resolution;
 matching both is ambiguous, never an implicit preference or upgrade.
 
 V2 permits a separately owned catalog only for profile-scoped use where the pinned

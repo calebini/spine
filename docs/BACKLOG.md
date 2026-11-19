@@ -4750,6 +4750,14 @@ contract and migration verification passed. The broad regression matrix has seve
 historical byte-witness fixture mismatches in this environment; an archive of
 unchanged `3e65ef0` reproduced the exact observed witness hashes. The historical
 fixtures were left unchanged. Verification used disposable ledgers only.
+**Audit follow-up (2026-11-19):** Applied the four confirmed findings from
+`attached-field-disclosure-release-audit-001` locally: version-specific
+location rules, fresh lookup and revoked-grant error consistency, and the
+v2 revocation record invariant. The shared-schema digest finding was not
+reproduced; the audited artifacts and digest were left intact. The focused
+`attached-field-disclosure-release-audit-002` recheck passed with boundary
+preserved and no findings. The corrections are packaged as 0.13.1 on schema 21;
+existing grants and historical evidence require no additional migration.
 
 ### SPINE-074 — Implement opt-in enriched reminder delivery offline
 

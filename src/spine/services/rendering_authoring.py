@@ -109,7 +109,8 @@ def resolve(db, selection, *, policy, item_type, origin, permissions=None, budge
         for source in revision["revision"]["selections"]:
             permissions.schema(source["facet_schema_revision_id"], use=True)
     authorization = selected["authorization"]
-    if authorization["resolution"] == "exact":
+    exact = authorization["resolution"] == "exact"
+    if exact:
         ids = [authorization["disclosure_authorization_id"]]
         if db.execute("SELECT 1 FROM notification_rendering_disclosures WHERE disclosure_authorization_id=?", (ids[0],)).fetchone() is None:
             codec.fail("rendering_disclosure_unavailable", "presentation.authorization")
@@ -131,15 +132,17 @@ def resolve(db, selection, *, policy, item_type, origin, permissions=None, budge
         grant = load_disclosure(db, identity)
         attached_field = grant["scope_contract_version"] == codec.ATTACHED_FIELD_DISCLOSURES
         if (
-            grant["status"] == "active"
-            and (permissions is None if attached_field else same_owner)
+            (permissions is None if attached_field else same_owner)
             and all(grant["scope"][k] == v for k, v in expected.items())
             and set(selected["effective_selection_keys"]) <= set(grant["scope"]["approved_selection_keys"])
         ):
-            matches.append(grant)
+            if grant["status"] == "active":
+                matches.append(grant)
+            elif exact:
+                codec.fail("rendering_disclosure_unavailable", "presentation.authorization")
     if not matches:
         codec.fail(
-            "rendering_disclosure_scope_mismatch" if authorization["resolution"] == "exact" else "rendering_disclosure_unavailable",
+            "rendering_disclosure_scope_mismatch" if exact else "rendering_disclosure_unavailable",
             "presentation.authorization",
         )
     if len(matches) != 1:

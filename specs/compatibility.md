@@ -397,3 +397,9 @@ field/route approval is a separate operator action. Tooling with an exact releas
 or schema pin must qualify the new runtime before using it; do not substitute a
 different Spine artifact or loosen the pin. The frozen web surfaces and Tickerd
 compatibility boundary are unchanged.
+
+Spine 0.13.1 retains schema 21 and the v1/v2 selectors. It corrects error
+classification for missing, wrong-version and revoked grants and rejects
+contradictory v2 revocation records. Existing grants, stored attempts and pack
+content need no conversion. Consumers that pin exact release or schema bytes
+must qualify these updated artifacts before using them.

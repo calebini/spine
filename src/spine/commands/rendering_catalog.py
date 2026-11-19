@@ -98,6 +98,14 @@ def row(db, table, key, identity, budget):
     return dict(value)
 
 
+def require_disclosure_identity(db, request):
+    if not db.execute(
+        "SELECT 1 FROM notification_rendering_disclosures WHERE disclosure_authorization_id=? AND scope_contract_version=?",
+        (request[DISCLOSURE_ID], request["contract_version"]),
+    ).fetchone():
+        codec.fail("referenced_row_not_found", DISCLOSURE_ID)
+
+
 def provenance(db, receipt_id):
     r = db.execute(
         "SELECT command_id,actor_subject_id,action_timestamp_utc FROM command_receipts WHERE command_receipt_id=?", (receipt_id,)
@@ -374,9 +382,8 @@ def write(command, request, db, budget, permissions):
             effect = "rendering_disclosure_provisioned"
         else:
             identity = request[DISCLOSURE_ID]
+            require_disclosure_identity(db, request)
             grant = load_disclosure(db, identity)
-            if grant["scope_contract_version"] != request["contract_version"]:
-                codec.fail("referenced_row_not_found", DISCLOSURE_ID)
             if permissions:
                 permissions.owner_admin(grant["scope"]["item_owner"])
             if request["expected_scope_hash"] != grant["scope_hash"]:
@@ -442,11 +449,8 @@ def read(command, request, db, budget, permissions, admission, config, now):
     base = {"ok": True, "command": command, "contract_version": request["contract_version"]}
     generation = db.execute("SELECT generation FROM notification_rendering_catalog_state WHERE singleton=1").fetchone()[0]
     if command.endswith(".show"):
-        if not definition and not db.execute(
-            "SELECT 1 FROM notification_rendering_disclosures WHERE disclosure_authorization_id=? AND scope_contract_version=?",
-            (request[identity], request["contract_version"]),
-        ).fetchone():
-            codec.fail("referenced_row_not_found", identity)
+        if not definition:
+            require_disclosure_identity(db, request)
         if permissions:
             if definition:
                 permissions.rendering(request[identity])

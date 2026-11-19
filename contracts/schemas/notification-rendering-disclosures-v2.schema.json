@@ -108,7 +108,28 @@
           ]
         }
       },
-      "additionalProperties": false
+      "additionalProperties": false,
+      "if": {
+        "properties": {
+          "status": {
+            "const": "active"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "revoked": {
+            "type": "null"
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "revoked": {
+            "type": "object"
+          }
+        }
+      }
     },
     "provisionRequest": {
       "type": "object",

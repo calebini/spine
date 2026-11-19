@@ -90,11 +90,15 @@ one pickup, preparation task or follow-up per occurrence, with independent task
 history, follow-source timing and reminders. Public activation and release
 verification are tracked under [SPINE-095](docs/BACKLOG.md#spine-095--r4-recurring-task-activation-and-release-verification).
 
-Spine `0.13.0` is an implemented alpha; its scheduling core is exercised in a staging
+Spine `0.13.1` is an implemented alpha; its scheduling core is exercised in a staging
 agent environment. The current SQLite ledger schema is version `21`. The trusted multi-operator backend is also running in staging on `cortext1`, with
 operator testing through the connected [Kinflow frontend](../kinflow-web-ui/README.md).
 Concrete operator-reported work is tracked in the [backlog](docs/BACKLOG.md);
 this checkout version is not a deployment claim.
+
+Version 0.13.1 clarifies version-specific location rules, aligns disclosure lookup
+and revocation errors, and tightens v2 revocation record validation. It retains
+schema 21, with no migration from 0.13.0 or changes to existing grants.
 
 Version 0.13.0 adds [attached-field disclosure](docs/NOTIFICATION_RENDERING_GUIDE.md#2-record-reusable-scoped-disclosure):
 approve an airport field for a route once, without maintaining an airport allowlist.

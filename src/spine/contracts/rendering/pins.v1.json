@@ -19,7 +19,7 @@
     "schemas/notification-rendering-definition-evidence.schema.json": "f444e19a5ee8b4fcf04b1ba87b2bcaa5f9e2e5ff71574c342af453c186c22a0f",
     "schemas/notification-rendering-definition-responses.schema.json": "df4352d013699072b0d37ea38299cae613e7ef2123690523a72d23f815d9f4af",
     "schemas/notification-rendering-definition-types.schema.json": "3b6ea94ce86bbb06f45c63516700235edba43cd0800ed4be05261fc774848344",
-    "schemas/notification-rendering-disclosures-v2.schema.json": "88129f88481f1461b30db680302eddcb01350a9bca819f1aed2d550c43a80e8e",
+    "schemas/notification-rendering-disclosures-v2.schema.json": "71efa8a1d37cca974b881adb27c88996e956508a5539ac87a68c34f8ade76e32",
     "schemas/notification-rendering-integration-failure.schema.json": "25a887ebb1569d299ede8353fec2c0752cdccca92dc29e615290d6387e68cc8e",
     "schemas/notification-rendering-integration-types.schema.json": "5740b6f3e92cdac2f48daf4f85ea79b37803345dfb54a705f5fd8c37ff320aa6",
     "schemas/notification-rendering-v2.schema.json": "8e728a66d33714d93cddac1fa5cb9c07391ef786a6fcb47d2524866f50e853cc",

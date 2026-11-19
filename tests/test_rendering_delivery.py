@@ -21,7 +21,7 @@ from spine.commands import handle
 from spine.core.errors import SpineValidationError
 from spine.core.notification_details import decode_detailed
 from spine.core.notifications import normalize_notification_policy
-from spine.core.rendering_definitions import ATTACHED_FIELD_DISCLOSURES
+from spine.core.rendering_definitions import ATTACHED_FIELD_DISCLOSURES, DISCLOSURES
 from spine.core.schedule import system_timezone_database_version
 from spine.ledger import connect, get_notification_rendering, get_work_instance
 from spine.ledger.notifications import insert_notification_schedule_policy
@@ -349,6 +349,35 @@ class RenderingDeliveryTests(successor.RenderingSuccessorTests):
         self.prepare(message)
         verify_deep(self.db)
 
+    def test_revoked_matching_grant_is_unavailable_for_fresh_authoring(self):
+        event, _ = self.event(selected=False)
+        grant = self.configure_fields(event, ["airport"], attached=True)
+        revoke = "notification_rendering_disclosure.revoke"
+        self.command(revoke, self.request(
+            revoke, contract_version=ATTACHED_FIELD_DISCLOSURES,
+            disclosure_authorization_id=grant["disclosure_authorization_id"],
+            expected_scope_hash=grant["scope_hash"], reason_code="withdrawn",
+        ))
+        matching = self.selection(grant) | {"effective_selection_keys": ["airport"]}
+        selected = {
+            "exact-revoked": (matching, "rendering_disclosure_unavailable"),
+            "unique-revoked": (
+                matching | {"authorization": {"resolution": "unique_match"}},
+                "rendering_disclosure_unavailable",
+            ),
+            "wrong-revoked-scope": (
+                matching | {"effective_selection_keys": ["airport", "flight"]},
+                "rendering_disclosure_scope_mismatch",
+            ),
+        }
+        before = self.db.total_changes
+        for command_id, (selection, code) in selected.items():
+            with self.subTest(command_id=command_id):
+                result = handle("schedule.update", self.edit(event, selection, command_id), self.context)
+                self.assertFalse(result["ok"], result)
+                self.assertEqual((result["error"]["code"], result["error"]["field"]), (code, "presentation.authorization"))
+        self.assertEqual(self.db.total_changes, before)
+
     def test_attached_field_contract_and_versioned_catalog(self):
         from dataclasses import replace
 
@@ -384,7 +413,7 @@ class RenderingDeliveryTests(successor.RenderingSuccessorTests):
         query = self.request(show, contract_version=v2, disclosure_authorization_id=identity)
         validator("showRequest").validate(query)
         validator("showResponse").validate(self.command(show, query))
-        wrong = query | {"contract_version": "spine.notification-rendering-disclosures.v1"}
+        wrong = query | {"contract_version": DISCLOSURES}
         self.assertEqual(handle(show, wrong, context)["error"]["code"], "referenced_row_not_found")
         list_command = "notification_rendering_disclosure.list"
         query = self.request(list_command, owner=self.scope, status="active", limit="1")
@@ -405,7 +434,40 @@ class RenderingDeliveryTests(successor.RenderingSuccessorTests):
         request = self.request(revoke, contract_version=v2, disclosure_authorization_id=identity,
                                expected_scope_hash=created["record"]["scope_hash"], reason_code="withdrawn")
         validator("revokeRequest").validate(request)
-        validator("revokeResponse").validate(self.command(revoke, request))
+        wrong_targets = (
+            request | {"disclosure_authorization_id": "missing-grant"},
+            request | {"contract_version": DISCLOSURES},
+            request | {"disclosure_authorization_id": old["disclosure_authorization_id"]},
+        )
+        before = self.db.total_changes
+        with patch("spine.commands.rendering_catalog.load_disclosure", side_effect=AssertionError("must not decode wrong target")):
+            for wrong_target in wrong_targets:
+                result = handle(revoke, wrong_target, context)
+                self.assertFalse(result["ok"], result)
+                self.assertEqual(
+                    (result["error"]["code"], result["error"]["field"]), ("referenced_row_not_found", "disclosure_authorization_id"),
+                )
+        self.assertEqual(self.db.total_changes, before)
+        with patch("spine.commands.rendering_catalog.load_disclosure",
+                   side_effect=SpineValidationError("environment_failure:rendering", "corrupt stored disclosure")):
+            corrupt = handle(revoke, request, context)
+        self.assertEqual((corrupt["error"]["code"], corrupt["error"]["field"]), ("environment_failure", "rendering"))
+        self.assertEqual(self.db.total_changes, before)
+        revoked = self.command(revoke, request)
+        validator("revokeResponse").validate(revoked)
+        before = self.db.total_changes
+        with patch(
+            "spine.commands.rendering_catalog.require_disclosure_identity", side_effect=AssertionError("replay must not look up grant"),
+        ):
+            replayed = self.command(revoke, request)
+        self.assertEqual(replayed, revoked | {"changed": False, "replayed": True})
+        self.assertEqual(self.db.total_changes, before)
+        active_record, revoked_record = created["record"], revoked["record"]
+        record_validator = validator("authorizationRecord")
+        record_validator.validate(active_record)
+        record_validator.validate(revoked_record)
+        self.assertFalse(record_validator.is_valid(active_record | {"revoked": revoked_record["revoked"]}))
+        self.assertFalse(record_validator.is_valid(revoked_record | {"revoked": None}))
 
     def test_typed_scalar_order_and_approved_location_label_only(self):
         from spine.ledger import LocationInput
