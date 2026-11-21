@@ -1,6 +1,6 @@
 # Spine Backlog
 
-Last updated: 2026-11-19
+Last updated: 2026-11-21
 
 This is the single work queue for Spine development. The
 [implementation plan](IMPLEMENTATION_PLAN.md) explains roadmap direction and delivery
@@ -4732,6 +4732,23 @@ never authorizes deletion of canonical evidence.
 **Source:** [Storage lifecycle horizon](IMPLEMENTATION_PLAN.md#future-horizon-bounded-ledger-storage-lifecycle).
 
 ## Completed
+
+### SPINE-104 — Preview and capture one staging reminder without delivery
+
+**Status:** Included in Spine 0.14.0 (2026-11-21), schema 21 unchanged; staging
+installation and actual capture are separate, not run. **Scope:** Trusted-local `spine-enrichment-pilot` only:
+private exact-request preview, explicit digest approval and owner signoff,
+once-only no-tools capture on an eligible subject-owned event reminder, and
+local readback. No normal command/web/worker activation, ledger migration,
+canonical writes or delivery change. **Contract and operations:**
+[Trusted-local staging capture pilot](../specs/notification-enrichment-delivery.md#trusted-local-staging-capture-pilot)
+and [operator steps](NOTIFICATION_ENRICHMENT_DELIVERY.md#trusted-local-staging-pilot).
+**Evidence:** [Offline pilot tests](../tests/test_enrichment_pilot.py) use
+disposable ledgers, an independent Impetus worker with mock transport, and
+refusal/replay/isolation checks. The local wheel installs the entrypoint and
+packaged schema without an editable checkout. **Activation gate:** Verify the
+staging ledger and released build; obtain Impetus owner real-source/retention
+signoff and the operator's exact private preview approval before any handoff.
 
 ### SPINE-103 — Approve attached location fields without an airport allowlist
 

@@ -72,6 +72,9 @@ connects explicitly approved event context, pre-reminder research and one ordina
 message with a validated addendum. Missing, failed, stale or late research takes
 ordinary fallback; it cannot create a late second message. This library integration
 is tested offline and disabled by default. See [operations and limits](docs/NOTIFICATION_ENRICHMENT_DELIVERY.md).
+The [trusted-local staging pilot](docs/NOTIFICATION_ENRICHMENT_DELIVERY.md#trusted-local-staging-pilot)
+can prepare a private preview for one reminder and capture an explicitly approved
+result without enabling enriched delivery.
 The earlier [capture-only pilot](specs/contextual-notification-real-capture-pilot.md)
 is retained as superseded design history. Real-data access, providers and actual
 delivery still require explicit configuration and authorization.
@@ -90,11 +93,15 @@ one pickup, preparation task or follow-up per occurrence, with independent task
 history, follow-source timing and reminders. Public activation and release
 verification are tracked under [SPINE-095](docs/BACKLOG.md#spine-095--r4-recurring-task-activation-and-release-verification).
 
-Spine `0.13.1` is an implemented alpha; its scheduling core is exercised in a staging
+Spine `0.14.0` is an implemented alpha; its scheduling core is exercised in a staging
 agent environment. The current SQLite ledger schema is version `21`. The trusted multi-operator backend is also running in staging on `cortext1`, with
 operator testing through the connected [Kinflow frontend](../kinflow-web-ui/README.md).
 Concrete operator-reported work is tracked in the [backlog](docs/BACKLOG.md);
 this checkout version is not a deployment claim.
+
+Version 0.14.0 adds the [trusted-local staging enrichment pilot](docs/NOTIFICATION_ENRICHMENT_DELIVERY.md#trusted-local-staging-pilot).
+It does not enable enriched delivery, change existing command contracts, or add a
+ledger migration. The release continues to require schema 21.
 
 Version 0.13.1 clarifies version-specific location rules, aligns disclosure lookup
 and revocation errors, and tightens v2 revocation record validation. It retains

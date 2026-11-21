@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "spine:notification-enrichment-pilot:v1",
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "contract": {"const": "spine.notification-enrichment-pilot.v1"},
+    "ref": {"type": "string", "minLength": 1},
+    "preview": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "contract", "request", "request_sha256", "work_instance_id", "actor_subject_id",
+        "retention_reference", "approved_context_sha256", "source_fingerprint", "binding",
+        "state_dir", "impetus_python", "impetus_state"
+      ],
+      "properties": {
+        "contract": {"$ref": "#/$defs/contract"},
+        "request": {"$ref": "https://cortext.local/impetus/contextual-notification-openai-v1.schema.json#/$defs/request"},
+        "request_sha256": {"$ref": "#/$defs/sha256"},
+        "work_instance_id": {"$ref": "#/$defs/ref"},
+        "actor_subject_id": {"$ref": "#/$defs/ref"},
+        "retention_reference": {"$ref": "#/$defs/ref"},
+        "approved_context_sha256": {"$ref": "#/$defs/sha256"},
+        "source_fingerprint": {"$ref": "#/$defs/sha256"},
+        "binding": {
+          "type": "object",
+          "description": "Exact counting-profile binding, validated against the existing Spine binding derivation."
+        },
+        "state_dir": {"$ref": "#/$defs/ref"},
+        "impetus_python": {"$ref": "#/$defs/ref"},
+        "impetus_state": {"$ref": "#/$defs/ref"}
+      }
+    },
+    "receipt": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["contract", "status", "approval_sha256", "request_sha256", "cutoff_utc", "capture_reason", "selected", "sent"],
+      "properties": {
+        "contract": {"$ref": "#/$defs/contract"},
+        "status": {"enum": ["preview_ready", "capture_recorded", "launch_consumed_no_local_result"]},
+        "approval_sha256": {"$ref": "#/$defs/sha256"},
+        "request_sha256": {"$ref": "#/$defs/sha256"},
+        "cutoff_utc": {"type": "string", "format": "date-time"},
+        "capture_reason": {"type": ["string", "null"]},
+        "selected": {"const": false},
+        "sent": {"const": false}
+      }
+    },
+    "refusal": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["contract", "status", "reason", "selected", "sent"],
+      "properties": {
+        "contract": {"$ref": "#/$defs/contract"},
+        "status": {"const": "refused"},
+        "reason": {"type": "string", "pattern": "^pilot_[a-z_]+$"},
+        "selected": {"const": false},
+        "sent": {"const": false}
+      }
+    }
+  }
+}

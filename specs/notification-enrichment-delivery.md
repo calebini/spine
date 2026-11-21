@@ -102,8 +102,8 @@ current ordinary text. Revoked/stale enrichment cannot survive as a retry suffix
 
 Default delivery remains ordinary; the new library/worker injection is explicit
 and disabled unless supplied by the trusted operator. No environment default,
-CLI activation, new public command, Tickerd pin, ledger schema or release change
-is implied. Capture-only records remain selected=false/sent=false; separate choice,
+delivery CLI activation, Tickerd pin or ledger schema change is implied.
+Capture-only records remain selected=false/sent=false; separate choice,
 prepared envelope and canonical attempts establish actual inclusion/send evidence.
 
 Private source/proposal retention uses an explicit operator-agreed policy supported
@@ -117,3 +117,45 @@ lost response/restart, immutable choice/no late upgrade, source/consent race at
 attempt gate, stable retry key, source disclosure and unchanged ordinary paths.
 All new serialized shapes/resources need closed schemas and parity tests. Run
 appropriate full regressions and existing checks; report pre-existing errors.
+
+## Trusted-local staging capture pilot
+
+`spine-enrichment-pilot` is a separate, manually invoked operator entrypoint
+(`spine.notification-enrichment-pilot.v1`). It has no normal command/web registry
+entry and cannot enroll or alter reminder delivery. The operator designates one
+staging ledger identity, one exact already-materialized, eligible, unattempted
+single-event work instance, and one private Spine/Impetus state pair. Apply the
+source/actor checks above and require a positive pre-event offset. The first pilot
+exports no structured facets and allows zero tools. Review nominal ordinary prose
+in full: information already rendered into that prose is not redacted.
+
+`preview` reads the source without changing it and freezes the exact original
+Impetus request, provider configuration binding, source/disclosure fingerprints,
+and local execution/retention references in a newly created private state directory.
+The request SHA-256 covers the exact original UTF-8 export including its terminal
+newline. The approval SHA-256 covers the sorted compact UTF-8 preview JSON object
+without a newline. Receipt output is metadata only; preview bytes stay private.
+Preview has no launcher, credential lookup or Impetus exchange. It does not
+authorize capture or application of the result.
+
+`capture` requires a separately supplied exact approved digest and an explicit
+Impetus owner approval reference for real-source use and retention. These are
+trusted operator attestations, not authenticated consent or automatic proof of
+Impetus qualification. Recheck the exact existing ledger, current work/owner,
+eligibility, no prior attempt, disclosure, frozen request and configuration before
+entry. Both commands run within the configured lead window (at most 300 seconds)
+and require more than 30 seconds remaining before the nominal reminder cutoff.
+No ledger transaction spans process entry. If source facts change after the final
+check, only the already approved bytes can be disclosed; do not claim atomic
+revocation across the source and the provider.
+
+Commit the approval and once-only marker in the same private transaction before
+subprocess entry. No retry, no implicit Impetus read and no automatic recreation
+or replacement of missing state. Preserve the designated continuous state; host
+rollback or intentional replacement is outside the trusted-local guarantee.
+`show` reads only retained local state, including when a launch yielded no local
+result. The separate pilot profile cannot be opened as delivery enrichment; its
+records are not usable for selection, are never sent, and never create configured
+reminder work, messages or canonical attempts. An ordinary worker may independently
+send the ordinary reminder on schedule. The local [preview and receipt schema](../contracts/contextual_notification/enrichment-pilot-v1.schema.json)
+does not change the pinned Impetus wire contract.

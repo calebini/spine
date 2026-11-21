@@ -32,7 +32,7 @@ authorize reusing or replacing a consumed research opportunity.
 
 ## Library flow
 
-1. `spine.adapters.enrichment.open_source(existing_path)` opens a schema-19 source
+1. `spine.adapters.enrichment.open_source(existing_path)` opens an exact current-schema source
    read-only without bootstrapping, migrating or changing its journal mode.
    `source.preview(work_id, config)` exposes the exact `context` for local review.
    Approve its canonical digest with `spine.adapters.contextual_experiment.digest`
@@ -61,7 +61,7 @@ authorize reusing or replacing a consumed research opportunity.
    gateway idempotency key remain in force.
 
 The source connection and sidecar are caller-owned; close them after use. There is
-no new CLI switch or environment default. The connected test module is a fully
+no delivery CLI switch or environment default. The connected test module is a fully
 disposable example of construction, approval, mocked research and fake delivery;
 it is not a real-ledger trial command.
 
@@ -103,3 +103,55 @@ locations/retention, gateway duplicate suppression and the one-message authoriza
 Then review that concrete configuration and activate only the selected work.
 There is no additional usefulness study or general resilience campaign prerequisite.
 No real-source, live-provider or real-reminder qualification is claimed here.
+
+## Trusted-local staging pilot
+
+`spine-enrichment-pilot` previews and optionally captures one reminder. It is not
+a worker setting, an agent-facing command, or a way to send an enriched message.
+Keep the pilot directory and provider credential under operator control, outside
+the checkout, shared logs and agent workspaces. Do not let a scheduling agent
+generate its own approval from a preview hash. Confirm the installed command
+with `--help` and confirm the staging ledger schema, health and **full** ledger
+ID through `system info`. The pilot needs a Spine build that includes this command
+and the exact ledger schema required by that build (currently 21). Do not point
+it at production; source identity is pinned, not automatically classified.
+
+1. Select one existing, already-materialized, non-sensitive, pre-event reminder
+   on a timed non-recurring event with an assigned archetype and a resolved subject
+   owner. Nominate one continuous state directory for Spine and another for the
+   Impetus worker. No settings or work are created on the source ledger. If the
+   owner scope or source facts do not qualify, choose the source explicitly before
+   creating a pilot; never substitute automatically.
+2. Prepare private local inputs. The pilot input uses the enrichment config from
+   above **without** `approved_context_sha256` or `provider_configuration_json`.
+   Use `synthetic_only: false`, `permit_ordinary_text: true`, one selected item and
+   work ID, the resolved owner as `actor_subject_id`, `facet_fields: {}`,
+   `allowed_tools: []`, meaningful definition/disclosure/retention references,
+   and a lead window such as `lead_seconds: 300`. The non-secret provider file is
+   separate and must be the qualified counting-capable configuration, not the
+   synthetic pricing example. Use the pinned Impetus interpreter and trusted state
+   paths; preserve both after the trial. Do not pass credentials on the command line.
+3. Within the lead window and with more than 30 seconds before the reminder, run
+   `spine-enrichment-pilot preview --db <staging-db> --ledger-id <full-staging-id> --config <input.json> --provider-config <provider.json> --state-dir <new-private-pilot-dir> --impetus-python <absolute-pinned-venv-python> --impetus-state <absolute-owner-state-dir>`.
+   This does not call Impetus, initialize its state or look up credentials. On a
+   private terminal inspect `preview.json` in the pilot directory: review the actual
+   context/objective (sent to the provider for counting and generation), local wire
+   references, model/accounting bounds and agreed retention. The ordinary prose can
+   contain incidental location, rendered facets or third-party data even though the
+   structured facets array is empty. Refuse sensitive or unresolved disclosure.
+4. **Stop after preview until the operator approves its exact `approval_sha256`.**
+   Also require Impetus owner signoff on one real reminder, the installed runtime,
+   provider/account and retention for the two state stores. Impetus's synthetic
+   qualification alone is not that signoff. Resolve the agreed, continuous owner
+   store and credentials under that authorization; the pilot will not create or
+   repair that store. If approval and readiness arrive before cutoff, run
+   `spine-enrichment-pilot capture --db <staging-db> --config <input.json> --state-dir <pilot-dir> --approve-preview-sha256 <operator-approved-sha256> --impetus-approval-ref <owner-signoff-ref>`.
+   Do not reuse the approved digest after drift, miss the cutoff and retry, run a
+   second pilot from replacement state, or reinitialize either store to recover.
+5. Use `spine-enrichment-pilot show --state-dir <pilot-dir>` for metadata; add
+   `--private` only on a private terminal to inspect the retained preview/result.
+   `show` and capture replay do not call Impetus. `capture_recorded` means status
+   evidence was recorded; check `capture_reason` for success, failure or uncertainty.
+   `launch_consumed_no_local_result` is not license to retry or proof the worker
+   did not run. No result enters delivery. Preserve the state and follow the agreed
+   private retention rules; this command has no purge or recovery mode.

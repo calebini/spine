@@ -73,6 +73,8 @@ class LiveExperiment(Experiment):
     """Separate format-2 profile; inherits only source freshness/fingerprint helpers."""
 
     capture_contract = CONTRACT
+    hypothetical_selection = True
+    objective = OBJECTIVE
 
     def __init__(self, source, store, launcher, config, *, clock=None):
         require(isinstance(store, LiveCaptureStore), "live_store_required")
@@ -110,20 +112,25 @@ class LiveExperiment(Experiment):
         if existing:
             self.validate_binding(existing[1]["binding"])
             return existing
-        require("provider_configuration_json" in self.config, "export_configuration_required")
-        binding = self._configuration_binding(self.config["provider_configuration_json"])
         snapshot = self.source.snapshot(work_instance_id, self.config)
-        binding["source_config_sha256"] = snapshot["config_hash"]
-        binding["disclosure_sha256"] = digest({name: self.config[name] for name in (
-            "synthetic_only", "opted_in_item_ids", "permit_ordinary_text", "facet_fields", "disclosure_revision"
-        )})
         opportunity = snapshot["opportunity"]
         existing = self.store.get(opportunity)
         if existing:
             self.validate_binding(existing["binding"])
             return opportunity, existing
-        now_utc = now_utc or utc(self.clock())
-        context = snapshot["context"]
+        raw, fingerprint, binding = self.build_export(snapshot, now_utc or utc(self.clock()))
+        return opportunity, self.store.put(opportunity, work_instance_id, raw, fingerprint, binding)
+
+    def build_export(self, snapshot, now_utc):
+        """Construct exact wire bytes and local bindings without I/O or persistence."""
+        require("provider_configuration_json" in self.config, "export_configuration_required")
+        binding = self._configuration_binding(self.config["provider_configuration_json"])
+        binding["source_config_sha256"] = snapshot["config_hash"]
+        binding["disclosure_sha256"] = digest({name: self.config[name] for name in (
+            "synthetic_only", "opted_in_item_ids", "permit_ordinary_text", "facet_fields", "disclosure_revision"
+        )})
+        opportunity = snapshot["opportunity"]
+        context = decode(dump(snapshot["context"]))
         eligible = instant(context["notification"]["eligible_at_utc"])
         require(eligible - timedelta(seconds=self.config["lead_seconds"]) <= instant(now_utc)
                 < eligible - timedelta(seconds=1), "outside_export_window")
@@ -141,14 +148,14 @@ class LiveExperiment(Experiment):
                 rendering_definition_revision="sha256:" + snapshot["rendering_hash"],
                 experiment_definition_revision=self.config["definition_revision"], disclosure_revision=self.config["disclosure_revision"],
             ),
-            captured_at_utc=now_utc, context=context, objective=OBJECTIVE, allowed_tools=[],
+            captured_at_utc=now_utc, context=context, objective=self.objective, allowed_tools=[],
             limits=dict(model_calls=1, tool_calls=0, elapsed_seconds=20, addendum_utf8_bytes=512),
             selection_cutoff_utc=utc(eligible), request_expires_at_utc=utc(eligible),
         )
         Draft202012Validator(SCHEMA["$defs"]["request"]).validate(request)
         for text, maximum in (
             (context["event"]["title"], 1024), (context["event"]["timezone"], 128),
-            (context["notification"]["ordinary_text"], 8192), (OBJECTIVE, 2048),
+            (context["notification"]["ordinary_text"], 8192), (self.objective, 2048),
             (context["archetype"], 256), (work_id, 256),
         ):
             require(0 < len(text.encode()) <= maximum, "request_string_bytes")
@@ -160,8 +167,7 @@ class LiveExperiment(Experiment):
             require(0 < len(facet["schema_revision"].encode()) <= 256, "facet_reference_bytes")
         raw = dump(request) + b"\n"
         require(len(raw) <= 65536, "request_size")
-        exported = self.store.put(opportunity, work_instance_id, raw, self.fingerprint(snapshot), binding)
-        return opportunity, exported
+        return raw, self.fingerprint(snapshot), binding
 
     def run(self, opportunity, now_utc=None):
         exported = self.store.get(opportunity)
@@ -223,7 +229,7 @@ class LiveExperiment(Experiment):
         completed = None if execution is None else execution["completed_at_utc"]
         timely = completed is not None and instant(completed) <= instant(request["selection_cutoff_utc"])
         fresh = self.freshness(exported)
-        usable = bool(execution and execution["status"] == "succeeded" and timely and
+        usable = bool(self.hypothetical_selection and execution and execution["status"] == "succeeded" and timely and
                       instant(completed) <= instant(now_utc) <= instant(request["selection_cutoff_utc"]) and fresh == "current")
         try:
             response_digest = None if response is None else digest(response)
